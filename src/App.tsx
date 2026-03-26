@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
@@ -33,37 +35,39 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/gallery" element={<Gallery />} />
-            <Route path="/notices" element={<NoticePage />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/result" element={<ResultFind />} />
-            <Route path="/student-info" element={<StudentInfoPage />} />
-            <Route path="/admission" element={<AdmissionPage />} />
-            <Route path="/donation" element={<DonationPage />} />
-            <Route path="/fee-payment" element={<FeePaymentPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/admin/students" element={<AdminStudents />} />
-            <Route path="/admin/staff" element={<AdminStaff />} />
-            <Route path="/admin/staff/add" element={<AdminStaffForm />} />
-            <Route path="/admin/divisions" element={<AdminDivisions />} />
-            <Route path="/admin/subjects" element={<AdminSubjects />} />
-            <Route path="/admin/results" element={<AdminResults />} />
-            <Route path="/admin/notices" element={<AdminNotices />} />
-            <Route path="/admin/fees" element={<AdminFees />} />
-            <Route path="/admin/website" element={<AdminWebsite />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/notices" element={<NoticePage />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/result" element={<ResultFind />} />
+              <Route path="/student-info" element={<StudentInfoPage />} />
+              <Route path="/admission" element={<AdmissionPage />} />
+              <Route path="/donation" element={<DonationPage />} />
+              <Route path="/fee-payment" element={<FeePaymentPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/admin/students" element={<ProtectedRoute><AdminStudents /></ProtectedRoute>} />
+              <Route path="/admin/staff" element={<ProtectedRoute><AdminStaff /></ProtectedRoute>} />
+              <Route path="/admin/staff/add" element={<ProtectedRoute><AdminStaffForm /></ProtectedRoute>} />
+              <Route path="/admin/divisions" element={<ProtectedRoute><AdminDivisions /></ProtectedRoute>} />
+              <Route path="/admin/subjects" element={<ProtectedRoute><AdminSubjects /></ProtectedRoute>} />
+              <Route path="/admin/results" element={<ProtectedRoute><AdminResults /></ProtectedRoute>} />
+              <Route path="/admin/notices" element={<ProtectedRoute><AdminNotices /></ProtectedRoute>} />
+              <Route path="/admin/fees" element={<ProtectedRoute><AdminFees /></ProtectedRoute>} />
+              <Route path="/admin/website" element={<ProtectedRoute><AdminWebsite /></ProtectedRoute>} />
+              <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
 );

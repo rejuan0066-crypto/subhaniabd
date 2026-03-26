@@ -1,6 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
 import {
   LayoutDashboard, Users, UserCog, BookOpen, FileText, Bell,
@@ -10,6 +11,7 @@ import {
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { t } = useLanguage();
+  const { signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -74,7 +76,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {(sidebarOpen || mobile) && (
           <div className="p-3 border-t border-sidebar-border">
             <button
-              onClick={() => navigate('/login')}
+              onClick={async () => { await signOut(); navigate('/login'); }}
               className="sidebar-item w-full text-destructive/80 hover:text-destructive"
             >
               <LogOut className="w-5 h-5" />
