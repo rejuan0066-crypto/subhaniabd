@@ -76,7 +76,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {(sidebarOpen || mobile) && (
           <div className="p-3 border-t border-sidebar-border">
             <button
-              onClick={() => navigate('/login')}
+              onClick={async () => { await signOut(); navigate('/login'); }}
               className="sidebar-item w-full text-destructive/80 hover:text-destructive"
             >
               <LogOut className="w-5 h-5" />
