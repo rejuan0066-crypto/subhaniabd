@@ -803,15 +803,18 @@ const AdminExpenses = () => {
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {projects.map((p: any) => (
-                      <Card key={p.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setSelectedProjectId(p.id)}>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold text-foreground">{bn ? p.name_bn : p.name}</h4>
-                          <div className="mt-2 flex justify-between text-sm">
-                            <span className="text-muted-foreground">{bn ? 'মাসিক:' : 'Monthly:'} <span className="text-destructive font-medium">৳{formatNum(getProjectMonthly(p.id))}</span></span>
-                            <span className="text-muted-foreground">{bn ? 'মোট:' : 'Total:'} <span className="text-destructive font-medium">৳{formatNum(getProjectTotal(p.id))}</span></span>
+                      <div key={p.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedProjectId(p.id)}>
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                          <FolderPlus className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? p.name_bn : p.name}</h4>
+                          <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
+                            <span>{bn ? 'মাসিক:' : 'Mo:'} <span className="text-destructive font-medium">৳{formatNum(getProjectMonthly(p.id))}</span></span>
+                            <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-medium">৳{formatNum(getProjectTotal(p.id))}</span></span>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -827,15 +830,18 @@ const AdminExpenses = () => {
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {projectCategories.map((c: any) => (
-                      <Card key={c.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setSelectedCategoryId(c.id)}>
-                        <CardContent className="p-4">
-                          <h4 className="font-semibold text-foreground">{bn ? c.name_bn : c.name}</h4>
-                          <div className="mt-2 flex justify-between text-sm">
-                            <span className="text-muted-foreground">{bn ? 'মাসিক:' : 'Monthly:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryMonthly(c.id))}</span></span>
-                            <span className="text-muted-foreground">{bn ? 'মোট:' : 'Total:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryTotal(c.id))}</span></span>
+                      <div key={c.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCategoryId(c.id)}>
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                          <TagIcon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? c.name_bn : c.name}</h4>
+                          <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
+                            <span>{bn ? 'মাসিক:' : 'Mo:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryMonthly(c.id))}</span></span>
+                            <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryTotal(c.id))}</span></span>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
