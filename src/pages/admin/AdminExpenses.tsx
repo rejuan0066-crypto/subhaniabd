@@ -325,7 +325,7 @@ const AdminExpenses = () => {
             { label: bn ? 'মোট খরচ' : 'Total Expense', val: totalExpenseAll, color: 'text-destructive' },
             { label: bn ? 'মোট জমা' : 'Total Deposit', val: totalDepositAll, color: 'text-primary' },
             { label: bn ? 'মোট ক্যাশ' : 'Total Cash', val: totalCashAll, color: totalCashAll >= 0 ? 'text-primary' : 'text-destructive' },
-            { label: bn ? 'মোট বকেয়া' : 'Total Arrears', val: previousArrears, color: 'text-muted-foreground' },
+            { label: bn ? 'মোট বকেয়া' : 'Total Arrears', val: totalArrearsAll, color: totalArrearsAll > 0 ? 'text-destructive' : 'text-muted-foreground' },
           ].map((s, i) => (
             <div key={i} className="bg-card rounded-lg border p-3 text-center">
               <p className="text-xs text-muted-foreground">{s.label}</p>
