@@ -299,6 +299,12 @@ const AdminReports = () => {
               {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Button size="sm" variant="outline" onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-1" />{bn ? 'প্রিন্ট/PDF' : 'Print/PDF'}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleDownloadCSV}>
+            <Download className="h-4 w-4 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
+          </Button>
         </div>
 
         {/* Summary Cards */}
