@@ -56,6 +56,7 @@ const AdminExpenses = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [printProjectId, setPrintProjectId] = useState<string | null>(null);
 
   // Dialogs
   const [projectDialog, setProjectDialog] = useState(false);
@@ -1151,9 +1152,14 @@ const AdminExpenses = () => {
                               <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
                               <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => handleProjectExcelDownload(p.id)}>
-                              <Download className="w-3 h-3 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button variant="outline" size="sm" onClick={() => setPrintProjectId(p.id)}>
+                                <Printer className="w-3 h-3 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleProjectExcelDownload(p.id)}>
+                                <Download className="w-3 h-3 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
+                              </Button>
+                            </div>
                           </div>
                         );
                       })}
@@ -1302,6 +1308,103 @@ const AdminExpenses = () => {
                 <Printer className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Print Preview Dialog */}
+      <Dialog open={!!printProjectId} onOpenChange={() => setPrintProjectId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>{bn ? 'প্রকল্প প্রিন্ট প্রিভিউ' : 'Project Print Preview'}</DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const project = projects.find((p: any) => p.id === printProjectId);
+            if (!project) return null;
+            const projExpenses = expenses.filter((e: any) => e.project_id === printProjectId);
+            const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+            const projCategories = categories.filter((c: any) => c.project_id === printProjectId);
+            return (
+              <div id="project-print-content">
+                {/* Institution Header */}
+                <div className="text-center mb-4 border-b-2 border-foreground pb-3">
+                  <h1 className="text-lg font-bold">{bn ? summaryForm.inst_name : summaryForm.inst_name_en}</h1>
+                  <p className="text-sm">{summaryForm.inst_address}</p>
+                  <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {summaryForm.inst_phone} | {bn ? 'ইমেইল' : 'Email'}: {summaryForm.inst_email}</p>
+                  {summaryForm.inst_other && <p className="text-xs">{summaryForm.inst_other}</p>}
+                  <p className="text-base font-semibold mt-2">{bn ? 'প্রকল্প খরচ প্রতিবেদন' : 'Project Expense Report'}</p>
+                  <p className="text-sm">{bn ? 'প্রকল্প' : 'Project'}: {bn ? project.name_bn : project.name} | {selectedMonthYear}</p>
+                </div>
+
+                {projCategories.map((cat: any) => {
+                  const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+                  if (catExpenses.length === 0) return null;
+                  const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+                  return (
+                    <div key={cat.id} className="mb-4">
+                      <h3 className="text-sm font-semibold mb-1">{bn ? cat.name_bn : cat.name} — ৳{formatNum(catTotal)}</h3>
+                      <table className="w-full border-collapse border text-xs">
+                        <thead>
+                          <tr className="bg-muted">
+                            <th className="border p-1 text-left w-8">#</th>
+                            <th className="border p-1 text-left">{bn ? 'তারিখ' : 'Date'}</th>
+                            <th className="border p-1 text-left">{bn ? 'বিবরণ' : 'Description'}</th>
+                            <th className="border p-1 text-left">{bn ? 'পরিমাণ' : 'Qty'}</th>
+                            <th className="border p-1 text-left">{bn ? 'মাধ্যম' : 'Method'}</th>
+                            <th className="border p-1 text-right">{bn ? 'টাকা' : 'Amount'}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {catExpenses.map((e: any, i: number) => (
+                            <tr key={e.id}>
+                              <td className="border p-1">{i + 1}</td>
+                              <td className="border p-1">{e.expense_date}</td>
+                              <td className="border p-1">{cleanDesc(e.description)}</td>
+                              <td className="border p-1">{e.quantity || 1} {getUnit(e.description)}</td>
+                              <td className="border p-1">{getMethod(e.description)}</td>
+                              <td className="border p-1 text-right">৳{formatNum(Number(e.amount))}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })}
+
+                <div className="border-t-2 border-foreground pt-2 text-right font-bold text-sm">
+                  {bn ? 'প্রকল্প মোট খরচ' : 'Project Total'}: ৳{formatNum(projTotal)}
+                </div>
+
+                {/* Signatures */}
+                <div className="flex justify-between mt-12 pt-8">
+                  <div className="text-center">
+                    <div className="border-t border-foreground w-40 mx-auto mb-1"></div>
+                    <p className="text-sm font-medium">{summaryData?.casher_name || (bn ? 'ক্যাশিয়ার' : 'Cashier')}</p>
+                    <p className="text-xs">{bn ? 'ক্যাশিয়ার' : 'Cashier'}</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="border-t border-foreground w-40 mx-auto mb-1"></div>
+                    <p className="text-sm font-medium">{summaryData?.principal_name || (bn ? 'অধ্যক্ষ' : 'Principal')}</p>
+                    <p className="text-xs">{bn ? 'অধ্যক্ষ' : 'Principal'}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setPrintProjectId(null)}>{bn ? 'বন্ধ করুন' : 'Close'}</Button>
+            <Button onClick={() => {
+              const content = document.getElementById('project-print-content');
+              if (!content) return;
+              const win = window.open('', '_blank');
+              if (!win) return;
+              win.document.write(`<html><head><title>${bn ? 'প্রকল্প প্রতিবেদন' : 'Project Report'}</title><style>body{font-family:'Noto Sans Bengali',sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 8px}th{background:#f0f0f0;text-align:left}.text-right{text-align:right}.text-center{text-align:center}h1{font-size:18px}h3{font-size:14px}@media print{body{padding:0}}</style></head><body>${content.innerHTML}</body></html>`);
+              win.document.close();
+              win.focus();
+              win.print();
+            }}>
+              <Printer className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট করুন' : 'Print'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
