@@ -67,7 +67,28 @@ type FormData = {
   description: string;
   form_type: string;
   is_active: boolean;
+  publish_to: string;
+  parent_menu: string;
+  menu_slug: string;
 };
+
+const ADMIN_MENUS = [
+  { value: '/admin', label: 'Dashboard', label_bn: 'ড্যাশবোর্ড' },
+  { value: '/admin/donors', label: 'Donor List', label_bn: 'দাতা তালিকা' },
+  { value: '/admin/students', label: 'Student Management', label_bn: 'ছাত্র ব্যবস্থাপনা' },
+  { value: '/admin/staff', label: 'Staff/Teacher Management', label_bn: 'স্টাফ/শিক্ষক ব্যবস্থাপনা' },
+  { value: '/admin/divisions', label: 'Division & Class', label_bn: 'বিভাগ ও শ্রেণী' },
+  { value: '/admin/fee-receipts', label: 'Fee Receipts', label_bn: 'ফি রসিদ' },
+  { value: '/admin/results', label: 'Results', label_bn: 'ফলাফল' },
+  { value: '/admin/notices', label: 'Notice', label_bn: 'নোটিশ' },
+  { value: '/admin/fees', label: 'Fees', label_bn: 'ফি' },
+  { value: '/admin/expenses', label: 'Expenses', label_bn: 'খরচ ব্যবস্থাপনা' },
+  { value: '/admin/website', label: 'Website Control', label_bn: 'ওয়েবসাইট নিয়ন্ত্রণ' },
+  { value: '/admin/designations', label: 'Designations', label_bn: 'পদবি তৈরি' },
+  { value: '/admin/subjects', label: 'Subjects', label_bn: 'বিষয়সমূহ' },
+  { value: '/admin/form-builder', label: 'Custom Builder', label_bn: 'কাস্টম বিল্ডার' },
+  { value: '/admin/settings', label: 'Settings', label_bn: 'সেটিংস' },
+];
 
 type ConditionData = {
   enabled: boolean;
@@ -92,7 +113,7 @@ type FieldData = {
 };
 
 const emptyCondition: ConditionData = { enabled: false, source_field_id: '', operator: 'equals', value: '' };
-const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type: 'custom', is_active: true };
+const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type: 'custom', is_active: true, publish_to: 'none', parent_menu: '', menu_slug: '' };
 const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition } };
 
 // Sortable field item component
@@ -338,7 +359,7 @@ const AdminFormBuilder = () => {
   };
 
   const openEditForm = (form: any) => {
-    setFormData({ name: form.name, name_bn: form.name_bn, description: form.description || '', form_type: form.form_type, is_active: form.is_active });
+    setFormData({ name: form.name, name_bn: form.name_bn, description: form.description || '', form_type: form.form_type, is_active: form.is_active, publish_to: form.publish_to || 'none', parent_menu: form.parent_menu || '', menu_slug: form.menu_slug || '' });
     setEditingFormId(form.id);
     setFormDialogOpen(true);
   };
@@ -459,6 +480,50 @@ const AdminFormBuilder = () => {
                  <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
                  <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={2} />
                </div>
+
+               {/* Menu Publish Options */}
+               <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                 <Label className="font-semibold">{bn ? '📌 মেনুতে পাবলিশ' : '📌 Publish to Menu'}</Label>
+                 <div>
+                   <Label className="text-xs">{bn ? 'পাবলিশ টাইপ' : 'Publish Type'}</Label>
+                   <Select value={formData.publish_to} onValueChange={v => setFormData(p => ({ ...p, publish_to: v, parent_menu: v === 'none' ? '' : p.parent_menu }))}>
+                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="none">{bn ? 'পাবলিশ করবেন না' : "Don't Publish"}</SelectItem>
+                       <SelectItem value="main_menu">{bn ? 'মেইন মেনু হিসেবে' : 'As Main Menu'}</SelectItem>
+                       <SelectItem value="sub_menu">{bn ? 'সাব মেনু হিসেবে' : 'As Sub Menu'}</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+                 {formData.publish_to === 'sub_menu' && (
+                   <div>
+                     <Label className="text-xs">{bn ? 'প্যারেন্ট মেনু' : 'Parent Menu'}</Label>
+                     <Select value={formData.parent_menu} onValueChange={v => setFormData(p => ({ ...p, parent_menu: v }))}>
+                       <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'মেনু নির্বাচন করুন' : 'Select parent menu'} /></SelectTrigger>
+                       <SelectContent>
+                         {ADMIN_MENUS.map(m => (
+                           <SelectItem key={m.value} value={m.value}>{bn ? m.label_bn : m.label}</SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 )}
+                 {formData.publish_to !== 'none' && (
+                   <div>
+                     <Label className="text-xs">{bn ? 'মেনু স্লাগ (URL)' : 'Menu Slug (URL)'}</Label>
+                     <div className="flex items-center gap-1 mt-1">
+                       <span className="text-xs text-muted-foreground">/admin/custom/</span>
+                       <Input
+                         value={formData.menu_slug}
+                         onChange={e => setFormData(p => ({ ...p, menu_slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))}
+                         placeholder="my-form"
+                         className="flex-1"
+                       />
+                     </div>
+                   </div>
+                 )}
+               </div>
+
                <div className="flex items-center gap-2">
                  <Switch checked={formData.is_active} onCheckedChange={c => setFormData(p => ({ ...p, is_active: c }))} />
                  <Label>{bn ? 'সক্রিয়' : 'Active'}</Label>
