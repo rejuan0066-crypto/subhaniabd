@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import AdminLayout from '@/components/AdminLayout';
@@ -66,7 +66,7 @@ const AdminExpenses = () => {
   const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
   const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
   const [depositForm, setDepositForm] = useState(defaultDepositForm);
-  const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
+  const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0', inst_name: '', inst_name_en: '', inst_address: '', inst_phone: '', inst_email: '', inst_other: '' });
 
   // Queries
   const { data: projects = [] } = useQuery({
@@ -348,6 +348,21 @@ const AdminExpenses = () => {
 
   const filteredCategories = categories.filter((c: any) => !expenseForm.project_id || c.project_id === expenseForm.project_id);
 
+  // Load summary and institution defaults
+  useEffect(() => {
+    setSummaryForm(f => ({
+      ...f,
+      principal_name: summaryData?.principal_name || f.principal_name || '',
+      casher_name: summaryData?.casher_name || f.casher_name || '',
+      previous_arrears: String(summaryData?.previous_arrears || f.previous_arrears || '0'),
+      inst_name: f.inst_name || madrasaName,
+      inst_name_en: f.inst_name_en || madrasaNameEn,
+      inst_address: f.inst_address || madrasaAddress,
+      inst_phone: f.inst_phone || madrasaPhone,
+      inst_email: f.inst_email || madrasaEmail,
+    }));
+  }, [summaryData, madrasaName, madrasaNameEn, madrasaAddress, madrasaPhone, madrasaEmail]);
+
   // Drill-down state for expenses tab
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -385,10 +400,11 @@ const AdminExpenses = () => {
   const handleExcelDownload = () => {
     const rows: string[][] = [];
     // Header
-    rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? madrasaName : madrasaNameEn]);
-    rows.push([bn ? 'ঠিকানা' : 'Address', madrasaAddress]);
-    rows.push([bn ? 'ফোন' : 'Phone', madrasaPhone]);
-    rows.push([bn ? 'ইমেইল' : 'Email', madrasaEmail]);
+    rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? summaryForm.inst_name : summaryForm.inst_name_en]);
+    rows.push([bn ? 'ঠিকানা' : 'Address', summaryForm.inst_address]);
+    rows.push([bn ? 'ফোন' : 'Phone', summaryForm.inst_phone]);
+    rows.push([bn ? 'ইমেইল' : 'Email', summaryForm.inst_email]);
+    if (summaryForm.inst_other) rows.push([bn ? 'অন্যান্য' : 'Other', summaryForm.inst_other]);
     rows.push([]);
     rows.push([bn ? 'খরচ প্রতিবেদন' : 'Expense Report', selectedMonthYear]);
     rows.push([]);
@@ -954,6 +970,37 @@ const AdminExpenses = () => {
                   <div><p className="text-xs text-muted-foreground">{bn ? 'ক্যাশ' : 'Cash'}</p><p className={`font-bold ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p></div>
                 </div>
 
+                {/* Institution Info for Print/Excel */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <h4 className="text-sm font-semibold mb-3 text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য (প্রিন্ট/এক্সেল)' : 'Institution Info (Print/Excel)'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (বাংলা)' : 'Institution Name (Bangla)'}</Label>
+                      <Input value={summaryForm.inst_name} onChange={e => setSummaryForm(f => ({ ...f, inst_name: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (ইংরেজি)' : 'Institution Name (English)'}</Label>
+                      <Input value={summaryForm.inst_name_en} onChange={e => setSummaryForm(f => ({ ...f, inst_name_en: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ঠিকানা' : 'Address'}</Label>
+                      <Input value={summaryForm.inst_address} onChange={e => setSummaryForm(f => ({ ...f, inst_address: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ফোন' : 'Phone'}</Label>
+                      <Input value={summaryForm.inst_phone} onChange={e => setSummaryForm(f => ({ ...f, inst_phone: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ইমেইল' : 'Email'}</Label>
+                      <Input value={summaryForm.inst_email} onChange={e => setSummaryForm(f => ({ ...f, inst_email: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</Label>
+                      <Input value={summaryForm.inst_other} onChange={e => setSummaryForm(f => ({ ...f, inst_other: e.target.value }))} placeholder={bn ? 'EIIN, MPO নং ইত্যাদি' : 'EIIN, MPO No. etc.'} />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label>{bn ? 'পূর্ববর্তী বকেয়া' : 'Previous Arrears'}</Label>
@@ -990,9 +1037,10 @@ const AdminExpenses = () => {
       <div className="print-section hidden print:block p-8" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
         {/* Institution Header */}
         <div className="text-center mb-4 border-b-2 border-black pb-3">
-          <h1 className="text-lg font-bold">{bn ? madrasaName : madrasaNameEn}</h1>
-          <p className="text-sm">{madrasaAddress}</p>
-          <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {madrasaPhone} | {bn ? 'ইমেইল' : 'Email'}: {madrasaEmail}</p>
+          <h1 className="text-lg font-bold">{bn ? summaryForm.inst_name : summaryForm.inst_name_en}</h1>
+          <p className="text-sm">{summaryForm.inst_address}</p>
+          <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {summaryForm.inst_phone} | {bn ? 'ইমেইল' : 'Email'}: {summaryForm.inst_email}</p>
+          {summaryForm.inst_other && <p className="text-xs">{summaryForm.inst_other}</p>}
           <p className="text-base font-semibold mt-2">{bn ? 'খরচ প্রতিবেদন' : 'Expense Report'}</p>
           <p className="text-sm">{selectedMonthYear}</p>
         </div>
