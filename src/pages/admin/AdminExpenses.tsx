@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon } from 'lucide-react';
+import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload } from 'lucide-react';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -44,6 +44,8 @@ const AdminExpenses = () => {
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Dialogs
   const [projectDialog, setProjectDialog] = useState(false);
@@ -183,6 +185,23 @@ const AdminExpenses = () => {
   const addExpense = useMutation({
     mutationFn: async () => {
       if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill required fields'); return; }
+      
+      let receiptUrl = expenseForm.receipt_url || null;
+      
+      // Upload receipt file if exists
+      if (receiptFile && expenseForm.has_receipt) {
+        setUploading(true);
+        const fileExt = receiptFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(fileName, receiptFile);
+        setUploading(false);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('receipts').getPublicUrl(uploadData.path);
+        receiptUrl = urlData.publicUrl;
+      }
+      
       const payload = {
         month_year: selectedMonthYear,
         project_id: expenseForm.project_id,
@@ -191,7 +210,7 @@ const AdminExpenses = () => {
         description: expenseForm.description,
         quantity: Number(expenseForm.quantity) || 1,
         has_receipt: expenseForm.has_receipt,
-        receipt_url: expenseForm.receipt_url || null,
+        receipt_url: receiptUrl,
         amount: Number(expenseForm.amount)
       };
       if (editingExpenseId) {
@@ -205,10 +224,11 @@ const AdminExpenses = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
-      setExpenseDialog(false);
+      // Reset form for new entry, keep dialog open
       setExpenseForm(defaultExpenseForm);
+      setReceiptFile(null);
       setEditingExpenseId(null);
-      toast.success(bn ? 'সংরক্ষিত' : 'Saved');
+      toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
     },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
@@ -235,10 +255,9 @@ const AdminExpenses = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['deposits'] });
       qc.invalidateQueries({ queryKey: ['all_deposits'] });
-      setDepositDialog(false);
       setDepositForm(defaultDepositForm);
       setEditingDepositId(null);
-      toast.success(bn ? 'সংরক্ষিত' : 'Saved');
+      toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
     },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
@@ -444,8 +463,27 @@ const AdminExpenses = () => {
                       <Checkbox checked={expenseForm.has_receipt} onCheckedChange={v => setExpenseForm(f => ({ ...f, has_receipt: !!v }))} />
                       <Label>{bn ? 'রসিদ আছে' : 'Has Receipt'}</Label>
                     </div>
-                    <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending}>
-                      {bn ? 'সংরক্ষণ করুন' : 'Save'}
+                    {expenseForm.has_receipt && (
+                      <div>
+                        <Label>{bn ? 'রসিদ আপলোড' : 'Upload Receipt'}</Label>
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            type="file" 
+                            accept="image/*,.pdf" 
+                            onChange={e => setReceiptFile(e.target.files?.[0] || null)}
+                            className="flex-1"
+                          />
+                          {receiptFile && <Upload className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                        {expenseForm.receipt_url && !receiptFile && (
+                          <a href={expenseForm.receipt_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 inline-block">
+                            {bn ? 'বর্তমান রসিদ দেখুন' : 'View current receipt'}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
+                      {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
                     </Button>
                   </div>
                 </DialogContent>
