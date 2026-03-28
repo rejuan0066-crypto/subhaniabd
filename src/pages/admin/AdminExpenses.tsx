@@ -68,7 +68,7 @@ const AdminExpenses = () => {
   const [editingInstitutionId, setEditingInstitutionId] = useState<string | null>(null);
   const [printEditMode, setPrintEditMode] = useState(false);
   const [printEditData, setPrintEditData] = useState({
-    instName: '', instNameEn: '', instAddress: '', instPhone: '', instEmail: '', instOther: '',
+    instName: '', instNameEn: '', instAddress: '', instPhone: '', instEmail: '', instOther: '', instLogo: '',
     reportTitle: '', reportSubtitle: '', casherName: '', principalName: '', extraNote: ''
   });
 
@@ -85,7 +85,9 @@ const AdminExpenses = () => {
   const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
   const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
   const [depositForm, setDepositForm] = useState(defaultDepositForm);
-  const [institutionForm, setInstitutionForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '' });
+  const [institutionForm, setInstitutionForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
 
   // Queries
@@ -189,6 +191,7 @@ const AdminExpenses = () => {
   const instPhone = selectedInstitution?.phone || '';
   const instEmail = selectedInstitution?.email || '';
   const instOther = selectedInstitution?.other_info || '';
+  const instLogo = selectedInstitution?.logo_url || '';
 
   // Stats
   const monthlyTotalExpense = useMemo(() => expenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [expenses]);
@@ -392,7 +395,18 @@ const AdminExpenses = () => {
   const saveInstitution = useMutation({
     mutationFn: async () => {
       if (!institutionForm.name) { toast.error(bn ? 'প্রতিষ্ঠানের নাম দিন' : 'Enter institution name'); return; }
-      const payload = { name: institutionForm.name, name_en: institutionForm.name_en || null, address: institutionForm.address || null, phone: institutionForm.phone || null, email: institutionForm.email || null, other_info: institutionForm.other_info || null };
+      let logoUrl = institutionForm.logo_url || null;
+      if (logoFile) {
+        setLogoUploading(true);
+        const fileExt = logoFile.name.split('.').pop();
+        const fileName = `logo_${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('institution-logos').upload(fileName, logoFile);
+        setLogoUploading(false);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('institution-logos').getPublicUrl(uploadData.path);
+        logoUrl = urlData.publicUrl;
+      }
+      const payload = { name: institutionForm.name, name_en: institutionForm.name_en || null, address: institutionForm.address || null, phone: institutionForm.phone || null, email: institutionForm.email || null, other_info: institutionForm.other_info || null, logo_url: logoUrl };
       if (editingInstitutionId) {
         const { error } = await supabase.from('institutions').update(payload).eq('id', editingInstitutionId);
         if (error) throw error;
@@ -401,7 +415,16 @@ const AdminExpenses = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); setInstitutionDialog(false); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '' }); setEditingInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); setInstitutionDialog(false); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' }); setLogoFile(null); setEditingInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
+  });
+
+  const deleteInstitution = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('institutions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
   });
 
@@ -1118,20 +1141,33 @@ const AdminExpenses = () => {
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য' : 'Institution Info'}</h4>
                     <div className="flex gap-2">
-                      <Dialog open={institutionDialog} onOpenChange={(open) => { if (!open) { setEditingInstitutionId(null); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '' }); } setInstitutionDialog(open); }}>
+                      <Dialog open={institutionDialog} onOpenChange={(open) => { if (!open) { setEditingInstitutionId(null); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' }); setLogoFile(null); } setInstitutionDialog(open); }}>
                         <DialogTrigger asChild>
                           <Button size="sm" variant="outline"><Plus className="w-4 h-4 mr-1" />{bn ? 'নতুন প্রতিষ্ঠান' : 'New Institution'}</Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader><DialogTitle>{editingInstitutionId ? (bn ? 'প্রতিষ্ঠান সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন প্রতিষ্ঠান' : 'New Institution')}</DialogTitle></DialogHeader>
-                          <div className="space-y-3">
+                          <div className="space-y-3 max-h-[70vh] overflow-auto">
                             <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={institutionForm.name} onChange={e => setInstitutionForm(f => ({ ...f, name: e.target.value }))} /></div>
                             <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'}</Label><Input value={institutionForm.name_en} onChange={e => setInstitutionForm(f => ({ ...f, name_en: e.target.value }))} /></div>
                             <div><Label>{bn ? 'ঠিকানা' : 'Address'}</Label><Input value={institutionForm.address} onChange={e => setInstitutionForm(f => ({ ...f, address: e.target.value }))} /></div>
                             <div><Label>{bn ? 'ফোন' : 'Phone'}</Label><Input value={institutionForm.phone} onChange={e => setInstitutionForm(f => ({ ...f, phone: e.target.value }))} /></div>
                             <div><Label>{bn ? 'ইমেইল' : 'Email'}</Label><Input value={institutionForm.email} onChange={e => setInstitutionForm(f => ({ ...f, email: e.target.value }))} /></div>
                             <div><Label>{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</Label><Input value={institutionForm.other_info} onChange={e => setInstitutionForm(f => ({ ...f, other_info: e.target.value }))} placeholder={bn ? 'EIIN, MPO নং ইত্যাদি' : 'EIIN, MPO No.'} /></div>
-                            <Button className="w-full" onClick={() => saveInstitution.mutate()} disabled={saveInstitution.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                            <div>
+                              <Label>{bn ? 'লোগো আপলোড' : 'Logo Upload'}</Label>
+                              {institutionForm.logo_url && (
+                                <div className="mb-2 flex items-center gap-2">
+                                  <img src={institutionForm.logo_url} alt="Logo" className="w-16 h-16 object-contain border rounded" />
+                                  <Button variant="ghost" size="sm" onClick={() => setInstitutionForm(f => ({ ...f, logo_url: '' }))}><Trash2 className="w-3 h-3 mr-1" />{bn ? 'সরান' : 'Remove'}</Button>
+                                </div>
+                              )}
+                              <Input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { if (f.size > 300 * 1024) { toast.error(bn ? 'সর্বোচ্চ ৩০০KB' : 'Max 300KB'); return; } setLogoFile(f); } }} />
+                              {logoFile && <p className="text-xs text-muted-foreground mt-1">{logoFile.name}</p>}
+                            </div>
+                            <Button className="w-full" onClick={() => saveInstitution.mutate()} disabled={saveInstitution.isPending || logoUploading}>
+                              {logoUploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ' : 'Save')}
+                            </Button>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -1143,14 +1179,22 @@ const AdminExpenses = () => {
                     <div className="space-y-2">
                       {institutions.map((inst: any) => (
                         <div key={inst.id} className={`flex items-center justify-between p-3 rounded-lg border ${selectedInstitutionId === inst.id ? 'border-primary bg-primary/5' : 'bg-secondary/30'}`}>
-                          <div className="cursor-pointer flex-1" onClick={() => setSelectedInstitutionId(inst.id)}>
-                            <span className="text-sm font-medium">{bn ? inst.name : (inst.name_en || inst.name)}</span>
-                            {inst.address && <span className="text-xs text-muted-foreground ml-2">— {inst.address}</span>}
-                            {selectedInstitutionId === inst.id && <span className="text-xs text-primary ml-2">✓ {bn ? 'নির্বাচিত' : 'Selected'}</span>}
+                          <div className="cursor-pointer flex-1 flex items-center gap-2" onClick={() => setSelectedInstitutionId(inst.id)}>
+                            {inst.logo_url && <img src={inst.logo_url} alt="Logo" className="w-8 h-8 object-contain rounded" />}
+                            <div>
+                              <span className="text-sm font-medium">{bn ? inst.name : (inst.name_en || inst.name)}</span>
+                              {inst.address && <span className="text-xs text-muted-foreground ml-2">— {inst.address}</span>}
+                              {selectedInstitutionId === inst.id && <span className="text-xs text-primary ml-2">✓ {bn ? 'নির্বাচিত' : 'Selected'}</span>}
+                            </div>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => { setEditingInstitutionId(inst.id); setInstitutionForm({ name: inst.name, name_en: inst.name_en || '', address: inst.address || '', phone: inst.phone || '', email: inst.email || '', other_info: inst.other_info || '' }); setInstitutionDialog(true); }}>
-                            <Edit2 className="w-4 h-4 text-muted-foreground" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => { setEditingInstitutionId(inst.id); setInstitutionForm({ name: inst.name, name_en: inst.name_en || '', address: inst.address || '', phone: inst.phone || '', email: inst.email || '', other_info: inst.other_info || '', logo_url: inst.logo_url || '' }); setInstitutionDialog(true); }}>
+                              <Edit2 className="w-4 h-4 text-muted-foreground" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => { if (confirm(bn ? 'এই প্রতিষ্ঠান মুছে ফেলতে চান?' : 'Delete this institution?')) { deleteInstitution.mutate(inst.id); if (selectedInstitutionId === inst.id) setSelectedInstitutionId(''); } }}>
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -1239,6 +1283,7 @@ const AdminExpenses = () => {
       <div className="print-section hidden print:block p-8" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
         {/* Institution Header */}
         <div className="text-center mb-4 border-b-2 border-black pb-3">
+          {instLogo && <img src={instLogo} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-1" />}
           <h1 className="text-lg font-bold">{bn ? instName : instNameEn}</h1>
           <p className="text-sm">{instAddress}</p>
           <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {instPhone} | {bn ? 'ইমেইল' : 'Email'}: {instEmail}</p>
@@ -1387,7 +1432,7 @@ const AdminExpenses = () => {
                 if (!printEditMode) {
                   setPrintEditData({
                     instName: instName, instNameEn: instNameEn, instAddress: instAddress,
-                    instPhone: instPhone, instEmail: instEmail, instOther: instOther,
+                    instPhone: instPhone, instEmail: instEmail, instOther: instOther, instLogo: instLogo,
                     reportTitle: bn ? 'প্রকল্প খরচ প্রতিবেদন' : 'Project Expense Report',
                     reportSubtitle: '',
                     casherName: summaryData?.casher_name || '',
@@ -1448,12 +1493,14 @@ const AdminExpenses = () => {
             const dInstPhone = ed.instPhone || instPhone;
             const dInstEmail = ed.instEmail || instEmail;
             const dInstOther = ed.instOther || instOther;
+            const dInstLogo = ed.instLogo || instLogo;
             const dReportTitle = ed.reportTitle || (bn ? 'প্রকল্প খরচ প্রতিবেদন' : 'Project Expense Report');
             const dCasher = ed.casherName || summaryData?.casher_name || (bn ? 'ক্যাশিয়ার' : 'Cashier');
             const dPrincipal = ed.principalName || summaryData?.principal_name || (bn ? 'অধ্যক্ষ' : 'Principal');
             return (
               <div id="project-print-content">
                 <div className="text-center mb-4 border-b-2 border-foreground pb-3">
+                  {dInstLogo && <img src={dInstLogo} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-1" />}
                   <h1 className="text-lg font-bold">{dInstName}</h1>
                   <p className="text-sm">{dInstAddress}</p>
                   <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {dInstPhone} | {bn ? 'ইমেইল' : 'Email'}: {dInstEmail}</p>
