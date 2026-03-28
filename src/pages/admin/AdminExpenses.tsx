@@ -185,6 +185,23 @@ const AdminExpenses = () => {
   const addExpense = useMutation({
     mutationFn: async () => {
       if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill required fields'); return; }
+      
+      let receiptUrl = expenseForm.receipt_url || null;
+      
+      // Upload receipt file if exists
+      if (receiptFile && expenseForm.has_receipt) {
+        setUploading(true);
+        const fileExt = receiptFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(fileName, receiptFile);
+        setUploading(false);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('receipts').getPublicUrl(uploadData.path);
+        receiptUrl = urlData.publicUrl;
+      }
+      
       const payload = {
         month_year: selectedMonthYear,
         project_id: expenseForm.project_id,
@@ -193,7 +210,7 @@ const AdminExpenses = () => {
         description: expenseForm.description,
         quantity: Number(expenseForm.quantity) || 1,
         has_receipt: expenseForm.has_receipt,
-        receipt_url: expenseForm.receipt_url || null,
+        receipt_url: receiptUrl,
         amount: Number(expenseForm.amount)
       };
       if (editingExpenseId) {
@@ -207,10 +224,11 @@ const AdminExpenses = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
-      setExpenseDialog(false);
+      // Reset form for new entry, keep dialog open
       setExpenseForm(defaultExpenseForm);
+      setReceiptFile(null);
       setEditingExpenseId(null);
-      toast.success(bn ? 'সংরক্ষিত' : 'Saved');
+      toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
     },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
