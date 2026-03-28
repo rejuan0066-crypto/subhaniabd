@@ -139,29 +139,29 @@ const Dashboard = () => {
   ];
 
   const staffTeacherStats = [
-    { label: language === 'bn' ? 'শিক্ষক (সক্রিয়)' : 'Teachers (Active)', value: activeTeachers.length, onClick: () => openList(language === 'bn' ? 'সক্রিয় শিক্ষক' : 'Active Teachers', 'staff', { status: 'active' }) },
-    { label: language === 'bn' ? 'শিক্ষক (পদত্যাগী)' : 'Teachers (Resigned)', value: resignedTeachers.length, onClick: () => openList(language === 'bn' ? 'পদত্যাগী শিক্ষক' : 'Resigned Teachers', 'staff') },
-    { label: language === 'bn' ? 'কর্মী (সক্রিয়)' : 'Staff (Active)', value: activeStaff.length, onClick: () => openList(language === 'bn' ? 'সক্রিয় কর্মী' : 'Active Staff', 'staff', { status: 'active' }) },
-    { label: language === 'bn' ? 'কর্মী (পদত্যাগী)' : 'Staff (Resigned)', value: resignedStaff.length, onClick: () => openList(language === 'bn' ? 'পদত্যাগী কর্মী' : 'Resigned Staff', 'staff') },
-    { label: language === 'bn' ? 'গত মাসের বেতন' : 'Last Month Salary', value: `৳ ${staff.filter(s => s.status === 'active').reduce((s, x) => s + (Number(x.salary) || 0), 0).toLocaleString()}`, onClick: () => openList(language === 'bn' ? 'সক্রিয় কর্মী ও শিক্ষক' : 'Active Staff & Teachers', 'staff', { status: 'active' }) },
+    { label: language === 'bn' ? 'শিক্ষক (সক্রিয়)' : 'Teachers (Active)', value: activeTeachers.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(language === 'bn' ? 'সক্রিয় শিক্ষক' : 'Active Teachers', 'staff', { status: 'active' }) },
+    { label: language === 'bn' ? 'শিক্ষক (পদত্যাগী)' : 'Teachers (Resigned)', value: resignedTeachers.length, icon: UserX, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(language === 'bn' ? 'পদত্যাগী শিক্ষক' : 'Resigned Teachers', 'staff') },
+    { label: language === 'bn' ? 'কর্মী (সক্রিয়)' : 'Staff (Active)', value: activeStaff.length, icon: UserCheck, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(language === 'bn' ? 'সক্রিয় কর্মী' : 'Active Staff', 'staff', { status: 'active' }) },
+    { label: language === 'bn' ? 'কর্মী (পদত্যাগী)' : 'Staff (Resigned)', value: resignedStaff.length, icon: UserX, color: 'text-muted-foreground', bg: 'bg-muted/50', onClick: () => openList(language === 'bn' ? 'পদত্যাগী কর্মী' : 'Resigned Staff', 'staff') },
+    { label: language === 'bn' ? 'গত মাসের বেতন' : 'Last Month Salary', value: `৳ ${staff.filter(s => s.status === 'active').reduce((s, x) => s + (Number(x.salary) || 0), 0).toLocaleString()}`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(language === 'bn' ? 'সক্রিয় কর্মী ও শিক্ষক' : 'Active Staff & Teachers', 'staff', { status: 'active' }) },
   ];
 
   const studentCategoryStats = [
-    { label: language === 'bn' ? 'এতিম ছাত্র' : 'Orphan Students', value: orphanStudents.length, onClick: () => openList(language === 'bn' ? 'এতিম ছাত্র' : 'Orphan Students', 'students', { student_category: 'orphan' }) },
-    { label: language === 'bn' ? 'গরীব ছাত্র' : 'Poor Students', value: poorStudents.length, onClick: () => openList(language === 'bn' ? 'গরীব ছাত্র' : 'Poor Students', 'students', { student_category: 'poor' }) },
-    { label: language === 'bn' ? 'সাধারণ ছাত্র ও পরিশোধিত' : 'Non-Orphan&Poor + Amounts', value: `${generalStudents.length} (৳${generalPaidAmount.toLocaleString()})` },
-    { label: language === 'bn' ? 'আবাসিক ছাত্র' : 'Resident Students', value: residentStudents.length, onClick: () => openList(language === 'bn' ? 'আবাসিক ছাত্র' : 'Resident Students', 'students', { residence_type: 'resident' }) },
-    { label: language === 'bn' ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', value: nonResidentStudents.length, onClick: () => openList(language === 'bn' ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', 'students', { residence_type: 'non-resident' }) },
+    { label: language === 'bn' ? 'এতিম ছাত্র' : 'Orphan Students', value: orphanStudents.length, icon: Users, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(language === 'bn' ? 'এতিম ছাত্র' : 'Orphan Students', 'students', { student_category: 'orphan' }) },
+    { label: language === 'bn' ? 'গরীব ছাত্র' : 'Poor Students', value: poorStudents.length, icon: Users, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(language === 'bn' ? 'গরীব ছাত্র' : 'Poor Students', 'students', { student_category: 'poor' }) },
+    { label: language === 'bn' ? 'সাধারণ ছাত্র ও পরিশোধিত' : 'Non-Orphan&Poor + Amounts', value: `${generalStudents.length} (৳${generalPaidAmount.toLocaleString()})`, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: language === 'bn' ? 'আবাসিক ছাত্র' : 'Resident Students', value: residentStudents.length, icon: HomeIcon, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(language === 'bn' ? 'আবাসিক ছাত্র' : 'Resident Students', 'students', { residence_type: 'resident' }) },
+    { label: language === 'bn' ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', value: nonResidentStudents.length, icon: HomeIcon, color: 'text-muted-foreground', bg: 'bg-muted/50', onClick: () => openList(language === 'bn' ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', 'students', { residence_type: 'non-resident' }) },
   ];
 
   const studentDetailStats = [
-    { label: language === 'bn' ? 'নতুন ছাত্র' : 'New Students', value: newStudents.length, onClick: () => openList(language === 'bn' ? 'নতুন ছাত্র' : 'New Students', 'students') },
-    { label: language === 'bn' ? 'পুরাতন ছাত্র' : 'Old Students', value: oldStudents.length, onClick: () => openList(language === 'bn' ? 'পুরাতন ছাত্র' : 'Old Students', 'students') },
-    { label: language === 'bn' ? 'বিভাগ' : 'Divisions', value: divisions.length },
-    { label: language === 'bn' ? 'বিষয়' : 'Subjects', value: subjects.length },
-    { label: language === 'bn' ? 'পরীক্ষা' : 'Exams', value: exams.length },
-    { label: language === 'bn' ? 'ফলাফল' : 'Results', value: results.length },
-    { label: language === 'bn' ? 'ভর্তি ইতিহাস' : 'Admission History', value: students.length, onClick: () => openList(language === 'bn' ? 'ভর্তি ইতিহাস' : 'Admission History', 'students') },
+    { label: language === 'bn' ? 'নতুন ছাত্র' : 'New Students', value: newStudents.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(language === 'bn' ? 'নতুন ছাত্র' : 'New Students', 'students') },
+    { label: language === 'bn' ? 'পুরাতন ছাত্র' : 'Old Students', value: oldStudents.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(language === 'bn' ? 'পুরাতন ছাত্র' : 'Old Students', 'students') },
+    { label: language === 'bn' ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10' },
+    { label: language === 'bn' ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10' },
+    { label: language === 'bn' ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10' },
+    { label: language === 'bn' ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: language === 'bn' ? 'ভর্তি ইতিহাস' : 'Admission History', value: students.length, icon: History, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(language === 'bn' ? 'ভর্তি ইতিহাস' : 'Admission History', 'students') },
   ];
 
   return (
