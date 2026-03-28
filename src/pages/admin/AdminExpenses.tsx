@@ -1144,7 +1144,7 @@ const AdminExpenses = () => {
                 </div>
 
                 {/* Institution Management */}
-                <div className="border rounded-lg p-4 bg-muted/20">
+                <div className="card-elevated p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="text-sm font-semibold text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য' : 'Institution Info'}</h4>
                     <div className="flex gap-2">
@@ -1185,7 +1185,7 @@ const AdminExpenses = () => {
                   ) : (
                     <div className="space-y-2">
                       {institutions.map((inst: any) => (
-                        <div key={inst.id} className={`flex items-center justify-between p-3 rounded-lg border ${selectedInstitutionId === inst.id ? 'border-primary bg-primary/5' : 'bg-secondary/30'}`}>
+                        <div key={inst.id} className={`stat-card flex items-center justify-between ${selectedInstitutionId === inst.id ? 'border-primary bg-primary/5' : ''}`}>
                           <div className="cursor-pointer flex-1 flex items-center gap-2" onClick={() => setSelectedInstitutionId(inst.id)}>
                             {inst.logo_url && <img src={inst.logo_url} alt="Logo" className="w-8 h-8 object-contain rounded" />}
                             <div>
@@ -1240,7 +1240,7 @@ const AdminExpenses = () => {
 
                 {/* Per-project download */}
                 {projects.length > 0 && (
-                  <div className="border rounded-lg p-4 bg-muted/20">
+                  <div className="card-elevated p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-sm font-semibold text-foreground">{bn ? 'প্রকল্প ভিত্তিক ডাউনলোড' : 'Per-Project Download'}</h4>
                       {institutions.length > 1 && (
@@ -1261,7 +1261,7 @@ const AdminExpenses = () => {
                         const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                         if (projExp.length === 0) return null;
                         return (
-                          <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+                          <div key={p.id} className="stat-card flex items-center justify-between">
                             <div>
                               <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
                               <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
