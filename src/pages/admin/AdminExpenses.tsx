@@ -57,6 +57,7 @@ const AdminExpenses = () => {
   const [uploading, setUploading] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [printProjectId, setPrintProjectId] = useState<string | null>(null);
+  const [editProjectEntriesId, setEditProjectEntriesId] = useState<string | null>(null);
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
 
   // Dialogs
