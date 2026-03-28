@@ -1428,7 +1428,12 @@ const AdminExpenses = () => {
       <Dialog open={!!editProjectEntriesId} onOpenChange={(open) => { if (!open) setEditProjectEntriesId(null); }}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
           <DialogHeader>
-            <DialogTitle>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = projects.find((p: any) => p.id === editProjectEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = projects.find((p: any) => p.id === editProjectEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
+              <Button size="sm" onClick={() => { setExpenseForm({ ...defaultExpenseForm, project_id: editProjectEntriesId || '' }); setEditingExpenseId(null); setExpenseDialog(true); setEditProjectEntriesId(null); }}>
+                <Plus className="w-3 h-3 mr-1" />{bn ? 'নতুন এন্ট্রি' : 'New Entry'}
+              </Button>
+            </DialogTitle>
           </DialogHeader>
           {(() => {
             const projExpenses = expenses.filter((e: any) => e.project_id === editProjectEntriesId);
