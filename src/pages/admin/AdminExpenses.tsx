@@ -509,131 +509,199 @@ const AdminExpenses = () => {
             <TabsTrigger value="summary">{bn ? 'সারাংশ' : 'Summary'}</TabsTrigger>
           </TabsList>
 
-          {/* Expenses Tab */}
+          {/* Expenses Tab - Drill-down: Projects → Categories → Expenses */}
           <TabsContent value="dashboard" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
-              <Dialog open={expenseDialog} onOpenChange={resetExpenseDialog}>
-                <DialogTrigger asChild>
-                  <Button size="sm"><Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}</Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                  <DialogHeader><DialogTitle>{editingExpenseId ? (bn ? 'খরচ সম্পাদনা' : 'Edit Expense') : (bn ? 'নতুন খরচ' : 'New Expense')}</DialogTitle></DialogHeader>
-                  <div className="space-y-3">
-                    <div>
-                      <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
-                      <Select value={expenseForm.project_id} onValueChange={v => setExpenseForm(f => ({ ...f, project_id: v, category_id: '' }))}>
-                        <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-                        <SelectContent>
-                          {projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
-                      <Select value={expenseForm.category_id} onValueChange={v => setExpenseForm(f => ({ ...f, category_id: v }))}>
-                        <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-                        <SelectContent>
-                          {filteredCategories.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>{bn ? 'তারিখ' : 'Date'} *</Label>
-                        <Input type="date" value={expenseForm.expense_date} onChange={e => setExpenseForm(f => ({ ...f, expense_date: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>{bn ? 'পরিমাণ' : 'Quantity'}</Label>
-                        <Input type="number" value={expenseForm.quantity} onChange={e => setExpenseForm(f => ({ ...f, quantity: e.target.value }))} />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
-                      <Textarea value={expenseForm.description} onChange={e => setExpenseForm(f => ({ ...f, description: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'পরিমাণ (টাকা)' : 'Amount (BDT)'} *</Label>
-                      <Input type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'রসিদ সংযুক্ত করুন' : 'Attach Receipt'}</Label>
-                      <div className="flex items-center gap-2">
-                        <Input 
-                          type="file" 
-                          accept="image/*,.pdf" 
-                          onChange={e => {
-                            const file = e.target.files?.[0] || null;
-                            setReceiptFile(file);
-                            if (file) setExpenseForm(f => ({ ...f, has_receipt: true }));
-                          }}
-                          className="flex-1"
-                        />
-                        {receiptFile && <Upload className="h-4 w-4 text-muted-foreground" />}
-                      </div>
-                      {expenseForm.receipt_url && !receiptFile && (
-                        <a href={expenseForm.receipt_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 inline-block">
-                          {bn ? 'বর্তমান রসিদ দেখুন' : 'View current receipt'}
-                        </a>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Checkbox checked={expenseForm.has_receipt} onCheckedChange={v => setExpenseForm(f => ({ ...f, has_receipt: !!v }))} />
-                      <Label>{bn ? 'রসিদ আছে' : 'Has Receipt'}</Label>
-                    </div>
-                    <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
-                      {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-2 text-sm">
+              <button 
+                onClick={() => { setSelectedProjectId(null); setSelectedCategoryId(null); }}
+                className={`font-medium ${!selectedProjectId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
+              >
+                {bn ? 'প্রকল্প সমূহ' : 'Projects'}
+              </button>
+              {selectedProjectId && (
+                <>
+                  <span className="text-muted-foreground">/</span>
+                  <button 
+                    onClick={() => setSelectedCategoryId(null)}
+                    className={`font-medium ${!selectedCategoryId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
+                  >
+                    {bn ? selectedProject?.name_bn : selectedProject?.name}
+                  </button>
+                </>
+              )}
+              {selectedCategoryId && (
+                <>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="font-medium text-primary">{bn ? selectedCategory?.name_bn : selectedCategory?.name}</span>
+                </>
+              )}
             </div>
 
-            <div className="border rounded-lg overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>{bn ? 'তারিখ' : 'Date'}</TableHead>
-                    <TableHead>{bn ? 'প্রকল্প' : 'Project'}</TableHead>
-                    <TableHead>{bn ? 'ক্যাটেগরি' : 'Category'}</TableHead>
-                    <TableHead>{bn ? 'বিবরণ' : 'Description'}</TableHead>
-                    <TableHead>{bn ? 'পরিমাণ' : 'Qty'}</TableHead>
-                    <TableHead>{bn ? 'রসিদ' : 'Receipt'}</TableHead>
-                    <TableHead className="text-right">{bn ? 'টাকা' : 'Amount'}</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {expenses.length === 0 && (
-                    <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</TableCell></TableRow>
-                  )}
-                  {expenses.map((e: any, i: number) => (
-                    <TableRow key={e.id}>
-                      <TableCell>{i + 1}</TableCell>
-                      <TableCell>{e.expense_date}</TableCell>
-                      <TableCell>{bn ? e.expense_projects?.name_bn : e.expense_projects?.name}</TableCell>
-                      <TableCell>{bn ? e.expense_categories?.name_bn : e.expense_categories?.name}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{e.description || '-'}</TableCell>
-                      <TableCell>{e.quantity}</TableCell>
-                      <TableCell>{e.has_receipt ? '✅' : '❌'}</TableCell>
-                      <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
-                      <TableCell className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteExpense.mutate(e.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {expenses.length > 0 && (
-                    <TableRow className="bg-muted/50 font-bold">
-                      <TableCell colSpan={7} className="text-right">{bn ? 'মোট খরচ:' : 'Total:'}</TableCell>
-                      <TableCell className="text-right">৳{formatNum(monthlyTotalExpense)}</TableCell>
-                      <TableCell />
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            {/* Level 1: Project List */}
+            {!selectedProjectId && (
+              <div className="space-y-3">
+                <h3 className="font-semibold">{bn ? 'প্রকল্প নির্বাচন করুন' : 'Select Project'} ({selectedMonthYear})</h3>
+                {projects.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">{bn ? 'কোনো প্রকল্প নেই। প্রকল্প ট্যাব থেকে যোগ করুন।' : 'No projects. Add from Projects tab.'}</p>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {projects.map((p: any) => (
+                      <Card key={p.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setSelectedProjectId(p.id)}>
+                        <CardContent className="p-4">
+                          <h4 className="font-semibold text-foreground">{bn ? p.name_bn : p.name}</h4>
+                          <div className="mt-2 flex justify-between text-sm">
+                            <span className="text-muted-foreground">{bn ? 'মাসিক:' : 'Monthly:'} <span className="text-destructive font-medium">৳{formatNum(getProjectMonthly(p.id))}</span></span>
+                            <span className="text-muted-foreground">{bn ? 'মোট:' : 'Total:'} <span className="text-destructive font-medium">৳{formatNum(getProjectTotal(p.id))}</span></span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Level 2: Category List for selected project */}
+            {selectedProjectId && !selectedCategoryId && (
+              <div className="space-y-3">
+                <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedProject?.name_bn : selectedProject?.name}</h3>
+                {projectCategories.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">{bn ? 'এই প্রকল্পে কোনো ক্যাটেগরি নেই। প্রকল্প ট্যাব থেকে যোগ করুন।' : 'No categories in this project.'}</p>
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {projectCategories.map((c: any) => (
+                      <Card key={c.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setSelectedCategoryId(c.id)}>
+                        <CardContent className="p-4">
+                          <h4 className="font-semibold text-foreground">{bn ? c.name_bn : c.name}</h4>
+                          <div className="mt-2 flex justify-between text-sm">
+                            <span className="text-muted-foreground">{bn ? 'মাসিক:' : 'Monthly:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryMonthly(c.id))}</span></span>
+                            <span className="text-muted-foreground">{bn ? 'মোট:' : 'Total:'} <span className="text-destructive font-medium">৳{formatNum(getCategoryTotal(c.id))}</span></span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Level 3: Expenses for selected project+category */}
+            {selectedProjectId && selectedCategoryId && (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
+                  <Dialog open={expenseDialog} onOpenChange={resetExpenseDialog}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" onClick={() => setExpenseForm(f => ({ ...f, project_id: selectedProjectId, category_id: selectedCategoryId }))}>
+                        <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                      <DialogHeader><DialogTitle>{editingExpenseId ? (bn ? 'খরচ সম্পাদনা' : 'Edit Expense') : (bn ? 'নতুন খরচ' : 'New Expense')}</DialogTitle></DialogHeader>
+                      <div className="space-y-3">
+                        <div>
+                          <Label>{bn ? 'প্রকল্প' : 'Project'}</Label>
+                          <Input value={bn ? selectedProject?.name_bn : selectedProject?.name} disabled className="bg-muted" />
+                        </div>
+                        <div>
+                          <Label>{bn ? 'ক্যাটেগরি' : 'Category'}</Label>
+                          <Input value={bn ? selectedCategory?.name_bn : selectedCategory?.name} disabled className="bg-muted" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label>{bn ? 'তারিখ' : 'Date'} *</Label>
+                            <Input type="date" value={expenseForm.expense_date} onChange={e => setExpenseForm(f => ({ ...f, expense_date: e.target.value }))} />
+                          </div>
+                          <div>
+                            <Label>{bn ? 'পরিমাণ' : 'Quantity'}</Label>
+                            <Input type="number" value={expenseForm.quantity} onChange={e => setExpenseForm(f => ({ ...f, quantity: e.target.value }))} />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
+                          <Textarea value={expenseForm.description} onChange={e => setExpenseForm(f => ({ ...f, description: e.target.value }))} />
+                        </div>
+                        <div>
+                          <Label>{bn ? 'পরিমাণ (টাকা)' : 'Amount (BDT)'} *</Label>
+                          <Input type="number" value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: e.target.value }))} />
+                        </div>
+                        <div>
+                          <Label>{bn ? 'রসিদ সংযুক্ত করুন' : 'Attach Receipt'}</Label>
+                          <div className="flex items-center gap-2">
+                            <Input 
+                              type="file" 
+                              accept="image/*,.pdf" 
+                              onChange={e => {
+                                const file = e.target.files?.[0] || null;
+                                setReceiptFile(file);
+                                if (file) setExpenseForm(f => ({ ...f, has_receipt: true }));
+                              }}
+                              className="flex-1"
+                            />
+                            {receiptFile && <Upload className="h-4 w-4 text-muted-foreground" />}
+                          </div>
+                          {expenseForm.receipt_url && !receiptFile && (
+                            <a href={expenseForm.receipt_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 inline-block">
+                              {bn ? 'বর্তমান রসিদ দেখুন' : 'View current receipt'}
+                            </a>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Checkbox checked={expenseForm.has_receipt} onCheckedChange={v => setExpenseForm(f => ({ ...f, has_receipt: !!v }))} />
+                          <Label>{bn ? 'রসিদ আছে' : 'Has Receipt'}</Label>
+                        </div>
+                        <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
+                          {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="border rounded-lg overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>{bn ? 'তারিখ' : 'Date'}</TableHead>
+                        <TableHead>{bn ? 'বিবরণ' : 'Description'}</TableHead>
+                        <TableHead>{bn ? 'পরিমাণ' : 'Qty'}</TableHead>
+                        <TableHead>{bn ? 'রসিদ' : 'Receipt'}</TableHead>
+                        <TableHead className="text-right">{bn ? 'টাকা' : 'Amount'}</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {categoryExpenses.length === 0 && (
+                        <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</TableCell></TableRow>
+                      )}
+                      {categoryExpenses.map((e: any, i: number) => (
+                        <TableRow key={e.id}>
+                          <TableCell>{i + 1}</TableCell>
+                          <TableCell>{e.expense_date}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">{e.description || '-'}</TableCell>
+                          <TableCell>{e.quantity}</TableCell>
+                          <TableCell>{e.has_receipt ? '✅' : '❌'}</TableCell>
+                          <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
+                          <TableCell className="flex gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => deleteExpense.mutate(e.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {categoryExpenses.length > 0 && (
+                        <TableRow className="bg-muted/50 font-bold">
+                          <TableCell colSpan={5} className="text-right">{bn ? 'মোট খরচ:' : 'Total:'}</TableCell>
+                          <TableCell className="text-right">৳{formatNum(categoryExpenseTotal)}</TableCell>
+                          <TableCell />
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Deposits Tab */}
