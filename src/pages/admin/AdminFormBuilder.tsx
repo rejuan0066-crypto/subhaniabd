@@ -565,6 +565,49 @@ const AdminFormBuilder = () => {
                             </div>
                           </div>
 
+                          {/* Conditional Logic */}
+                          <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                            <div className="flex items-center gap-2">
+                              <Switch checked={fieldData.condition.enabled} onCheckedChange={c => setFieldData(p => ({ ...p, condition: { ...p.condition, enabled: c } }))} />
+                              <Label className="font-semibold">{bn ? 'কন্ডিশনাল লজিক' : 'Conditional Logic'}</Label>
+                            </div>
+                            {fieldData.condition.enabled && (
+                              <div className="space-y-2 pl-1">
+                                <p className="text-xs text-muted-foreground">{bn ? 'এই ফিল্ডটি তখনই দেখাবে যখন:' : 'Show this field only when:'}</p>
+                                <div>
+                                  <Label className="text-xs">{bn ? 'উৎস ফিল্ড' : 'Source Field'}</Label>
+                                  <Select value={fieldData.condition.source_field_id} onValueChange={v => setFieldData(p => ({ ...p, condition: { ...p.condition, source_field_id: v } }))}>
+                                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'ফিল্ড নির্বাচন করুন' : 'Select field'} /></SelectTrigger>
+                                    <SelectContent>
+                                      {fields.filter(f => f.id !== editingFieldId).map(f => (
+                                        <SelectItem key={f.id} value={f.id}>{bn ? f.label_bn : f.label}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label className="text-xs">{bn ? 'শর্ত' : 'Operator'}</Label>
+                                  <Select value={fieldData.condition.operator} onValueChange={v => setFieldData(p => ({ ...p, condition: { ...p.condition, operator: v as ConditionData['operator'] } }))}>
+                                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="equals">{bn ? 'সমান' : 'Equals'}</SelectItem>
+                                      <SelectItem value="not_equals">{bn ? 'সমান নয়' : 'Not Equals'}</SelectItem>
+                                      <SelectItem value="contains">{bn ? 'ধারণ করে' : 'Contains'}</SelectItem>
+                                      <SelectItem value="not_empty">{bn ? 'খালি নয়' : 'Not Empty'}</SelectItem>
+                                      <SelectItem value="is_empty">{bn ? 'খালি' : 'Is Empty'}</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                {!['not_empty', 'is_empty'].includes(fieldData.condition.operator) && (
+                                  <div>
+                                    <Label className="text-xs">{bn ? 'মান' : 'Value'}</Label>
+                                    <Input className="mt-1" value={fieldData.condition.value} onChange={e => setFieldData(p => ({ ...p, condition: { ...p.condition, value: e.target.value } }))} placeholder={bn ? 'মান লিখুন' : 'Enter value'} />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
                           <div>
                             <Label>{bn ? 'ক্রম' : 'Sort Order'}</Label>
                             <Input type="number" value={fieldData.sort_order} onChange={e => setFieldData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
