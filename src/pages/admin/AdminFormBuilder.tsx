@@ -264,6 +264,7 @@ const AdminFormBuilder = () => {
   // Field mutations
   const saveField = useMutation({
     mutationFn: async (data: FieldData) => {
+      const validationObj = data.condition.enabled ? { condition: { source_field_id: data.condition.source_field_id, operator: data.condition.operator, value: data.condition.value } } : {};
       const payload = {
         form_id: selectedFormId!,
         field_type: data.field_type,
@@ -275,6 +276,7 @@ const AdminFormBuilder = () => {
         options: JSON.stringify(data.options),
         default_value: data.default_value,
         is_active: data.is_active,
+        validation: JSON.stringify(validationObj),
       };
       if (editingFieldId) {
         const { error } = await supabase.from('custom_form_fields').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editingFieldId);
