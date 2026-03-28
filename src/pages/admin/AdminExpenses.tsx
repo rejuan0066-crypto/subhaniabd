@@ -255,10 +255,9 @@ const AdminExpenses = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['deposits'] });
       qc.invalidateQueries({ queryKey: ['all_deposits'] });
-      setDepositDialog(false);
       setDepositForm(defaultDepositForm);
       setEditingDepositId(null);
-      toast.success(bn ? 'সংরক্ষিত' : 'Saved');
+      toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
     },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
