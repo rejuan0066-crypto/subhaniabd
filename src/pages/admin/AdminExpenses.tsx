@@ -397,12 +397,12 @@ const AdminExpenses = () => {
           <TabsContent value="dashboard" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
-              <Dialog open={expenseDialog} onOpenChange={setExpenseDialog}>
+              <Dialog open={expenseDialog} onOpenChange={resetExpenseDialog}>
                 <DialogTrigger asChild>
                   <Button size="sm"><Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                  <DialogHeader><DialogTitle>{bn ? 'নতুন খরচ' : 'New Expense'}</DialogTitle></DialogHeader>
+                  <DialogHeader><DialogTitle>{editingExpenseId ? (bn ? 'খরচ সম্পাদনা' : 'Edit Expense') : (bn ? 'নতুন খরচ' : 'New Expense')}</DialogTitle></DialogHeader>
                   <div className="space-y-3">
                     <div>
                       <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
