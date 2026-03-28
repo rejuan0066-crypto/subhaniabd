@@ -254,16 +254,19 @@ const AdminExpenses = () => {
         receiptUrl = urlData.publicUrl;
       }
       
+      const descWithUnit = expenseForm.quantity_unit && expenseForm.quantity_unit !== 'পিস'
+        ? `${expenseForm.description || ''}[unit:${expenseForm.quantity_unit}]`.trim()
+        : (expenseForm.description || '').replace(/\[unit:.*?\]/g, '').trim();
       const payload = {
         month_year: selectedMonthYear,
         project_id: expenseForm.project_id,
         category_id: expenseForm.category_id,
         expense_date: expenseForm.expense_date,
-        description: expenseForm.description,
-        quantity: Number(expenseForm.quantity) || 1,
+        description: descWithUnit,
+        quantity: Number(bnToEnDigit(expenseForm.quantity)) || 1,
         has_receipt: expenseForm.has_receipt,
         receipt_url: receiptUrl,
-        amount: Number(expenseForm.amount)
+        amount: Number(bnToEnDigit(expenseForm.amount))
       };
       if (editingExpenseId) {
         const { error } = await supabase.from('expenses').update(payload).eq('id', editingExpenseId);
