@@ -503,12 +503,12 @@ const AdminExpenses = () => {
           <TabsContent value="deposits" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-semibold">{bn ? 'জমা তালিকা' : 'Deposit List'} ({selectedMonthYear})</h3>
-              <Dialog open={depositDialog} onOpenChange={setDepositDialog}>
+              <Dialog open={depositDialog} onOpenChange={resetDepositDialog}>
                 <DialogTrigger asChild>
                   <Button size="sm"><Plus className="w-4 h-4 mr-1" />{bn ? 'জমা যোগ' : 'Add Deposit'}</Button>
                 </DialogTrigger>
                 <DialogContent>
-                  <DialogHeader><DialogTitle>{bn ? 'নতুন জমা' : 'New Deposit'}</DialogTitle></DialogHeader>
+                  <DialogHeader><DialogTitle>{editingDepositId ? (bn ? 'জমা সম্পাদনা' : 'Edit Deposit') : (bn ? 'নতুন জমা' : 'New Deposit')}</DialogTitle></DialogHeader>
                   <div className="space-y-3">
                     <div>
                       <Label>{bn ? 'তারিখ' : 'Date'} *</Label>
