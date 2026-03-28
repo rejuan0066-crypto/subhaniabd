@@ -481,7 +481,8 @@ const AdminExpenses = () => {
                       <TableCell>{e.quantity}</TableCell>
                       <TableCell>{e.has_receipt ? '✅' : '❌'}</TableCell>
                       <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteExpense.mutate(e.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </TableCell>
                     </TableRow>
