@@ -17,10 +17,13 @@ import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download } from 'lucide-react';
 
 const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লিটার', 'ফুট', 'মিটার', 'সেট', 'প্যাকেট', 'বস্তা', 'রিম'];
+const EXPENSE_METHODS = ['ক্যাশ', 'চেক', 'বিকাশ', 'নগদ', 'রকেট', 'ব্যাংক ট্রান্সফার', 'অন্যান্য'];
 
 const bnToEnDigit = (str: string) => str.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d).toString());
+const onlyNumbers = (str: string) => bnToEnDigit(str).replace(/[^0-9.]/g, '');
 const getUnit = (desc: string) => desc?.match(/\[unit:(.*?)\]/)?.[1] || 'পিস';
-const cleanDesc = (desc: string) => (desc || '').replace(/\[unit:.*?\]/g, '').trim() || '-';
+const getMethod = (desc: string) => desc?.match(/\[method:(.*?)\]/)?.[1] || 'ক্যাশ';
+const cleanDesc = (desc: string) => (desc || '').replace(/\[unit:.*?\]/g, '').replace(/\[method:.*?\]/g, '').trim() || '-';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -66,7 +69,7 @@ const AdminExpenses = () => {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   // Form states
-  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '1', quantity_unit: 'পিস', has_receipt: false, receipt_url: '', amount: '' };
+  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '1', quantity_unit: 'পিস', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
   const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
@@ -238,7 +241,11 @@ const AdminExpenses = () => {
 
   const addExpense = useMutation({
     mutationFn: async () => {
-      if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill required fields'); return; }
+      if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
+      const parsedAmount = Number(onlyNumbers(expenseForm.amount));
+      const parsedQty = Number(onlyNumbers(expenseForm.quantity));
+      if (isNaN(parsedAmount) || parsedAmount <= 0) { toast.error(bn ? 'সঠিক টাকার পরিমাণ দিন' : 'Enter valid amount'); return; }
+      if (isNaN(parsedQty) || parsedQty <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid quantity'); return; }
       
       let receiptUrl = expenseForm.receipt_url || null;
       
@@ -256,19 +263,20 @@ const AdminExpenses = () => {
         receiptUrl = urlData.publicUrl;
       }
       
-      const descWithUnit = expenseForm.quantity_unit && expenseForm.quantity_unit !== 'পিস'
-        ? `${expenseForm.description || ''}[unit:${expenseForm.quantity_unit}]`.trim()
-        : (expenseForm.description || '').replace(/\[unit:.*?\]/g, '').trim();
+      let descWithTags = (expenseForm.description || '').trim();
+      if (expenseForm.quantity_unit && expenseForm.quantity_unit !== 'পিস') descWithTags += `[unit:${expenseForm.quantity_unit}]`;
+      if (expenseForm.expense_method && expenseForm.expense_method !== 'ক্যাশ') descWithTags += `[method:${expenseForm.expense_method}]`;
+      
       const payload = {
         month_year: selectedMonthYear,
         project_id: expenseForm.project_id,
         category_id: expenseForm.category_id,
         expense_date: expenseForm.expense_date,
-        description: descWithUnit,
-        quantity: Number(bnToEnDigit(expenseForm.quantity)) || 1,
+        description: descWithTags,
+        quantity: parsedQty,
         has_receipt: expenseForm.has_receipt,
         receipt_url: receiptUrl,
-        amount: Number(bnToEnDigit(expenseForm.amount))
+        amount: parsedAmount
       };
       if (editingExpenseId) {
         const { error } = await supabase.from('expenses').update(payload).eq('id', editingExpenseId);
@@ -393,7 +401,7 @@ const AdminExpenses = () => {
 
   const openEditExpense = (e: any) => {
     setEditingExpenseId(e.id);
-    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount) });
+    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: getMethod(e.description) });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
@@ -434,9 +442,9 @@ const AdminExpenses = () => {
         if (catExpenses.length === 0) return;
         const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
         rows.push([`  ${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', `৳${formatNum(catTotal)}`]);
-        rows.push(['#', bn ? 'তারিখ' : 'Date', bn ? 'বিবরণ' : 'Description', bn ? 'পরিমাণ' : 'Qty', bn ? 'টাকা' : 'Amount', bn ? 'রসিদ' : 'Receipt']);
+        rows.push(['#', bn ? 'তারিখ' : 'Date', bn ? 'বিবরণ' : 'Description', bn ? 'পরিমাণ' : 'Qty', bn ? 'মাধ্যম' : 'Method', bn ? 'টাকা' : 'Amount', bn ? 'রসিদ' : 'Receipt']);
         catExpenses.forEach((e: any, i: number) => {
-          rows.push([String(i + 1), e.expense_date, cleanDesc(e.description), `${e.quantity || 1} ${getUnit(e.description)}`, `৳${formatNum(Number(e.amount))}`, e.has_receipt ? '✓' : '-']);
+          rows.push([String(i + 1), e.expense_date, cleanDesc(e.description), `${e.quantity || 1} ${getUnit(e.description)}`, getMethod(e.description), `৳${formatNum(Number(e.amount))}`, e.has_receipt ? '✓' : '-']);
         });
         rows.push([]);
       });
@@ -451,6 +459,47 @@ const AdminExpenses = () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = `expense_report_${selectedMonthYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
+  };
+
+  const handleProjectExcelDownload = (projectId: string) => {
+    const project = projects.find((p: any) => p.id === projectId);
+    if (!project) return;
+    const projExpenses = expenses.filter((e: any) => e.project_id === projectId);
+    const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+    const rows: string[][] = [];
+    rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? summaryForm.inst_name : summaryForm.inst_name_en]);
+    rows.push([bn ? 'ঠিকানা' : 'Address', summaryForm.inst_address]);
+    rows.push([bn ? 'ফোন' : 'Phone', summaryForm.inst_phone]);
+    rows.push([bn ? 'ইমেইল' : 'Email', summaryForm.inst_email]);
+    if (summaryForm.inst_other) rows.push([bn ? 'অন্যান্য' : 'Other', summaryForm.inst_other]);
+    rows.push([]);
+    rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, selectedMonthYear]);
+    rows.push([]);
+
+    const projCategories = categories.filter((c: any) => c.project_id === projectId);
+    projCategories.forEach((cat: any) => {
+      const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+      if (catExpenses.length === 0) return;
+      const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+      rows.push([`${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', '', `৳${formatNum(catTotal)}`]);
+      rows.push(['#', bn ? 'তারিখ' : 'Date', bn ? 'বিবরণ' : 'Description', bn ? 'পরিমাণ' : 'Qty', bn ? 'মাধ্যম' : 'Method', bn ? 'টাকা' : 'Amount', bn ? 'রসিদ' : 'Receipt']);
+      catExpenses.forEach((e: any, i: number) => {
+        rows.push([String(i + 1), e.expense_date, cleanDesc(e.description), `${e.quantity || 1} ${getUnit(e.description)}`, getMethod(e.description), `৳${formatNum(Number(e.amount))}`, e.has_receipt ? '✓' : '-']);
+      });
+      rows.push([]);
+    });
+
+    rows.push([bn ? 'প্রকল্প মোট খরচ' : 'Project Total', `৳${formatNum(projTotal)}`]);
+    const csvContent = rows.map(r => r.map(c => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${bn ? project.name_bn : project.name}_${selectedMonthYear}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
@@ -715,8 +764,9 @@ const AdminExpenses = () => {
                               <Input 
                                 className="flex-1" 
                                 value={expenseForm.quantity} 
-                                onChange={e => setExpenseForm(f => ({ ...f, quantity: bnToEnDigit(e.target.value) }))} 
+                                onChange={e => setExpenseForm(f => ({ ...f, quantity: onlyNumbers(e.target.value) }))} 
                                 placeholder="১"
+                                inputMode="decimal"
                               />
                               <Select value={expenseForm.quantity_unit} onValueChange={v => setExpenseForm(f => ({ ...f, quantity_unit: v }))}>
                                 <SelectTrigger className="w-24">
@@ -735,7 +785,21 @@ const AdminExpenses = () => {
                         </div>
                         <div>
                           <Label>{bn ? 'পরিমাণ (টাকা)' : 'Amount (BDT)'} *</Label>
-                          <Input value={expenseForm.amount} onChange={e => setExpenseForm(f => ({ ...f, amount: bnToEnDigit(e.target.value) }))} placeholder="০" />
+                          <Input 
+                            value={expenseForm.amount} 
+                            onChange={e => setExpenseForm(f => ({ ...f, amount: onlyNumbers(e.target.value) }))} 
+                            placeholder="০" 
+                            inputMode="decimal"
+                          />
+                        </div>
+                        <div>
+                          <Label>{bn ? 'খরচের মাধ্যম' : 'Expense Method'}</Label>
+                          <Select value={expenseForm.expense_method} onValueChange={v => setExpenseForm(f => ({ ...f, expense_method: v }))}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {EXPENSE_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div>
                           <Label>{bn ? 'রসিদ সংযুক্ত করুন' : 'Attach Receipt'}</Label>
@@ -778,6 +842,7 @@ const AdminExpenses = () => {
                         <TableHead>{bn ? 'তারিখ' : 'Date'}</TableHead>
                         <TableHead>{bn ? 'বিবরণ' : 'Description'}</TableHead>
                         <TableHead>{bn ? 'পরিমাণ' : 'Qty'}</TableHead>
+                        <TableHead>{bn ? 'মাধ্যম' : 'Method'}</TableHead>
                         <TableHead>{bn ? 'রসিদ' : 'Receipt'}</TableHead>
                         <TableHead className="text-right">{bn ? 'টাকা' : 'Amount'}</TableHead>
                         <TableHead></TableHead>
@@ -785,7 +850,7 @@ const AdminExpenses = () => {
                     </TableHeader>
                     <TableBody>
                       {categoryExpenses.length === 0 && (
-                        <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</TableCell></TableRow>
                       )}
                       {categoryExpenses.map((e: any, i: number) => (
                         <TableRow key={e.id}>
@@ -793,6 +858,7 @@ const AdminExpenses = () => {
                           <TableCell>{e.expense_date}</TableCell>
                           <TableCell className="max-w-[200px] truncate">{cleanDesc(e.description)}</TableCell>
                           <TableCell>{e.quantity} {getUnit(e.description)}</TableCell>
+                          <TableCell>{getMethod(e.description)}</TableCell>
                           <TableCell>{e.has_receipt ? '✅' : '❌'}</TableCell>
                           <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
                           <TableCell className="flex gap-1">
@@ -803,7 +869,7 @@ const AdminExpenses = () => {
                       ))}
                       {categoryExpenses.length > 0 && (
                         <TableRow className="bg-muted/50 font-bold">
-                          <TableCell colSpan={5} className="text-right">{bn ? 'মোট খরচ:' : 'Total:'}</TableCell>
+                          <TableCell colSpan={6} className="text-right">{bn ? 'মোট খরচ:' : 'Total:'}</TableCell>
                           <TableCell className="text-right">৳{formatNum(categoryExpenseTotal)}</TableCell>
                           <TableCell />
                         </TableRow>
@@ -1040,17 +1106,42 @@ const AdminExpenses = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button onClick={() => saveSummary.mutate()} disabled={saveSummary.isPending}>
                     {bn ? 'সারাংশ সংরক্ষণ' : 'Save Summary'}
                   </Button>
                   <Button variant="outline" onClick={handlePrint}>
-                    <Printer className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
+                    <Printer className="w-4 h-4 mr-1" />{bn ? 'সম্পূর্ণ প্রিন্ট' : 'Print All'}
                   </Button>
                   <Button variant="outline" onClick={handleExcelDownload}>
-                    <Download className="w-4 h-4 mr-1" />{bn ? 'এক্সেল ডাউনলোড' : 'Excel Download'}
+                    <Download className="w-4 h-4 mr-1" />{bn ? 'সম্পূর্ণ এক্সেল' : 'Excel All'}
                   </Button>
                 </div>
+
+                {/* Per-project download */}
+                {projects.length > 0 && (
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <h4 className="text-sm font-semibold mb-3 text-foreground">{bn ? 'প্রকল্প ভিত্তিক ডাউনলোড' : 'Per-Project Download'}</h4>
+                    <div className="space-y-2">
+                      {projects.map((p: any) => {
+                        const projExp = expenses.filter((e: any) => e.project_id === p.id);
+                        const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+                        if (projExp.length === 0) return null;
+                        return (
+                          <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+                            <div>
+                              <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => handleProjectExcelDownload(p.id)}>
+                              <Download className="w-3 h-3 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1114,11 +1205,12 @@ const AdminExpenses = () => {
                     </h3>
                     <table className="w-full border-collapse border text-sm">
                       <thead>
-                        <tr className="bg-gray-100">
+                        <tr className="bg-muted">
                           <th className="border p-1 text-left w-8">#</th>
                           <th className="border p-1 text-left">{bn ? 'তারিখ' : 'Date'}</th>
                           <th className="border p-1 text-left">{bn ? 'বিবরণ' : 'Description'}</th>
                           <th className="border p-1 text-center">{bn ? 'পরিমাণ' : 'Qty'}</th>
+                          <th className="border p-1 text-center">{bn ? 'মাধ্যম' : 'Method'}</th>
                           <th className="border p-1 text-right">{bn ? 'টাকা' : 'Amount'}</th>
                           <th className="border p-1 text-center">{bn ? 'রসিদ' : 'Receipt'}</th>
                         </tr>
@@ -1130,12 +1222,13 @@ const AdminExpenses = () => {
                             <td className="border p-1">{e.expense_date}</td>
                             <td className="border p-1">{cleanDesc(e.description)}</td>
                             <td className="border p-1 text-center">{e.quantity || 1} {getUnit(e.description)}</td>
+                            <td className="border p-1 text-center">{getMethod(e.description)}</td>
                             <td className="border p-1 text-right">৳{formatNum(Number(e.amount))}</td>
                             <td className="border p-1 text-center">{e.has_receipt ? '✓' : '-'}</td>
                           </tr>
                         ))}
-                        <tr className="font-bold bg-gray-50">
-                          <td colSpan={4} className="border p-1 text-right">{bn ? 'উপমোট:' : 'Subtotal:'}</td>
+                        <tr className="font-bold bg-muted/50">
+                          <td colSpan={5} className="border p-1 text-right">{bn ? 'উপমোট:' : 'Subtotal:'}</td>
                           <td className="border p-1 text-right">৳{formatNum(catTotal)}</td>
                           <td className="border p-1"></td>
                         </tr>
@@ -1150,7 +1243,7 @@ const AdminExpenses = () => {
 
         {/* Grand Total */}
         <table className="w-full border-collapse border mb-6 text-sm">
-          <tr className="font-bold bg-gray-200">
+          <tr className="font-bold bg-muted">
             <td className="border p-2">{bn ? 'সর্বমোট খরচ' : 'Grand Total Expense'}</td>
             <td className="border p-2 text-right">৳{formatNum(monthlyTotalExpense)}</td>
           </tr>
