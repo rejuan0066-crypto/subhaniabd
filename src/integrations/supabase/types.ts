@@ -644,8 +644,10 @@ export type Database = {
           name_en: string | null
           phone: string | null
           photo_url: string | null
+          residence_type: string | null
           roll_number: string | null
           status: string | null
+          student_category: string | null
           student_id: string
           updated_at: string | null
         }
@@ -665,8 +667,10 @@ export type Database = {
           name_en?: string | null
           phone?: string | null
           photo_url?: string | null
+          residence_type?: string | null
           roll_number?: string | null
           status?: string | null
+          student_category?: string | null
           student_id: string
           updated_at?: string | null
         }
@@ -686,8 +690,10 @@ export type Database = {
           name_en?: string | null
           phone?: string | null
           photo_url?: string | null
+          residence_type?: string | null
           roll_number?: string | null
           status?: string | null
+          student_category?: string | null
           student_id?: string
           updated_at?: string | null
         }
