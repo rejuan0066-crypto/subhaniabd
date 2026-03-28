@@ -1432,7 +1432,7 @@ const AdminExpenses = () => {
                 if (!printEditMode) {
                   setPrintEditData({
                     instName: instName, instNameEn: instNameEn, instAddress: instAddress,
-                    instPhone: instPhone, instEmail: instEmail, instOther: instOther,
+                    instPhone: instPhone, instEmail: instEmail, instOther: instOther, instLogo: instLogo,
                     reportTitle: bn ? 'প্রকল্প খরচ প্রতিবেদন' : 'Project Expense Report',
                     reportSubtitle: '',
                     casherName: summaryData?.casher_name || '',
