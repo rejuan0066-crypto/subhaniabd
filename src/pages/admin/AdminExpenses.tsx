@@ -51,17 +51,19 @@ const AdminExpenses = () => {
   const [expenseDialog, setExpenseDialog] = useState(false);
   const [depositDialog, setDepositDialog] = useState(false);
 
+  // Edit IDs
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [editingDepositId, setEditingDepositId] = useState<string | null>(null);
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+
   // Form states
+  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '1', has_receipt: false, receipt_url: '', amount: '' };
+  const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
   const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
-  const [expenseForm, setExpenseForm] = useState({
-    project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0],
-    description: '', quantity: '1', has_receipt: false, receipt_url: '', amount: ''
-  });
-  const [depositForm, setDepositForm] = useState({
-    deposit_date: new Date().toISOString().split('T')[0],
-    bank_details: '', other_details: '', amount: '', source: 'manual'
-  });
+  const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
+  const [depositForm, setDepositForm] = useState(defaultDepositForm);
   const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
 
   // Queries
