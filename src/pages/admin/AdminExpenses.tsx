@@ -1261,6 +1261,9 @@ const AdminExpenses = () => {
                               <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
                             </div>
                             <div className="flex gap-1">
+                              <Button variant="outline" size="sm" onClick={() => setEditProjectEntriesId(p.id)}>
+                                <Edit2 className="w-3 h-3 mr-1" />{bn ? 'এডিট' : 'Edit'}
+                              </Button>
                               <Button variant="outline" size="sm" onClick={() => setPrintProjectId(p.id)}>
                                 <Printer className="w-3 h-3 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
                               </Button>
