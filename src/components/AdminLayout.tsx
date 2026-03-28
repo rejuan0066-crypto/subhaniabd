@@ -32,6 +32,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { menuConfig } = useMenuSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
