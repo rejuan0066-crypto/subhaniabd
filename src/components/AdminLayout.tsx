@@ -1,13 +1,15 @@
 import { ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import LanguageToggle from './LanguageToggle';
 import {
   LayoutDashboard, Users, UserCog, BookOpen, FileText, Bell,
   CreditCard, Settings, Globe, GraduationCap, Menu, X, LogOut,
   ChevronRight, Layers, Receipt, Heart, ReceiptText, FileSignature,
-  FilePlus, FileCheck, Tag, Wrench, UserCircle, ChevronDown
+  FilePlus, FileCheck, Tag, Wrench, UserCircle, ChevronDown, FileBox
 } from 'lucide-react';
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
