@@ -394,7 +394,18 @@ const AdminExpenses = () => {
   const saveInstitution = useMutation({
     mutationFn: async () => {
       if (!institutionForm.name) { toast.error(bn ? 'প্রতিষ্ঠানের নাম দিন' : 'Enter institution name'); return; }
-      const payload = { name: institutionForm.name, name_en: institutionForm.name_en || null, address: institutionForm.address || null, phone: institutionForm.phone || null, email: institutionForm.email || null, other_info: institutionForm.other_info || null };
+      let logoUrl = institutionForm.logo_url || null;
+      if (logoFile) {
+        setLogoUploading(true);
+        const fileExt = logoFile.name.split('.').pop();
+        const fileName = `logo_${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('institution-logos').upload(fileName, logoFile);
+        setLogoUploading(false);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('institution-logos').getPublicUrl(uploadData.path);
+        logoUrl = urlData.publicUrl;
+      }
+      const payload = { name: institutionForm.name, name_en: institutionForm.name_en || null, address: institutionForm.address || null, phone: institutionForm.phone || null, email: institutionForm.email || null, other_info: institutionForm.other_info || null, logo_url: logoUrl };
       if (editingInstitutionId) {
         const { error } = await supabase.from('institutions').update(payload).eq('id', editingInstitutionId);
         if (error) throw error;
@@ -403,7 +414,16 @@ const AdminExpenses = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); setInstitutionDialog(false); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '' }); setEditingInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); setInstitutionDialog(false); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' }); setLogoFile(null); setEditingInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
+  });
+
+  const deleteInstitution = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('institutions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['institutions'] }); toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
   });
 
