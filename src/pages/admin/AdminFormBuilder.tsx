@@ -650,6 +650,7 @@ const AdminFormBuilder = () => {
                             getFieldLabel={getFieldLabel}
                             openEditField={openEditField}
                             deleteField={(id: string) => deleteFieldMut.mutate(id)}
+                            fields={fields}
                           />
                         ))}
                       </div>
