@@ -614,6 +614,7 @@ const AdminExpenses = () => {
                       {projects.map((p: any) => (
                         <li key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
                           <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
+                          <Button variant="ghost" size="icon" onClick={() => openEditProject(p)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
                         </li>
                       ))}
                     </ul>
