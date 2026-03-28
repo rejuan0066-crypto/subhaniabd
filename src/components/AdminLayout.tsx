@@ -26,6 +26,21 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Fetch published custom forms for dynamic menu
+  const { data: publishedForms = [] } = useQuery({
+    queryKey: ['published-custom-forms'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custom_forms')
+        .select('*')
+        .neq('publish_to', 'none')
+        .eq('is_active', true)
+        .order('created_at');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   type MenuItem = {
     path: string;
     label: string;
@@ -33,7 +48,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     children?: { path: string; label: string; icon: any }[];
   };
 
-  const menuItems: MenuItem[] = [
+  const baseMenuItems: MenuItem[] = [
     {
       path: '/admin', label: language === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: LayoutDashboard,
       children: [
@@ -58,6 +73,39 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { path: '/admin/form-builder', label: language === 'bn' ? 'কাস্টম বিল্ডার' : 'Custom Builder', icon: Wrench },
     { path: '/admin/settings', label: language === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
   ];
+
+  // Build final menu items with published custom forms injected
+  const menuItems: MenuItem[] = baseMenuItems.map(item => {
+    // Find sub_menu forms that belong under this menu item
+    const subForms = publishedForms.filter(f => f.publish_to === 'sub_menu' && f.parent_menu === item.path);
+    if (subForms.length > 0) {
+      const existingChildren = item.children || [];
+      const newChildren = subForms.map(f => ({
+        path: `/admin/custom/${f.menu_slug}`,
+        label: language === 'bn' ? f.name_bn : f.name,
+        icon: FileBox,
+      }));
+      return { ...item, children: [...existingChildren, ...newChildren] };
+    }
+    return item;
+  });
+
+  // Add main_menu published forms
+  const mainMenuForms = publishedForms.filter(f => f.publish_to === 'main_menu');
+  mainMenuForms.forEach(f => {
+    // Insert before Settings (last item)
+    const settingsIdx = menuItems.findIndex(m => m.path === '/admin/settings');
+    const newItem: MenuItem = {
+      path: `/admin/custom/${f.menu_slug}`,
+      label: language === 'bn' ? f.name_bn : f.name,
+      icon: FileBox,
+    };
+    if (settingsIdx !== -1) {
+      menuItems.splice(settingsIdx, 0, newItem);
+    } else {
+      menuItems.push(newItem);
+    }
+  });
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
     <aside className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:flex'} flex`}>
