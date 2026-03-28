@@ -408,6 +408,7 @@ export type Database = {
           email: string | null
           id: string
           is_default: boolean | null
+          logo_url: string | null
           name: string
           name_en: string | null
           other_info: string | null
@@ -420,6 +421,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_default?: boolean | null
+          logo_url?: string | null
           name: string
           name_en?: string | null
           other_info?: string | null
@@ -432,6 +434,7 @@ export type Database = {
           email?: string | null
           id?: string
           is_default?: boolean | null
+          logo_url?: string | null
           name?: string
           name_en?: string | null
           other_info?: string | null
