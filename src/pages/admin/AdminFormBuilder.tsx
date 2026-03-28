@@ -119,7 +119,11 @@ const SortableFieldItem = ({ field, bn, getFieldIcon, getFieldLabel, openEditFie
           <div className="flex items-center gap-2 mt-0.5">
             <Badge variant="outline" className="text-[10px]">{getFieldLabel(field.field_type)}</Badge>
             {opts.length > 0 && <span className="text-[10px] text-muted-foreground">{opts.length} {bn ? 'টি অপশন' : 'options'}</span>}
-          </div>
+            {hasCondition && (
+              <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                {bn ? 'শর্তযুক্ত' : 'Conditional'}
+              </Badge>
+            )}
         </div>
         <div className="flex items-center gap-1">
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditField(field)}>
