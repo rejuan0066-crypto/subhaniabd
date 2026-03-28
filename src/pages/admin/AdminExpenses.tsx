@@ -153,10 +153,15 @@ const AdminExpenses = () => {
   const addProject = useMutation({
     mutationFn: async () => {
       if (!projectForm.name || !projectForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
-      const { error } = await supabase.from('expense_projects').insert(projectForm);
-      if (error) throw error;
+      if (editingProjectId) {
+        const { error } = await supabase.from('expense_projects').update(projectForm).eq('id', editingProjectId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('expense_projects').insert(projectForm);
+        if (error) throw error;
+      }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_projects'] }); setProjectDialog(false); setProjectForm({ name: '', name_bn: '' }); toast.success(bn ? 'প্রকল্প যোগ হয়েছে' : 'Project added'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_projects'] }); setProjectDialog(false); setProjectForm({ name: '', name_bn: '' }); setEditingProjectId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
