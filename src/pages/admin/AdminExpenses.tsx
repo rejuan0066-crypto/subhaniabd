@@ -1430,7 +1430,11 @@ const AdminExpenses = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = projects.find((p: any) => p.id === editProjectEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
-              <Button size="sm" onClick={() => { setExpenseForm({ ...defaultExpenseForm, project_id: editProjectEntriesId || '' }); setEditingExpenseId(null); setExpenseDialog(true); setEditProjectEntriesId(null); }}>
+              <Button size="sm" onClick={() => {
+                const pid = editProjectEntriesId || '';
+                setEditProjectEntriesId(null);
+                setTimeout(() => { setExpenseForm({ ...defaultExpenseForm, project_id: pid }); setEditingExpenseId(null); setExpenseDialog(true); }, 150);
+              }}>
                 <Plus className="w-3 h-3 mr-1" />{bn ? 'নতুন এন্ট্রি' : 'New Entry'}
               </Button>
             </DialogTitle>
@@ -1460,6 +1464,7 @@ const AdminExpenses = () => {
                             <TableHead>{bn ? 'পরিমাণ' : 'Qty'}</TableHead>
                             <TableHead>{bn ? 'মাধ্যম' : 'Method'}</TableHead>
                             <TableHead className="text-right">{bn ? 'টাকা' : 'Amount'}</TableHead>
+                            <TableHead className="text-center">{bn ? 'রসিদ' : 'Receipt'}</TableHead>
                             <TableHead className="w-20">{bn ? 'অ্যাকশন' : 'Action'}</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -1472,9 +1477,18 @@ const AdminExpenses = () => {
                               <TableCell>{e.quantity || 1} {getUnit(e.description)}</TableCell>
                               <TableCell>{getMethod(e.description)}</TableCell>
                               <TableCell className="text-right">৳{formatNum(Number(e.amount))}</TableCell>
+                              <TableCell className="text-center">
+                                {e.has_receipt ? (
+                                  e.receipt_url ? <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setReceiptPreview(e.receipt_url)}><Eye className="w-3 h-3 text-primary" /></Button> : <span className="text-primary">✓</span>
+                                ) : '-'}
+                              </TableCell>
                               <TableCell>
                                 <div className="flex gap-1">
-                                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { openEditExpense(e); setEditProjectEntriesId(null); }}>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                                    const eid = editProjectEntriesId;
+                                    setEditProjectEntriesId(null);
+                                    setTimeout(() => { openEditExpense(e); }, 150);
+                                  }}>
                                     <Edit2 className="w-3 h-3" />
                                   </Button>
                                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteExpense.mutate(e.id); }}>
