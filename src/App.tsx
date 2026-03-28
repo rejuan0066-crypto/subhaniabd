@@ -82,6 +82,7 @@ const App = () => (
               <Route path="/admin/admission-letters" element={<ProtectedRoute><AdminAdmissionLetters /></ProtectedRoute>} />
               <Route path="/admin/designations" element={<ProtectedRoute><AdminDesignations /></ProtectedRoute>} />
               <Route path="/admin/form-builder" element={<ProtectedRoute><AdminFormBuilder /></ProtectedRoute>} />
+              <Route path="/admin/custom/:slug" element={<ProtectedRoute><AdminCustomFormPage /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
