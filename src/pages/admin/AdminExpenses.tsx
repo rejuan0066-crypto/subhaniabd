@@ -66,6 +66,11 @@ const AdminExpenses = () => {
   const [depositDialog, setDepositDialog] = useState(false);
   const [institutionDialog, setInstitutionDialog] = useState(false);
   const [editingInstitutionId, setEditingInstitutionId] = useState<string | null>(null);
+  const [printEditMode, setPrintEditMode] = useState(false);
+  const [printEditData, setPrintEditData] = useState({
+    instName: '', instNameEn: '', instAddress: '', instPhone: '', instEmail: '', instOther: '',
+    reportTitle: '', reportSubtitle: '', casherName: '', principalName: '', extraNote: ''
+  });
 
   // Edit IDs
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
