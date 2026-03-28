@@ -313,7 +313,7 @@ const AdminExpenses = () => {
               <div className="p-2 rounded-lg bg-secondary"><DollarSign className="w-5 h-5 text-secondary-foreground" /></div>
               <div>
                 <p className="text-xs text-muted-foreground">{bn ? 'বকেয়া' : 'Arrears'}</p>
-                <p className="text-lg font-bold text-foreground">৳{formatNum(previousArrears)}</p>
+                <p className={`text-lg font-bold ${totalArrears > 0 ? 'text-destructive' : 'text-foreground'}`}>৳{formatNum(totalArrears)}</p>
               </div>
             </CardContent>
           </Card>
