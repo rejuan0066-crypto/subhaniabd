@@ -55,6 +55,7 @@ const AdminExpenses = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
 
   // Dialogs
   const [projectDialog, setProjectDialog] = useState(false);
@@ -859,7 +860,13 @@ const AdminExpenses = () => {
                           <TableCell className="max-w-[200px] truncate">{cleanDesc(e.description)}</TableCell>
                           <TableCell>{e.quantity} {getUnit(e.description)}</TableCell>
                           <TableCell>{getMethod(e.description)}</TableCell>
-                          <TableCell>{e.has_receipt ? '✅' : '❌'}</TableCell>
+                          <TableCell>
+                            {e.has_receipt && e.receipt_url ? (
+                              <Button variant="ghost" size="sm" className="text-primary p-0 h-auto" onClick={() => setReceiptPreview(e.receipt_url)}>
+                                <Eye className="w-4 h-4 mr-1" />{bn ? 'দেখুন' : 'View'}
+                              </Button>
+                            ) : e.has_receipt ? '✅' : '❌'}
+                          </TableCell>
                           <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
                           <TableCell className="flex gap-1">
                             <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
