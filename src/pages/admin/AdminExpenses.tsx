@@ -112,7 +112,7 @@ const AdminExpenses = () => {
   const { data: allExpenses = [] } = useQuery({
     queryKey: ['all_expenses'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expenses').select('month_year, amount');
+      const { data, error } = await supabase.from('expenses').select('month_year, amount, project_id, category_id, expense_projects(name, name_bn), expense_categories(name, name_bn)');
       if (error) throw error;
       return data;
     }
@@ -150,6 +150,34 @@ const AdminExpenses = () => {
   const rawCashAll = totalDepositAll - totalExpenseAll;
   const totalCashAll = rawCashAll >= 0 ? rawCashAll : 0;
   const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
+
+  // Project-wise breakdown
+  const projectBreakdown = useMemo(() => {
+    const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
+    allExpenses.forEach((e: any) => {
+      if (!e.project_id) return;
+      if (!map[e.project_id]) {
+        map[e.project_id] = { name: e.expense_projects?.name || '', name_bn: e.expense_projects?.name_bn || '', monthly: 0, total: 0 };
+      }
+      map[e.project_id].total += Number(e.amount || 0);
+      if (e.month_year === selectedMonthYear) map[e.project_id].monthly += Number(e.amount || 0);
+    });
+    return Object.values(map);
+  }, [allExpenses, selectedMonthYear]);
+
+  // Category-wise breakdown
+  const categoryBreakdown = useMemo(() => {
+    const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
+    allExpenses.forEach((e: any) => {
+      if (!e.category_id) return;
+      if (!map[e.category_id]) {
+        map[e.category_id] = { name: e.expense_categories?.name || '', name_bn: e.expense_categories?.name_bn || '', monthly: 0, total: 0 };
+      }
+      map[e.category_id].total += Number(e.amount || 0);
+      if (e.month_year === selectedMonthYear) map[e.category_id].monthly += Number(e.amount || 0);
+    });
+    return Object.values(map);
+  }, [allExpenses, selectedMonthYear]);
 
   // Mutations
   const addProject = useMutation({
@@ -403,7 +431,68 @@ const AdminExpenses = () => {
           ))}
         </div>
 
-        {/* Tabs */}
+        {/* Project-wise Breakdown */}
+        {projectBreakdown.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">{bn ? 'প্রকল্প ভিত্তিক খরচ' : 'Project-wise Expenses'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{bn ? 'প্রকল্প' : 'Project'}</TableHead>
+                      <TableHead className="text-right">{bn ? 'মাসিক খরচ' : 'Monthly'}</TableHead>
+                      <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {projectBreakdown.map((p, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium">{bn ? p.name_bn : p.name}</TableCell>
+                        <TableCell className="text-right text-destructive">৳{formatNum(p.monthly)}</TableCell>
+                        <TableCell className="text-right text-destructive font-semibold">৳{formatNum(p.total)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Category-wise Breakdown */}
+        {categoryBreakdown.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">{bn ? 'ক্যাটেগরি ভিত্তিক খরচ' : 'Category-wise Expenses'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{bn ? 'ক্যাটেগরি' : 'Category'}</TableHead>
+                      <TableHead className="text-right">{bn ? 'মাসিক খরচ' : 'Monthly'}</TableHead>
+                      <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {categoryBreakdown.map((c, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium">{bn ? c.name_bn : c.name}</TableCell>
+                        <TableCell className="text-right text-destructive">৳{formatNum(c.monthly)}</TableCell>
+                        <TableCell className="text-right text-destructive font-semibold">৳{formatNum(c.total)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-4 w-full max-w-lg">
             <TabsTrigger value="dashboard">{bn ? 'খরচ' : 'Expenses'}</TabsTrigger>
