@@ -1177,7 +1177,7 @@ const AdminExpenses = () => {
 
         {/* Grand Total */}
         <table className="w-full border-collapse border mb-6 text-sm">
-          <tr className="font-bold bg-gray-200">
+          <tr className="font-bold bg-muted">
             <td className="border p-2">{bn ? 'সর্বমোট খরচ' : 'Grand Total Expense'}</td>
             <td className="border p-2 text-right">৳{formatNum(monthlyTotalExpense)}</td>
           </tr>
