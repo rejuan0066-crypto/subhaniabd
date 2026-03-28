@@ -41,6 +41,7 @@ import AdminFormBuilder from "./pages/admin/AdminFormBuilder";
 import AdminCustomFormPage from "./pages/admin/AdminCustomFormPage";
 import AdminModuleManager from "./pages/admin/AdminModuleManager";
 import AdminFormulaBuilder from "./pages/admin/AdminFormulaBuilder";
+import AdminAttendance from "./pages/admin/AdminAttendance";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
