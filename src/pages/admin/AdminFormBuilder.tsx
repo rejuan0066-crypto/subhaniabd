@@ -23,8 +23,11 @@ import { CSS } from '@dnd-kit/utilities';
 import {
   Plus, Edit2, Trash2, GripVertical, Eye, Copy,
   Type, Hash, ListOrdered, CheckSquare, CircleDot,
-  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone
+  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone,
+  ChevronDown, FolderOpen
 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import { Checkbox } from '@/components/ui/checkbox';
 
