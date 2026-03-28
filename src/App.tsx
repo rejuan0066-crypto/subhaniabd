@@ -39,6 +39,8 @@ import AdminAdmissionLetters from "./pages/admin/AdminAdmissionLetters";
 import AdminDesignations from "./pages/admin/AdminDesignations";
 import AdminFormBuilder from "./pages/admin/AdminFormBuilder";
 import AdminCustomFormPage from "./pages/admin/AdminCustomFormPage";
+import AdminModuleManager from "./pages/admin/AdminModuleManager";
+import AdminFormulaBuilder from "./pages/admin/AdminFormulaBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +85,8 @@ const App = () => (
               <Route path="/admin/designations" element={<ProtectedRoute><AdminDesignations /></ProtectedRoute>} />
               <Route path="/admin/form-builder" element={<ProtectedRoute><AdminFormBuilder /></ProtectedRoute>} />
               <Route path="/admin/custom/:slug" element={<ProtectedRoute><AdminCustomFormPage /></ProtectedRoute>} />
+              <Route path="/admin/module-manager" element={<ProtectedRoute><AdminModuleManager /></ProtectedRoute>} />
+              <Route path="/admin/formula-builder" element={<ProtectedRoute><AdminFormulaBuilder /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -9,7 +9,8 @@ import {
   LayoutDashboard, Users, UserCog, BookOpen, FileText, Bell,
   CreditCard, Settings, Globe, GraduationCap, Menu, X, LogOut,
   ChevronRight, Layers, Receipt, Heart, ReceiptText, FileSignature,
-  FilePlus, FileCheck, Tag, Wrench, UserCircle, ChevronDown, FileBox
+  FilePlus, FileCheck, Tag, Wrench, UserCircle, ChevronDown, FileBox,
+  Blocks, FlaskConical
 } from 'lucide-react';
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -70,7 +71,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     { path: '/admin/website', label: language === 'bn' ? 'ওয়েবসাইট নিয়ন্ত্রণ' : 'Website Control', icon: Globe },
     { path: '/admin/designations', label: language === 'bn' ? 'পদবি তৈরি' : 'Designations', icon: Tag },
     { path: '/admin/subjects', label: language === 'bn' ? 'বিষয়সমূহ' : 'Subjects', icon: BookOpen },
-    { path: '/admin/form-builder', label: language === 'bn' ? 'কাস্টম বিল্ডার' : 'Custom Builder', icon: Wrench },
+    { path: '/admin/form-builder', label: language === 'bn' ? 'কাস্টম বিল্ডার' : 'Custom Builder', icon: Wrench,
+      children: [
+        { path: '/admin/module-manager', label: language === 'bn' ? 'মডিউল ম্যানেজার' : 'Module Manager', icon: Blocks },
+        { path: '/admin/formula-builder', label: language === 'bn' ? 'ফর্মুলা বিল্ডার' : 'Formula Builder', icon: FlaskConical },
+      ]
+    },
     { path: '/admin/settings', label: language === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
   ];
 
