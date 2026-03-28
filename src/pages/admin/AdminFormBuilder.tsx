@@ -8,15 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   Plus, Edit2, Trash2, GripVertical, Eye, Copy,
   Type, Hash, ListOrdered, CheckSquare, CircleDot,
-  Upload, Calendar, ToggleLeft, FileText, ArrowUp, ArrowDown
+  Upload, Calendar, ToggleLeft, FileText
 } from 'lucide-react';
 
 const FORM_TYPES = [
@@ -70,6 +77,46 @@ type FieldData = {
 const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type: 'custom', is_active: true };
 const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true };
 
+// Sortable field item component
+const SortableFieldItem = ({ field, bn, getFieldIcon, getFieldLabel, openEditField, deleteField }: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : undefined, opacity: isDragging ? 0.5 : (!field.is_active ? 0.5 : 1) };
+  const Icon = getFieldIcon(field.field_type);
+  let opts: string[] = [];
+  try { opts = typeof field.options === 'string' ? JSON.parse(field.options as string) : (Array.isArray(field.options) ? (field.options as string[]) : []); } catch { opts = []; }
+
+  return (
+    <Card ref={setNodeRef} style={style} className="transition-shadow">
+      <CardContent className="p-3 flex items-center gap-3">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none p-1 -m-1 rounded hover:bg-muted">
+          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+        </button>
+        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-sm text-foreground truncate">{bn ? field.label_bn : field.label}</span>
+            {field.is_required && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">*</Badge>}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <Badge variant="outline" className="text-[10px]">{getFieldLabel(field.field_type)}</Badge>
+            {opts.length > 0 && <span className="text-[10px] text-muted-foreground">{opts.length} {bn ? 'টি অপশন' : 'options'}</span>}
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditField(field)}>
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => { if (confirm(bn ? 'ফিল্ডটি মুছে ফেলতে চান?' : 'Delete this field?')) deleteField(field.id); }}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const AdminFormBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -84,6 +131,11 @@ const AdminFormBuilder = () => {
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [optionInput, setOptionInput] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   // Fetch forms
   const { data: forms = [] } = useQuery({
@@ -140,6 +192,51 @@ const AdminFormBuilder = () => {
     },
   });
 
+  // Duplicate form mutation
+  const duplicateForm = useMutation({
+    mutationFn: async (formId: string) => {
+      const sourceForm = forms.find(f => f.id === formId);
+      if (!sourceForm) throw new Error('Form not found');
+
+      // Create new form
+      const { data: newForm, error: formErr } = await supabase.from('custom_forms').insert({
+        name: sourceForm.name + ' (Copy)',
+        name_bn: sourceForm.name_bn + ' (কপি)',
+        description: sourceForm.description,
+        form_type: sourceForm.form_type,
+        is_active: sourceForm.is_active,
+      }).select().single();
+      if (formErr || !newForm) throw formErr;
+
+      // Copy fields
+      const { data: sourceFields } = await supabase.from('custom_form_fields').select('*').eq('form_id', formId).order('sort_order');
+      if (sourceFields && sourceFields.length > 0) {
+        const newFields = sourceFields.map(f => ({
+          form_id: newForm.id,
+          field_type: f.field_type,
+          label: f.label,
+          label_bn: f.label_bn,
+          placeholder: f.placeholder,
+          is_required: f.is_required,
+          sort_order: f.sort_order,
+          options: f.options,
+          validation: f.validation,
+          default_value: f.default_value,
+          is_active: f.is_active,
+        }));
+        const { error: fieldsErr } = await supabase.from('custom_form_fields').insert(newFields);
+        if (fieldsErr) throw fieldsErr;
+      }
+      return newForm;
+    },
+    onSuccess: (newForm) => {
+      queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+      setSelectedFormId(newForm.id);
+      toast.success(bn ? 'ফর্ম ডুপ্লিকেট হয়েছে' : 'Form duplicated');
+    },
+    onError: () => toast.error(bn ? 'ডুপ্লিকেট করতে সমস্যা হয়েছে' : 'Failed to duplicate'),
+  });
+
   // Field mutations
   const saveField = useMutation({
     mutationFn: async (data: FieldData) => {
@@ -173,7 +270,7 @@ const AdminFormBuilder = () => {
     onError: () => toast.error(bn ? 'ফিল্ড সেভ করতে সমস্যা হয়েছে' : 'Failed to save field'),
   });
 
-  const deleteField = useMutation({
+  const deleteFieldMut = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('custom_form_fields').delete().eq('id', id);
       if (error) throw error;
@@ -184,19 +281,24 @@ const AdminFormBuilder = () => {
     },
   });
 
-  const moveField = useMutation({
-    mutationFn: async ({ id, direction }: { id: string; direction: 'up' | 'down' }) => {
-      const idx = fields.findIndex(f => f.id === id);
-      if ((direction === 'up' && idx === 0) || (direction === 'down' && idx === fields.length - 1)) return;
-      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-      const updates = [
-        supabase.from('custom_form_fields').update({ sort_order: fields[swapIdx].sort_order }).eq('id', fields[idx].id),
-        supabase.from('custom_form_fields').update({ sort_order: fields[idx].sort_order }).eq('id', fields[swapIdx].id),
-      ];
-      await Promise.all(updates);
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['custom-form-fields', selectedFormId] }),
-  });
+  // Drag end handler
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = fields.findIndex(f => f.id === active.id);
+    const newIndex = fields.findIndex(f => f.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(fields, oldIndex, newIndex);
+
+    // Update all sort_orders in DB
+    const updates = reordered.map((f, i) =>
+      supabase.from('custom_form_fields').update({ sort_order: i }).eq('id', f.id)
+    );
+    await Promise.all(updates);
+    queryClient.invalidateQueries({ queryKey: ['custom-form-fields', selectedFormId] });
+  };
 
   const openEditForm = (form: any) => {
     setFormData({ name: form.name, name_bn: form.name_bn, description: form.description || '', form_type: form.form_type, is_active: form.is_active });
@@ -316,6 +418,9 @@ const AdminFormBuilder = () => {
                         </div>
                       </div>
                       <div className="flex gap-1 ml-2">
+                        <Button size="icon" variant="ghost" className="h-7 w-7" title={bn ? 'ডুপ্লিকেট' : 'Duplicate'} onClick={e => { e.stopPropagation(); duplicateForm.mutate(form.id); }}>
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditForm(form); }}>
                           <Edit2 className="h-3.5 w-3.5" />
                         </Button>
@@ -359,7 +464,6 @@ const AdminFormBuilder = () => {
                           <DialogTitle>{editingFieldId ? (bn ? 'ফিল্ড সম্পাদনা' : 'Edit Field') : (bn ? 'নতুন ফিল্ড যোগ' : 'Add New Field')}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
-                          {/* Field type selector */}
                           <div>
                             <Label>{bn ? 'ফিল্ডের ধরন' : 'Field Type'}</Label>
                             <div className="grid grid-cols-3 gap-2 mt-2">
@@ -401,7 +505,6 @@ const AdminFormBuilder = () => {
                             <Input value={fieldData.default_value} onChange={e => setFieldData(p => ({ ...p, default_value: e.target.value }))} />
                           </div>
 
-                          {/* Options for select/radio/checkbox */}
                           {['select', 'radio', 'checkbox'].includes(fieldData.field_type) && (
                             <div>
                               <Label>{bn ? 'অপশন সমূহ' : 'Options'}</Label>
@@ -445,7 +548,7 @@ const AdminFormBuilder = () => {
                   </div>
                 </div>
 
-                {/* Fields list */}
+                {/* Fields list with drag and drop */}
                 {fields.length === 0 ? (
                   <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">
@@ -454,47 +557,30 @@ const AdminFormBuilder = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <div className="space-y-2">
-                    {fields.map((field, idx) => {
-                      const Icon = getFieldIcon(field.field_type);
-                      let opts: string[] = [];
-                      try { opts = typeof field.options === 'string' ? JSON.parse(field.options as string) : (Array.isArray(field.options) ? (field.options as string[]) : []); } catch { opts = []; }
-                      return (
-                        <Card key={field.id} className={`transition-all ${!field.is_active ? 'opacity-50' : ''}`}>
-                          <CardContent className="p-3 flex items-center gap-3">
-                            <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                              <Icon className="h-4 w-4 text-primary" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm text-foreground truncate">{bn ? field.label_bn : field.label}</span>
-                                {field.is_required && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">*</Badge>}
-                              </div>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <Badge variant="outline" className="text-[10px]">{getFieldLabel(field.field_type)}</Badge>
-                                {opts.length > 0 && <span className="text-[10px] text-muted-foreground">{opts.length} {bn ? 'টি অপশন' : 'options'}</span>}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveField.mutate({ id: field.id, direction: 'up' })} disabled={idx === 0}>
-                                <ArrowUp className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveField.mutate({ id: field.id, direction: 'down' })} disabled={idx === fields.length - 1}>
-                                <ArrowDown className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditField(field)}>
-                                <Edit2 className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => { if (confirm(bn ? 'ফিল্ডটি মুছে ফেলতে চান?' : 'Delete this field?')) deleteField.mutate(field.id); }}>
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                      <div className="space-y-2">
+                        {fields.map(field => (
+                          <SortableFieldItem
+                            key={field.id}
+                            field={field}
+                            bn={bn}
+                            getFieldIcon={getFieldIcon}
+                            getFieldLabel={getFieldLabel}
+                            openEditField={openEditField}
+                            deleteField={(id: string) => deleteFieldMut.mutate(id)}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
+
+                {fields.length > 0 && (
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    <GripVertical className="h-3 w-3 inline-block mr-1" />
+                    {bn ? 'ফিল্ড টেনে সাজান (ড্র্যাগ এন্ড ড্রপ)' : 'Drag fields to reorder'}
+                  </p>
                 )}
               </div>
             )}
