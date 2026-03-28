@@ -969,6 +969,37 @@ const AdminExpenses = () => {
                   <div><p className="text-xs text-muted-foreground">{bn ? 'ক্যাশ' : 'Cash'}</p><p className={`font-bold ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p></div>
                 </div>
 
+                {/* Institution Info for Print/Excel */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <h4 className="text-sm font-semibold mb-3 text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য (প্রিন্ট/এক্সেল)' : 'Institution Info (Print/Excel)'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (বাংলা)' : 'Institution Name (Bangla)'}</Label>
+                      <Input value={summaryForm.inst_name} onChange={e => setSummaryForm(f => ({ ...f, inst_name: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (ইংরেজি)' : 'Institution Name (English)'}</Label>
+                      <Input value={summaryForm.inst_name_en} onChange={e => setSummaryForm(f => ({ ...f, inst_name_en: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ঠিকানা' : 'Address'}</Label>
+                      <Input value={summaryForm.inst_address} onChange={e => setSummaryForm(f => ({ ...f, inst_address: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ফোন' : 'Phone'}</Label>
+                      <Input value={summaryForm.inst_phone} onChange={e => setSummaryForm(f => ({ ...f, inst_phone: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'ইমেইল' : 'Email'}</Label>
+                      <Input value={summaryForm.inst_email} onChange={e => setSummaryForm(f => ({ ...f, inst_email: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</Label>
+                      <Input value={summaryForm.inst_other} onChange={e => setSummaryForm(f => ({ ...f, inst_other: e.target.value }))} placeholder={bn ? 'EIIN, MPO নং ইত্যাদি' : 'EIIN, MPO No. etc.'} />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label>{bn ? 'পূর্ববর্তী বকেয়া' : 'Previous Arrears'}</Label>
