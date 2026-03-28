@@ -122,21 +122,42 @@ const AdminReports = () => {
     const data = getExportData();
     const w = window.open('', '_blank');
     if (!w) return;
+    const logoHtml = ws.logo_url ? `<img src="${ws.logo_url}" style="height:60px;width:60px;object-fit:contain;border-radius:8px" />` : '';
+    const instName = bn ? ws.institution_name : ws.institution_name_en;
     w.document.write(`<html><head><title>${data.title}</title><style>
       body{font-family:Arial,sans-serif;padding:30px;color:#222}
       table{width:100%;border-collapse:collapse;margin-top:15px}
       th,td{border:1px solid #ddd;padding:10px;text-align:left;font-size:13px}
       th{background:#f5f5f5;font-weight:bold}
-      h2{margin:0 0 5px;font-size:20px}
+      .header{text-align:center;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:15px}
+      .header h1{margin:5px 0;font-size:22px}
+      .header p{margin:2px 0;font-size:12px;color:#555}
+      .header img{margin-bottom:5px}
+      .report-title{font-size:16px;font-weight:bold;margin-top:15px;text-align:center;color:#333}
       .summary{margin-top:20px;background:#f9f9f9;padding:15px;border-radius:8px}
       .summary td{border:none;padding:5px 10px}
       .summary td:last-child{font-weight:bold;text-align:right}
+      .footer{margin-top:40px;display:flex;justify-content:space-between;padding:0 30px}
+      .sig{text-align:center;min-width:150px}
+      .sig .line{border-top:1px solid #333;margin-top:40px;padding-top:5px;font-size:12px}
+      .date-line{text-align:right;font-size:11px;color:#777;margin-top:10px}
       @media print{body{padding:10px}}
     </style></head><body>
-    <h2>${data.title}</h2>
+    <div class="header">
+      ${logoHtml}
+      <h1>${instName}</h1>
+      <p>${ws.address}</p>
+      <p>${bn ? 'ফোন' : 'Phone'}: ${ws.phone} | ${bn ? 'ইমেইল' : 'Email'}: ${ws.email}</p>
+    </div>
+    <div class="report-title">${data.title}</div>
     <table><thead><tr>${data.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
     <tbody>${data.rows.map(r => `<tr>${r.map(c => `<td>${typeof c === 'number' ? '৳' + c.toLocaleString() : c}</td>`).join('')}</tr>`).join('')}</tbody></table>
     <div class="summary"><table>${data.summary.map(r => `<tr><td>${r[0]}</td><td>৳${Number(r[1]).toLocaleString()}</td></tr>`).join('')}</table></div>
+    <div class="date-line">${bn ? 'তারিখ' : 'Date'}: ${new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-US')}</div>
+    <div class="footer">
+      <div class="sig"><div class="line">${bn ? 'ক্যাশিয়ার' : 'Cashier'}</div></div>
+      <div class="sig"><div class="line">${bn ? 'অধ্যক্ষ' : 'Principal'}</div></div>
+    </div>
     </body></html>`);
     w.document.close();
     w.print();
