@@ -44,6 +44,8 @@ const AdminExpenses = () => {
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Dialogs
   const [projectDialog, setProjectDialog] = useState(false);
