@@ -393,7 +393,7 @@ const AdminExpenses = () => {
 
   const openEditExpense = (e: any) => {
     setEditingExpenseId(e.id);
-    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: e.description || '', quantity: String(e.quantity || 1), quantity_unit: e.description?.match(/\[unit:(.*?)\]/)?.[1] || 'পিস', has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount) });
+    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount) });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
