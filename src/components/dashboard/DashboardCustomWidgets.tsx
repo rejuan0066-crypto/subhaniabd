@@ -69,7 +69,7 @@ const DashboardCustomWidgets = () => {
     enabled: widgets.some(w => w.visible && w.data_source === 'donors'),
   });
 
-  const getDataSource = (source: string) => {
+  const getDataSource = (source: string): any[] => {
     switch (source) {
       case 'students': return students;
       case 'staff': return staffData;
@@ -82,7 +82,7 @@ const DashboardCustomWidgets = () => {
 
   const computeValue = (w: WidgetConfig): string | number => {
     if (w.aggregation === 'custom_value') return w.custom_value || '0';
-    const data = getDataSource(w.data_source);
+    const data: any[] = getDataSource(w.data_source);
     let filtered = data;
     if (w.filter_field && w.filter_value) {
       filtered = data.filter((d: any) => d[w.filter_field!] === w.filter_value);
