@@ -136,6 +136,26 @@ const AdminExpenses = () => {
     }
   });
 
+  const { data: websiteSettings = [] } = useQuery({
+    queryKey: ['website_settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('website_settings').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const getSetting = (key: string) => {
+    const s = websiteSettings.find((ws: any) => ws.key === key);
+    return s?.value as string || '';
+  };
+
+  const madrasaName = getSetting('madrasa_name') || 'আল-আরাবিয়া সুভানিয়া হাফিজিয়া মাদ্রাসা';
+  const madrasaNameEn = getSetting('madrasa_name_en') || 'Al-Arabia Subhania Hafizia Madrasah';
+  const madrasaAddress = getSetting('madrasa_address') || 'খজান্চি রোড, এমএইচ সেন্টার, বিশ্বনাথ, সিলেট';
+  const madrasaPhone = getSetting('madrasa_phone') || '01749842401';
+  const madrasaEmail = getSetting('madrasa_email') || 'info@subhania.edu.bd';
+
   // Stats
   const monthlyTotalExpense = useMemo(() => expenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [expenses]);
   const monthlyTotalDeposit = useMemo(() => deposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [deposits]);
