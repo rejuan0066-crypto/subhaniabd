@@ -221,7 +221,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               {menuItems.find(i => i.path === location.pathname)?.label || t('dashboard')}
             </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <NotificationPanel />
             <LanguageToggle />
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
               <Globe className="w-4 h-4" /> {t('home')}
