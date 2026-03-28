@@ -47,7 +47,8 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'permissions', path: '/admin/permissions', label_bn: 'পারমিশন', label_en: 'Permissions', icon: 'KeyRound', visible: true, sort_order: 17 },
   { id: 'theme', path: '/admin/theme', label_bn: 'থিম কাস্টমাইজার', label_en: 'Theme Customizer', icon: 'Palette', visible: true, sort_order: 18 },
   { id: 'menu-manager', path: '/admin/menu-manager', label_bn: 'মেনু ম্যানেজার', label_en: 'Menu Manager', icon: 'ListOrdered', visible: true, sort_order: 19 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 20 },
+  { id: 'widget-builder', path: '/admin/widget-builder', label_bn: 'উইজেট বিল্ডার', label_en: 'Widget Builder', icon: 'LayoutGrid', visible: true, sort_order: 20 },
+  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 21 },
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [

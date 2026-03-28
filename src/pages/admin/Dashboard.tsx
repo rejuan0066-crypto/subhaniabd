@@ -11,6 +11,7 @@ import DashboardInstitutionCard from '@/components/dashboard/DashboardInstitutio
 import DashboardSearch from '@/components/dashboard/DashboardSearch';
 import DashboardFeeSection from '@/components/dashboard/DashboardFeeSection';
 import DashboardStatsList from '@/components/dashboard/DashboardStatsList';
+import DashboardCustomWidgets from '@/components/dashboard/DashboardCustomWidgets';
 
 const Dashboard = () => {
   const { language } = useLanguage();
