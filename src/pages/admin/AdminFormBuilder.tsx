@@ -389,7 +389,6 @@ const AdminFormBuilder = () => {
   const updatePreviewValue = (fieldId: string, val: string) => {
     setPreviewValues(p => ({ ...p, [fieldId]: val }));
   };
-  };
 
   return (
     <AdminLayout>
