@@ -714,6 +714,60 @@ export type Database = {
         }
         Relationships: []
       }
+      guardian_notifications: {
+        Row: {
+          channel: string
+          created_at: string | null
+          failed_count: number | null
+          id: string
+          message: string
+          notification_type: string
+          recipient_filter: Json | null
+          recipients_count: number | null
+          sent_at: string | null
+          sent_by: string | null
+          sent_count: number | null
+          status: string
+          subject: string | null
+          template_key: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string | null
+          failed_count?: number | null
+          id?: string
+          message: string
+          notification_type?: string
+          recipient_filter?: Json | null
+          recipients_count?: number | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_count?: number | null
+          status?: string
+          subject?: string | null
+          template_key?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string | null
+          failed_count?: number | null
+          id?: string
+          message?: string
+          notification_type?: string
+          recipient_filter?: Json | null
+          recipients_count?: number | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sent_count?: number | null
+          status?: string
+          subject?: string | null
+          template_key?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       institutions: {
         Row: {
           address: string | null
@@ -798,6 +852,51 @@ export type Database = {
           title?: string
           title_bn?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          body: string
+          body_bn: string
+          channel: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_bn: string
+          subject: string | null
+          template_type: string
+          updated_at: string | null
+          variables: Json | null
+        }
+        Insert: {
+          body: string
+          body_bn: string
+          channel?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_bn: string
+          subject?: string | null
+          template_type?: string
+          updated_at?: string | null
+          variables?: Json | null
+        }
+        Update: {
+          body?: string
+          body_bn?: string
+          channel?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_bn?: string
+          subject?: string | null
+          template_type?: string
+          updated_at?: string | null
+          variables?: Json | null
         }
         Relationships: []
       }
