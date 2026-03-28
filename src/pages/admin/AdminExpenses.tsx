@@ -1636,6 +1636,8 @@ const AdminExpenses = () => {
           })()}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!printProjectId} onOpenChange={(open) => {
         if (!open) { setPrintProjectId(null); setPrintEditMode(false); }
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
