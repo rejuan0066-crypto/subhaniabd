@@ -480,6 +480,50 @@ const AdminFormBuilder = () => {
                  <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
                  <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} rows={2} />
                </div>
+
+               {/* Menu Publish Options */}
+               <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                 <Label className="font-semibold">{bn ? '📌 মেনুতে পাবলিশ' : '📌 Publish to Menu'}</Label>
+                 <div>
+                   <Label className="text-xs">{bn ? 'পাবলিশ টাইপ' : 'Publish Type'}</Label>
+                   <Select value={formData.publish_to} onValueChange={v => setFormData(p => ({ ...p, publish_to: v, parent_menu: v === 'none' ? '' : p.parent_menu }))}>
+                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="none">{bn ? 'পাবলিশ করবেন না' : "Don't Publish"}</SelectItem>
+                       <SelectItem value="main_menu">{bn ? 'মেইন মেনু হিসেবে' : 'As Main Menu'}</SelectItem>
+                       <SelectItem value="sub_menu">{bn ? 'সাব মেনু হিসেবে' : 'As Sub Menu'}</SelectItem>
+                     </SelectContent>
+                   </Select>
+                 </div>
+                 {formData.publish_to === 'sub_menu' && (
+                   <div>
+                     <Label className="text-xs">{bn ? 'প্যারেন্ট মেনু' : 'Parent Menu'}</Label>
+                     <Select value={formData.parent_menu} onValueChange={v => setFormData(p => ({ ...p, parent_menu: v }))}>
+                       <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'মেনু নির্বাচন করুন' : 'Select parent menu'} /></SelectTrigger>
+                       <SelectContent>
+                         {ADMIN_MENUS.map(m => (
+                           <SelectItem key={m.value} value={m.value}>{bn ? m.label_bn : m.label}</SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 )}
+                 {formData.publish_to !== 'none' && (
+                   <div>
+                     <Label className="text-xs">{bn ? 'মেনু স্লাগ (URL)' : 'Menu Slug (URL)'}</Label>
+                     <div className="flex items-center gap-1 mt-1">
+                       <span className="text-xs text-muted-foreground">/admin/custom/</span>
+                       <Input
+                         value={formData.menu_slug}
+                         onChange={e => setFormData(p => ({ ...p, menu_slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))}
+                         placeholder="my-form"
+                         className="flex-1"
+                       />
+                     </div>
+                   </div>
+                 )}
+               </div>
+
                <div className="flex items-center gap-2">
                  <Switch checked={formData.is_active} onCheckedChange={c => setFormData(p => ({ ...p, is_active: c }))} />
                  <Label>{bn ? 'সক্রিয়' : 'Active'}</Label>
