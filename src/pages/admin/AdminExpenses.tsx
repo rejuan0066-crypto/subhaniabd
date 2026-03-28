@@ -160,14 +160,30 @@ const AdminExpenses = () => {
     }
   });
 
-  const getSetting = (key: string) => {
-    const s = websiteSettings.find((ws: any) => ws.key === key);
-    return s?.value as string || '';
-  };
+  const { data: institutions = [] } = useQuery({
+    queryKey: ['institutions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('institutions').select('*').order('created_at');
+      if (error) throw error;
+      return data as any[];
+    }
+  });
 
-  const madrasaName = getSetting('madrasa_name') || 'আল-আরাবিয়া সুভানিয়া হাফিজিয়া মাদ্রাসা';
-  const madrasaNameEn = getSetting('madrasa_name_en') || 'Al-Arabia Subhania Hafizia Madrasah';
-  const madrasaAddress = getSetting('madrasa_address') || 'খজান্চি রোড, এমএইচ সেন্টার, বিশ্বনাথ, সিলেট';
+  // Auto-select default institution
+  useEffect(() => {
+    if (institutions.length > 0 && !selectedInstitutionId) {
+      const def = institutions.find((i: any) => i.is_default);
+      setSelectedInstitutionId(def?.id || institutions[0].id);
+    }
+  }, [institutions, selectedInstitutionId]);
+
+  const selectedInstitution = institutions.find((i: any) => i.id === selectedInstitutionId) || institutions[0];
+  const instName = selectedInstitution?.name || '';
+  const instNameEn = selectedInstitution?.name_en || '';
+  const instAddress = selectedInstitution?.address || '';
+  const instPhone = selectedInstitution?.phone || '';
+  const instEmail = selectedInstitution?.email || '';
+  const instOther = selectedInstitution?.other_info || '';
   const madrasaPhone = getSetting('madrasa_phone') || '01749842401';
   const madrasaEmail = getSetting('madrasa_email') || 'info@subhania.edu.bd';
 
