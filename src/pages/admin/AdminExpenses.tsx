@@ -191,6 +191,7 @@ const AdminExpenses = () => {
   const instPhone = selectedInstitution?.phone || '';
   const instEmail = selectedInstitution?.email || '';
   const instOther = selectedInstitution?.other_info || '';
+  const instLogo = selectedInstitution?.logo_url || '';
 
   // Stats
   const monthlyTotalExpense = useMemo(() => expenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [expenses]);
