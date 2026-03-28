@@ -136,11 +136,16 @@ const AdminExpenses = () => {
   const monthlyTotalExpense = useMemo(() => expenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [expenses]);
   const monthlyTotalDeposit = useMemo(() => deposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [deposits]);
   const previousArrears = Number(summaryData?.previous_arrears || 0);
-  const monthlyCash = monthlyTotalDeposit - monthlyTotalExpense - previousArrears;
+  const rawCash = monthlyTotalDeposit - monthlyTotalExpense - previousArrears;
+  const monthlyCash = rawCash >= 0 ? rawCash : 0;
+  const currentArrears = rawCash < 0 ? Math.abs(rawCash) : 0;
+  const totalArrears = previousArrears + currentArrears;
 
   const totalExpenseAll = useMemo(() => allExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [allExpenses]);
   const totalDepositAll = useMemo(() => allDeposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [allDeposits]);
-  const totalCashAll = totalDepositAll - totalExpenseAll;
+  const rawCashAll = totalDepositAll - totalExpenseAll;
+  const totalCashAll = rawCashAll >= 0 ? rawCashAll : 0;
+  const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
 
   // Mutations
   const addProject = useMutation({
