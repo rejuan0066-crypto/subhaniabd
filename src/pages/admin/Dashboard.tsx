@@ -11,6 +11,7 @@ import DashboardInstitutionCard from '@/components/dashboard/DashboardInstitutio
 import DashboardSearch from '@/components/dashboard/DashboardSearch';
 import DashboardFeeSection from '@/components/dashboard/DashboardFeeSection';
 import DashboardStatsList from '@/components/dashboard/DashboardStatsList';
+import DashboardCustomWidgets from '@/components/dashboard/DashboardCustomWidgets';
 
 const Dashboard = () => {
   const { language } = useLanguage();
@@ -323,6 +324,9 @@ const Dashboard = () => {
           <DashboardFeeSection category="exam" titleBn="পরীক্ষা ফি" titleEn="Exam Fees" />
           <DashboardFeeSection category="admission" titleBn="ভর্তি ফি" titleEn="Admission Fees" />
         </div>
+
+        {/* Custom Widgets */}
+        <DashboardCustomWidgets />
 
         {/* Stats List Dialog */}
         <DashboardStatsList
