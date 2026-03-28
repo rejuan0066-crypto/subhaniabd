@@ -280,8 +280,32 @@ const AdminExpenses = () => {
   const filteredCategories = categories.filter((c: any) => !expenseForm.project_id || c.project_id === expenseForm.project_id);
 
   const handlePrint = () => window.print();
-
   const formatNum = (n: number) => n.toLocaleString(bn ? 'bn-BD' : 'en-BD');
+
+  const openEditExpense = (e: any) => {
+    setEditingExpenseId(e.id);
+    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: e.description || '', quantity: String(e.quantity || 1), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount) });
+    setExpenseDialog(true);
+  };
+  const openEditDeposit = (d: any) => {
+    setEditingDepositId(d.id);
+    setDepositForm({ deposit_date: d.deposit_date, bank_details: d.bank_details || '', other_details: d.other_details || '', amount: String(d.amount), source: d.source || 'manual' });
+    setDepositDialog(true);
+  };
+  const openEditProject = (p: any) => {
+    setEditingProjectId(p.id);
+    setProjectForm({ name: p.name, name_bn: p.name_bn });
+    setProjectDialog(true);
+  };
+  const openEditCategory = (c: any) => {
+    setEditingCategoryId(c.id);
+    setCategoryForm({ project_id: c.project_id, name: c.name, name_bn: c.name_bn });
+    setCategoryDialog(true);
+  };
+  const resetExpenseDialog = (open: boolean) => { if (!open) { setEditingExpenseId(null); setExpenseForm(defaultExpenseForm); } setExpenseDialog(open); };
+  const resetDepositDialog = (open: boolean) => { if (!open) { setEditingDepositId(null); setDepositForm(defaultDepositForm); } setDepositDialog(open); };
+  const resetProjectDialog = (open: boolean) => { if (!open) { setEditingProjectId(null); setProjectForm({ name: '', name_bn: '' }); } setProjectDialog(open); };
+  const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
     <AdminLayout>
