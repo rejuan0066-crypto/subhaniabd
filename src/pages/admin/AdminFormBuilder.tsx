@@ -359,7 +359,7 @@ const AdminFormBuilder = () => {
   };
 
   const openEditForm = (form: any) => {
-    setFormData({ name: form.name, name_bn: form.name_bn, description: form.description || '', form_type: form.form_type, is_active: form.is_active });
+    setFormData({ name: form.name, name_bn: form.name_bn, description: form.description || '', form_type: form.form_type, is_active: form.is_active, publish_to: form.publish_to || 'none', parent_menu: form.parent_menu || '', menu_slug: form.menu_slug || '' });
     setEditingFormId(form.id);
     setFormDialogOpen(true);
   };
