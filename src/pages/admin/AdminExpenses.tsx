@@ -1092,35 +1092,51 @@ const AdminExpenses = () => {
                   <div><p className="text-xs text-muted-foreground">{bn ? 'ক্যাশ' : 'Cash'}</p><p className={`font-bold ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p></div>
                 </div>
 
-                {/* Institution Info for Print/Excel */}
+                {/* Institution Management */}
                 <div className="border rounded-lg p-4 bg-muted/20">
-                  <h4 className="text-sm font-semibold mb-3 text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য (প্রিন্ট/এক্সেল)' : 'Institution Info (Print/Excel)'}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (বাংলা)' : 'Institution Name (Bangla)'}</Label>
-                      <Input value={instName} onChange={e => setSummaryForm(f => ({ ...f, inst_name: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'প্রতিষ্ঠানের নাম (ইংরেজি)' : 'Institution Name (English)'}</Label>
-                      <Input value={instNameEn} onChange={e => setSummaryForm(f => ({ ...f, inst_name_en: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'ঠিকানা' : 'Address'}</Label>
-                      <Input value={instAddress} onChange={e => setSummaryForm(f => ({ ...f, inst_address: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'ফোন' : 'Phone'}</Label>
-                      <Input value={instPhone} onChange={e => setSummaryForm(f => ({ ...f, inst_phone: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'ইমেইল' : 'Email'}</Label>
-                      <Input value={instEmail} onChange={e => setSummaryForm(f => ({ ...f, inst_email: e.target.value }))} />
-                    </div>
-                    <div>
-                      <Label>{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</Label>
-                      <Input value={instOther} onChange={e => setSummaryForm(f => ({ ...f, inst_other: e.target.value }))} placeholder={bn ? 'EIIN, MPO নং ইত্যাদি' : 'EIIN, MPO No. etc.'} />
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-foreground">{bn ? 'প্রতিষ্ঠানের তথ্য' : 'Institution Info'}</h4>
+                    <div className="flex gap-2">
+                      <Dialog open={institutionDialog} onOpenChange={(open) => { if (!open) { setEditingInstitutionId(null); setInstitutionForm({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '' }); } setInstitutionDialog(open); }}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline"><Plus className="w-4 h-4 mr-1" />{bn ? 'নতুন প্রতিষ্ঠান' : 'New Institution'}</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader><DialogTitle>{editingInstitutionId ? (bn ? 'প্রতিষ্ঠান সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন প্রতিষ্ঠান' : 'New Institution')}</DialogTitle></DialogHeader>
+                          <div className="space-y-3">
+                            <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={institutionForm.name} onChange={e => setInstitutionForm(f => ({ ...f, name: e.target.value }))} /></div>
+                            <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'}</Label><Input value={institutionForm.name_en} onChange={e => setInstitutionForm(f => ({ ...f, name_en: e.target.value }))} /></div>
+                            <div><Label>{bn ? 'ঠিকানা' : 'Address'}</Label><Input value={institutionForm.address} onChange={e => setInstitutionForm(f => ({ ...f, address: e.target.value }))} /></div>
+                            <div><Label>{bn ? 'ফোন' : 'Phone'}</Label><Input value={institutionForm.phone} onChange={e => setInstitutionForm(f => ({ ...f, phone: e.target.value }))} /></div>
+                            <div><Label>{bn ? 'ইমেইল' : 'Email'}</Label><Input value={institutionForm.email} onChange={e => setInstitutionForm(f => ({ ...f, email: e.target.value }))} /></div>
+                            <div><Label>{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</Label><Input value={institutionForm.other_info} onChange={e => setInstitutionForm(f => ({ ...f, other_info: e.target.value }))} placeholder={bn ? 'EIIN, MPO নং ইত্যাদি' : 'EIIN, MPO No.'} /></div>
+                            <Button className="w-full" onClick={() => saveInstitution.mutate()} disabled={saveInstitution.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
+                  {institutions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{bn ? 'কোনো প্রতিষ্ঠান নেই' : 'No institutions'}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {institutions.map((inst: any) => (
+                        <div key={inst.id} className={`flex items-center justify-between p-3 rounded-lg border ${selectedInstitutionId === inst.id ? 'border-primary bg-primary/5' : 'bg-secondary/30'}`}>
+                          <div className="cursor-pointer flex-1" onClick={() => setSelectedInstitutionId(inst.id)}>
+                            <span className="text-sm font-medium">{bn ? inst.name : (inst.name_en || inst.name)}</span>
+                            {inst.address && <span className="text-xs text-muted-foreground ml-2">— {inst.address}</span>}
+                            {selectedInstitutionId === inst.id && <span className="text-xs text-primary ml-2">✓ {bn ? 'নির্বাচিত' : 'Selected'}</span>}
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={() => { setEditingInstitutionId(inst.id); setInstitutionForm({ name: inst.name, name_en: inst.name_en || '', address: inst.address || '', phone: inst.phone || '', email: inst.email || '', other_info: inst.other_info || '' }); setInstitutionDialog(true); }}>
+                            <Edit2 className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {selectedInstitution && (
+                    <p className="text-xs text-muted-foreground mt-2">{bn ? 'নির্বাচিত প্রতিষ্ঠানের তথ্য প্রিন্ট ও এক্সেল ফাইলে ব্যবহৃত হবে' : 'Selected institution info will be used in print & Excel files'}</p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-4">
