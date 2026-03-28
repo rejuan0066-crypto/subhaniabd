@@ -112,7 +112,7 @@ const AdminExpenses = () => {
   const { data: allExpenses = [] } = useQuery({
     queryKey: ['all_expenses'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expenses').select('month_year, amount');
+      const { data, error } = await supabase.from('expenses').select('month_year, amount, project_id, category_id, expense_projects(name, name_bn), expense_categories(name, name_bn)');
       if (error) throw error;
       return data;
     }
