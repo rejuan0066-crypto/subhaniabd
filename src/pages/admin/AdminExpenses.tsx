@@ -464,6 +464,47 @@ const AdminExpenses = () => {
     toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
   };
 
+  const handleProjectExcelDownload = (projectId: string) => {
+    const project = projects.find((p: any) => p.id === projectId);
+    if (!project) return;
+    const projExpenses = expenses.filter((e: any) => e.project_id === projectId);
+    const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+    const rows: string[][] = [];
+    rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? summaryForm.inst_name : summaryForm.inst_name_en]);
+    rows.push([bn ? 'ঠিকানা' : 'Address', summaryForm.inst_address]);
+    rows.push([bn ? 'ফোন' : 'Phone', summaryForm.inst_phone]);
+    rows.push([bn ? 'ইমেইল' : 'Email', summaryForm.inst_email]);
+    if (summaryForm.inst_other) rows.push([bn ? 'অন্যান্য' : 'Other', summaryForm.inst_other]);
+    rows.push([]);
+    rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, selectedMonthYear]);
+    rows.push([]);
+
+    const projCategories = categories.filter((c: any) => c.project_id === projectId);
+    projCategories.forEach((cat: any) => {
+      const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+      if (catExpenses.length === 0) return;
+      const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+      rows.push([`${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', '', `৳${formatNum(catTotal)}`]);
+      rows.push(['#', bn ? 'তারিখ' : 'Date', bn ? 'বিবরণ' : 'Description', bn ? 'পরিমাণ' : 'Qty', bn ? 'মাধ্যম' : 'Method', bn ? 'টাকা' : 'Amount', bn ? 'রসিদ' : 'Receipt']);
+      catExpenses.forEach((e: any, i: number) => {
+        rows.push([String(i + 1), e.expense_date, cleanDesc(e.description), `${e.quantity || 1} ${getUnit(e.description)}`, getMethod(e.description), `৳${formatNum(Number(e.amount))}`, e.has_receipt ? '✓' : '-']);
+      });
+      rows.push([]);
+    });
+
+    rows.push([bn ? 'প্রকল্প মোট খরচ' : 'Project Total', `৳${formatNum(projTotal)}`]);
+    const csvContent = rows.map(r => r.map(c => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${bn ? project.name_bn : project.name}_${selectedMonthYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
+  };
+
   const openEditCategory = (c: any) => {
     setEditingCategoryId(c.id);
     setCategoryForm({ project_id: c.project_id, name: c.name, name_bn: c.name_bn });
