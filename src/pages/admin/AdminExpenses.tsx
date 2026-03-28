@@ -571,7 +571,8 @@ const AdminExpenses = () => {
                       <TableCell>{d.other_details || '-'}</TableCell>
                       <TableCell>{d.source}</TableCell>
                       <TableCell className="text-right font-medium">৳{formatNum(Number(d.amount))}</TableCell>
-                      <TableCell>
+                      <TableCell className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditDeposit(d)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteDeposit.mutate(d.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </TableCell>
                     </TableRow>
