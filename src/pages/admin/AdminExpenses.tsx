@@ -1106,17 +1106,42 @@ const AdminExpenses = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button onClick={() => saveSummary.mutate()} disabled={saveSummary.isPending}>
                     {bn ? 'সারাংশ সংরক্ষণ' : 'Save Summary'}
                   </Button>
                   <Button variant="outline" onClick={handlePrint}>
-                    <Printer className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
+                    <Printer className="w-4 h-4 mr-1" />{bn ? 'সম্পূর্ণ প্রিন্ট' : 'Print All'}
                   </Button>
                   <Button variant="outline" onClick={handleExcelDownload}>
-                    <Download className="w-4 h-4 mr-1" />{bn ? 'এক্সেল ডাউনলোড' : 'Excel Download'}
+                    <Download className="w-4 h-4 mr-1" />{bn ? 'সম্পূর্ণ এক্সেল' : 'Excel All'}
                   </Button>
                 </div>
+
+                {/* Per-project download */}
+                {projects.length > 0 && (
+                  <div className="border rounded-lg p-4 bg-muted/20">
+                    <h4 className="text-sm font-semibold mb-3 text-foreground">{bn ? 'প্রকল্প ভিত্তিক ডাউনলোড' : 'Per-Project Download'}</h4>
+                    <div className="space-y-2">
+                      {projects.map((p: any) => {
+                        const projExp = expenses.filter((e: any) => e.project_id === p.id);
+                        const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+                        if (projExp.length === 0) return null;
+                        return (
+                          <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+                            <div>
+                              <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => handleProjectExcelDownload(p.id)}>
+                              <Download className="w-3 h-3 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
