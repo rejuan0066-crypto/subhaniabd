@@ -151,6 +151,34 @@ const AdminExpenses = () => {
   const totalCashAll = rawCashAll >= 0 ? rawCashAll : 0;
   const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
 
+  // Project-wise breakdown
+  const projectBreakdown = useMemo(() => {
+    const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
+    allExpenses.forEach((e: any) => {
+      if (!e.project_id) return;
+      if (!map[e.project_id]) {
+        map[e.project_id] = { name: e.expense_projects?.name || '', name_bn: e.expense_projects?.name_bn || '', monthly: 0, total: 0 };
+      }
+      map[e.project_id].total += Number(e.amount || 0);
+      if (e.month_year === selectedMonthYear) map[e.project_id].monthly += Number(e.amount || 0);
+    });
+    return Object.values(map);
+  }, [allExpenses, selectedMonthYear]);
+
+  // Category-wise breakdown
+  const categoryBreakdown = useMemo(() => {
+    const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
+    allExpenses.forEach((e: any) => {
+      if (!e.category_id) return;
+      if (!map[e.category_id]) {
+        map[e.category_id] = { name: e.expense_categories?.name || '', name_bn: e.expense_categories?.name_bn || '', monthly: 0, total: 0 };
+      }
+      map[e.category_id].total += Number(e.amount || 0);
+      if (e.month_year === selectedMonthYear) map[e.category_id].monthly += Number(e.amount || 0);
+    });
+    return Object.values(map);
+  }, [allExpenses, selectedMonthYear]);
+
   // Mutations
   const addProject = useMutation({
     mutationFn: async () => {
