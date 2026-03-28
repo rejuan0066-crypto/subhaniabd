@@ -333,7 +333,12 @@ const AdminFormBuilder = () => {
   const openEditField = (field: any) => {
     let opts: string[] = [];
     try { opts = typeof field.options === 'string' ? JSON.parse(field.options) : (Array.isArray(field.options) ? field.options : []); } catch { opts = []; }
-    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active });
+    let cond: ConditionData = { ...emptyCondition };
+    try {
+      const v = typeof field.validation === 'string' ? JSON.parse(field.validation) : (field.validation || {});
+      if (v.condition) cond = { ...emptyCondition, ...v.condition, enabled: true };
+    } catch {}
+    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active, condition: cond });
     setEditingFieldId(field.id);
     setFieldDialogOpen(true);
   };
