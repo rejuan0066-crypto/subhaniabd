@@ -654,6 +654,7 @@ const AdminExpenses = () => {
                             <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
                           </div>
+                          <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
                         </li>
                       ))}
                     </ul>
