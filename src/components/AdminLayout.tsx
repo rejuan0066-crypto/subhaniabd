@@ -10,7 +10,7 @@ import {
   CreditCard, Settings, Globe, GraduationCap, Menu, X, LogOut,
   ChevronRight, Layers, Receipt, Heart, ReceiptText, FileSignature,
   FilePlus, FileCheck, Tag, Wrench, UserCircle, ChevronDown, FileBox,
-  Blocks, FlaskConical, CalendarDays, ShieldCheck, BarChart3
+  Blocks, FlaskConical, CalendarDays, ShieldCheck, BarChart3, KeyRound
 } from 'lucide-react';
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
@@ -80,6 +80,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         { path: '/admin/reports', label: language === 'bn' ? 'রিপোর্ট ও অ্যানালিটিক্স' : 'Reports & Analytics', icon: BarChart3 },
       ]
     },
+    { path: '/admin/permissions', label: language === 'bn' ? 'পারমিশন' : 'Permissions', icon: KeyRound },
     { path: '/admin/settings', label: language === 'bn' ? 'সেটিংস' : 'Settings', icon: Settings },
   ];
 
