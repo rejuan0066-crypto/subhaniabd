@@ -184,8 +184,6 @@ const AdminExpenses = () => {
   const instPhone = selectedInstitution?.phone || '';
   const instEmail = selectedInstitution?.email || '';
   const instOther = selectedInstitution?.other_info || '';
-  const madrasaPhone = getSetting('madrasa_phone') || '01749842401';
-  const madrasaEmail = getSetting('madrasa_email') || 'info@subhania.edu.bd';
 
   // Stats
   const monthlyTotalExpense = useMemo(() => expenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [expenses]);
