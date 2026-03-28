@@ -36,6 +36,7 @@ const MONTHS_BN = [
 const AdminReports = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { settings: ws } = useWebsiteSettings();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [activeTab, setActiveTab] = useState('income-expense');
