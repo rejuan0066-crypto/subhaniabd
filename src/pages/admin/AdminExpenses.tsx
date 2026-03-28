@@ -644,43 +644,43 @@ const AdminExpenses = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-destructive/10"><TrendingDown className="w-5 h-5 text-destructive" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">{bn ? 'মাসিক খরচ' : 'Monthly Expense'}</p>
-                <p className="text-lg font-bold text-foreground">৳{formatNum(monthlyTotalExpense)}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10"><TrendingUp className="w-5 h-5 text-primary" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">{bn ? 'মাসিক জমা' : 'Monthly Deposit'}</p>
-                <p className="text-lg font-bold text-foreground">৳{formatNum(monthlyTotalDeposit)}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent/40"><Wallet className="w-5 h-5 text-accent-foreground" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">{bn ? 'মাসিক ক্যাশ' : 'Monthly Cash'}</p>
-                <p className={`text-lg font-bold ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-secondary"><DollarSign className="w-5 h-5 text-secondary-foreground" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground">{bn ? 'বকেয়া' : 'Arrears'}</p>
-                <p className={`text-lg font-bold ${totalArrears > 0 ? 'text-destructive' : 'text-foreground'}`}>৳{formatNum(totalArrears)}</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="stat-card flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+              <TrendingDown className="w-5 h-5 text-destructive" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-lg font-bold text-destructive leading-tight">৳{formatNum(monthlyTotalExpense)}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? 'মাসিক খরচ' : 'Monthly Expense'}</p>
+            </div>
+          </div>
+          <div className="stat-card flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-lg font-bold text-primary leading-tight">৳{formatNum(monthlyTotalDeposit)}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? 'মাসিক জমা' : 'Monthly Deposit'}</p>
+            </div>
+          </div>
+          <div className="stat-card flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl ${monthlyCash >= 0 ? 'bg-primary/10' : 'bg-destructive/10'} flex items-center justify-center shrink-0`}>
+              <Wallet className={`w-5 h-5 ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`} />
+            </div>
+            <div className="min-w-0">
+              <p className={`text-lg font-bold leading-tight ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? 'মাসিক ক্যাশ' : 'Monthly Cash'}</p>
+            </div>
+          </div>
+          <div className="stat-card flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl ${totalArrears > 0 ? 'bg-destructive/10' : 'bg-muted/50'} flex items-center justify-center shrink-0`}>
+              <DollarSign className={`w-5 h-5 ${totalArrears > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+            </div>
+            <div className="min-w-0">
+              <p className={`text-lg font-bold leading-tight ${totalArrears > 0 ? 'text-destructive' : 'text-foreground'}`}>৳{formatNum(totalArrears)}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? 'বকেয়া' : 'Arrears'}</p>
+            </div>
+          </div>
         </div>
 
         {/* Overall Stats */}
