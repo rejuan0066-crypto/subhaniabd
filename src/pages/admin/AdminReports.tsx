@@ -101,8 +101,15 @@ const AdminReports = () => {
 
   const handleDownloadCSV = () => {
     const data = getExportData();
+    const instName = bn ? ws.institution_name : ws.institution_name_en;
     const lines = [
-      [data.title], [],
+      [instName],
+      [ws.address],
+      [`${bn ? 'ফোন' : 'Phone'}: ${ws.phone} | ${bn ? 'ইমেইল' : 'Email'}: ${ws.email}`],
+      [],
+      [data.title],
+      [`${bn ? 'তারিখ' : 'Date'}: ${new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-US')}`],
+      [],
       data.headers,
       ...data.rows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`)),
       [], [bn ? '--- সারসংক্ষেপ ---' : '--- Summary ---'],
