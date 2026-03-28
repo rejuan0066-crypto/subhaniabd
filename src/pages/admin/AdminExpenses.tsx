@@ -252,8 +252,10 @@ const AdminExpenses = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
-      // Reset form for new entry, keep dialog open
-      setExpenseForm(defaultExpenseForm);
+      // Reset form for new entry, keep dialog open with same project/category
+      const keepProjectId = selectedProjectId || '';
+      const keepCategoryId = selectedCategoryId || '';
+      setExpenseForm({ ...defaultExpenseForm, project_id: keepProjectId, category_id: keepCategoryId });
       setReceiptFile(null);
       setEditingExpenseId(null);
       toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
