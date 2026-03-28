@@ -156,6 +156,7 @@ const AdminFormBuilder = () => {
   const [permanentAddr, setPermanentAddr] = useState<AddressData>({ division: '', district: '', upazila: '', union: '', postOffice: '', village: '' });
   const [presentAddr, setPresentAddr] = useState<AddressData>({ division: '', district: '', upazila: '', union: '', postOffice: '', village: '' });
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
+  const [previewValues, setPreviewValues] = useState<Record<string, string>>({});
 
   // Sync present address when "same as permanent" is checked
   const handleSameAsPermanent = (checked: boolean) => {
