@@ -1493,13 +1493,14 @@ const AdminExpenses = () => {
             const dInstPhone = ed.instPhone || instPhone;
             const dInstEmail = ed.instEmail || instEmail;
             const dInstOther = ed.instOther || instOther;
+            const dInstLogo = ed.instLogo || instLogo;
             const dReportTitle = ed.reportTitle || (bn ? 'প্রকল্প খরচ প্রতিবেদন' : 'Project Expense Report');
             const dCasher = ed.casherName || summaryData?.casher_name || (bn ? 'ক্যাশিয়ার' : 'Cashier');
             const dPrincipal = ed.principalName || summaryData?.principal_name || (bn ? 'অধ্যক্ষ' : 'Principal');
             return (
               <div id="project-print-content">
                 <div className="text-center mb-4 border-b-2 border-foreground pb-3">
-                  {instLogo && <img src={instLogo} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-1" />}
+                  {dInstLogo && <img src={dInstLogo} alt="Logo" className="w-16 h-16 object-contain mx-auto mb-1" />}
                   <h1 className="text-lg font-bold">{dInstName}</h1>
                   <p className="text-sm">{dInstAddress}</p>
                   <p className="text-xs">{bn ? 'ফোন' : 'Phone'}: {dInstPhone} | {bn ? 'ইমেইল' : 'Email'}: {dInstEmail}</p>
