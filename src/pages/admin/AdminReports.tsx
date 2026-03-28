@@ -329,7 +329,7 @@ const AdminReports = () => {
         </div>
 
         {/* Charts Tabs */}
-        <Tabs defaultValue="income-expense">
+        <Tabs defaultValue="income-expense" onValueChange={setActiveTab}>
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="income-expense">
               <BarChart3 className="h-3.5 w-3.5 mr-1" />
