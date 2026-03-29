@@ -102,7 +102,7 @@ const PrayerTimesWidget = () => {
 
   // Calculate current/next prayer and remaining time
   const getActiveInfo = () => {
-    if (!timings) return { activeIndex: -1, activeRemainingMs: 0 };
+    if (!timings) return { activeIndex: -1, nextIndex: -1, activeRemainingMs: 0 };
     const times = PRAYER_ORDER.map(k => {
       const raw = timings[k] || '00:00';
       return parseTime(raw);
@@ -115,18 +115,20 @@ const PrayerTimesWidget = () => {
         const nextIdx = i + 1;
         if (nextIdx < PRAYER_ORDER.length) {
           const remaining = times[nextIdx].getTime() - nowMs;
-          return { activeIndex: i, activeRemainingMs: remaining > 0 ? remaining : 0 };
+          return { activeIndex: i, nextIndex: nextIdx, activeRemainingMs: remaining > 0 ? remaining : 0 };
         }
-        // Last prayer (Isha) - calculate remaining until midnight or just show as active
-        return { activeIndex: i, activeRemainingMs: 0 };
+        // After Isha - countdown to next Fajr (add 24h to Fajr time)
+        const nextFajr = times[0].getTime() + 24 * 60 * 60 * 1000;
+        const remaining = nextFajr - nowMs;
+        return { activeIndex: i, nextIndex: 0, activeRemainingMs: remaining > 0 ? remaining : 0 };
       }
     }
-    // Before Fajr
+    // Before Fajr - countdown to Fajr
     const remaining = times[0].getTime() - nowMs;
-    return { activeIndex: -1, activeRemainingMs: remaining > 0 ? remaining : 0 };
+    return { activeIndex: -1, nextIndex: 0, activeRemainingMs: remaining > 0 ? remaining : 0 };
   };
 
-  const { activeIndex, activeRemainingMs } = getActiveInfo();
+  const { activeIndex, nextIndex, activeRemainingMs } = getActiveInfo();
 
   return (
     <div className="card-elevated rounded-xl overflow-hidden">
