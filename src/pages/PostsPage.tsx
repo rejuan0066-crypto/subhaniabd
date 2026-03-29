@@ -184,7 +184,7 @@ const PostsPage = () => {
                     </div>
                   )}
 
-                  <PostInteractions postId={post.id} />
+                  <PostInteractions postId={post.id} title={bn ? (post.title_bn || post.title) : post.title} />
                 </article>
               );
             })}

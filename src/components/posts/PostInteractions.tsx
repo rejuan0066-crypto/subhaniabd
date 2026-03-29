@@ -130,6 +130,8 @@ const PostInteractions = ({ postId, title }: Props) => {
           <MessageCircle className="w-4 h-4" />
           <span>{commentCount > 0 ? commentCount : ''} {bn ? 'মন্তব্য' : 'Comment'}</span>
         </button>
+
+        <PostShareButton postId={postId} title={title} />
       </div>
 
       {/* Comments section */}
