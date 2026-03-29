@@ -872,7 +872,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   return (
     <Dialog open={open} onOpenChange={o => { onOpenChange(o); if (!o) resetForm(); }}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>{bn ? 'ভর্তি আবেদন ফর্ম' : 'Admission Application Form'}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{isEditMode ? (bn ? 'ছাত্রের তথ্য সম্পাদনা' : 'Edit Student') : (bn ? 'ভর্তি আবেদন ফর্ম' : 'Admission Application Form')}</DialogTitle></DialogHeader>
 
         {!isLoaded ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
@@ -889,13 +889,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             </div>
 
             {/* Submit */}
-            <Button onClick={handleSubmit} className="btn-primary-gradient w-full text-lg py-5" disabled={addMutation.isPending}>
-              {addMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-              {bn ? 'আবেদন জমা দিন' : 'Submit Application'}
+            <Button onClick={handleSubmit} className="btn-primary-gradient w-full text-lg py-5" disabled={addMutation.isPending || updateMutation.isPending}>
+              {(addMutation.isPending || updateMutation.isPending) ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : isEditMode ? <Save className="w-5 h-5 mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+              {isEditMode ? (bn ? 'আপডেট করুন' : 'Update Student') : (bn ? 'আবেদন জমা দিন' : 'Submit Application')}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              {bn ? 'জমা দেওয়ার পর অ্যাডমিনের অনুমোদন প্রয়োজন' : 'Admin approval required after submission'}
-            </p>
+            {!isEditMode && (
+              <p className="text-center text-xs text-muted-foreground">
+                {bn ? 'জমা দেওয়ার পর অ্যাডমিনের অনুমোদন প্রয়োজন' : 'Admin approval required after submission'}
+              </p>
+            )}
           </div>
         )}
       </DialogContent>
