@@ -2,7 +2,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ const AdminStudents = () => {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [showDetail, setShowDetail] = useState<any>(null);
+  const [editStudent, setEditStudent] = useState<any>(null);
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['students'],
@@ -126,6 +127,7 @@ const AdminStudents = () => {
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setShowDetail(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></button>
+                          <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                           {((s as any).approval_status !== 'approved') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="p-2 rounded-lg hover:bg-success/10 text-muted-foreground hover:text-success" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" /></button>
                           )}
@@ -151,7 +153,7 @@ const AdminStudents = () => {
       </div>
 
       {/* Dynamic Admission Form */}
-      <AdmissionForm open={showAdd} onOpenChange={setShowAdd} />
+      <AdmissionForm open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) setEditStudent(null); }} editStudent={editStudent} />
 
       {/* Detail View Dialog */}
       <Dialog open={!!showDetail} onOpenChange={o => { if (!o) setShowDetail(null); }}>
@@ -186,6 +188,9 @@ const AdminStudents = () => {
                 <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{showDetail.residence_type || '-'}</div>
               </div>
               <div className="flex gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => { setEditStudent(showDetail); setShowDetail(null); setShowAdd(true); }} className="flex-1">
+                  <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
+                </Button>
                 {(showDetail as any).approval_status !== 'approved' && (
                   <Button onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 bg-success hover:bg-success/90 text-success-foreground">
                     <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
