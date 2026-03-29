@@ -1,12 +1,21 @@
 import PublicLayout from '@/components/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
+import { toast } from 'sonner';
 
 const Contact = () => {
   const { t, language } = useLanguage();
+  const { settings } = useWebsiteSettings();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success(language === 'bn' ? 'বার্তা পাঠানো হয়েছে!' : 'Message sent!');
+  };
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-12">
@@ -16,19 +25,19 @@ const Contact = () => {
             <h2 className="text-xl font-display font-bold mb-6">
               {language === 'bn' ? 'বার্তা পাঠান' : 'Send Message'}
             </h2>
-            <form className="space-y-4">
-              <Input placeholder={language === 'bn' ? 'আপনার নাম' : 'Your Name'} className="bg-background" />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <Input placeholder={language === 'bn' ? 'আপনার নাম' : 'Your Name'} className="bg-background" required />
               <Input placeholder={t('email')} type="email" className="bg-background" />
               <Input placeholder={t('phone')} className="bg-background" />
-              <Textarea placeholder={language === 'bn' ? 'আপনার বার্তা' : 'Your Message'} rows={5} className="bg-background" />
-              <Button className="btn-primary-gradient w-full">{language === 'bn' ? 'পাঠান' : 'Send'}</Button>
+              <Textarea placeholder={language === 'bn' ? 'আপনার বার্তা' : 'Your Message'} rows={5} className="bg-background" required />
+              <Button type="submit" className="btn-primary-gradient w-full">{language === 'bn' ? 'পাঠান' : 'Send'}</Button>
             </form>
           </div>
           <div className="space-y-6">
             {[
-              { icon: MapPin, label: t('address'), value: 'ঢাকা, বাংলাদেশ' },
-              { icon: Phone, label: t('phone'), value: '+880 1XXX-XXXXXX' },
-              { icon: Mail, label: t('email'), value: 'info@madrasa.edu.bd' },
+              { icon: MapPin, label: language === 'bn' ? 'ঠিকানা' : 'Address', value: settings.address },
+              { icon: Phone, label: language === 'bn' ? 'ফোন' : 'Phone', value: settings.phone },
+              { icon: Mail, label: language === 'bn' ? 'ইমেইল' : 'Email', value: settings.email },
             ].map((item, i) => (
               <div key={i} className="card-elevated p-5 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -40,6 +49,27 @@ const Contact = () => {
                 </div>
               </div>
             ))}
+
+            {/* Social Links */}
+            {settings.social_links?.filter(s => s.url).length > 0 && (
+              <div className="card-elevated p-5">
+                <p className="text-sm text-muted-foreground mb-3">{language === 'bn' ? 'সোশ্যাল মিডিয়া' : 'Social Media'}</p>
+                <div className="flex gap-3">
+                  {settings.social_links.filter(s => s.url).map((s, i) => (
+                    <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors">
+                      {s.platform}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Map */}
+            {settings.contact_map_embed && (
+              <div className="card-elevated overflow-hidden rounded-xl">
+                <div dangerouslySetInnerHTML={{ __html: settings.contact_map_embed }} className="w-full [&>iframe]:w-full [&>iframe]:h-[250px] [&>iframe]:border-0" />
+              </div>
+            )}
           </div>
         </div>
       </div>
