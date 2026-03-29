@@ -387,7 +387,11 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       return;
     }
     setFieldErrors({});
-    addMutation.mutate();
+    if (isEditMode) {
+      updateMutation.mutate();
+    } else {
+      addMutation.mutate();
+    }
   };
 
   const FieldError = ({ field }: { field: string }) => {
