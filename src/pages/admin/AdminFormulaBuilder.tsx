@@ -30,7 +30,33 @@ const FORMULA_TYPES = [
   { value: 'calculation', label: 'Calculation', label_bn: 'হিসাব' },
   { value: 'grade_rule', label: 'Grade Rule', label_bn: 'গ্রেড রুল' },
   { value: 'deduction', label: 'Deduction', label_bn: 'কর্তন' },
+  { value: 'bonus', label: 'Bonus', label_bn: 'বোনাস' },
   { value: 'condition', label: 'Condition', label_bn: 'শর্ত' },
+];
+
+const SALARY_PRESETS = [
+  { name: 'Net Salary', name_bn: 'নিট বেতন', formula: 'base_salary + bonus + overtime + other_allowance - late_deduction - absence_deduction - advance_deduction - other_deduction', result_field: 'net_salary', type: 'calculation',
+    vars: [
+      { key: 'base_salary', label: 'মূল বেতন', label_en: 'Base Salary' },
+      { key: 'bonus', label: 'বোনাস', label_en: 'Bonus' },
+      { key: 'overtime', label: 'ওভারটাইম', label_en: 'Overtime' },
+      { key: 'other_allowance', label: 'অন্যান্য ভাতা', label_en: 'Other Allowance' },
+      { key: 'late_deduction', label: 'বিলম্ব কর্তন', label_en: 'Late Deduction' },
+      { key: 'absence_deduction', label: 'অনুপস্থিতি কর্তন', label_en: 'Absence Deduction' },
+      { key: 'advance_deduction', label: 'অগ্রিম কর্তন', label_en: 'Advance Deduction' },
+      { key: 'other_deduction', label: 'অন্যান্য কর্তন', label_en: 'Other Deduction' },
+    ]},
+  { name: 'Absence Deduction', name_bn: 'অনুপস্থিতি কর্তন', formula: '(base_salary / working_days) * absent_days', result_field: 'absence_deduction', type: 'deduction',
+    vars: [
+      { key: 'base_salary', label: 'মূল বেতন', label_en: 'Base Salary' },
+      { key: 'working_days', label: 'কর্মদিবস', label_en: 'Working Days' },
+      { key: 'absent_days', label: 'অনুপস্থিত দিন', label_en: 'Absent Days' },
+    ]},
+  { name: 'Eid Bonus', name_bn: 'ঈদ বোনাস', formula: 'base_salary * (percentage / 100)', result_field: 'eid_bonus', type: 'bonus',
+    vars: [
+      { key: 'base_salary', label: 'মূল বেতন', label_en: 'Base Salary' },
+      { key: 'percentage', label: 'শতাংশ', label_en: 'Percentage' },
+    ]},
 ];
 
 type VariableItem = { key: string; label: string; label_en: string };
