@@ -171,15 +171,11 @@ const AdminStaffForm = () => {
               {language === 'bn' ? '১. ব্যক্তিগত তথ্য' : '1. Employee Details'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <div className="shrink-0">
-                <div onClick={() => photoRef.current?.click()}
-                  className="w-32 h-40 border-2 border-dashed border-primary/40 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-all overflow-hidden">
-                  {photo ? <img src={photo} alt="Staff" className="w-full h-full object-cover" /> : (
-                    <><Camera className="w-8 h-8 text-muted-foreground mb-1" /><span className="text-xs text-muted-foreground">{language === 'bn' ? 'ছবি' : 'Photo'}</span></>
-                  )}
-                </div>
-                <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-              </div>
+              <PhotoUpload
+                value={photoUrl}
+                onChange={setPhotoUrl}
+                folder="staff"
+              />
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>{bn ? 'প্রথম নাম' : 'First Name'} <span className="text-destructive">*</span></Label>
