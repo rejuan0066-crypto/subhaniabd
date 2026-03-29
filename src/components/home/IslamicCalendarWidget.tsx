@@ -163,10 +163,22 @@ const IslamicCalendarWidget = () => {
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
   const dayName = bn ? BANGLA_DAYS[now.getDay()] : EN_DAYS[now.getDay()];
 
-  // Get Bangla & Hijri month/year for the viewed month (use mid-month date)
-  const viewMidDate = new Date(viewYear, viewMonth, 15);
-  const viewBangla = getBanglaDate(viewMidDate);
-  const viewHijri = getHijriDate(viewMidDate);
+  // Get Bangla & Hijri month/year for viewed month (show both if month spans two)
+  const viewStartDate = new Date(viewYear, viewMonth, 1);
+  const viewEndDate = new Date(viewYear, viewMonth + 1, 0);
+  const viewBanglaStart = getBanglaDate(viewStartDate);
+  const viewBanglaEnd = getBanglaDate(viewEndDate);
+  const viewHijriStart = getHijriDate(viewStartDate);
+  const viewHijriEnd = getHijriDate(viewEndDate);
+
+  const banglaMonthLabel = viewBanglaStart.month === viewBanglaEnd.month
+    ? viewBanglaStart.month
+    : `${viewBanglaStart.month} - ${viewBanglaEnd.month}`;
+
+  const getHijriMonthName = (idx: number) => bn ? HIJRI_MONTHS_BN[idx] : HIJRI_MONTHS_EN[idx];
+  const hijriMonthLabel = viewHijriStart.month === viewHijriEnd.month
+    ? getHijriMonthName(viewHijriStart.month)
+    : `${getHijriMonthName(viewHijriStart.month)} - ${getHijriMonthName(viewHijriEnd.month)}`;
 
   // Calendar grid
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
@@ -273,7 +285,7 @@ const IslamicCalendarWidget = () => {
               {bn ? BN_MONTHS[viewMonth] : EN_MONTHS[viewMonth]}
             </span>
             <span className="text-[8px] text-muted-foreground">
-              {viewBangla.month} • {bn ? HIJRI_MONTHS_BN[viewHijri.month] : HIJRI_MONTHS_EN[viewHijri.month]}
+              {banglaMonthLabel} • {hijriMonthLabel}
             </span>
           </button>
           <button onClick={nextMonth} className="p-1 rounded hover:bg-muted/50 transition-colors">
