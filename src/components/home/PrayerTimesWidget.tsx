@@ -118,7 +118,7 @@ const PrayerTimesWidget = () => {
     return { activeIndex: -1, remainingMs: times[0].getTime() - now.getTime(), activeRemainingMs: 0 };
   };
 
-  const { activeIndex, remainingMs } = getActiveInfo();
+  const { activeIndex, remainingMs, activeRemainingMs } = getActiveInfo();
   const nextPrayerIndex = activeIndex === -1 ? 0 : (activeIndex + 1 < PRAYER_ORDER.length ? activeIndex + 1 : -1);
 
   return (
@@ -138,21 +138,6 @@ const PrayerTimesWidget = () => {
         )}
       </div>
 
-      {/* Countdown Banner */}
-      {timings && nextPrayerIndex >= 0 && remainingMs > 0 && (
-        <div className="bg-accent/15 border-b border-border px-3 py-2 flex items-center gap-2">
-          <Timer className="w-4 h-4 text-accent animate-pulse" />
-          <div className="text-xs">
-            <span className="text-muted-foreground">{bn ? 'পরবর্তী ওয়াক্ত' : 'Next'}:</span>{' '}
-            <span className="font-bold text-foreground">
-              {bn ? PRAYER_NAMES[PRAYER_ORDER[nextPrayerIndex]].bn : PRAYER_NAMES[PRAYER_ORDER[nextPrayerIndex]].en}
-            </span>{' '}
-            <span className="font-mono font-semibold text-primary">
-              — {formatCountdown(remainingMs, bn)} {bn ? 'বাকি' : 'left'}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Location Selector */}
       <div className="p-3 space-y-2 bg-muted/30 border-b border-border">
@@ -226,9 +211,10 @@ const PrayerTimesWidget = () => {
                       <span className="text-sm">{val.icon}</span>
                       <span className={`text-xs font-medium ${isActive ? 'text-primary font-bold' : 'text-foreground'}`}>
                         {bn ? val.bn : val.en}
-                        {isActive && (
-                          <span className="ml-1 text-[9px] text-primary/80">
-                            ({bn ? 'চলমান' : 'Now'})
+                        {isActive && activeRemainingMs > 0 && (
+                          <span className="ml-1.5 inline-flex items-center gap-1 text-[10px] font-mono font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">
+                            <Timer className="w-3 h-3 animate-pulse" />
+                            {formatCountdown(activeRemainingMs, bn)}
                           </span>
                         )}
                       </span>
