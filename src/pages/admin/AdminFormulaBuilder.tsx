@@ -261,7 +261,7 @@ const AdminFormulaBuilder = () => {
                         {FORMULA_TYPES.find(t => t.value === f.formula_type)?.[bn ? 'label_bn' : 'label'] || f.formula_type}
                       </Badge>
                     </div>
-                    {f.formula_type === 'calculation' && expr.formula && (
+                    {(f.formula_type === 'calculation' || f.formula_type === 'deduction' || f.formula_type === 'bonus') && expr.formula && (
                       <code className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded mt-1 inline-block font-mono">
                         {expr.result_field} = {expr.formula}
                       </code>
