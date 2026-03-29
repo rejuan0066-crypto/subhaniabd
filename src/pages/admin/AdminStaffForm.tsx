@@ -108,14 +108,7 @@ const AdminStaffForm = () => {
     );
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setPhoto(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
+  // Photo upload handled by PhotoUpload component
 
   const addMutation = useMutation({
     mutationFn: async () => {
