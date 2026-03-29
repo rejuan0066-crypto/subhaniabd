@@ -2,6 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
 
+export interface GalleryItem {
+  title_bn: string;
+  title_en: string;
+  image_url: string;
+  sort_order: number;
+}
+
+export interface SocialLink {
+  platform: string;
+  url: string;
+  icon: string;
+}
+
 export interface WebsiteSettings {
   institution_name: string;
   institution_name_en: string;
@@ -13,6 +26,7 @@ export interface WebsiteSettings {
   hero_title_en: string;
   hero_subtitle_bn: string;
   hero_subtitle_en: string;
+  hero_bg_image_url: string;
   principal_name: string;
   principal_title_bn: string;
   principal_title_en: string;
@@ -21,11 +35,19 @@ export interface WebsiteSettings {
   principal_photo_url: string;
   about_content_bn: string;
   about_content_en: string;
+  about_mission_bn: string;
+  about_mission_en: string;
+  about_vision_bn: string;
+  about_vision_en: string;
+  about_image_url: string;
   footer_description_bn: string;
   footer_description_en: string;
+  contact_map_embed: string;
   stat_students: string;
   stat_teachers: string;
   stat_years: string;
+  social_links: SocialLink[];
+  gallery_items: GalleryItem[];
   sections: {
     banner: boolean;
     principalMessage: boolean;
@@ -53,6 +75,7 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   hero_title_en: 'Beacon of Islamic Education',
   hero_subtitle_bn: 'কুরআন ও সুন্নাহর আলোকে আদর্শ মানুষ গড়ার প্রত্যয়ে প্রতিষ্ঠিত',
   hero_subtitle_en: 'Established with the commitment to build ideal humans in the light of Quran and Sunnah',
+  hero_bg_image_url: '',
   principal_name: 'মুফতি আব্দুল্লাহ',
   principal_title_bn: 'অধ্যক্ষ',
   principal_title_en: 'Principal',
@@ -61,11 +84,27 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   principal_photo_url: '',
   about_content_bn: 'ইসলামিক শিক্ষা ও আধুনিক জ্ঞানের সমন্বয়ে একটি আদর্শ শিক্ষা প্রতিষ্ঠান।',
   about_content_en: 'An ideal educational institution combining Islamic education and modern knowledge.',
+  about_mission_bn: 'কুরআন ও সুন্নাহর আলোকে আদর্শ মানুষ গড়ে তোলা এবং সমাজে ইসলামিক মূল্যবোধ প্রতিষ্ঠা করা।',
+  about_mission_en: 'To build ideal human beings in the light of the Quran and Sunnah and to establish Islamic values in society.',
+  about_vision_bn: 'একটি আলোকিত সমাজ গঠনে নৈতিক ও জ্ঞানভিত্তিক শিক্ষার কেন্দ্রবিন্দু হওয়া।',
+  about_vision_en: 'To be the center of moral and knowledge-based education in building an enlightened society.',
+  about_image_url: '',
   footer_description_bn: 'ইসলামিক শিক্ষা ও আধুনিক জ্ঞানের সমন্বয়ে একটি আদর্শ শিক্ষা প্রতিষ্ঠান।',
   footer_description_en: 'An ideal educational institution combining Islamic education and modern knowledge.',
+  contact_map_embed: '',
   stat_students: '500+',
   stat_teachers: '50+',
   stat_years: '15+',
+  social_links: [
+    { platform: 'Facebook', url: '', icon: 'facebook' },
+    { platform: 'YouTube', url: '', icon: 'youtube' },
+  ],
+  gallery_items: [
+    { title_bn: 'মাদরাসা ভবন', title_en: 'Madrasah Building', image_url: '', sort_order: 1 },
+    { title_bn: 'বার্ষিক সভা', title_en: 'Annual Meeting', image_url: '', sort_order: 2 },
+    { title_bn: 'ক্লাসরুম', title_en: 'Classroom', image_url: '', sort_order: 3 },
+    { title_bn: 'লাইব্রেরি', title_en: 'Library', image_url: '', sort_order: 4 },
+  ],
   sections: {
     banner: true,
     principalMessage: true,

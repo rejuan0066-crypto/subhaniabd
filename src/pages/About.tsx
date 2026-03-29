@@ -1,21 +1,91 @@
 import PublicLayout from '@/components/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
+import { motion } from 'framer-motion';
+import { Target, Eye, BookOpen } from 'lucide-react';
 
 const About = () => {
   const { language } = useLanguage();
+  const { settings } = useWebsiteSettings();
+
   return (
     <PublicLayout>
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-display font-bold text-foreground mb-6">
-          {language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us'}
-        </h1>
-        <div className="card-elevated p-8 prose max-w-none">
-          <p className="text-muted-foreground leading-relaxed">
-            {language === 'bn'
-              ? 'নূরুল ইসলাম মাদরাসা বাংলাদেশের একটি ঐতিহ্যবাহী ইসলামিক শিক্ষা প্রতিষ্ঠান। আমাদের লক্ষ্য হলো কুরআন ও সুন্নাহর আলোকে ছাত্রদের আদর্শ মানুষ হিসেবে গড়ে তোলা। আমরা ইসলামিক শিক্ষার পাশাপাশি আধুনিক জ্ঞান-বিজ্ঞানেও শিক্ষা প্রদান করি। আমাদের অভিজ্ঞ শিক্ষকমণ্ডলী ছাত্রদের সর্বাঙ্গীণ বিকাশে নিরলসভাবে কাজ করে যাচ্ছেন। মাদরাসায় হিফয, নূরানী, এবতেদায়ী ও মুতাওয়াসসিতাহ বিভাগ চালু রয়েছে।'
-              : 'Nurul Islam Madrasa is a traditional Islamic educational institution in Bangladesh. Our goal is to build students as ideal human beings in the light of the Quran and Sunnah. Along with Islamic education, we also provide modern knowledge and science education.'}
-          </p>
+      <div className="container mx-auto px-4 py-12 space-y-12">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-3xl font-display font-bold text-foreground mb-6">
+            {language === 'bn' ? 'আমাদের সম্পর্কে' : 'About Us'}
+          </h1>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="card-elevated p-8 prose max-w-none">
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {language === 'bn' ? settings.about_content_bn : settings.about_content_en}
+              </p>
+            </div>
+            {settings.about_image_url ? (
+              <div className="card-elevated overflow-hidden">
+                <img src={settings.about_image_url} alt="About" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="card-elevated p-8 flex items-center justify-center bg-secondary/30">
+                <BookOpen className="w-24 h-24 text-primary/20" />
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Mission & Vision */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="card-elevated p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Target className="w-6 h-6 text-primary" />
+              </div>
+              <h2 className="text-xl font-display font-bold text-foreground">
+                {language === 'bn' ? 'আমাদের মিশন' : 'Our Mission'}
+              </h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+              {language === 'bn' ? settings.about_mission_bn : settings.about_mission_en}
+            </p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="card-elevated p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Eye className="w-6 h-6 text-accent" />
+              </div>
+              <h2 className="text-xl font-display font-bold text-foreground">
+                {language === 'bn' ? 'আমাদের ভিশন' : 'Our Vision'}
+              </h2>
+            </div>
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+              {language === 'bn' ? settings.about_vision_bn : settings.about_vision_en}
+            </p>
+          </motion.div>
         </div>
+
+        {/* Principal Section */}
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card-elevated p-8">
+          <h2 className="text-2xl font-display font-bold text-foreground mb-6">
+            {language === 'bn' ? 'অধ্যক্ষের বাণী' : "Principal's Message"}
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-6">
+            <div className="w-32 h-32 rounded-xl bg-secondary shrink-0 flex items-center justify-center text-4xl overflow-hidden">
+              {settings.principal_photo_url ? (
+                <img src={settings.principal_photo_url} alt="Principal" className="w-full h-full object-cover" />
+              ) : '👤'}
+            </div>
+            <div>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                {language === 'bn' ? settings.principal_message_bn : settings.principal_message_en}
+              </p>
+              <p className="mt-4 font-semibold text-foreground">{settings.principal_name}</p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'bn' ? settings.principal_title_bn : settings.principal_title_en}
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </PublicLayout>
   );
