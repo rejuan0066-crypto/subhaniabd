@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Calendar, Clock, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, Star, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const toBanglaNum = (str: string) => String(str).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[parseInt(d)]);
+const toArabicNum = (str: string) => String(str).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[parseInt(d)]);
 
 const BANGLA_MONTHS_CAL = ['বৈশাখ', 'জ্যৈষ্ঠ', 'আষাঢ়', 'শ্রাবণ', 'ভাদ্র', 'আশ্বিন', 'কার্তিক', 'অগ্রহায়ণ', 'পৌষ', 'মাঘ', 'ফাল্গুন', 'চৈত্র'];
 const BANGLA_DAYS = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
@@ -12,6 +13,24 @@ const EN_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July
 const BN_MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
 const SHORT_DAYS_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const SHORT_DAYS_BN = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহ', 'শুক্র', 'শনি'];
+
+const HIJRI_MONTHS_AR = ['مُحَرَّم', 'صَفَر', 'رَبِيع ٱلْأَوَّل', 'رَبِيع ٱلثَّانِي', 'جُمَادَىٰ ٱلْأُولَىٰ', 'جُمَادَىٰ ٱلثَّانِيَة', 'رَجَب', 'شَعْبَان', 'رَمَضَان', 'شَوَّال', 'ذُو ٱلْقَعْدَة', 'ذُو ٱلْحِجَّة'];
+const HIJRI_MONTHS_BN = ['মুহাররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জুমাদাল উলা', 'জুমাদাল সানিয়া', 'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলকদ', 'জিলহজ'];
+const HIJRI_MONTHS_EN = ['Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani", 'Jumada al-Ula', 'Jumada al-Thani', 'Rajab', "Sha'ban", 'Ramadan', 'Shawwal', 'Dhul Qi\'dah', 'Dhul Hijjah'];
+
+// Approximate Hijri date calculation
+function getHijriDate(date: Date) {
+  const jd = Math.floor((date.getTime() / 86400000) + 2440587.5);
+  const l = jd - 1948440 + 10632;
+  const n = Math.floor((l - 1) / 10631);
+  const l2 = l - 10631 * n + 354;
+  const j = Math.floor((10985 - l2) / 5316) * Math.floor((50 * l2) / 17719) + Math.floor(l2 / 5670) * Math.floor((43 * l2) / 15238);
+  const l3 = l2 - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+  const month = Math.floor((24 * l3) / 709);
+  const day = l3 - Math.floor((709 * month) / 24);
+  const year = 30 * n + j - 30;
+  return { day, month: month - 1, year };
+}
 
 function getBanglaDate(date: Date) {
   const banglaYearOffset = date.getMonth() < 3 || (date.getMonth() === 3 && date.getDate() < 14) ? -594 : -593;
@@ -27,7 +46,7 @@ function getBanglaDate(date: Date) {
     if (remaining < monthDays[i]) { monthIdx = i; break; }
     remaining -= monthDays[i];
   }
-  return { day: remaining + 1, month: BANGLA_MONTHS_CAL[monthIdx], year: banglaYear };
+  return { day: remaining + 1, month: BANGLA_MONTHS_CAL[monthIdx], monthIdx, year: banglaYear };
 }
 
 interface Holiday {
@@ -38,34 +57,76 @@ interface Holiday {
   approximate?: boolean;
 }
 
-const HOLIDAYS_2026: Holiday[] = [
-  { date: '01-27', nameBn: 'শবে মেরাজ', nameEn: 'Shab-e-Meraj', type: 'islamic', approximate: true },
-  { date: '02-13', nameBn: 'শবে বরাত', nameEn: 'Shab-e-Barat', type: 'islamic', approximate: true },
-  { date: '02-21', nameBn: 'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', nameEn: 'Shaheed Day & Intl Mother Language Day', type: 'government' },
-  { date: '03-01', nameBn: 'রমজান শুরু', nameEn: 'Ramadan Starts', type: 'islamic', approximate: true },
-  { date: '03-17', nameBn: 'জাতির পিতার জন্মদিন', nameEn: "Father of the Nation's Birthday", type: 'government' },
-  { date: '03-26', nameBn: 'স্বাধীনতা ও জাতীয় দিবস', nameEn: 'Independence & National Day', type: 'government' },
-  { date: '03-27', nameBn: 'শবে কদর', nameEn: 'Laylat al-Qadr', type: 'islamic', approximate: true },
-  { date: '03-30', nameBn: 'ঈদুল ফিতর', nameEn: 'Eid ul-Fitr', type: 'islamic', approximate: true },
-  { date: '03-31', nameBn: 'ঈদুল ফিতর (২য় দিন)', nameEn: 'Eid ul-Fitr (2nd Day)', type: 'islamic', approximate: true },
-  { date: '04-14', nameBn: 'পহেলা বৈশাখ', nameEn: 'Pohela Boishakh', type: 'festival' },
-  { date: '05-01', nameBn: 'মে দিবস', nameEn: 'May Day', type: 'government' },
-  { date: '06-06', nameBn: 'ঈদুল আযহা', nameEn: 'Eid ul-Adha', type: 'islamic', approximate: true },
-  { date: '06-07', nameBn: 'ঈদুল আযহা (২য় দিন)', nameEn: 'Eid ul-Adha (2nd Day)', type: 'islamic', approximate: true },
-  { date: '07-06', nameBn: 'আশুরা', nameEn: 'Ashura', type: 'islamic', approximate: true },
-  { date: '08-15', nameBn: 'জাতীয় শোক দিবস', nameEn: 'National Mourning Day', type: 'government' },
-  { date: '09-05', nameBn: 'ঈদে মিলাদুন্নবী', nameEn: 'Eid-e-Milad-un-Nabi', type: 'islamic', approximate: true },
-  { date: '10-02', nameBn: 'দুর্গাপূজা', nameEn: 'Durga Puja', type: 'festival', approximate: true },
-  { date: '11-01', nameBn: 'বিপ্লব ও সংহতি দিবস', nameEn: 'Revolution & Solidarity Day', type: 'government' },
-  { date: '12-16', nameBn: 'বিজয় দিবস', nameEn: 'Victory Day', type: 'government' },
-  { date: '12-25', nameBn: 'বড়দিন', nameEn: 'Christmas', type: 'festival' },
-];
+const HOLIDAYS: Record<number, Holiday[]> = {
+  2025: [
+    { date: '01-14', nameBn: 'শবে মেরাজ', nameEn: 'Shab-e-Meraj', type: 'islamic', approximate: true },
+    { date: '02-13', nameBn: 'শবে বরাত', nameEn: 'Shab-e-Barat', type: 'islamic', approximate: true },
+    { date: '02-21', nameBn: 'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', nameEn: 'Shaheed Day & Intl Mother Language Day', type: 'government' },
+    { date: '03-01', nameBn: 'রমজান শুরু', nameEn: 'Ramadan Starts', type: 'islamic', approximate: true },
+    { date: '03-17', nameBn: 'জাতির পিতার জন্মদিন', nameEn: "Father of the Nation's Birthday", type: 'government' },
+    { date: '03-26', nameBn: 'স্বাধীনতা ও জাতীয় দিবস', nameEn: 'Independence & National Day', type: 'government' },
+    { date: '03-30', nameBn: 'ঈদুল ফিতর', nameEn: 'Eid ul-Fitr', type: 'islamic', approximate: true },
+    { date: '03-31', nameBn: 'ঈদুল ফিতর (২য় দিন)', nameEn: 'Eid ul-Fitr (2nd Day)', type: 'islamic', approximate: true },
+    { date: '04-14', nameBn: 'পহেলা বৈশাখ', nameEn: 'Pohela Boishakh', type: 'festival' },
+    { date: '05-01', nameBn: 'মে দিবস', nameEn: 'May Day', type: 'government' },
+    { date: '06-07', nameBn: 'ঈদুল আযহা', nameEn: 'Eid ul-Adha', type: 'islamic', approximate: true },
+    { date: '06-08', nameBn: 'ঈদুল আযহা (২য় দিন)', nameEn: 'Eid ul-Adha (2nd Day)', type: 'islamic', approximate: true },
+    { date: '07-06', nameBn: 'আশুরা', nameEn: 'Ashura', type: 'islamic', approximate: true },
+    { date: '08-15', nameBn: 'জাতীয় শোক দিবস', nameEn: 'National Mourning Day', type: 'government' },
+    { date: '09-05', nameBn: 'ঈদে মিলাদুন্নবী', nameEn: 'Eid-e-Milad-un-Nabi', type: 'islamic', approximate: true },
+    { date: '10-02', nameBn: 'দুর্গাপূজা', nameEn: 'Durga Puja', type: 'festival', approximate: true },
+    { date: '12-16', nameBn: 'বিজয় দিবস', nameEn: 'Victory Day', type: 'government' },
+    { date: '12-25', nameBn: 'বড়দিন', nameEn: 'Christmas', type: 'festival' },
+  ],
+  2026: [
+    { date: '01-27', nameBn: 'শবে মেরাজ', nameEn: 'Shab-e-Meraj', type: 'islamic', approximate: true },
+    { date: '02-13', nameBn: 'শবে বরাত', nameEn: 'Shab-e-Barat', type: 'islamic', approximate: true },
+    { date: '02-21', nameBn: 'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', nameEn: 'Shaheed Day & Intl Mother Language Day', type: 'government' },
+    { date: '03-01', nameBn: 'রমজান শুরু', nameEn: 'Ramadan Starts', type: 'islamic', approximate: true },
+    { date: '03-17', nameBn: 'জাতির পিতার জন্মদিন', nameEn: "Father of the Nation's Birthday", type: 'government' },
+    { date: '03-26', nameBn: 'স্বাধীনতা ও জাতীয় দিবস', nameEn: 'Independence & National Day', type: 'government' },
+    { date: '03-27', nameBn: 'শবে কদর', nameEn: 'Laylat al-Qadr', type: 'islamic', approximate: true },
+    { date: '03-30', nameBn: 'ঈদুল ফিতর', nameEn: 'Eid ul-Fitr', type: 'islamic', approximate: true },
+    { date: '03-31', nameBn: 'ঈদুল ফিতর (২য় দিন)', nameEn: 'Eid ul-Fitr (2nd Day)', type: 'islamic', approximate: true },
+    { date: '04-14', nameBn: 'পহেলা বৈশাখ', nameEn: 'Pohela Boishakh', type: 'festival' },
+    { date: '05-01', nameBn: 'মে দিবস', nameEn: 'May Day', type: 'government' },
+    { date: '06-06', nameBn: 'ঈদুল আযহা', nameEn: 'Eid ul-Adha', type: 'islamic', approximate: true },
+    { date: '06-07', nameBn: 'ঈদুল আযহা (২য় দিন)', nameEn: 'Eid ul-Adha (2nd Day)', type: 'islamic', approximate: true },
+    { date: '07-06', nameBn: 'আশুরা', nameEn: 'Ashura', type: 'islamic', approximate: true },
+    { date: '08-15', nameBn: 'জাতীয় শোক দিবস', nameEn: 'National Mourning Day', type: 'government' },
+    { date: '09-05', nameBn: 'ঈদে মিলাদুন্নবী', nameEn: 'Eid-e-Milad-un-Nabi', type: 'islamic', approximate: true },
+    { date: '10-02', nameBn: 'দুর্গাপূজা', nameEn: 'Durga Puja', type: 'festival', approximate: true },
+    { date: '11-01', nameBn: 'বিপ্লব ও সংহতি দিবস', nameEn: 'Revolution & Solidarity Day', type: 'government' },
+    { date: '12-16', nameBn: 'বিজয় দিবস', nameEn: 'Victory Day', type: 'government' },
+    { date: '12-25', nameBn: 'বড়দিন', nameEn: 'Christmas', type: 'festival' },
+  ],
+  2027: [
+    { date: '01-16', nameBn: 'শবে মেরাজ', nameEn: 'Shab-e-Meraj', type: 'islamic', approximate: true },
+    { date: '02-03', nameBn: 'শবে বরাত', nameEn: 'Shab-e-Barat', type: 'islamic', approximate: true },
+    { date: '02-18', nameBn: 'রমজান শুরু', nameEn: 'Ramadan Starts', type: 'islamic', approximate: true },
+    { date: '02-21', nameBn: 'শহীদ দিবস ও আন্তর্জাতিক মাতৃভাষা দিবস', nameEn: 'Shaheed Day & Intl Mother Language Day', type: 'government' },
+    { date: '03-17', nameBn: 'জাতির পিতার জন্মদিন', nameEn: "Father of the Nation's Birthday", type: 'government' },
+    { date: '03-20', nameBn: 'ঈদুল ফিতর', nameEn: 'Eid ul-Fitr', type: 'islamic', approximate: true },
+    { date: '03-21', nameBn: 'ঈদুল ফিতর (২য় দিন)', nameEn: 'Eid ul-Fitr (2nd Day)', type: 'islamic', approximate: true },
+    { date: '03-26', nameBn: 'স্বাধীনতা ও জাতীয় দিবস', nameEn: 'Independence & National Day', type: 'government' },
+    { date: '04-14', nameBn: 'পহেলা বৈশাখ', nameEn: 'Pohela Boishakh', type: 'festival' },
+    { date: '05-01', nameBn: 'মে দিবস', nameEn: 'May Day', type: 'government' },
+    { date: '05-27', nameBn: 'ঈদুল আযহা', nameEn: 'Eid ul-Adha', type: 'islamic', approximate: true },
+    { date: '05-28', nameBn: 'ঈদুল আযহা (২য় দিন)', nameEn: 'Eid ul-Adha (2nd Day)', type: 'islamic', approximate: true },
+    { date: '06-26', nameBn: 'আশুরা', nameEn: 'Ashura', type: 'islamic', approximate: true },
+    { date: '08-15', nameBn: 'জাতীয় শোক দিবস', nameEn: 'National Mourning Day', type: 'government' },
+    { date: '08-26', nameBn: 'ঈদে মিলাদুন্নবী', nameEn: 'Eid-e-Milad-un-Nabi', type: 'islamic', approximate: true },
+    { date: '10-02', nameBn: 'দুর্গাপূজা', nameEn: 'Durga Puja', type: 'festival', approximate: true },
+    { date: '12-16', nameBn: 'বিজয় দিবস', nameEn: 'Victory Day', type: 'government' },
+    { date: '12-25', nameBn: 'বড়দিন', nameEn: 'Christmas', type: 'festival' },
+  ],
+};
 
-const TYPE_COLORS: Record<string, { dot: string; ring: string; label: string; labelBn: string }> = {
-  islamic: { dot: 'bg-emerald-500', ring: 'ring-emerald-400', label: 'Islamic', labelBn: 'ইসলামিক' },
-  government: { dot: 'bg-blue-500', ring: 'ring-blue-400', label: 'Government', labelBn: 'সরকারি' },
-  festival: { dot: 'bg-amber-500', ring: 'ring-amber-400', label: 'Festival', labelBn: 'উৎসব' },
-  other: { dot: 'bg-purple-500', ring: 'ring-purple-400', label: 'Other', labelBn: 'অন্যান্য' },
+const TYPE_COLORS: Record<string, { dot: string; label: string; labelBn: string }> = {
+  islamic: { dot: 'bg-emerald-500', label: 'Islamic', labelBn: 'ইসলামিক' },
+  government: { dot: 'bg-blue-500', label: 'Government', labelBn: 'সরকারি' },
+  festival: { dot: 'bg-amber-500', label: 'Festival', labelBn: 'উৎসব' },
+  other: { dot: 'bg-purple-500', label: 'Other', labelBn: 'অন্যান্য' },
 };
 
 function getHolidayMap(holidays: Holiday[]): Map<string, Holiday[]> {
@@ -81,7 +142,7 @@ const IslamicCalendarWidget = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const [now, setNow] = useState(new Date());
-  const [viewYear, setViewYear] = useState(2026);
+  const [viewYear, setViewYear] = useState(new Date().getFullYear());
   const [viewMonth, setViewMonth] = useState(new Date().getMonth());
 
   useEffect(() => {
@@ -90,15 +151,20 @@ const IslamicCalendarWidget = () => {
   }, []);
 
   const banglaDate = getBanglaDate(now);
+  const hijriToday = getHijriDate(now);
   const todayStr = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const todayHoliday = HOLIDAYS_2026.find(h => h.date === todayStr);
-  const holidayMap = useMemo(() => getHolidayMap(HOLIDAYS_2026), []);
+  
+  const yearHolidays = HOLIDAYS[viewYear] || [];
+  const holidayMap = useMemo(() => getHolidayMap(yearHolidays), [viewYear]);
+  const todayHoliday = (HOLIDAYS[now.getFullYear()] || []).find(h => h.date === todayStr);
 
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
   const dayName = bn ? BANGLA_DAYS[now.getDay()] : EN_DAYS[now.getDay()];
-  const gregorianDate = bn
-    ? `${toBanglaNum(String(now.getDate()))} ${EN_MONTHS[now.getMonth()]} ${toBanglaNum(String(now.getFullYear()))}`
-    : `${now.getDate()} ${EN_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+
+  // Get Bangla & Hijri month/year for the viewed month (use mid-month date)
+  const viewMidDate = new Date(viewYear, viewMonth, 15);
+  const viewBangla = getBanglaDate(viewMidDate);
+  const viewHijri = getHijriDate(viewMidDate);
 
   // Calendar grid
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
@@ -115,10 +181,12 @@ const IslamicCalendarWidget = () => {
     if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
     else setViewMonth(m => m + 1);
   };
+  const prevYear = () => setViewYear(y => y - 1);
+  const nextYear = () => setViewYear(y => y + 1);
   const goToday = () => { setViewMonth(now.getMonth()); setViewYear(now.getFullYear()); };
 
   // Holidays in current view month
-  const monthHolidays = HOLIDAYS_2026.filter(h => {
+  const monthHolidays = yearHolidays.filter(h => {
     const m = parseInt(h.date.split('-')[0]) - 1;
     return m === viewMonth;
   });
@@ -136,37 +204,29 @@ const IslamicCalendarWidget = () => {
         </div>
       </div>
 
-      {/* Dates */}
-      <div className="p-3 space-y-2 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <Calendar className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+      {/* Combined Dates - All 3 in one row */}
+      <div className="p-2.5 border-b border-border">
+        <div className="grid grid-cols-3 gap-1.5">
+          {/* Gregorian */}
+          <div className="text-center p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/30">
+            <p className="text-[8px] text-muted-foreground mb-0.5">{bn ? 'ইংরেজি' : 'Gregorian'}</p>
+            <p className="text-sm font-bold text-foreground">{bn ? toBanglaNum(String(now.getDate())) : now.getDate()}</p>
+            <p className="text-[9px] text-muted-foreground">{bn ? BN_MONTHS[now.getMonth()] : EN_MONTHS[now.getMonth()]}</p>
+            <p className="text-[8px] text-muted-foreground">{bn ? toBanglaNum(String(now.getFullYear())) : now.getFullYear()}</p>
           </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground">{bn ? 'ইংরেজি' : 'Gregorian'}</p>
-            <p className="text-xs font-semibold text-foreground">{gregorianDate}</p>
+          {/* Bangla */}
+          <div className="text-center p-1.5 rounded-lg bg-orange-50 dark:bg-orange-950/30">
+            <p className="text-[8px] text-muted-foreground mb-0.5">{bn ? 'বাংলা' : 'Bengali'}</p>
+            <p className="text-sm font-bold text-foreground">{bn ? toBanglaNum(String(banglaDate.day)) : banglaDate.day}</p>
+            <p className="text-[9px] text-muted-foreground">{banglaDate.month}</p>
+            <p className="text-[8px] text-muted-foreground">{bn ? toBanglaNum(String(banglaDate.year)) : banglaDate.year}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <span className="text-sm">🇧🇩</span>
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground">{bn ? 'বাংলা' : 'Bengali'}</p>
-            <p className="text-xs font-semibold text-foreground">
-              {bn ? `${toBanglaNum(String(banglaDate.day))} ${banglaDate.month} ${toBanglaNum(String(banglaDate.year))}` : `${banglaDate.day} ${banglaDate.month} ${banglaDate.year}`}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-            <span className="text-sm">☪️</span>
-          </div>
-          <div>
-            <p className="text-[10px] text-muted-foreground">{bn ? 'আরবি (হিজরি)' : 'Hijri'}</p>
-            <p className="text-xs font-semibold text-foreground" id="hijri-date">
-              {bn ? 'নামাজের সময় থেকে লোড হবে' : 'Loaded from prayer times'}
-            </p>
+          {/* Hijri */}
+          <div className="text-center p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30" dir="rtl">
+            <p className="text-[8px] text-muted-foreground mb-0.5" dir="ltr">{bn ? 'হিজরি' : 'Hijri'}</p>
+            <p className="text-sm font-bold text-foreground">{toArabicNum(String(hijriToday.day))}</p>
+            <p className="text-[9px] text-muted-foreground">{HIJRI_MONTHS_AR[hijriToday.month]}</p>
+            <p className="text-[8px] text-muted-foreground">{toArabicNum(String(hijriToday.year))}</p>
           </div>
         </div>
       </div>
@@ -188,17 +248,30 @@ const IslamicCalendarWidget = () => {
 
       {/* Full Calendar */}
       <div className="p-3">
-        {/* Month Navigation */}
-        <div className="flex items-center justify-between mb-2">
+        {/* Year Navigation */}
+        <div className="flex items-center justify-center gap-2 mb-1.5">
+          <button onClick={prevYear} className="p-0.5 rounded hover:bg-muted/50 transition-colors" title={bn ? 'আগের বছর' : 'Previous Year'}>
+            <ChevronsLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <span className="text-xs font-bold text-foreground min-w-[40px] text-center">
+            {bn ? toBanglaNum(String(viewYear)) : viewYear}
+          </span>
+          <button onClick={nextYear} className="p-0.5 rounded hover:bg-muted/50 transition-colors" title={bn ? 'পরের বছর' : 'Next Year'}>
+            <ChevronsRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        {/* Month Navigation with triple calendar month names */}
+        <div className="flex items-center justify-between mb-1">
           <button onClick={prevMonth} className="p-1 rounded hover:bg-muted/50 transition-colors">
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button onClick={goToday} className="text-center">
-            <span className="text-xs font-bold text-foreground">
+          <button onClick={goToday} className="text-center leading-tight">
+            <span className="text-xs font-bold text-foreground block">
               {bn ? BN_MONTHS[viewMonth] : EN_MONTHS[viewMonth]}
             </span>
-            <span className="text-[10px] text-muted-foreground ml-1">
-              {bn ? toBanglaNum(String(viewYear)) : viewYear}
+            <span className="text-[8px] text-muted-foreground">
+              {viewBangla.month} • {bn ? HIJRI_MONTHS_BN[viewHijri.month] : HIJRI_MONTHS_EN[viewHijri.month]}
             </span>
           </button>
           <button onClick={nextMonth} className="p-1 rounded hover:bg-muted/50 transition-colors">
@@ -239,7 +312,6 @@ const IslamicCalendarWidget = () => {
                 <span className={`text-[11px] leading-none ${isToday ? '' : 'text-foreground'}`}>
                   {bn ? toBanglaNum(String(day)) : day}
                 </span>
-                {/* Holiday dots */}
                 {dayHolidays.length > 0 && (
                   <div className="flex gap-0.5 mt-0.5">
                     {dayHolidays.map((h, idx) => (
@@ -264,6 +336,15 @@ const IslamicCalendarWidget = () => {
             </div>
           ))}
         </div>
+
+        {/* No holidays data warning */}
+        {!HOLIDAYS[viewYear] && (
+          <div className="text-center py-2">
+            <p className="text-[10px] text-muted-foreground">
+              {bn ? `${toBanglaNum(String(viewYear))} সালের ছুটির তথ্য নেই` : `No holiday data for ${viewYear}`}
+            </p>
+          </div>
+        )}
 
         {/* Month's Holiday List */}
         {monthHolidays.length > 0 && (
