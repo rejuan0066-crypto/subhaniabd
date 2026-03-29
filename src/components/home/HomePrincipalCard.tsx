@@ -19,7 +19,7 @@ const HomePrincipalCard = ({ settings, language, t }: Props) => {
   const bn = language === 'bn';
 
   return (
-    <ScrollArea className="h-full">
+    <ScrollArea className="h-[600px]">
     <div className="space-y-5 pr-1">
       {/* Principal Card */}
       <div className="card-elevated overflow-hidden">
