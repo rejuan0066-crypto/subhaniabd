@@ -12,6 +12,8 @@ import HomePostsSection from '@/components/home/HomePostsSection';
 import HomeNoticesSection from '@/components/home/HomeNoticesSection';
 import HomePrincipalCard from '@/components/home/HomePrincipalCard';
 import HomeMoreNews from '@/components/home/HomeMoreNews';
+import PrayerTimesWidget from '@/components/home/PrayerTimesWidget';
+import IslamicCalendarWidget from '@/components/home/IslamicCalendarWidget';
 
 const Home = () => {
   const { t, language } = useLanguage();
@@ -125,10 +127,20 @@ const Home = () => {
         </div>
       </section>
 
-      {/* More News Grid */}
-      {posts.length > 2 && (
-        <HomeMoreNews posts={posts} language={language} />
-      )}
+      {/* Prayer Times & Calendar */}
+      <section className="py-8 bg-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <PrayerTimesWidget />
+            <IslamicCalendarWidget />
+            <div className="md:col-span-2 lg:col-span-1">
+              {posts.length > 2 && (
+                <HomeMoreNews posts={posts} language={language} />
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Stats */}
       {settings.sections.stats && (
