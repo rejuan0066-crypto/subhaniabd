@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Heart, MessageCircle, Send, Loader2 } from 'lucide-react';
+import PostShareButton from './PostShareButton';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -20,9 +21,10 @@ const getVisitorId = () => {
 
 interface Props {
   postId: string;
+  title: string;
 }
 
-const PostInteractions = ({ postId }: Props) => {
+const PostInteractions = ({ postId, title }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const qc = useQueryClient();
@@ -128,6 +130,8 @@ const PostInteractions = ({ postId }: Props) => {
           <MessageCircle className="w-4 h-4" />
           <span>{commentCount > 0 ? commentCount : ''} {bn ? 'মন্তব্য' : 'Comment'}</span>
         </button>
+
+        <PostShareButton postId={postId} title={title} />
       </div>
 
       {/* Comments section */}
