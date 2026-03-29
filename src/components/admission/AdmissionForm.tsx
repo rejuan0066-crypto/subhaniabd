@@ -77,6 +77,60 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   // Custom field values (for admin-added fields)
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
 
+  const isEditMode = !!editStudent;
+
+  // Pre-fill form when editing
+  useEffect(() => {
+    if (editStudent && open) {
+      const s = editStudent;
+      const admData = s.admission_data || {};
+      setForm({
+        student_type: admData.student_type || 'new',
+        residence_type: s.residence_type || 'non-resident',
+        admission_session: s.admission_session || '',
+        roll_number: s.roll_number || '',
+        registration_no: s.registration_no || '',
+        admission_date: s.admission_date || new Date().toISOString().split('T')[0],
+        session_year: s.session_year || new Date().getFullYear().toString(),
+        admission_class: admData.admission_class || '',
+        first_name: s.name_bn || '',
+        last_name: s.name_en || '',
+        gender: s.gender || 'male',
+        religion: s.religion || 'islam',
+        date_of_birth: s.date_of_birth || '',
+        birth_reg_no: s.birth_reg_no || '',
+        previous_class: s.previous_class || '',
+        previous_institute: s.previous_institute || '',
+        is_orphan: s.is_orphan || false,
+        is_poor: s.is_poor || false,
+        photo_url: s.photo_url || '',
+        father_name: s.father_name || '',
+        father_occupation: s.father_occupation || '',
+        father_nid: s.father_nid || '',
+        father_phone: s.father_phone || '',
+        father_phone_code: admData.father_phone_code || '+880',
+        mother_name: s.mother_name || '',
+        mother_occupation: s.mother_occupation || '',
+        mother_nid: s.mother_nid || '',
+        mother_phone: s.mother_phone || '',
+        mother_phone_code: admData.mother_phone_code || '+880',
+        guardian_type: admData.guardian_type || '',
+        guardian_name: admData.guardian_name || '',
+        guardian_relation: admData.guardian_relation || '',
+        guardian_phone: admData.guardian_phone || '',
+        guardian_phone_code: admData.guardian_phone_code || '+880',
+        guardian_nid: admData.guardian_nid || '',
+      });
+      if (admData.permanentAddr) setPermanentAddr(admData.permanentAddr);
+      if (admData.presentAddr) setPresentAddr(admData.presentAddr);
+      if (admData.parentPermanentAddr) setParentPermanentAddr(admData.parentPermanentAddr);
+      if (admData.parentPresentAddr) setParentPresentAddr(admData.parentPresentAddr);
+      if (admData.guardianPermAddr) setGuardianPermAddr(admData.guardianPermAddr);
+      if (admData.guardianPresAddr) setGuardianPresAddr(admData.guardianPresAddr);
+      if (admData.custom_fields) setCustomFieldValues(admData.custom_fields);
+    }
+  }, [editStudent, open]);
+
   const { data: classes = [] } = useQuery({
     queryKey: ['classes'],
     queryFn: async () => {
