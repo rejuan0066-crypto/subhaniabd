@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowRight, BookOpen, FileText, GraduationCap, Users } from 'lucide-react';
 
 interface Props {
@@ -18,7 +19,8 @@ const HomePrincipalCard = ({ settings, language, t }: Props) => {
   const bn = language === 'bn';
 
   return (
-    <div className="space-y-5 sticky top-24">
+    <ScrollArea className="h-full">
+    <div className="space-y-5 pr-1">
       {/* Principal Card */}
       <div className="card-elevated overflow-hidden">
         <div className="bg-primary px-4 py-3">

@@ -104,21 +104,21 @@ const Home = () => {
       {/* Main 3-Column Layout */}
       <section className="py-8 sm:py-10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[600px]">
             {/* Left - Principal Card */}
             {settings.sections.principalMessage && (
-              <aside className="lg:col-span-3">
+              <aside className="lg:col-span-3 lg:overflow-hidden">
                 <HomePrincipalCard settings={settings} language={language} t={t} />
               </aside>
             )}
 
             {/* Center - Posts */}
-            <div className={`${settings.sections.principalMessage ? 'lg:col-span-5' : 'lg:col-span-8'}`}>
+            <div className={`${settings.sections.principalMessage ? 'lg:col-span-5' : 'lg:col-span-8'} lg:overflow-hidden`}>
               <HomePostsSection posts={posts} language={language} />
             </div>
 
             {/* Right - Notices */}
-            <aside className="lg:col-span-4">
+            <aside className="lg:col-span-4 lg:overflow-hidden">
               <HomeNoticesSection notices={notices} language={language} t={t} />
             </aside>
           </div>
