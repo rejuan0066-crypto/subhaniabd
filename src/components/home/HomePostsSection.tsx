@@ -34,7 +34,7 @@ const HomePostsSection = ({ posts, language }: Props) => {
       </div>
 
       {/* Scrollable posts area */}
-      <ScrollArea className="h-[540px] pr-1">
+      <ScrollArea className="h-[calc(100%-2.5rem)]" >
         <div className="space-y-4">
           {/* Featured Post */}
           {featured && (
