@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useValidationRules } from '@/hooks/useValidationRules';
+import PhotoUpload from '@/components/PhotoUpload';
 
 const initialForm = {
   name_bn: '', name_en: '', student_id: '', roll_number: '',
