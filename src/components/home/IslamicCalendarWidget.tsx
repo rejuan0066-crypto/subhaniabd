@@ -285,7 +285,7 @@ const IslamicCalendarWidget = () => {
               {bn ? BN_MONTHS[viewMonth] : EN_MONTHS[viewMonth]}
             </span>
             <span className="text-[8px] text-muted-foreground">
-              {viewBangla.month} • {bn ? HIJRI_MONTHS_BN[viewHijri.month] : HIJRI_MONTHS_EN[viewHijri.month]}
+              {banglaMonthLabel} • {hijriMonthLabel}
             </span>
           </button>
           <button onClick={nextMonth} className="p-1 rounded hover:bg-muted/50 transition-colors">
