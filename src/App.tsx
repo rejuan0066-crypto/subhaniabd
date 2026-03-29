@@ -51,6 +51,7 @@ import AdminMenuManager from "./pages/admin/AdminMenuManager";
 import AdminWidgetBuilder from "./pages/admin/AdminWidgetBuilder";
 import AdminBackup from "./pages/admin/AdminBackup";
 import AdminGuardianNotifications from "./pages/admin/AdminGuardianNotifications";
+import AdminSalary from "./pages/admin/AdminSalary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
