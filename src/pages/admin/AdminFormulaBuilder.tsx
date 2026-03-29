@@ -350,6 +350,29 @@ const AdminFormulaBuilder = () => {
                 <Textarea value={formulaData.description} onChange={e => setFormulaData(p => ({ ...p, description: e.target.value }))} rows={2} />
               </div>
 
+              {/* Salary Preset Templates */}
+              {formulaData.module === 'salary' && !editingId && (
+                <div className="border rounded-lg p-3 bg-accent/10 space-y-2">
+                  <Label className="font-semibold text-xs">{bn ? '⚡ বেতন টেমপ্লেট থেকে তৈরি করুন' : '⚡ Quick Start from Salary Template'}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {SALARY_PRESETS.map((preset, i) => (
+                      <Button key={i} size="sm" variant="outline" className="text-xs" onClick={() => {
+                        setFormulaData(p => ({
+                          ...p,
+                          name: preset.name,
+                          name_bn: preset.name_bn,
+                          formula_type: preset.type,
+                          expression: { formula: preset.formula, result_field: preset.result_field },
+                          variables: preset.vars,
+                        }));
+                      }}>
+                        <Wallet className="h-3 w-3 mr-1" /> {bn ? preset.name_bn : preset.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Expression Editor */}
               {isGrade ? (
                 <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
