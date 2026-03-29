@@ -1,12 +1,14 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import PublicLayout from '@/components/PublicLayout';
 import { motion } from 'framer-motion';
-import { BookOpen, Users, Award, ArrowRight, Bell, ImageIcon } from 'lucide-react';
+import { BookOpen, Users, Award, ArrowRight, Bell, FileText, Image as ImageIcon, ThumbsUp, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 const Home = () => {
   const { t, language } = useLanguage();
