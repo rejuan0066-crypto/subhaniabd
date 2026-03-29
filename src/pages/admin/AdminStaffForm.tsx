@@ -78,11 +78,34 @@ const AdminStaffForm = () => {
   const validateNid = (val: string) => {
     const cleaned = val.replace(/\D/g, '');
     setNid(cleaned);
-    if (cleaned.length > 0 && cleaned.length !== 10 && cleaned.length !== 17) {
-      setNidError(language === 'bn' ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits');
+    // Check DB validation rules first
+    const dbError = validate('nid', cleaned);
+    if (dbError) {
+      setNidError(dbError);
+    } else if (cleaned.length > 0 && cleaned.length !== 10 && cleaned.length !== 17) {
+      setNidError(bn ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits');
     } else {
       setNidError('');
     }
+  };
+
+  const handleFieldChange = (field: string, value: string, setter: (v: string) => void) => {
+    setter(value);
+    const error = validate(field, value);
+    setFieldErrors(prev => {
+      const next = { ...prev };
+      if (error) next[field] = error; else delete next[field];
+      return next;
+    });
+  };
+
+  const FieldError = ({ field }: { field: string }) => {
+    if (!fieldErrors[field]) return null;
+    return (
+      <p className="text-xs text-destructive mt-1 flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" /> {fieldErrors[field]}
+      </p>
+    );
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
