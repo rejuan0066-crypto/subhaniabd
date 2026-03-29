@@ -33,7 +33,7 @@ const HomeNoticesSection = ({ notices, language, t }: Props) => {
             {bn ? 'নোটিশ বোর্ড' : 'Notice Board'}
           </span>
         </div>
-        <ScrollArea className="h-[490px]">
+        <ScrollArea className="h-[500px]">
           <div className="divide-y divide-border">
             {notices.length > 0 ? notices.map((n, idx) => (
               <Link
