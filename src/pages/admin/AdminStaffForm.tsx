@@ -23,8 +23,11 @@ const formatAddress = (addr: AddressData) => {
 
 const AdminStaffForm = () => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { validate, validateAll } = useValidationRules('staff');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [photo, setPhoto] = useState<string | null>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const [sameAddress, setSameAddress] = useState(false);
