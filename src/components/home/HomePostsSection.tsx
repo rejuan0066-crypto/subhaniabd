@@ -23,91 +23,93 @@ const HomePostsSection = ({ posts, language }: Props) => {
   return (
     <div className="space-y-4">
       {/* Section Header */}
-      <div className="flex items-center justify-between">
+      <div className="section-header-bar flex items-center justify-between">
         <h2 className="text-base sm:text-lg font-display font-bold text-foreground flex items-center gap-2">
-          <span className="w-1 h-5 bg-primary rounded-full" />
+          <span className="w-1 h-6 bg-primary rounded-full" />
           {bn ? 'সর্বশেষ সংবাদ' : 'Latest News'}
         </h2>
-        <Link to="/posts" className="text-xs text-primary hover:underline flex items-center gap-1">
+        <Link to="/posts" className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
           {bn ? 'সব দেখুন' : 'View All'} <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
 
-      {/* Featured Post + Secondary Grid */}
-      {featured && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Featured Large */}
-          <Link to="/posts" className="card-elevated overflow-hidden group sm:col-span-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-              <div className="aspect-video sm:aspect-auto bg-secondary overflow-hidden">
-                {getFirstImage(featured) ? (
-                  <img src={getFirstImage(featured).url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="w-full h-full min-h-[180px] flex items-center justify-center bg-primary/5">
-                    <FileText className="w-12 h-12 text-muted-foreground/20" />
-                  </div>
-                )}
-              </div>
-              <div className="p-4 flex flex-col justify-center">
-                <Badge variant="outline" className="text-[9px] capitalize w-fit mb-2">{featured.category}</Badge>
-                <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-3 group-hover:text-primary transition-colors leading-snug mb-2">
-                  {bn ? (featured.title_bn || featured.title) : featured.title}
-                </h3>
-                <p className="text-xs text-muted-foreground line-clamp-3 mb-3 leading-relaxed">
-                  {bn ? (featured.content_bn || featured.content) : featured.content}
-                </p>
-                <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
-                  <Calendar className="w-3 h-3" />
-                  {featured.published_at ? format(new Date(featured.published_at), 'dd/MM/yyyy') : ''}
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Secondary Posts */}
-          {secondary.map((post: any) => {
-            const img = getFirstImage(post);
-            return (
-              <Link key={post.id} to="/posts" className="card-elevated overflow-hidden group">
-                <div className="aspect-video bg-secondary overflow-hidden">
-                  {img ? (
-                    <img src={img.url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+      {/* Scrollable posts area */}
+      <ScrollArea className="h-[540px] pr-1">
+        <div className="space-y-4">
+          {/* Featured Post */}
+          {featured && (
+            <Link to="/posts" className="card-elevated overflow-hidden group block">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+                <div className="aspect-video sm:aspect-auto sm:min-h-[200px] bg-secondary overflow-hidden">
+                  {getFirstImage(featured) ? (
+                    <img src={getFirstImage(featured).url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/5">
-                      <FileText className="w-8 h-8 text-muted-foreground/20" />
+                    <div className="w-full h-full min-h-[180px] flex items-center justify-center bg-primary/5">
+                      <FileText className="w-12 h-12 text-muted-foreground/20" />
                     </div>
                   )}
                 </div>
-                <div className="p-3">
-                  <h3 className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-1">
-                    {bn ? (post.title_bn || post.title) : post.title}
+                <div className="p-4 flex flex-col justify-center">
+                  <Badge variant="outline" className="text-[9px] capitalize w-fit mb-2">{featured.category}</Badge>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-3 group-hover:text-primary transition-colors leading-snug mb-2">
+                    {bn ? (featured.title_bn || featured.title) : featured.title}
                   </h3>
+                  <p className="text-xs text-muted-foreground line-clamp-3 mb-3 leading-relaxed">
+                    {bn ? (featured.content_bn || featured.content) : featured.content}
+                  </p>
                   <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
                     <Calendar className="w-3 h-3" />
-                    {post.published_at ? format(new Date(post.published_at), 'dd/MM/yyyy') : ''}
+                    {featured.published_at ? format(new Date(featured.published_at), 'dd/MM/yyyy') : ''}
                   </div>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+              </div>
+            </Link>
+          )}
 
-      {/* List of remaining posts */}
-      {rest.length > 0 && (
-        <div className="card-elevated">
-          <ScrollArea className="h-[280px]">
-            <div className="divide-y divide-border">
+          {/* Secondary Posts */}
+          {secondary.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {secondary.map((post: any) => {
+                const img = getFirstImage(post);
+                return (
+                  <Link key={post.id} to="/posts" className="card-elevated overflow-hidden group">
+                    <div className="aspect-video bg-secondary overflow-hidden">
+                      {img ? (
+                        <img src={img.url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-primary/5">
+                          <FileText className="w-8 h-8 text-muted-foreground/20" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <h3 className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                        {bn ? (post.title_bn || post.title) : post.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
+                        <Calendar className="w-3 h-3" />
+                        {post.published_at ? format(new Date(post.published_at), 'dd/MM/yyyy') : ''}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {/* List of remaining posts */}
+          {rest.length > 0 && (
+            <div className="card-elevated divide-y divide-border">
               {rest.map((post: any) => {
                 const img = getFirstImage(post);
                 return (
                   <Link key={post.id} to="/posts" className="flex gap-3 p-3 hover:bg-secondary/50 transition-colors group">
                     {img ? (
-                      <div className="w-20 h-16 rounded overflow-hidden shrink-0 bg-secondary">
+                      <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0 bg-secondary">
                         <img src={img.url} alt="" className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-20 h-16 rounded shrink-0 bg-secondary/80 flex items-center justify-center">
+                      <div className="w-20 h-16 rounded-lg shrink-0 bg-secondary/80 flex items-center justify-center">
                         <FileText className="w-5 h-5 text-muted-foreground/30" />
                       </div>
                     )}
@@ -123,9 +125,9 @@ const HomePostsSection = ({ posts, language }: Props) => {
                 );
               })}
             </div>
-          </ScrollArea>
+          )}
         </div>
-      )}
+      </ScrollArea>
 
       {posts.length === 0 && (
         <div className="card-elevated text-center py-16 text-muted-foreground">

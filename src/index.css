@@ -139,6 +139,19 @@
   .islamic-pattern {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 0l30 30-30 30L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
+  .hero-section {
+    background: linear-gradient(135deg, hsl(152 60% 14%), hsl(152 55% 22%), hsl(150 50% 18%));
+  }
+  .hero-pattern {
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M40 0l40 40-40 40L0 40z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+      radial-gradient(ellipse at 30% 20%, hsl(152 55% 30% / 0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, hsl(42 85% 55% / 0.08) 0%, transparent 50%);
+  }
+  .stats-section {
+    background: linear-gradient(135deg, hsl(152 55% 25%), hsl(152 60% 18%));
+    color: white;
+  }
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--sidebar-accent)) transparent;
