@@ -96,6 +96,16 @@ const AdminSalary = () => {
     },
   });
 
+  // Fetch salary formulas from formula builder
+  const { data: salaryFormulas = [] } = useQuery({
+    queryKey: ['salary-formulas'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('formulas').select('*').eq('module', 'salary').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Get setting value helper
   const getSetting = (key: string) => {
     const s = settings.find((st: any) => st.setting_key === key);
@@ -112,40 +122,99 @@ const AdminSalary = () => {
     return { present, absent, late, halfDay, total: records.length };
   };
 
-  // Calculate salary for a staff member
+  // Evaluate a formula expression safely
+  const evaluateFormula = (formulaStr: string, vars: Record<string, number>): number => {
+    try {
+      // Replace variable names with their values
+      let expr = formulaStr;
+      for (const [key, val] of Object.entries(vars)) {
+        expr = expr.replace(new RegExp(`\\b${key}\\b`, 'g'), String(val));
+      }
+      // Safe math evaluation (only numbers, operators, parentheses)
+      if (/^[\d\s+\-*/().]+$/.test(expr)) {
+        const result = new Function(`return (${expr})`)();
+        return isNaN(result) || !isFinite(result) ? 0 : Math.round(result);
+      }
+      return 0;
+    } catch { return 0; }
+  };
+
+  // Get formula by result_field
+  const getFormula = (resultField: string) => {
+    return salaryFormulas.find((f: any) => {
+      const expr = f.expression as any;
+      return expr?.result_field === resultField;
+    });
+  };
+
+  // Calculate salary for a staff member using formula builder
   const calculateSalary = (staffMember: any) => {
     const baseSalary = Number(staffMember.salary) || 0;
-    const stats = getAttendanceStats(staffMember.id);
+    const attStats = getAttendanceStats(staffMember.id);
     const lateDeductionSetting = getSetting('late_deduction_per_day');
-    const lateDeductionPerDay = Number(lateDeductionSetting?.amount) || 50;
+    const defaultLateRate = Number(lateDeductionSetting?.amount) || 50;
 
-    // Working days in month (approximate)
     const year = Number(selectedYear);
     const month = Number(selectedMonth);
     const workingDays = new Date(year, month, 0).getDate();
 
-    const perDaySalary = baseSalary / workingDays;
-    const absenceDeduction = Math.round(stats.absent * perDaySalary);
-    const lateDeduction = stats.late * lateDeductionPerDay;
-    const halfDayDeduction = Math.round(stats.halfDay * (perDaySalary / 2));
+    // Build variables context for formula evaluation
+    const ctx: Record<string, number> = {
+      base_salary: baseSalary,
+      working_days: workingDays,
+      present_days: attStats.present,
+      absent_days: attStats.absent,
+      late_days: attStats.late,
+      half_days: attStats.halfDay,
+      late_rate: defaultLateRate,
+      percentage: 100,
+      bonus: 0, overtime: 0, other_allowance: 0, advance_deduction: 0,
+    };
 
-    const totalDeduction = absenceDeduction + lateDeduction + halfDayDeduction;
-    const netSalary = Math.max(0, baseSalary - totalDeduction);
+    // Apply absence deduction formula
+    const absFormula = getFormula('absence_deduction');
+    if (absFormula) {
+      const expr = (absFormula.expression as any)?.formula;
+      ctx.absence_deduction = evaluateFormula(expr, ctx);
+    } else {
+      ctx.absence_deduction = Math.round(attStats.absent * (baseSalary / workingDays));
+    }
+
+    // Apply late deduction formula
+    const lateFormula = getFormula('late_deduction');
+    if (lateFormula) {
+      const expr = (lateFormula.expression as any)?.formula;
+      ctx.late_deduction = evaluateFormula(expr, ctx);
+    } else {
+      ctx.late_deduction = attStats.late * defaultLateRate;
+    }
+
+    // Half day deduction (fallback)
+    ctx.other_deduction = Math.round(attStats.halfDay * (baseSalary / workingDays / 2));
+
+    // Apply net salary formula
+    const netFormula = getFormula('net_salary');
+    if (netFormula) {
+      const expr = (netFormula.expression as any)?.formula;
+      ctx.net_salary = Math.max(0, evaluateFormula(expr, ctx));
+    } else {
+      ctx.net_salary = Math.max(0, baseSalary - ctx.absence_deduction - ctx.late_deduction - ctx.other_deduction);
+    }
 
     return {
       base_salary: baseSalary,
       working_days: workingDays,
-      present_days: stats.present,
-      absent_days: stats.absent,
-      late_days: stats.late,
-      absence_deduction: absenceDeduction,
-      late_deduction: lateDeduction,
-      other_deduction: halfDayDeduction,
-      bonus: 0,
-      overtime: 0,
-      other_allowance: 0,
-      advance_deduction: 0,
-      net_salary: netSalary,
+      present_days: attStats.present,
+      absent_days: attStats.absent,
+      late_days: attStats.late,
+      absence_deduction: ctx.absence_deduction,
+      late_deduction: ctx.late_deduction,
+      other_deduction: ctx.other_deduction,
+      bonus: ctx.bonus,
+      overtime: ctx.overtime,
+      other_allowance: ctx.other_allowance,
+      advance_deduction: ctx.advance_deduction,
+      net_salary: ctx.net_salary,
     };
   };
 
@@ -182,8 +251,25 @@ const AdminSalary = () => {
   // Update single salary record
   const updateMutation = useMutation({
     mutationFn: async (record: any) => {
-      const netSalary = (record.base_salary || 0) + (record.bonus || 0) + (record.overtime || 0) + (record.other_allowance || 0)
-        - (record.late_deduction || 0) - (record.absence_deduction || 0) - (record.advance_deduction || 0) - (record.other_deduction || 0);
+      const ctx: Record<string, number> = {
+        base_salary: Number(record.base_salary || 0),
+        bonus: Number(record.bonus || 0),
+        overtime: Number(record.overtime || 0),
+        other_allowance: Number(record.other_allowance || 0),
+        late_deduction: Number(record.late_deduction || 0),
+        absence_deduction: Number(record.absence_deduction || 0),
+        advance_deduction: Number(record.advance_deduction || 0),
+        other_deduction: Number(record.other_deduction || 0),
+      };
+      const netFormula = getFormula('net_salary');
+      let netSalary: number;
+      if (netFormula) {
+        const expr = (netFormula.expression as any)?.formula;
+        netSalary = Math.max(0, evaluateFormula(expr, ctx));
+      } else {
+        netSalary = ctx.base_salary + ctx.bonus + ctx.overtime + ctx.other_allowance
+          - ctx.late_deduction - ctx.absence_deduction - ctx.advance_deduction - ctx.other_deduction;
+      }
       const { error } = await supabase.from('salary_records')
         .update({ ...record, net_salary: Math.max(0, netSalary), updated_at: new Date().toISOString() })
         .eq('id', record.id);
