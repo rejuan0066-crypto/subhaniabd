@@ -110,7 +110,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   // Build final menu items with published custom forms injected
   const menuItems: MenuItem[] = baseMenuItems.map(item => {
-    // Find sub_menu forms that belong under this menu item
     const subForms = publishedForms.filter(f => f.publish_to === 'sub_menu' && f.parent_menu === item.path);
     if (subForms.length > 0) {
       const existingChildren = item.children || [];
@@ -127,7 +126,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Add main_menu published forms
   const mainMenuForms = publishedForms.filter(f => f.publish_to === 'main_menu');
   mainMenuForms.forEach(f => {
-    // Insert before Settings (last item)
     const settingsIdx = menuItems.findIndex(m => m.path === '/admin/settings');
     const newItem: MenuItem = {
       path: `/admin/custom/${f.menu_slug}`,
@@ -141,8 +139,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
-    <aside className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:flex h-screen sticky top-0'} flex`}>
+  const renderSidebar = (mobile = false) => (
+    <aside key={mobile ? 'mobile' : 'desktop'} className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:flex h-screen sticky top-0'} flex`}>
       {mobile && (
         <div
           className="flex-1 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200"
@@ -195,7 +193,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       </Link>
                       {(sidebarOpen || mobile) && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); toggleGroup(item.path); }}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleGroup(item.path); }}
                           className="p-1 rounded hover:bg-sidebar-accent shrink-0 ml-auto"
                         >
                           <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isGroupOpen ? 'rotate-180' : ''}`} />
@@ -256,8 +254,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen flex bg-background">
-      <Sidebar />
-      {mobileSidebarOpen && <Sidebar mobile />}
+      {renderSidebar(false)}
+      {mobileSidebarOpen && renderSidebar(true)}
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
