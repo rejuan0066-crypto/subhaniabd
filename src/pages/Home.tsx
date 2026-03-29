@@ -19,10 +19,24 @@ const Home = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('notices')
-        .select('id, title, title_bn, published_at')
+        .select('id, title, title_bn, published_at, category')
         .eq('is_published', true)
         .order('published_at', { ascending: false })
-        .limit(5);
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: posts = [] } = useQuery({
+    queryKey: ['home-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(10);
       if (error) throw error;
       return data;
     },
