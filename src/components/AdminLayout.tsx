@@ -148,23 +148,29 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             return (
               <div key={item.path}>
                 <div className="flex items-center">
-                  <Link
-                    to={item.path}
-                    onClick={() => mobile && setMobileSidebarOpen(false)}
-                    className={`sidebar-item flex-1 ${isActive && !hasChildren ? 'active' : ''} ${isActive && hasChildren ? 'active' : ''}`}
-                    title={!sidebarOpen && !mobile ? item.label : undefined}
-                  >
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
-                    {isActive && !hasChildren && (sidebarOpen || mobile) && <ChevronRight className="w-4 h-4 ml-auto shrink-0" />}
-                  </Link>
-                  {hasChildren && (sidebarOpen || mobile) && (
+                  {hasChildren ? (
                     <button
                       onClick={() => toggleGroup(item.path)}
-                      className="p-1.5 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/60"
+                      className={`sidebar-item flex-1 ${isActive ? 'active' : ''}`}
+                      title={!sidebarOpen && !mobile ? item.label : undefined}
                     >
-                      <ChevronDown className={`w-4 h-4 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`} />
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
+                      {(sidebarOpen || mobile) && (
+                        <ChevronDown className={`w-4 h-4 ml-auto shrink-0 transition-transform ${isGroupOpen ? 'rotate-180' : ''}`} />
+                      )}
                     </button>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => mobile && setMobileSidebarOpen(false)}
+                      className={`sidebar-item flex-1 ${isActive ? 'active' : ''}`}
+                      title={!sidebarOpen && !mobile ? item.label : undefined}
+                    >
+                      <item.icon className="w-5 h-5 shrink-0" />
+                      {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
+                      {isActive && (sidebarOpen || mobile) && <ChevronRight className="w-4 h-4 ml-auto shrink-0" />}
+                    </Link>
                   )}
                 </div>
                 {hasChildren && isGroupOpen && (sidebarOpen || mobile) && (
