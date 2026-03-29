@@ -122,40 +122,99 @@ const AdminSalary = () => {
     return { present, absent, late, halfDay, total: records.length };
   };
 
-  // Calculate salary for a staff member
+  // Evaluate a formula expression safely
+  const evaluateFormula = (formulaStr: string, vars: Record<string, number>): number => {
+    try {
+      // Replace variable names with their values
+      let expr = formulaStr;
+      for (const [key, val] of Object.entries(vars)) {
+        expr = expr.replace(new RegExp(`\\b${key}\\b`, 'g'), String(val));
+      }
+      // Safe math evaluation (only numbers, operators, parentheses)
+      if (/^[\d\s+\-*/().]+$/.test(expr)) {
+        const result = new Function(`return (${expr})`)();
+        return isNaN(result) || !isFinite(result) ? 0 : Math.round(result);
+      }
+      return 0;
+    } catch { return 0; }
+  };
+
+  // Get formula by result_field
+  const getFormula = (resultField: string) => {
+    return salaryFormulas.find((f: any) => {
+      const expr = f.expression as any;
+      return expr?.result_field === resultField;
+    });
+  };
+
+  // Calculate salary for a staff member using formula builder
   const calculateSalary = (staffMember: any) => {
     const baseSalary = Number(staffMember.salary) || 0;
-    const stats = getAttendanceStats(staffMember.id);
+    const attStats = getAttendanceStats(staffMember.id);
     const lateDeductionSetting = getSetting('late_deduction_per_day');
-    const lateDeductionPerDay = Number(lateDeductionSetting?.amount) || 50;
+    const defaultLateRate = Number(lateDeductionSetting?.amount) || 50;
 
-    // Working days in month (approximate)
     const year = Number(selectedYear);
     const month = Number(selectedMonth);
     const workingDays = new Date(year, month, 0).getDate();
 
-    const perDaySalary = baseSalary / workingDays;
-    const absenceDeduction = Math.round(stats.absent * perDaySalary);
-    const lateDeduction = stats.late * lateDeductionPerDay;
-    const halfDayDeduction = Math.round(stats.halfDay * (perDaySalary / 2));
+    // Build variables context for formula evaluation
+    const ctx: Record<string, number> = {
+      base_salary: baseSalary,
+      working_days: workingDays,
+      present_days: attStats.present,
+      absent_days: attStats.absent,
+      late_days: attStats.late,
+      half_days: attStats.halfDay,
+      late_rate: defaultLateRate,
+      percentage: 100,
+      bonus: 0, overtime: 0, other_allowance: 0, advance_deduction: 0,
+    };
 
-    const totalDeduction = absenceDeduction + lateDeduction + halfDayDeduction;
-    const netSalary = Math.max(0, baseSalary - totalDeduction);
+    // Apply absence deduction formula
+    const absFormula = getFormula('absence_deduction');
+    if (absFormula) {
+      const expr = (absFormula.expression as any)?.formula;
+      ctx.absence_deduction = evaluateFormula(expr, ctx);
+    } else {
+      ctx.absence_deduction = Math.round(attStats.absent * (baseSalary / workingDays));
+    }
+
+    // Apply late deduction formula
+    const lateFormula = getFormula('late_deduction');
+    if (lateFormula) {
+      const expr = (lateFormula.expression as any)?.formula;
+      ctx.late_deduction = evaluateFormula(expr, ctx);
+    } else {
+      ctx.late_deduction = attStats.late * defaultLateRate;
+    }
+
+    // Half day deduction (fallback)
+    ctx.other_deduction = Math.round(attStats.halfDay * (baseSalary / workingDays / 2));
+
+    // Apply net salary formula
+    const netFormula = getFormula('net_salary');
+    if (netFormula) {
+      const expr = (netFormula.expression as any)?.formula;
+      ctx.net_salary = Math.max(0, evaluateFormula(expr, ctx));
+    } else {
+      ctx.net_salary = Math.max(0, baseSalary - ctx.absence_deduction - ctx.late_deduction - ctx.other_deduction);
+    }
 
     return {
       base_salary: baseSalary,
       working_days: workingDays,
-      present_days: stats.present,
-      absent_days: stats.absent,
-      late_days: stats.late,
-      absence_deduction: absenceDeduction,
-      late_deduction: lateDeduction,
-      other_deduction: halfDayDeduction,
-      bonus: 0,
-      overtime: 0,
-      other_allowance: 0,
-      advance_deduction: 0,
-      net_salary: netSalary,
+      present_days: attStats.present,
+      absent_days: attStats.absent,
+      late_days: attStats.late,
+      absence_deduction: ctx.absence_deduction,
+      late_deduction: ctx.late_deduction,
+      other_deduction: ctx.other_deduction,
+      bonus: ctx.bonus,
+      overtime: ctx.overtime,
+      other_allowance: ctx.other_allowance,
+      advance_deduction: ctx.advance_deduction,
+      net_salary: ctx.net_salary,
     };
   };
 
