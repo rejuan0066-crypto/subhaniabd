@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePrayerCalendarSettings } from '@/hooks/usePrayerCalendarSettings';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Timer } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 const COUNTRIES = [
   { en: 'Bangladesh', bn: 'বাংলাদেশ', code: 'BD' },
@@ -66,45 +67,50 @@ const formatCountdown = (ms: number, isBn: boolean): string => {
 
 const formatDisplayTime = (timeStr: string, isBn: boolean, timeFormat: '24h' | '12h'): string => {
   if (!timeStr) return '';
-
   const clean = timeStr.replace(/\s*\(.*\)/, '');
   if (timeFormat === '24h') {
     return isBn ? toBanglaNum(clean) : clean;
   }
-
   const [rawHour, rawMinute] = clean.split(':').map(Number);
-  const period = rawHour >= 12 ? (isBn ? 'PM' : 'PM') : (isBn ? 'AM' : 'AM');
+  const period = rawHour >= 12 ? 'PM' : 'AM';
   const hour12 = rawHour % 12 || 12;
   const formatted = `${hour12.toString().padStart(2, '0')}:${rawMinute.toString().padStart(2, '0')} ${period}`;
-
   return isBn ? `${toBanglaNum(formatted.slice(0, 5))} ${period}` : formatted;
 };
 
 const PrayerTimesWidget = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { config } = usePrayerCalendarSettings();
 
-  const [country, setCountry] = useState('BD');
-  const [division, setDivision] = useState('sylhet');
-  const [city, setCity] = useState('Sylhet');
-  const [timeFormat, setTimeFormat] = useState<'24h' | '12h'>('24h');
+  // Use backend defaults, allow user override
+  const [country, setCountry] = useState<string | null>(null);
+  const [division, setDivision] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [timeFormat, setTimeFormat] = useState<'24h' | '12h' | null>(null);
   const [now, setNow] = useState(new Date());
+
+  // Effective values: user override > backend config
+  const effectiveCountry = country ?? config.default_country;
+  const effectiveDivision = division ?? config.default_division;
+  const effectiveCity = city ?? config.default_city;
+  const effectiveTimeFormat = timeFormat ?? config.time_format;
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const selectedCity = country === 'BD' ? city : COUNTRIES.find(c => c.code === country)?.en || 'Dhaka';
-  const selectedCountry = COUNTRIES.find(c => c.code === country)?.en || 'Bangladesh';
+  const selectedCity = effectiveCountry === 'BD' ? effectiveCity : COUNTRIES.find(c => c.code === effectiveCountry)?.en || 'Dhaka';
+  const selectedCountry = COUNTRIES.find(c => c.code === effectiveCountry)?.en || 'Bangladesh';
 
   const { data: prayerData, isLoading } = useQuery({
-    queryKey: ['prayer-times', selectedCity, selectedCountry],
+    queryKey: ['prayer-times', selectedCity, selectedCountry, config.calculation_method],
     queryFn: async () => {
       const today = new Date();
       const dateStr = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
       const res = await fetch(
-        `https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=${encodeURIComponent(selectedCity)}&country=${encodeURIComponent(selectedCountry)}&method=1`
+        `https://api.aladhan.com/v1/timingsByCity/${dateStr}?city=${encodeURIComponent(selectedCity)}&country=${encodeURIComponent(selectedCountry)}&method=${config.calculation_method}`
       );
       if (!res.ok) throw new Error('Failed to fetch prayer times');
       const json = await res.json();
@@ -117,16 +123,13 @@ const PrayerTimesWidget = () => {
   const timings = prayerData?.timings;
   const hijriDate = prayerData?.date?.hijri;
 
-  // Calculate current/next prayer and remaining time
   const getActiveInfo = () => {
     if (!timings) return { activeIndex: -1, nextIndex: -1, activeRemainingMs: 0 };
     const times = PRAYER_ORDER.map(k => {
       const raw = timings[k] || '00:00';
       return parseTime(raw);
     });
-
     const nowMs = now.getTime();
-
     for (let i = PRAYER_ORDER.length - 1; i >= 0; i--) {
       if (nowMs >= times[i].getTime()) {
         const nextIdx = i + 1;
@@ -139,12 +142,13 @@ const PrayerTimesWidget = () => {
         return { activeIndex: i, nextIndex: 0, activeRemainingMs: remaining > 0 ? remaining : 0 };
       }
     }
-
     const remaining = times[0].getTime() - nowMs;
     return { activeIndex: PRAYER_ORDER.length - 1, nextIndex: 0, activeRemainingMs: remaining > 0 ? remaining : 0 };
   };
 
   const { activeIndex, activeRemainingMs } = getActiveInfo();
+
+  if (!config.show_prayer_times) return null;
 
   return (
     <div className="card-elevated rounded-xl overflow-hidden">
@@ -167,7 +171,7 @@ const PrayerTimesWidget = () => {
           <MapPin className="w-3 h-3" />
           <span>{bn ? 'অবস্থান নির্বাচন' : 'Select Location'}</span>
         </div>
-        <Select value={country} onValueChange={(v) => { setCountry(v); if (v !== 'BD') { setDivision(''); setCity(''); } else { setDivision('sylhet'); setCity('Sylhet'); } }}>
+        <Select value={effectiveCountry} onValueChange={(v) => { setCountry(v); if (v !== 'BD') { setDivision(''); setCity(''); } else { setDivision(config.default_division); setCity(config.default_city); } }}>
           <SelectTrigger className="h-7 text-xs">
             <SelectValue />
           </SelectTrigger>
@@ -177,9 +181,9 @@ const PrayerTimesWidget = () => {
             ))}
           </SelectContent>
         </Select>
-        {country === 'BD' && (
+        {effectiveCountry === 'BD' && (
           <div className="grid grid-cols-2 gap-2">
-            <Select value={division} onValueChange={(v) => { setDivision(v); setCity(BD_DIVISIONS[v].cities[0].en); }}>
+            <Select value={effectiveDivision} onValueChange={(v) => { setDivision(v); setCity(BD_DIVISIONS[v].cities[0].en); }}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder={bn ? 'বিভাগ' : 'Division'} /></SelectTrigger>
               <SelectContent>
                 {Object.entries(BD_DIVISIONS).map(([k, v]) => (
@@ -187,17 +191,17 @@ const PrayerTimesWidget = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={city} onValueChange={setCity}>
+            <Select value={effectiveCity} onValueChange={v => setCity(v)}>
               <SelectTrigger className="h-7 text-xs"><SelectValue placeholder={bn ? 'জেলা' : 'District'} /></SelectTrigger>
               <SelectContent>
-                {division && BD_DIVISIONS[division]?.cities.map(c => (
+                {effectiveDivision && BD_DIVISIONS[effectiveDivision]?.cities.map(c => (
                   <SelectItem key={c.en} value={c.en} className="text-xs">{bn ? c.bn : c.en}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         )}
-        <Select value={timeFormat} onValueChange={(value: '24h' | '12h') => setTimeFormat(value)}>
+        <Select value={effectiveTimeFormat} onValueChange={(value: '24h' | '12h') => setTimeFormat(value)}>
           <SelectTrigger className="h-7 text-xs">
             <SelectValue placeholder={bn ? 'টাইম ফরমেট' : 'Time format'} />
           </SelectTrigger>
@@ -249,10 +253,10 @@ const PrayerTimesWidget = () => {
                       </span>
                     </div>
                     <span className={`text-[11px] font-mono text-center w-20 ${isActive ? 'font-bold text-primary' : 'text-foreground'}`}>
-                      {formatDisplayTime(startTime, bn, timeFormat)}
+                      {formatDisplayTime(startTime, bn, effectiveTimeFormat)}
                     </span>
                     <span className="text-[11px] font-mono text-center w-20 text-muted-foreground">
-                      {endTime ? formatDisplayTime(endTime, bn, timeFormat) : '—'}
+                      {endTime ? formatDisplayTime(endTime, bn, effectiveTimeFormat) : '—'}
                     </span>
                   </div>
                 );
