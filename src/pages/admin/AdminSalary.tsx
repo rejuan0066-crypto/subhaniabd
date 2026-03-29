@@ -96,6 +96,16 @@ const AdminSalary = () => {
     },
   });
 
+  // Fetch salary formulas from formula builder
+  const { data: salaryFormulas = [] } = useQuery({
+    queryKey: ['salary-formulas'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('formulas').select('*').eq('module', 'salary').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Get setting value helper
   const getSetting = (key: string) => {
     const s = settings.find((st: any) => st.setting_key === key);
