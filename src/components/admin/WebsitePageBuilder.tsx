@@ -673,6 +673,7 @@ const WebsitePageBuilder = ({ form, setForm, language, saving, onSave }: Props) 
 
         {/* CONTENT */}
         <TabsContent value="content" className="mt-3">
+          {renderSectionLabelEditor()}
           {renderContentEditor()}
         </TabsContent>
       </Tabs>
