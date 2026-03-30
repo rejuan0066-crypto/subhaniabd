@@ -201,11 +201,13 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
     teachersList: false,
     studentInfo: false,
     latestNotice: true,
+    latestPosts: true,
     admissionButtons: true,
     gallery: true,
     donation: false,
     feePayment: false,
     stats: true,
+    prayerCalendar: true,
   },
   divisions: [
     { name: 'হিফয বিভাগ', nameEn: 'Hifz Division', icon: '📖' },
