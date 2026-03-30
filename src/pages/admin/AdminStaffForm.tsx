@@ -135,6 +135,13 @@ const AdminStaffForm = () => {
   const [otherSignName, setOtherSignName] = useState('');
   const [otherSignPosition, setOtherSignPosition] = useState('');
 
+  // Approver fields
+  const [approverName, setApproverName] = useState('');
+  const [approverPosition, setApproverPosition] = useState('');
+  const [approverSignatureUrl, setApproverSignatureUrl] = useState('');
+  const [approverDate, setApproverDate] = useState('');
+  const approverSigRef = useRef<HTMLInputElement>(null);
+
   const designations = [
     { value: 'head_teacher', bn: 'প্রধান শিক্ষক', en: 'Head Teacher' },
     { value: 'asst_head_teacher', bn: 'সহকারী প্রধান শিক্ষক', en: 'Asst. Head Teacher' },
