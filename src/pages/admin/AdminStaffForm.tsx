@@ -8,12 +8,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
 import PhotoUpload from '@/components/PhotoUpload';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Plus, AlertCircle, CheckCircle, Loader2, Upload, Trash2, Eye, Printer, Download, FileText, X, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useValidationRules } from '@/hooks/useValidationRules';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -52,10 +52,13 @@ const AdminStaffForm = () => {
   const bn = language === 'bn';
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { id: editId } = useParams<{ id: string }>();
+  const isEditMode = !!editId;
   const { validate, validateAll } = useValidationRules('staff');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const printRef = useRef<HTMLDivElement>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const { data: institution } = useQuery({
     queryKey: ['institution'],
@@ -64,6 +67,18 @@ const AdminStaffForm = () => {
       return data;
     },
   });
+
+  // Load existing staff data for edit mode
+  const { data: existingStaff } = useQuery({
+    queryKey: ['staff', editId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('staff').select('*').eq('id', editId!).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: isEditMode,
+  });
+
 
   // Section 1: Employee
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -158,6 +173,78 @@ const AdminStaffForm = () => {
     { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
     { value: 'other', bn: 'অন্যান্য', en: 'Other' },
   ];
+  // Populate form fields when editing
+  useEffect(() => {
+    if (!isEditMode || !existingStaff || dataLoaded) return;
+    const sd = (existingStaff.staff_data as any) || {};
+    setFirstName(sd.first_name || existingStaff.name_bn?.split(' ')[0] || '');
+    setLastName(sd.last_name || existingStaff.name_bn?.split(' ').slice(1).join(' ') || '');
+    setMobile(existingStaff.phone?.replace(/^\+\d{1,3}/, '') || '');
+    setMobileCode(sd.mobile_code || '+880');
+    setEmploymentType(existingStaff.employment_type || '');
+    const desigMatch = designations.find(d => d.bn === existingStaff.designation || d.en === existingStaff.designation);
+    setDesignation(desigMatch?.value || existingStaff.designation || '');
+    setResidenceType(existingStaff.residence_type || '');
+    setDob(existingStaff.date_of_birth || '');
+    setReligion(existingStaff.religion || '');
+    setNid(existingStaff.nid || '');
+    setEducation(existingStaff.education || '');
+    setExperience(existingStaff.experience || '');
+    setPrevInstitute(existingStaff.previous_institute || '');
+    setSalary(existingStaff.salary?.toString() || '');
+    setPhotoUrl(existingStaff.photo_url || null);
+    if (sd.permanent_address) setPermanentAddr(sd.permanent_address);
+    if (sd.present_address) setPresentAddr(sd.present_address);
+    if (sd.parents) {
+      const p = sd.parents;
+      setFatherName(p.father?.name || '');
+      setFatherMobile(p.father?.mobile || '');
+      setFatherMobileCode(p.father?.mobile_code || '+880');
+      setFatherNid(p.father?.nid || '');
+      setFatherOccupation(p.father?.occupation || '');
+      setMotherName(p.mother?.name || '');
+      setMotherMobile(p.mother?.mobile || '');
+      setMotherMobileCode(p.mother?.mobile_code || '+880');
+      setMotherNid(p.mother?.nid || '');
+      setMotherOccupation(p.mother?.occupation || '');
+      if (p.permanent_address) setParentPermAddr(p.permanent_address);
+      if (p.present_address) setParentPresAddr(p.present_address);
+    }
+    if (sd.guardian) {
+      const g = sd.guardian;
+      setGuardianType(g.type || '');
+      setGuardianName(g.name || '');
+      setGuardianRelation(g.relation || '');
+      setGuardianMobile(g.mobile || '');
+      setGuardianMobileCode(g.mobile_code || '+880');
+      setGuardianNid(g.nid || '');
+      if (g.permanent_address) setGuardianPermAddr(g.permanent_address);
+      if (g.present_address) setGuardianPresAddr(g.present_address);
+    }
+    if (sd.identifier) {
+      const ii = sd.identifier;
+      setIdentifierName(ii.name || '');
+      setIdentifierRelation(ii.relation || '');
+      setIdentifierMobile(ii.mobile || '');
+      setIdentifierMobileCode(ii.mobile_code || '+880');
+      setIdentifierNid(ii.nid || '');
+      if (ii.address) setIdentifierAddr(ii.address);
+    }
+    if (sd.documents) setDocuments(sd.documents.map((d: any) => ({ ...d, id: d.id || crypto.randomUUID() })));
+    if (sd.signatures) {
+      setPrincipalName(sd.signatures.principal?.name || '');
+      setPrincipalPosition(sd.signatures.principal?.position || (bn ? 'অধ্যক্ষ' : 'Principal'));
+      setOtherSignName(sd.signatures.other?.name || '');
+      setOtherSignPosition(sd.signatures.other?.position || '');
+    }
+    if (sd.approver) {
+      setApproverName(sd.approver.name || '');
+      setApproverPosition(sd.approver.position || '');
+      setApproverSignatureUrl(sd.approver.signature_url || '');
+      setApproverDate(sd.approver.date || '');
+    }
+    setDataLoaded(true);
+  }, [isEditMode, existingStaff, dataLoaded]);
 
   const validateNid = (val: string, setter: (v: string) => void, errorSetter?: (v: string) => void) => {
     const cleaned = val.replace(/\D/g, '');
@@ -227,7 +314,7 @@ const AdminStaffForm = () => {
   };
 
   // Submit
-  const addMutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async () => {
       const fullName = `${firstName} ${lastName}`.trim();
       const desigLabel = designations.find(d => d.value === designation)?.[bn ? 'bn' : 'en'] || designation;
@@ -281,7 +368,7 @@ const AdminStaffForm = () => {
         },
       };
 
-      const { error } = await supabase.from('staff').insert({
+      const record = {
         name_bn: fullName,
         name_en: fullName,
         designation: desigLabel,
@@ -289,7 +376,6 @@ const AdminStaffForm = () => {
         department: designation?.includes('teacher') ? 'শিক্ষা বিভাগ' : 'প্রশাসন',
         address: formatAddress(permanentAddr) || null,
         salary: salary ? parseFloat(salary) : null,
-        joining_date: new Date().toISOString().split('T')[0],
         photo_url: photoUrl || null,
         date_of_birth: dob || null,
         religion: religion === 'other' ? customReligion : religion || null,
@@ -300,12 +386,22 @@ const AdminStaffForm = () => {
         experience: experience || null,
         previous_institute: prevInstitute || null,
         staff_data: staffData as any,
-      });
-      if (error) throw error;
+      };
+
+      if (isEditMode && editId) {
+        const { error } = await supabase.from('staff').update(record).eq('id', editId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('staff').insert({
+          ...record,
+          joining_date: new Date().toISOString().split('T')[0],
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success(bn ? 'কর্মী/শিক্ষক সফলভাবে যোগ হয়েছে' : 'Staff/Teacher added successfully');
+      toast.success(bn ? (isEditMode ? 'কর্মী/শিক্ষক সফলভাবে আপডেট হয়েছে' : 'কর্মী/শিক্ষক সফলভাবে যোগ হয়েছে') : (isEditMode ? 'Staff/Teacher updated successfully' : 'Staff/Teacher added successfully'));
       navigate('/admin/staff');
     },
     onError: (e: any) => toast.error(e.message || 'Error saving staff'),
@@ -354,7 +450,7 @@ const AdminStaffForm = () => {
       toast.error(Object.values(errors)[0]);
       return;
     }
-    addMutation.mutate();
+    saveMutation.mutate();
   };
 
   const handleApproverSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -615,7 +711,7 @@ const AdminStaffForm = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-display font-bold text-foreground">
-            {bn ? 'নতুন কর্মী/শিক্ষক যোগ করুন' : 'Add New Staff/Teacher'}
+            {bn ? (isEditMode ? 'কর্মী/শিক্ষক সম্পাদনা' : 'নতুন কর্মী/শিক্ষক যোগ করুন') : (isEditMode ? 'Edit Staff/Teacher' : 'Add New Staff/Teacher')}
           </h1>
           <Button variant="outline" onClick={() => navigate('/admin/staff')}>{bn ? 'ফিরে যান' : 'Back'}</Button>
         </div>
@@ -994,9 +1090,9 @@ const AdminStaffForm = () => {
           </div>
 
           <div className="flex gap-3">
-            <Button type="submit" className="btn-primary-gradient flex-1 text-lg py-6" disabled={addMutation.isPending}>
-              {addMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
-              {bn ? 'কর্মী/শিক্ষক যোগ করুন' : 'Add Staff/Teacher'}
+            <Button type="submit" className="btn-primary-gradient flex-1 text-lg py-6" disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
+              {bn ? (isEditMode ? 'আপডেট করুন' : 'কর্মী/শিক্ষক যোগ করুন') : (isEditMode ? 'Update' : 'Add Staff/Teacher')}
             </Button>
             <Button type="button" variant="outline" className="py-6 gap-2" onClick={openPrintPreview}>
               <Eye className="w-5 h-5" /> {bn ? 'প্রিভিউ' : 'Preview'}

@@ -2,7 +2,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -102,8 +102,9 @@ const AdminStaff = () => {
                           {s.status === 'active' ? (language === 'bn' ? 'সক্রিয়' : 'Active') : (language === 'bn' ? 'নিষ্ক্রিয়' : 'Inactive')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                      <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
+                        <button onClick={() => navigate(`/admin/staff/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={language === 'bn' ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                        <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={language === 'bn' ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
                       </td>
                     </tr>
                   ))}
