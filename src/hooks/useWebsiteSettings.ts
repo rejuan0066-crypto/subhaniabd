@@ -102,11 +102,13 @@ export interface WebsiteSettings {
     teachersList: boolean;
     studentInfo: boolean;
     latestNotice: boolean;
+    latestPosts: boolean;
     admissionButtons: boolean;
     gallery: boolean;
     donation: boolean;
     feePayment: boolean;
     stats: boolean;
+    prayerCalendar: boolean;
   };
   divisions: Array<{ name: string; nameEn: string; icon: string }>;
 }
