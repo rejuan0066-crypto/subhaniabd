@@ -962,7 +962,6 @@ const AdminStaffForm = () => {
 };
 
 export default AdminStaffForm;
-              <div className="field-row"><div className="field"><label>{bn ? 'নাম' : 'Name'}:</label> {firstName} {lastName}</div></div>
               <div className="field-row">
                 <div className="field"><label>{bn ? 'বেতন' : 'Salary'}:</label> ৳{salary}</div>
                 <div className="field"><label>{bn ? 'মোবাইল' : 'Mobile'}:</label> {mobileCode}{mobile}</div>
