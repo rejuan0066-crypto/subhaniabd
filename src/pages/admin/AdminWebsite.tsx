@@ -539,23 +539,38 @@ const AdminWebsite = () => {
                   <Button variant="outline" size="sm" onClick={() => setPublicMenu(prev => [...prev, {
                     id: `custom-${Date.now()}`,
                     path: '/',
-                    label_bn: '',
-                    label_en: '',
+                    label_bn: 'নতুন মেনু',
+                    label_en: 'New Menu',
                     icon: '',
                     visible: true,
                     sort_order: prev.length,
                   }])}>
-                    <Plus className="w-4 h-4 mr-1" /> {language === 'bn' ? 'নতুন মেনু' : 'Add Menu'}
+                    <Plus className="w-4 h-4 mr-1" /> {language === 'bn' ? 'নতুন মেনু যোগ' : 'Add Menu Item'}
                   </Button>
+                </div>
+
+                {/* Live Menu Preview */}
+                <div className="p-3 rounded-lg border bg-secondary/30">
+                  <Label className="text-xs text-muted-foreground mb-2 block">{language === 'bn' ? 'লাইভ মেনু প্রিভিউ' : 'Live Menu Preview'}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {publicMenu.filter(m => m.visible).map(item => (
+                      <span key={item.id} className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+                        {language === 'bn' ? item.label_bn : item.label_en}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="space-y-3">
                   {publicMenu.map((item, index) => (
                     <div key={item.id} className={`p-4 rounded-lg border bg-card space-y-3 ${!item.visible ? 'opacity-50' : ''}`}>
                       <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <div className="text-sm font-semibold text-foreground">{language === 'bn' ? item.label_bn || `মেনু ${index + 1}` : item.label_en || `Menu ${index + 1}`}</div>
-                          <div className="text-xs text-muted-foreground">{item.path}</div>
+                        <div className="flex items-center gap-2">
+                          <Menu className="w-4 h-4 text-muted-foreground cursor-grab" />
+                          <div>
+                            <div className="text-sm font-semibold text-foreground">{language === 'bn' ? item.label_bn || `মেনু ${index + 1}` : item.label_en || `Menu ${index + 1}`}</div>
+                            <div className="text-xs text-muted-foreground">{item.path}</div>
+                          </div>
                         </div>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, visible: !m.visible } : m))}>
@@ -581,18 +596,41 @@ const AdminWebsite = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div>
-                          <Label>{language === 'bn' ? 'নাম (বাংলা)' : 'Label (BN)'}</Label>
-                          <Input className="bg-background mt-1" value={item.label_bn} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, label_bn: e.target.value } : m))} />
+                          <Label className="text-xs">{language === 'bn' ? 'নাম (বাংলা)' : 'Label (BN)'}</Label>
+                          <Input className="bg-background mt-1 h-9" value={item.label_bn} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, label_bn: e.target.value } : m))} />
                         </div>
                         <div>
-                          <Label>{language === 'bn' ? 'নাম (ইংরেজি)' : 'Label (EN)'}</Label>
-                          <Input className="bg-background mt-1" value={item.label_en} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, label_en: e.target.value } : m))} />
+                          <Label className="text-xs">{language === 'bn' ? 'নাম (ইংরেজি)' : 'Label (EN)'}</Label>
+                          <Input className="bg-background mt-1 h-9" value={item.label_en} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, label_en: e.target.value } : m))} />
                         </div>
                         <div>
-                          <Label>{language === 'bn' ? 'লিংক/পাথ' : 'Path'}</Label>
-                          <Input className="bg-background mt-1" value={item.path} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, path: e.target.value } : m))} placeholder="/about" />
+                          <Label className="text-xs">{language === 'bn' ? 'পেইজ লিংক পিকার' : 'Link Picker'}</Label>
+                          <Select value={AVAILABLE_PAGES.find(p => p.path === item.path) ? item.path : 'custom'} onValueChange={v => {
+                            if (v === 'custom') return;
+                            const page = AVAILABLE_PAGES.find(p => p.path === v);
+                            setPublicMenu(prev => prev.map((m, i) => i === index ? {
+                              ...m,
+                              path: v,
+                              label_bn: m.label_bn || page?.label_bn || '',
+                              label_en: m.label_en || page?.label_en || '',
+                            } : m));
+                          }}>
+                            <SelectTrigger className="mt-1 bg-background h-9"><SelectValue placeholder={language === 'bn' ? 'পেইজ নির্বাচন' : 'Select page'} /></SelectTrigger>
+                            <SelectContent>
+                              {AVAILABLE_PAGES.map(page => (
+                                <SelectItem key={page.path} value={page.path}>
+                                  {language === 'bn' ? page.label_bn : page.label_en} ({page.path})
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="custom">{language === 'bn' ? 'কাস্টম লিংক' : 'Custom Link'}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-xs">{language === 'bn' ? 'কাস্টম পাথ' : 'Custom Path'}</Label>
+                          <Input className="bg-background mt-1 h-9" value={item.path} onChange={e => setPublicMenu(prev => prev.map((m, i) => i === index ? { ...m, path: e.target.value } : m))} placeholder="/custom-page" />
                         </div>
                       </div>
                     </div>
