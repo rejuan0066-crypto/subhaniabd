@@ -51,8 +51,8 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'backup', path: '/admin/backup', label_bn: 'ব্যাকআপ', label_en: 'Backup', icon: 'HardDrive', visible: true, sort_order: 21 },
   { id: 'guardian-notify', path: '/admin/guardian-notify', label_bn: 'অভিভাবক নোটিফিকেশন', label_en: 'Guardian Notify', icon: 'MessageSquare', visible: true, sort_order: 22 },
   { id: 'prayer-calendar', path: '/admin/prayer-calendar', label_bn: 'নামাজ ও ক্যালেন্ডার', label_en: 'Prayer & Calendar', icon: 'Clock', visible: true, sort_order: 23 },
-  { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 23 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 24 },
+  { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 24 },
+  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 25 },
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [
