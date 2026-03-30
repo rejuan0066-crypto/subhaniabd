@@ -86,6 +86,7 @@ const App = () => (
               <Route path="/admin/students" element={<ProtectedRoute><ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard></ProtectedRoute>} />
               <Route path="/admin/staff" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaff /></ModuleGuard></ProtectedRoute>} />
               <Route path="/admin/staff/add" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard></ProtectedRoute>} />
+              <Route path="/admin/staff/edit/:id" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard></ProtectedRoute>} />
               <Route path="/admin/divisions" element={<ProtectedRoute><ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard></ProtectedRoute>} />
               <Route path="/admin/subjects" element={<ProtectedRoute><ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard></ProtectedRoute>} />
               <Route path="/admin/results" element={<ProtectedRoute><ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard></ProtectedRoute>} />
