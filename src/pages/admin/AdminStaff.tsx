@@ -15,7 +15,7 @@ const AdminStaff = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { data: staffList = [], isLoading } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
