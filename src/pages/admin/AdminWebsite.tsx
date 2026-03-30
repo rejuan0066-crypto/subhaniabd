@@ -237,7 +237,7 @@ const AdminWebsite = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-5xl">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
             <Globe className="w-6 h-6 text-primary" />
