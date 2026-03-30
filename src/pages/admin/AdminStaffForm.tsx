@@ -405,20 +405,57 @@ const AdminStaffForm = () => {
   const religionLabel = religion === 'other' ? customReligion : RELIGIONS.find(r => r.value === religion)?.[bn ? 'bn' : 'en'] || '';
   const todayDate = new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB');
 
+  // Edit mode overrides for print preview
+  const [editMode, setEditMode] = useState(false);
+  const [editInstitutionName, setEditInstitutionName] = useState('');
+  const [editInstitutionNameEn, setEditInstitutionNameEn] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editFormTitle, setEditFormTitle] = useState('');
+  const [editPrincipalName, setEditPrincipalName] = useState('');
+  const [editPrincipalPosition, setEditPrincipalPosition] = useState('');
+  const [editOtherSignName, setEditOtherSignName] = useState('');
+  const [editOtherSignPosition, setEditOtherSignPosition] = useState('');
+  const [editNote, setEditNote] = useState('');
+
+  // Initialize edit values when preview opens
+  const openPrintPreview = () => {
+    setEditInstitutionName(institution?.name || '');
+    setEditInstitutionNameEn(institution?.name_en || '');
+    setEditAddress(institution?.address || '');
+    setEditFormTitle(bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form');
+    setEditPrincipalName(principalName);
+    setEditPrincipalPosition(principalPosition);
+    setEditOtherSignName(otherSignName);
+    setEditOtherSignPosition(otherSignPosition);
+    setEditNote('');
+    setEditMode(false);
+    setShowPrintPreview(true);
+  };
+
+  // Use edit overrides or originals
+  const pInstName = editMode ? editInstitutionName : (institution?.name || '');
+  const pInstNameEn = editMode ? editInstitutionNameEn : (institution?.name_en || '');
+  const pInstAddr = editMode ? editAddress : (institution?.address || '');
+  const pFormTitle = editMode ? editFormTitle : (bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form');
+  const pPrincipalName = editMode ? editPrincipalName : principalName;
+  const pPrincipalPosition = editMode ? editPrincipalPosition : principalPosition;
+  const pOtherSignName = editMode ? editOtherSignName : otherSignName;
+  const pOtherSignPosition = editMode ? editOtherSignPosition : otherSignPosition;
+
   const PrintableForm = () => (
     <div>
       <div className="form-header" style={{ position: 'relative' }}>
         {institution?.logo_url && <img src={institution.logo_url} alt="" className="logo" style={{ position: 'absolute', left: 0, top: 0, width: 60, height: 60 }} />}
-        <h1>{institution?.name || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
-        {institution?.name_en && <h2>{institution.name_en}</h2>}
-        {institution?.address && <p>{institution.address}</p>}
+        <h1>{pInstName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
+        {pInstNameEn && <h2>{pInstNameEn}</h2>}
+        {pInstAddr && <p>{pInstAddr}</p>}
         {(institution?.phone || institution?.email) && <p>{[institution?.phone, institution?.email].filter(Boolean).join(' | ')}</p>}
         <div className="photo-area">
           {photoUrl ? <img src={photoUrl} alt="Photo" /> : <div className="placeholder">{bn ? 'ছবি' : 'Photo'}<br/>Passport Size</div>}
         </div>
       </div>
 
-      <div className="form-title">{bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form'}</div>
+      <div className="form-title">{pFormTitle}</div>
 
       <div className="section">
         <div className="section-title">{bn ? '১. ব্যক্তিগত তথ্য' : '1. Employee Details'}</div>
@@ -484,25 +521,32 @@ const AdminStaffForm = () => {
         </div>
       )}
 
+      {editNote && (
+        <div className="section">
+          <div className="section-title">{bn ? 'অতিরিক্ত নোট' : 'Additional Note'}</div>
+          <p style={{ padding: '5px 10px', fontSize: '10pt', border: '1px solid #ccc' }}>{editNote}</p>
+        </div>
+      )}
+
       <div className="signatures">
         <div className="sig-box">
           <div className="sig-line">
             <div className="sig-name">{bn ? 'আবেদনকারীর স্বাক্ষর' : "Applicant's Signature"}</div>
           </div>
         </div>
-        {otherSignName && (
+        {pOtherSignName && (
           <div className="sig-box">
             <div className="sig-line">
-              <div className="sig-name">{otherSignName}</div>
-              <div className="sig-position">{otherSignPosition}</div>
+              <div className="sig-name">{pOtherSignName}</div>
+              <div className="sig-position">{pOtherSignPosition}</div>
             </div>
           </div>
         )}
-        {principalName && (
+        {pPrincipalName && (
           <div className="sig-box">
             <div className="sig-line">
-              <div className="sig-name">{principalName}</div>
-              <div className="sig-position">{principalPosition}</div>
+              <div className="sig-name">{pPrincipalName}</div>
+              <div className="sig-position">{pPrincipalPosition}</div>
             </div>
           </div>
         )}
