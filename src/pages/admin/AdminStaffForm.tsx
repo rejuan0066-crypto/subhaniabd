@@ -357,7 +357,19 @@ const AdminStaffForm = () => {
     addMutation.mutate();
   };
 
-  const handlePrint = () => {
+  const handleApproverSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 300 * 1024) { toast.error(bn ? 'ফাইল সাইজ ৩০০KB এর বেশি' : 'File size exceeds 300KB'); return; }
+    const ext = file.name.split('.').pop();
+    const path = `approver-signatures/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('photos').upload(path, file);
+    if (error) { toast.error(bn ? 'আপলোড ব্যর্থ' : 'Upload failed'); return; }
+    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+    setApproverSignatureUrl(urlData.publicUrl);
+    toast.success(bn ? 'স্বাক্ষর আপলোড হয়েছে' : 'Signature uploaded');
+  };
+
     const content = printRef.current;
     if (!content) return;
     const printWindow = window.open('', '_blank', 'width=800,height=900');
