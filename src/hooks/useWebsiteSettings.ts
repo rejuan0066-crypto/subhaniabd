@@ -102,11 +102,13 @@ export interface WebsiteSettings {
     teachersList: boolean;
     studentInfo: boolean;
     latestNotice: boolean;
+    latestPosts: boolean;
     admissionButtons: boolean;
     gallery: boolean;
     donation: boolean;
     feePayment: boolean;
     stats: boolean;
+    prayerCalendar: boolean;
   };
   divisions: Array<{ name: string; nameEn: string; icon: string }>;
 }
@@ -199,11 +201,13 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
     teachersList: false,
     studentInfo: false,
     latestNotice: true,
+    latestPosts: true,
     admissionButtons: true,
     gallery: true,
     donation: false,
     feePayment: false,
     stats: true,
+    prayerCalendar: true,
   },
   divisions: [
     { name: 'হিফয বিভাগ', nameEn: 'Hifz Division', icon: '📖' },

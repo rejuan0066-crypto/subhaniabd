@@ -201,10 +201,12 @@ const AdminWebsite = () => {
     { key: 'teachersList', bn: 'শিক্ষক তালিকা', en: 'Teachers List' },
     { key: 'studentInfo', bn: 'ছাত্র তথ্য', en: 'Student Info' },
     { key: 'latestNotice', bn: 'সর্বশেষ নোটিশ', en: 'Latest Notices' },
+    { key: 'latestPosts', bn: 'সর্বশেষ পোস্ট/সংবাদ', en: 'Latest Posts/News' },
     { key: 'admissionButtons', bn: 'ভর্তি বাটন', en: 'Admission Buttons' },
     { key: 'gallery', bn: 'গ্যালারি', en: 'Gallery' },
     { key: 'donation', bn: 'দান সেকশন', en: 'Donation Section' },
     { key: 'feePayment', bn: 'ফি পেমেন্ট', en: 'Fee Payment' },
+    { key: 'prayerCalendar', bn: 'নামাজ ও ক্যালেন্ডার', en: 'Prayer & Calendar' },
   ];
 
   const colorInput = (label: string, value: string, onChange: (v: string) => void) => (
