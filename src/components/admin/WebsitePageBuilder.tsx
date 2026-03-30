@@ -97,6 +97,60 @@ const WebsitePageBuilder = ({ form, setForm, language, saving, onSave }: Props) 
     });
   };
 
+  const startEditLabel = (key: string) => {
+    const section = sectionOrder.find(s => s.key === key);
+    if (!section) return;
+    setEditingLabel(key);
+    setEditLabelBn(section.label_bn);
+    setEditLabelEn(section.label_en);
+  };
+
+  const saveLabel = () => {
+    if (!editingLabel) return;
+    setForm(prev => {
+      if (!prev) return prev;
+      const newOrder = [...(prev.section_order || ALL_SECTION_CONFIGS)];
+      const idx = newOrder.findIndex(s => s.key === editingLabel);
+      if (idx === -1) return prev;
+      newOrder[idx] = { ...newOrder[idx], label_bn: editLabelBn, label_en: editLabelEn };
+      return { ...prev, section_order: newOrder };
+    });
+    setEditingLabel(null);
+  };
+
+  const addCustomSection = () => {
+    if (!newSectionBn.trim() && !newSectionEn.trim()) return;
+    const key = `custom_${Date.now()}` as HomeSectionKey;
+    const newSection: HomeSectionConfig = {
+      key,
+      visible: true,
+      label_bn: newSectionBn || newSectionEn,
+      label_en: newSectionEn || newSectionBn,
+      icon: newSectionIcon,
+    };
+    setForm(prev => {
+      if (!prev) return prev;
+      return { ...prev, section_order: [...(prev.section_order || ALL_SECTION_CONFIGS), newSection] };
+    });
+    setNewSectionBn('');
+    setNewSectionEn('');
+    setNewSectionIcon('📄');
+    setShowAddSection(false);
+  };
+
+  const removeSection = (key: string) => {
+    setForm(prev => {
+      if (!prev) return prev;
+      const newOrder = (prev.section_order || ALL_SECTION_CONFIGS).filter(s => s.key !== key);
+      const newSections = { ...prev.sections };
+      if (key in newSections) {
+        (newSections as any)[key] = false;
+      }
+      return { ...prev, section_order: newOrder, sections: newSections };
+    });
+    if (selectedSection === key) setSelectedSection(null);
+  };
+
   const selectedConfig = sectionOrder.find(s => s.key === selectedSection);
   const selectedStyle = selectedSection ? getStyle(selectedSection) : null;
 
