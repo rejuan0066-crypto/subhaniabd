@@ -9,9 +9,7 @@ interface Props {
 
 const HomeGallery = ({ galleryItems, language }: Props) => {
   const bn = language === 'bn';
-  const items = galleryItems.filter(g => g.image_url).slice(0, 8);
-
-  if (items.length === 0) return null;
+  const items = galleryItems.slice(0, 8);
 
   return (
     <section className="py-10">
