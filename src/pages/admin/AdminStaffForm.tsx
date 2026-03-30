@@ -926,17 +926,66 @@ const AdminStaffForm = () => {
 
       {/* Print Preview Dialog */}
       <Dialog open={showPrintPreview} onOpenChange={setShowPrintPreview}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>{bn ? 'ফরম প্রিভিউ' : 'Form Preview'}</span>
               <div className="flex gap-2">
+                <Button variant={editMode ? "default" : "outline"} size="sm" className="gap-1" onClick={() => setEditMode(!editMode)}>
+                  <FileText className="w-4 h-4" /> {editMode ? (bn ? 'এডিট বন্ধ' : 'Close Edit') : (bn ? 'এডিট মোড' : 'Edit Mode')}
+                </Button>
                 <Button variant="outline" size="sm" className="gap-1" onClick={handlePrint}>
                   <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট' : 'Print'}
                 </Button>
               </div>
             </DialogTitle>
           </DialogHeader>
+
+          {/* Edit Mode Panel */}
+          {editMode && (
+            <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-4">
+              <p className="text-xs text-muted-foreground italic">{bn ? '* এই পরিবর্তনগুলো শুধুমাত্র এই প্রিন্টের জন্য, ডাটাবেসে সেভ হবে না' : '* These changes are temporary, only for this print'}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রতিষ্ঠানের নাম (বাংলা)' : 'Institution Name'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editInstitutionName} onChange={e => setEditInstitutionName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রতিষ্ঠানের নাম (ইংরেজি)' : 'Institution Name (English)'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editInstitutionNameEn} onChange={e => setEditInstitutionNameEn(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'ঠিকানা' : 'Address'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editAddress} onChange={e => setEditAddress(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'ফরমের শিরোনাম' : 'Form Title'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editFormTitle} onChange={e => setEditFormTitle(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রিন্সিপালের নাম' : "Principal's Name"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editPrincipalName} onChange={e => setEditPrincipalName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রিন্সিপালের পদবী' : "Principal's Position"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editPrincipalPosition} onChange={e => setEditPrincipalPosition(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'অন্য স্বাক্ষরকারীর নাম' : "Other Signatory Name"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editOtherSignName} onChange={e => setEditOtherSignName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'অন্য স্বাক্ষরকারীর পদবী' : "Other Signatory Position"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editOtherSignPosition} onChange={e => setEditOtherSignPosition(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'অতিরিক্ত নোট (ঐচ্ছিক)' : 'Additional Note (optional)'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editNote} onChange={e => setEditNote(e.target.value)} placeholder={bn ? 'প্রিন্টে নোট যোগ করুন...' : 'Add a note to print...'} />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="border border-border rounded-lg bg-white text-black p-8" style={{ fontFamily: "'Noto Sans Bengali', sans-serif", fontSize: '11pt' }}>
             <style dangerouslySetInnerHTML={{ __html: `
               .preview-form .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
