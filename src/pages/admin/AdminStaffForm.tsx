@@ -55,6 +55,15 @@ const AdminStaffForm = () => {
   const { validate, validateAll } = useValidationRules('staff');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const printRef = useRef<HTMLDivElement>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+
+  const { data: institution } = useQuery({
+    queryKey: ['institution'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('*').eq('is_default', true).maybeSingle();
+      return data;
+    },
+  });
 
   // Section 1: Employee
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
