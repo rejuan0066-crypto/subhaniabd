@@ -381,6 +381,61 @@ const WebsitePageBuilder = ({ form, setForm, language, saving, onSave }: Props) 
     }
   };
 
+  const renderSectionLabelEditor = () => {
+    if (!selectedSection) return null;
+    const section = sectionOrder.find(s => s.key === selectedSection);
+    if (!section) return null;
+    return (
+      <div className="space-y-2 mb-3 pb-3 border-b">
+        <h4 className="text-xs font-semibold">{bn ? 'সেকশন লেবেল' : 'Section Label'}</h4>
+        <div className="grid grid-cols-2 gap-1.5">
+          <div>
+            <Label className="text-[11px]">{bn ? 'নাম (বাংলা)' : 'Label (BN)'}</Label>
+            <Input className="bg-background mt-0.5 h-7 text-xs" value={section.label_bn}
+              onChange={e => {
+                setForm(prev => {
+                  if (!prev) return prev;
+                  const newOrder = [...(prev.section_order || ALL_SECTION_CONFIGS)];
+                  const idx = newOrder.findIndex(s => s.key === selectedSection);
+                  if (idx === -1) return prev;
+                  newOrder[idx] = { ...newOrder[idx], label_bn: e.target.value };
+                  return { ...prev, section_order: newOrder };
+                });
+              }} />
+          </div>
+          <div>
+            <Label className="text-[11px]">{bn ? 'নাম (ইংরেজি)' : 'Label (EN)'}</Label>
+            <Input className="bg-background mt-0.5 h-7 text-xs" value={section.label_en}
+              onChange={e => {
+                setForm(prev => {
+                  if (!prev) return prev;
+                  const newOrder = [...(prev.section_order || ALL_SECTION_CONFIGS)];
+                  const idx = newOrder.findIndex(s => s.key === selectedSection);
+                  if (idx === -1) return prev;
+                  newOrder[idx] = { ...newOrder[idx], label_en: e.target.value };
+                  return { ...prev, section_order: newOrder };
+                });
+              }} />
+          </div>
+        </div>
+        <div>
+          <Label className="text-[11px]">{bn ? 'আইকন' : 'Icon'}</Label>
+          <Input className="bg-background mt-0.5 h-7 text-xs w-16" value={section.icon} maxLength={2}
+            onChange={e => {
+              setForm(prev => {
+                if (!prev) return prev;
+                const newOrder = [...(prev.section_order || ALL_SECTION_CONFIGS)];
+                const idx = newOrder.findIndex(s => s.key === selectedSection);
+                if (idx === -1) return prev;
+                newOrder[idx] = { ...newOrder[idx], icon: e.target.value };
+                return { ...prev, section_order: newOrder };
+              });
+            }} />
+        </div>
+      </div>
+    );
+  };
+
   // ===== CONTENT EDITOR =====
   const renderContentEditor = () => {
     if (!selectedSection) return null;
