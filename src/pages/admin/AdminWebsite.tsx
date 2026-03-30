@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
-import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database } from 'lucide-react';
+import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText } from 'lucide-react';
+import WebsitePageBuilder from '@/components/admin/WebsitePageBuilder';
 import { toast } from 'sonner';
 import { useWebsiteSettings, WebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { Json } from '@/integrations/supabase/types';
@@ -276,7 +277,7 @@ const AdminWebsite = () => {
               <PanelBottom className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'ফুটার' : 'Footer'}
             </TabsTrigger>
             <TabsTrigger value="sections" className="text-xs py-2 px-2.5">
-              <Layout className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'সেকশন' : 'Sections'}
+              <Layout className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'পেইজ বিল্ডার' : 'Page Builder'}
             </TabsTrigger>
             <TabsTrigger value="divisions" className="text-xs py-2 px-2.5">
               <BarChart3 className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'বিভাগ' : 'Divisions'}
@@ -595,6 +596,56 @@ const AdminWebsite = () => {
                 </Button>
               </div>
 
+              {/* Admin Card */}
+              <div className="card-elevated p-5 space-y-4">
+                <h3 className="font-display font-bold text-foreground">
+                  {language === 'bn' ? 'এডমিনের বাণী' : "Admin's Message"}
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label>{language === 'bn' ? 'নাম' : 'Name'}</Label>
+                    <Input className="bg-background mt-1" value={form.admin_name} onChange={e => updateField('admin_name', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>{language === 'bn' ? 'পদবী (বাংলা)' : 'Title (Bangla)'}</Label>
+                    <Input className="bg-background mt-1" value={form.admin_title_bn} onChange={e => updateField('admin_title_bn', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>{language === 'bn' ? 'পদবী (ইংরেজি)' : 'Title (English)'}</Label>
+                    <Input className="bg-background mt-1" value={form.admin_title_en} onChange={e => updateField('admin_title_en', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>{language === 'bn' ? 'ইমেইল' : 'Email'}</Label>
+                    <Input className="bg-background mt-1" value={form.admin_email} onChange={e => updateField('admin_email', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>{language === 'bn' ? 'ফোন' : 'Phone'}</Label>
+                    <Input className="bg-background mt-1" value={form.admin_phone} onChange={e => updateField('admin_phone', e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>{language === 'bn' ? 'ছবি' : 'Photo'}</Label>
+                    <ImageUpload
+                      value={form.admin_photo_url}
+                      onChange={(url) => updateField('admin_photo_url', url)}
+                      folder="admin"
+                      className="mt-1"
+                      aspectRatio="aspect-square w-32"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>{language === 'bn' ? 'বাণী (বাংলা)' : 'Message (Bangla)'}</Label>
+                  <Textarea className="bg-background mt-1 min-h-[100px]" value={form.admin_message_bn} onChange={e => updateField('admin_message_bn', e.target.value)} />
+                </div>
+                <div>
+                  <Label>{language === 'bn' ? 'বাণী (ইংরেজি)' : 'Message (English)'}</Label>
+                  <Textarea className="bg-background mt-1 min-h-[100px]" value={form.admin_message_en} onChange={e => updateField('admin_message_en', e.target.value)} />
+                </div>
+                <Button className="btn-primary-gradient" onClick={() => saveSection(['admin_name', 'admin_title_bn', 'admin_title_en', 'admin_message_bn', 'admin_message_en', 'admin_photo_url', 'admin_email', 'admin_phone'])} disabled={saving}>
+                  <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সংরক্ষণ' : 'Save'}
+                </Button>
+              </div>
+
               {/* About */}
               <div className="card-elevated p-5 space-y-4">
                 <h3 className="font-display font-bold text-foreground">
@@ -809,26 +860,16 @@ const AdminWebsite = () => {
             </div>
           </TabsContent>
 
-          {/* Sections Tab */}
+          {/* Sections / Page Builder Tab */}
           <TabsContent value="sections">
-            <div className="card-elevated p-5 space-y-4">
-              <h3 className="font-display font-bold text-foreground">
-                {language === 'bn' ? 'হোমপেজ সেকশন দেখানো/লুকানো' : 'Homepage Section Show/Hide'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {language === 'bn' ? 'হোমপেজে কোন সেকশনগুলো দেখাবে তা নিয়ন্ত্রণ করুন' : 'Control which sections appear on the homepage'}
-              </p>
-              <div className="space-y-3">
-                {sectionLabels.map(s => (
-                  <div key={s.key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                    <span className="text-sm font-medium text-foreground">{language === 'bn' ? s.bn : s.en}</span>
-                    <Switch checked={form.sections[s.key]} onCheckedChange={() => toggleSection(s.key)} />
-                  </div>
-                ))}
-              </div>
-              <Button className="btn-primary-gradient" onClick={() => saveSection(['sections'])} disabled={saving}>
-                <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সংরক্ষণ' : 'Save'}
-              </Button>
+            <div className="card-elevated p-5">
+              <WebsitePageBuilder
+                form={form}
+                setForm={setForm}
+                language={language}
+                saving={saving}
+                onSave={saveSection}
+              />
             </div>
           </TabsContent>
 
