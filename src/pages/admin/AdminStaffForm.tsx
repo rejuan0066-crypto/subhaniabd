@@ -273,6 +273,12 @@ const AdminStaffForm = () => {
           principal: { name: principalName, position: principalPosition },
           other: { name: otherSignName, position: otherSignPosition },
         },
+        approver: {
+          name: approverName,
+          position: approverPosition,
+          signature_url: approverSignatureUrl,
+          date: approverDate,
+        },
       };
 
       const { error } = await supabase.from('staff').insert({
