@@ -97,6 +97,40 @@ const AdminWebsite = () => {
     });
   };
 
+  // Info Links CRUD
+  const addInfoLink = () => {
+    setForm(prev => {
+      if (!prev) return prev;
+      const links = [...(prev.info_links || [])];
+      links.push({ id: `info-${Date.now()}`, label_bn: '', label_en: '', path: '/', icon: 'Globe', visible: true, sort_order: links.length });
+      return { ...prev, info_links: links };
+    });
+  };
+  const removeInfoLink = (index: number) => {
+    setForm(prev => {
+      if (!prev) return prev;
+      return { ...prev, info_links: (prev.info_links || []).filter((_, i) => i !== index) };
+    });
+  };
+  const updateInfoLink = (index: number, field: string, value: any) => {
+    setForm(prev => {
+      if (!prev) return prev;
+      const links = [...(prev.info_links || [])];
+      links[index] = { ...links[index], [field]: value };
+      return { ...prev, info_links: links };
+    });
+  };
+  const moveInfoLink = (index: number, dir: 'up' | 'down') => {
+    setForm(prev => {
+      if (!prev) return prev;
+      const links = [...(prev.info_links || [])];
+      const swapIdx = dir === 'up' ? index - 1 : index + 1;
+      if (swapIdx < 0 || swapIdx >= links.length) return prev;
+      [links[index], links[swapIdx]] = [links[swapIdx], links[index]];
+      return { ...prev, info_links: links.map((l, i) => ({ ...l, sort_order: i })) };
+    });
+  };
+
   const updateDivision = (index: number, field: string, value: string) => {
     setForm(prev => {
       if (!prev) return prev;
