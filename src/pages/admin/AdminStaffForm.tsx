@@ -837,7 +837,12 @@ const AdminStaffForm = () => {
           <DialogHeader><DialogTitle>{previewDoc?.type} - {previewDoc?.name}</DialogTitle></DialogHeader>
           <div className="flex justify-center p-4">
             {previewDoc?.url.endsWith('.pdf') ? (
-              <iframe src={previewDoc.url} className="w-full h-[500px] border border-border rounded" />
+              <object data={previewDoc.url} type="application/pdf" className="w-full h-[500px] border border-border rounded">
+                <p className="text-center py-8 text-muted-foreground">
+                  {bn ? 'PDF প্রিভিউ দেখা যাচ্ছে না।' : 'Cannot display PDF preview.'}
+                  <a href={previewDoc.url} target="_blank" rel="noopener noreferrer" className="text-primary underline ml-1">{bn ? 'ডাউনলোড করুন' : 'Download'}</a>
+                </p>
+              </object>
             ) : (
               <img src={previewDoc?.url} alt={previewDoc?.name} className="max-w-full max-h-[500px] object-contain rounded" />
             )}
