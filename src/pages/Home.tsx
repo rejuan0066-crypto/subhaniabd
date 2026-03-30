@@ -12,6 +12,7 @@ import HomeInfoLinks from '@/components/home/HomeInfoLinks';
 import HomeNoticesSection from '@/components/home/HomeNoticesSection';
 import HomeAdmissionButtons from '@/components/home/HomeAdmissionButtons';
 import HomeGallery from '@/components/home/HomeGallery';
+import HomePostsSection from '@/components/home/HomePostsSection';
 import PrayerTimesWidget from '@/components/home/PrayerTimesWidget';
 import IslamicCalendarWidget from '@/components/home/IslamicCalendarWidget';
 
@@ -26,6 +27,20 @@ const Home = () => {
       const { data, error } = await supabase
         .from('notices')
         .select('id, title, title_bn, published_at, category')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: posts = [] } = useQuery({
+    queryKey: ['home-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id, title, title_bn, content, content_bn, category, published_at, attachments')
         .eq('is_published', true)
         .order('published_at', { ascending: false })
         .limit(10);
@@ -135,20 +150,38 @@ const Home = () => {
         </div>
       </section>
 
+      {/* ===== Latest Posts/News ===== */}
+      {settings.sections.latestPosts && (
+        <section className="pb-6 sm:pb-8">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+            >
+              <HomePostsSection posts={posts} language={language} />
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* ===== Gallery ===== */}
-      {settings.sections.gallery && settings.gallery_items?.filter(g => g.image_url).length > 0 && (
+      {settings.sections.gallery && (
         <HomeGallery galleryItems={settings.gallery_items} language={language} />
       )}
 
       {/* ===== Prayer & Calendar Row ===== */}
-      <section className="py-8 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <PrayerTimesWidget />
-            <IslamicCalendarWidget />
+      {settings.sections.prayerCalendar && (
+        <section className="py-8 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <PrayerTimesWidget />
+              <IslamicCalendarWidget />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ===== Stats ===== */}
       {settings.sections.stats && (
