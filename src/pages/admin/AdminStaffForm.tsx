@@ -347,26 +347,68 @@ const AdminStaffForm = () => {
   const handlePrint = () => {
     const content = printRef.current;
     if (!content) return;
-    const printStyles = document.createElement('style');
-    printStyles.id = 'staff-print-styles';
-    printStyles.textContent = `
-      @media print {
-        body > *:not(.staff-print-area) { display: none !important; }
-        .staff-print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
-        .staff-print-area * { visibility: visible; }
-        .no-print { display: none !important; }
-      }
-    `;
-    document.head.appendChild(printStyles);
-    content.classList.add('staff-print-area');
-    window.print();
-    setTimeout(() => {
-      content.classList.remove('staff-print-area');
-      printStyles.remove();
-    }, 1000);
+    const printWindow = document.createElement('iframe');
+    printWindow.style.position = 'fixed';
+    printWindow.style.top = '-9999px';
+    printWindow.style.left = '-9999px';
+    printWindow.style.width = '210mm';
+    printWindow.style.height = '297mm';
+    document.body.appendChild(printWindow);
+    const doc = printWindow.contentDocument || printWindow.contentWindow?.document;
+    if (!doc) return;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Staff Form</title>
+      <style>${getPrintStyles()}</style></head><body>${content.innerHTML}</body></html>`);
+    doc.close();
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(printWindow), 2000);
+      }, 300);
+    };
   };
 
-  return (
+  const getPrintStyles = () => `
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm 15mm 10mm 15mm; }
+    .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
+    .form-header .logo { width: 60px; height: 60px; object-fit: contain; }
+    .form-header h1 { font-size: 16pt; font-weight: 700; margin: 4px 0 2px; color: #1a5c2e; }
+    .form-header h2 { font-size: 12pt; font-weight: 600; color: #333; margin: 2px 0; }
+    .form-header p { font-size: 9pt; color: #555; }
+    .form-title { background: #1a5c2e; color: #fff; text-align: center; padding: 6px; font-size: 13pt; font-weight: 700; margin: 10px 0; border-radius: 2px; }
+    .photo-area { position: absolute; top: 0; right: 0; width: 90px; height: 110px; border: 2px solid #1a5c2e; overflow: hidden; background: #f9f9f9; display: flex; align-items: center; justify-content: center; }
+    .photo-area img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-area .placeholder { font-size: 8pt; color: #999; text-align: center; padding: 5px; }
+    .section { margin: 10px 0; }
+    .section-title { background: #e8f5e9; padding: 5px 10px; font-size: 11pt; font-weight: 700; color: #1a5c2e; border-left: 4px solid #1a5c2e; margin-bottom: 6px; }
+    .form-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    .form-table td { border: 1px solid #ccc; padding: 4px 8px; font-size: 10pt; vertical-align: top; }
+    .form-table .label { background: #f5f5f5; font-weight: 600; width: 28%; color: #333; white-space: nowrap; }
+    .form-table .value { color: #000; }
+    .doc-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+    .doc-table th { background: #e8f5e9; border: 1px solid #ccc; padding: 4px 8px; font-size: 9pt; font-weight: 600; text-align: left; }
+    .doc-table td { border: 1px solid #ccc; padding: 3px 8px; font-size: 9pt; }
+    .signatures { display: flex; justify-content: space-between; margin-top: 50px; padding-top: 10px; }
+    .sig-box { text-align: center; min-width: 180px; }
+    .sig-line { border-top: 1px solid #000; padding-top: 5px; margin-top: 35px; }
+    .sig-name { font-weight: 600; font-size: 10pt; }
+    .sig-position { font-size: 9pt; color: #555; }
+    .form-date { text-align: right; font-size: 9pt; color: #555; margin-top: 8px; }
+    @media print { body { padding: 10mm; } @page { size: A4; margin: 0; } }
+  `;
+
+  const getGuardianInfo = () => {
+    if (guardianType === 'father') return { name: fatherName, relation: bn ? 'পিতা' : 'Father', mobile: fatherMobileCode + fatherMobile, nid: fatherNid };
+    if (guardianType === 'mother') return { name: motherName, relation: bn ? 'মাতা' : 'Mother', mobile: motherMobileCode + motherMobile, nid: motherNid };
+    return { name: guardianName, relation: guardianRelation, mobile: guardianMobileCode + guardianMobile, nid: guardianNid };
+  };
+
+  const guardianInfo = getGuardianInfo();
+  const desigLabel = designations.find(d => d.value === designation)?.[bn ? 'bn' : 'en'] || '';
+  const religionLabel = religion === 'other' ? customReligion : RELIGIONS.find(r => r.value === religion)?.[bn ? 'bn' : 'en'] || '';
+  const todayDate = new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB');
     <AdminLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
