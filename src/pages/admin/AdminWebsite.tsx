@@ -355,6 +355,9 @@ const AdminWebsite = () => {
             <TabsTrigger value="divisions" className="text-xs py-2 px-2.5">
               <BarChart3 className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'বিভাগ' : 'Divisions'}
             </TabsTrigger>
+            <TabsTrigger value="info-links" className="text-xs py-2 px-2.5">
+              <Link2 className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'তথ্য লিংক' : 'Info Links'}
+            </TabsTrigger>
             <TabsTrigger value="social" className="text-xs py-2 px-2.5">
               <Share2 className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'সোশ্যাল' : 'Social'}
             </TabsTrigger>
