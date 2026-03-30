@@ -206,7 +206,7 @@ const AdminWebsite = () => {
     setSaving(true);
     try {
       await saveMenuConfig.mutateAsync({ sidebar: menuConfig.sidebar, public: publicMenu });
-      await updateMultiple.mutateAsync([{ key: 'nav_style', value: form.nav_style as Json }]);
+      await updateMultiple.mutateAsync([{ key: 'nav_style', value: form.nav_style as unknown as Json }]);
       toast.success(language === 'bn' ? 'নেভিগেশন সংরক্ষিত!' : 'Navigation saved!');
     } catch {
       toast.error(language === 'bn' ? 'নেভিগেশন সংরক্ষণে ত্রুটি' : 'Error saving navigation');
