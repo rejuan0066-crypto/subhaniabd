@@ -347,31 +347,26 @@ const AdminStaffForm = () => {
   const handlePrint = () => {
     const content = printRef.current;
     if (!content) return;
-    const printWindow = document.createElement('iframe');
-    printWindow.style.position = 'fixed';
-    printWindow.style.top = '-9999px';
-    printWindow.style.left = '-9999px';
-    printWindow.style.width = '210mm';
-    printWindow.style.height = '297mm';
-    document.body.appendChild(printWindow);
-    const doc = printWindow.contentDocument || printWindow.contentWindow?.document;
-    if (!doc) return;
-    doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Staff Form</title>
-      <style>${getPrintStyles()}</style></head><body>${content.innerHTML}</body></html>`);
-    doc.close();
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
+    if (!printWindow) { toast.error('Popup blocked'); return; }
+    const styles = getPrintStyles();
+    printWindow.document.open();
+    printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Staff Form</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <style>${styles}</style></head><body>${content.innerHTML}</body></html>`);
+    printWindow.document.close();
+    // Wait for fonts to load before printing
     printWindow.onload = () => {
       setTimeout(() => {
-        printWindow.contentWindow?.print();
-        setTimeout(() => document.body.removeChild(printWindow), 2000);
-      }, 300);
+        printWindow.print();
+      }, 600);
     };
   };
 
   const getPrintStyles = () => `
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm 15mm 10mm 15mm; }
+    body { font-family: 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm; }
     .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
     .form-header .logo { width: 60px; height: 60px; object-fit: contain; }
     .form-header h1 { font-size: 16pt; font-weight: 700; margin: 4px 0 2px; color: #1a5c2e; }
