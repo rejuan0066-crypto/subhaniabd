@@ -416,6 +416,8 @@ const AdminStaffForm = () => {
     .sig-name { font-weight: 600; font-size: 10pt; }
     .sig-position { font-size: 9pt; color: #555; }
     .form-date { text-align: right; font-size: 9pt; color: #555; margin-top: 8px; }
+    .approver-section { margin-top: 20px; border-top: 1px solid #ccc; padding-top: 10px; }
+    .approver-section .section-title { background: #e8f5e9; padding: 5px 10px; font-size: 11pt; font-weight: 700; color: #1a5c2e; border-left: 4px solid #1a5c2e; margin-bottom: 6px; }
     @media print { body { padding: 10mm; } @page { size: A4; margin: 0; } }
   `;
 
