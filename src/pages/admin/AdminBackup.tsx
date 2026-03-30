@@ -57,8 +57,8 @@ const AdminBackup = () => {
     const loadKey = table ? `${table}-${format}` : `full-${format}`;
     setLoading(loadKey);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) throw new Error(bn ? 'লগইন করুন' : 'Not authenticated. Please login again.');
 
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const params = new URLSearchParams({ format });
