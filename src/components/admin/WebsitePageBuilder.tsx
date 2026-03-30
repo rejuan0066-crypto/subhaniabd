@@ -682,15 +682,32 @@ const WebsitePageBuilder = ({ form, setForm, language, saving, onSave }: Props) 
               >
                 <GripVertical className="w-3 h-3 text-muted-foreground/30 shrink-0" />
                 <span className="text-sm shrink-0">{section.icon}</span>
-                <span className="flex-1 truncate text-[11px] font-medium">
-                  {bn ? section.label_bn : section.label_en}
-                </span>
+                {editingLabel === section.key ? (
+                  <div className="flex-1 flex items-center gap-1 min-w-0" onClick={e => e.stopPropagation()}>
+                    <Input className="h-5 text-[10px] bg-background px-1 flex-1 min-w-0" value={bn ? editLabelBn : editLabelEn}
+                      onChange={e => bn ? setEditLabelBn(e.target.value) : setEditLabelEn(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && saveLabel()}
+                      autoFocus />
+                    <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-green-600" onClick={saveLabel}><Check className="w-3 h-3" /></Button>
+                    <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => setEditingLabel(null)}><X className="w-3 h-3" /></Button>
+                  </div>
+                ) : (
+                  <span className="flex-1 truncate text-[11px] font-medium">
+                    {bn ? section.label_bn : section.label_en}
+                  </span>
+                )}
                 <div className="flex items-center gap-0 shrink-0 opacity-0 group-hover:opacity-100">
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); startEditLabel(section.key); }} title={bn ? 'নাম পরিবর্তন' : 'Rename'}>
+                    <Pencil className="w-2.5 h-2.5" />
+                  </Button>
                   <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); moveSection(index, 'up'); }} disabled={index === 0}>
                     <ChevronUp className="w-3 h-3" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={(e) => { e.stopPropagation(); moveSection(index, 'down'); }} disabled={index === sectionOrder.length - 1}>
                     <ChevronDown className="w-3 h-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); removeSection(section.key); }} title={bn ? 'মুছুন' : 'Remove'}>
+                    <Trash2 className="w-2.5 h-2.5" />
                   </Button>
                 </div>
                 <Button variant="ghost" size="sm"
@@ -700,6 +717,29 @@ const WebsitePageBuilder = ({ form, setForm, language, saving, onSave }: Props) 
                 </Button>
               </div>
             ))}
+
+            {/* Add Section Button */}
+            {showAddSection ? (
+              <div className="p-2 border border-dashed border-primary/30 rounded-lg space-y-1.5 mt-1" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-1">
+                  <Input className="h-6 text-[10px] bg-background px-1.5 w-10" value={newSectionIcon} onChange={e => setNewSectionIcon(e.target.value)} placeholder="📄" maxLength={2} />
+                  <Input className="h-6 text-[10px] bg-background px-1.5 flex-1" value={newSectionBn} onChange={e => setNewSectionBn(e.target.value)} placeholder={bn ? 'নাম (বাংলা)' : 'Name (BN)'} />
+                </div>
+                <Input className="h-6 text-[10px] bg-background px-1.5" value={newSectionEn} onChange={e => setNewSectionEn(e.target.value)} placeholder={bn ? 'নাম (ইংরেজি)' : 'Name (EN)'} />
+                <div className="flex gap-1">
+                  <Button size="sm" className="h-6 text-[10px] flex-1 bg-primary text-primary-foreground" onClick={addCustomSection}>
+                    <Plus className="w-3 h-3 mr-0.5" /> {bn ? 'যোগ' : 'Add'}
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => setShowAddSection(false)}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" className="w-full h-7 text-[10px] mt-1 border-dashed" onClick={() => setShowAddSection(true)}>
+                <Plus className="w-3 h-3 mr-0.5" /> {bn ? 'নতুন সেকশন যোগ করুন' : 'Add New Section'}
+              </Button>
+            )}
           </div>
         </ScrollArea>
       </div>
