@@ -405,20 +405,57 @@ const AdminStaffForm = () => {
   const religionLabel = religion === 'other' ? customReligion : RELIGIONS.find(r => r.value === religion)?.[bn ? 'bn' : 'en'] || '';
   const todayDate = new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB');
 
+  // Edit mode overrides for print preview
+  const [editMode, setEditMode] = useState(false);
+  const [editInstitutionName, setEditInstitutionName] = useState('');
+  const [editInstitutionNameEn, setEditInstitutionNameEn] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editFormTitle, setEditFormTitle] = useState('');
+  const [editPrincipalName, setEditPrincipalName] = useState('');
+  const [editPrincipalPosition, setEditPrincipalPosition] = useState('');
+  const [editOtherSignName, setEditOtherSignName] = useState('');
+  const [editOtherSignPosition, setEditOtherSignPosition] = useState('');
+  const [editNote, setEditNote] = useState('');
+
+  // Initialize edit values when preview opens
+  const openPrintPreview = () => {
+    setEditInstitutionName(institution?.name || '');
+    setEditInstitutionNameEn(institution?.name_en || '');
+    setEditAddress(institution?.address || '');
+    setEditFormTitle(bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form');
+    setEditPrincipalName(principalName);
+    setEditPrincipalPosition(principalPosition);
+    setEditOtherSignName(otherSignName);
+    setEditOtherSignPosition(otherSignPosition);
+    setEditNote('');
+    setEditMode(false);
+    setShowPrintPreview(true);
+  };
+
+  // Use edit overrides or originals
+  const pInstName = editMode ? editInstitutionName : (institution?.name || '');
+  const pInstNameEn = editMode ? editInstitutionNameEn : (institution?.name_en || '');
+  const pInstAddr = editMode ? editAddress : (institution?.address || '');
+  const pFormTitle = editMode ? editFormTitle : (bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form');
+  const pPrincipalName = editMode ? editPrincipalName : principalName;
+  const pPrincipalPosition = editMode ? editPrincipalPosition : principalPosition;
+  const pOtherSignName = editMode ? editOtherSignName : otherSignName;
+  const pOtherSignPosition = editMode ? editOtherSignPosition : otherSignPosition;
+
   const PrintableForm = () => (
     <div>
       <div className="form-header" style={{ position: 'relative' }}>
         {institution?.logo_url && <img src={institution.logo_url} alt="" className="logo" style={{ position: 'absolute', left: 0, top: 0, width: 60, height: 60 }} />}
-        <h1>{institution?.name || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
-        {institution?.name_en && <h2>{institution.name_en}</h2>}
-        {institution?.address && <p>{institution.address}</p>}
+        <h1>{pInstName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
+        {pInstNameEn && <h2>{pInstNameEn}</h2>}
+        {pInstAddr && <p>{pInstAddr}</p>}
         {(institution?.phone || institution?.email) && <p>{[institution?.phone, institution?.email].filter(Boolean).join(' | ')}</p>}
         <div className="photo-area">
           {photoUrl ? <img src={photoUrl} alt="Photo" /> : <div className="placeholder">{bn ? 'ছবি' : 'Photo'}<br/>Passport Size</div>}
         </div>
       </div>
 
-      <div className="form-title">{bn ? 'কর্মী/শিক্ষক তথ্য ফরম' : 'Staff/Teacher Information Form'}</div>
+      <div className="form-title">{pFormTitle}</div>
 
       <div className="section">
         <div className="section-title">{bn ? '১. ব্যক্তিগত তথ্য' : '1. Employee Details'}</div>
@@ -484,25 +521,32 @@ const AdminStaffForm = () => {
         </div>
       )}
 
+      {editNote && (
+        <div className="section">
+          <div className="section-title">{bn ? 'অতিরিক্ত নোট' : 'Additional Note'}</div>
+          <p style={{ padding: '5px 10px', fontSize: '10pt', border: '1px solid #ccc' }}>{editNote}</p>
+        </div>
+      )}
+
       <div className="signatures">
         <div className="sig-box">
           <div className="sig-line">
             <div className="sig-name">{bn ? 'আবেদনকারীর স্বাক্ষর' : "Applicant's Signature"}</div>
           </div>
         </div>
-        {otherSignName && (
+        {pOtherSignName && (
           <div className="sig-box">
             <div className="sig-line">
-              <div className="sig-name">{otherSignName}</div>
-              <div className="sig-position">{otherSignPosition}</div>
+              <div className="sig-name">{pOtherSignName}</div>
+              <div className="sig-position">{pOtherSignPosition}</div>
             </div>
           </div>
         )}
-        {principalName && (
+        {pPrincipalName && (
           <div className="sig-box">
             <div className="sig-line">
-              <div className="sig-name">{principalName}</div>
-              <div className="sig-position">{principalPosition}</div>
+              <div className="sig-name">{pPrincipalName}</div>
+              <div className="sig-position">{pPrincipalPosition}</div>
             </div>
           </div>
         )}
@@ -863,7 +907,7 @@ const AdminStaffForm = () => {
               {addMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
               {bn ? 'কর্মী/শিক্ষক যোগ করুন' : 'Add Staff/Teacher'}
             </Button>
-            <Button type="button" variant="outline" className="py-6 gap-2" onClick={() => setShowPrintPreview(true)}>
+            <Button type="button" variant="outline" className="py-6 gap-2" onClick={openPrintPreview}>
               <Eye className="w-5 h-5" /> {bn ? 'প্রিভিউ' : 'Preview'}
             </Button>
             <Button type="button" variant="outline" className="py-6 gap-2" onClick={handlePrint}>
@@ -882,17 +926,66 @@ const AdminStaffForm = () => {
 
       {/* Print Preview Dialog */}
       <Dialog open={showPrintPreview} onOpenChange={setShowPrintPreview}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span>{bn ? 'ফরম প্রিভিউ' : 'Form Preview'}</span>
               <div className="flex gap-2">
+                <Button variant={editMode ? "default" : "outline"} size="sm" className="gap-1" onClick={() => setEditMode(!editMode)}>
+                  <FileText className="w-4 h-4" /> {editMode ? (bn ? 'এডিট বন্ধ' : 'Close Edit') : (bn ? 'এডিট মোড' : 'Edit Mode')}
+                </Button>
                 <Button variant="outline" size="sm" className="gap-1" onClick={handlePrint}>
                   <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট' : 'Print'}
                 </Button>
               </div>
             </DialogTitle>
           </DialogHeader>
+
+          {/* Edit Mode Panel */}
+          {editMode && (
+            <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-4">
+              <p className="text-xs text-muted-foreground italic">{bn ? '* এই পরিবর্তনগুলো শুধুমাত্র এই প্রিন্টের জন্য, ডাটাবেসে সেভ হবে না' : '* These changes are temporary, only for this print'}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রতিষ্ঠানের নাম (বাংলা)' : 'Institution Name'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editInstitutionName} onChange={e => setEditInstitutionName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রতিষ্ঠানের নাম (ইংরেজি)' : 'Institution Name (English)'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editInstitutionNameEn} onChange={e => setEditInstitutionNameEn(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'ঠিকানা' : 'Address'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editAddress} onChange={e => setEditAddress(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'ফরমের শিরোনাম' : 'Form Title'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editFormTitle} onChange={e => setEditFormTitle(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রিন্সিপালের নাম' : "Principal's Name"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editPrincipalName} onChange={e => setEditPrincipalName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'প্রিন্সিপালের পদবী' : "Principal's Position"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editPrincipalPosition} onChange={e => setEditPrincipalPosition(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'অন্য স্বাক্ষরকারীর নাম' : "Other Signatory Name"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editOtherSignName} onChange={e => setEditOtherSignName(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'অন্য স্বাক্ষরকারীর পদবী' : "Other Signatory Position"}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editOtherSignPosition} onChange={e => setEditOtherSignPosition(e.target.value)} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Label className="text-xs">{bn ? 'অতিরিক্ত নোট (ঐচ্ছিক)' : 'Additional Note (optional)'}</Label>
+                  <Input className="bg-background mt-1 h-8 text-sm" value={editNote} onChange={e => setEditNote(e.target.value)} placeholder={bn ? 'প্রিন্টে নোট যোগ করুন...' : 'Add a note to print...'} />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="border border-border rounded-lg bg-white text-black p-8" style={{ fontFamily: "'Noto Sans Bengali', sans-serif", fontSize: '11pt' }}>
             <style dangerouslySetInnerHTML={{ __html: `
               .preview-form .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
