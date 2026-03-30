@@ -8,14 +8,33 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
-import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff } from 'lucide-react';
+import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff, Link2, List } from 'lucide-react';
 import WebsitePageBuilder from '@/components/admin/WebsitePageBuilder';
 import { toast } from 'sonner';
-import { useWebsiteSettings, WebsiteSettings } from '@/hooks/useWebsiteSettings';
+import { useWebsiteSettings, WebsiteSettings, InfoLink } from '@/hooks/useWebsiteSettings';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
 import { Json } from '@/integrations/supabase/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import ImageUpload from '@/components/ImageUpload';
+
+const AVAILABLE_PAGES = [
+  { path: '/', label_bn: 'হোম', label_en: 'Home' },
+  { path: '/about', label_bn: 'আমাদের সম্পর্কে', label_en: 'About' },
+  { path: '/gallery', label_bn: 'গ্যালারি', label_en: 'Gallery' },
+  { path: '/admission', label_bn: 'ভর্তি', label_en: 'Admission' },
+  { path: '/result', label_bn: 'ফলাফল', label_en: 'Result' },
+  { path: '/student-info', label_bn: 'শিক্ষার্থী তথ্য', label_en: 'Student Info' },
+  { path: '/notices', label_bn: 'নোটিশ', label_en: 'Notices' },
+  { path: '/donation', label_bn: 'দান', label_en: 'Donation' },
+  { path: '/fee-payment', label_bn: 'ফি প্রদান', label_en: 'Fee Payment' },
+  { path: '/contact', label_bn: 'যোগাযোগ', label_en: 'Contact' },
+  { path: '/posts', label_bn: 'পোস্ট/সংবাদ', label_en: 'Posts/News' },
+];
+
+const INFO_LINK_ICONS = [
+  'Users', 'UserCheck', 'BookOpen', 'GraduationCap', 'FileText', 'List', 'Award',
+  'Globe', 'Heart', 'Star', 'Shield', 'Clock', 'MapPin', 'Phone', 'Mail', 'Settings', 'Bookmark', 'Layers', 'Tag',
+];
 
 const AdminWebsite = () => {
   const { language } = useLanguage();
