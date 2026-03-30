@@ -860,14 +860,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     );
   };
 
-  // Get unique sections from fields
-  const activeSections = Array.from(new Set(
-    configFields.map(f => (f.validation as any)?.section).filter(Boolean)
-  )).sort((a, b) => {
-    const orderA = SECTION_INFO[a as keyof typeof SECTION_INFO]?.order || 99;
-    const orderB = SECTION_INFO[b as keyof typeof SECTION_INFO]?.order || 99;
-    return orderA - orderB;
-  });
+  // Get unique sections from fields - use sections from hook which covers all known sections
+  const activeSections = sections.filter(section => getFieldsBySection(section).length > 0);
 
   return (
     <Dialog open={open} onOpenChange={o => { onOpenChange(o); if (!o) resetForm(); }}>
