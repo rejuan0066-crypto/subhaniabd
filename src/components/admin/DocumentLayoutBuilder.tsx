@@ -258,11 +258,15 @@ const DocumentLayoutBuilder = () => {
     e.dataTransfer.setData('text/plain', 'section');
   };
   const handleSectionDragOver = (e: DragEvent, index: number) => {
+    // Only handle section drags, not field drags
+    if (dragFieldRef.current) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverSection(index);
   };
   const handleSectionDrop = (e: DragEvent, targetIndex: number) => {
+    // Only handle section drags, not field drags
+    if (dragFieldRef.current) return;
     e.preventDefault();
     setDragOverSection(null);
     const srcIndex = dragSectionRef.current;
