@@ -13,12 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
-  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight
+  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon
 } from 'lucide-react';
 
 const STATUS_ICONS: Record<string, any> = {
@@ -33,6 +32,12 @@ const STATUS_COLORS: Record<string, string> = {
   leave: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
+const SHIFTS = [
+  { value: 'morning', labelBn: 'সকাল', labelEn: 'Morning', icon: Sun },
+  { value: 'afternoon', labelBn: 'দুপুর', labelEn: 'Afternoon', icon: Sunset },
+  { value: 'evening', labelBn: 'সন্ধ্যা', labelEn: 'Evening', icon: Moon },
+];
+
 const AdminAttendance = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -41,32 +46,99 @@ const AdminAttendance = () => {
   const fmt = (t: string) => formatTimeDisplay(t, timeFormat);
 
   const [entityType, setEntityType] = useState<'student' | 'staff'>('student');
+  const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential'>('all');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSessionYear, setSelectedSessionYear] = useState('');
+  const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [selectedShift, setSelectedShift] = useState('morning');
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
   const [ruleForm, setRuleForm] = useState({ name: '', name_bn: '', entity_type: 'student', config: { color: 'green', counts_as: 'present' } });
 
-  // Fetch entities (students or staff)
-  const { data: entities = [] } = useQuery({
-    queryKey: [entityType === 'student' ? 'students' : 'staff'],
+  // Fetch divisions
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions'],
     queryFn: async () => {
-      const table = entityType === 'student' ? 'students' : 'staff';
-      const { data, error } = await supabase.from(table).select('*').eq('status', 'active').order('name_bn');
-      if (error) throw error;
-      return data;
+      const { data } = await supabase.from('divisions').select('*').eq('is_active', true).order('sort_order');
+      return data || [];
     },
   });
 
-  // Fetch attendance for selected date
-  const { data: attendance = [] } = useQuery({
-    queryKey: ['attendance', selectedDate, entityType],
+  // Fetch students
+  const { data: allStudents = [] } = useQuery({
+    queryKey: ['students-attendance'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase.from('students').select('*').eq('status', 'active').order('name_bn');
+      return data || [];
+    },
+    enabled: entityType === 'student',
+  });
+
+  // Fetch staff
+  const { data: allStaff = [] } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      const { data } = await supabase.from('staff').select('*').eq('status', 'active').order('name_bn');
+      return data || [];
+    },
+    enabled: entityType === 'staff',
+  });
+
+  // Get unique session years from students
+  const sessionYears = useMemo(() => {
+    const years = new Set(allStudents.map((s: any) => s.session_year).filter(Boolean));
+    return Array.from(years).sort().reverse();
+  }, [allStudents]);
+
+  // Set default session year
+  useMemo(() => {
+    if (sessionYears.length > 0 && !selectedSessionYear) {
+      setSelectedSessionYear(sessionYears[0] as string);
+    }
+  }, [sessionYears]);
+
+  // Filter students based on sub-tab and filters
+  const entities = useMemo(() => {
+    if (entityType === 'staff') return allStaff;
+
+    let filtered = allStudents;
+
+    // Residential sub-tab: only residential students
+    if (studentSubTab === 'residential') {
+      filtered = filtered.filter((s: any) => s.residence_type === 'resident');
+    }
+
+    // Session year filter
+    if (selectedSessionYear) {
+      filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
+    }
+
+    // Division/class filter (only for 'all' tab)
+    if (studentSubTab === 'all' && selectedDivisionId) {
+      filtered = filtered.filter((s: any) => s.division_id === selectedDivisionId);
+    }
+
+    return filtered;
+  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedDivisionId]);
+
+  // Fetch attendance for selected date (for staff, fetch by shift too)
+  const { data: attendance = [] } = useQuery({
+    queryKey: ['attendance', selectedDate, entityType, entityType === 'staff' ? selectedShift : 'full_day'],
+    queryFn: async () => {
+      let query = supabase
         .from('attendance_records')
         .select('*')
         .eq('attendance_date', selectedDate)
         .eq('entity_type', entityType);
+
+      if (entityType === 'staff') {
+        query = query.eq('shift', selectedShift);
+      } else {
+        query = query.eq('shift', 'full_day');
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -89,6 +161,7 @@ const AdminAttendance = () => {
   // Save attendance mutation
   const saveMutation = useMutation({
     mutationFn: async ({ entityId, status, remarks, check_in_time, check_out_time }: { entityId: string; status: string; remarks?: string; check_in_time?: string; check_out_time?: string }) => {
+      const shiftVal = entityType === 'staff' ? selectedShift : 'full_day';
       const existing = attendance.find((a: any) => a.entity_id === entityId);
       const updateData: any = { status, remarks, updated_at: new Date().toISOString() };
       if (check_in_time !== undefined) updateData.check_in_time = check_in_time;
@@ -99,7 +172,7 @@ const AdminAttendance = () => {
       } else {
         const { error } = await supabase.from('attendance_records').insert({
           attendance_date: selectedDate, entity_type: entityType,
-          entity_id: entityId, ...updateData,
+          entity_id: entityId, shift: shiftVal, ...updateData,
         });
         if (error) throw error;
       }
@@ -111,11 +184,12 @@ const AdminAttendance = () => {
   // Bulk mark all
   const bulkMutation = useMutation({
     mutationFn: async (status: string) => {
+      const shiftVal = entityType === 'staff' ? selectedShift : 'full_day';
       const unmarked = entities.filter((e: any) => !attendance.find((a: any) => a.entity_id === e.id));
       if (unmarked.length === 0) return;
       const records = unmarked.map((e: any) => ({
         attendance_date: selectedDate, entity_type: entityType,
-        entity_id: e.id, status,
+        entity_id: e.id, status, shift: shiftVal,
       }));
       const { error } = await supabase.from('attendance_records').insert(records);
       if (error) throw error;
@@ -217,13 +291,13 @@ const AdminAttendance = () => {
 
         {/* Controls */}
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-4 space-y-3">
             <div className="flex flex-col sm:flex-row gap-3 items-center">
               {/* Entity Type */}
-              <Tabs value={entityType} onValueChange={(v) => setEntityType(v as any)} className="shrink-0">
+              <Tabs value={entityType} onValueChange={(v) => { setEntityType(v as any); setSearchQuery(''); }} className="shrink-0">
                 <TabsList>
                   <TabsTrigger value="student"><Users className="h-4 w-4 mr-1" /> {bn ? 'ছাত্র' : 'Students'}</TabsTrigger>
-                  <TabsTrigger value="staff"><UserCog className="h-4 w-4 mr-1" /> {bn ? 'স্টাফ' : 'Staff'}</TabsTrigger>
+                  <TabsTrigger value="staff"><UserCog className="h-4 w-4 mr-1" /> {bn ? 'স্টাফ/শিক্ষক' : 'Staff/Teacher'}</TabsTrigger>
                 </TabsList>
               </Tabs>
 
@@ -241,19 +315,84 @@ const AdminAttendance = () => {
                 </Button>
               </div>
 
-              {/* Search */}
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9 h-8 text-sm" placeholder={bn ? 'নাম বা আইডি দিয়ে খুঁজুন...' : 'Search by name or ID...'} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-              </div>
-
               {/* Bulk Actions */}
-              <div className="flex gap-1 shrink-0">
+              <div className="flex gap-1 shrink-0 ml-auto">
                 <Button size="sm" variant="outline" className="text-xs" onClick={() => bulkMutation.mutate('present')}>
                   <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>
               </div>
             </div>
+
+            {/* Student Filters Row */}
+            {entityType === 'student' && (
+              <div className="flex flex-wrap gap-3 items-center">
+                {/* Sub-tabs: All / Residential */}
+                <Tabs value={studentSubTab} onValueChange={(v) => setStudentSubTab(v as any)} className="shrink-0">
+                  <TabsList className="h-8">
+                    <TabsTrigger value="all" className="text-xs h-7 px-3">
+                      <Users className="h-3 w-3 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
+                    </TabsTrigger>
+                    <TabsTrigger value="residential" className="text-xs h-7 px-3">
+                      <Home className="h-3 w-3 mr-1" /> {bn ? 'আবাসিক ছাত্র' : 'Residential'}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {/* Session Year */}
+                <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
+                  <SelectTrigger className="w-36 h-8 text-xs">
+                    <SelectValue placeholder={bn ? 'সেশন ইয়ার' : 'Session Year'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sessionYears.map((sy: any) => (
+                      <SelectItem key={sy} value={sy}>{sy}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Division/Class filter (only for 'all' sub-tab) */}
+                {studentSubTab === 'all' && (
+                  <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
+                    <SelectTrigger className="w-44 h-8 text-xs">
+                      <SelectValue placeholder={bn ? 'বিভাগ/শ্রেণী নির্বাচন' : 'Select Division'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
+                      {divisions.map((d: any) => (
+                        <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* Search */}
+                <div className="relative flex-1 min-w-[150px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input className="pl-9 h-8 text-sm" placeholder={bn ? 'নাম বা আইডি...' : 'Name or ID...'} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                </div>
+              </div>
+            )}
+
+            {/* Staff Shift Selector */}
+            {entityType === 'staff' && (
+              <div className="flex flex-wrap gap-3 items-center">
+                <Tabs value={selectedShift} onValueChange={setSelectedShift} className="shrink-0">
+                  <TabsList className="h-8">
+                    {SHIFTS.map(sh => (
+                      <TabsTrigger key={sh.value} value={sh.value} className="text-xs h-7 px-3">
+                        <sh.icon className="h-3 w-3 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+
+                {/* Search */}
+                <div className="relative flex-1 min-w-[150px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input className="pl-9 h-8 text-sm" placeholder={bn ? 'নাম বা পদবী...' : 'Name or designation...'} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -281,11 +420,13 @@ const AdminAttendance = () => {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{bn ? entity.name_bn : (entity.name_en || entity.name_bn)}</p>
                     <p className="text-[10px] text-muted-foreground">
-                      {entityType === 'student' ? `ID: ${entity.student_id || '-'}` : (entity.designation || '-')}
+                      {entityType === 'student'
+                        ? `${bn ? 'আইডি' : 'ID'}: ${entity.student_id || '-'} ${entity.roll_number ? `| ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number}` : ''}`
+                        : (entity.designation || '-')}
                     </p>
                   </div>
 
-                  {/* Late Minutes Display */}
+                  {/* Late Minutes Display for staff */}
                   {entityType === 'staff' && att?.check_in_time && (() => {
                     const dutyStart = (entity.duty_start_time || '08:00').split(':').map(Number);
                     const checkIn = att.check_in_time.split(':').map(Number);
@@ -335,7 +476,6 @@ const AdminAttendance = () => {
                           key={rule.id}
                           onClick={() => {
                             const mutateData: any = { entityId: entity.id, status: countsAs };
-                            // Auto-fill duty times for staff when present/late/half_day
                             if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
                               mutateData.check_in_time = entity.duty_start_time || '08:00';
                               mutateData.check_out_time = entity.duty_end_time || '17:00';
