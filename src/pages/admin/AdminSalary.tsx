@@ -1152,7 +1152,7 @@ const AdminSalary = () => {
                     {[
                       { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, color: 'text-emerald-600' },
                       { label: bn ? 'অনুপস্থিত' : 'Absent', value: stats.absent, color: 'text-red-500' },
-                      { label: bn ? 'বিলম্ব' : 'Late', value: stats.late, color: 'text-yellow-600' },
+                      { label: bn ? 'বিলম্ব উপস্থিত' : 'Late Present', value: stats.late, color: 'text-yellow-600' },
                       { label: bn ? 'অর্ধদিন' : 'Half Day', value: stats.halfDay, color: 'text-orange-600' },
                       { label: bn ? 'ছুটি' : 'Leave', value: stats.leave || 0, color: 'text-blue-600' },
                     ].map((s, i) => (
