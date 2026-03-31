@@ -376,6 +376,18 @@ const AdminAttendance = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              {/* Time Format Toggle */}
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                <div>
+                  <p className="text-sm font-medium">{bn ? 'টাইম ফরম্যাট' : 'Time Format'}</p>
+                  <p className="text-[10px] text-muted-foreground">{timeFormat === '12h' ? '12-hour (AM/PM)' : '24-hour'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">12h</span>
+                  <Switch checked={timeFormat === '24h'} onCheckedChange={c => setTimeFormat.mutate(c ? '24h' : '12h')} />
+                  <span className="text-xs text-muted-foreground">24h</span>
+                </div>
+              </div>
               {/* Existing Rules */}
               <div className="space-y-2">
                 {rules.map((rule: any) => {
