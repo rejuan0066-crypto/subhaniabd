@@ -701,7 +701,7 @@ const DocumentLayoutBuilder = () => {
                                             <Button size="icon" variant={f.style?.bold ? 'default' : 'ghost'} className="h-6 w-6" onClick={() => updateFieldStyle(sec.id, f.id, 'bold', !f.style?.bold)}><Bold className="w-3 h-3" /></Button>
                                             <Button size="icon" variant={f.style?.italic ? 'default' : 'ghost'} className="h-6 w-6" onClick={() => updateFieldStyle(sec.id, f.id, 'italic', !f.style?.italic)}><Italic className="w-3 h-3" /></Button>
                                           </div>
-                                          {(f.type === 'select') && (
+                                          {(['select', 'radio', 'checkbox'].includes(f.type)) && (
                                             <div className="space-y-1.5 pt-1 border-t">
                                               <Label className="text-[10px]">{bn ? 'অপশনসমূহ' : 'Options'}</Label>
                                               {(f.options || []).map((opt, oi) => (
