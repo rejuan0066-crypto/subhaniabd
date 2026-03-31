@@ -212,6 +212,7 @@ const AdminAttendance = () => {
     },
   });
 
+  const statusOptions = useMemo(() => {
     return rules.filter((r: any) => r.entity_type === entityType && r.rule_type === 'status' && r.is_active);
   }, [rules, entityType]);
 
