@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent } from 'react';
+import React, { useState, useRef, DragEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
