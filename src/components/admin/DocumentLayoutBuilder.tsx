@@ -25,14 +25,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Slider } from '@/components/ui/slider';
 
 // ─── Types ───
+interface FieldStyle {
+  fontSize?: number; color?: string; bold?: boolean; italic?: boolean;
+}
 interface LayoutField {
   id: string; label: string; label_bn: string;
   type: 'text' | 'number' | 'date' | 'select' | 'photo' | 'textarea' | 'toggle' | 'email' | 'phone';
   required: boolean; options?: string[]; show: boolean; width: 'full' | 'half';
+  style?: FieldStyle;
 }
 interface SectionStyle {
   fontSize?: number; color?: string; textAlign?: 'left' | 'center' | 'right';
-  bgColor?: string;
+  bgColor?: string; borderStyle?: 'solid' | 'dashed' | 'dotted' | 'none'; borderColor?: string;
+  padding?: number; margin?: number;
 }
 interface LayoutSection { id: string; name: string; name_bn: string; fields: LayoutField[]; collapsed: boolean; style?: SectionStyle; }
 interface SignatureLine { id: string; title: string; title_bn: string; }
