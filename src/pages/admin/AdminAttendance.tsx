@@ -104,18 +104,16 @@ const AdminAttendance = () => {
 
     let filtered = allStudents;
 
-    // Residential sub-tab: only residential students
+    // Residential sub-tab: only residential students with session year filter
     if (studentSubTab === 'residential') {
       filtered = filtered.filter((s: any) => s.residence_type === 'resident');
+      if (selectedSessionYear) {
+        filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
+      }
     }
 
-    // Session year filter
-    if (selectedSessionYear) {
-      filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
-    }
-
-    // Division/class filter (only for 'all' tab)
-    if (studentSubTab === 'all' && selectedDivisionId) {
+    // All students tab: filter by division/class only
+    if (studentSubTab === 'all' && selectedDivisionId && selectedDivisionId !== 'all') {
       filtered = filtered.filter((s: any) => s.division_id === selectedDivisionId);
     }
 
