@@ -41,6 +41,14 @@ const timeToMinutes = (t: string): number => {
   return (h || 0) * 60 + (m || 0);
 };
 
+const formatTime12h = (t: string) => {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+};
+
 const AdminSalary = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
