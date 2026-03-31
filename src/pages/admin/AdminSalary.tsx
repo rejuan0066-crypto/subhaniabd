@@ -1154,8 +1154,10 @@ const AdminSalary = () => {
             </DialogHeader>
             {attendanceDetailDialog && (() => {
               const staffId = attendanceDetailDialog.staff.id;
-              const records = attendanceData.filter((a: any) => a.entity_id === staffId);
               const stats = attendanceDetailDialog.stats;
+              const breakdown = stats.dailyBreakdown || [];
+              const totalDeduction = breakdown.reduce((s: number, d: any) => s + d.deduction, 0);
+              const totalAddition = breakdown.reduce((s: number, d: any) => s + d.addition, 0);
               
               const STATUS_LABEL: Record<string, { bn: string; en: string; color: string }> = {
                 present: { bn: 'উপস্থিত', en: 'Present', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
@@ -1167,73 +1169,133 @@ const AdminSalary = () => {
 
               return (
                 <div className="space-y-4">
-                  {/* Summary */}
-                  <div className="grid grid-cols-4 gap-2">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-5 gap-2">
                     {[
                       { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, color: 'text-emerald-600' },
                       { label: bn ? 'অনুপস্থিত' : 'Absent', value: stats.absent, color: 'text-red-500' },
                       { label: bn ? 'বিলম্ব' : 'Late', value: stats.late, color: 'text-yellow-600' },
                       { label: bn ? 'অর্ধদিন' : 'Half Day', value: stats.halfDay, color: 'text-orange-600' },
+                      { label: bn ? 'ছুটি' : 'Leave', value: stats.leave || 0, color: 'text-blue-600' },
                     ].map((s, i) => (
                       <div key={i} className="text-center p-2 border rounded-lg">
-                        <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                        <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
                         <p className="text-[10px] text-muted-foreground">{s.label}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Minute Stats */}
+                  {/* Minute & Money Breakdown */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="p-2 border rounded-lg flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-red-500" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'মোট মিসড মিনিট' : 'Total Missed Min'}</p>
-                        <p className="font-semibold">{stats.totalMissedMinutes} {bn ? 'মিনিট' : 'min'}</p>
+                    <div className="p-2 border rounded-lg space-y-1">
+                      <p className="text-xs font-semibold text-red-600">{bn ? 'কর্তন বিবরণ' : 'Deductions'}</p>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{bn ? 'লেইট আসা' : 'Late Arrival'}</span>
+                        <span>{stats.totalLateArrivalMinutes} {bn ? 'মি.' : 'min'} = ৳{Math.round(stats.totalLateArrivalMinutes * stats.perMinuteRate).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{bn ? 'আগাম যাওয়া' : 'Early Exit'}</span>
+                        <span>{stats.totalEarlyExitMinutes} {bn ? 'মি.' : 'min'} = ৳{Math.round(stats.totalEarlyExitMinutes * stats.perMinuteRate).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{bn ? 'অনুপস্থিতি' : 'Absence'}</span>
+                        <span>{stats.absent} {bn ? 'দিন' : 'days'} = ৳{Math.round(stats.absent * stats.dailyRate).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{bn ? 'অর্ধদিন' : 'Half Day'}</span>
+                        <span>{stats.halfDay} {bn ? 'দিন' : 'days'} = ৳{Math.round(stats.halfDay * stats.dailyRate / 2).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-bold border-t pt-1 text-red-600">
+                        <span>{bn ? 'মোট কর্তন' : 'Total Ded.'}</span>
+                        <span>৳{totalDeduction.toLocaleString()}</span>
                       </div>
                     </div>
-                    <div className="p-2 border rounded-lg flex items-center gap-2">
-                      <Timer className="h-4 w-4 text-blue-500" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'মোট ওভারটাইম' : 'Total Overtime'}</p>
-                        <p className="font-semibold">{stats.totalOvertimeMinutes} {bn ? 'মিনিট' : 'min'}</p>
+                    <div className="p-2 border rounded-lg space-y-1">
+                      <p className="text-xs font-semibold text-emerald-600">{bn ? 'যোগ বিবরণ' : 'Additions'}</p>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">{bn ? 'ওভারটাইম' : 'Overtime'}</span>
+                        <span>{stats.totalOvertimeMinutes} {bn ? 'মি.' : 'min'} = ৳{Math.round(stats.totalOvertimeMinutes * stats.perMinuteRate).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-bold border-t pt-1 text-emerald-600 mt-auto">
+                        <span>{bn ? 'মোট যোগ' : 'Total Add.'}</span>
+                        <span>৳{totalAddition.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Daily Records */}
+                  {/* Per-Minute Rate Info */}
+                  <div className="p-2 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+                    <Calculator className="h-3 w-3 inline mr-1" />
+                    {bn ? 'প্রতি মিনিট রেট' : 'Per-min rate'}: ৳{stats.perMinuteRate.toFixed(2)} | 
+                    {bn ? ' দৈনিক রেট' : ' Daily rate'}: ৳{Math.round(stats.dailyRate).toLocaleString()}
+                  </div>
+
+                  {/* Daily Records Table */}
                   <div className="border rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-muted/50 border-b">
-                          <th className="px-3 py-2 text-left text-xs">{bn ? 'তারিখ' : 'Date'}</th>
-                          <th className="px-3 py-2 text-center text-xs">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
-                          <th className="px-3 py-2 text-center text-xs">{bn ? 'ইন' : 'In'}</th>
-                          <th className="px-3 py-2 text-center text-xs">{bn ? 'আউট' : 'Out'}</th>
+                          <th className="px-2 py-2 text-left text-xs">{bn ? 'তারিখ' : 'Date'}</th>
+                          <th className="px-2 py-2 text-center text-xs">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                          <th className="px-2 py-2 text-center text-xs">{bn ? 'ইন/আউট' : 'In/Out'}</th>
+                          <th className="px-2 py-2 text-center text-xs">{bn ? 'লেইট/আগাম' : 'Late/Early'}</th>
+                          <th className="px-2 py-2 text-right text-xs text-red-500">{bn ? 'কর্তন' : 'Ded.'}</th>
+                          <th className="px-2 py-2 text-right text-xs text-emerald-600">{bn ? 'যোগ' : 'Add.'}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {records.length === 0 ? (
-                          <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                            {bn ? 'এই মাসে কোনো উপস্থিতি রেকর্ড নেই' : 'No attendance records this month'}
+                        {breakdown.length === 0 ? (
+                          <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                            {bn ? 'এই মাসে কোনো রেকর্ড নেই' : 'No records this month'}
                           </td></tr>
                         ) : (
-                          records
-                            .sort((a: any, b: any) => a.attendance_date.localeCompare(b.attendance_date))
-                            .map((r: any) => {
-                              const sl = STATUS_LABEL[r.status] || { bn: r.status, en: r.status, color: 'bg-muted' };
+                          breakdown
+                            .sort((a: any, b: any) => a.date.localeCompare(b.date))
+                            .map((d: any, i: number) => {
+                              const sl = STATUS_LABEL[d.status] || { bn: d.status, en: d.status, color: 'bg-muted' };
                               return (
-                                <tr key={r.id} className="border-b hover:bg-muted/30">
-                                  <td className="px-3 py-1.5">{new Date(r.attendance_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { day: 'numeric', month: 'short' })}</td>
-                                  <td className="px-3 py-1.5 text-center">
-                                    <Badge className={`${sl.color} text-[10px]`}>{bn ? sl.bn : sl.en}</Badge>
+                                <tr key={i} className="border-b hover:bg-muted/30">
+                                  <td className="px-2 py-1.5 text-xs">{new Date(d.date).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { day: 'numeric', month: 'short' })}</td>
+                                  <td className="px-2 py-1.5 text-center">
+                                    <Badge className={`${sl.color} text-[9px]`}>{bn ? sl.bn : sl.en}</Badge>
                                   </td>
-                                  <td className="px-3 py-1.5 text-center text-xs">{r.check_in_time ? formatTime12h(r.check_in_time) : '-'}</td>
-                                  <td className="px-3 py-1.5 text-center text-xs">{r.check_out_time ? formatTime12h(r.check_out_time) : '-'}</td>
+                                  <td className="px-2 py-1.5 text-center text-[10px]">
+                                    {d.status === 'absent' ? '-' : (
+                                      <>{d.checkIn ? formatTime12h(d.checkIn) : '-'} / {d.checkOut ? formatTime12h(d.checkOut) : '-'}</>
+                                    )}
+                                  </td>
+                                  <td className="px-2 py-1.5 text-center text-[10px]">
+                                    {d.status === 'absent' ? (
+                                      <span className="text-red-500">{bn ? 'পুরো দিন' : 'Full day'}</span>
+                                    ) : (
+                                      <>
+                                        {d.lateMin > 0 && <span className="text-yellow-600">{d.lateMin}{bn ? 'মি↓' : 'm↓'} </span>}
+                                        {d.earlyMin > 0 && <span className="text-orange-600">{d.earlyMin}{bn ? 'মি↑' : 'm↑'} </span>}
+                                        {d.lateMin === 0 && d.earlyMin === 0 && d.status !== 'half_day' && <span className="text-emerald-500">✓</span>}
+                                        {d.status === 'half_day' && <span className="text-orange-500">{bn ? '½দিন' : '½day'}</span>}
+                                      </>
+                                    )}
+                                  </td>
+                                  <td className="px-2 py-1.5 text-right text-xs text-red-500">
+                                    {d.deduction > 0 ? `৳${d.deduction.toLocaleString()}` : '-'}
+                                  </td>
+                                  <td className="px-2 py-1.5 text-right text-xs text-emerald-600">
+                                    {d.addition > 0 ? `৳${d.addition.toLocaleString()}` : '-'}
+                                  </td>
                                 </tr>
                               );
                             })
                         )}
                       </tbody>
+                      {breakdown.length > 0 && (
+                        <tfoot>
+                          <tr className="bg-muted/50 font-semibold">
+                            <td colSpan={4} className="px-2 py-2 text-xs text-right">{bn ? 'মোট' : 'Total'}</td>
+                            <td className="px-2 py-2 text-right text-xs text-red-600">৳{totalDeduction.toLocaleString()}</td>
+                            <td className="px-2 py-2 text-right text-xs text-emerald-600">৳{totalAddition.toLocaleString()}</td>
+                          </tr>
+                        </tfoot>
+                      )}
                     </table>
                   </div>
                 </div>
