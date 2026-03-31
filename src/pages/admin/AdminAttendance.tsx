@@ -112,9 +112,14 @@ const AdminAttendance = () => {
       }
     }
 
-    // All students tab: filter by division/class only
-    if (studentSubTab === 'all' && selectedDivisionId && selectedDivisionId !== 'all') {
-      filtered = filtered.filter((s: any) => s.division_id === selectedDivisionId);
+    // All students tab: filter by session year + division/class
+    if (studentSubTab === 'all') {
+      if (selectedSessionYear) {
+        filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
+      }
+      if (selectedDivisionId && selectedDivisionId !== 'all') {
+        filtered = filtered.filter((s: any) => s.division_id === selectedDivisionId);
+      }
     }
 
     return filtered;
@@ -336,6 +341,18 @@ const AdminAttendance = () => {
                   </TabsList>
                 </Tabs>
 
+                {/* Session Year (both tabs) */}
+                <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
+                  <SelectTrigger className="w-36 h-8 text-xs">
+                    <SelectValue placeholder={bn ? 'সেশন ইয়ার' : 'Session Year'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sessionYears.map((sy: any) => (
+                      <SelectItem key={sy} value={sy}>{sy}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 {/* Division/Class filter (for 'all' sub-tab) */}
                 {studentSubTab === 'all' && (
                   <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
@@ -346,20 +363,6 @@ const AdminAttendance = () => {
                       <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Classes'}</SelectItem>
                       {divisions.map((d: any) => (
                         <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {/* Session Year (for 'residential' sub-tab only) */}
-                {studentSubTab === 'residential' && (
-                  <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
-                    <SelectTrigger className="w-36 h-8 text-xs">
-                      <SelectValue placeholder={bn ? 'সেশন ইয়ার' : 'Session Year'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sessionYears.map((sy: any) => (
-                        <SelectItem key={sy} value={sy}>{sy}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
