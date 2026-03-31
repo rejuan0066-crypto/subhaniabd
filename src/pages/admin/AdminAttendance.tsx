@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTimeFormat, formatTimeDisplay } from '@/hooks/useTimeFormat';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -36,6 +37,8 @@ const AdminAttendance = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { timeFormat, setTimeFormat } = useTimeFormat();
+  const fmt = (t: string) => formatTimeDisplay(t, timeFormat);
 
   const [entityType, setEntityType] = useState<'student' | 'staff'>('student');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -373,6 +376,18 @@ const AdminAttendance = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              {/* Time Format Toggle */}
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
+                <div>
+                  <p className="text-sm font-medium">{bn ? 'টাইম ফরম্যাট' : 'Time Format'}</p>
+                  <p className="text-[10px] text-muted-foreground">{timeFormat === '12h' ? '12-hour (AM/PM)' : '24-hour'}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">12h</span>
+                  <Switch checked={timeFormat === '24h'} onCheckedChange={c => setTimeFormat.mutate(c ? '24h' : '12h')} />
+                  <span className="text-xs text-muted-foreground">24h</span>
+                </div>
+              </div>
               {/* Existing Rules */}
               <div className="space-y-2">
                 {rules.map((rule: any) => {
