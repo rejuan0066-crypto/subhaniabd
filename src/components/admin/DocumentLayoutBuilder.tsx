@@ -73,6 +73,14 @@ const CATEGORIES = [
   { value: 'donation', label: 'General Donation Receipt', label_bn: 'সাধারণ দান রসিদ' },
 ];
 
+const FIELD_TYPE_MAP: Record<string, LayoutField['type']> = {
+  text: 'text', number: 'number', textarea: 'textarea', select: 'select',
+  radio: 'select', checkbox: 'select', file: 'photo', date: 'date',
+  switch: 'toggle', email: 'email', phone: 'phone',
+  address_permanent: 'text', address_present: 'text', post_office: 'text',
+  village: 'text', nid: 'text', identity_card: 'text',
+};
+
 const DocumentLayoutBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -87,6 +95,7 @@ const DocumentLayoutBuilder = () => {
   const [formCategory, setFormCategory] = useState('student');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('sections');
+  const [importingForm, setImportingForm] = useState(false);
 
   const { data: layouts = [], isLoading } = useQuery({
     queryKey: ['document_layouts'],
