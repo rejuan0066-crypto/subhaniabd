@@ -23,7 +23,7 @@ import { CSS } from '@dnd-kit/utilities';
 import {
   Plus, Edit2, Trash2, GripVertical, Eye, Copy,
   Type, Hash, ListOrdered, CheckSquare, CircleDot,
-  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone,
+  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone, CreditCard,
   ChevronDown, FolderOpen
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -58,6 +58,7 @@ const FIELD_TYPES = [
   { value: 'address_present', label: 'Present Address', label_bn: 'বর্তমান ঠিকানা', icon: MapPin },
   { value: 'post_office', label: 'Post Office', label_bn: 'পোস্ট অফিস', icon: Mail },
   { value: 'village', label: 'Village', label_bn: 'গ্রাম', icon: MapPin },
+  { value: 'nid', label: 'NID', label_bn: 'এনআইডি (NID)', icon: CreditCard },
 ];
 
 type FormData = {
@@ -819,6 +820,7 @@ const AdminFormBuilder = () => {
                     {field.field_type === 'switch' && <Switch />}
                     {field.field_type === 'post_office' && <Input placeholder={bn ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} />}
                     {field.field_type === 'village' && <Input placeholder={bn ? 'গ্রাম লিখুন' : 'Enter village'} />}
+                    {field.field_type === 'nid' && <Input placeholder={bn ? '১০ বা ১৭ ডিজিট NID' : '10 or 17 digit NID'} maxLength={17} onChange={e => { const cleaned = e.target.value.replace(/\D/g, ''); e.target.value = cleaned; updatePreviewValue(field.id, cleaned); }} />}
                     {field.field_type === 'address_permanent' && (
                       <AddressFields
                         label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'}

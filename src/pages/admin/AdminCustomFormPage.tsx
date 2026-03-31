@@ -178,6 +178,22 @@ const AdminCustomFormPage = () => {
                       {field.field_type === 'switch' && <Switch checked={!!value} onCheckedChange={c => updateValue(field.id, c)} />}
                       {field.field_type === 'post_office' && <Input placeholder={bn ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} value={value} onChange={e => updateValue(field.id, e.target.value)} />}
                       {field.field_type === 'village' && <Input placeholder={bn ? 'গ্রাম লিখুন' : 'Enter village'} value={value} onChange={e => updateValue(field.id, e.target.value)} />}
+                      {field.field_type === 'nid' && (() => {
+                        const nidVal = String(value || '');
+                        const nidErr = nidVal.length > 0 && nidVal.length !== 10 && nidVal.length !== 17;
+                        return (
+                          <div>
+                            <Input
+                              placeholder={bn ? '১০ বা ১৭ ডিজিট NID' : '10 or 17 digit NID'}
+                              maxLength={17}
+                              className={nidErr ? 'border-destructive' : ''}
+                              value={nidVal}
+                              onChange={e => { const cleaned = e.target.value.replace(/\D/g, ''); updateValue(field.id, cleaned); }}
+                            />
+                            {nidErr && <p className="text-xs text-destructive mt-1">{bn ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits'}</p>}
+                          </div>
+                        );
+                      })()}
                       {field.field_type === 'address_permanent' && (
                         <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={(data) => { setPermanentAddr(data); if (sameAsPermanent) setPresentAddr(data); }} />
                       )}
