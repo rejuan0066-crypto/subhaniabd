@@ -23,7 +23,7 @@ import { CSS } from '@dnd-kit/utilities';
 import {
   Plus, Edit2, Trash2, GripVertical, Eye, Copy,
   Type, Hash, ListOrdered, CheckSquare, CircleDot,
-  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone,
+  Upload, Calendar, ToggleLeft, FileText, MapPin, Mail, Phone, CreditCard,
   ChevronDown, FolderOpen
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
