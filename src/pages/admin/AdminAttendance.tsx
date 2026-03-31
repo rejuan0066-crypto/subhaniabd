@@ -61,6 +61,10 @@ const AdminAttendance = () => {
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
   const [ruleForm, setRuleForm] = useState({ name: '', name_bn: '', entity_type: 'student', config: { color: 'green', counts_as: 'present' } });
+  const [dutyTimes, setDutyTimes] = useState({
+    morning_start: '06:00', morning_end: '08:00',
+    evening_start: '17:00', evening_end: '19:00',
+  });
 
   // Fetch divisions
   const { data: divisions = [] } = useQuery({
