@@ -694,6 +694,30 @@ const DocumentLayoutBuilder = () => {
 
                   {/* Footer Tab */}
                   <TabsContent value="footer" className="space-y-3 mt-3">
+                    {/* Custom Note */}
+                    <Card><CardContent className="p-3 space-y-3">
+                      <h4 className="font-semibold text-sm">{bn ? 'কাস্টম নোট/বার্তা' : 'Custom Note/Message'}</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>{bn ? 'নোট (EN)' : 'Note (EN)'}</Label><Textarea value={config.footer.customNote} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, customNote: e.target.value } }))} className="text-xs h-16" placeholder={bn ? 'যেকোনো কাস্টম বার্তা...' : 'Any custom message...'} /></div>
+                        <div><Label>{bn ? 'নোট (BN)' : 'Note (BN)'}</Label><Textarea value={config.footer.customNote_bn} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, customNote_bn: e.target.value } }))} className="text-xs h-16" placeholder={bn ? 'বাংলায় বার্তা...' : 'Bangla message...'} /></div>
+                      </div>
+                    </CardContent></Card>
+
+                    {/* Address & Contact */}
+                    <Card><CardContent className="p-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm">{bn ? 'ঠিকানা ও যোগাযোগ' : 'Address & Contact'}</h4>
+                        <div className="flex items-center gap-2"><Switch checked={config.footer.showAddress} onCheckedChange={v => setConfig(c => ({ ...c, footer: { ...c.footer, showAddress: v } }))} /><Label className="text-xs">{bn ? 'দেখান' : 'Show'}</Label></div>
+                      </div>
+                      {config.footer.showAddress && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div><Label>{bn ? 'ঠিকানা' : 'Address'}</Label><Input value={config.footer.addressText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, addressText: e.target.value } }))} className="text-xs" placeholder={bn ? 'প্রতিষ্ঠানের ঠিকানা' : 'Institution address'} /></div>
+                          <div><Label>{bn ? 'যোগাযোগ' : 'Contact'}</Label><Input value={config.footer.contactText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, contactText: e.target.value } }))} className="text-xs" placeholder={bn ? 'ফোন, ইমেইল' : 'Phone, Email'} /></div>
+                        </div>
+                      )}
+                    </CardContent></Card>
+
+                    {/* Terms & Copyright */}
                     <Card><CardContent className="p-3 space-y-3">
                       <h4 className="font-semibold text-sm">{bn ? 'শর্তাবলী ও কপিরাইট' : 'Terms & Copyright'}</h4>
                       <div className="grid grid-cols-2 gap-3">
@@ -701,6 +725,14 @@ const DocumentLayoutBuilder = () => {
                         <div><Label>Terms (BN)</Label><Textarea value={config.footer.termsText_bn} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, termsText_bn: e.target.value } }))} className="text-xs h-16" /></div>
                       </div>
                       <div><Label>Copyright</Label><Input value={config.footer.copyrightText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, copyrightText: e.target.value } }))} className="text-xs" /></div>
+                    </CardContent></Card>
+
+                    {/* Page Number */}
+                    <Card><CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        <Switch checked={config.footer.showPageNumber} onCheckedChange={v => setConfig(c => ({ ...c, footer: { ...c.footer, showPageNumber: v } }))} />
+                        <Label className="text-sm">{bn ? 'পেইজ নম্বর দেখান' : 'Show Page Number'}</Label>
+                      </div>
                     </CardContent></Card>
                   </TabsContent>
 
