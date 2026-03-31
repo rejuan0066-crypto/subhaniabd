@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
-  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon
+  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee
 } from 'lucide-react';
 
 const STATUS_ICONS: Record<string, any> = {
@@ -32,10 +32,15 @@ const STATUS_COLORS: Record<string, string> = {
   leave: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
-const SHIFTS = [
-  { value: 'morning', labelBn: 'সকাল', labelEn: 'Morning', icon: Sun },
-  { value: 'afternoon', labelBn: 'দুপুর', labelEn: 'Afternoon', icon: Sunset },
-  { value: 'evening', labelBn: 'সন্ধ্যা', labelEn: 'Evening', icon: Moon },
+const DUTY_SHIFTS = [
+  { value: 'morning', labelBn: 'সকাল ডিউটি', labelEn: 'Morning Duty', icon: Sun },
+  { value: 'evening', labelBn: 'সন্ধ্যা ডিউটি', labelEn: 'Evening Duty', icon: Moon },
+];
+
+const MEAL_SHIFTS = [
+  { value: 'meal_breakfast', labelBn: 'সকালের নাস্তা', labelEn: 'Breakfast', icon: Coffee },
+  { value: 'meal_lunch', labelBn: 'দুপুরের খাবার', labelEn: 'Lunch', icon: Utensils },
+  { value: 'meal_dinner', labelBn: 'রাতের খাবার', labelEn: 'Dinner', icon: Utensils },
 ];
 
 const AdminAttendance = () => {
@@ -47,6 +52,7 @@ const AdminAttendance = () => {
 
   const [entityType, setEntityType] = useState<'student' | 'staff'>('student');
   const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential'>('all');
+  const [staffSubTab, setStaffSubTab] = useState<'duty' | 'meal'>('duty');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSessionYear, setSelectedSessionYear] = useState('');
@@ -100,8 +106,13 @@ const AdminAttendance = () => {
 
   // Filter students based on sub-tab and filters
   const entities = useMemo(() => {
-    if (entityType === 'staff') return allStaff;
-
+    if (entityType === 'staff') {
+      // Meal tab: only residential staff
+      if (staffSubTab === 'meal') {
+        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+      }
+      return allStaff;
+    }
     let filtered = allStudents;
 
     // Residential sub-tab: only residential students with session year filter
@@ -379,9 +390,22 @@ const AdminAttendance = () => {
             {/* Staff Shift Selector */}
             {entityType === 'staff' && (
               <div className="flex flex-wrap gap-3 items-center">
+                {/* Staff Sub-tabs: Duty / Meal */}
+                <Tabs value={staffSubTab} onValueChange={(v) => { setStaffSubTab(v as any); setSelectedShift(v === 'duty' ? 'morning' : 'meal_breakfast'); }} className="shrink-0">
+                  <TabsList className="h-8">
+                    <TabsTrigger value="duty" className="text-xs h-7 px-3">
+                      <Clock className="h-3 w-3 mr-1" /> {bn ? 'ডিউটি হাজিরা' : 'Duty Attendance'}
+                    </TabsTrigger>
+                    <TabsTrigger value="meal" className="text-xs h-7 px-3">
+                      <Utensils className="h-3 w-3 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal Attendance'}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {/* Shift selector based on sub-tab */}
                 <Tabs value={selectedShift} onValueChange={setSelectedShift} className="shrink-0">
                   <TabsList className="h-8">
-                    {SHIFTS.map(sh => (
+                    {(staffSubTab === 'duty' ? DUTY_SHIFTS : MEAL_SHIFTS).map(sh => (
                       <TabsTrigger key={sh.value} value={sh.value} className="text-xs h-7 px-3">
                         <sh.icon className="h-3 w-3 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
                       </TabsTrigger>
