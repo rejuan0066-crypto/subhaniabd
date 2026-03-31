@@ -128,6 +128,24 @@ const DocumentLayoutBuilder = () => {
   const dragSectionRef = useRef<number | null>(null);
   const [dragOverField, setDragOverField] = useState<{ sectionId: string; fieldIndex: number } | null>(null);
   const [dragOverSection, setDragOverSection] = useState<number | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const autoScrollRAF = useRef<number | null>(null);
+
+  // Auto-scroll during drag near edges
+  const handleDragAutoScroll = (e: DragEvent) => {
+    if (!scrollAreaRef.current) return;
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const edgeSize = 60;
+    const speed = 12;
+    let scrollDir = 0;
+    if (e.clientY < rect.top + edgeSize) scrollDir = -speed;
+    else if (e.clientY > rect.bottom - edgeSize) scrollDir = speed;
+    if (scrollDir !== 0) {
+      viewport.scrollTop += scrollDir;
+    }
+  };
 
   const { data: layouts = [], isLoading } = useQuery({
     queryKey: ['document_layouts'],
@@ -229,6 +247,7 @@ const DocumentLayoutBuilder = () => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverField({ sectionId, fieldIndex });
+    handleDragAutoScroll(e);
   };
   const handleFieldDrop = (e: DragEvent, targetSectionId: string, targetIndex: number) => {
     e.preventDefault();
@@ -532,7 +551,7 @@ const DocumentLayoutBuilder = () => {
             <DialogDescription>{bn ? 'ফর্ম বা রসিদের লেআউট ডিজাইন করুন' : 'Design your form or receipt layout'}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col lg:flex-row h-[calc(90vh-130px)]">
-            <ScrollArea className="w-full lg:w-1/2 border-r border-border">
+            <ScrollArea ref={scrollAreaRef} className="w-full lg:w-1/2 border-r border-border">
               <div className="p-4 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label>{bn ? 'নাম (EN)' : 'Name (EN)'}</Label><Input value={formName} onChange={e => setFormName(e.target.value)} /></div>
