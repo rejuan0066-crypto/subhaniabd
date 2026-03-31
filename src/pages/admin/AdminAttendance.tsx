@@ -111,6 +111,11 @@ const AdminAttendance = () => {
       if (staffSubTab === 'meal') {
         return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
       }
+      // Duty tab: only residential staff (সকাল/সন্ধ্যা ডিউটি আবাসিকদের জন্য)
+      if (staffSubTab === 'duty') {
+        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+      }
+      // Full-time: all staff
       return allStaff;
     }
     let filtered = allStudents;
