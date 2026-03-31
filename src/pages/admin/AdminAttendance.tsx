@@ -177,7 +177,41 @@ const AdminAttendance = () => {
     },
   });
 
-  const statusOptions = useMemo(() => {
+  // Fetch residential duty times
+  const { data: savedDutyTimes } = useQuery({
+    queryKey: ['residential-duty-times'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'residential_duty_times').maybeSingle();
+      return data?.value as any;
+    },
+  });
+
+  // Sync loaded duty times to state
+  useMemo(() => {
+    if (savedDutyTimes) {
+      setDutyTimes({
+        morning_start: savedDutyTimes.morning_start || '06:00',
+        morning_end: savedDutyTimes.morning_end || '08:00',
+        evening_start: savedDutyTimes.evening_start || '17:00',
+        evening_end: savedDutyTimes.evening_end || '19:00',
+      });
+    }
+  }, [savedDutyTimes]);
+
+  const saveDutyTimesMutation = useMutation({
+    mutationFn: async (times: typeof dutyTimes) => {
+      const { error } = await supabase.from('website_settings').upsert(
+        { key: 'residential_duty_times', value: times, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['residential-duty-times'] });
+      toast.success(bn ? 'ডিউটি টাইম সেভ হয়েছে' : 'Duty times saved');
+    },
+  });
+
     return rules.filter((r: any) => r.entity_type === entityType && r.rule_type === 'status' && r.is_active);
   }, [rules, entityType]);
 
