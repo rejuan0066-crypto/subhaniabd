@@ -388,7 +388,7 @@ const FeePaymentPage = () => {
           </div>
         )}
       </div>
-    </PublicLayout>
+    </AdminLayout>
   );
 };
 
