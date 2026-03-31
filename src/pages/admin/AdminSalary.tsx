@@ -1104,6 +1104,104 @@ const AdminSalary = () => {
             </Tabs>
           </DialogContent>
         </Dialog>
+        {/* Attendance Detail Dialog */}
+        <Dialog open={!!attendanceDetailDialog} onOpenChange={() => setAttendanceDetailDialog(null)}>
+          <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                <Users className="h-5 w-5 inline mr-2" />
+                {attendanceDetailDialog?.staff?.name_bn} - {bn ? 'মাসিক উপস্থিতি' : 'Monthly Attendance'}
+              </DialogTitle>
+            </DialogHeader>
+            {attendanceDetailDialog && (() => {
+              const staffId = attendanceDetailDialog.staff.id;
+              const records = attendanceData.filter((a: any) => a.entity_id === staffId);
+              const stats = attendanceDetailDialog.stats;
+              
+              const STATUS_LABEL: Record<string, { bn: string; en: string; color: string }> = {
+                present: { bn: 'উপস্থিত', en: 'Present', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                absent: { bn: 'অনুপস্থিত', en: 'Absent', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+                late: { bn: 'বিলম্ব', en: 'Late', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                half_day: { bn: 'অর্ধদিন', en: 'Half Day', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+                leave: { bn: 'ছুটি', en: 'Leave', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+              };
+
+              return (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, color: 'text-emerald-600' },
+                      { label: bn ? 'অনুপস্থিত' : 'Absent', value: stats.absent, color: 'text-red-500' },
+                      { label: bn ? 'বিলম্ব' : 'Late', value: stats.late, color: 'text-yellow-600' },
+                      { label: bn ? 'অর্ধদিন' : 'Half Day', value: stats.halfDay, color: 'text-orange-600' },
+                    ].map((s, i) => (
+                      <div key={i} className="text-center p-2 border rounded-lg">
+                        <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                        <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Minute Stats */}
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 border rounded-lg flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-red-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'মোট মিসড মিনিট' : 'Total Missed Min'}</p>
+                        <p className="font-semibold">{stats.totalMissedMinutes} {bn ? 'মিনিট' : 'min'}</p>
+                      </div>
+                    </div>
+                    <div className="p-2 border rounded-lg flex items-center gap-2">
+                      <Timer className="h-4 w-4 text-blue-500" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'মোট ওভারটাইম' : 'Total Overtime'}</p>
+                        <p className="font-semibold">{stats.totalOvertimeMinutes} {bn ? 'মিনিট' : 'min'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daily Records */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/50 border-b">
+                          <th className="px-3 py-2 text-left text-xs">{bn ? 'তারিখ' : 'Date'}</th>
+                          <th className="px-3 py-2 text-center text-xs">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                          <th className="px-3 py-2 text-center text-xs">{bn ? 'ইন' : 'In'}</th>
+                          <th className="px-3 py-2 text-center text-xs">{bn ? 'আউট' : 'Out'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {records.length === 0 ? (
+                          <tr><td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                            {bn ? 'এই মাসে কোনো উপস্থিতি রেকর্ড নেই' : 'No attendance records this month'}
+                          </td></tr>
+                        ) : (
+                          records
+                            .sort((a: any, b: any) => a.attendance_date.localeCompare(b.attendance_date))
+                            .map((r: any) => {
+                              const sl = STATUS_LABEL[r.status] || { bn: r.status, en: r.status, color: 'bg-muted' };
+                              return (
+                                <tr key={r.id} className="border-b hover:bg-muted/30">
+                                  <td className="px-3 py-1.5">{new Date(r.attendance_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { day: 'numeric', month: 'short' })}</td>
+                                  <td className="px-3 py-1.5 text-center">
+                                    <Badge className={`${sl.color} text-[10px]`}>{bn ? sl.bn : sl.en}</Badge>
+                                  </td>
+                                  <td className="px-3 py-1.5 text-center text-xs">{r.check_in_time ? formatTime12h(r.check_in_time) : '-'}</td>
+                                  <td className="px-3 py-1.5 text-center text-xs">{r.check_out_time ? formatTime12h(r.check_out_time) : '-'}</td>
+                                </tr>
+                              );
+                            })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
