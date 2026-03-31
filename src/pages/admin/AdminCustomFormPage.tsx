@@ -253,22 +253,29 @@ const AdminCustomFormPage = () => {
                         const cardVal = String(value || '');
                         const numOnly = cardVal.replace(/\D/g, '');
                         
-                        // Default card types if no options configured
-                        const defaultCardTypes = [
-                          { value: 'nid', label: bn ? 'এনআইডি' : 'NID', digits: '10,17', msg: bn ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits' },
-                          { value: 'birth_cert', label: bn ? 'জন্ম নিবন্ধন' : 'Birth Certificate', digits: '17', msg: bn ? 'জন্ম নিবন্ধন অবশ্যই ১৭ ডিজিট হতে হবে' : 'Birth certificate must be 17 digits' },
-                          { value: 'passport', label: bn ? 'পাসপোর্ট' : 'Passport', digits: '7-9', msg: bn ? 'পাসপোর্ট ৭-৯ ডিজিট হতে হবে' : 'Passport must be 7-9 digits' },
-                          { value: 'driving', label: bn ? 'ড্রাইভিং লাইসেন্স' : 'Driving License', digits: '10-15', msg: bn ? 'ড্রাইভিং লাইসেন্স ১০-১৫ ডিজিট হতে হবে' : 'Driving license must be 10-15 digits' },
-                        ];
+                        // Read saved card_rules from field validation
+                        const fieldValidation = typeof field.validation === 'string' ? (() => { try { return JSON.parse(field.validation); } catch { return {}; } })() : (field.validation || {});
+                        const savedRules = fieldValidation?.rules?.card_rules || fieldValidation?.card_rules || {};
 
-                        // Use custom options if configured, otherwise defaults
-                        const cardTypes = opts.length > 0 
-                          ? opts.map(opt => {
-                              // Check if option matches a known type
-                              const known = defaultCardTypes.find(d => d.value === opt.toLowerCase().replace(/\s+/g, '_') || d.label.toLowerCase() === opt.toLowerCase());
-                              return known || { value: opt, label: opt, digits: '', msg: '' };
-                            })
-                          : defaultCardTypes;
+                        // Build card types from saved rules (with fallback defaults)
+                        const defaultDefs: Record<string, { label: string; labelBn: string; digits: string; msg: string; msgBn: string }> = {
+                          nid: { label: 'NID', labelBn: 'এনআইডি', digits: '10,17', msg: 'NID must be 10 or 17 digits', msgBn: 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' },
+                          birth_cert: { label: 'Birth Certificate', labelBn: 'জন্ম নিবন্ধন', digits: '17', msg: 'Birth certificate must be 17 digits', msgBn: 'জন্ম নিবন্ধন অবশ্যই ১৭ ডিজিট হতে হবে' },
+                          passport: { label: 'Passport', labelBn: 'পাসপোর্ট', digits: '7-9', msg: 'Passport must be 7-9 digits', msgBn: 'পাসপোর্ট ৭-৯ ডিজিট হতে হবে' },
+                          driving: { label: 'Driving License', labelBn: 'ড্রাইভিং লাইসেন্স', digits: '10-15', msg: 'Driving license must be 10-15 digits', msgBn: 'ড্রাইভিং লাইসেন্স ১০-১৫ ডিজিট হতে হবে' },
+                        };
+
+                        const cardKeys = Object.keys(savedRules).length > 0 ? Object.keys(savedRules) : Object.keys(defaultDefs);
+                        const cardTypes = cardKeys.map(key => {
+                          const saved = savedRules[key];
+                          const def = defaultDefs[key];
+                          return {
+                            value: key,
+                            label: saved?.label || (bn ? def?.labelBn : def?.label) || key,
+                            digits: saved?.digits || def?.digits || '',
+                            msg: bn ? (saved?.error_message_bn || def?.msgBn || '') : (saved?.error_message || def?.msg || ''),
+                          };
+                        });
 
                         let cardErr = '';
                         if (numOnly.length > 0 && !cardType) {
