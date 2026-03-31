@@ -222,7 +222,6 @@ const AdminSalary = () => {
       scheduledMinutesPerDay, dailyBreakdown, perMinuteRate, dailyRate,
     };
   };
-  };
 
   // Evaluate a formula expression safely
   const evaluateFormula = (formulaStr: string, vars: Record<string, number>): number => {
