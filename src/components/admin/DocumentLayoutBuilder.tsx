@@ -215,6 +215,8 @@ const DocumentLayoutBuilder = () => {
   const addField = (sid: string) => setConfig(c => ({ ...c, sections: c.sections.map(s => s.id === sid ? { ...s, fields: [...s.fields, { id: uid(), label: 'New Field', label_bn: 'নতুন ফিল্ড', type: 'text', required: false, show: true, width: 'half' }] } : s) }));
   const removeField = (sid: string, fid: string) => setConfig(c => ({ ...c, sections: c.sections.map(s => s.id === sid ? { ...s, fields: s.fields.filter(f => f.id !== fid) } : s) }));
   const updateField = (sid: string, fid: string, key: string, val: any) => setConfig(c => ({ ...c, sections: c.sections.map(s => s.id === sid ? { ...s, fields: s.fields.map(f => f.id === fid ? { ...f, [key]: val } : f) } : s) }));
+  const updateFieldStyle = (sid: string, fid: string, key: string, val: any) => setConfig(c => ({ ...c, sections: c.sections.map(s => s.id === sid ? { ...s, fields: s.fields.map(f => f.id === fid ? { ...f, style: { ...f.style, [key]: val } } : f) } : s) }));
+  const updateFieldOptions = (sid: string, fid: string, options: string[]) => updateField(sid, fid, 'options', options);
 
   // Drag & Drop - Fields
   const handleFieldDragStart = (e: DragEvent, sectionId: string, fieldIndex: number) => {
