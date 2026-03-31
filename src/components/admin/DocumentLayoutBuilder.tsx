@@ -46,7 +46,7 @@ interface HeaderConfig {
 }
 interface LayoutConfig {
   header: HeaderConfig;
-  footer: { signatures: SignatureLine[]; termsText: string; termsText_bn: string; copyrightText: string; };
+  footer: { signatures: SignatureLine[]; termsText: string; termsText_bn: string; copyrightText: string; customNote: string; customNote_bn: string; showAddress: boolean; showPageNumber: boolean; addressText: string; contactText: string; };
   sections: LayoutSection[]; receiptRows: ReceiptRow[];
   showFields: { studentId: boolean; date: boolean; amountInWords: boolean; receiptNo: boolean; };
 }
