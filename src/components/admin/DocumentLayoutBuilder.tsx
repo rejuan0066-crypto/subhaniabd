@@ -1,4 +1,4 @@
-import React, { useState, useRef, DragEvent } from 'react';
+import React, { useEffect, useState, useRef, DragEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -129,23 +129,51 @@ const DocumentLayoutBuilder = () => {
   const [dragOverField, setDragOverField] = useState<{ sectionId: string; fieldIndex: number } | null>(null);
   const [dragOverSection, setDragOverSection] = useState<number | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const autoScrollRAF = useRef<number | null>(null);
 
-  // Auto-scroll during drag near edges
-  const handleDragAutoScroll = (e: DragEvent) => {
+  const handleDragAutoScroll = (clientY: number) => {
     if (!scrollAreaRef.current) return;
-    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
     if (!viewport) return;
+
     const rect = viewport.getBoundingClientRect();
-    const edgeSize = 60;
-    const speed = 12;
-    let scrollDir = 0;
-    if (e.clientY < rect.top + edgeSize) scrollDir = -speed;
-    else if (e.clientY > rect.bottom - edgeSize) scrollDir = speed;
-    if (scrollDir !== 0) {
-      viewport.scrollTop += scrollDir;
+    const edgeSize = 88;
+    const maxSpeed = 20;
+    let delta = 0;
+
+    if (clientY < rect.top + edgeSize) {
+      const intensity = Math.min(1, (rect.top + edgeSize - clientY) / edgeSize);
+      delta = -Math.max(8, Math.round(maxSpeed * intensity));
+    } else if (clientY > rect.bottom - edgeSize) {
+      const intensity = Math.min(1, (clientY - (rect.bottom - edgeSize)) / edgeSize);
+      delta = Math.max(8, Math.round(maxSpeed * intensity));
+    }
+
+    if (delta !== 0) {
+      viewport.scrollTop += delta;
     }
   };
+
+  useEffect(() => {
+    const onWindowDragOver = (event: globalThis.DragEvent) => {
+      if (!dragFieldRef.current) return;
+      handleDragAutoScroll(event.clientY);
+    };
+
+    const resetFieldDrag = () => {
+      dragFieldRef.current = null;
+      setDragOverField(null);
+    };
+
+    window.addEventListener('dragover', onWindowDragOver);
+    window.addEventListener('drop', resetFieldDrag);
+    window.addEventListener('dragend', resetFieldDrag);
+
+    return () => {
+      window.removeEventListener('dragover', onWindowDragOver);
+      window.removeEventListener('drop', resetFieldDrag);
+      window.removeEventListener('dragend', resetFieldDrag);
+    };
+  }, []);
 
   const { data: layouts = [], isLoading } = useQuery({
     queryKey: ['document_layouts'],
