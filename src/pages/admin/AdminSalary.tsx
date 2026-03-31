@@ -1309,3 +1309,4 @@ const AdminSalary = () => {
 };
 
 export default AdminSalary;
+
