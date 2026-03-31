@@ -766,7 +766,7 @@ const AdminFormBuilder = () => {
                             <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
                               <Label className="font-semibold">{bn ? 'ভ্যালিডেশন নিয়ম' : 'Validation Rules'}</Label>
                               <div className="grid grid-cols-2 gap-3">
-                                {['text', 'textarea', 'email', 'phone', 'nid'].includes(fieldData.field_type) && (
+                                {['text', 'textarea', 'email', 'phone', 'nid', 'identity_card'].includes(fieldData.field_type) && (
                                   <>
                                     <div>
                                       <Label className="text-xs">{bn ? 'সর্বনিম্ন অক্ষর' : 'Min Length'}</Label>
