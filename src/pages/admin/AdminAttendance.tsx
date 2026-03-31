@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
-  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon
+  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee
 } from 'lucide-react';
 
 const STATUS_ICONS: Record<string, any> = {
@@ -32,10 +32,15 @@ const STATUS_COLORS: Record<string, string> = {
   leave: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
 };
 
-const SHIFTS = [
-  { value: 'morning', labelBn: 'সকাল', labelEn: 'Morning', icon: Sun },
-  { value: 'afternoon', labelBn: 'দুপুর', labelEn: 'Afternoon', icon: Sunset },
-  { value: 'evening', labelBn: 'সন্ধ্যা', labelEn: 'Evening', icon: Moon },
+const DUTY_SHIFTS = [
+  { value: 'morning', labelBn: 'সকাল ডিউটি', labelEn: 'Morning Duty', icon: Sun },
+  { value: 'evening', labelBn: 'সন্ধ্যা ডিউটি', labelEn: 'Evening Duty', icon: Moon },
+];
+
+const MEAL_SHIFTS = [
+  { value: 'meal_breakfast', labelBn: 'সকালের নাস্তা', labelEn: 'Breakfast', icon: Coffee },
+  { value: 'meal_lunch', labelBn: 'দুপুরের খাবার', labelEn: 'Lunch', icon: Utensils },
+  { value: 'meal_dinner', labelBn: 'রাতের খাবার', labelEn: 'Dinner', icon: Utensils },
 ];
 
 const AdminAttendance = () => {
