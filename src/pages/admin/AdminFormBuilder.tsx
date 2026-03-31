@@ -58,6 +58,7 @@ const FIELD_TYPES = [
   { value: 'address_present', label: 'Present Address', label_bn: 'বর্তমান ঠিকানা', icon: MapPin },
   { value: 'post_office', label: 'Post Office', label_bn: 'পোস্ট অফিস', icon: Mail },
   { value: 'village', label: 'Village', label_bn: 'গ্রাম', icon: MapPin },
+  { value: 'nid', label: 'NID', label_bn: 'এনআইডি (NID)', icon: CreditCard },
 ];
 
 type FormData = {
