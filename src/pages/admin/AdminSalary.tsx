@@ -171,27 +171,44 @@ const AdminSalary = () => {
     const dailyBreakdown: Array<{
       date: string; status: string; checkIn: string; checkOut: string;
       lateMin: number; earlyMin: number; overtimeMin: number;
-      deduction: number; addition: number;
+      deduction: number; addition: number; dailyEarning: number;
     }> = [];
 
     const baseSalary = Number(staffMember.salary) || 0;
     const dailyRate = baseSalary / 30;
     const perMinuteRate = scheduledMinutesPerDay > 0 ? dailyRate / scheduledMinutesPerDay : 0;
 
+    // Additive: each day's earning based on status
+    let totalDailyEarnings = 0;
+
     records.forEach((r: any) => {
       const entry: any = {
         date: r.attendance_date, status: r.status,
         checkIn: r.check_in_time || '', checkOut: r.check_out_time || '',
-        lateMin: 0, earlyMin: 0, overtimeMin: 0, deduction: 0, addition: 0,
+        lateMin: 0, earlyMin: 0, overtimeMin: 0, deduction: 0, addition: 0, dailyEarning: 0,
       };
 
       if (r.status === 'absent') {
+        // Absent = 0 earning, full day deduction
         entry.deduction = Math.round(dailyRate);
+        entry.dailyEarning = 0;
         dailyBreakdown.push(entry);
         return;
       }
+      
+      if (r.status === 'leave') {
+        // Leave = 0 earning
+        entry.dailyEarning = 0;
+        dailyBreakdown.push(entry);
+        return;
+      }
+
       if (r.status === 'half_day') {
+        entry.dailyEarning = Math.round(dailyRate / 2);
         entry.deduction = Math.round(dailyRate / 2);
+      } else {
+        // present or late: full daily rate
+        entry.dailyEarning = Math.round(dailyRate);
       }
 
       const checkIn = r.check_in_time ? timeToMinutes(r.check_in_time) : dutyStart;
@@ -208,9 +225,16 @@ const AdminSalary = () => {
       entry.lateMin = lateMinutes;
       entry.earlyMin = earlyExitMinutes;
       entry.overtimeMin = overtimeMinutes;
-      entry.deduction += Math.round((lateMinutes + earlyExitMinutes) * perMinuteRate);
+      
+      // Deduct late/early from daily earning
+      const timeDeduction = Math.round((lateMinutes + earlyExitMinutes) * perMinuteRate);
+      entry.deduction += timeDeduction;
+      entry.dailyEarning = Math.max(0, entry.dailyEarning - timeDeduction);
+      
       entry.addition = Math.round(overtimeMinutes * perMinuteRate);
+      entry.dailyEarning += entry.addition;
 
+      totalDailyEarnings += entry.dailyEarning;
       dailyBreakdown.push(entry);
     });
 
@@ -219,7 +243,7 @@ const AdminSalary = () => {
     return {
       present, absent, late, halfDay, leave, total: records.length,
       totalLateArrivalMinutes, totalEarlyExitMinutes, totalMissedMinutes, totalOvertimeMinutes,
-      scheduledMinutesPerDay, dailyBreakdown, perMinuteRate, dailyRate,
+      scheduledMinutesPerDay, dailyBreakdown, perMinuteRate, dailyRate, totalDailyEarnings,
     };
   };
 
