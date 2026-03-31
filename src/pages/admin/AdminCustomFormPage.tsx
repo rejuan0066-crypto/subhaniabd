@@ -287,6 +287,9 @@ const AdminCustomFormPage = () => {
                           );
                         })}</div>
                       )}
+                      {fieldErrors[field.id] && (
+                        <p className="text-xs text-destructive mt-1">{fieldErrors[field.id]}</p>
+                      )}
                     </div>
                   );
                 })}
