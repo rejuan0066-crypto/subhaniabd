@@ -18,8 +18,9 @@ import { toast } from 'sonner';
 import {
   Plus, Trash2, Edit, Copy, FileText, Receipt, Eye, Printer,
   ChevronDown, ChevronUp, X, Type, Calendar, List, Image, Hash,
-  ToggleLeft, Mail, Phone, Pen
+  ToggleLeft, Mail, Phone, Pen, FolderOpen
 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 // ─── Types ───
 interface LayoutField {
