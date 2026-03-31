@@ -95,6 +95,10 @@ const AdminStaffForm = () => {
   const [customReligion, setCustomReligion] = useState('');
   const [nid, setNid] = useState('');
   const [nidError, setNidError] = useState('');
+  const [fatherNidError, setFatherNidError] = useState('');
+  const [motherNidError, setMotherNidError] = useState('');
+  const [guardianNidError, setGuardianNidError] = useState('');
+  const [identifierNidError, setIdentifierNidError] = useState('');
   const [education, setEducation] = useState('');
   const [experience, setExperience] = useState('');
   const [prevInstitute, setPrevInstitute] = useState('');
@@ -848,7 +852,8 @@ const AdminStaffForm = () => {
               <PhoneInput label={bn ? 'পিতার মোবাইল' : 'Father Mobile'} required value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />
               <div>
                 <Label>{bn ? 'পিতার NID' : 'Father NID'} <span className="text-destructive">*</span></Label>
-                <Input className="bg-background mt-1" maxLength={17} value={fatherNid} onChange={e => validateNid(e.target.value, setFatherNid)} />
+                <Input className={`bg-background mt-1 ${fatherNidError ? 'border-destructive' : ''}`} maxLength={17} value={fatherNid} onChange={e => validateNid(e.target.value, setFatherNid, setFatherNidError)} />
+                {fatherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fatherNidError}</p>}
               </div>
               <div>
                 <Label>{bn ? 'পিতার পেশা' : 'Father Occupation'} <span className="text-destructive">*</span></Label>
@@ -862,7 +867,8 @@ const AdminStaffForm = () => {
               <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />
               <div>
                 <Label>{bn ? 'মাতার NID' : 'Mother NID'}</Label>
-                <Input className="bg-background mt-1" maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid)} />
+                <Input className={`bg-background mt-1 ${motherNidError ? 'border-destructive' : ''}`} maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid, setMotherNidError)} />
+                {motherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {motherNidError}</p>}
               </div>
               <div>
                 <Label>{bn ? 'মাতার পেশা' : 'Mother Occupation'}</Label>
@@ -927,7 +933,8 @@ const AdminStaffForm = () => {
                 <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={guardianMobile} countryCode={guardianMobileCode} onChange={(p, c) => { setGuardianMobile(p); setGuardianMobileCode(c); }} />
                 <div>
                   <Label>{bn ? 'NID (১০/১৭ ডিজিট)' : 'NID (10/17 digits)'} <span className="text-destructive">*</span></Label>
-                  <Input className={`bg-background mt-1 ${fieldErrors['guardian_nid'] ? 'border-destructive' : ''}`} maxLength={17} value={guardianNid} onChange={e => validateNid(e.target.value, setGuardianNid)} />
+                  <Input className={`bg-background mt-1 ${fieldErrors['guardian_nid'] || guardianNidError ? 'border-destructive' : ''}`} maxLength={17} value={guardianNid} onChange={e => validateNid(e.target.value, setGuardianNid, setGuardianNidError)} />
+                  {guardianNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {guardianNidError}</p>}
                   <FieldError field="guardian_nid" />
                 </div>
                 <div className="sm:col-span-2">
@@ -963,7 +970,8 @@ const AdminStaffForm = () => {
               <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={identifierMobile} countryCode={identifierMobileCode} onChange={(p, c) => { setIdentifierMobile(p); setIdentifierMobileCode(c); }} />
               <div>
                 <Label>{bn ? 'NID (১০/১৭ ডিজিট)' : 'NID (10/17 digits)'} <span className="text-destructive">*</span></Label>
-                <Input className={`bg-background mt-1 ${fieldErrors['identifier_nid'] ? 'border-destructive' : ''}`} maxLength={17} value={identifierNid} onChange={e => validateNid(e.target.value, setIdentifierNid)} />
+                <Input className={`bg-background mt-1 ${fieldErrors['identifier_nid'] || identifierNidError ? 'border-destructive' : ''}`} maxLength={17} value={identifierNid} onChange={e => validateNid(e.target.value, setIdentifierNid, setIdentifierNidError)} />
+                {identifierNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {identifierNidError}</p>}
                 <FieldError field="identifier_nid" />
               </div>
               <div className="sm:col-span-2">
