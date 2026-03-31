@@ -297,17 +297,39 @@ const AdminSalary = () => {
   // Generate salary sheet mutation
   const generateMutation = useMutation({
     mutationFn: async () => {
+      const requireAttendance = getSetting('require_attendance')?.enabled !== false;
+      const skippedNames: string[] = [];
+
       const records = staff.map((s: any) => {
         const existing = salaryRecords.find((r: any) => r.staff_id === s.id);
         if (existing) return null;
+
+        // Check if attendance exists for this staff
+        if (requireAttendance) {
+          const hasAttendance = attendanceData.some((a: any) => a.entity_id === s.id);
+          if (!hasAttendance) {
+            skippedNames.push(s.name_bn || s.name_en || 'Unknown');
+            return null;
+          }
+        }
+
         const calc = calculateSalary(s);
         return { staff_id: s.id, month_year: monthYear, ...calc, status: 'pending' };
       }).filter(Boolean);
 
-      if (records.length === 0) {
+      if (skippedNames.length > 0) {
+        toast.warning(
+          bn ? `${skippedNames.length} জন স্টাফের উপস্থিতি নেই, বেতন যোগ হয়নি: ${skippedNames.join(', ')}`
+             : `${skippedNames.length} staff skipped (no attendance): ${skippedNames.join(', ')}`,
+          { duration: 6000 }
+        );
+      }
+
+      if (records.length === 0 && skippedNames.length === 0) {
         toast.info(bn ? 'ইতোমধ্যে সব বেতন জেনারেট হয়েছে' : 'All salaries already generated');
         return;
       }
+      if (records.length === 0) return;
 
       const { error } = await supabase.from('salary_records').insert(records);
       if (error) throw error;
