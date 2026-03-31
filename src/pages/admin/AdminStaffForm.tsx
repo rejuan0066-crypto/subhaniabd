@@ -867,7 +867,8 @@ const AdminStaffForm = () => {
               <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />
               <div>
                 <Label>{bn ? 'মাতার NID' : 'Mother NID'}</Label>
-                <Input className="bg-background mt-1" maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid)} />
+                <Input className={`bg-background mt-1 ${motherNidError ? 'border-destructive' : ''}`} maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid, setMotherNidError)} />
+                {motherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {motherNidError}</p>}
               </div>
               <div>
                 <Label>{bn ? 'মাতার পেশা' : 'Mother Occupation'}</Label>
