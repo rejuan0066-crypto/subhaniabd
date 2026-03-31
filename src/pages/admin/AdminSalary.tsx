@@ -902,6 +902,7 @@ const AdminSalary = () => {
             <Tabs value={settingsTab} onValueChange={setSettingsTab}>
               <TabsList className="w-full">
                 <TabsTrigger value="general" className="flex-1">{bn ? 'সাধারণ' : 'General'}</TabsTrigger>
+                <TabsTrigger value="expense" className="flex-1">{bn ? 'খরচ সংযোগ' : 'Expense Link'}</TabsTrigger>
                 <TabsTrigger value="formula" className="flex-1">{bn ? 'ফর্মুলা' : 'Formula'}</TabsTrigger>
               </TabsList>
               <TabsContent value="general" className="space-y-4 mt-4">
@@ -927,6 +928,76 @@ const AdminSalary = () => {
                     onBlur={e => saveSettingMutation.mutate({ key: 'late_deduction_per_day', value: { amount: Number(e.target.value) } })} />
                 </div>
               </TabsContent>
+
+              {/* Expense Link Settings */}
+              <TabsContent value="expense" className="space-y-4 mt-4">
+                <div className="p-3 bg-muted/50 rounded-lg text-sm">
+                  <FolderOpen className="h-4 w-4 inline mr-1 text-primary" />
+                  <span className="font-semibold">{bn ? 'খরচে অটো-সেভ সেটিংস' : 'Auto-Save to Expenses Settings'}</span>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {bn ? 'বেতন পরিশোধ করলে স্বয়ংক্রিয়ভাবে খরচ ব্যবস্থাপনায় সেভ হবে। প্রকল্প ও ক্যাটাগরি নির্বাচন করুন।' 
+                         : 'When salary is paid, it will auto-save to expense management. Select project & category.'}
+                  </p>
+                </div>
+
+                <div>
+                  <Label>{bn ? 'প্রকল্প (Project)' : 'Expense Project'}</Label>
+                  <Select
+                    value={getSetting('expense_location')?.project_id || ''}
+                    onValueChange={v => {
+                      const current = getSetting('expense_location') || {};
+                      saveSettingMutation.mutate({ key: 'expense_location', value: { ...current, project_id: v } });
+                    }}
+                  >
+                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
+                    <SelectContent>
+                      {expenseProjects.map((p: any) => (
+                        <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label>{bn ? 'ক্যাটাগরি (Category)' : 'Expense Category'}</Label>
+                  <Select
+                    value={getSetting('expense_location')?.category_id || ''}
+                    onValueChange={v => {
+                      const current = getSetting('expense_location') || {};
+                      saveSettingMutation.mutate({ key: 'expense_location', value: { ...current, category_id: v } });
+                    }}
+                  >
+                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'ক্যাটাগরি নির্বাচন করুন' : 'Select category'} /></SelectTrigger>
+                    <SelectContent>
+                      {expenseCategories
+                        .filter((c: any) => {
+                          const selectedProject = getSetting('expense_location')?.project_id;
+                          return !selectedProject || c.project_id === selectedProject;
+                        })
+                        .map((c: any) => (
+                          <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {getSetting('expense_location')?.project_id && getSetting('expense_location')?.category_id ? (
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-sm">
+                    <CheckCircle2 className="h-4 w-4 inline mr-1 text-emerald-600" />
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                      {bn ? 'সক্রিয়: বেতন পেইড হলে অটো-সেভ হবে' : 'Active: Auto-save on salary paid'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm">
+                    <AlertCircle className="h-4 w-4 inline mr-1 text-yellow-600" />
+                    <span className="text-yellow-700 dark:text-yellow-400">
+                      {bn ? 'প্রকল্প ও ক্যাটাগরি নির্বাচন করুন অটো-সেভ চালু করতে' : 'Select project & category to enable auto-save'}
+                    </span>
+                  </div>
+                )}
+              </TabsContent>
+
               <TabsContent value="formula" className="space-y-4 mt-4">
                 <div className="p-3 bg-muted/50 rounded-lg space-y-2 text-sm">
                   <h4 className="font-semibold">{bn ? 'Per-Minute ফর্মুলা' : 'Per-Minute Formula'}</h4>
