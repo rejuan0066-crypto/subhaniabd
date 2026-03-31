@@ -352,10 +352,14 @@ const DocumentLayoutBuilder = () => {
                       fontWeight: fs.bold ? 'bold' : 'normal',
                       fontStyle: fs.italic ? 'italic' : 'normal',
                     }}>{bn ? f.label_bn : f.label}{f.required && <span className="text-red-500">*</span>}: </span>
-                    {f.type === 'photo' ? <div className="inline-block w-16 h-16 border border-dashed border-gray-400 text-center text-[8px] leading-[60px]">Photo</div> :
+                     {f.type === 'photo' ? <div className="inline-block w-16 h-16 border border-dashed border-gray-400 text-center text-[8px] leading-[60px]">Photo</div> :
                      f.type === 'select' && f.options?.length ? (
-                       <span className="text-[9px] text-gray-500">[{f.options.join(' / ')}]</span>
-                     ) : <span className="border-b border-dotted border-gray-400 inline-block min-w-[80px]">&nbsp;</span>}
+                        <span className="text-[9px] text-gray-500">[{f.options.join(' / ')}]</span>
+                      ) : f.type === 'radio' && f.options?.length ? (
+                        <span className="text-[9px] text-gray-500">{f.options.map(o => `○ ${o}`).join('  ')}</span>
+                      ) : f.type === 'checkbox' && f.options?.length ? (
+                        <span className="text-[9px] text-gray-500">{f.options.map(o => `☐ ${o}`).join('  ')}</span>
+                      ) : <span className="border-b border-dotted border-gray-400 inline-block min-w-[80px]">&nbsp;</span>}
                   </div>
                 );
               })}
