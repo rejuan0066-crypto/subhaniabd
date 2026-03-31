@@ -416,7 +416,7 @@ const AdminAttendance = () => {
                       <SelectContent>
                         <SelectItem value="present">{bn ? 'উপস্থিত' : 'Present'}</SelectItem>
                         <SelectItem value="absent">{bn ? 'অনুপস্থিত' : 'Absent'}</SelectItem>
-                        <SelectItem value="late">{bn ? 'বিলম্ব' : 'Late'}</SelectItem>
+                        <SelectItem value="late">{bn ? 'বিলম্ব উপস্থিত' : 'Late Present'}</SelectItem>
                         <SelectItem value="half_day">{bn ? 'অর্ধদিন' : 'Half Day'}</SelectItem>
                         <SelectItem value="leave">{bn ? 'ছুটি' : 'Leave'}</SelectItem>
                       </SelectContent>
