@@ -122,6 +122,26 @@ const AdminSalary = () => {
     },
   });
 
+  // Fetch expense projects for salary→expense integration
+  const { data: expenseProjects = [] } = useQuery({
+    queryKey: ['expense-projects-salary'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_projects').select('*').eq('is_active', true).order('name_bn');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch expense categories for salary→expense integration
+  const { data: expenseCategories = [] } = useQuery({
+    queryKey: ['expense-categories-salary'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_categories').select('*').eq('is_active', true).order('name_bn');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Get setting value helper
   const getSetting = (key: string) => {
     const s = settings.find((st: any) => st.setting_key === key);
