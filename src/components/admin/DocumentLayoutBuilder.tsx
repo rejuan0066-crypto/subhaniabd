@@ -56,7 +56,7 @@ const uid = () => crypto.randomUUID().slice(0, 8);
 
 const DEFAULT_CONFIG: LayoutConfig = {
   header: { showLogo: true, showName: true, showAddress: true, showContact: true, customTitle: '', customTitle_bn: '', customSubtitle: '', customSubtitle_bn: '' },
-  footer: { signatures: [{ id: uid(), title: 'Principal Signature', title_bn: 'অধ্যক্ষের স্বাক্ষর' }], termsText: '', termsText_bn: '', copyrightText: '' },
+  footer: { signatures: [{ id: uid(), title: 'Principal Signature', title_bn: 'অধ্যক্ষের স্বাক্ষর' }], termsText: '', termsText_bn: '', copyrightText: '', customNote: '', customNote_bn: '', showAddress: false, showPageNumber: false, addressText: '', contactText: '' },
   sections: [{ id: uid(), name: 'Personal Information', name_bn: 'ব্যক্তিগত তথ্য', fields: [
     { id: uid(), label: 'Full Name', label_bn: 'পূর্ণ নাম', type: 'text', required: true, show: true, width: 'half' },
     { id: uid(), label: 'Date of Birth', label_bn: 'জন্ম তারিখ', type: 'date', required: true, show: true, width: 'half' },
