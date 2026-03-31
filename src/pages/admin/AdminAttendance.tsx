@@ -314,7 +314,19 @@ const AdminAttendance = () => {
                       return (
                         <button
                           key={rule.id}
-                          onClick={() => saveMutation.mutate({ entityId: entity.id, status: countsAs })}
+                          onClick={() => {
+                            const mutateData: any = { entityId: entity.id, status: countsAs };
+                            // Auto-fill duty times for staff when present/late/half_day
+                            if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
+                              mutateData.check_in_time = entity.duty_start_time || '08:00';
+                              mutateData.check_out_time = entity.duty_end_time || '17:00';
+                            }
+                            if (countsAs === 'absent' || countsAs === 'leave') {
+                              mutateData.check_in_time = '';
+                              mutateData.check_out_time = '';
+                            }
+                            saveMutation.mutate(mutateData);
+                          }}
                           className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-all ${colorClass} ${isActive ? 'ring-1 ring-offset-1 ring-primary/30' : ''}`}
                         >
                           <Icon className="h-3 w-3" />
