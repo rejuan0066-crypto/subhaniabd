@@ -797,6 +797,19 @@ const DocumentLayoutBuilder = () => {
                                   </div>
                                 );
                               })}
+                              {/* Drop zone for cross-section field moves */}
+                              <div
+                                onDragOver={e => { e.preventDefault(); e.stopPropagation(); if (dragFieldRef.current) setDragOverField({ sectionId: sec.id, fieldIndex: sec.fields.length }); }}
+                                onDrop={e => { e.stopPropagation(); handleFieldDrop(e, sec.id, sec.fields.length); }}
+                                className={`rounded border-2 border-dashed transition-all min-h-[28px] flex items-center justify-center ${
+                                  dragFieldRef.current && dragOverField?.sectionId === sec.id && dragOverField?.fieldIndex === sec.fields.length
+                                    ? 'border-primary bg-primary/10' : 'border-transparent'
+                                }`}
+                              >
+                                {dragFieldRef.current && (
+                                  <span className="text-[10px] text-muted-foreground">{bn ? 'এখানে ড্রপ করুন' : 'Drop here'}</span>
+                                )}
+                              </div>
                               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => addField(sec.id)}><Plus className="w-3 h-3 mr-1" />{bn ? 'ফিল্ড যোগ' : 'Add Field'}</Button>
                             </div>
                           )}
