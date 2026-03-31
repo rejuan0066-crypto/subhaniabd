@@ -128,6 +128,24 @@ const DocumentLayoutBuilder = () => {
   const dragSectionRef = useRef<number | null>(null);
   const [dragOverField, setDragOverField] = useState<{ sectionId: string; fieldIndex: number } | null>(null);
   const [dragOverSection, setDragOverSection] = useState<number | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const autoScrollRAF = useRef<number | null>(null);
+
+  // Auto-scroll during drag near edges
+  const handleDragAutoScroll = (e: DragEvent) => {
+    if (!scrollAreaRef.current) return;
+    const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement;
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const edgeSize = 60;
+    const speed = 12;
+    let scrollDir = 0;
+    if (e.clientY < rect.top + edgeSize) scrollDir = -speed;
+    else if (e.clientY > rect.bottom - edgeSize) scrollDir = speed;
+    if (scrollDir !== 0) {
+      viewport.scrollTop += scrollDir;
+    }
+  };
 
   const { data: layouts = [], isLoading } = useQuery({
     queryKey: ['document_layouts'],
