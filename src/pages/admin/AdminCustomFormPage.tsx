@@ -250,38 +250,61 @@ const AdminCustomFormPage = () => {
                       })()}
                       {field.field_type === 'identity_card' && (() => {
                         const cardType = formValues[field.id + '_type'] || '';
-                        const cardVal = String(value || '').replace(/\D/g, '');
+                        const cardVal = String(value || '');
+                        const numOnly = cardVal.replace(/\D/g, '');
+                        
+                        // Default card types if no options configured
+                        const defaultCardTypes = [
+                          { value: 'nid', label: bn ? 'এনআইডি' : 'NID', digits: '10,17', msg: bn ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits' },
+                          { value: 'birth_cert', label: bn ? 'জন্ম নিবন্ধন' : 'Birth Certificate', digits: '17', msg: bn ? 'জন্ম নিবন্ধন অবশ্যই ১৭ ডিজিট হতে হবে' : 'Birth certificate must be 17 digits' },
+                          { value: 'passport', label: bn ? 'পাসপোর্ট' : 'Passport', digits: '7-9', msg: bn ? 'পাসপোর্ট ৭-৯ ডিজিট হতে হবে' : 'Passport must be 7-9 digits' },
+                          { value: 'driving', label: bn ? 'ড্রাইভিং লাইসেন্স' : 'Driving License', digits: '10-15', msg: bn ? 'ড্রাইভিং লাইসেন্স ১০-১৫ ডিজিট হতে হবে' : 'Driving license must be 10-15 digits' },
+                        ];
+
+                        // Use custom options if configured, otherwise defaults
+                        const cardTypes = opts.length > 0 
+                          ? opts.map(opt => {
+                              // Check if option matches a known type
+                              const known = defaultCardTypes.find(d => d.value === opt.toLowerCase().replace(/\s+/g, '_') || d.label.toLowerCase() === opt.toLowerCase());
+                              return known || { value: opt, label: opt, digits: '', msg: '' };
+                            })
+                          : defaultCardTypes;
+
                         let cardErr = '';
-                        if (cardVal.length > 0) {
-                          if (cardType === 'nid' && cardVal.length !== 10 && cardVal.length !== 17) {
-                            cardErr = bn ? 'NID অবশ্যই ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
-                          } else if (cardType === 'birth_cert' && cardVal.length !== 17) {
-                            cardErr = bn ? 'জন্ম নিবন্ধন অবশ্যই ১৭ ডিজিট হতে হবে' : 'Birth certificate must be 17 digits';
-                          } else if (cardType === 'passport' && (cardVal.length < 7 || cardVal.length > 9)) {
-                            cardErr = bn ? 'পাসপোর্ট ৭-৯ ডিজিট হতে হবে' : 'Passport must be 7-9 digits';
-                          } else if (cardType === 'driving' && (cardVal.length < 10 || cardVal.length > 15)) {
-                            cardErr = bn ? 'ড্রাইভিং লাইসেন্স ১০-১৫ ডিজিট হতে হবে' : 'Driving license must be 10-15 digits';
+                        if (numOnly.length > 0 && !cardType) {
+                          cardErr = bn ? 'প্রথমে ধরন নির্বাচন করুন' : 'Please select type first';
+                        } else if (numOnly.length > 0 && cardType) {
+                          const activeType = cardTypes.find(t => t.value === cardType);
+                          if (activeType && activeType.digits) {
+                            const parts = activeType.digits.split(/[,-]/);
+                            if (parts.length === 1) {
+                              if (numOnly.length !== Number(parts[0])) cardErr = activeType.msg;
+                            } else if (parts.length >= 2) {
+                              const allowed = parts.map(Number);
+                              if (activeType.digits.includes('-')) {
+                                if (numOnly.length < allowed[0] || numOnly.length > allowed[1]) cardErr = activeType.msg;
+                              } else {
+                                if (!allowed.includes(numOnly.length)) cardErr = activeType.msg;
+                              }
+                            }
                           }
                         }
-                        if (!cardType && cardVal.length > 0) {
-                          cardErr = bn ? 'প্রথমে ধরন নির্বাচন করুন' : 'Please select type first';
-                        }
+
                         return (
                           <div className="space-y-1.5">
                             <div className="flex gap-2">
                               <Select value={cardType} onValueChange={v => setFormValues(prev => ({ ...prev, [field.id + '_type']: v }))}>
                                 <SelectTrigger className="w-[180px]"><SelectValue placeholder={bn ? 'ধরন নির্বাচন' : 'Select type'} /></SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="nid">{bn ? 'এনআইডি' : 'NID'}</SelectItem>
-                                  <SelectItem value="birth_cert">{bn ? 'জন্ম নিবন্ধন' : 'Birth Certificate'}</SelectItem>
-                                  <SelectItem value="passport">{bn ? 'পাসপোর্ট' : 'Passport'}</SelectItem>
-                                  <SelectItem value="driving">{bn ? 'ড্রাইভিং লাইসেন্স' : 'Driving License'}</SelectItem>
+                                  {cardTypes.map((ct, i) => (
+                                    <SelectItem key={i} value={ct.value}>{ct.label}</SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <Input
                                 className={`flex-1 ${cardErr ? 'border-destructive' : ''}`}
                                 placeholder={bn ? 'নম্বর লিখুন' : 'Enter number'}
-                                value={cardVal}
+                                value={numOnly}
                                 onChange={e => { const cleaned = e.target.value.replace(/\D/g, ''); updateValue(field.id, cleaned); }}
                               />
                             </div>
