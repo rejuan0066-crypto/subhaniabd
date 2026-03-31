@@ -95,6 +95,10 @@ const AdminStaffForm = () => {
   const [customReligion, setCustomReligion] = useState('');
   const [nid, setNid] = useState('');
   const [nidError, setNidError] = useState('');
+  const [fatherNidError, setFatherNidError] = useState('');
+  const [motherNidError, setMotherNidError] = useState('');
+  const [guardianNidError, setGuardianNidError] = useState('');
+  const [identifierNidError, setIdentifierNidError] = useState('');
   const [education, setEducation] = useState('');
   const [experience, setExperience] = useState('');
   const [prevInstitute, setPrevInstitute] = useState('');
