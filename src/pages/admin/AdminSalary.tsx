@@ -63,6 +63,7 @@ const AdminSalary = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('general');
   const [dutyDialog, setDutyDialog] = useState<any>(null);
+  const [attendanceDetailDialog, setAttendanceDetailDialog] = useState<any>(null);
 
   const monthYear = `${selectedYear}-${selectedMonth}`;
 
