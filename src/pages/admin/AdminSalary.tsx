@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
@@ -297,17 +298,39 @@ const AdminSalary = () => {
   // Generate salary sheet mutation
   const generateMutation = useMutation({
     mutationFn: async () => {
+      const requireAttendance = getSetting('require_attendance')?.enabled !== false;
+      const skippedNames: string[] = [];
+
       const records = staff.map((s: any) => {
         const existing = salaryRecords.find((r: any) => r.staff_id === s.id);
         if (existing) return null;
+
+        // Check if attendance exists for this staff
+        if (requireAttendance) {
+          const hasAttendance = attendanceData.some((a: any) => a.entity_id === s.id);
+          if (!hasAttendance) {
+            skippedNames.push(s.name_bn || s.name_en || 'Unknown');
+            return null;
+          }
+        }
+
         const calc = calculateSalary(s);
         return { staff_id: s.id, month_year: monthYear, ...calc, status: 'pending' };
       }).filter(Boolean);
 
-      if (records.length === 0) {
+      if (skippedNames.length > 0) {
+        toast.warning(
+          bn ? `${skippedNames.length} জন স্টাফের উপস্থিতি নেই, বেতন যোগ হয়নি: ${skippedNames.join(', ')}`
+             : `${skippedNames.length} staff skipped (no attendance): ${skippedNames.join(', ')}`,
+          { duration: 6000 }
+        );
+      }
+
+      if (records.length === 0 && skippedNames.length === 0) {
         toast.info(bn ? 'ইতোমধ্যে সব বেতন জেনারেট হয়েছে' : 'All salaries already generated');
         return;
       }
+      if (records.length === 0) return;
 
       const { error } = await supabase.from('salary_records').insert(records);
       if (error) throw error;
@@ -926,6 +949,18 @@ const AdminSalary = () => {
                   <Label>{bn ? 'প্রতি বিলম্বের দিনে কর্তন (৳) - Fixed মোডে' : 'Late Deduction Per Day (৳) - Fixed mode'}</Label>
                   <Input type="number" defaultValue={getSetting('late_deduction_per_day')?.amount || 50}
                     onBlur={e => saveSettingMutation.mutate({ key: 'late_deduction_per_day', value: { amount: Number(e.target.value) } })} />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <Label>{bn ? 'উপস্থিতি বাধ্যতামূলক' : 'Require Attendance'}</Label>
+                    <p className="text-[10px] text-muted-foreground">
+                      {bn ? 'উপস্থিতি না দিলে বেতন জেনারেট হবে না' : 'Salary won\'t generate without attendance records'}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={getSetting('require_attendance')?.enabled !== false}
+                    onCheckedChange={v => saveSettingMutation.mutate({ key: 'require_attendance', value: { enabled: v } })}
+                  />
                 </div>
               </TabsContent>
 
