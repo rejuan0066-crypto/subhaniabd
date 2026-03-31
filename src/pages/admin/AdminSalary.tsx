@@ -935,7 +935,7 @@ const AdminSalary = () => {
                   <Label className="text-xs font-semibold text-red-500">{bn ? 'কর্তনসমূহ' : 'Deductions'}</Label>
                   <div className="grid grid-cols-2 gap-3 mt-2">
                     <div>
-                      <Label className="text-xs">{bn ? 'বিলম্ব/সময় কর্তন' : 'Late/Time Ded.'}</Label>
+                      <Label className="text-xs">{bn ? 'বিলম্ব উপস্থিত কর্তন' : 'Late Present Ded.'}</Label>
                       <Input type="number" value={editDialog.late_deduction || 0} onChange={e => setEditDialog({ ...editDialog, late_deduction: Number(e.target.value) })} />
                     </div>
                     <div>
