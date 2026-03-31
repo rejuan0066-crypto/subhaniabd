@@ -604,6 +604,47 @@ const DocumentLayoutBuilder = () => {
                             </div>
                           )}
 
+                          {/* Border/Padding Controls */}
+                          {!sec.collapsed && (
+                            <div className="flex items-center gap-2 pl-6 flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <Label className="text-[10px]">{bn ? 'বর্ডার' : 'Border'}</Label>
+                                <Select value={sec.style?.borderStyle || 'solid'} onValueChange={v => updateSectionStyle(sec.id, 'borderStyle', v)}>
+                                  <SelectTrigger className="h-6 text-[10px] w-16"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="solid">Solid</SelectItem>
+                                    <SelectItem value="dashed">Dashed</SelectItem>
+                                    <SelectItem value="dotted">Dotted</SelectItem>
+                                    <SelectItem value="none">None</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                <Label className="text-[10px]">{bn ? 'বর্ডার রং' : 'B.Color'}</Label>
+                                <Input type="color" value={sec.style?.borderColor || '#d1d5db'} onChange={e => updateSectionStyle(sec.id, 'borderColor', e.target.value)} className="h-5 w-7 p-0 border-0" />
+                              </div>
+
+                              <Separator orientation="vertical" className="h-5" />
+
+                              <div className="flex items-center gap-1">
+                                <Label className="text-[10px]">{bn ? 'প্যাডিং' : 'Pad'}</Label>
+                                <div className="w-14">
+                                  <Slider value={[sec.style?.padding || 8]} min={0} max={32} step={2} onValueChange={([v]) => updateSectionStyle(sec.id, 'padding', v)} />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">{sec.style?.padding || 8}</span>
+                              </div>
+
+                              <div className="flex items-center gap-1">
+                                <Label className="text-[10px]">{bn ? 'মার্জিন' : 'Margin'}</Label>
+                                <div className="w-14">
+                                  <Slider value={[sec.style?.margin || 12]} min={0} max={32} step={2} onValueChange={([v]) => updateSectionStyle(sec.id, 'margin', v)} />
+                                </div>
+                                <span className="text-[10px] text-muted-foreground">{sec.style?.margin || 12}</span>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Fields with drag & drop */}
                           {!sec.collapsed && (
                             <div className="space-y-1.5 pl-6">
