@@ -604,6 +604,44 @@ const AdminAttendance = () => {
                   <span className="text-xs text-muted-foreground">24h</span>
                 </div>
               </div>
+
+              {/* Residential Duty Times */}
+              <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
+                <Label className="font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  {bn ? 'আবাসিক ডিউটি টাইম সেটিংস' : 'Residential Duty Time Settings'}
+                </Label>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">{bn ? 'সকাল ডিউটি' : 'Morning Duty'}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
+                      <Input type="time" className="h-8 text-sm" value={dutyTimes.morning_start} onChange={e => setDutyTimes(p => ({ ...p, morning_start: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
+                      <Input type="time" className="h-8 text-sm" value={dutyTimes.morning_end} onChange={e => setDutyTimes(p => ({ ...p, morning_end: e.target.value }))} />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">{bn ? 'সন্ধ্যা ডিউটি' : 'Evening Duty'}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
+                      <Input type="time" className="h-8 text-sm" value={dutyTimes.evening_start} onChange={e => setDutyTimes(p => ({ ...p, evening_start: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
+                      <Input type="time" className="h-8 text-sm" value={dutyTimes.evening_end} onChange={e => setDutyTimes(p => ({ ...p, evening_end: e.target.value }))} />
+                    </div>
+                  </div>
+                </div>
+                <Button size="sm" className="w-full" onClick={() => saveDutyTimesMutation.mutate(dutyTimes)}>
+                  <Save className="h-3 w-3 mr-1" /> {bn ? 'ডিউটি টাইম সেভ করুন' : 'Save Duty Times'}
+                </Button>
+              </div>
+
               {/* Existing Rules */}
               <div className="space-y-2">
                 {rules.map((rule: any) => {
