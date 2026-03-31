@@ -46,7 +46,7 @@ interface HeaderConfig {
 }
 interface LayoutConfig {
   header: HeaderConfig;
-  footer: { signatures: SignatureLine[]; termsText: string; termsText_bn: string; copyrightText: string; };
+  footer: { signatures: SignatureLine[]; termsText: string; termsText_bn: string; copyrightText: string; customNote: string; customNote_bn: string; showAddress: boolean; showPageNumber: boolean; addressText: string; contactText: string; };
   sections: LayoutSection[]; receiptRows: ReceiptRow[];
   showFields: { studentId: boolean; date: boolean; amountInWords: boolean; receiptNo: boolean; };
 }
@@ -56,7 +56,7 @@ const uid = () => crypto.randomUUID().slice(0, 8);
 
 const DEFAULT_CONFIG: LayoutConfig = {
   header: { showLogo: true, showName: true, showAddress: true, showContact: true, customTitle: '', customTitle_bn: '', customSubtitle: '', customSubtitle_bn: '' },
-  footer: { signatures: [{ id: uid(), title: 'Principal Signature', title_bn: 'অধ্যক্ষের স্বাক্ষর' }], termsText: '', termsText_bn: '', copyrightText: '' },
+  footer: { signatures: [{ id: uid(), title: 'Principal Signature', title_bn: 'অধ্যক্ষের স্বাক্ষর' }], termsText: '', termsText_bn: '', copyrightText: '', customNote: '', customNote_bn: '', showAddress: false, showPageNumber: false, addressText: '', contactText: '' },
   sections: [{ id: uid(), name: 'Personal Information', name_bn: 'ব্যক্তিগত তথ্য', fields: [
     { id: uid(), label: 'Full Name', label_bn: 'পূর্ণ নাম', type: 'text', required: true, show: true, width: 'half' },
     { id: uid(), label: 'Date of Birth', label_bn: 'জন্ম তারিখ', type: 'date', required: true, show: true, width: 'half' },
@@ -343,10 +343,14 @@ const DocumentLayoutBuilder = () => {
       {formType === 'receipt' && config.showFields.amountInWords && <p className="text-[10px] mb-3"><strong>{bn ? 'কথায়:' : 'In Words:'}</strong> ________________________________</p>}
       <div className="mt-6">
         {config.footer.termsText && <p className="text-[8px] text-gray-500 mb-4">{bn ? config.footer.termsText_bn || config.footer.termsText : config.footer.termsText}</p>}
+        {config.footer.customNote && <p className="text-[9px] text-gray-600 mb-3">{bn ? config.footer.customNote_bn || config.footer.customNote : config.footer.customNote}</p>}
         <div className="flex justify-between mt-8 pt-2">
           {config.footer.signatures.map(sig => (<div key={sig.id} className="text-center"><div className="border-t border-black w-28 mx-auto mb-1" /><span className="text-[10px]">{bn ? sig.title_bn : sig.title}</span></div>))}
         </div>
+        {config.footer.showAddress && config.footer.addressText && <p className="text-[8px] text-center text-gray-500 mt-3">{config.footer.addressText}</p>}
+        {config.footer.showAddress && config.footer.contactText && <p className="text-[8px] text-center text-gray-500">{config.footer.contactText}</p>}
         {config.footer.copyrightText && <p className="text-[8px] text-center text-gray-400 mt-4">{config.footer.copyrightText}</p>}
+        {config.footer.showPageNumber && <p className="text-[8px] text-center text-gray-400 mt-2">{bn ? 'পৃষ্ঠা ১/১' : 'Page 1/1'}</p>}
       </div>
     </div>
   );
@@ -690,6 +694,30 @@ const DocumentLayoutBuilder = () => {
 
                   {/* Footer Tab */}
                   <TabsContent value="footer" className="space-y-3 mt-3">
+                    {/* Custom Note */}
+                    <Card><CardContent className="p-3 space-y-3">
+                      <h4 className="font-semibold text-sm">{bn ? 'কাস্টম নোট/বার্তা' : 'Custom Note/Message'}</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div><Label>{bn ? 'নোট (EN)' : 'Note (EN)'}</Label><Textarea value={config.footer.customNote} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, customNote: e.target.value } }))} className="text-xs h-16" placeholder={bn ? 'যেকোনো কাস্টম বার্তা...' : 'Any custom message...'} /></div>
+                        <div><Label>{bn ? 'নোট (BN)' : 'Note (BN)'}</Label><Textarea value={config.footer.customNote_bn} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, customNote_bn: e.target.value } }))} className="text-xs h-16" placeholder={bn ? 'বাংলায় বার্তা...' : 'Bangla message...'} /></div>
+                      </div>
+                    </CardContent></Card>
+
+                    {/* Address & Contact */}
+                    <Card><CardContent className="p-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm">{bn ? 'ঠিকানা ও যোগাযোগ' : 'Address & Contact'}</h4>
+                        <div className="flex items-center gap-2"><Switch checked={config.footer.showAddress} onCheckedChange={v => setConfig(c => ({ ...c, footer: { ...c.footer, showAddress: v } }))} /><Label className="text-xs">{bn ? 'দেখান' : 'Show'}</Label></div>
+                      </div>
+                      {config.footer.showAddress && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div><Label>{bn ? 'ঠিকানা' : 'Address'}</Label><Input value={config.footer.addressText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, addressText: e.target.value } }))} className="text-xs" placeholder={bn ? 'প্রতিষ্ঠানের ঠিকানা' : 'Institution address'} /></div>
+                          <div><Label>{bn ? 'যোগাযোগ' : 'Contact'}</Label><Input value={config.footer.contactText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, contactText: e.target.value } }))} className="text-xs" placeholder={bn ? 'ফোন, ইমেইল' : 'Phone, Email'} /></div>
+                        </div>
+                      )}
+                    </CardContent></Card>
+
+                    {/* Terms & Copyright */}
                     <Card><CardContent className="p-3 space-y-3">
                       <h4 className="font-semibold text-sm">{bn ? 'শর্তাবলী ও কপিরাইট' : 'Terms & Copyright'}</h4>
                       <div className="grid grid-cols-2 gap-3">
@@ -697,6 +725,14 @@ const DocumentLayoutBuilder = () => {
                         <div><Label>Terms (BN)</Label><Textarea value={config.footer.termsText_bn} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, termsText_bn: e.target.value } }))} className="text-xs h-16" /></div>
                       </div>
                       <div><Label>Copyright</Label><Input value={config.footer.copyrightText} onChange={e => setConfig(c => ({ ...c, footer: { ...c.footer, copyrightText: e.target.value } }))} className="text-xs" /></div>
+                    </CardContent></Card>
+
+                    {/* Page Number */}
+                    <Card><CardContent className="p-3">
+                      <div className="flex items-center gap-3">
+                        <Switch checked={config.footer.showPageNumber} onCheckedChange={v => setConfig(c => ({ ...c, footer: { ...c.footer, showPageNumber: v } }))} />
+                        <Label className="text-sm">{bn ? 'পেইজ নম্বর দেখান' : 'Show Page Number'}</Label>
+                      </div>
                     </CardContent></Card>
                   </TabsContent>
 
