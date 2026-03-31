@@ -689,7 +689,7 @@ const AdminFormBuilder = () => {
                             <Input value={fieldData.default_value} onChange={e => setFieldData(p => ({ ...p, default_value: e.target.value }))} />
                           </div>
 
-                          {['select', 'radio', 'checkbox'].includes(fieldData.field_type) && (
+                          {['select', 'radio', 'checkbox', 'identity_card'].includes(fieldData.field_type) && (
                             <div>
                               <Label>{bn ? 'অপশন সমূহ' : 'Options'}</Label>
                               <div className="flex gap-2 mt-1">
