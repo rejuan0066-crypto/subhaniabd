@@ -642,7 +642,7 @@ const AdminSalary = () => {
       <tr><th colspan="2" style="text-align:center">${bn ? 'আয়' : 'Earnings'}</th>
           <th colspan="2" style="text-align:center">${bn ? 'কর্তন' : 'Deductions'}</th></tr>
       <tr><td>${bn ? 'মূল বেতন' : 'Base Salary'}</td><td>৳${Number(record.base_salary).toLocaleString()}</td>
-          <td>${bn ? 'বিলম্ব কর্তন' : 'Late/Time Ded.'}</td><td>৳${Number(record.late_deduction || 0).toLocaleString()}</td></tr>
+          <td>${bn ? 'বিলম্ব উপস্থিত কর্তন' : 'Late Present Ded.'}</td><td>৳${Number(record.late_deduction || 0).toLocaleString()}</td></tr>
       <tr><td>${bn ? 'বোনাস' : 'Bonus'}</td><td>৳${Number(record.bonus || 0).toLocaleString()}</td>
           <td>${bn ? 'অনুপস্থিতি কর্তন' : 'Absence Ded.'}</td><td>৳${Number(record.absence_deduction || 0).toLocaleString()}</td></tr>
       <tr><td>${bn ? 'ওভারটাইম' : 'Overtime'}</td><td>৳${Number(record.overtime || 0).toLocaleString()}</td>
