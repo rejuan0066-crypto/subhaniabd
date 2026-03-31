@@ -322,20 +322,40 @@ const DocumentLayoutBuilder = () => {
       {formType === 'form' && config.sections.map(sec => {
         const style = sec.style || {};
         return (
-          <div key={sec.id} className="mb-3">
-            <h4 className="text-xs font-bold px-2 py-1 border border-gray-300" style={{
+          <div key={sec.id} style={{ marginBottom: style.margin ? `${style.margin}px` : '12px' }}>
+            <h4 className="text-xs font-bold px-2 py-1" style={{
               fontSize: style.fontSize ? `${style.fontSize}px` : '13px',
               color: style.color || '#000',
               textAlign: style.textAlign || 'left',
               backgroundColor: style.bgColor || '#f3f4f6',
+              borderStyle: style.borderStyle || 'solid',
+              borderWidth: style.borderStyle === 'none' ? 0 : '1px',
+              borderColor: style.borderColor || '#d1d5db',
             }}>{bn ? sec.name_bn : sec.name}</h4>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 p-2 border border-t-0 border-gray-300">
-              {sec.fields.filter(f => f.show).map(f => (
-                <div key={f.id} className={f.width === 'full' ? 'col-span-2' : ''}>
-                  <span className="text-[10px]">{bn ? f.label_bn : f.label}{f.required && <span className="text-red-500">*</span>}: </span>
-                  {f.type === 'photo' ? <div className="inline-block w-16 h-16 border border-dashed border-gray-400 text-center text-[8px] leading-[60px]">Photo</div> : <span className="border-b border-dotted border-gray-400 inline-block min-w-[80px]">&nbsp;</span>}
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1" style={{
+              padding: style.padding ? `${style.padding}px` : '8px',
+              borderStyle: style.borderStyle === 'none' ? 'none' : (style.borderStyle || 'solid'),
+              borderWidth: style.borderStyle === 'none' ? 0 : '1px',
+              borderTop: 'none',
+              borderColor: style.borderColor || '#d1d5db',
+            }}>
+              {sec.fields.filter(f => f.show).map(f => {
+                const fs = f.style || {};
+                return (
+                  <div key={f.id} className={f.width === 'full' ? 'col-span-2' : ''}>
+                    <span style={{
+                      fontSize: fs.fontSize ? `${fs.fontSize}px` : '10px',
+                      color: fs.color || undefined,
+                      fontWeight: fs.bold ? 'bold' : 'normal',
+                      fontStyle: fs.italic ? 'italic' : 'normal',
+                    }}>{bn ? f.label_bn : f.label}{f.required && <span className="text-red-500">*</span>}: </span>
+                    {f.type === 'photo' ? <div className="inline-block w-16 h-16 border border-dashed border-gray-400 text-center text-[8px] leading-[60px]">Photo</div> :
+                     f.type === 'select' && f.options?.length ? (
+                       <span className="text-[9px] text-gray-500">[{f.options.join(' / ')}]</span>
+                     ) : <span className="border-b border-dotted border-gray-400 inline-block min-w-[80px]">&nbsp;</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
