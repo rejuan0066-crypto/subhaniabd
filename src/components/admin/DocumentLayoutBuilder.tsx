@@ -652,14 +652,14 @@ const DocumentLayoutBuilder = () => {
                               {sec.fields.map((f, fi) => {
                                 const FIcon = FIELD_TYPE_ICONS[f.type] || Type;
                                 return (
-                                  <div key={f.id} className="bg-secondary/30 rounded p-2 space-y-1.5"
+                                  <div key={f.id}
                                     draggable
                                     onDragStart={e => { e.stopPropagation(); handleFieldDragStart(e, sec.id, fi); }}
                                     onDragOver={e => { e.stopPropagation(); handleFieldDragOver(e, sec.id, fi); }}
                                     onDrop={e => { e.stopPropagation(); handleFieldDrop(e, sec.id, fi); }}
                                     onDragEnd={() => setDragOverField(null)}
-                                    className={`bg-secondary/30 rounded p-2 space-y-1.5 transition-all cursor-move ${
-                                      dragOverField?.sectionId === sec.id && dragOverField?.fieldIndex === fi ? 'ring-2 ring-primary bg-primary/10' : ''
+                                    className={`rounded p-2 space-y-1.5 transition-all cursor-move ${
+                                      dragOverField?.sectionId === sec.id && dragOverField?.fieldIndex === fi ? 'ring-2 ring-primary bg-primary/10' : 'bg-secondary/30'
                                     }`}
                                   >
                                     {/* Row 1: Drag handle + Labels */}
