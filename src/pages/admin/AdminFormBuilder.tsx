@@ -98,6 +98,16 @@ type ConditionData = {
   value: string;
 };
 
+type ValidationData = {
+  min_length: string;
+  max_length: string;
+  min_value: string;
+  max_value: string;
+  pattern: string;
+  error_message: string;
+  error_message_bn: string;
+};
+
 type FieldData = {
   id?: string;
   form_id?: string;
@@ -111,11 +121,13 @@ type FieldData = {
   default_value: string;
   is_active: boolean;
   condition: ConditionData;
+  validation: ValidationData;
 };
 
+const emptyValidation: ValidationData = { min_length: '', max_length: '', min_value: '', max_value: '', pattern: '', error_message: '', error_message_bn: '' };
 const emptyCondition: ConditionData = { enabled: false, source_field_id: '', operator: 'equals', value: '' };
 const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type: 'custom', is_active: true, publish_to: 'none', parent_menu: '', menu_slug: '' };
-const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition } };
+const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition }, validation: { ...emptyValidation } };
 
 // Sortable field item component
 const SortableFieldItem = ({ field, bn, getFieldIcon, getFieldLabel, openEditField, deleteField, fields }: any) => {
@@ -297,7 +309,14 @@ const AdminFormBuilder = () => {
   // Field mutations
   const saveField = useMutation({
     mutationFn: async (data: FieldData) => {
-      const validationObj = data.condition.enabled ? { condition: { source_field_id: data.condition.source_field_id, operator: data.condition.operator, value: data.condition.value } } : {};
+      const validationObj: Record<string, any> = {};
+      if (data.condition.enabled) {
+        validationObj.condition = { source_field_id: data.condition.source_field_id, operator: data.condition.operator, value: data.condition.value };
+      }
+      const hasRules = data.validation.min_length || data.validation.max_length || data.validation.min_value || data.validation.max_value || data.validation.pattern || data.validation.error_message || data.validation.error_message_bn;
+      if (hasRules) {
+        validationObj.rules = { ...data.validation };
+      }
       const payload = {
         form_id: selectedFormId!,
         field_type: data.field_type,
@@ -369,11 +388,13 @@ const AdminFormBuilder = () => {
     let opts: string[] = [];
     try { opts = typeof field.options === 'string' ? JSON.parse(field.options) : (Array.isArray(field.options) ? field.options : []); } catch { opts = []; }
     let cond: ConditionData = { ...emptyCondition };
+    let val: ValidationData = { ...emptyValidation };
     try {
       const v = typeof field.validation === 'string' ? JSON.parse(field.validation) : (field.validation || {});
       if (v.condition) cond = { ...emptyCondition, ...v.condition, enabled: true };
+      if (v.rules) val = { ...emptyValidation, ...v.rules };
     } catch {}
-    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active, condition: cond });
+    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active, condition: cond, validation: val });
     setEditingFieldId(field.id);
     setFieldDialogOpen(true);
   };
@@ -738,6 +759,53 @@ const AdminFormBuilder = () => {
                               </div>
                             )}
                           </div>
+
+                          {/* Validation Rules */}
+                          {['text', 'number', 'textarea', 'email', 'phone', 'nid'].includes(fieldData.field_type) && (
+                            <div className="border rounded-lg p-3 space-y-3 bg-muted/30">
+                              <Label className="font-semibold">{bn ? 'ভ্যালিডেশন নিয়ম' : 'Validation Rules'}</Label>
+                              <div className="grid grid-cols-2 gap-3">
+                                {['text', 'textarea', 'email', 'phone', 'nid'].includes(fieldData.field_type) && (
+                                  <>
+                                    <div>
+                                      <Label className="text-xs">{bn ? 'সর্বনিম্ন অক্ষর' : 'Min Length'}</Label>
+                                      <Input type="number" className="mt-1" value={fieldData.validation.min_length} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, min_length: e.target.value } }))} placeholder="0" />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">{bn ? 'সর্বোচ্চ অক্ষর' : 'Max Length'}</Label>
+                                      <Input type="number" className="mt-1" value={fieldData.validation.max_length} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, max_length: e.target.value } }))} placeholder="999" />
+                                    </div>
+                                  </>
+                                )}
+                                {fieldData.field_type === 'number' && (
+                                  <>
+                                    <div>
+                                      <Label className="text-xs">{bn ? 'সর্বনিম্ন মান' : 'Min Value'}</Label>
+                                      <Input type="number" className="mt-1" value={fieldData.validation.min_value} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, min_value: e.target.value } }))} placeholder="0" />
+                                    </div>
+                                    <div>
+                                      <Label className="text-xs">{bn ? 'সর্বোচ্চ মান' : 'Max Value'}</Label>
+                                      <Input type="number" className="mt-1" value={fieldData.validation.max_value} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, max_value: e.target.value } }))} placeholder="999999" />
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              <div>
+                                <Label className="text-xs">{bn ? 'রেজেক্স প্যাটার্ন' : 'Regex Pattern'}</Label>
+                                <Input className="mt-1 font-mono text-xs" value={fieldData.validation.pattern} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, pattern: e.target.value } }))} placeholder={bn ? 'যেমন: ^[0-9]{10,17}$' : 'e.g. ^[0-9]{10,17}$'} />
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <Label className="text-xs">{bn ? 'এরর মেসেজ (EN)' : 'Error Message (EN)'}</Label>
+                                  <Input className="mt-1" value={fieldData.validation.error_message} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, error_message: e.target.value } }))} placeholder="Invalid input" />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">{bn ? 'এরর মেসেজ (বাংলা)' : 'Error Message (BN)'}</Label>
+                                  <Input className="mt-1" value={fieldData.validation.error_message_bn} onChange={e => setFieldData(p => ({ ...p, validation: { ...p.validation, error_message_bn: e.target.value } }))} placeholder="সঠিক তথ্য দিন" />
+                                </div>
+                              </div>
+                            </div>
+                          )}
 
                           <div>
                             <Label>{bn ? 'ক্রম' : 'Sort Order'}</Label>

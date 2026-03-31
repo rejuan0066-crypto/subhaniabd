@@ -30,6 +30,7 @@ const AdminCustomFormPage = () => {
   const queryClient = useQueryClient();
 
   const [formValues, setFormValues] = useState<Record<string, any>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [permanentAddr, setPermanentAddr] = useState<AddressData>({ division: '', district: '', upazila: '', union: '', postOffice: '', village: '' });
   const [presentAddr, setPresentAddr] = useState<AddressData>({ division: '', district: '', upazila: '', union: '', postOffice: '', village: '' });
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
@@ -109,8 +110,49 @@ const AdminCustomFormPage = () => {
     },
   });
 
+  const getFieldValidation = (field: any) => {
+    try {
+      const v = typeof field.validation === 'string' ? JSON.parse(field.validation) : (field.validation || {});
+      return v.rules || {};
+    } catch { return {}; }
+  };
+
+  const validateField = (field: any, value: any): string => {
+    const rules = getFieldValidation(field);
+    const str = String(value || '');
+    if (rules.min_length && str.length > 0 && str.length < Number(rules.min_length)) {
+      return rules.error_message_bn && bn ? rules.error_message_bn : rules.error_message || (bn ? `সর্বনিম্ন ${rules.min_length} অক্ষর` : `Min ${rules.min_length} chars`);
+    }
+    if (rules.max_length && str.length > Number(rules.max_length)) {
+      return rules.error_message_bn && bn ? rules.error_message_bn : rules.error_message || (bn ? `সর্বোচ্চ ${rules.max_length} অক্ষর` : `Max ${rules.max_length} chars`);
+    }
+    if (rules.min_value && value !== '' && Number(value) < Number(rules.min_value)) {
+      return rules.error_message_bn && bn ? rules.error_message_bn : rules.error_message || (bn ? `সর্বনিম্ন ${rules.min_value}` : `Min value ${rules.min_value}`);
+    }
+    if (rules.max_value && value !== '' && Number(value) > Number(rules.max_value)) {
+      return rules.error_message_bn && bn ? rules.error_message_bn : rules.error_message || (bn ? `সর্বোচ্চ ${rules.max_value}` : `Max value ${rules.max_value}`);
+    }
+    if (rules.pattern && str.length > 0) {
+      try {
+        if (!new RegExp(rules.pattern).test(str)) {
+          return rules.error_message_bn && bn ? rules.error_message_bn : rules.error_message || (bn ? 'সঠিক ফরম্যাটে লিখুন' : 'Invalid format');
+        }
+      } catch {}
+    }
+    return '';
+  };
+
   const updateValue = (fieldId: string, value: any) => {
     setFormValues(prev => ({ ...prev, [fieldId]: value }));
+    const field = fields.find(f => f.id === fieldId);
+    if (field) {
+      const err = validateField(field, value);
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        if (err) next[fieldId] = err; else delete next[fieldId];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = () => {
@@ -121,6 +163,18 @@ const AdminCustomFormPage = () => {
         toast.error(bn ? `"${field.label_bn}" আবশ্যক` : `"${field.label}" is required`);
         return;
       }
+    }
+    // Check validation errors
+    const activeFields = fields.filter(f => f.is_active);
+    const errors: Record<string, string> = {};
+    for (const field of activeFields) {
+      const err = validateField(field, formValues[field.id]);
+      if (err) errors[field.id] = err;
+    }
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      toast.error(bn ? 'ফর্মে ত্রুটি রয়েছে, সংশোধন করুন' : 'Please fix form errors');
+      return;
     }
     submitMutation.mutate();
   };
@@ -232,6 +286,9 @@ const AdminCustomFormPage = () => {
                             </label>
                           );
                         })}</div>
+                      )}
+                      {fieldErrors[field.id] && (
+                        <p className="text-xs text-destructive mt-1">{fieldErrors[field.id]}</p>
                       )}
                     </div>
                   );
