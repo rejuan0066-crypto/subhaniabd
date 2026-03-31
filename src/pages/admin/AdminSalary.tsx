@@ -354,17 +354,52 @@ const AdminSalary = () => {
     },
   });
 
-  // Mark as paid
+  // Mark as paid + auto-create expense
   const markPaidMutation = useMutation({
     mutationFn: async (id: string) => {
+      const record = salaryRecords.find((r: any) => r.id === id);
+      if (!record) throw new Error('Record not found');
+
+      // Update salary status
       const { error } = await supabase.from('salary_records')
         .update({ status: 'paid', paid_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
+
+      // Auto-create expense entry
+      const expenseConfig = getSetting('expense_location');
+      const projectId = expenseConfig?.project_id;
+      const categoryId = expenseConfig?.category_id;
+
+      if (projectId && categoryId) {
+        const staffMember = staff.find((s: any) => s.id === record.staff_id);
+        const monthName = MONTHS.find(m => m.value === selectedMonth);
+        const description = `${bn ? 'বেতন' : 'Salary'}: ${staffMember?.name_bn || 'Staff'} - ${bn ? monthName?.bn : monthName?.en} ${selectedYear}`;
+
+        // Generate PDF link for receipt
+        const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        const pdfUrl = `https://${projectRef}.supabase.co/functions/v1/salary-pdf`;
+
+        const { error: expError } = await supabase.from('expenses').insert({
+          project_id: projectId,
+          category_id: categoryId,
+          month_year: monthYear,
+          expense_date: new Date().toISOString().split('T')[0],
+          amount: Number(record.net_salary),
+          description,
+          has_receipt: true,
+          receipt_url: pdfUrl,
+        });
+        if (expError) {
+          console.error('Expense creation error:', expError);
+          toast.warning(bn ? 'বেতন পরিশোধিত হয়েছে কিন্তু খরচে সেভ হয়নি' : 'Marked paid but expense save failed');
+          return;
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salary-records', monthYear] });
-      toast.success(bn ? 'পরিশোধিত হিসেবে চিহ্নিত' : 'Marked as paid');
+      toast.success(bn ? 'পরিশোধিত ও খরচে সেভ হয়েছে' : 'Marked as paid & saved to expenses');
     },
   });
 
