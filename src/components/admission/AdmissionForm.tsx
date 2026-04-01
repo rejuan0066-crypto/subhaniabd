@@ -546,8 +546,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       case 'father_nid':
         return (
           <div>
-            <Label>{label}</Label>
-            <Input className={`bg-background mt-1 ${hasError || fatherNidError ? 'border-destructive' : ''}`}
+            <Label className={errorLabel}>{label}</Label>
+            <Input className={`bg-background mt-1 ${errorBorder || (fatherNidError ? 'border-destructive ring-1 ring-destructive/30' : '')}`}
               maxLength={17} value={form.father_nid}
               onChange={e => validateNid(e.target.value, 'father_nid', setFatherNidError)} />
             {fatherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fatherNidError}</p>}
