@@ -1002,23 +1002,23 @@ const AdmissionPage = () => {
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Noto Sans Bengali', sans-serif; padding: 20mm; font-size: 12px; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .header img { height: 60px; margin-bottom: 5px; }
-        .header h1 { font-size: 18px; font-weight: 700; }
-        .header p { font-size: 11px; color: #666; }
-        .form-title { text-align: center; font-size: 16px; font-weight: 700; margin: 15px 0; padding: 8px; background: #f5f5f5; border: 1px solid #ddd; }
-        .photo-section { float: right; width: 100px; height: 120px; border: 1px solid #999; display: flex; align-items: center; justify-content: center; margin-left: 15px; }
+        body { font-family: 'Noto Sans Bengali', sans-serif; padding: 10mm 12mm; font-size: 11px; color: #333; }
+        .header { text-align: center; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 6px; }
+        .header img { height: 50px; margin-bottom: 3px; }
+        .header h1 { font-size: 16px; font-weight: 700; }
+        .header p { font-size: 10px; color: #666; }
+        .form-title { text-align: center; font-size: 14px; font-weight: 700; margin: 8px 0; padding: 5px; background: #f5f5f5; border: 1px solid #ddd; }
+        .photo-section { float: right; width: 90px; height: 110px; border: 1px solid #999; display: flex; align-items: center; justify-content: center; margin-left: 10px; }
         .photo-section img { width: 100%; height: 100%; object-fit: cover; }
-        .section { margin-bottom: 15px; clear: both; }
-        .section-title { font-size: 13px; font-weight: 700; padding: 5px 10px; background: #e8e8e8; border-left: 3px solid #333; margin-bottom: 8px; }
-        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 15px; }
-        .field { display: flex; gap: 5px; padding: 3px 0; border-bottom: 1px dotted #ccc; }
-        .field-label { font-weight: 600; min-width: 120px; color: #555; }
-        .field-value { flex: 1; }
-        .status-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
-        .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #999; border-top: 1px solid #ddd; padding-top: 10px; }
-        @media print { body { padding: 10mm; } @page { margin: 10mm; } }
+        .section { margin-bottom: 8px; clear: both; }
+        .section-title { font-size: 12px; font-weight: 700; padding: 3px 8px; background: #e8e8e8; border-left: 3px solid #333; margin-bottom: 5px; }
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; }
+        .field { display: flex; gap: 4px; padding: 2px 0; border-bottom: 1px dotted #ccc; }
+        .field-label { font-weight: 600; min-width: 100px; color: #555; font-size: 10px; }
+        .field-value { flex: 1; font-size: 10px; }
+        .status-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 600; background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+        .footer { margin-top: 15px; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #ddd; padding-top: 5px; }
+        @media print { body { padding: 8mm; } @page { margin: 8mm; } }
       </style>
     </head><body>
       <div class="header">
