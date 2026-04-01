@@ -83,6 +83,11 @@ const AdminStudents = () => {
     if (filterClassId !== 'all') {
       if (s.class_id !== filterClassId) return false;
     }
+    // Approval status filter
+    if (filterApproval !== 'all') {
+      const status = s.approval_status || 'pending';
+      if (status !== filterApproval) return false;
+    }
     // Text search
     if (search) {
       const q = search.toLowerCase();
