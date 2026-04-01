@@ -675,9 +675,11 @@ const AdminAttendance = () => {
 
                   {/* Late Minutes Display for staff */}
                   {entityType === 'staff' && att?.check_in_time && (() => {
-                    const dutyStart = (entity.duty_start_time || '08:00').split(':').map(Number);
+                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : (entity.duty_start_time || '08:00');
+                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : (entity.duty_end_time || '17:00');
+                    const dutyStart = effStart.split(':').map(Number);
                     const checkIn = att.check_in_time.split(':').map(Number);
-                    const dutyEnd = (entity.duty_end_time || '17:00').split(':').map(Number);
+                    const dutyEnd = effEnd.split(':').map(Number);
                     const checkOut = att.check_out_time ? att.check_out_time.split(':').map(Number) : dutyEnd;
                     const lateMin = Math.max(0, (checkIn[0] * 60 + checkIn[1]) - (dutyStart[0] * 60 + dutyStart[1]));
                     const earlyMin = Math.max(0, (dutyEnd[0] * 60 + dutyEnd[1]) - (checkOut[0] * 60 + checkOut[1]));
