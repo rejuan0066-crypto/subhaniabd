@@ -482,6 +482,19 @@ const AdminAttendance = () => {
       return;
     }
 
+    // For student tabs, fetch attendance fresh from DB
+    let studentAttData: any[] = [];
+    if (entityType === 'student') {
+      const entityIds = filtered.map((e: any) => e.id);
+      if (entityIds.length > 0) {
+        const { data } = await supabase.from('attendance_records').select('*')
+          .eq('attendance_date', selectedDate).eq('entity_type', 'student').eq('shift', 'full_day')
+          .in('entity_id', entityIds);
+        studentAttData = data || [];
+      }
+    }
+    const getAtt = (id: string) => entityType === 'student' ? studentAttData.find((a: any) => a.entity_id === id) : getAttendance(id);
+
     const rows: string[][] = [];
     const header = [
       bn ? 'ক্রম' : 'SL',
@@ -495,7 +508,7 @@ const AdminAttendance = () => {
     rows.push(header);
 
     filtered.forEach((entity: any, idx: number) => {
-      const att = getAttendance(entity.id);
+      const att = getAtt(entity.id);
       const row = [
         String(idx + 1),
         entity.name_bn,
@@ -509,8 +522,10 @@ const AdminAttendance = () => {
       rows.push(row);
     });
 
+    const csvPresent = entityType === 'student' ? studentAttData.filter((a: any) => a.status === 'present').length : stats.present;
+    const csvAbsent = entityType === 'student' ? studentAttData.filter((a: any) => a.status === 'absent').length : stats.absent;
     rows.push([]);
-    rows.push([bn ? 'মোট' : 'Total', String(stats.total), bn ? 'উপস্থিত' : 'Present', String(stats.present), bn ? 'অনুপস্থিত' : 'Absent', String(stats.absent)]);
+    rows.push([bn ? 'মোট' : 'Total', String(filtered.length), bn ? 'উপস্থিত' : 'Present', String(csvPresent), bn ? 'অনুপস্থিত' : 'Absent', String(csvAbsent)]);
 
     const bom = '\uFEFF';
     const csv = bom + rows.map(r => r.join(',')).join('\n');
