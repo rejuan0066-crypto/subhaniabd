@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
-import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff, Link2, List } from 'lucide-react';
+import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff, Link2, List, SlidersHorizontal } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import WebsitePageBuilder from '@/components/admin/WebsitePageBuilder';
 import { toast } from 'sonner';
 import { useWebsiteSettings, WebsiteSettings, InfoLink } from '@/hooks/useWebsiteSettings';
@@ -363,6 +365,9 @@ const AdminWebsite = () => {
             </TabsTrigger>
             <TabsTrigger value="sync" className="text-xs py-2 px-2.5">
               <Database className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'সিঙ্ক স্ট্যাটাস' : 'Sync Status'}
+            </TabsTrigger>
+            <TabsTrigger value="form-settings" className="text-xs py-2 px-2.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'ফর্ম সেটিংস' : 'Form Settings'}
             </TabsTrigger>
           </TabsList>
 
@@ -1382,9 +1387,180 @@ const AdminWebsite = () => {
               </div>
             </div>
           </TabsContent>
+
+          {/* Form Settings Tab */}
+          <TabsContent value="form-settings">
+            <FormSettingsTab language={language} />
+          </TabsContent>
         </Tabs>
       </div>
     </AdminLayout>
+  );
+};
+
+// ─── Form Settings Tab Component ───
+const FORM_FIELD_LABELS: Record<string, { bn: string; en: string }> = {
+  roll_no: { bn: 'রোল নম্বর', en: 'Roll No' },
+  admission_session: { bn: 'ভর্তি সেশন', en: 'Admission Session' },
+  admission_class: { bn: 'ভর্তি শ্রেণী', en: 'Admission Class' },
+  registration_no: { bn: 'রেজিস্ট্রেশন নং', en: 'Registration No' },
+  session_year: { bn: 'সেশন বছর', en: 'Session Year' },
+  previous_class: { bn: 'পূর্ববর্তী শ্রেণী', en: 'Previous Class' },
+  previous_institute: { bn: 'পূর্ববর্তী প্রতিষ্ঠান', en: 'Previous Institute' },
+  birth_reg_no: { bn: 'জন্ম নিবন্ধন নং', en: 'Birth Reg No' },
+  father_nid: { bn: 'পিতার NID', en: "Father's NID" },
+  mother_nid: { bn: 'মাতার NID', en: "Mother's NID" },
+  guardian_nid: { bn: 'অভিভাবকের NID', en: "Guardian's NID" },
+  is_orphan: { bn: 'এতিম', en: 'Orphan' },
+  is_poor: { bn: 'গরীব', en: 'Poor' },
+  footer_paragraph: { bn: 'ফুটার প্যারাগ্রাফ', en: 'Footer Paragraph' },
+};
+
+type FormSettingRow = {
+  id: string;
+  field_name: string;
+  is_visible: boolean;
+  footer_text: string | null;
+  updated_at: string | null;
+};
+
+const FormSettingsTab = ({ language }: { language: string }) => {
+  const queryClient = useQueryClient();
+  const [localSettings, setLocalSettings] = useState<FormSettingRow[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  const { data: formSettings, isLoading } = useQuery({
+    queryKey: ['form-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('form_settings')
+        .select('*')
+        .order('field_name');
+      if (error) throw error;
+      return (data || []) as FormSettingRow[];
+    },
+  });
+
+  useEffect(() => {
+    if (formSettings) {
+      // Ensure all known fields exist locally
+      const existing = new Set(formSettings.map(f => f.field_name));
+      const merged = [...formSettings];
+      Object.keys(FORM_FIELD_LABELS).forEach(key => {
+        if (!existing.has(key)) {
+          merged.push({ id: '', field_name: key, is_visible: true, footer_text: null, updated_at: null });
+        }
+      });
+      setLocalSettings(merged);
+    }
+  }, [formSettings]);
+
+  const toggleVisibility = (fieldName: string) => {
+    setLocalSettings(prev =>
+      prev.map(s => s.field_name === fieldName ? { ...s, is_visible: !s.is_visible } : s)
+    );
+  };
+
+  const updateFooterText = (fieldName: string, text: string) => {
+    setLocalSettings(prev =>
+      prev.map(s => s.field_name === fieldName ? { ...s, footer_text: text } : s)
+    );
+  };
+
+  const saveFormSettings = async () => {
+    setSaving(true);
+    try {
+      for (const setting of localSettings) {
+        if (setting.id) {
+          await supabase
+            .from('form_settings')
+            .update({ is_visible: setting.is_visible, footer_text: setting.footer_text, updated_at: new Date().toISOString() })
+            .eq('id', setting.id);
+        } else {
+          await supabase
+            .from('form_settings')
+            .insert({ field_name: setting.field_name, is_visible: setting.is_visible, footer_text: setting.footer_text });
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['form-settings'] });
+      toast.success(language === 'bn' ? 'ফর্ম সেটিংস সংরক্ষিত!' : 'Form settings saved!');
+    } catch {
+      toast.error(language === 'bn' ? 'সংরক্ষণে ত্রুটি' : 'Error saving');
+    }
+    setSaving(false);
+  };
+
+  const footerSetting = localSettings.find(s => s.field_name === 'footer_paragraph');
+  const fieldSettings = localSettings.filter(s => s.field_name !== 'footer_paragraph');
+
+  if (isLoading) {
+    return <div className="card-elevated p-5"><Skeleton className="h-[300px] w-full" /></div>;
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Field Visibility Toggles */}
+      <div className="card-elevated p-5">
+        <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <SlidersHorizontal className="w-5 h-5 text-primary" />
+          {language === 'bn' ? 'ভর্তি ফর্ম ফিল্ড দৃশ্যমানতা' : 'Admission Form Field Visibility'}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          {language === 'bn' ? 'কোন ফিল্ড ভর্তি ফর্মে দেখাবে বা লুকাবে তা নিয়ন্ত্রণ করুন।' : 'Control which fields are shown or hidden on the admission form.'}
+        </p>
+        <div className="space-y-2">
+          {fieldSettings.map(setting => {
+            const label = FORM_FIELD_LABELS[setting.field_name];
+            return (
+              <div key={setting.field_name} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                <div className="flex items-center gap-2">
+                  {setting.is_visible ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                  <span className="text-sm font-medium text-foreground">
+                    {language === 'bn' ? (label?.bn || setting.field_name) : (label?.en || setting.field_name)}
+                  </span>
+                </div>
+                <Switch
+                  checked={setting.is_visible}
+                  onCheckedChange={() => toggleVisibility(setting.field_name)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Footer Paragraph */}
+      <div className="card-elevated p-5">
+        <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+          <FileText className="w-5 h-5 text-primary" />
+          {language === 'bn' ? 'ফর্মের নিচের প্যারাগ্রাফ' : 'Form Footer Paragraph'}
+        </h3>
+        <p className="text-sm text-muted-foreground mb-3">
+          {language === 'bn' ? 'ভর্তি ফর্মের নিচে যে লেখা দেখানো হবে তা এখানে লিখুন।' : 'Write the text that will appear at the bottom of the admission form.'}
+        </p>
+        <Textarea
+          className="bg-background min-h-[120px]"
+          placeholder={language === 'bn' ? 'এখানে প্যারাগ্রাফ লিখুন...' : 'Write your paragraph here...'}
+          value={footerSetting?.footer_text || ''}
+          onChange={e => updateFooterText('footer_paragraph', e.target.value)}
+        />
+        <div className="flex items-center gap-2 mt-2">
+          <Switch
+            checked={footerSetting?.is_visible ?? true}
+            onCheckedChange={() => toggleVisibility('footer_paragraph')}
+          />
+          <span className="text-xs text-muted-foreground">
+            {language === 'bn' ? 'ফুটার প্যারাগ্রাফ দেখান' : 'Show footer paragraph'}
+          </span>
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <Button className="btn-primary-gradient w-full" onClick={saveFormSettings} disabled={saving}>
+        <Save className="w-4 h-4 mr-2" />
+        {language === 'bn' ? 'ফর্ম সেটিংস সংরক্ষণ করুন' : 'Save Form Settings'}
+      </Button>
+    </div>
   );
 };
 
