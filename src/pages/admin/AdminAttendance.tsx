@@ -709,20 +709,18 @@ const AdminAttendance = () => {
                   </SelectContent>
                 </Select>
 
-                {/* Division/Class filter (for 'all' sub-tab) */}
-                {studentSubTab === 'all' && (
-                  <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
-                    <SelectTrigger className="w-44 h-8 text-xs">
-                      <SelectValue placeholder={bn ? 'বিভাগ/শ্রেণী নির্বাচন' : 'Select Class'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Classes'}</SelectItem>
-                      {divisions.map((d: any) => (
-                        <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                {/* Division/Class filter (all student sub-tabs) */}
+                <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
+                  <SelectTrigger className="w-44 h-8 text-xs">
+                    <SelectValue placeholder={bn ? 'বিভাগ/শ্রেণী নির্বাচন' : 'Select Class'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Classes'}</SelectItem>
+                    {divisions.map((d: any) => (
+                      <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 {/* Search */}
                 <div className="relative flex-1 min-w-[150px]">
