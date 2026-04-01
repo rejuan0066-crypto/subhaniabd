@@ -17,7 +17,8 @@ import { toast } from 'sonner';
 import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
-  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee
+  CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee,
+  Download, Printer
 } from 'lucide-react';
 
 const STATUS_ICONS: Record<string, any> = {
