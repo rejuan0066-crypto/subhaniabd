@@ -800,9 +800,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
-              if (!key) return <div key={f.id}>{renderCustomField(f)}</div>;
-              if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
-              return <div key={f.id}>{renderCustomField(f)}</div>;
+              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
           </div>
           <p className="text-xs text-destructive flex items-center gap-1 mt-2">
