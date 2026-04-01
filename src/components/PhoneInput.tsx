@@ -24,9 +24,10 @@ interface PhoneInputProps {
   countryCode?: string;
   onChange?: (phone: string, countryCode: string) => void;
   required?: boolean;
+  error?: boolean;
 }
 
-const PhoneInput = ({ label, value = '', countryCode = '+880', onChange, required }: PhoneInputProps) => {
+const PhoneInput = ({ label, value = '', countryCode = '+880', onChange, required, error }: PhoneInputProps) => {
   const [code, setCode] = useState(countryCode);
   const [phone, setPhone] = useState(value);
 
