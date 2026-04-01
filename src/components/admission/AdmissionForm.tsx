@@ -232,7 +232,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   }, [isEditMode, getRollStartForClass]);
 
   // Auto-generate registration number based on session
-  const generateRegistrationNumber = useCallback(async (sessionYear: string) => {
+  const generateRegistrationNumber = useCallback(async (sessionYear: string, force = false) => {
     if (!sessionYear || isEditMode) return;
     const year = sessionYear.trim();
     const { count } = await supabase
@@ -243,7 +243,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     const autoNum = `${year}${serial}`;
     setForm(prev => ({
       ...prev,
-      registration_no: prev.registration_no || autoNum,
+      registration_no: force ? autoNum : (prev.registration_no || autoNum),
     }));
   }, [isEditMode]);
 
@@ -257,7 +257,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   // Trigger registration number generation when session_year changes
   useEffect(() => {
     if (open && !isEditMode && form.session_year) {
-      generateRegistrationNumber(form.session_year);
+      generateRegistrationNumber(form.session_year, true);
     }
   }, [open, form.session_year, isEditMode, generateRegistrationNumber]);
 
@@ -619,7 +619,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                 placeholder={bn ? 'অটো জেনারেট / টাইপ করুন' : 'Auto / Type'} />
               <button type="button"
                 className="absolute right-1 top-1/2 -translate-y-1/2 mt-0.5 text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                onClick={() => generateRegistrationNumber(form.session_year)}>
+                onClick={() => generateRegistrationNumber(form.session_year, true)}>
                 {bn ? 'অটো' : 'Auto'}
               </button>
             </div>
