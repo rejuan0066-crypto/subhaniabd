@@ -201,6 +201,9 @@ const AdminAttendance = () => {
         evening_end: savedDutyTimes.evening_end || '19:00',
         extra_duty_enabled: savedDutyTimes.extra_duty_enabled || false,
         extra_duty_rate: savedDutyTimes.extra_duty_rate || 0,
+        morning_days: savedDutyTimes.morning_days || 30,
+        evening_days: savedDutyTimes.evening_days || 30,
+        total_salary: savedDutyTimes.total_salary || 0,
       });
     }
   }, [savedDutyTimes]);
