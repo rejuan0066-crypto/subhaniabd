@@ -987,14 +987,15 @@ const AdmissionPage = () => {
     setPhotoFile(null); setPhotoPreview(null);
   };
 
-  const handlePrint = () => {
-    if (!submittedData) return;
-    const d = submittedData;
+  const handlePrint = (blank = false) => {
+    const d = blank ? {} as any : submittedData;
+    if (!blank && !d) return;
     const instName = institution?.name || '';
     const instNameEn = institution?.name_en || '';
     const instAddr = institution?.address || '';
     const instLogo = institution?.logo_url || '';
-    const className = d.class_id ? (classes.find((c: any) => c.id === d.class_id) as any)?.name_bn || '' : '';
+    const className = !blank && d?.class_id ? (classes.find((c: any) => c.id === d.class_id) as any)?.name_bn || '' : '';
+    const blankVal = blank ? '&nbsp;' : '';
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
