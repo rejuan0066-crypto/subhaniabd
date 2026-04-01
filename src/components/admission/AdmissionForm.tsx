@@ -572,8 +572,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       case 'guardian_nid':
         return (
           <div>
-            <Label>{label} {reqStar}</Label>
-            <Input className={`bg-background mt-1 ${hasError || guardianNidError ? 'border-destructive' : ''}`}
+            <Label className={errorLabel}>{label} {reqStar}</Label>
+            <Input className={`bg-background mt-1 ${errorBorder || (guardianNidError ? 'border-destructive ring-1 ring-destructive/30' : '')}`}
               maxLength={17} value={form.guardian_nid}
               onChange={e => validateNid(e.target.value, 'guardian_nid', setGuardianNidError)} />
             {guardianNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {guardianNidError}</p>}
