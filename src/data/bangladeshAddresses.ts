@@ -1910,6 +1910,60 @@ export const bangladeshAddresses: Division[] = [
         "nameEn": "B.baria",
         "upazilas": [
           {
+            "name": "ব্রাহ্মণবাড়িয়া পৌরসভা",
+            "nameEn": "Brahmanbaria Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              },
+              {
+                "name": "ওয়ার্ড নং-10",
+                "nameEn": "Ward No-10"
+              },
+              {
+                "name": "ওয়ার্ড নং-11",
+                "nameEn": "Ward No-11"
+              },
+              {
+                "name": "ওয়ার্ড নং-12",
+                "nameEn": "Ward No-12"
+              }
+            ]
+          },
+          {
             "name": "ব্রাহ্মণবাড়িয়া সদর উপজেলা",
             "nameEn": "Akhaura",
             "unions": [
@@ -2978,6 +3032,48 @@ export const bangladeshAddresses: Division[] = [
         "nameEn": "Cox's bazar",
         "upazilas": [
           {
+            "name": "কক্সবাজার পৌরসভা",
+            "nameEn": "Cox's Bazar Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
+          {
             "name": "কক্সবাজার সদর",
             "nameEn": "Chakoria",
             "unions": [
@@ -3975,6 +4071,48 @@ export const bangladeshAddresses: Division[] = [
         "name": "লক্ষ্মীপুর",
         "nameEn": "Laxmipur",
         "upazilas": [
+          {
+            "name": "লক্ষ্মীপুর পৌরসভা",
+            "nameEn": "Lakshmipur Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
           {
             "name": "লক্ষ্মীপুর",
             "nameEn": "Komol Nagar",
@@ -7016,6 +7154,48 @@ export const bangladeshAddresses: Division[] = [
         "nameEn": "Narshingdi",
         "upazilas": [
           {
+            "name": "নরসিংদী পৌরসভা",
+            "nameEn": "Narsingdi Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
+          {
             "name": "নরসিংদী সদর উপজেলা",
             "nameEn": "Belabo",
             "unions": [
@@ -7877,6 +8057,132 @@ export const bangladeshAddresses: Division[] = [
         "name": "বরিশাল",
         "nameEn": "Barisal",
         "upazilas": [
+          {
+            "name": "বরিশাল সিটি কর্পোরেশন",
+            "nameEn": "Barishal City Corporation",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              },
+              {
+                "name": "ওয়ার্ড নং-10",
+                "nameEn": "Ward No-10"
+              },
+              {
+                "name": "ওয়ার্ড নং-11",
+                "nameEn": "Ward No-11"
+              },
+              {
+                "name": "ওয়ার্ড নং-12",
+                "nameEn": "Ward No-12"
+              },
+              {
+                "name": "ওয়ার্ড নং-13",
+                "nameEn": "Ward No-13"
+              },
+              {
+                "name": "ওয়ার্ড নং-14",
+                "nameEn": "Ward No-14"
+              },
+              {
+                "name": "ওয়ার্ড নং-15",
+                "nameEn": "Ward No-15"
+              },
+              {
+                "name": "ওয়ার্ড নং-16",
+                "nameEn": "Ward No-16"
+              },
+              {
+                "name": "ওয়ার্ড নং-17",
+                "nameEn": "Ward No-17"
+              },
+              {
+                "name": "ওয়ার্ড নং-18",
+                "nameEn": "Ward No-18"
+              },
+              {
+                "name": "ওয়ার্ড নং-19",
+                "nameEn": "Ward No-19"
+              },
+              {
+                "name": "ওয়ার্ড নং-20",
+                "nameEn": "Ward No-20"
+              },
+              {
+                "name": "ওয়ার্ড নং-21",
+                "nameEn": "Ward No-21"
+              },
+              {
+                "name": "ওয়ার্ড নং-22",
+                "nameEn": "Ward No-22"
+              },
+              {
+                "name": "ওয়ার্ড নং-23",
+                "nameEn": "Ward No-23"
+              },
+              {
+                "name": "ওয়ার্ড নং-24",
+                "nameEn": "Ward No-24"
+              },
+              {
+                "name": "ওয়ার্ড নং-25",
+                "nameEn": "Ward No-25"
+              },
+              {
+                "name": "ওয়ার্ড নং-26",
+                "nameEn": "Ward No-26"
+              },
+              {
+                "name": "ওয়ার্ড নং-27",
+                "nameEn": "Ward No-27"
+              },
+              {
+                "name": "ওয়ার্ড নং-28",
+                "nameEn": "Ward No-28"
+              },
+              {
+                "name": "ওয়ার্ড নং-29",
+                "nameEn": "Ward No-29"
+              },
+              {
+                "name": "ওয়ার্ড নং-30",
+                "nameEn": "Ward No-30"
+              }
+            ]
+          },
           {
             "name": "বরিশাল সদর",
             "nameEn": "Barisal Sadar",
@@ -8806,6 +9112,48 @@ export const bangladeshAddresses: Division[] = [
         "nameEn": "জামালপুর",
         "upazilas": [
           {
+            "name": "জামালপুর পৌরসভা",
+            "nameEn": "Jamalpur Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
+          {
             "name": "জামালপুর সদর উপজেলা",
             "nameEn": "জামালপুর সদর",
             "unions": [
@@ -8913,6 +9261,96 @@ export const bangladeshAddresses: Division[] = [
         "name": "ময়মনসিংহ",
         "nameEn": "ময়মনসিংহ",
         "upazilas": [
+          {
+            "name": "ময়মনসিংহ সিটি কর্পোরেশন",
+            "nameEn": "Mymensingh City Corporation",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              },
+              {
+                "name": "ওয়ার্ড নং-10",
+                "nameEn": "Ward No-10"
+              },
+              {
+                "name": "ওয়ার্ড নং-11",
+                "nameEn": "Ward No-11"
+              },
+              {
+                "name": "ওয়ার্ড নং-12",
+                "nameEn": "Ward No-12"
+              },
+              {
+                "name": "ওয়ার্ড নং-13",
+                "nameEn": "Ward No-13"
+              },
+              {
+                "name": "ওয়ার্ড নং-14",
+                "nameEn": "Ward No-14"
+              },
+              {
+                "name": "ওয়ার্ড নং-15",
+                "nameEn": "Ward No-15"
+              },
+              {
+                "name": "ওয়ার্ড নং-16",
+                "nameEn": "Ward No-16"
+              },
+              {
+                "name": "ওয়ার্ড নং-17",
+                "nameEn": "Ward No-17"
+              },
+              {
+                "name": "ওয়ার্ড নং-18",
+                "nameEn": "Ward No-18"
+              },
+              {
+                "name": "ওয়ার্ড নং-19",
+                "nameEn": "Ward No-19"
+              },
+              {
+                "name": "ওয়ার্ড নং-20",
+                "nameEn": "Ward No-20"
+              },
+              {
+                "name": "ওয়ার্ড নং-21",
+                "nameEn": "Ward No-21"
+              }
+            ]
+          },
           {
             "name": "ময়মনসিংহ সদর",
             "nameEn": "ময়মনসিংহ সদর",
@@ -9090,6 +9528,48 @@ export const bangladeshAddresses: Division[] = [
         "nameEn": "নেত্রকোনা",
         "upazilas": [
           {
+            "name": "নেত্রকোনা পৌরসভা",
+            "nameEn": "Netrokona Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
+          {
             "name": "নেত্রকোনা সদর",
             "nameEn": "নেত্রকোনা সদর",
             "unions": [
@@ -9235,6 +9715,48 @@ export const bangladeshAddresses: Division[] = [
         "name": "শেরপুর",
         "nameEn": "শেরপুর",
         "upazilas": [
+          {
+            "name": "শেরপুর পৌরসভা",
+            "nameEn": "Sherpur Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
           {
             "name": "শেরপুর সদর",
             "nameEn": "শেরপুর সদর",
@@ -12331,6 +12853,48 @@ export const bangladeshAddresses: Division[] = [
         "name": "চাঁপাইনবাবগঞ্জ",
         "nameEn": "C. nawabganj",
         "upazilas": [
+          {
+            "name": "চাঁপাইনবাবগঞ্জ পৌরসভা",
+            "nameEn": "Chapainawabganj Municipality",
+            "unions": [
+              {
+                "name": "ওয়ার্ড নং-1",
+                "nameEn": "Ward No-1"
+              },
+              {
+                "name": "ওয়ার্ড নং-2",
+                "nameEn": "Ward No-2"
+              },
+              {
+                "name": "ওয়ার্ড নং-3",
+                "nameEn": "Ward No-3"
+              },
+              {
+                "name": "ওয়ার্ড নং-4",
+                "nameEn": "Ward No-4"
+              },
+              {
+                "name": "ওয়ার্ড নং-5",
+                "nameEn": "Ward No-5"
+              },
+              {
+                "name": "ওয়ার্ড নং-6",
+                "nameEn": "Ward No-6"
+              },
+              {
+                "name": "ওয়ার্ড নং-7",
+                "nameEn": "Ward No-7"
+              },
+              {
+                "name": "ওয়ার্ড নং-8",
+                "nameEn": "Ward No-8"
+              },
+              {
+                "name": "ওয়ার্ড নং-9",
+                "nameEn": "Ward No-9"
+              }
+            ]
+          },
           {
             "name": "চাঁপাইনবাবগঞ্জ সদর",
             "nameEn": "Bholahat",
