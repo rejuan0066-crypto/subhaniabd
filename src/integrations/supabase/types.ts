@@ -776,6 +776,30 @@ export type Database = {
           },
         ]
       }
+      form_settings: {
+        Row: {
+          field_name: string | null
+          footer_text: string | null
+          id: string
+          is_visible: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          field_name?: string | null
+          footer_text?: string | null
+          id?: string
+          is_visible?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          field_name?: string | null
+          footer_text?: string | null
+          id?: string
+          is_visible?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       formulas: {
         Row: {
           created_at: string | null
