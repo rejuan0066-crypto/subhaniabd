@@ -545,6 +545,7 @@ const AdminAttendance = () => {
     if (!printWindow) return;
 
     let tableHtml = '';
+    let printMetaStats = { total: filtered.length, present: 0, absent: 0, late: 0, unmarked: 0 };
 
     // For duty tab, combine morning + evening
     if (entityType === 'staff' && staffSubTab === 'duty') {
