@@ -734,7 +734,7 @@ const AdminAttendance = () => {
       <h3 style="text-align:center;margin-bottom:8px">${title}</h3>
       <div class="meta">
         <span>${bn ? 'তারিখ' : 'Date'}: ${selectedDate}</span>
-        <span>${bn ? 'মোট স্টাফ' : 'Total'}: ${filtered.length}</span>
+        <span>${entityType === 'student' ? (bn ? 'মোট ছাত্র' : 'Total Students') : (bn ? 'মোট স্টাফ' : 'Total Staff')}: ${filtered.length}</span>
       </div>
       ${tableHtml}
     </body></html>`;
