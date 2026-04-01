@@ -18,7 +18,7 @@ import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee,
-  Download, Printer
+  Download, Printer, RotateCcw
 } from 'lucide-react';
 
 const STATUS_ICONS: Record<string, any> = {
@@ -264,6 +264,21 @@ const AdminAttendance = () => {
       queryClient.invalidateQueries({ queryKey: ['attendance', selectedDate, entityType, effectiveShift] });
       toast.success(bn ? 'সবার উপস্থিতি সেভ হয়েছে' : 'Bulk attendance saved');
     },
+  });
+
+  // Reset all attendance for current date/shift
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      const ids = attendance.map((a: any) => a.id);
+      if (ids.length === 0) throw new Error('No records to reset');
+      const { error } = await supabase.from('attendance_records').delete().in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendance', selectedDate, entityType, effectiveShift] });
+      toast.success(bn ? 'উপস্থিতি রিসেট হয়েছে' : 'Attendance reset');
+    },
+    onError: () => toast.error(bn ? 'রিসেট করতে সমস্যা' : 'Failed to reset'),
   });
 
   // Rule CRUD
@@ -547,6 +562,15 @@ const AdminAttendance = () => {
                 <Button size="sm" variant="outline" className="text-xs" onClick={() => bulkMutation.mutate('present')}>
                   <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>
+                {attendance.length > 0 && (
+                  <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => {
+                    if (window.confirm(bn ? 'আজকের সকল উপস্থিতি রিসেট করতে চান?' : 'Reset all attendance for today?')) {
+                      resetMutation.mutate();
+                    }
+                  }}>
+                    <RotateCcw className="h-3 w-3 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
+                  </Button>
+                )}
               </div>
             </div>
 
