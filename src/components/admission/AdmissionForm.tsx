@@ -898,6 +898,33 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : (
           <div className="space-y-6 py-4">
+            {/* Error summary banner */}
+            {Object.keys(fieldErrors).length > 0 && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 space-y-2">
+                <p className="text-sm font-semibold text-destructive flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {bn ? `${Object.keys(fieldErrors).length}টি ত্রুটি সংশোধন করুন` : `Please fix ${Object.keys(fieldErrors).length} error(s)`}
+                </p>
+                <ul className="space-y-1 ml-6 list-disc">
+                  {Object.entries(fieldErrors).map(([key, msg]) => {
+                    const fieldConfig = configFields.find(f => f.default_value === key);
+                    const fieldLabel = fieldConfig ? (bn ? fieldConfig.label_bn : fieldConfig.label) : key;
+                    return (
+                      <li key={key} className="text-xs text-destructive">
+                        <button type="button" className="underline hover:no-underline text-left"
+                          onClick={() => {
+                            const el = document.querySelector(`[data-field="${key}"]`);
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }}>
+                          <span className="font-medium">{fieldLabel}</span>: {msg}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             {activeSections.map(section => renderSection(section))}
 
             {/* Approver Section */}
