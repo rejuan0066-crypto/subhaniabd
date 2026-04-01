@@ -317,6 +317,7 @@ const AdmissionPage = () => {
                   </p>
                 )}
               </div>
+              {showBirthRegNo && (
               <div>
                 <Label>{language === 'bn' ? 'জন্ম নিবন্ধন নম্বর (১৭ ডিজিট)' : 'Birth Reg No (17 digits)'} <span className="text-destructive">*</span></Label>
                 <Input className="bg-background mt-1" maxLength={17} value={birthRegNo} onChange={(e) => validateBirthReg(e.target.value)} required />
@@ -327,19 +328,24 @@ const AdmissionPage = () => {
                   <p className="text-xs text-success mt-1 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> {language === 'bn' ? 'সঠিক' : 'Valid'}</p>
                 )}
               </div>
+              )}
               <div className="sm:col-span-2 flex flex-wrap gap-6">
                 <div className="flex items-center gap-2">
                   <Checkbox id="nonOrphanPoor" />
                   <Label htmlFor="nonOrphanPoor">{language === 'bn' ? 'সাধারণ (এতিম/গরীব নয়)' : 'Non Orphan & Poor'}</Label>
                 </div>
+                {showIsOrphan && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="orphan" />
                   <Label htmlFor="orphan">{language === 'bn' ? 'এতিম' : 'Orphan'}</Label>
                 </div>
+                )}
+                {showIsPoor && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="poor" />
                   <Label htmlFor="poor">{language === 'bn' ? 'গরীব' : 'Poor'}</Label>
                 </div>
+                )}
               </div>
               <div className="sm:col-span-2 flex flex-wrap gap-6">
                 <div className="flex items-center gap-2">
