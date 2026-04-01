@@ -838,8 +838,8 @@ const AdminAttendance = () => {
                     ) : null;
                   })()}
 
-                  {/* Time Inputs for Staff */}
-                  {entityType === 'staff' && (
+                  {/* Time Inputs for Staff (hide for meal tab) */}
+                  {entityType === 'staff' && staffSubTab !== 'meal' && (
                     <div className="flex gap-1 items-center shrink-0">
                       <div className="flex flex-col items-center">
                         <Input
