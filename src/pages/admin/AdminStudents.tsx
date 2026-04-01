@@ -2,7 +2,8 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,6 +19,26 @@ const AdminStudents = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [showDetail, setShowDetail] = useState<any>(null);
   const [editStudent, setEditStudent] = useState<any>(null);
+  const [filterSessionId, setFilterSessionId] = useState('all');
+  const [filterClassId, setFilterClassId] = useState('all');
+
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic-sessions-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: classes = [] } = useQuery({
+    queryKey: ['classes'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('classes').select('*, divisions(name, name_bn)').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: students = [], isLoading } = useQuery({
     queryKey: ['students'],
@@ -53,9 +74,20 @@ const AdminStudents = () => {
   });
 
   const filtered = students.filter((s: any) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return s.name_bn?.toLowerCase().includes(q) || s.student_id?.toLowerCase().includes(q) || s.roll_number?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q);
+    // Session filter
+    if (filterSessionId !== 'all') {
+      if (s.session_id !== filterSessionId) return false;
+    }
+    // Class filter
+    if (filterClassId !== 'all') {
+      if (s.class_id !== filterClassId) return false;
+    }
+    // Text search
+    if (search) {
+      const q = search.toLowerCase();
+      return s.name_bn?.toLowerCase().includes(q) || s.student_id?.toLowerCase().includes(q) || s.roll_number?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q);
+    }
+    return true;
   });
 
   const getApprovalBadge = (status: string) => {
@@ -66,13 +98,27 @@ const AdminStudents = () => {
     }
   };
 
+  const getClassName = (classId: string | null) => {
+    if (!classId) return '-';
+    const cls = classes.find((c: any) => c.id === classId);
+    return cls ? (bn ? cls.name_bn : cls.name) : '-';
+  };
+
+  const getSessionName = (sessionId: string | null, fallback: string | null) => {
+    if (sessionId) {
+      const session = academicSessions.find((s: any) => s.id === sessionId);
+      if (session) return session.name;
+    }
+    return fallback || '-';
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">{t('students')}</h1>
-            <p className="text-sm text-muted-foreground">{bn ? `মোট ${students.length} জন ছাত্র` : `Total ${students.length} students`}</p>
+            <p className="text-sm text-muted-foreground">{bn ? `মোট ${filtered.length} জন ছাত্র` : `Total ${filtered.length} students`}</p>
           </div>
           <Button onClick={() => setShowAdd(true)} className="btn-primary-gradient flex items-center gap-2">
             <Plus className="w-4 h-4" /> {bn ? 'নতুন ভর্তি' : 'New Admission'}
@@ -80,9 +126,35 @@ const AdminStudents = () => {
         </div>
 
         <div className="card-elevated p-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+            </div>
+            <Select value={filterSessionId} onValueChange={setFilterSessionId}>
+              <SelectTrigger className="bg-background w-full sm:w-48">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'সেশন ফিল্টার' : 'Filter Session'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল সেশন' : 'All Sessions'}</SelectItem>
+                {academicSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterClassId} onValueChange={setFilterClassId}>
+              <SelectTrigger className="bg-background w-full sm:w-48">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'শ্রেণী ফিল্টার' : 'Filter Class'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
+                {classes.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -98,6 +170,7 @@ const AdminStudents = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'আইডি' : 'ID'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রোল' : 'Roll'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সেশন' : 'Session'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শ্রেণী' : 'Class'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অনুমোদন' : 'Approval'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
@@ -122,19 +195,20 @@ const AdminStudents = () => {
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.student_id}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.roll_number || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{(s as any).admission_session || '-'}</td>
-                      <td className="px-4 py-3">{getApprovalBadge((s as any).approval_status || 'pending')}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
+                      <td className="px-4 py-3">{getApprovalBadge(s.approval_status || 'pending')}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setShowDetail(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></button>
                           <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
-                          {((s as any).approval_status !== 'approved') && (
+                          {(s.approval_status !== 'approved') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="p-2 rounded-lg hover:bg-success/10 text-muted-foreground hover:text-success" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" /></button>
                           )}
-                          {((s as any).approval_status !== 'rejected') && (
+                          {(s.approval_status !== 'rejected') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'rejected' })} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive" title={bn ? 'প্রত্যাখ্যান' : 'Reject'}><XCircle className="w-4 h-4" /></button>
                           )}
-                          {((s as any).approval_status === 'rejected') && (
+                          {(s.approval_status === 'rejected') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-lg hover:bg-warning/10 text-muted-foreground hover:text-warning" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" /></button>
                           )}
                           <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
@@ -143,7 +217,7 @@ const AdminStudents = () => {
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={6} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
+                    <tr><td colSpan={7} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -172,7 +246,7 @@ const AdminStudents = () => {
                   {showDetail.name_en && <p className="text-sm text-muted-foreground">{showDetail.name_en}</p>}
                   <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{showDetail.student_id}</p>
                   <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{showDetail.roll_number || '-'}</p>
-                  <div className="mt-2">{getApprovalBadge((showDetail as any).approval_status || 'pending')}</div>
+                  <div className="mt-2">{getApprovalBadge(showDetail.approval_status || 'pending')}</div>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -182,26 +256,27 @@ const AdminStudents = () => {
                 <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{showDetail.gender || '-'}</div>
                 <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{showDetail.phone || '-'}</div>
                 <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian: '}</span>{showDetail.guardian_phone || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{(showDetail as any).birth_reg_no || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{(showDetail as any).religion || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{(showDetail as any).admission_session || '-'}</div>
+                <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{showDetail.birth_reg_no || '-'}</div>
+                <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{showDetail.religion || '-'}</div>
+                <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(showDetail.session_id, showDetail.admission_session)}</div>
+                <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(showDetail.class_id)}</div>
                 <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{showDetail.residence_type || '-'}</div>
               </div>
               <div className="flex gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => { setEditStudent(showDetail); setShowDetail(null); setShowAdd(true); }} className="flex-1">
                   <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
                 </Button>
-                {(showDetail as any).approval_status !== 'approved' && (
+                {showDetail.approval_status !== 'approved' && (
                   <Button onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 bg-success hover:bg-success/90 text-success-foreground">
                     <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
                   </Button>
                 )}
-                {(showDetail as any).approval_status !== 'rejected' && (
+                {showDetail.approval_status !== 'rejected' && (
                   <Button variant="destructive" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'rejected' }); setShowDetail(null); }} className="flex-1">
                     <XCircle className="w-4 h-4 mr-2" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
                   </Button>
                 )}
-                {(showDetail as any).approval_status === 'rejected' && (
+                {showDetail.approval_status === 'rejected' && (
                   <Button variant="outline" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'pending' }); setShowDetail(null); }} className="flex-1">
                     <Clock className="w-4 h-4 mr-2" /> {bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}
                   </Button>
