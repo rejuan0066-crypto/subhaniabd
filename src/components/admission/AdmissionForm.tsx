@@ -232,7 +232,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   }, [isEditMode, getRollStartForClass]);
 
   // Auto-generate registration number based on session
-  const generateRegistrationNumber = useCallback(async (sessionYear: string) => {
+  const generateRegistrationNumber = useCallback(async (sessionYear: string, force = false) => {
     if (!sessionYear || isEditMode) return;
     const year = sessionYear.trim();
     const { count } = await supabase
@@ -243,7 +243,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     const autoNum = `${year}${serial}`;
     setForm(prev => ({
       ...prev,
-      registration_no: prev.registration_no || autoNum,
+      registration_no: force ? autoNum : (prev.registration_no || autoNum),
     }));
   }, [isEditMode]);
 
