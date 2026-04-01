@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
-import { Camera, Search, Loader2, AlertCircle, CheckCircle, Plus } from 'lucide-react';
+import { Camera, Search, Loader2, AlertCircle, CheckCircle, Plus, Printer, Download, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 const emptyAddress: AddressData = { division: '', district: '', upazila: '', union: '', postOffice: '', village: '' };
