@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useRef } from 'react';
 import { Json } from '@/integrations/supabase/types';
