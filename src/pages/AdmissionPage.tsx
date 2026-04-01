@@ -987,14 +987,15 @@ const AdmissionPage = () => {
     setPhotoFile(null); setPhotoPreview(null);
   };
 
-  const handlePrint = () => {
-    if (!submittedData) return;
-    const d = submittedData;
+  const handlePrint = (blank = false) => {
+    const d = blank ? {} as any : submittedData;
+    if (!blank && !d) return;
     const instName = institution?.name || '';
     const instNameEn = institution?.name_en || '';
     const instAddr = institution?.address || '';
     const instLogo = institution?.logo_url || '';
-    const className = d.class_id ? (classes.find((c: any) => c.id === d.class_id) as any)?.name_bn || '' : '';
+    const className = !blank && d?.class_id ? (classes.find((c: any) => c.id === d.class_id) as any)?.name_bn || '' : '';
+    const blankVal = blank ? '&nbsp;' : '';
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -1032,44 +1033,44 @@ const AdmissionPage = () => {
       </div>
       <div class="form-title">ভর্তি আবেদন ফর্ম</div>
 
-      ${d.photo_url ? `<div class="photo-section"><img src="${d.photo_url}" /></div>` : '<div class="photo-section">ছবি</div>'}
+      ${!blank && d?.photo_url ? `<div class="photo-section"><img src="${d.photo_url}" /></div>` : '<div class="photo-section">ছবি</div>'}
 
       <div class="section">
         <div class="section-title">১. শিক্ষার্থীর তথ্য</div>
         <div class="field-grid">
-          <div class="field"><span class="field-label">নাম (বাংলা):</span><span class="field-value">${d.name_bn || '-'}</span></div>
-          <div class="field"><span class="field-label">নাম (ইংরেজি):</span><span class="field-value">${d.name_en || '-'}</span></div>
-          <div class="field"><span class="field-label">রোল নম্বর:</span><span class="field-value">${d.roll_number || '-'}</span></div>
-          <div class="field"><span class="field-label">রেজিস্ট্রেশন নং:</span><span class="field-value">${d.registration_no || '-'}</span></div>
-          <div class="field"><span class="field-label">ভর্তি সেশন:</span><span class="field-value">${d.admission_session || '-'}</span></div>
-          <div class="field"><span class="field-label">শ্রেণী:</span><span class="field-value">${className || '-'}</span></div>
-          <div class="field"><span class="field-label">লিঙ্গ:</span><span class="field-value">${d.gender === 'male' ? 'পুরুষ' : d.gender === 'female' ? 'মহিলা' : d.gender || '-'}</span></div>
-          <div class="field"><span class="field-label">ধর্ম:</span><span class="field-value">${d.religion || '-'}</span></div>
-          <div class="field"><span class="field-label">জন্ম তারিখ:</span><span class="field-value">${d.date_of_birth || '-'}</span></div>
-          <div class="field"><span class="field-label">জন্ম নিবন্ধন:</span><span class="field-value">${d.birth_reg_no || '-'}</span></div>
-          <div class="field"><span class="field-label">ভর্তির তারিখ:</span><span class="field-value">${d.admission_date || '-'}</span></div>
-          <div class="field"><span class="field-label">আবাসিক ধরন:</span><span class="field-value">${d.residence_type || '-'}</span></div>
+          <div class="field"><span class="field-label">নাম (বাংলা):</span><span class="field-value">${blank ? blankVal : (d.name_bn || '-')}</span></div>
+          <div class="field"><span class="field-label">নাম (ইংরেজি):</span><span class="field-value">${blank ? blankVal : (d.name_en || '-')}</span></div>
+          <div class="field"><span class="field-label">রোল নম্বর:</span><span class="field-value">${blank ? blankVal : (d.roll_number || '-')}</span></div>
+          <div class="field"><span class="field-label">রেজিস্ট্রেশন নং:</span><span class="field-value">${blank ? blankVal : (d.registration_no || '-')}</span></div>
+          <div class="field"><span class="field-label">ভর্তি সেশন:</span><span class="field-value">${blank ? blankVal : (d.admission_session || '-')}</span></div>
+          <div class="field"><span class="field-label">শ্রেণী:</span><span class="field-value">${blank ? blankVal : (className || '-')}</span></div>
+          <div class="field"><span class="field-label">লিঙ্গ:</span><span class="field-value">${blank ? blankVal : (d.gender === 'male' ? 'পুরুষ' : d.gender === 'female' ? 'মহিলা' : d.gender || '-')}</span></div>
+          <div class="field"><span class="field-label">ধর্ম:</span><span class="field-value">${blank ? blankVal : (d.religion || '-')}</span></div>
+          <div class="field"><span class="field-label">জন্ম তারিখ:</span><span class="field-value">${blank ? blankVal : (d.date_of_birth || '-')}</span></div>
+          <div class="field"><span class="field-label">জন্ম নিবন্ধন:</span><span class="field-value">${blank ? blankVal : (d.birth_reg_no || '-')}</span></div>
+          <div class="field"><span class="field-label">ভর্তির তারিখ:</span><span class="field-value">${blank ? blankVal : (d.admission_date || '-')}</span></div>
+          <div class="field"><span class="field-label">আবাসিক ধরন:</span><span class="field-value">${blank ? blankVal : (d.residence_type || '-')}</span></div>
         </div>
       </div>
 
       <div class="section">
         <div class="section-title">২. পিতা-মাতার তথ্য</div>
         <div class="field-grid">
-          <div class="field"><span class="field-label">পিতার নাম:</span><span class="field-value">${d.father_name || '-'}</span></div>
-          <div class="field"><span class="field-label">পিতার পেশা:</span><span class="field-value">${d.father_occupation || '-'}</span></div>
-          <div class="field"><span class="field-label">পিতার ফোন:</span><span class="field-value">${d.father_phone || '-'}</span></div>
-          <div class="field"><span class="field-label">পিতার NID:</span><span class="field-value">${d.father_nid || '-'}</span></div>
-          <div class="field"><span class="field-label">মাতার নাম:</span><span class="field-value">${d.mother_name || '-'}</span></div>
-          <div class="field"><span class="field-label">মাতার পেশা:</span><span class="field-value">${d.mother_occupation || '-'}</span></div>
-          <div class="field"><span class="field-label">মাতার ফোন:</span><span class="field-value">${d.mother_phone || '-'}</span></div>
-          <div class="field"><span class="field-label">মাতার NID:</span><span class="field-value">${d.mother_nid || '-'}</span></div>
+          <div class="field"><span class="field-label">পিতার নাম:</span><span class="field-value">${blank ? blankVal : (d.father_name || '-')}</span></div>
+          <div class="field"><span class="field-label">পিতার পেশা:</span><span class="field-value">${blank ? blankVal : (d.father_occupation || '-')}</span></div>
+          <div class="field"><span class="field-label">পিতার ফোন:</span><span class="field-value">${blank ? blankVal : (d.father_phone || '-')}</span></div>
+          <div class="field"><span class="field-label">পিতার NID:</span><span class="field-value">${blank ? blankVal : (d.father_nid || '-')}</span></div>
+          <div class="field"><span class="field-label">মাতার নাম:</span><span class="field-value">${blank ? blankVal : (d.mother_name || '-')}</span></div>
+          <div class="field"><span class="field-label">মাতার পেশা:</span><span class="field-value">${blank ? blankVal : (d.mother_occupation || '-')}</span></div>
+          <div class="field"><span class="field-label">মাতার ফোন:</span><span class="field-value">${blank ? blankVal : (d.mother_phone || '-')}</span></div>
+          <div class="field"><span class="field-label">মাতার NID:</span><span class="field-value">${blank ? blankVal : (d.mother_nid || '-')}</span></div>
         </div>
       </div>
 
       <div class="section">
         <div class="section-title">৩. ঠিকানা</div>
         <div class="field-grid">
-          <div class="field"><span class="field-label">ঠিকানা:</span><span class="field-value">${d.address || '-'}</span></div>
+          <div class="field"><span class="field-label">ঠিকানা:</span><span class="field-value">${blank ? blankVal : (d.address || '-')}</span></div>
         </div>
       </div>
 
@@ -1083,9 +1084,9 @@ const AdmissionPage = () => {
         </div>
       </div>
 
-      <div class="section" style="margin-top: 25px; text-align: center;">
+      ${!blank ? `<div class="section" style="margin-top: 25px; text-align: center;">
         <span class="status-badge">অনুমোদনের অপেক্ষায়</span>
-      </div>
+      </div>` : ''}
 
       <div class="footer">
         <p>${instName} — ভর্তি আবেদন ফর্ম</p>
@@ -1149,10 +1150,10 @@ const AdmissionPage = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2" variant="outline">
+              <Button onClick={() => handlePrint(false)} className="flex-1 flex items-center justify-center gap-2" variant="outline">
                 <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট করুন' : 'Print'}
               </Button>
-              <Button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2 btn-primary-gradient">
+              <Button onClick={() => handlePrint(false)} className="flex-1 flex items-center justify-center gap-2 btn-primary-gradient">
                 <Download className="w-4 h-4" /> {bn ? 'ডাউনলোড (PDF)' : 'Download (PDF)'}
               </Button>
             </div>
@@ -1223,10 +1224,15 @@ const AdmissionPage = () => {
               </div>
             )}
 
-            <Button onClick={handleSubmit} className="btn-primary-gradient w-full text-lg py-6" disabled={addMutation.isPending}>
-              {addMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-              {bn ? 'আবেদন জমা দিন' : 'Submit Application'}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handleSubmit} className="btn-primary-gradient flex-1 text-lg py-6" disabled={addMutation.isPending}>
+                {addMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+                {bn ? 'আবেদন জমা দিন' : 'Submit Application'}
+              </Button>
+              <Button onClick={() => handlePrint(true)} variant="outline" className="flex-1 text-lg py-6 flex items-center justify-center gap-2">
+                <Printer className="w-5 h-5" /> {bn ? 'ব্লাংক ফর্ম প্রিন্ট' : 'Print Blank Form'}
+              </Button>
+            </div>
             <p className="text-center text-xs text-muted-foreground">
               {bn ? 'জমা দেওয়ার পর অ্যাডমিনের অনুমোদন প্রয়োজন' : 'Admin approval required after submission'}
             </p>
