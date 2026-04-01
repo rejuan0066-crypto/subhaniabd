@@ -450,28 +450,36 @@ const AdminSalary = () => {
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error generating salary'),
   });
 
-  // Update single salary record
+  // Update single salary record (manual edit)
   const updateMutation = useMutation({
     mutationFn: async (record: any) => {
       const { staffName, ...cleanRecord } = record;
-      const ctx: Record<string, number> = {
-        base_salary: Number(cleanRecord.base_salary || 0),
-        bonus: Number(cleanRecord.bonus || 0),
-        overtime: Number(cleanRecord.overtime || 0),
-        other_allowance: Number(cleanRecord.other_allowance || 0),
-        late_deduction: Number(cleanRecord.late_deduction || 0),
-        absence_deduction: Number(cleanRecord.absence_deduction || 0),
-        advance_deduction: Number(cleanRecord.advance_deduction || 0),
-        other_deduction: Number(cleanRecord.other_deduction || 0),
-      };
-      const netFormula = getFormula('net_salary');
+      // For manual edits, recalculate from attendance-based additive earnings
+      // Find the staff member to get fresh attendance stats
+      const staffMember = staff.find((s: any) => s.id === cleanRecord.staff_id);
       let netSalary: number;
-      if (netFormula) {
-        const expr = (netFormula.expression as any)?.formula;
-        netSalary = Math.max(0, evaluateFormula(expr, ctx));
+      if (staffMember) {
+        const attStats = getAttendanceStats(staffMember);
+        // Additive: daily earnings + overtime + bonus + allowance - advance
+        netSalary = Math.max(0,
+          attStats.totalDailyEarnings +
+          Number(cleanRecord.overtime || 0) +
+          Number(cleanRecord.bonus || 0) +
+          Number(cleanRecord.other_allowance || 0) -
+          Number(cleanRecord.advance_deduction || 0)
+        );
       } else {
-        netSalary = ctx.base_salary + ctx.bonus + ctx.overtime + ctx.other_allowance
-          - ctx.late_deduction - ctx.absence_deduction - ctx.advance_deduction - ctx.other_deduction;
+        // Fallback if staff not found
+        netSalary = Math.max(0,
+          Number(cleanRecord.base_salary || 0) +
+          Number(cleanRecord.bonus || 0) +
+          Number(cleanRecord.overtime || 0) +
+          Number(cleanRecord.other_allowance || 0) -
+          Number(cleanRecord.late_deduction || 0) -
+          Number(cleanRecord.absence_deduction || 0) -
+          Number(cleanRecord.advance_deduction || 0) -
+          Number(cleanRecord.other_deduction || 0)
+        );
       }
       const { error } = await supabase.from('salary_records')
         .update({ ...cleanRecord, net_salary: Math.max(0, netSalary), updated_at: new Date().toISOString() })
