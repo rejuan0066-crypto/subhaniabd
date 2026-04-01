@@ -393,7 +393,26 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      toast.error(bn ? 'ফর্মে ত্রুটি রয়েছে' : 'Form has errors');
+      // Build detailed error summary
+      const errorCount = Object.keys(errors).length;
+      const errorDetails = Object.entries(errors).slice(0, 5).map(([key, msg]) => {
+        const fieldConfig = configFields.find(f => f.default_value === key);
+        const fieldLabel = fieldConfig ? (bn ? fieldConfig.label_bn : fieldConfig.label) : key;
+        return `• ${fieldLabel}: ${msg}`;
+      }).join('\n');
+      const moreText = errorCount > 5 ? (bn ? `\n...আরো ${errorCount - 5}টি ত্রুটি` : `\n...and ${errorCount - 5} more errors`) : '';
+      toast.error(bn ? `ফর্মে ${errorCount}টি ত্রুটি রয়েছে` : `Form has ${errorCount} error(s)`, {
+        description: errorDetails + moreText,
+        duration: 8000,
+      });
+      // Scroll to first error field
+      setTimeout(() => {
+        const firstErrorKey = Object.keys(errors)[0];
+        const errorEl = document.querySelector(`[data-field="${firstErrorKey}"]`) || document.querySelector(`[name="${firstErrorKey}"]`);
+        if (errorEl) {
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
     setFieldErrors({});
