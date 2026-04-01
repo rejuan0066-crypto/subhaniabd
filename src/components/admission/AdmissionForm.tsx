@@ -164,27 +164,14 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     },
   });
 
-  // Fetch website_settings for show_roll_no, show_session, admission_footer_text
-  const { data: websiteAdmissionSettings } = useQuery({
-    queryKey: ['website-admission-settings'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('website_settings')
-        .select('key, value')
-        .in('key', ['show_roll_no', 'show_session', 'admission_footer_text']);
-      if (error) throw error;
-      const result: Record<string, any> = {};
-      data?.forEach(row => { result[row.key] = row.value; });
-      return result;
-    },
-  });
+  // Derive visibility from form_settings
+  const isFormFieldVisible = (fieldName: string) => {
+    const setting = formSettings.find(s => s.field_name === fieldName);
+    return setting ? setting.is_visible : true; // default visible if no setting exists
+  };
 
-  const showRollNo = websiteAdmissionSettings?.show_roll_no !== 'false' && websiteAdmissionSettings?.show_roll_no !== false;
-  const showSession = websiteAdmissionSettings?.show_session !== 'false' && websiteAdmissionSettings?.show_session !== false;
-  const admissionFooterText = typeof websiteAdmissionSettings?.admission_footer_text === 'string'
-    ? websiteAdmissionSettings.admission_footer_text
-    : '';
-
+  const showRollNo = isFormFieldVisible('roll_no');
+  const showSession = isFormFieldVisible('admission_session');
   const footerParagraph = formSettings.find(s => s.field_name === 'footer_paragraph');
 
   const getRollStartForClass = useCallback((classId: string) => {
@@ -600,6 +587,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'registration_no':
+        if (!isFormFieldVisible('registration_no')) return null;
         return (
           <div data-field={fieldKey}>
             <Label className={errorLabel}>{label} {reqStar}</Label>
@@ -640,6 +628,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'admission_class':
+        if (!isFormFieldVisible('admission_class')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
@@ -696,6 +685,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'birth_reg_no':
+        if (!isFormFieldVisible('birth_reg_no')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
@@ -712,6 +702,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         return null; // Rendered together in special block
 
       case 'father_nid':
+        if (!isFormFieldVisible('father_nid')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label}</Label>
@@ -725,6 +716,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'mother_nid':
+        if (!isFormFieldVisible('mother_nid')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label}</Label>
@@ -738,6 +730,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'guardian_nid':
+        if (!isFormFieldVisible('guardian_nid')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
@@ -835,6 +828,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       default:
+        if (!isFormFieldVisible(fieldKey)) return null;
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
@@ -973,15 +967,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
 
           {/* Orphan/Poor status */}
-          {(orphanField || poorField) && (
+          {(orphanField && isFormFieldVisible('is_orphan') || poorField && isFormFieldVisible('is_poor')) && (
             <div className="flex flex-wrap gap-6">
-              {orphanField && (
+              {orphanField && isFormFieldVisible('is_orphan') && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="isOrphan" checked={form.is_orphan} onCheckedChange={v => setForm(prev => ({ ...prev, is_orphan: !!v, is_poor: false }))} />
                   <Label htmlFor="isOrphan">{bn ? orphanField.label_bn : orphanField.label}</Label>
                 </div>
               )}
-              {poorField && (
+              {poorField && isFormFieldVisible('is_poor') && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="isPoor" checked={form.is_poor} onCheckedChange={v => setForm(prev => ({ ...prev, is_poor: !!v, is_orphan: false }))} />
                   <Label htmlFor="isPoor">{bn ? poorField.label_bn : poorField.label}</Label>
@@ -1186,12 +1180,6 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               </div>
             )}
 
-            {/* Footer from website_settings admission_footer_text */}
-            {admissionFooterText && (
-              <div className="border rounded-lg p-4 bg-muted/50">
-                <p className="text-sm text-foreground whitespace-pre-wrap">{admissionFooterText}</p>
-              </div>
-            )}
 
             {/* Submit */}
             <Button onClick={handleSubmit} className="btn-primary-gradient w-full text-lg py-5" disabled={addMutation.isPending || updateMutation.isPending}>
