@@ -150,8 +150,11 @@ const AdminAttendance = () => {
     if (selectedSessionYear) {
       filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
     }
-    if (selectedDivisionId && selectedDivisionId !== 'all') {
-      filtered = filtered.filter((s: any) => s.division_id === selectedDivisionId);
+    if (selectedClassId && selectedClassId !== 'all') {
+      const selectedClass = classes.find((c: any) => c.id === selectedClassId);
+      if (selectedClass) {
+        filtered = filtered.filter((s: any) => s.division_id === selectedClass.division_id);
+      }
     }
 
     return filtered;
