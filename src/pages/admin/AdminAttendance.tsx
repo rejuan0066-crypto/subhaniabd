@@ -724,10 +724,20 @@ const AdminAttendance = () => {
                     <SelectValue placeholder={bn ? 'বিভাগ/শ্রেণী নির্বাচন' : 'Select Class'} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Classes'}</SelectItem>
-                    {divisions.map((d: any) => (
-                      <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>
-                    ))}
+                    <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
+                    {divisions.map((d: any) => {
+                      const divClasses = classes.filter((c: any) => c.division_id === d.id);
+                      return [
+                        <SelectItem key={`div-${d.id}`} value={d.id} className="font-semibold">
+                          {bn ? d.name : d.name} ({bn ? 'সকল' : 'All'})
+                        </SelectItem>,
+                        ...divClasses.map((c: any) => (
+                          <SelectItem key={c.id} value={`class_${c.id}_${d.id}`} className="pl-6">
+                            &nbsp;&nbsp;{bn ? c.name_bn : c.name} — {bn ? d.name : d.name}
+                          </SelectItem>
+                        ))
+                      ];
+                    })}
                   </SelectContent>
                 </Select>
 
