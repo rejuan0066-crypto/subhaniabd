@@ -341,27 +341,10 @@ const AdminSalary = () => {
       overtime += Math.round(dutyOvertime);
     }
 
-    // Check if a net_salary formula exists from formula builder
-    const netFormula = getFormula('net_salary');
-    let netSalary: number;
-    if (netFormula) {
-      const expr = (netFormula.expression as any)?.formula;
-      const ctx: Record<string, number> = {
-        base_salary: baseSalary,
-        total_earned: totalEarned,
-        bonus,
-        overtime,
-        other_allowance: otherAllowance,
-        late_deduction: lateDeduction,
-        absence_deduction: absenceDeduction,
-        advance_deduction: advanceDeduction,
-        other_deduction: otherDeduction,
-      };
-      netSalary = Math.max(0, evaluateFormula(expr, ctx));
-    } else {
-      // Default additive: total earned from daily attendance + overtime + allowances - deductions
-      netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction);
-    }
+    // ALWAYS use additive approach: net = sum of daily earnings + overtime + allowances - advance
+    // Daily earnings already account for present/late/half_day/absent per-day
+    // No records = 0 added (purely additive)
+    const netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction);
 
     return {
       base_salary: baseSalary,
@@ -431,26 +414,14 @@ const AdminSalary = () => {
       // Update existing pending records with recalculated values
       for (const rec of updateRecords) {
         const { id, ...updateData } = rec;
-        // Recalculate net with preserved manual fields
-        const netFormula = getFormula('net_salary');
-        let netSalary: number;
-        const ctx: Record<string, number> = {
-          base_salary: Number(updateData.base_salary || 0),
-          bonus: Number(updateData.bonus || 0),
-          overtime: Number(updateData.overtime || 0),
-          other_allowance: Number(updateData.other_allowance || 0),
-          late_deduction: Number(updateData.late_deduction || 0),
-          absence_deduction: Number(updateData.absence_deduction || 0),
-          advance_deduction: Number(updateData.advance_deduction || 0),
-          other_deduction: Number(updateData.other_deduction || 0),
-        };
-        if (netFormula) {
-          const expr = (netFormula.expression as any)?.formula;
-          netSalary = Math.max(0, evaluateFormula(expr, ctx));
-        } else {
-          // Additive: recalculate from attendance-based earnings + manual adjustments
-          netSalary = Math.max(0, updateData.net_salary + Number(updateData.bonus || 0) + Number(updateData.other_allowance || 0) - Number(updateData.advance_deduction || 0));
-        }
+        // Additive: net = attendance-based earnings + overtime + bonus + allowance - advance
+        // updateData.net_salary already has totalEarned + overtime from calculateSalary
+        const netSalary = Math.max(0,
+          Number(updateData.net_salary) +
+          Number(updateData.bonus || 0) +
+          Number(updateData.other_allowance || 0) -
+          Number(updateData.advance_deduction || 0)
+        );
         updateData.net_salary = netSalary;
         updateData.updated_at = new Date().toISOString();
 
@@ -479,28 +450,36 @@ const AdminSalary = () => {
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error generating salary'),
   });
 
-  // Update single salary record
+  // Update single salary record (manual edit)
   const updateMutation = useMutation({
     mutationFn: async (record: any) => {
       const { staffName, ...cleanRecord } = record;
-      const ctx: Record<string, number> = {
-        base_salary: Number(cleanRecord.base_salary || 0),
-        bonus: Number(cleanRecord.bonus || 0),
-        overtime: Number(cleanRecord.overtime || 0),
-        other_allowance: Number(cleanRecord.other_allowance || 0),
-        late_deduction: Number(cleanRecord.late_deduction || 0),
-        absence_deduction: Number(cleanRecord.absence_deduction || 0),
-        advance_deduction: Number(cleanRecord.advance_deduction || 0),
-        other_deduction: Number(cleanRecord.other_deduction || 0),
-      };
-      const netFormula = getFormula('net_salary');
+      // For manual edits, recalculate from attendance-based additive earnings
+      // Find the staff member to get fresh attendance stats
+      const staffMember = staff.find((s: any) => s.id === cleanRecord.staff_id);
       let netSalary: number;
-      if (netFormula) {
-        const expr = (netFormula.expression as any)?.formula;
-        netSalary = Math.max(0, evaluateFormula(expr, ctx));
+      if (staffMember) {
+        const attStats = getAttendanceStats(staffMember);
+        // Additive: daily earnings + overtime + bonus + allowance - advance
+        netSalary = Math.max(0,
+          attStats.totalDailyEarnings +
+          Number(cleanRecord.overtime || 0) +
+          Number(cleanRecord.bonus || 0) +
+          Number(cleanRecord.other_allowance || 0) -
+          Number(cleanRecord.advance_deduction || 0)
+        );
       } else {
-        netSalary = ctx.base_salary + ctx.bonus + ctx.overtime + ctx.other_allowance
-          - ctx.late_deduction - ctx.absence_deduction - ctx.advance_deduction - ctx.other_deduction;
+        // Fallback if staff not found
+        netSalary = Math.max(0,
+          Number(cleanRecord.base_salary || 0) +
+          Number(cleanRecord.bonus || 0) +
+          Number(cleanRecord.overtime || 0) +
+          Number(cleanRecord.other_allowance || 0) -
+          Number(cleanRecord.late_deduction || 0) -
+          Number(cleanRecord.absence_deduction || 0) -
+          Number(cleanRecord.advance_deduction || 0) -
+          Number(cleanRecord.other_deduction || 0)
+        );
       }
       const { error } = await supabase.from('salary_records')
         .update({ ...cleanRecord, net_salary: Math.max(0, netSalary), updated_at: new Date().toISOString() })
