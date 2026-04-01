@@ -57,7 +57,7 @@ const AdminAttendance = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSessionYear, setSelectedSessionYear] = useState('');
-  const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedShift, setSelectedShift] = useState('full_day');
   // Effective shift: fulltime tab always uses 'full_day'
   const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
