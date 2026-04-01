@@ -1109,8 +1109,8 @@ const AdmissionPage = () => {
     iframe.style.position = 'fixed';
     iframe.style.left = '-10000px';
     iframe.style.top = '0';
-    iframe.style.width = '794px'; // A4 width at 96dpi
-    iframe.style.height = '1123px'; // A4 height at 96dpi
+    iframe.style.width = '794px';
+    iframe.style.height = 'auto';
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
