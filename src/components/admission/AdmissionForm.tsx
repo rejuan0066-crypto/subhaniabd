@@ -145,6 +145,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     },
   });
 
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic-sessions-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Auto-generate roll & registration numbers
   const generateAutoNumber = useCallback(async (sessionYear: string) => {
     if (!sessionYear || isEditMode) return;
@@ -313,7 +322,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       admission_date: form.admission_date || null,
       birth_reg_no: form.birth_reg_no || null,
       religion: form.religion,
-      admission_session: form.admission_session || null,
+      admission_session: academicSessions.find((s: any) => s.id === form.admission_session)?.name || form.admission_session || null,
+      session_id: form.admission_session || null,
       registration_no: form.registration_no || null,
       session_year: form.session_year || null,
       previous_class: form.previous_class || null,
@@ -516,6 +526,25 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               </button>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">{bn ? 'সেশন+সিরিয়াল অটো জেনারেট, এডিটযোগ্য' : 'Auto: session+serial, editable'}</p>
+            <FieldError field={fieldKey} />
+          </div>
+        );
+
+      case 'admission_session':
+        return (
+          <div data-field={fieldKey}>
+            <Label className={errorLabel}>{label} {reqStar}</Label>
+            <Select value={form.admission_session} onValueChange={v => {
+              const session = academicSessions.find((s: any) => s.id === v);
+              setForm(prev => ({ ...prev, admission_session: v, session_year: session?.name || prev.session_year }));
+            }}>
+              <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={bn ? 'সেশন নির্বাচন' : 'Select Session'} /></SelectTrigger>
+              <SelectContent>
+                {academicSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <FieldError field={fieldKey} />
           </div>
         );
