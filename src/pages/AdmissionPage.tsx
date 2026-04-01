@@ -53,6 +53,7 @@ const AdmissionPage = () => {
   const [guardianPresAddr, setGuardianPresAddr] = useState<AddressData>(emptyAddress);
   const [guardianSameAddr, setGuardianSameAddr] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
+  const [submittedData, setSubmittedData] = useState<Record<string, any> | null>(null);
 
   // Old student search
   const [oldRoll, setOldRoll] = useState('');
