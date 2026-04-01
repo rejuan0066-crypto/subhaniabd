@@ -21,6 +21,7 @@ const AdminStudents = () => {
   const [editStudent, setEditStudent] = useState<any>(null);
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
+  const [filterApproval, setFilterApproval] = useState('all');
 
   const { data: academicSessions = [] } = useQuery({
     queryKey: ['academic-sessions-active'],
@@ -81,6 +82,11 @@ const AdminStudents = () => {
     // Class filter
     if (filterClassId !== 'all') {
       if (s.class_id !== filterClassId) return false;
+    }
+    // Approval status filter
+    if (filterApproval !== 'all') {
+      const status = s.approval_status || 'pending';
+      if (status !== filterApproval) return false;
     }
     // Text search
     if (search) {
@@ -153,6 +159,18 @@ const AdminStudents = () => {
                 {classes.map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterApproval} onValueChange={setFilterApproval}>
+              <SelectTrigger className="bg-background w-full sm:w-48">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'অনুমোদন স্ট্যাটাস' : 'Approval Status'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল স্ট্যাটাস' : 'All Status'}</SelectItem>
+                <SelectItem value="pending">{bn ? 'অপেক্ষমাণ' : 'Pending'}</SelectItem>
+                <SelectItem value="approved">{bn ? 'অনুমোদিত' : 'Approved'}</SelectItem>
+                <SelectItem value="rejected">{bn ? 'প্রত্যাখ্যাত' : 'Rejected'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
