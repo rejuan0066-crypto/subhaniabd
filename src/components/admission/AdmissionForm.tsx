@@ -529,6 +529,25 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
         );
 
+      case 'admission_session':
+        return (
+          <div data-field={fieldKey}>
+            <Label className={errorLabel}>{label} {reqStar}</Label>
+            <Select value={form.admission_session} onValueChange={v => {
+              const session = academicSessions.find((s: any) => s.id === v);
+              setForm(prev => ({ ...prev, admission_session: v, session_year: session?.name || prev.session_year }));
+            }}>
+              <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={bn ? 'সেশন নির্বাচন' : 'Select Session'} /></SelectTrigger>
+              <SelectContent>
+                {academicSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError field={fieldKey} />
+          </div>
+        );
+
       case 'admission_class':
         return (
           <div>
