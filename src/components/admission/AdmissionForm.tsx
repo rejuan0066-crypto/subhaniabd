@@ -716,6 +716,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'mother_nid':
+        if (!isFormFieldVisible('mother_nid')) return null;
         return (
           <div>
             <Label className={errorLabel}>{label}</Label>
