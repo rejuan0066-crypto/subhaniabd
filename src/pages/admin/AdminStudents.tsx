@@ -21,6 +21,7 @@ const AdminStudents = () => {
   const [editStudent, setEditStudent] = useState<any>(null);
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
+  const [filterApproval, setFilterApproval] = useState('all');
 
   const { data: academicSessions = [] } = useQuery({
     queryKey: ['academic-sessions-active'],
