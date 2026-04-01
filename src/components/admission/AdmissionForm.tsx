@@ -145,6 +145,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     },
   });
 
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic-sessions-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Auto-generate roll & registration numbers
   const generateAutoNumber = useCallback(async (sessionYear: string) => {
     if (!sessionYear || isEditMode) return;
