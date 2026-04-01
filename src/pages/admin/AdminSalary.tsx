@@ -86,8 +86,11 @@ const AdminSalary = () => {
   const { data: attendanceData = [] } = useQuery({
     queryKey: ['salary-attendance', monthYear],
     queryFn: async () => {
+      const year = Number(selectedYear);
+      const month = Number(selectedMonth);
+      const lastDay = new Date(year, month, 0).getDate();
       const startDate = `${monthYear}-01`;
-      const endDate = `${monthYear}-31`;
+      const endDate = `${monthYear}-${String(lastDay).padStart(2, '0')}`;
       const { data, error } = await supabase
         .from('attendance_records')
         .select('*')
