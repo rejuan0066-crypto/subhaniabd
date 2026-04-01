@@ -58,7 +58,9 @@ const AdminAttendance = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSessionYear, setSelectedSessionYear] = useState('');
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
-  const [selectedShift, setSelectedShift] = useState('morning');
+  const [selectedShift, setSelectedShift] = useState('full_day');
+  // Effective shift: fulltime tab always uses 'full_day'
+  const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
   const [ruleForm, setRuleForm] = useState({ name: '', name_bn: '', entity_type: 'student', config: { color: 'green', counts_as: 'present' } });
