@@ -158,7 +158,7 @@ const AdminAttendance = () => {
     }
 
     return filtered;
-  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedDivisionId]);
+  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, classes]);
 
   // Fetch attendance for selected date (for staff, fetch by shift too)
   const { data: attendance = [] } = useQuery({
