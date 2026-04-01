@@ -203,22 +203,26 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   }, [classes]);
 
   // Auto-generate roll number based on class + session
-  const generateRollNumber = useCallback(async (classId: string, sessionId: string) => {
-    if (!classId || !sessionId || isEditMode) return;
+  const generateRollNumber = useCallback(async (classId: string, sessionId?: string) => {
+    if (!classId || isEditMode) return;
     const rollStart = getRollStartForClass(classId);
-    const rollPrefix = Math.floor(rollStart / 1000); // e.g. 1 for 1001, 2 for 2001
+    const rollPrefix = Math.floor(rollStart / 1000);
 
-    // Find the latest roll in this class+session that starts with the prefix
-    const { data } = await supabase
+    let query = supabase
       .from('students')
       .select('roll_number')
       .eq('class_id', classId)
-      .eq('session_id', sessionId)
       .not('roll_number', 'is', null)
       .order('roll_number', { ascending: false })
       .limit(50);
 
-    let maxRoll = rollStart - 1; // e.g. 1000
+    if (sessionId) {
+      query = query.eq('session_id', sessionId);
+    }
+
+    const { data } = await query;
+
+    let maxRoll = rollStart - 1;
     if (data && data.length > 0) {
       for (const s of data) {
         const num = parseInt(s.roll_number || '0', 10);
@@ -231,14 +235,21 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     setForm(prev => ({ ...prev, roll_number: nextRoll }));
   }, [isEditMode, getRollStartForClass]);
 
-  // Auto-generate registration number based on session
-  const generateRegistrationNumber = useCallback(async (sessionYear: string, force = false) => {
+  // Auto-generate registration number based on session + class
+  const generateRegistrationNumber = useCallback(async (sessionYear: string, classId?: string, force = false) => {
     if (!sessionYear || isEditMode) return;
     const year = sessionYear.trim();
-    const { count } = await supabase
+
+    let query = supabase
       .from('students')
       .select('id', { count: 'exact', head: true })
       .or(`session_year.eq.${year},admission_session.ilike.%${year}%`);
+
+    if (classId) {
+      query = query.eq('class_id', classId);
+    }
+
+    const { count } = await query;
     const serial = String((count || 0) + 1).padStart(3, '0');
     const autoNum = `${year}${serial}`;
     setForm(prev => ({
@@ -247,19 +258,16 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     }));
   }, [isEditMode]);
 
-  // Trigger roll generation when class or session changes
+  // Trigger roll & registration generation when class or session changes
   useEffect(() => {
-    if (open && !isEditMode && form.admission_class && form.admission_session) {
-      generateRollNumber(form.admission_class, form.admission_session);
+    if (!open || isEditMode) return;
+    if (form.admission_class) {
+      generateRollNumber(form.admission_class, form.admission_session || undefined);
     }
-  }, [open, form.admission_class, form.admission_session, isEditMode, generateRollNumber]);
-
-  // Trigger registration number generation when session_year changes
-  useEffect(() => {
-    if (open && !isEditMode && form.session_year) {
-      generateRegistrationNumber(form.session_year, true);
+    if (form.session_year) {
+      generateRegistrationNumber(form.session_year, form.admission_class || undefined, true);
     }
-  }, [open, form.session_year, isEditMode, generateRegistrationNumber]);
+  }, [open, form.admission_class, form.admission_session, form.session_year, isEditMode, generateRollNumber, generateRegistrationNumber]);
 
   const calculateAge = useCallback((dateStr: string) => {
     if (!dateStr) return '';
