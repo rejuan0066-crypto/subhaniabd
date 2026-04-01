@@ -722,7 +722,7 @@ const AdminAttendance = () => {
                 </Select>
 
                 {/* Division/Class filter (all student sub-tabs) */}
-                <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
+                <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                   <SelectTrigger className="w-44 h-8 text-xs">
                     <SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select Class'} />
                   </SelectTrigger>
@@ -731,8 +731,8 @@ const AdminAttendance = () => {
                     {classes.map((c: any) => {
                       const div = divisions.find((d: any) => d.id === c.division_id);
                       return (
-                        <SelectItem key={c.id} value={c.division_id}>
-                          {bn ? c.name_bn : c.name} {div ? `(${div.name})` : ''}
+                        <SelectItem key={c.id} value={c.id}>
+                          {bn ? c.name_bn : c.name} {div ? `(${bn ? div.name_bn : div.name})` : ''}
                         </SelectItem>
                       );
                     })}
