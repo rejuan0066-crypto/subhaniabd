@@ -966,15 +966,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
 
           {/* Orphan/Poor status */}
-          {(orphanField || poorField) && (
+          {(orphanField && isFormFieldVisible('is_orphan') || poorField && isFormFieldVisible('is_poor')) && (
             <div className="flex flex-wrap gap-6">
-              {orphanField && (
+              {orphanField && isFormFieldVisible('is_orphan') && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="isOrphan" checked={form.is_orphan} onCheckedChange={v => setForm(prev => ({ ...prev, is_orphan: !!v, is_poor: false }))} />
                   <Label htmlFor="isOrphan">{bn ? orphanField.label_bn : orphanField.label}</Label>
                 </div>
               )}
-              {poorField && (
+              {poorField && isFormFieldVisible('is_poor') && (
                 <div className="flex items-center gap-2">
                   <Checkbox id="isPoor" checked={form.is_poor} onCheckedChange={v => setForm(prev => ({ ...prev, is_poor: !!v, is_orphan: false }))} />
                   <Label htmlFor="isPoor">{bn ? poorField.label_bn : poorField.label}</Label>
