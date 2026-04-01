@@ -667,7 +667,9 @@ const AdminAttendance = () => {
                     <p className="text-[10px] text-muted-foreground">
                       {entityType === 'student'
                         ? `${bn ? 'আইডি' : 'ID'}: ${entity.student_id || '-'} ${entity.roll_number ? `| ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number}` : ''}`
-                        : `${entity.designation || '-'} | ${fmt(entity.duty_start_time || '08:00')} - ${fmt(entity.duty_end_time || '17:00')}`}
+                        : staffSubTab === 'duty'
+                          ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
+                          : `${entity.designation || '-'} | ${fmt(entity.duty_start_time || '08:00')} - ${fmt(entity.duty_end_time || '17:00')}`}
                     </p>
                   </div>
 
