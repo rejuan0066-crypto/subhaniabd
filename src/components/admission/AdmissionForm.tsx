@@ -499,6 +499,27 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
         );
 
+      case 'roll_number':
+      case 'registration_no':
+        return (
+          <div data-field={fieldKey}>
+            <Label className={errorLabel}>{label} {reqStar}</Label>
+            <div className="relative">
+              <Input className={`bg-background mt-1 pr-24 ${errorBorder}`}
+                value={form[fieldKey] || ''}
+                onChange={e => setForm(prev => ({ ...prev, [fieldKey]: e.target.value }))}
+                placeholder={bn ? 'অটো জেনারেট / টাইপ করুন' : 'Auto / Type'} />
+              <button type="button"
+                className="absolute right-1 top-1/2 -translate-y-1/2 mt-0.5 text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                onClick={() => generateAutoNumber(form.session_year)}>
+                {bn ? 'অটো' : 'Auto'}
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">{bn ? 'সেশন+সিরিয়াল অটো জেনারেট, এডিটযোগ্য' : 'Auto: session+serial, editable'}</p>
+            <FieldError field={fieldKey} />
+          </div>
+        );
+
       case 'admission_class':
         return (
           <div>
