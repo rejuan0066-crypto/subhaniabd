@@ -414,26 +414,14 @@ const AdminSalary = () => {
       // Update existing pending records with recalculated values
       for (const rec of updateRecords) {
         const { id, ...updateData } = rec;
-        // Recalculate net with preserved manual fields
-        const netFormula = getFormula('net_salary');
-        let netSalary: number;
-        const ctx: Record<string, number> = {
-          base_salary: Number(updateData.base_salary || 0),
-          bonus: Number(updateData.bonus || 0),
-          overtime: Number(updateData.overtime || 0),
-          other_allowance: Number(updateData.other_allowance || 0),
-          late_deduction: Number(updateData.late_deduction || 0),
-          absence_deduction: Number(updateData.absence_deduction || 0),
-          advance_deduction: Number(updateData.advance_deduction || 0),
-          other_deduction: Number(updateData.other_deduction || 0),
-        };
-        if (netFormula) {
-          const expr = (netFormula.expression as any)?.formula;
-          netSalary = Math.max(0, evaluateFormula(expr, ctx));
-        } else {
-          // Additive: recalculate from attendance-based earnings + manual adjustments
-          netSalary = Math.max(0, updateData.net_salary + Number(updateData.bonus || 0) + Number(updateData.other_allowance || 0) - Number(updateData.advance_deduction || 0));
-        }
+        // Additive: net = attendance-based earnings + overtime + bonus + allowance - advance
+        // updateData.net_salary already has totalEarned + overtime from calculateSalary
+        const netSalary = Math.max(0,
+          Number(updateData.net_salary) +
+          Number(updateData.bonus || 0) +
+          Number(updateData.other_allowance || 0) -
+          Number(updateData.advance_deduction || 0)
+        );
         updateData.net_salary = netSalary;
         updateData.updated_at = new Date().toISOString();
 
