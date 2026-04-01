@@ -488,9 +488,17 @@ const AdminAttendance = () => {
               {bn ? 'ছাত্র ও স্টাফের দৈনিক উপস্থিতি ট্র্যাক করুন' : 'Track daily attendance for students & staff'}
             </p>
           </div>
-          <Button variant="outline" onClick={() => setRulesDialogOpen(true)}>
-            <Settings2 className="h-4 w-4 mr-1" /> {bn ? 'রুল সেটিংস' : 'Rule Settings'}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={handleDownloadCSV}>
+              <Download className="h-4 w-4 mr-1" /> {bn ? 'ডাউনলোড' : 'Download'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handlePrint}>
+              <Printer className="h-4 w-4 mr-1" /> {bn ? 'প্রিন্ট' : 'Print'}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setRulesDialogOpen(true)}>
+              <Settings2 className="h-4 w-4 mr-1" /> {bn ? 'রুল সেটিংস' : 'Rule Settings'}
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
