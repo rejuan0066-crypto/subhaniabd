@@ -545,6 +545,7 @@ const AdminAttendance = () => {
     if (!printWindow) return;
 
     let tableHtml = '';
+    let printMetaStats = { total: filtered.length, present: 0, absent: 0, late: 0, unmarked: 0 };
 
     // For duty tab, combine morning + evening
     if (entityType === 'staff' && staffSubTab === 'duty') {
@@ -680,6 +681,9 @@ const AdminAttendance = () => {
       const pLate = entityType === 'student' ? printAttData.filter((a: any) => a.status === 'late').length : stats.late;
       const pUnmarked = filtered.length - (entityType === 'student' ? printAttData.length : attendance.length);
 
+      // Store for meta section
+      printMetaStats = { total: filtered.length, present: pPresent, absent: pAbsent, late: pLate, unmarked: pUnmarked };
+
       tableHtml = `
         <table>
           <thead><tr>
@@ -734,7 +738,9 @@ const AdminAttendance = () => {
       <h3 style="text-align:center;margin-bottom:8px">${title}</h3>
       <div class="meta">
         <span>${bn ? 'তারিখ' : 'Date'}: ${selectedDate}</span>
-        <span>${entityType === 'student' ? (bn ? 'মোট ছাত্র' : 'Total Students') : (bn ? 'মোট স্টাফ' : 'Total Staff')}: ${filtered.length}</span>
+        <span>${entityType === 'student' ? (bn ? 'মোট ছাত্র' : 'Total Students') : (bn ? 'মোট স্টাফ' : 'Total Staff')}: ${printMetaStats.total}</span>
+        ${entityType === 'student' ? `<span style="color:#16a34a;font-weight:600">${bn ? 'উপস্থিত' : 'Present'}: ${printMetaStats.present}</span>
+        <span style="color:#dc2626;font-weight:600">${bn ? 'অনুপস্থিত' : 'Absent'}: ${printMetaStats.absent}</span>` : ''}
       </div>
       ${tableHtml}
     </body></html>`;
