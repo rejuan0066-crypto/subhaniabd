@@ -66,6 +66,9 @@ const AdminAttendance = () => {
     evening_start: '17:00', evening_end: '19:00',
     extra_duty_enabled: false,
     extra_duty_rate: 0,
+    morning_days: 30,
+    evening_days: 30,
+    total_salary: 0,
   });
 
   // Fetch divisions
@@ -198,6 +201,9 @@ const AdminAttendance = () => {
         evening_end: savedDutyTimes.evening_end || '19:00',
         extra_duty_enabled: savedDutyTimes.extra_duty_enabled || false,
         extra_duty_rate: savedDutyTimes.extra_duty_rate || 0,
+        morning_days: savedDutyTimes.morning_days || 30,
+        evening_days: savedDutyTimes.evening_days || 30,
+        total_salary: savedDutyTimes.total_salary || 0,
       });
     }
   }, [savedDutyTimes]);
@@ -562,7 +568,16 @@ const AdminAttendance = () => {
                           key={rule.id}
                           onClick={() => {
                             const mutateData: any = { entityId: entity.id, status: countsAs };
-                            if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
+                            if (entityType === 'staff' && staffSubTab === 'duty' && ['present', 'late', 'half_day'].includes(countsAs)) {
+                              // Use saved residential duty times for duty tab
+                              if (selectedShift === 'morning') {
+                                mutateData.check_in_time = dutyTimes.morning_start;
+                                mutateData.check_out_time = dutyTimes.morning_end;
+                              } else if (selectedShift === 'evening') {
+                                mutateData.check_in_time = dutyTimes.evening_start;
+                                mutateData.check_out_time = dutyTimes.evening_end;
+                              }
+                            } else if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
                               mutateData.check_in_time = entity.duty_start_time || '08:00';
                               mutateData.check_out_time = entity.duty_end_time || '17:00';
                             }
@@ -650,6 +665,33 @@ const AdminAttendance = () => {
                 <Button size="sm" className="w-full" onClick={() => saveDutyTimesMutation.mutate(dutyTimes)}>
                   <Save className="h-3 w-3 mr-1" /> {bn ? 'ডিউটি টাইম সেভ করুন' : 'Save Duty Times'}
                 </Button>
+
+                {/* Days & Salary Settings */}
+                <div className="border-t pt-3 mt-3 space-y-3">
+                  <p className="text-xs font-semibold text-muted-foreground">{bn ? 'ডিউটি দিন ও বেতন সেটিংস' : 'Duty Days & Salary Settings'}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'সকাল ডিউটি (দিন)' : 'Morning Duty (Days)'}</Label>
+                      <Input type="number" className="h-8 text-sm" value={dutyTimes.morning_days} onChange={e => setDutyTimes(p => ({ ...p, morning_days: Number(e.target.value) }))} />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">{bn ? 'সন্ধ্যা ডিউটি (দিন)' : 'Evening Duty (Days)'}</Label>
+                      <Input type="number" className="h-8 text-sm" value={dutyTimes.evening_days} onChange={e => setDutyTimes(p => ({ ...p, evening_days: Number(e.target.value) }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-[10px]">{bn ? 'মোট ডিউটি বেতন (৳)' : 'Total Duty Salary (৳)'}</Label>
+                    <Input type="number" className="h-8 text-sm" placeholder="0" value={dutyTimes.total_salary || ''} onChange={e => setDutyTimes(p => ({ ...p, total_salary: Number(e.target.value) }))} />
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      {bn
+                        ? `মোট ${dutyTimes.morning_days + dutyTimes.evening_days} শিফট | প্রতি শিফট: ৳${dutyTimes.total_salary && (dutyTimes.morning_days + dutyTimes.evening_days) > 0 ? (dutyTimes.total_salary / (dutyTimes.morning_days + dutyTimes.evening_days)).toFixed(2) : '0'}`
+                        : `Total ${dutyTimes.morning_days + dutyTimes.evening_days} shifts | Per shift: ৳${dutyTimes.total_salary && (dutyTimes.morning_days + dutyTimes.evening_days) > 0 ? (dutyTimes.total_salary / (dutyTimes.morning_days + dutyTimes.evening_days)).toFixed(2) : '0'}`}
+                    </p>
+                  </div>
+                  <Button size="sm" variant="secondary" className="w-full" onClick={() => saveDutyTimesMutation.mutate(dutyTimes)}>
+                    <Save className="h-3 w-3 mr-1" /> {bn ? 'সেভ করুন' : 'Save'}
+                  </Button>
+                </div>
 
                 {/* Extra Duty Option */}
                 <div className="border-t pt-3 mt-3 space-y-3">
