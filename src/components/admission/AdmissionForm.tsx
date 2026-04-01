@@ -501,9 +501,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       case 'religion':
         return (
           <div>
-            <Label>{label} {reqStar}</Label>
+            <Label className={errorLabel}>{label} {reqStar}</Label>
             <Select value={form.religion} onValueChange={v => setForm(prev => ({ ...prev, religion: v }))}>
-              <SelectTrigger className="bg-background mt-1"><SelectValue /></SelectTrigger>
+              <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="islam">{bn ? 'ইসলাম' : 'Islam'}</SelectItem>
                 <SelectItem value="hinduism">{bn ? 'হিন্দু' : 'Hinduism'}</SelectItem>
@@ -512,6 +512,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                 <SelectItem value="other">{bn ? 'অন্যান্য' : 'Other'}</SelectItem>
               </SelectContent>
             </Select>
+            <FieldError field={fieldKey} />
           </div>
         );
 
