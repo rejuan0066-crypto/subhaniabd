@@ -692,6 +692,12 @@ const AdminAttendance = () => {
                     <Save className="h-3 w-3 mr-1" /> {bn ? 'সেভ করুন' : 'Save'}
                   </Button>
                 </div>
+
+                {/* Extra Duty Option */}
+                <div className="border-t pt-3 mt-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{bn ? 'অতিরিক্ত ডিউটি হিসেবে যোগ করুন' : 'Count as Extra Duty'}</p>
                       <p className="text-[10px] text-muted-foreground">{bn ? 'চালু করলে আবাসিক ডিউটি অতিরিক্ত বেতন হিসেবে যোগ হবে' : 'If enabled, residential duty will be added as extra pay'}</p>
                     </div>
                     <Switch
