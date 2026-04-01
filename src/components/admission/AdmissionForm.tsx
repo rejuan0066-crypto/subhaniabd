@@ -393,7 +393,26 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      toast.error(bn ? 'ফর্মে ত্রুটি রয়েছে' : 'Form has errors');
+      // Build detailed error summary
+      const errorCount = Object.keys(errors).length;
+      const errorDetails = Object.entries(errors).slice(0, 5).map(([key, msg]) => {
+        const fieldConfig = configFields.find(f => f.default_value === key);
+        const fieldLabel = fieldConfig ? (bn ? fieldConfig.label_bn : fieldConfig.label) : key;
+        return `• ${fieldLabel}: ${msg}`;
+      }).join('\n');
+      const moreText = errorCount > 5 ? (bn ? `\n...আরো ${errorCount - 5}টি ত্রুটি` : `\n...and ${errorCount - 5} more errors`) : '';
+      toast.error(bn ? `ফর্মে ${errorCount}টি ত্রুটি রয়েছে` : `Form has ${errorCount} error(s)`, {
+        description: errorDetails + moreText,
+        duration: 8000,
+      });
+      // Scroll to first error field
+      setTimeout(() => {
+        const firstErrorKey = Object.keys(errors)[0];
+        const errorEl = document.querySelector(`[data-field="${firstErrorKey}"]`) || document.querySelector(`[name="${firstErrorKey}"]`);
+        if (errorEl) {
+          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return;
     }
     setFieldErrors({});
@@ -742,9 +761,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {otherFields.map(f => {
               const key = f.default_value;
-              if (!key) return renderCustomField(f);
-              if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
-              return <div key={f.id}>{renderCustomField(f)}</div>;
+              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
           </div>
 
@@ -781,9 +800,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
-              if (!key) return <div key={f.id}>{renderCustomField(f)}</div>;
-              if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
-              return <div key={f.id}>{renderCustomField(f)}</div>;
+              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
           </div>
           <p className="text-xs text-destructive flex items-center gap-1 mt-2">
@@ -836,9 +855,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {otherGuardianFields.map(f => {
                   const key = f.default_value;
-                  if (!key) return <div key={f.id}>{renderCustomField(f)}</div>;
-                  if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
-                  return <div key={f.id}>{renderCustomField(f)}</div>;
+                  if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+                  if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+                  return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
                 })}
               </div>
               <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={guardianPermAddr} onChange={setGuardianPermAddr} />
@@ -859,9 +878,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
         {sectionFields.map(f => {
           const key = f.default_value;
-          if (!key) return <div key={f.id}>{renderCustomField(f)}</div>;
-          if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
-          return <div key={f.id}>{renderCustomField(f)}</div>;
+          if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+          if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+          return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
         })}
       </div>
     );
@@ -879,6 +898,33 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : (
           <div className="space-y-6 py-4">
+            {/* Error summary banner */}
+            {Object.keys(fieldErrors).length > 0 && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 space-y-2">
+                <p className="text-sm font-semibold text-destructive flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {bn ? `${Object.keys(fieldErrors).length}টি ত্রুটি সংশোধন করুন` : `Please fix ${Object.keys(fieldErrors).length} error(s)`}
+                </p>
+                <ul className="space-y-1 ml-6 list-disc">
+                  {Object.entries(fieldErrors).map(([key, msg]) => {
+                    const fieldConfig = configFields.find(f => f.default_value === key);
+                    const fieldLabel = fieldConfig ? (bn ? fieldConfig.label_bn : fieldConfig.label) : key;
+                    return (
+                      <li key={key} className="text-xs text-destructive">
+                        <button type="button" className="underline hover:no-underline text-left"
+                          onClick={() => {
+                            const el = document.querySelector(`[data-field="${key}"]`);
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }}>
+                          <span className="font-medium">{fieldLabel}</span>: {msg}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
             {activeSections.map(section => renderSection(section))}
 
             {/* Approver Section */}
