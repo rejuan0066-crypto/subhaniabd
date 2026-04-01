@@ -227,7 +227,7 @@ const AdminAttendance = () => {
   // Save attendance mutation
   const saveMutation = useMutation({
     mutationFn: async ({ entityId, status, remarks, check_in_time, check_out_time }: { entityId: string; status: string; remarks?: string; check_in_time?: string; check_out_time?: string }) => {
-      const shiftVal = entityType === 'staff' ? selectedShift : 'full_day';
+      const shiftVal = effectiveShift;
       const existing = attendance.find((a: any) => a.entity_id === entityId);
       const updateData: any = { status, remarks, updated_at: new Date().toISOString() };
       if (check_in_time !== undefined) updateData.check_in_time = check_in_time;
