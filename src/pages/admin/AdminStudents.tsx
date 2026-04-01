@@ -7,7 +7,7 @@ import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AdmissionForm from '@/components/admission/AdmissionForm';
 
@@ -22,6 +22,17 @@ const AdminStudents = () => {
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
   const [filterApproval, setFilterApproval] = useState('all');
+
+  // Realtime subscription for auto-refresh
+  useEffect(() => {
+    const channel = supabase
+      .channel('students-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['students'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
 
   const { data: academicSessions = [] } = useQuery({
     queryKey: ['academic-sessions-active'],
