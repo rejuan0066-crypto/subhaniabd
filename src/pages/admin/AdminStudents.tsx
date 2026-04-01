@@ -161,6 +161,18 @@ const AdminStudents = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={filterApproval} onValueChange={setFilterApproval}>
+              <SelectTrigger className="bg-background w-full sm:w-48">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'অনুমোদন স্ট্যাটাস' : 'Approval Status'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল স্ট্যাটাস' : 'All Status'}</SelectItem>
+                <SelectItem value="pending">{bn ? 'অপেক্ষমাণ' : 'Pending'}</SelectItem>
+                <SelectItem value="approved">{bn ? 'অনুমোদিত' : 'Approved'}</SelectItem>
+                <SelectItem value="rejected">{bn ? 'প্রত্যাখ্যাত' : 'Rejected'}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
