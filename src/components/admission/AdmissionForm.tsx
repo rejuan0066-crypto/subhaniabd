@@ -237,27 +237,12 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   // Convert Bengali digits to English
   const bnToEn = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)));
 
-  // Auto-generate registration number based on session + class
-  const generateRegistrationNumber = useCallback(async (sessionYear: string, classId?: string, force = false) => {
-    if (!sessionYear || isEditMode) return;
-    const year = bnToEn(sessionYear.trim());
-
-    let query = supabase
-      .from('students')
-      .select('id', { count: 'exact', head: true })
-      .or(`session_year.eq.${year},admission_session.ilike.%${year}%`);
-
-    if (classId) {
-      query = query.eq('class_id', classId);
-    }
-
-    const { count } = await query;
-    const serial = String((count || 0) + 1).padStart(3, '0');
-    const autoNum = `${year}${serial}`;
-    setForm(prev => ({
-      ...prev,
-      registration_no: force ? autoNum : (prev.registration_no || autoNum),
-    }));
+  // Auto-generate registration number = session first 4 digits + roll number
+  const updateRegistrationFromRoll = useCallback((sessionYear: string, rollNumber: string) => {
+    if (!sessionYear || !rollNumber || isEditMode) return;
+    const year = bnToEn(sessionYear.trim()).slice(0, 4);
+    const regNo = `${year}${rollNumber}`;
+    setForm(prev => ({ ...prev, registration_no: regNo }));
   }, [isEditMode]);
 
   // Trigger roll & registration generation when class or session changes
