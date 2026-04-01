@@ -145,6 +145,30 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     },
   });
 
+  // Auto-generate roll & registration numbers
+  const generateAutoNumber = useCallback(async (sessionYear: string) => {
+    if (!sessionYear || isEditMode) return;
+    const year = sessionYear.trim();
+    const { count } = await supabase
+      .from('students')
+      .select('id', { count: 'exact', head: true })
+      .or(`session_year.eq.${year},admission_session.ilike.%${year}%`);
+    const serial = String((count || 0) + 1).padStart(3, '0');
+    const autoNum = `${year}${serial}`;
+    setForm(prev => ({
+      ...prev,
+      roll_number: prev.roll_number || autoNum,
+      registration_no: prev.registration_no || autoNum,
+    }));
+  }, [isEditMode]);
+
+  // Trigger auto-generation when session_year changes
+  useEffect(() => {
+    if (open && !isEditMode && form.session_year) {
+      generateAutoNumber(form.session_year);
+    }
+  }, [open, form.session_year, isEditMode, generateAutoNumber]);
+
   const calculateAge = useCallback((dateStr: string) => {
     if (!dateStr) return '';
     const birth = new Date(dateStr);
