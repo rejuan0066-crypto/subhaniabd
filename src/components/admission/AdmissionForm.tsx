@@ -620,6 +620,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         );
 
       case 'admission_session':
+        if (!showSession) return null;
         return (
           <div data-field={fieldKey}>
             <Label className={errorLabel}>{label} {reqStar}</Label>
