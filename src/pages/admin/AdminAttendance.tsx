@@ -250,7 +250,7 @@ const AdminAttendance = () => {
   // Bulk mark all
   const bulkMutation = useMutation({
     mutationFn: async (status: string) => {
-      const shiftVal = entityType === 'staff' ? selectedShift : 'full_day';
+      const shiftVal = effectiveShift;
       const unmarked = entities.filter((e: any) => !attendance.find((a: any) => a.entity_id === e.id));
       if (unmarked.length === 0) return;
       const records = unmarked.map((e: any) => ({
