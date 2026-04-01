@@ -341,27 +341,10 @@ const AdminSalary = () => {
       overtime += Math.round(dutyOvertime);
     }
 
-    // Check if a net_salary formula exists from formula builder
-    const netFormula = getFormula('net_salary');
-    let netSalary: number;
-    if (netFormula) {
-      const expr = (netFormula.expression as any)?.formula;
-      const ctx: Record<string, number> = {
-        base_salary: baseSalary,
-        total_earned: totalEarned,
-        bonus,
-        overtime,
-        other_allowance: otherAllowance,
-        late_deduction: lateDeduction,
-        absence_deduction: absenceDeduction,
-        advance_deduction: advanceDeduction,
-        other_deduction: otherDeduction,
-      };
-      netSalary = Math.max(0, evaluateFormula(expr, ctx));
-    } else {
-      // Default additive: total earned from daily attendance + overtime + allowances - deductions
-      netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction);
-    }
+    // ALWAYS use additive approach: net = sum of daily earnings + overtime + allowances - advance
+    // Daily earnings already account for present/late/half_day/absent per-day
+    // No records = 0 added (purely additive)
+    const netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction);
 
     return {
       base_salary: baseSalary,
