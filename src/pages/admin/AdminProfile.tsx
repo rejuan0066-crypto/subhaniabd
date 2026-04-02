@@ -174,12 +174,16 @@ const AdminProfile = () => {
     setCountdown(0);
   };
 
-  // ─── Password Change ───
-  const handleChangePassword = useCallback(async () => {
-    if (!currentPassword.trim()) { toast.error(bn ? 'বর্তমান পাসওয়ার্ড দিন' : 'Enter current password'); return; }
-    if (newPassword.length < 6) { toast.error(bn ? 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে' : 'New password must be at least 6 characters'); return; }
-    if (newPassword !== confirmPassword) { toast.error(bn ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match'); return; }
+  // ─── Password Change: validate common fields ───
+  const validatePwFields = () => {
+    if (!currentPassword.trim()) { toast.error(bn ? 'বর্তমান পাসওয়ার্ড দিন' : 'Enter current password'); return false; }
+    if (newPassword.length < 6) { toast.error(bn ? 'নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে' : 'New password must be at least 6 characters'); return false; }
+    if (newPassword !== confirmPassword) { toast.error(bn ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match'); return false; }
+    return true;
+  };
 
+  const handleChangePassword = useCallback(async () => {
+    if (!validatePwFields()) return;
     setChangingPassword(true);
     try {
       const { data, error } = await supabase.functions.invoke('change-password', {
@@ -191,10 +195,7 @@ const AdminProfile = () => {
         return;
       }
       toast.success(bn ? '✅ পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' : '✅ Password changed successfully!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      // Re-login with new password
+      setPwStep('done');
       setTimeout(async () => {
         await supabase.auth.signInWithPassword({ email: currentEmail, password: newPassword });
       }, 1000);
@@ -203,6 +204,60 @@ const AdminProfile = () => {
     }
     setChangingPassword(false);
   }, [currentPassword, newPassword, confirmPassword, currentEmail, bn]);
+
+  // ─── Password Change: OTP flow ───
+  const handlePwSendOtp = useCallback(async () => {
+    if (!validatePwFields()) return;
+    // Verify current password first
+    setChangingPassword(true);
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: currentEmail, password: currentPassword.trim() });
+    if (signInError) { toast.error(bn ? 'বর্তমান পাসওয়ার্ড ভুল' : 'Current password incorrect'); setChangingPassword(false); return; }
+
+    const result = await sendOtp(currentEmail, 'password_reset', currentEmail);
+    setChangingPassword(false);
+    if (result.success) {
+      setPwStep('otp');
+      setPwCountdown(60);
+      toast.success(bn ? `${currentEmail} এ OTP কোড পাঠানো হয়েছে` : `OTP sent to ${currentEmail}`);
+    }
+  }, [currentPassword, newPassword, confirmPassword, currentEmail, bn, sendOtp]);
+
+  const handlePwResendOtp = useCallback(async () => {
+    const result = await sendOtp(currentEmail, 'password_reset', currentEmail);
+    if (result.success) { setPwCountdown(60); setPwOtpCode(''); toast.success(bn ? 'নতুন কোড পাঠানো হয়েছে' : 'New code sent'); }
+  }, [currentEmail, bn, sendOtp]);
+
+  const handlePwVerifyAndChange = useCallback(async () => {
+    if (pwOtpCode.length !== 6) { toast.error(bn ? '৬ ডিজিটের কোড দিন' : 'Enter 6-digit code'); return; }
+    setChangingPassword(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('change-password', {
+        body: { current_password: currentPassword.trim(), new_password: newPassword, otp_code: pwOtpCode },
+      });
+      if (error || !data?.success) {
+        toast.error(data?.error || error?.message || (bn ? 'পাসওয়ার্ড পরিবর্তন ব্যর্থ' : 'Password change failed'));
+        setChangingPassword(false);
+        return;
+      }
+      setPwStep('done');
+      toast.success(bn ? '✅ পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' : '✅ Password changed successfully!');
+      setTimeout(async () => {
+        await supabase.auth.signInWithPassword({ email: currentEmail, password: newPassword });
+      }, 1000);
+    } catch {
+      toast.error(bn ? 'পাসওয়ার্ড পরিবর্তন ব্যর্থ' : 'Password change failed');
+    }
+    setChangingPassword(false);
+  }, [pwOtpCode, currentPassword, newPassword, currentEmail, bn]);
+
+  const handlePwReset = () => {
+    setPwStep('form');
+    setPwOtpCode('');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setPwCountdown(0);
+  };
 
   const PasswordInput = ({ value, onChange, show, onToggle, placeholder }: { value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void; placeholder: string }) => (
     <div className="relative">
