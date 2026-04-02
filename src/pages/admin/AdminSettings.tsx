@@ -478,10 +478,16 @@ const AdminSettings = () => {
                 />
               </div>
 
-              <Button onClick={saveEmailjsConfig} disabled={emailjsSaving} className="btn-primary-gradient">
-                {emailjsSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                {bn ? 'ইমেইল সেটিংস সংরক্ষণ' : 'Save Email Settings'}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={saveEmailjsConfig} disabled={emailjsSaving} className="btn-primary-gradient flex-1">
+                  {emailjsSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  {bn ? 'ইমেইল সেটিংস সংরক্ষণ' : 'Save Email Settings'}
+                </Button>
+                <Button onClick={() => setTestEmailDialog(true)} variant="outline">
+                  <Send className="w-4 h-4 mr-2" />
+                  {bn ? 'টেস্ট ইমেইল' : 'Test Email'}
+                </Button>
+              </div>
 
               <div className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground space-y-1">
                 <p className="font-medium text-foreground">{bn ? 'EmailJS টেমপ্লেটে এই ভেরিয়েবল ব্যবহার করুন:' : 'Use these variables in your EmailJS template:'}</p>
