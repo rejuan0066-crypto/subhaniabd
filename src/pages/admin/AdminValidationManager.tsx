@@ -309,13 +309,13 @@ const AdminValidationManager = () => {
                     <Switch checked={r.is_active} onCheckedChange={c => {
                       saveMutation.mutate({ ...r, config: r.config || {}, is_active: c });
                     }} />
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(r)}>
+                    {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(r)}>
                       <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                    </Button>}
+                    {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                       onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(r.id); }}>
                       <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    </Button>}
                   </div>
                 </CardContent>
               </Card>

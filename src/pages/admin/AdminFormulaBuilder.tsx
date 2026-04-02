@@ -278,13 +278,13 @@ const AdminFormulaBuilder = () => {
                     <Switch checked={f.is_active} onCheckedChange={c => {
                       saveMutation.mutate({ ...f, variables: Array.isArray(f.variables) ? f.variables : [], is_active: c });
                     }} />
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(f)}>
+                    {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(f)}>
                       <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                    </Button>}
+                    {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                       onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(f.id); }}>
                       <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    </Button>}
                   </div>
                 </CardContent>
               </Card>

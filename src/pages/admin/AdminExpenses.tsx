@@ -944,7 +944,7 @@ const AdminExpenses = () => {
                 <Button size="sm" variant="outline" onClick={handleDepositExcelDownload}>
                   <Download className="w-4 h-4 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
                 </Button>
-                <Dialog open={depositDialog} onOpenChange={resetDepositDialog}>
+                {canAddItem && <Dialog open={depositDialog} onOpenChange={resetDepositDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="w-4 h-4 mr-1" />{bn ? 'জমা যোগ' : 'Add Deposit'}</Button>
                   </DialogTrigger>

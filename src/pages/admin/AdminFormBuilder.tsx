@@ -616,15 +616,15 @@ const AdminFormBuilder = () => {
                                </Badge>
                              </div>
                              <div className="flex gap-1 ml-2">
-                               <Button size="icon" variant="ghost" className="h-7 w-7" title={bn ? 'ডুপ্লিকেট' : 'Duplicate'} onClick={e => { e.stopPropagation(); duplicateForm.mutate(form.id); }}>
+                               {canAddItem && <Button size="icon" variant="ghost" className="h-7 w-7" title={bn ? 'ডুপ্লিকেট' : 'Duplicate'} onClick={e => { e.stopPropagation(); duplicateForm.mutate(form.id); }}>
                                  <Copy className="h-3.5 w-3.5" />
-                               </Button>
-                               <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditForm(form); }}>
+                               </Button>}
+                               {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditForm(form); }}>
                                  <Edit2 className="h-3.5 w-3.5" />
-                               </Button>
-                               <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); if (confirm(bn ? 'ফর্মটি মুছে ফেলতে চান?' : 'Delete this form?')) deleteForm.mutate(form.id); }}>
+                               </Button>}
+                               {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); if (confirm(bn ? 'ফর্মটি মুছে ফেলতে চান?' : 'Delete this form?')) deleteForm.mutate(form.id); }}>
                                  <Trash2 className="h-3.5 w-3.5" />
-                               </Button>
+                               </Button>}
                              </div>
                            </div>
                          </CardContent>

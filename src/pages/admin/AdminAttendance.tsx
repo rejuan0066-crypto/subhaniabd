@@ -827,7 +827,7 @@ const AdminAttendance = () => {
                 {canEditItem && <Button size="sm" variant="outline" className="text-xs" onClick={() => bulkMutation.mutate('present')}>
                   <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
-                {attendance.length > 0 && (
+                {canDeleteItem && attendance.length > 0 && (
                   <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => {
                     if (window.confirm(bn ? 'আজকের সকল উপস্থিতি রিসেট করতে চান?' : 'Reset all attendance for today?')) {
                       resetMutation.mutate();

@@ -918,7 +918,7 @@ const AdminSalary = () => {
                           <div className="flex gap-1 justify-center">
                             {rec && (
                               <>
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
+                                {canEditItem && <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
                                   <Edit2 className="h-3 w-3" />
                                 </Button>
                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => printSlip(s, rec)}>
