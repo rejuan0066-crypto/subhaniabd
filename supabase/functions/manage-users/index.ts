@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
       }
 
       // Prevent self-deletion
-      if (user_id === user.id) {
+      if (user_id === userId) {
         return new Response(JSON.stringify({ error: "Cannot delete your own account" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
