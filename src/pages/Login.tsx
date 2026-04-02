@@ -27,6 +27,9 @@ const Login = () => {
   }
 
   if (user) {
+    if (role === 'staff' || role === 'teacher') {
+      return <Navigate to="/staff-dashboard" replace />;
+    }
     return <Navigate to="/admin" replace />;
   }
 
