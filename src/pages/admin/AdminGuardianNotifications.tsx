@@ -272,7 +272,7 @@ const AdminGuardianNotifications = () => {
                   {canAddItem && <Button onClick={handleSend} disabled={!message.trim() || sending || recipientsWithContact.length === 0}>
                     {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                     {sending ? (bn ? 'পাঠানো হচ্ছে...' : 'Sending...') : (bn ? 'বার্তা পাঠান' : 'Send Message')}
-                  </Button>
+                  </Button>}
                 </div>
               </div>
 

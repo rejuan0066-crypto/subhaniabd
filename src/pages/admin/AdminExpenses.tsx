@@ -984,7 +984,7 @@ const AdminExpenses = () => {
                       </Button>
                     </div>
                   </DialogContent>
-                </Dialog>
+                </Dialog>}
               </div>
             </div>
 

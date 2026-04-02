@@ -204,7 +204,7 @@ const AdminFormulaBuilder = () => {
           </div>
           {canAddItem && <Button onClick={() => { setFormulaData({ ...emptyFormula, sort_order: formulas.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন ফর্মুলা' : 'New Formula'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Summary Cards */}

@@ -226,7 +226,7 @@ const AdminValidationManager = () => {
           </div>
           {canAddItem && <Button onClick={() => { setRuleData({ ...emptyRule, sort_order: rules.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন রুল' : 'New Rule'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Summary Cards */}

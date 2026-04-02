@@ -491,7 +491,7 @@ const AdminFormBuilder = () => {
                    </DropdownMenuItem>
                  ))}
                </DropdownMenuContent>
-             </DropdownMenu>
+             </DropdownMenu>}
            </div>
          </div>
 
