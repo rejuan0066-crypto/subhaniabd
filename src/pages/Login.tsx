@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const Login = () => {
   const { t, language } = useLanguage();
-  const { signIn, user, loading: authLoading } = useAuth();
+  const { signIn, user, loading: authLoading, role } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
