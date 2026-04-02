@@ -798,7 +798,7 @@ const AdminStaffForm = () => {
                     placeholder={bn ? 'ইমেইল এড্রেস (ঐচ্ছিক)' : 'Email address (optional)'}
                   />
                   {staffEmail && !emailVerified && !isEditMode && (
-                    <p className="text-xs text-amber-600 mt-1">{bn ? 'সাবমিটের সময় ইমেইল যাচাই করা হবে' : 'Email will be verified on submit'}</p>
+                    <p className="text-xs text-destructive mt-1">{bn ? 'সাবমিটের সময় ইমেইল যাচাই করা হবে' : 'Email will be verified on submit'}</p>
                   )}
                 </div>
                 <div>
