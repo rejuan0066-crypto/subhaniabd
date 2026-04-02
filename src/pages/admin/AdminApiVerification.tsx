@@ -23,6 +23,8 @@ const AdminApiVerification = () => {
   const [unlocked, setUnlocked] = useState(false);
   const [masterInput, setMasterInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Form state
   const [apiUrl, setApiUrl] = useState('');
@@ -330,16 +332,45 @@ const AdminApiVerification = () => {
               {bn ? 'মাস্টার পাসওয়ার্ড' : 'Master Password'}
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {config?.master_password && (
+              <div>
+                <Label>{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
+                <div className="relative mt-1">
+                  <Input
+                    className="bg-muted/50 pr-10"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={config.master_password}
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
             <div>
-              <Label>{bn ? 'নতুন পাসওয়ার্ড সেট করুন' : 'Set new password'}</Label>
-              <Input
-                className="mt-1 bg-background"
-                type="password"
-                value={newMasterPassword}
-                onChange={e => setNewMasterPassword(e.target.value)}
-                placeholder={bn ? 'নতুন পাসওয়ার্ড (খালি রাখলে পুরাতনটি থাকবে)' : 'New password (leave blank to keep current)'}
-              />
+              <Label>{bn ? 'নতুন পাসওয়ার্ড সেট করুন' : 'Set New Password'}</Label>
+              <div className="relative mt-1">
+                <Input
+                  className="bg-background pr-10"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newMasterPassword}
+                  onChange={e => setNewMasterPassword(e.target.value)}
+                  placeholder={bn ? 'নতুন পাসওয়ার্ড (খালি রাখলে পুরাতনটি থাকবে)' : 'New password (leave blank to keep current)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           </CardContent>
         </Card>
