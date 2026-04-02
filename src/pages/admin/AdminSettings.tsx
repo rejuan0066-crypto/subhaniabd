@@ -175,8 +175,40 @@ const AdminSettings = () => {
     setSmtpTesting(false);
   };
 
+  const testEmailjs = async () => {
+    if (!testEmail) {
+      toast.error(bn ? 'টেস্ট ইমেইল দিন' : 'Enter test email');
+      return;
+    }
+    if (!emailjs.service_id || !emailjs.template_id || !emailjs.public_key) {
+      toast.error(bn ? 'প্রথমে EmailJS কনফিগারেশন সম্পূর্ণ করুন' : 'Complete EmailJS configuration first');
+      return;
+    }
+    setEmailjsTesting(true);
+    try {
+      const { default: emailjsLib } = await import('@emailjs/browser');
+      await emailjsLib.send(
+        emailjs.service_id,
+        emailjs.template_id,
+        {
+          to_email: testEmail,
+          to_name: 'Test User',
+          otp_code: '123456',
+          expiry_minutes: emailjs.otp_expiry_minutes,
+          purpose: 'Test Email',
+        },
+        emailjs.public_key
+      );
+      toast.success(bn ? `✅ টেস্ট ইমেইল পাঠানো হয়েছে: ${testEmail}` : `✅ Test email sent to: ${testEmail}`);
+      setTestEmailDialog(false);
+    } catch (err: any) {
+      console.error('EmailJS test error:', err);
+      toast.error(bn ? `❌ ইমেইল পাঠানো ব্যর্থ: ${err?.text || err?.message || 'Unknown error'}` : `❌ Failed to send: ${err?.text || err?.message || 'Unknown error'}`);
+    }
+    setEmailjsTesting(false);
+  };
 
-  return (
+
     <AdminLayout>
       <div className="space-y-6 max-w-3xl">
         <h1 className="text-2xl font-display font-bold text-foreground">{bn ? 'সেটিংস' : 'Settings'}</h1>
