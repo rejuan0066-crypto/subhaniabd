@@ -65,6 +65,8 @@ const AdminAcademicSessions = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const session = sessions.find((s: any) => s.id === id);
+      if (await checkApproval('delete', { id, name: session?.name }, id, `সেশন মুছুন: ${session?.name}`)) return;
       const { error } = await supabase.from('academic_sessions').delete().eq('id', id);
       if (error) throw error;
     },
