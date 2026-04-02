@@ -96,6 +96,8 @@ const AdminDivisions = () => {
 
   const deleteClassMutation = useMutation({
     mutationFn: async (id: string) => {
+      const cls = classes.find((c: any) => c.id === id);
+      if (await checkClassApproval('delete', { id, name_bn: cls?.name_bn }, id, `শ্রেণী মুছুন: ${cls?.name_bn}`)) return;
       const { error } = await supabase.from('classes' as any).delete().eq('id', id);
       if (error) throw error;
     },

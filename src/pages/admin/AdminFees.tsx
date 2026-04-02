@@ -68,7 +68,7 @@ const AdminFees = () => {
   const payMutation = useMutation({
     mutationFn: async () => {
       if (!selectedStudent || !paidAmount || !selectedFeeType) throw new Error('Fill all fields');
-      const { error } = await supabase.from('fee_payments').insert({
+      const payload = {
         student_id: selectedStudent,
         fee_type_id: selectedFeeType,
         amount: parseFloat(paidAmount),
@@ -77,7 +77,9 @@ const AdminFees = () => {
         year: new Date().getFullYear(),
         status: 'paid',
         paid_at: new Date().toISOString(),
-      });
+      };
+      if (await checkApproval('add', payload, undefined, `ফি পরিশোধ: ৳${paidAmount}`)) return;
+      const { error } = await supabase.from('fee_payments').insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {

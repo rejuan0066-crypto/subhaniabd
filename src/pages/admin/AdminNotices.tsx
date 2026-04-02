@@ -68,6 +68,8 @@ const AdminNotices = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const notice = notices.find((n: any) => n.id === id);
+      if (await checkApproval('delete', { id, title: notice?.title }, id, `নোটিশ মুছুন: ${notice?.title}`)) return;
       const { error } = await supabase.from('notices').delete().eq('id', id);
       if (error) throw error;
     },

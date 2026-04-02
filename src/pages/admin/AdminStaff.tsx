@@ -44,6 +44,8 @@ const AdminStaff = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const staff = staffList.find((s: any) => s.id === id);
+      if (await checkApproval('delete', { id, name_bn: staff?.name_bn }, id, `কর্মী মুছুন: ${staff?.name_bn}`)) return;
       const { error } = await supabase.from('staff').delete().eq('id', id);
       if (error) throw error;
     },

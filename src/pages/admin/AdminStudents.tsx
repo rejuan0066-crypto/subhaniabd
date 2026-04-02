@@ -78,6 +78,8 @@ const AdminStudents = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const student = students.find((s: any) => s.id === id);
+      if (await checkApproval('delete', { id, name_bn: student?.name_bn, student_id: student?.student_id }, id, `ছাত্র মুছুন: ${student?.name_bn}`)) return;
       const { error } = await supabase.from('students').delete().eq('id', id);
       if (error) throw error;
     },
