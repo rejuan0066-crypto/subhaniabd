@@ -1,6 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
 // Paths that are always accessible to any authenticated user
@@ -9,26 +11,14 @@ const ALWAYS_ALLOWED = [
   '/admin/profile',   // own profile
 ];
 
-// Admin-only paths that non-admin users should never access
-const ADMIN_ONLY_PATHS = [
-  '/admin/settings',
-  '/admin/user-management',
-  '/admin/permissions',
-  '/admin/module-manager',
-  '/admin/theme',
-  '/admin/menu-manager',
-  '/admin/widget-builder',
-  '/admin/backup',
-  '/admin/website',
-  '/admin/form-builder',
-  '/admin/formula-builder',
-  '/admin/validation-manager',
-  '/admin/api-verification',
-  '/admin/address-manager',
-  '/admin/prayer-calendar',
-  '/admin/guardian-notify',
-  '/admin/approvals',
-  '/admin/designations',
+// Fallback if DB setting not loaded yet
+const DEFAULT_ADMIN_ONLY_PATHS = [
+  '/admin/settings', '/admin/user-management', '/admin/permissions',
+  '/admin/module-manager', '/admin/theme', '/admin/menu-manager',
+  '/admin/widget-builder', '/admin/backup', '/admin/website',
+  '/admin/form-builder', '/admin/formula-builder', '/admin/validation-manager',
+  '/admin/api-verification', '/admin/address-manager', '/admin/prayer-calendar',
+  '/admin/guardian-notify', '/admin/approvals', '/admin/designations',
   '/admin/academic-sessions',
 ];
 
@@ -36,6 +26,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, role } = useAuth();
   const { canView, isLoading: permLoading } = usePermissions();
   const location = useLocation();
+
+  // Load dynamic admin-only paths from website_settings
+  const { data: adminOnlyPaths } = useQuery({
+    queryKey: ['admin-only-paths'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('website_settings')
+        .select('value')
+        .eq('key', 'admin_only_paths')
+        .maybeSingle();
+      if (data?.value && Array.isArray((data.value as any)?.paths)) {
+        return (data.value as any).paths as string[];
+      }
+      return DEFAULT_ADMIN_ONLY_PATHS;
+    },
+    staleTime: 60000,
+  });
+
+  const ADMIN_ONLY = adminOnlyPaths ?? DEFAULT_ADMIN_ONLY_PATHS;
 
   if (loading || permLoading) {
     return (
@@ -66,13 +75,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     // Admin-only paths → block immediately
-    const isAdminOnly = ADMIN_ONLY_PATHS.some(p => path === p || path.startsWith(p + '/'));
+    const isAdminOnly = ADMIN_ONLY.some(p => path === p || path.startsWith(p + '/'));
     if (isAdminOnly) {
       return <Navigate to="/staff-dashboard" replace />;
     }
 
     // For all other admin paths, check if user has view permission
-    // e.g. /admin/students, /admin/fees, /admin/notices
     if (!canView(path)) {
       return <Navigate to="/staff-dashboard" replace />;
     }

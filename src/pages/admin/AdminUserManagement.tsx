@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Plus, Loader2, Trash2, Eye, EyeOff, AlertTriangle, KeyRound, Save, Pencil, ShieldCheck, Tag } from 'lucide-react';
+import { Users, Plus, Loader2, Trash2, Eye, EyeOff, AlertTriangle, KeyRound, Save, Pencil, ShieldCheck, Tag, Shield } from 'lucide-react';
+import AccessControlTab from '@/components/admin/AccessControlTab';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -489,6 +490,10 @@ const AdminUserManagement = () => {
               <Tag className="w-4 h-4" />
               {bn ? 'রোল ব্যবস্থাপনা' : 'Roles'}
             </TabsTrigger>
+            <TabsTrigger value="access" className="gap-1.5">
+              <Shield className="w-4 h-4" />
+              {bn ? 'অ্যাক্সেস কন্ট্রোল' : 'Access Control'}
+            </TabsTrigger>
           </TabsList>
 
           {/* ===== USERS TAB ===== */}
@@ -712,6 +717,11 @@ const AdminUserManagement = () => {
                 </Table>
               )}
             </div>
+          </TabsContent>
+
+          {/* ===== ACCESS CONTROL TAB ===== */}
+          <TabsContent value="access" className="space-y-4">
+            <AccessControlTab />
           </TabsContent>
         </Tabs>
 
