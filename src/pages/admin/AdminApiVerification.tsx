@@ -25,6 +25,8 @@ const AdminApiVerification = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetConfirmInput, setResetConfirmInput] = useState('');
 
   // Form state
   const [apiUrl, setApiUrl] = useState('');
