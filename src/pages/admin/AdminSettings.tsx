@@ -2,10 +2,11 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useState, useEffect } from 'react';
-import { Save, Shield, Bell, Palette, Mail, Loader2, Eye, EyeOff, Globe, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Save, Shield, Bell, Palette, Mail, Loader2, Eye, EyeOff, Globe, ArrowRight, CheckCircle2, AlertCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,6 +35,9 @@ const AdminSettings = () => {
   const [emailjsLoading, setEmailjsLoading] = useState(true);
   const [emailjsSaving, setEmailjsSaving] = useState(false);
   const [showPublicKey, setShowPublicKey] = useState(false);
+  const [emailjsTesting, setEmailjsTesting] = useState(false);
+  const [testEmailDialog, setTestEmailDialog] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
 
   // SMTP config
   const [smtp, setSmtp] = useState({
@@ -169,6 +173,39 @@ const AdminSettings = () => {
       toast.error(bn ? 'SMTP টেস্ট ব্যর্থ' : 'SMTP test failed');
     }
     setSmtpTesting(false);
+  };
+
+  const testEmailjs = async () => {
+    if (!testEmail) {
+      toast.error(bn ? 'টেস্ট ইমেইল দিন' : 'Enter test email');
+      return;
+    }
+    if (!emailjs.service_id || !emailjs.template_id || !emailjs.public_key) {
+      toast.error(bn ? 'প্রথমে EmailJS কনফিগারেশন সম্পূর্ণ করুন' : 'Complete EmailJS configuration first');
+      return;
+    }
+    setEmailjsTesting(true);
+    try {
+      const { default: emailjsLib } = await import('@emailjs/browser');
+      await emailjsLib.send(
+        emailjs.service_id,
+        emailjs.template_id,
+        {
+          to_email: testEmail,
+          to_name: 'Test User',
+          otp_code: '123456',
+          expiry_minutes: emailjs.otp_expiry_minutes,
+          purpose: 'Test Email',
+        },
+        emailjs.public_key
+      );
+      toast.success(bn ? `✅ টেস্ট ইমেইল পাঠানো হয়েছে: ${testEmail}` : `✅ Test email sent to: ${testEmail}`);
+      setTestEmailDialog(false);
+    } catch (err: any) {
+      console.error('EmailJS test error:', err);
+      toast.error(bn ? `❌ ইমেইল পাঠানো ব্যর্থ: ${err?.text || err?.message || 'Unknown error'}` : `❌ Failed to send: ${err?.text || err?.message || 'Unknown error'}`);
+    }
+    setEmailjsTesting(false);
   };
 
 
@@ -441,10 +478,16 @@ const AdminSettings = () => {
                 />
               </div>
 
-              <Button onClick={saveEmailjsConfig} disabled={emailjsSaving} className="btn-primary-gradient">
-                {emailjsSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                {bn ? 'ইমেইল সেটিংস সংরক্ষণ' : 'Save Email Settings'}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={saveEmailjsConfig} disabled={emailjsSaving} className="btn-primary-gradient flex-1">
+                  {emailjsSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  {bn ? 'ইমেইল সেটিংস সংরক্ষণ' : 'Save Email Settings'}
+                </Button>
+                <Button onClick={() => setTestEmailDialog(true)} variant="outline">
+                  <Send className="w-4 h-4 mr-2" />
+                  {bn ? 'টেস্ট ইমেইল' : 'Test Email'}
+                </Button>
+              </div>
 
               <div className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground space-y-1">
                 <p className="font-medium text-foreground">{bn ? 'EmailJS টেমপ্লেটে এই ভেরিয়েবল ব্যবহার করুন:' : 'Use these variables in your EmailJS template:'}</p>
@@ -522,6 +565,39 @@ const AdminSettings = () => {
           <Save className="w-4 h-4 mr-2" /> {bn ? 'সকল সেটিংস সংরক্ষণ করুন' : 'Save All Settings'}
         </Button>
       </div>
+
+      {/* Test Email Dialog */}
+      <Dialog open={testEmailDialog} onOpenChange={setTestEmailDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-primary" />
+              {bn ? 'EmailJS টেস্ট ইমেইল পাঠান' : 'Send EmailJS Test Email'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {bn 
+                ? 'একটি টেস্ট OTP ইমেইল (কোড: 123456) পাঠানো হবে। ইমেইল আসলে EmailJS সঠিকভাবে কাজ করছে।'
+                : 'A test OTP email (code: 123456) will be sent. If received, EmailJS is working correctly.'}
+            </p>
+            <div>
+              <Label>{bn ? 'প্রাপকের ইমেইল' : 'Recipient Email'}</Label>
+              <Input
+                className="mt-1"
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder={bn ? 'আপনার ইমেইল দিন' : 'Enter your email'}
+              />
+            </div>
+            <Button onClick={testEmailjs} disabled={emailjsTesting} className="w-full btn-primary-gradient">
+              {emailjsTesting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+              {bn ? 'টেস্ট ইমেইল পাঠান' : 'Send Test Email'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
