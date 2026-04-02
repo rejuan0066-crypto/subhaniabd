@@ -115,6 +115,8 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
             placeholder={placeholder}
             searchPlaceholder={searchPh}
             disabled={disabled}
+            allowCustom
+            customLabel={addLabel}
             className="mt-1"
           />
         </div>
