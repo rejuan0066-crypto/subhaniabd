@@ -61,6 +61,7 @@ import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import StaffDashboard from "./pages/StaffDashboard";
+import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
 import NotFound from "./pages/NotFound";
 
@@ -88,6 +89,7 @@ const App = () => (
               <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
               <Route path="/posts" element={<PostsPage />} />
               <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
+              <Route path="/waiting-approval" element={<WaitingApproval />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/students" element={<ProtectedRoute><ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard></ProtectedRoute>} />

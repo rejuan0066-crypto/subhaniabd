@@ -22,6 +22,7 @@ interface UserItem {
   email: string;
   role: string;
   full_name: string;
+  status: string;
   created_at: string;
 }
 
@@ -195,6 +196,24 @@ const AdminUserManagement = () => {
       toast.error(bn ? 'ইউজার তৈরি ব্যর্থ' : 'Failed to create user');
     }
     setCreating(false);
+  };
+
+  const handleStatusChange = async (userId: string, status: 'pending' | 'approved') => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'update_status', user_id: userId, status },
+      });
+      if (error || !data?.success) {
+        toast.error(data?.error || (bn ? 'স্ট্যাটাস পরিবর্তন ব্যর্থ' : 'Failed to update status'));
+        return;
+      }
+      toast.success(status === 'approved'
+        ? (bn ? '✅ ইউজার অনুমোদিত হয়েছে' : '✅ User approved')
+        : (bn ? '⏸️ ইউজার স্থগিত করা হয়েছে' : '⏸️ User suspended'));
+      fetchUsers();
+    } catch {
+      toast.error(bn ? 'স্ট্যাটাস পরিবর্তন ব্যর্থ' : 'Failed to update status');
+    }
   };
 
   const handleDelete = async (userId: string) => {
@@ -589,6 +608,7 @@ const AdminUserManagement = () => {
                       <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
                       <TableHead>{bn ? 'ইমেইল' : 'Email'}</TableHead>
                       <TableHead>{bn ? 'রোল' : 'Role'}</TableHead>
+                      <TableHead>{bn ? 'স্ট্যাটাস' : 'Status'}</TableHead>
                       <TableHead>{bn ? 'তৈরির তারিখ' : 'Created'}</TableHead>
                       <TableHead className="w-32 text-center">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
                     </TableRow>
@@ -599,11 +619,41 @@ const AdminUserManagement = () => {
                         <TableCell className="font-medium">{u.full_name || '—'}</TableCell>
                         <TableCell>{u.email}</TableCell>
                         <TableCell>{roleBadge(u.role)}</TableCell>
+                        <TableCell>
+                          {u.status === 'approved' ? (
+                            <Badge variant="default" className="bg-green-600">{bn ? 'অনুমোদিত' : 'Approved'}</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
                           {new Date(u.created_at).toLocaleDateString(bn ? 'bn-BD' : 'en-US')}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-center gap-1">
+                            {/* Approve/Reject status */}
+                            {u.role !== 'admin' && u.status !== 'approved' && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                onClick={() => handleStatusChange(u.id, 'approved')}
+                                title={bn ? 'অনুমোদন করুন' : 'Approve'}
+                              >
+                                <ShieldCheck className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {u.role !== 'admin' && u.status === 'approved' && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                onClick={() => handleStatusChange(u.id, 'pending')}
+                                title={bn ? 'স্থগিত করুন' : 'Suspend'}
+                              >
+                                <AlertTriangle className="w-4 h-4" />
+                              </Button>
+                            )}
                             {/* Role edit */}
                             <Button
                               size="icon"

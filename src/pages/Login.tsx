@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 
 const Login = () => {
   const { t, language } = useLanguage();
-  const { signIn, user, loading: authLoading, role } = useAuth();
+  const { signIn, user, loading: authLoading, role, userStatus } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,9 +27,15 @@ const Login = () => {
   }
 
   if (user) {
+    // Admin always goes to admin panel
     if (role === 'admin') {
       return <Navigate to="/admin" replace />;
     }
+    // Pending users go to waiting page
+    if (userStatus === 'pending') {
+      return <Navigate to="/waiting-approval" replace />;
+    }
+    // Approved staff/teacher go to staff dashboard
     return <Navigate to="/staff-dashboard" replace />;
   }
 
