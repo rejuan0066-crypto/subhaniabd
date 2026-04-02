@@ -413,6 +413,8 @@ const AdminAddressManager = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+          </TabsContent>
+        </Tabs>
       </div>
     </AdminLayout>
   );
