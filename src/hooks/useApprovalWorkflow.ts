@@ -22,10 +22,10 @@ export const useApprovalWorkflow = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('user_permissions')
-        .select('menu_path, can_view, can_add, can_edit, can_delete, requires_approval')
+        .select('*')
         .eq('user_id', user.id);
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!user?.id,
   });
