@@ -17,6 +17,10 @@ import DashboardCustomWidgets from '@/components/dashboard/DashboardCustomWidget
 
 const Dashboard = () => {
   const { language } = useLanguage();
+  const { role } = useAuth();
+  const { hasPermission } = usePermissions();
+  const isAdmin = role === 'admin';
+  const canViewStats = isAdmin || hasPermission('/admin', 'view');
   const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors'; filters: Record<string, any> }>({
     open: false, title: '', table: 'students', filters: {},
   });
