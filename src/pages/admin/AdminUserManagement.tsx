@@ -756,29 +756,36 @@ const AdminUserManagement = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label>
-                  <Input className="mt-1" value={roleName} onChange={e => setRoleName(e.target.value)} placeholder="e.g. accountant" />
+                  <Input className="mt-1" value={roleName} onChange={e => setRoleName(e.target.value)} placeholder="e.g. accountant" disabled={editingRole?.is_system} />
                 </div>
                 <div>
                   <Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label>
                   <Input className="mt-1" value={roleNameBn} onChange={e => setRoleNameBn(e.target.value)} placeholder="যেমন: হিসাবরক্ষক" />
                 </div>
               </div>
-              <div>
-                <Label>{bn ? 'বেস রোল' : 'Base Role'} *</Label>
-                <Select value={roleBaseRole} onValueChange={setRoleBaseRole}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
-                    <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
-                    <SelectItem value="admin">{bn ? 'অ্যাডমিন' : 'Admin'}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {bn ? 'বেস রোল নির্ধারণ করে ইউজার সিস্টেমে কোন লেভেলের অ্যাক্সেস পাবে।' : 'Base role determines the system-level access.'}
+              {!editingRole?.is_system && (
+                <div>
+                  <Label>{bn ? 'বেস রোল' : 'Base Role'} *</Label>
+                  <Select value={roleBaseRole} onValueChange={setRoleBaseRole}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
+                      <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                      <SelectItem value="admin">{bn ? 'অ্যাডমিন' : 'Admin'}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {bn ? 'বেস রোল নির্ধারণ করে ইউজার সিস্টেমে কোন লেভেলের অ্যাক্সেস পাবে।' : 'Base role determines the system-level access.'}
+                  </p>
+                </div>
+              )}
+              {editingRole?.is_system && (
+                <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                  {bn ? '⚠️ সিস্টেম রোলের নাম ও বেস রোল পরিবর্তন করা যায় না। শুধু বাংলা নাম ও বিবরণ পরিবর্তন করতে পারবেন।' : '⚠️ System role name & base role cannot be changed. You can edit the Bangla name and description.'}
                 </p>
-              </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>{bn ? 'বিবরণ (ইংরেজি)' : 'Description (EN)'}</Label>
