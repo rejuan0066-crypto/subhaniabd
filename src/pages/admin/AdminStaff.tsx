@@ -77,7 +77,7 @@ const AdminStaff = () => {
 
     setAccCreating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('manage-users?action=create', {
+      const { data, error } = await supabase.functions.invoke('manage-users', {
         body: {
           email: accEmail.trim(),
           password: accPassword,
