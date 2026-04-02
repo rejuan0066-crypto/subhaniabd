@@ -23,6 +23,7 @@ import {
 const AdminAcademicSessions = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const { checkApproval } = useApprovalCheck('/admin/academic-sessions', 'academic_sessions');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [name, setName] = useState('');
