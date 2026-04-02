@@ -193,19 +193,19 @@ const AdminWidgetBuilder = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => editWidget(idx)} className="p-1.5 rounded hover:bg-muted">
+                  {canEditItem && <button onClick={() => editWidget(idx)} className="p-1.5 rounded hover:bg-muted">
                     <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-                  </button>
-                  <button onClick={() => toggleVisible(idx)} className="p-1.5 rounded hover:bg-muted">
+                  </button>}
+                  {canEditItem && <button onClick={() => toggleVisible(idx)} className="p-1.5 rounded hover:bg-muted">
                     {w.visible ? <Eye className="w-3.5 h-3.5 text-primary" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
-                  </button>
-                  <button onClick={() => moveWidget(idx, -1)} disabled={idx === 0} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
+                  </button>}
+                  {canEditItem && <button onClick={() => moveWidget(idx, -1)} disabled={idx === 0} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
                     <ChevronUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => moveWidget(idx, 1)} disabled={idx === list.length - 1} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
+                  </button>}
+                  {canEditItem && <button onClick={() => moveWidget(idx, 1)} disabled={idx === list.length - 1} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
                     <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => deleteWidget(idx)} className="p-1.5 rounded hover:bg-destructive/10">
+                  </button>}
+                  {canDeleteItem && <button onClick={() => deleteWidget(idx)} className="p-1.5 rounded hover:bg-destructive/10">
                     <Trash2 className="w-3.5 h-3.5 text-destructive" />
                   </button>
                 </div>

@@ -381,12 +381,12 @@ const AdminPrayerCalendar = () => {
                         </td>
                         <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditHoliday(h); setDialogOpen(true); }}>
+                            {canEditItem && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditHoliday(h); setDialogOpen(true); }}>
                               <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteHoliday(h.id)}>
+                            </Button>}
+                            {canDeleteItem && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteHoliday(h.id)}>
                               <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            </Button>}
                           </div>
                         </td>
                       </tr>

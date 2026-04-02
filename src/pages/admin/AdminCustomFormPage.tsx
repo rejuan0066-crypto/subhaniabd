@@ -408,10 +408,10 @@ const AdminCustomFormPage = () => {
                             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setViewSubmission(sub)}>
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                            {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                               onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(sub.id); }}>
                               <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                            </Button>}
                           </TableCell>
                         </TableRow>
                       ))}
