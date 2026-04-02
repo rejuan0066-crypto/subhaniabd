@@ -269,8 +269,8 @@ const AdminAddressManager = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{e.parent_path || '-'}</td>
                       <td className="px-4 py-3">{getActionBadge(e.action)}</td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(e)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteId(e.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                        {canEditItem && <button onClick={() => openEdit(e)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>}
+                        {canDeleteItem && <button onClick={() => setDeleteId(e.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
                       </td>
                     </tr>
                   ))}

@@ -171,7 +171,7 @@ const AdminAcademicSessions = () => {
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
-                        </AlertDialog>
+                        </AlertDialog>}
                       </div>
                     </TableCell>
                   </TableRow>
