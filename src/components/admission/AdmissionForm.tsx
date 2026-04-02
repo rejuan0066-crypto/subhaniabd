@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch';
 import PhotoUpload from '@/components/PhotoUpload';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
+import CardVerifySection from '@/components/CardVerifySection';
+import { useApiVerificationEnabled } from '@/hooks/useApiVerification';
 import { Plus, Search, Loader2, AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
