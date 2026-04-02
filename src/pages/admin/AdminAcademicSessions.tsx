@@ -111,10 +111,10 @@ const AdminAcademicSessions = () => {
             <CalendarDays className="w-6 h-6 text-primary" />
             {language === 'bn' ? 'একাডেমিক সেশন' : 'Academic Sessions'}
           </h1>
-          <Button className="btn-primary-gradient" onClick={() => { resetForm(); setDialogOpen(true); }}>
+          {canAddItem && <Button className="btn-primary-gradient" onClick={() => { resetForm(); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-1" />
             {language === 'bn' ? 'নতুন সেশন' : 'New Session'}
-          </Button>
+          </Button>}
         </div>
 
         <div className="card-elevated">
