@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
 import PhotoUpload from '@/components/PhotoUpload';
+import CardVerifySection from '@/components/CardVerifySection';
+import { useApiVerificationEnabled } from '@/hooks/useApiVerification';
 import { useState, useRef, useEffect } from 'react';
 import { Plus, AlertCircle, CheckCircle, Loader2, Upload, Trash2, Eye, Printer, Download, FileText, X, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
