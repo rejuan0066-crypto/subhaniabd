@@ -1147,6 +1147,14 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               </div>
             )}
 
+            <CardVerifySection
+              formType="student"
+              isEnabled={apiVerifyEnabled === true}
+              onDataReceived={(data) => {
+                setForm(prev => ({ ...prev, ...data }));
+              }}
+            />
+
             {activeSections.map(section => renderSection(section))}
 
             {/* Approver Section - Only visible in edit/approve mode */}

@@ -723,6 +723,20 @@ const AdminStaffForm = () => {
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
+          <CardVerifySection
+            formType="staff"
+            isEnabled={apiVerifyEnabled === true}
+            onDataReceived={(data) => {
+              if (data.name_bn) setFirstName(data.name_bn);
+              if (data.name_en) setLastName(data.name_en);
+              if (data.father_name) setFatherName(data.father_name);
+              if (data.date_of_birth) setDob(data.date_of_birth);
+              if (data.phone) setMobile(data.phone);
+              if (data.email) { /* setEmail if exists */ }
+              if (data.nid) setNid(data.nid);
+              if (data.education) setEducation(data.education);
+            }}
+          />
           {/* ========== SECTION 1: Employee Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
