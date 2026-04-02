@@ -60,6 +60,7 @@ import AdminAddressManager from "./pages/admin/AdminAddressManager";
 import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import StaffDashboard from "./pages/StaffDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="/donation" element={<DonationPage />} />
               <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
               <Route path="/posts" element={<PostsPage />} />
+              <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/students" element={<ProtectedRoute><ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard></ProtectedRoute>} />
