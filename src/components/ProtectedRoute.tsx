@@ -5,14 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
-// Paths that are always accessible to any authenticated user
+// Paths that are always accessible to any authenticated+approved user
 const ALWAYS_ALLOWED = [
   '/admin',           // dashboard
   '/admin/profile',   // own profile
 ];
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, role } = useAuth();
+  const { user, loading, role, userStatus } = useAuth();
   const { canView, hasUserPermission, isLoading: permLoading } = usePermissions();
   const location = useLocation();
 
@@ -51,10 +51,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Pending users must go to waiting-approval page
+  if (userStatus === 'pending' && role !== 'admin') {
+    const path = location.pathname;
+    if (path !== '/waiting-approval') {
+      return <Navigate to="/waiting-approval" replace />;
+    }
+    return <>{children}</>;
+  }
+
   const path = location.pathname;
   const isAdminRoute = path.startsWith('/admin');
-
-  
 
   // Admin has full access
   if (role === 'admin') {
@@ -70,38 +77,31 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (accessControl?.accessMap) {
-      // New format: check per-role access map
       const roleAccess = accessControl.accessMap[path];
       const userBaseRole = role as string;
       const roleAllowed = roleAccess && roleAccess[userBaseRole];
       
       if (roleAllowed) {
-        // Role explicitly allowed by access control - check view permission
         if (!canView(path)) {
           return <Navigate to="/staff-dashboard" replace />;
         }
       } else {
-        // Role NOT allowed - only individual user_permissions can override
         if (!hasUserPermission(path, 'view')) {
           return <Navigate to="/staff-dashboard" replace />;
         }
       }
     } else if (accessControl?.paths) {
-      // Old format: all listed paths are admin-only
       const isAdminOnly = accessControl.paths.some(p => path === p || path.startsWith(p + '/'));
       if (isAdminOnly) {
-        // Admin-only path: only individual user_permissions can override (NOT role_permissions)
         if (!hasUserPermission(path, 'view')) {
           return <Navigate to="/staff-dashboard" replace />;
         }
       } else {
-        // Not in admin-only list - check normal view permission
         if (!canView(path)) {
           return <Navigate to="/staff-dashboard" replace />;
         }
       }
     } else {
-      // No access control data - block all admin routes for non-admin
       return <Navigate to="/staff-dashboard" replace />;
     }
   }
