@@ -164,12 +164,19 @@ const AdminSettings = () => {
                 </div>
               </div>
 
+              <Button
+                className="w-full btn-primary-gradient"
+                onClick={() => window.open('https://id-preview--8564078b-79b9-40ef-8f5b-8322e217d011.lovable.app/admin/settings', '_self')}
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                {bn ? 'ইমেইল ডোমেইন সেটআপ শুরু করুন' : 'Start Email Domain Setup'}
+              </Button>
               <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-700 dark:text-amber-400">
                   {bn
-                    ? 'কাস্টম ডোমেইন সেটআপ করতে আমাকে (AI অ্যাসিস্ট্যান্ট) চ্যাটে বলুন "ইমেইল ডোমেইন সেটআপ করুন"। আমি আপনাকে ধাপে ধাপে সাহায্য করব।'
-                    : 'To set up a custom domain, tell me (AI Assistant) in chat: "Set up email domain". I will guide you step by step.'}
+                    ? 'কাস্টম ডোমেইন সেটআপ করতে চ্যাটে AI অ্যাসিস্ট্যান্টকে বলুন "ইমেইল ডোমেইন সেটআপ করুন"। সে আপনাকে ধাপে ধাপে সাহায্য করবে।'
+                    : 'To set up a custom domain, tell the AI Assistant in chat: "Set up email domain". It will guide you step by step.'}
                 </p>
               </div>
             </div>
