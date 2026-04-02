@@ -215,9 +215,9 @@ const AdminAddressManager = () => {
 
           <TabsContent value="data" className="mt-4 space-y-4">
             <div className="flex justify-end">
-              <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
+              {canAddItem && <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
                 <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
-              </Button>
+              </Button>}
             </div>
 
         <div className="card-elevated p-4 flex flex-col sm:flex-row gap-4">
