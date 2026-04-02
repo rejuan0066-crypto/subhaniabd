@@ -81,22 +81,24 @@ const AdminSubjects = () => {
       <div className="space-y-6">
         <h1 className="text-2xl font-display font-bold text-foreground">{language === 'bn' ? 'বিষয় ব্যবস্থাপনা' : 'Subject Management'}</h1>
 
-        <div className="card-elevated p-5">
-          <h3 className="font-display font-bold text-foreground mb-4">{language === 'bn' ? 'নতুন বিষয় যোগ' : 'Add New Subject'}</h3>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Input placeholder={language === 'bn' ? 'বিষয়ের নাম (বাংলা)' : 'Subject Name (BN)'} value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-background" />
-            <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newNameEn} onChange={(e) => setNewNameEn(e.target.value)} className="bg-background" />
-            <Input placeholder={language === 'bn' ? 'কোড' : 'Code'} value={newCode} onChange={(e) => setNewCode(e.target.value)} className="bg-background w-24" />
-            <Select value={newDivision} onValueChange={setNewDivision}>
-              <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
-              <SelectContent>{divisions.map(d => <SelectItem key={d.id} value={d.id}>{language === 'bn' ? d.name_bn : d.name}</SelectItem>)}</SelectContent>
-            </Select>
-            <Button onClick={() => { if (!newName.trim()) { toast.error(language === 'bn' ? 'বিষয়ের নাম লিখুন' : 'Enter subject name'); return; } addMutation.mutate(); }} className="btn-primary-gradient shrink-0" disabled={addMutation.isPending}>
-              {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
-              {language === 'bn' ? 'যোগ' : 'Add'}
-            </Button>
+        {canAddItem && (
+          <div className="card-elevated p-5">
+            <h3 className="font-display font-bold text-foreground mb-4">{language === 'bn' ? 'নতুন বিষয় যোগ' : 'Add New Subject'}</h3>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Input placeholder={language === 'bn' ? 'বিষয়ের নাম (বাংলা)' : 'Subject Name (BN)'} value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-background" />
+              <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newNameEn} onChange={(e) => setNewNameEn(e.target.value)} className="bg-background" />
+              <Input placeholder={language === 'bn' ? 'কোড' : 'Code'} value={newCode} onChange={(e) => setNewCode(e.target.value)} className="bg-background w-24" />
+              <Select value={newDivision} onValueChange={setNewDivision}>
+                <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
+                <SelectContent>{divisions.map(d => <SelectItem key={d.id} value={d.id}>{language === 'bn' ? d.name_bn : d.name}</SelectItem>)}</SelectContent>
+              </Select>
+              <Button onClick={() => { if (!newName.trim()) { toast.error(language === 'bn' ? 'বিষয়ের নাম লিখুন' : 'Enter subject name'); return; } addMutation.mutate(); }} className="btn-primary-gradient shrink-0" disabled={addMutation.isPending}>
+                {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
+                {language === 'bn' ? 'যোগ' : 'Add'}
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="card-elevated p-5">
           <div className="flex items-center justify-between mb-4">
