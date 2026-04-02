@@ -22,13 +22,28 @@ const StaffDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
 
   // Get staff record linked to current user
-  const { data: staffRecord } = useQuery({
+  const { data: staffRecord, isLoading: staffLoading } = useQuery({
     queryKey: ['my-staff-record', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('staff')
         .select('*')
         .eq('user_id', user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Get profile as fallback
+  const { data: profileRecord } = useQuery({
+    queryKey: ['my-profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user!.id)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -102,15 +117,6 @@ const StaffDashboard = () => {
   const absentDays = attendanceRecords.filter(r => r.status === 'absent').length;
   const lateDays = attendanceRecords.filter(r => r.status === 'late').length;
 
-  const statusIcon = (status: string) => {
-    switch (status) {
-      case 'present': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'absent': return <XCircle className="h-4 w-4 text-red-600" />;
-      case 'late': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      default: return null;
-    }
-  };
-
   const statusBadge = (status: string) => {
     const labels: Record<string, { bn: string; en: string; variant: 'default' | 'destructive' | 'secondary' | 'outline' }> = {
       present: { bn: 'উপস্থিত', en: 'Present', variant: 'default' },
@@ -121,6 +127,8 @@ const StaffDashboard = () => {
     const l = labels[status] || { bn: status, en: status, variant: 'outline' as const };
     return <Badge variant={l.variant}>{bn ? l.bn : l.en}</Badge>;
   };
+
+  const hasStaff = !!staffRecord;
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,34 +164,97 @@ const StaffDashboard = () => {
 
       {/* Content */}
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {!staffRecord ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              {bn ? 'আপনার স্টাফ প্রোফাইল পাওয়া যায়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।' : 'Staff profile not found. Please contact admin.'}
+        {/* Warning banner if no staff profile linked */}
+        {!hasStaff && !staffLoading && (
+          <Card className="mb-4 border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
+              <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                {bn
+                  ? 'আপনার স্টাফ প্রোফাইল এখনো লিঙ্ক হয়নি। বেতন ও হাজিরা দেখতে অ্যাডমিনের সাথে যোগাযোগ করুন।'
+                  : 'Your staff profile is not linked yet. Contact admin to view salary & attendance details.'}
+              </p>
             </CardContent>
           </Card>
-        ) : (
-          <Tabs defaultValue="profile" className="space-y-4">
-            <TabsList className="w-full grid grid-cols-4 h-auto">
-              <TabsTrigger value="profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+        )}
+
+        <Tabs defaultValue={hasStaff ? 'profile' : 'basic-profile'} className="space-y-4">
+          <TabsList className={`w-full grid h-auto ${hasStaff ? 'grid-cols-4' : 'grid-cols-2'}`}>
+            {hasStaff ? (
+              <>
+                <TabsTrigger value="profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{bn ? 'প্রোফাইল' : 'Profile'}</span>
+                </TabsTrigger>
+                <TabsTrigger value="salary" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+                  <Wallet className="h-4 w-4" />
+                  <span className="hidden sm:inline">{bn ? 'বেতন' : 'Salary'}</span>
+                </TabsTrigger>
+                <TabsTrigger value="attendance" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="hidden sm:inline">{bn ? 'হাজিরা' : 'Attendance'}</span>
+                </TabsTrigger>
+              </>
+            ) : (
+              <TabsTrigger value="basic-profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">{bn ? 'প্রোফাইল' : 'Profile'}</span>
               </TabsTrigger>
-              <TabsTrigger value="salary" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                <Wallet className="h-4 w-4" />
-                <span className="hidden sm:inline">{bn ? 'বেতন' : 'Salary'}</span>
-              </TabsTrigger>
-              <TabsTrigger value="attendance" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                <CalendarDays className="h-4 w-4" />
-                <span className="hidden sm:inline">{bn ? 'হাজিরা' : 'Attendance'}</span>
-              </TabsTrigger>
-              <TabsTrigger value="notices" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                <Bell className="h-4 w-4" />
-                <span className="hidden sm:inline">{bn ? 'নোটিশ' : 'Notices'}</span>
-              </TabsTrigger>
-            </TabsList>
+            )}
+            <TabsTrigger value="notices" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+              <Bell className="h-4 w-4" />
+              <span className="hidden sm:inline">{bn ? 'নোটিশ' : 'Notices'}</span>
+            </TabsTrigger>
+          </TabsList>
 
-            {/* Profile Tab */}
+          {/* Basic Profile Tab (no staff record) */}
+          {!hasStaff && (
+            <TabsContent value="basic-profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    {bn ? 'ব্যক্তিগত তথ্য' : 'Personal Information'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-start gap-2">
+                      <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'নাম' : 'Name'}</p>
+                        <p className="text-sm font-medium text-foreground">{profileRecord?.full_name || '—'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}</p>
+                        <p className="text-sm font-medium text-foreground">{profileRecord?.phone || '—'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'ইমেইল' : 'Email'}</p>
+                        <p className="text-sm font-medium text-foreground">{user?.email || '—'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">{bn ? 'রোল' : 'Role'}</p>
+                        <Badge variant="outline">{role || '—'}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
+
+          {/* Full Profile Tab (with staff record) */}
+          {hasStaff && (
             <TabsContent value="profile">
               <Card>
                 <CardHeader>
@@ -227,8 +298,10 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+          )}
 
-            {/* Salary Tab */}
+          {/* Salary Tab */}
+          {hasStaff && (
             <TabsContent value="salary">
               <Card>
                 <CardHeader>
@@ -294,8 +367,10 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+          )}
 
-            {/* Attendance Tab */}
+          {/* Attendance Tab */}
+          {hasStaff && (
             <TabsContent value="attendance">
               <Card>
                 <CardHeader>
@@ -313,7 +388,6 @@ const StaffDashboard = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {/* Summary */}
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-3 text-center">
                       <p className="text-2xl font-bold text-green-700 dark:text-green-400">{presentDays}</p>
@@ -358,60 +432,60 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+          )}
 
-            {/* Notices Tab */}
-            <TabsContent value="notices">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5" />
-                    {bn ? 'নোটিশ ও ঘোষণা' : 'Notices & Announcements'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {notices.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">
-                      {bn ? 'কোনো নোটিশ নেই' : 'No notices found'}
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {notices.map(notice => (
-                        <div key={notice.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h3 className="font-medium text-foreground">
-                                {bn ? (notice.title_bn || notice.title) : notice.title}
-                              </h3>
-                              {(bn ? notice.content_bn || notice.content : notice.content) && (
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                  {bn ? (notice.content_bn || notice.content) : notice.content}
-                                </p>
-                              )}
-                            </div>
-                            {notice.category && (
-                              <Badge variant="outline" className="shrink-0 text-xs">{notice.category}</Badge>
+          {/* Notices Tab */}
+          <TabsContent value="notices">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  {bn ? 'নোটিশ ও ঘোষণা' : 'Notices & Announcements'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {notices.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    {bn ? 'কোনো নোটিশ নেই' : 'No notices found'}
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {notices.map(notice => (
+                      <div key={notice.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-medium text-foreground">
+                              {bn ? (notice.title_bn || notice.title) : notice.title}
+                            </h3>
+                            {(bn ? notice.content_bn || notice.content : notice.content) && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {bn ? (notice.content_bn || notice.content) : notice.content}
+                              </p>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {notice.published_at ? format(new Date(notice.published_at), 'dd/MM/yyyy') : '—'}
-                            </span>
-                            {notice.attachment_url && (
-                              <a href={notice.attachment_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                {bn ? 'সংযুক্তি' : 'Attachment'}
-                              </a>
-                            )}
-                          </div>
+                          {notice.category && (
+                            <Badge variant="outline" className="shrink-0 text-xs">{notice.category}</Badge>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        )}
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {notice.published_at ? format(new Date(notice.published_at), 'dd/MM/yyyy') : '—'}
+                          </span>
+                          {notice.attachment_url && (
+                            <a href={notice.attachment_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                              {bn ? 'সংযুক্তি' : 'Attachment'}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
