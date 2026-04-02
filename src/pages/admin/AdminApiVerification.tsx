@@ -430,6 +430,21 @@ const AdminApiVerification = () => {
                 </button>
               </div>
             </div>
+            <div>
+              <Label>{bn ? 'কনফার্ম নতুন পাসওয়ার্ড' : 'Confirm New Password'}</Label>
+              <div className="relative mt-1">
+                <Input
+                  className="bg-background pr-10"
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={confirmMasterPassword}
+                  onChange={e => setConfirmMasterPassword(e.target.value)}
+                  placeholder={bn ? 'নতুন পাসওয়ার্ড আবার দিন' : 'Re-enter new password'}
+                />
+              </div>
+              {newMasterPassword && confirmMasterPassword && newMasterPassword !== confirmMasterPassword && (
+                <p className="text-xs text-destructive mt-1">{bn ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match'}</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
