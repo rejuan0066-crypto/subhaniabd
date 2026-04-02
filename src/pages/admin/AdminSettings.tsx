@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useState, useEffect } from 'react';
-import { Save, Shield, Bell, Palette, Mail, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Save, Shield, Bell, Palette, Mail, Loader2, Eye, EyeOff, Globe, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const AdminSettings = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const [emailProvider, setEmailProvider] = useState<'emailjs' | 'custom_domain'>('emailjs');
   const [settings, setSettings] = useState({
     twoFactorAuth: true,
     otpExpiry: '5',
@@ -87,6 +88,93 @@ const AdminSettings = () => {
     <AdminLayout>
       <div className="space-y-6 max-w-3xl">
         <h1 className="text-2xl font-display font-bold text-foreground">{bn ? 'সেটিংস' : 'Settings'}</h1>
+
+        {/* Email Provider Selection */}
+        <div className="card-elevated p-5">
+          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+            <Mail className="w-5 h-5 text-primary" /> {bn ? 'ইমেইল প্রোভাইডার' : 'Email Provider'}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <button
+              type="button"
+              onClick={() => setEmailProvider('emailjs')}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                emailProvider === 'emailjs'
+                  ? 'border-primary bg-primary/5 shadow-sm'
+                  : 'border-border hover:border-muted-foreground/30'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-foreground">EmailJS (Gmail)</span>
+                {emailProvider === 'emailjs' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+              </div>
+              <p className="text-xs text-muted-foreground">{bn ? 'ফ্রি — Gmail দিয়ে OTP পাঠান' : 'Free — Send OTP via Gmail'}</p>
+              <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 font-medium">
+                {bn ? 'বর্তমান' : 'Current'}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setEmailProvider('custom_domain')}
+              className={`p-4 rounded-xl border-2 text-left transition-all ${
+                emailProvider === 'custom_domain'
+                  ? 'border-primary bg-primary/5 shadow-sm'
+                  : 'border-border hover:border-muted-foreground/30'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-bold text-foreground">{bn ? 'কাস্টম ডোমেইন' : 'Custom Domain'}</span>
+                {emailProvider === 'custom_domain' && <CheckCircle2 className="w-4 h-4 text-primary" />}
+              </div>
+              <p className="text-xs text-muted-foreground">{bn ? 'পেইড — নিজের ডোমেইন থেকে ইমেইল' : 'Paid — Send from your own domain'}</p>
+              <span className="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-medium">
+                {bn ? 'আপগ্রেড' : 'Upgrade'}
+              </span>
+            </button>
+          </div>
+
+          {emailProvider === 'custom_domain' && (
+            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-3">
+              <div className="flex items-start gap-3">
+                <Globe className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    {bn ? 'কাস্টম ইমেইল ডোমেইন সেটআপ' : 'Custom Email Domain Setup'}
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {bn
+                      ? 'আপনার নিজের ডোমেইন (যেমন: notify@yourdomain.com) থেকে প্রফেশনাল ইমেইল পাঠান। এতে ইমেইল ডেলিভারি ভালো হয়, ব্র্যান্ডিং থাকে এবং দৈনিক সীমা নেই।'
+                      : 'Send professional emails from your own domain (e.g., notify@yourdomain.com). Better deliverability, branding, and no daily limits.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 pl-8">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <ArrowRight className="w-3 h-3 text-primary" />
+                  <span>{bn ? 'একটি ডোমেইন কিনুন বা বিদ্যমান ডোমেইন ব্যবহার করুন' : 'Buy a domain or use an existing one'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <ArrowRight className="w-3 h-3 text-primary" />
+                  <span>{bn ? 'DNS সেটআপ করুন (স্বয়ংক্রিয় গাইড দেওয়া হবে)' : 'Set up DNS (guided automatically)'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <ArrowRight className="w-3 h-3 text-primary" />
+                  <span>{bn ? 'সিস্টেম স্বয়ংক্রিয়ভাবে আপডেট হবে' : 'System updates automatically'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  {bn
+                    ? 'কাস্টম ডোমেইন সেটআপ করতে আমাকে (AI অ্যাসিস্ট্যান্ট) চ্যাটে বলুন "ইমেইল ডোমেইন সেটআপ করুন"। আমি আপনাকে ধাপে ধাপে সাহায্য করব।'
+                    : 'To set up a custom domain, tell me (AI Assistant) in chat: "Set up email domain". I will guide you step by step.'}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* EmailJS Configuration */}
         <div className="card-elevated p-5">
