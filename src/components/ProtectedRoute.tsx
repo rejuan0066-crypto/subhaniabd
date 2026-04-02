@@ -64,16 +64,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <>{children}</>;
   }
 
-  // Non-admin on admin routes — redirect to staff dashboard
+  // Non-admin on admin routes
   if (isAdminRoute) {
-    // Only /admin/profile is allowed for non-admins (own profile)
+    // /admin/profile is always allowed for non-admins (own profile)
     if (path === '/admin/profile' || path.startsWith('/admin/profile/')) {
       return <>{children}</>;
-    }
-
-    // The main /admin dashboard is NOT allowed for non-admins
-    if (path === '/admin') {
-      return <Navigate to="/staff-dashboard" replace />;
     }
 
     // Check if user has ANY permission (role-based OR individual) to view this path
@@ -85,12 +80,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       const roleAllowed = roleAccess && roleAccess[userBaseRole];
       
       if (roleAllowed) {
-        // Role is allowed by access control — check role or individual permissions
         if (!hasAccess) {
           return <Navigate to="/staff-dashboard" replace />;
         }
       } else {
-        // Role not allowed by access control — only individual permission can override
         if (!hasUserPermission(path, 'view')) {
           return <Navigate to="/staff-dashboard" replace />;
         }
