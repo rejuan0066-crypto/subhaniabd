@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch';
 import PhotoUpload from '@/components/PhotoUpload';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
+import CardVerifySection from '@/components/CardVerifySection';
+import { useApiVerificationEnabled } from '@/hooks/useApiVerification';
 import { Plus, Search, Loader2, AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -34,6 +36,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   const bn = language === 'bn';
   const queryClient = useQueryClient();
   const { validate, validateAll } = useValidationRules('student');
+  const { data: apiVerifyEnabled } = useApiVerificationEnabled();
   const { fields: configFields, isLoaded, isFieldActive, getField, getFieldsBySection, getCustomFields, sections } = useAdmissionFormConfig();
 
   // Form state
@@ -1144,6 +1147,14 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                 </ul>
               </div>
             )}
+
+            <CardVerifySection
+              formType="student"
+              isEnabled={apiVerifyEnabled === true}
+              onDataReceived={(data) => {
+                setForm(prev => ({ ...prev, ...data }));
+              }}
+            />
 
             {activeSections.map(section => renderSection(section))}
 

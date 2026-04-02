@@ -57,6 +57,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminPrayerCalendar from "./pages/admin/AdminPrayerCalendar";
 import AdminAcademicSessions from "./pages/admin/AdminAcademicSessions";
 import AdminAddressManager from "./pages/admin/AdminAddressManager";
+import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
 import NotFound from "./pages/NotFound";
 
@@ -121,6 +122,7 @@ const App = () => (
               <Route path="/admin/prayer-calendar" element={<ProtectedRoute><AdminPrayerCalendar /></ProtectedRoute>} />
               <Route path="/admin/academic-sessions" element={<ProtectedRoute><AdminAcademicSessions /></ProtectedRoute>} />
               <Route path="/admin/address-manager" element={<ProtectedRoute><AdminAddressManager /></ProtectedRoute>} />
+              <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

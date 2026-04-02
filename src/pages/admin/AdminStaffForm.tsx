@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
 import PhotoUpload from '@/components/PhotoUpload';
+import CardVerifySection from '@/components/CardVerifySection';
+import { useApiVerificationEnabled } from '@/hooks/useApiVerification';
 import { useState, useRef, useEffect } from 'react';
 import { Plus, AlertCircle, CheckCircle, Loader2, Upload, Trash2, Eye, Printer, Download, FileText, X, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -55,6 +57,7 @@ const AdminStaffForm = () => {
   const { id: editId } = useParams<{ id: string }>();
   const isEditMode = !!editId;
   const { validate, validateAll } = useValidationRules('staff');
+  const { data: apiVerifyEnabled } = useApiVerificationEnabled();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const printRef = useRef<HTMLDivElement>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -721,6 +724,20 @@ const AdminStaffForm = () => {
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
+          <CardVerifySection
+            formType="staff"
+            isEnabled={apiVerifyEnabled === true}
+            onDataReceived={(data) => {
+              if (data.name_bn) setFirstName(data.name_bn);
+              if (data.name_en) setLastName(data.name_en);
+              if (data.father_name) setFatherName(data.father_name);
+              if (data.date_of_birth) setDob(data.date_of_birth);
+              if (data.phone) setMobile(data.phone);
+              if (data.email) { /* setEmail if exists */ }
+              if (data.nid) setNid(data.nid);
+              if (data.education) setEducation(data.education);
+            }}
+          />
           {/* ========== SECTION 1: Employee Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
