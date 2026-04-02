@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .maybeSingle();
 
     setRole(data?.role ?? null);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -42,9 +43,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       } else {
         setRole(null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
@@ -55,9 +55,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         void fetchRole(currentSession.user.id);
       } else {
         setRole(null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
