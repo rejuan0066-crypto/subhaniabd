@@ -272,20 +272,30 @@ const AdminUserManagement = () => {
     }
     setRoleSaving(true);
     try {
-      const payload = {
-        name: roleName.trim().toLowerCase(),
-        name_bn: roleNameBn.trim(),
-        description: roleDesc.trim() || null,
-        description_bn: roleDescBn.trim() || null,
-        base_role: roleBaseRole,
-      };
-
-      if (editingRole) {
-        const { error } = await supabase.from('custom_roles').update(payload).eq('id', editingRole.id);
+      if (editingRole?.is_system) {
+        // System roles: only update display info
+        const { error } = await supabase.from('custom_roles').update({
+          name_bn: roleNameBn.trim(),
+          description: roleDesc.trim() || null,
+          description_bn: roleDescBn.trim() || null,
+        }).eq('id', editingRole.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('custom_roles').insert(payload);
-        if (error) throw error;
+        const payload = {
+          name: roleName.trim().toLowerCase(),
+          name_bn: roleNameBn.trim(),
+          description: roleDesc.trim() || null,
+          description_bn: roleDescBn.trim() || null,
+          base_role: roleBaseRole,
+        };
+
+        if (editingRole) {
+          const { error } = await supabase.from('custom_roles').update(payload).eq('id', editingRole.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase.from('custom_roles').insert(payload);
+          if (error) throw error;
+        }
       }
 
       toast.success(bn ? 'রোল সেভ হয়েছে' : 'Role saved');
