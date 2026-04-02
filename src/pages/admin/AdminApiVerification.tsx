@@ -71,22 +71,54 @@ const AdminApiVerification = () => {
     }
   };
 
-  const handleForgotReset = async () => {
-    if (resetConfirmInput !== 'RESET') {
-      toast.error(bn ? 'অনুগ্রহ করে RESET টাইপ করুন' : 'Please type RESET to confirm');
+  const handleSendOtp = async () => {
+    setSendingOtp(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      toast.error(bn ? 'ইমেইল পাওয়া যায়নি' : 'Email not found');
+      setSendingOtp(false);
       return;
     }
-    if (!config?.id) return;
-    const { error } = await supabase
-      .from('api_verification_config')
-      .update({ master_password: '', updated_at: new Date().toISOString() })
-      .eq('id', config.id);
+    setAdminEmail(user.email);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: user.email,
+      options: { shouldCreateUser: false }
+    });
+    setSendingOtp(false);
     if (error) {
       toast.error(error.message);
     } else {
+      setOtpSent(true);
+      toast.success(bn ? `ভেরিফিকেশন কোড ${user.email} এ পাঠানো হয়েছে` : `Verification code sent to ${user.email}`);
+    }
+  };
+
+  const handleVerifyAndReset = async () => {
+    if (!otpCode.trim()) {
+      toast.error(bn ? 'কোড দিন' : 'Enter the code');
+      return;
+    }
+    const { error } = await supabase.auth.verifyOtp({
+      email: adminEmail,
+      token: otpCode,
+      type: 'email'
+    });
+    if (error) {
+      toast.error(bn ? 'ভুল কোড বা কোডের মেয়াদ শেষ' : 'Invalid or expired code');
+      return;
+    }
+    if (!config?.id) return;
+    const { error: resetError } = await supabase
+      .from('api_verification_config')
+      .update({ master_password: '', updated_at: new Date().toISOString() })
+      .eq('id', config.id);
+    if (resetError) {
+      toast.error(resetError.message);
+    } else {
       toast.success(bn ? 'পাসওয়ার্ড রিসেট হয়েছে। নতুন পাসওয়ার্ড সেট করুন।' : 'Password reset. Please set a new password.');
       setForgotMode(false);
-      setResetConfirmInput('');
+      setOtpSent(false);
+      setOtpCode('');
       setUnlocked(true);
       queryClient.invalidateQueries({ queryKey: ['api-verification-config'] });
     }
