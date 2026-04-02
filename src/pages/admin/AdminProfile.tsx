@@ -127,9 +127,9 @@ const AdminProfile = () => {
 
           {/* Pending verification banner */}
           {pendingEmail && (
-            <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <Clock className="w-5 h-5 text-amber-500 mt-0.5 shrink-0 animate-pulse" />
+                <Clock className="w-5 h-5 text-destructive mt-0.5 shrink-0 animate-pulse" />
                 <div className="space-y-1">
                   <p className="font-semibold text-foreground">
                     {bn ? 'ভেরিফিকেশন পেন্ডিং' : 'Verification Pending'}
