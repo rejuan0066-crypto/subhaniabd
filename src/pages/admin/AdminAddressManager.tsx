@@ -191,18 +191,32 @@ const AdminAddressManager = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-primary" />
-              {bn ? 'ঠিকানা ব্যবস্থাপনা' : 'Address Manager'}
-            </h1>
-            <p className="text-sm text-muted-foreground">{bn ? 'বিভাগ, জেলা, উপজেলা, ইউনিয়ন ও পোস্ট অফিস যোগ/সংশোধন করুন' : 'Add or edit divisions, districts, upazilas, unions & post offices'}</p>
-          </div>
-          <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
-            <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
-          </Button>
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <MapPin className="w-6 h-6 text-primary" />
+            {bn ? 'ঠিকানা ব্যবস্থাপনা' : 'Address Manager'}
+          </h1>
+          <p className="text-sm text-muted-foreground">{bn ? 'ঠিকানা ডেটা ও লেভেল যোগ/সংশোধন করুন' : 'Manage address data & levels'}</p>
         </div>
+
+        <Tabs defaultValue="data" className="w-full">
+          <TabsList>
+            <TabsTrigger value="data">{bn ? 'ঠিকানা ডেটা' : 'Address Data'}</TabsTrigger>
+            <TabsTrigger value="levels">{bn ? 'লেভেল ব্যবস্থাপনা' : 'Level Management'}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="levels" className="mt-4">
+            <div className="card-elevated p-6">
+              <AddressLevelManager />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="data" className="mt-4 space-y-4">
+            <div className="flex justify-end">
+              <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
+                <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
+              </Button>
+            </div>
 
         <div className="card-elevated p-4 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1 max-w-md">
