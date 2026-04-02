@@ -250,7 +250,6 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
 
           {/* Salary Tab */}
           {hasStaff && (
