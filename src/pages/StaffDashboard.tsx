@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import LanguageToggle from '@/components/LanguageToggle';
 import {
   User, Wallet, CalendarDays, Bell, LogOut, GraduationCap,
-  Phone, MapPin, Briefcase, Calendar, Clock, CheckCircle, XCircle, AlertTriangle
+  Phone, MapPin, Briefcase, Calendar, Clock, CheckCircle, XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 
