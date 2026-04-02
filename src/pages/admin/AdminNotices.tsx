@@ -134,13 +134,15 @@ const AdminNotices = () => {
                     <span className="text-xs text-muted-foreground">{new Date(n.created_at).toLocaleDateString('bn-BD')}</span>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    {!n.is_published && (
+                    {canEditItem && !n.is_published && (
                       <button onClick={() => updateStatusMutation.mutate({ id: n.id, is_published: true })} className="p-2 rounded-lg hover:bg-success/10 text-success" title="Publish"><Check className="w-4 h-4" /></button>
                     )}
-                    {n.is_published && (
+                    {canEditItem && n.is_published && (
                       <button onClick={() => updateStatusMutation.mutate({ id: n.id, is_published: false })} className="p-2 rounded-lg hover:bg-warning/10 text-warning" title="Unpublish"><RotateCcw className="w-4 h-4" /></button>
                     )}
-                    <button onClick={() => deleteMutation.mutate(n.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                    {canDeleteItem && (
+                      <button onClick={() => deleteMutation.mutate(n.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                    )}
                   </div>
                 </div>
               </div>
