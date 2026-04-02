@@ -367,10 +367,10 @@ const AdminCustomFormPage = () => {
                   );
                 })}
                 {activeFields.length > 0 && (
-                  <Button className="w-full mt-4" onClick={handleSubmit} disabled={submitMutation.isPending}>
+                  {canAddItem && <Button className="w-full mt-4" onClick={handleSubmit} disabled={submitMutation.isPending}>
                     <Send className="h-4 w-4 mr-1" />
                     {submitMutation.isPending ? (bn ? 'সাবমিট হচ্ছে...' : 'Submitting...') : (bn ? 'সাবমিট করুন' : 'Submit')}
-                  </Button>
+                  </Button>}
                 )}
               </CardContent>
             </Card>
