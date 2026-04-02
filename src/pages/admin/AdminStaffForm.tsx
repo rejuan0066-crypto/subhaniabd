@@ -463,7 +463,24 @@ const AdminStaffForm = () => {
       toast.error(Object.values(errors)[0]);
       return;
     }
+
+    // If email is provided and not verified (and not edit mode), require OTP verification
+    if (staffEmail.trim() && !emailVerified && !isEditMode) {
+      setPendingSave(true);
+      setShowOtpDialog(true);
+      return;
+    }
+
     saveMutation.mutate();
+  };
+
+  const handleOtpVerified = () => {
+    setEmailVerified(true);
+    setShowOtpDialog(false);
+    if (pendingSave) {
+      setPendingSave(false);
+      saveMutation.mutate();
+    }
   };
 
   const handleApproverSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
