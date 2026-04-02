@@ -209,9 +209,11 @@ const AdminPosts = () => {
           <h1 className="text-2xl font-bold text-foreground">
             {bn ? 'পোস্ট ম্যানেজমেন্ট' : 'Post Management'}
           </h1>
-          <Button onClick={() => { setForm(emptyForm); setEditId(null); setDialogOpen(true); }}>
-            <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন পোস্ট' : 'New Post'}
-          </Button>
+          {canAddItem && (
+            <Button onClick={() => { setForm(emptyForm); setEditId(null); setDialogOpen(true); }}>
+              <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন পোস্ট' : 'New Post'}
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
