@@ -26,6 +26,7 @@ const AdminAddressManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { data: levels = [] } = useAddressLevels();
   const [search, setSearch] = useState('');
   const [filterLevel, setFilterLevel] = useState('all');
   const [showForm, setShowForm] = useState(false);
