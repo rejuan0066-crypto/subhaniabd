@@ -19,6 +19,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useValidationRules } from '@/hooks/useValidationRules';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import OtpVerificationDialog from '@/components/OtpVerificationDialog';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const emptyAddress: AddressData = { division: '', district: '', upazila: '', union: '', postOffice: '', village: '' };
 
@@ -54,6 +55,7 @@ const AdminStaffForm = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem } = usePagePermissions('/admin/staff');
   const navigate = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const isEditMode = !!editId;

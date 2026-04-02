@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { useWebsiteSettings, WebsiteSettings, InfoLink } from '@/hooks/useWebsiteSettings';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
 import { Json } from '@/integrations/supabase/types';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import ImageUpload from '@/components/ImageUpload';
 
@@ -41,6 +42,7 @@ const INFO_LINK_ICONS = [
 const AdminWebsite = () => {
   const { language } = useLanguage();
   const { settings, isLoading, updateMultiple } = useWebsiteSettings();
+  const { canEditItem } = usePagePermissions('/admin/website');
   const { menuConfig, saveMenuConfig } = useMenuSettings();
   const [form, setForm] = useState<WebsiteSettings | null>(null);
   const [publicMenu, setPublicMenu] = useState<MenuItemConfig[]>([]);
@@ -322,9 +324,9 @@ const AdminWebsite = () => {
             <Button variant="outline" size="sm" onClick={() => window.open('/', '_blank')}>
               <Eye className="w-4 h-4 mr-1" /> {language === 'bn' ? 'প্রিভিউ' : 'Preview'}
             </Button>
-            <Button className="btn-primary-gradient" size="sm" onClick={saveAll} disabled={saving}>
+            {canEditItem && <Button className="btn-primary-gradient" size="sm" onClick={saveAll} disabled={saving}>
               <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সব সংরক্ষণ' : 'Save All'}
-            </Button>
+            </Button>}
           </div>
         </div>
 

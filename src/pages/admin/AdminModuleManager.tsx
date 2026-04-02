@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import {
   LayoutDashboard, Users, UserCog, Layers, CreditCard, Receipt,
   FileText, Bell, Heart, BookOpen, ClipboardCheck, Wallet,
@@ -58,6 +59,7 @@ const AdminModuleManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/module-manager');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [moduleData, setModuleData] = useState<ModuleData>(emptyModule);
@@ -169,9 +171,9 @@ const AdminModuleManager = () => {
               {bn ? 'সিস্টেমের সকল মডিউল কানেক্ট/ডিসকানেক্ট ও কনফিগার করুন' : 'Connect/disconnect and configure all system modules'}
             </p>
           </div>
-          <Button onClick={() => { setModuleData({ ...emptyModule, sort_order: modules.length }); setEditingId(null); setDialogOpen(true); }}>
+          {canAddItem && <Button onClick={() => { setModuleData({ ...emptyModule, sort_order: modules.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন মডিউল' : 'New Module'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Stats */}
@@ -244,10 +246,10 @@ const AdminModuleManager = () => {
                     <code className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{mod.menu_path}</code>
                     <div className="flex gap-1">
                       {mod.is_system && <Badge variant="secondary" className="text-[10px]">{bn ? 'সিস্টেম' : 'System'}</Badge>}
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(mod)}>
+                      {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(mod)}>
                         <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-                      {!mod.is_system && (
+                      </Button>}
+                      {canDeleteItem && !mod.is_system && (
                         <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                           onClick={() => { if (confirm(bn ? 'মডিউলটি মুছে ফেলতে চান?' : 'Delete this module?')) deleteMutation.mutate(mod.id); }}>
                           <Trash2 className="h-3.5 w-3.5" />

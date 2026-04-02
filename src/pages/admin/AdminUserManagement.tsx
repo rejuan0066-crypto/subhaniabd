@@ -15,6 +15,7 @@ import AccessControlTab from '@/components/admin/AccessControlTab';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 interface UserItem {
   id: string;
@@ -93,6 +94,7 @@ const AdminUserManagement = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/user-management');
 
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -499,7 +501,7 @@ const AdminUserManagement = () => {
           {/* ===== USERS TAB ===== */}
           <TabsContent value="users" className="space-y-4">
             <div className="flex justify-end">
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              {canAddItem && <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="btn-primary-gradient gap-2">
                     <Plus className="w-4 h-4" /> {bn ? 'নতুন ইউজার' : 'New User'}
@@ -559,7 +561,7 @@ const AdminUserManagement = () => {
                     </Button>
                   </div>
                 </DialogContent>
-              </Dialog>
+              </Dialog>}
             </div>
 
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-start gap-3 text-sm">
@@ -625,7 +627,7 @@ const AdminUserManagement = () => {
                               </Button>
                             )}
                             {/* Delete */}
-                            <Button
+                            {canDeleteItem && <Button
                               size="icon"
                               variant="ghost"
                               className="text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -633,7 +635,7 @@ const AdminUserManagement = () => {
                               disabled={deleting === u.id}
                             >
                               {deleting === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                            </Button>
+                            </Button>}
                           </div>
                         </TableCell>
                       </TableRow>

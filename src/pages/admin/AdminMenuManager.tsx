@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Save, RotateCcw, GripVertical, ChevronDown, ChevronUp, Eye, EyeOff, Pencil } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const ICON_OPTIONS = [
   'LayoutDashboard', 'Users', 'UserCog', 'BookOpen', 'FileText', 'Bell',
@@ -32,6 +33,7 @@ interface EditDialogState {
 const AdminMenuManager = () => {
   const { language } = useLanguage();
   const { menuConfig, saveMenuConfig } = useMenuSettings();
+  const { canEditItem } = usePagePermissions('/admin/menu-manager');
   const [sidebar, setSidebar] = useState<MenuItemConfig[]>(menuConfig.sidebar);
   const [publicMenu, setPublicMenu] = useState<MenuItemConfig[]>(menuConfig.public);
   const [editDialog, setEditDialog] = useState<EditDialogState>({ open: false, item: null, parentIdx: null, childIdx: null, type: 'sidebar' });
@@ -173,10 +175,10 @@ const AdminMenuManager = () => {
             <Button variant="outline" size="sm" onClick={handleReset}>
               <RotateCcw className="w-4 h-4 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={saveMenuConfig.isPending}>
+            {canEditItem && <Button size="sm" onClick={handleSave} disabled={saveMenuConfig.isPending}>
               <Save className="w-4 h-4 mr-1" />
               {saveMenuConfig.isPending ? (bn ? 'সেভ হচ্ছে...' : 'Saving...') : (bn ? 'সেভ করুন' : 'Save')}
-            </Button>
+            </Button>}
           </div>
         </div>
 

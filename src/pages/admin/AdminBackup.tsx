@@ -15,6 +15,7 @@ import {
   Database, Download, FileJson, FileSpreadsheet, HardDrive,
   Loader2, AlertCircle, Clock, Upload, RotateCcw, CheckCircle2, XCircle, ShieldAlert
 } from 'lucide-react';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const TABLES = [
   { key: 'students', labelBn: 'শিক্ষার্থী', labelEn: 'Students', icon: '🎓' },
@@ -41,6 +42,7 @@ const TABLES = [
 const AdminBackup = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem, canEditItem } = usePagePermissions('/admin/backup');
   const [loading, setLoading] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
 

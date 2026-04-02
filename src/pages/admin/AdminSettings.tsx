@@ -9,10 +9,12 @@ import { useState, useEffect } from 'react';
 import { Save, Shield, Bell, Palette, Mail, Loader2, Eye, EyeOff, Globe, ArrowRight, CheckCircle2, AlertCircle, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const AdminSettings = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canEditItem } = usePagePermissions('/admin/settings');
   const [emailProvider, setEmailProvider] = useState<'emailjs' | 'custom_domain'>('emailjs');
   const [settings, setSettings] = useState({
     twoFactorAuth: true,

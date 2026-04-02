@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Palette, Type, Layout, RotateCcw, Save, Eye } from 'lucide-react';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const ColorPreview = ({ hue, sat, light, label }: { hue: number; sat: number; light: number; label: string }) => (
   <div className="flex items-center gap-3">
@@ -27,6 +28,7 @@ const ColorPreview = ({ hue, sat, light, label }: { hue: number; sat: number; li
 const AdminThemeCustomizer = () => {
   const { language } = useLanguage();
   const { theme, saveTheme } = useThemeSettings();
+  const { canEditItem } = usePagePermissions('/admin/theme-customizer');
   const [draft, setDraft] = useState<ThemeSettings>(theme);
   const [previewActive, setPreviewActive] = useState(false);
 
@@ -88,10 +90,10 @@ const AdminThemeCustomizer = () => {
               <RotateCcw className="w-4 h-4 mr-1" />
               {bn ? 'রিসেট' : 'Reset'}
             </Button>
-            <Button size="sm" onClick={handleSave} disabled={saveTheme.isPending}>
+            {canEditItem && <Button size="sm" onClick={handleSave} disabled={saveTheme.isPending}>
               <Save className="w-4 h-4 mr-1" />
               {saveTheme.isPending ? (bn ? 'সেভ হচ্ছে...' : 'Saving...') : (bn ? 'সেভ করুন' : 'Save')}
-            </Button>
+            </Button>}
           </div>
         </div>
 
