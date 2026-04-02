@@ -142,6 +142,7 @@ const AdminAcademicSessions = () => {
                     <TableCell className="text-center">
                       <Switch
                         checked={s.is_active}
+                        disabled={!canEditItem}
                         onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: s.id, active: checked })}
                       />
                     </TableCell>
