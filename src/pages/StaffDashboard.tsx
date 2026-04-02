@@ -184,19 +184,6 @@ const StaffDashboard = () => {
 
       {/* Content */}
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* Warning banner if no staff profile linked */}
-        {!hasStaff && !staffLoading && (
-          <Card className="mb-4 border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20">
-            <CardContent className="p-4 flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
-              <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                {bn
-                  ? 'আপনার স্টাফ প্রোফাইল এখনো লিঙ্ক হয়নি। বেতন ও হাজিরা দেখতে অ্যাডমিনের সাথে যোগাযোগ করুন।'
-                  : 'Your staff profile is not linked yet. Contact admin to view salary & attendance details.'}
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         <Tabs defaultValue="profile" className="space-y-4">
           <TabsList className="w-full grid h-auto grid-cols-4">
