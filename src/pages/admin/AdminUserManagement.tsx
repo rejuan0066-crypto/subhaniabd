@@ -204,6 +204,13 @@ const AdminUserManagement = () => {
     }));
   };
 
+  const toggleApproval = (menuPath: string) => {
+    setUserPerms(prev => prev.map(p => {
+      if (p.menu_path !== menuPath) return p;
+      return { ...p, requires_approval: !p.requires_approval };
+    }));
+  };
+
   const savePermissions = async () => {
     if (!permUser) return;
     setPermSaving(true);
