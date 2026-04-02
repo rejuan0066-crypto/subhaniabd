@@ -23,6 +23,8 @@ const AdminApiVerification = () => {
   const [unlocked, setUnlocked] = useState(false);
   const [masterInput, setMasterInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Form state
   const [apiUrl, setApiUrl] = useState('');
