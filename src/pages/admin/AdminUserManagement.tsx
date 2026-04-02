@@ -28,6 +28,7 @@ interface UserPerm {
   can_add: boolean;
   can_edit: boolean;
   can_delete: boolean;
+  requires_approval: boolean;
 }
 
 const MENU_PATHS = [
@@ -68,6 +69,7 @@ const MENU_PATHS = [
   { path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification' },
   { path: '/admin/user-management', label_bn: 'ইউজার ম্যানেজমেন্ট', label_en: 'User Management' },
   { path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings' },
+  { path: '/admin/approvals', label_bn: 'অনুমোদন ব্যবস্থাপনা', label_en: 'Approvals' },
 ];
 
 const AdminUserManagement = () => {
@@ -164,7 +166,7 @@ const AdminUserManagement = () => {
     try {
       const { data, error } = await supabase
         .from('user_permissions')
-        .select('menu_path, can_view, can_add, can_edit, can_delete')
+        .select('*')
         .eq('user_id', user.id);
 
       if (error) throw error;
@@ -178,6 +180,7 @@ const AdminUserManagement = () => {
           can_add: existing?.can_add ?? false,
           can_edit: existing?.can_edit ?? false,
           can_delete: existing?.can_delete ?? false,
+          requires_approval: existing?.requires_approval ?? false,
         };
       });
       setUserPerms(merged);
@@ -202,6 +205,13 @@ const AdminUserManagement = () => {
     }));
   };
 
+  const toggleApproval = (menuPath: string) => {
+    setUserPerms(prev => prev.map(p => {
+      if (p.menu_path !== menuPath) return p;
+      return { ...p, requires_approval: !p.requires_approval };
+    }));
+  };
+
   const savePermissions = async () => {
     if (!permUser) return;
     setPermSaving(true);
@@ -221,8 +231,13 @@ const AdminUserManagement = () => {
           can_delete: p.can_delete,
         }));
 
-      if (toInsert.length > 0) {
-        const { error } = await supabase.from('user_permissions').insert(toInsert);
+      const toInsertWithApproval = toInsert.map(p => {
+        const perm = userPerms.find(up => up.menu_path === p.menu_path);
+        return { ...p, requires_approval: perm?.requires_approval ?? false };
+      });
+
+      if (toInsertWithApproval.length > 0) {
+        const { error } = await supabase.from('user_permissions').insert(toInsertWithApproval);
         if (error) throw error;
       }
 
@@ -408,11 +423,14 @@ const AdminUserManagement = () => {
                     <TableHeader>
                       <TableRow className="bg-muted/50">
                         <TableHead className="min-w-[140px]">{bn ? 'মেনু' : 'Menu'}</TableHead>
-                        <TableHead className="text-center w-20">{bn ? 'দেখা' : 'View'}</TableHead>
-                        <TableHead className="text-center w-20">{bn ? 'যোগ' : 'Add'}</TableHead>
-                        <TableHead className="text-center w-20">{bn ? 'সম্পাদনা' : 'Edit'}</TableHead>
-                        <TableHead className="text-center w-20">{bn ? 'মুছুন' : 'Delete'}</TableHead>
-                        <TableHead className="text-center w-20">{bn ? 'সব' : 'All'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'দেখা' : 'View'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'যোগ' : 'Add'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'সম্পাদনা' : 'Edit'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'মুছুন' : 'Delete'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'সব' : 'All'}</TableHead>
+                        <TableHead className="text-center w-20">
+                          <span className="text-yellow-600">{bn ? 'অনুমোদন' : 'Approval'}</span>
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -438,6 +456,14 @@ const AdminUserManagement = () => {
                             </TableCell>
                             <TableCell className="text-center">
                               <Checkbox checked={allOn} onCheckedChange={() => toggleAllForPath(perm.menu_path)} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox
+                                checked={perm.requires_approval}
+                                onCheckedChange={() => toggleApproval(perm.menu_path)}
+                                className="border-yellow-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
+                                disabled={!perm.can_view && !perm.can_add && !perm.can_edit && !perm.can_delete}
+                              />
                             </TableCell>
                           </TableRow>
                         );
