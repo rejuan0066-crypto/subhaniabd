@@ -144,6 +144,8 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
             searchPlaceholder={searchPh}
             disabled={disabled || !value.district}
             groups={upazilaGroups}
+            allowCustom
+            customLabel={addLabel}
             className="mt-1"
           />
         </div>
