@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
@@ -47,6 +48,7 @@ const AdminSalary = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem } = usePagePermissions('/admin/salary');
   const { timeFormat } = useTimeFormat();
   const fmt = (t: string) => formatTimeDisplay(t, timeFormat);
 
@@ -816,9 +818,9 @@ const AdminSalary = () => {
               </div>
 
               <div className="flex gap-2 shrink-0 flex-wrap">
-                <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+                {canAddItem && <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
                   <Calculator className="h-3 w-3 mr-1" /> {bn ? 'জেনারেট' : 'Generate'}
-                </Button>
+                </Button>}
                 <Button size="sm" variant="outline" onClick={exportCSV}>
                   <Download className="h-3 w-3 mr-1" /> CSV
                 </Button>
@@ -916,9 +918,9 @@ const AdminSalary = () => {
                           <div className="flex gap-1 justify-center">
                             {rec && (
                               <>
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
+                                {canEditItem && <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
                                   <Edit2 className="h-3 w-3" />
-                                </Button>
+                                </Button>}
                                 <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => printSlip(s, rec)}>
                                   <Printer className="h-3 w-3" />
                                 </Button>

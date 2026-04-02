@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { toast } from 'sonner';
 import {
   Plus, Edit2, Trash2, Calculator, GraduationCap, Wallet,
@@ -89,6 +90,7 @@ const AdminFormulaBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/formula-builder');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formulaData, setFormulaData] = useState<FormulaData>(emptyFormula);
@@ -200,9 +202,9 @@ const AdminFormulaBuilder = () => {
               {bn ? 'ফি, বেতন, গ্রেড ইত্যাদির হিসাবের ফর্মুলা তৈরি ও এডিট করুন' : 'Create and edit formulas for fee, salary, grade calculations'}
             </p>
           </div>
-          <Button onClick={() => { setFormulaData({ ...emptyFormula, sort_order: formulas.length }); setEditingId(null); setDialogOpen(true); }}>
+          {canAddItem && <Button onClick={() => { setFormulaData({ ...emptyFormula, sort_order: formulas.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন ফর্মুলা' : 'New Formula'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Summary Cards */}
@@ -276,13 +278,13 @@ const AdminFormulaBuilder = () => {
                     <Switch checked={f.is_active} onCheckedChange={c => {
                       saveMutation.mutate({ ...f, variables: Array.isArray(f.variables) ? f.variables : [], is_active: c });
                     }} />
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(f)}>
+                    {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(f)}>
                       <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                    </Button>}
+                    {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                       onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(f.id); }}>
                       <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    </Button>}
                   </div>
                 </CardContent>
               </Card>

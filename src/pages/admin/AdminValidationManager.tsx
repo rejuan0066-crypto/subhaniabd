@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { toast } from 'sonner';
 import {
   Plus, Edit2, Trash2, ShieldCheck, Search, AlertTriangle,
@@ -72,6 +73,7 @@ const AdminValidationManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/validation-manager');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [ruleData, setRuleData] = useState<RuleData>(emptyRule);
@@ -222,9 +224,9 @@ const AdminValidationManager = () => {
               {bn ? 'ফিল্ড-লেভেল ও বিজনেস লজিক ভ্যালিডেশন যোগ, এডিট ও নিয়ন্ত্রণ করুন' : 'Add, edit and control field-level & business logic validations'}
             </p>
           </div>
-          <Button onClick={() => { setRuleData({ ...emptyRule, sort_order: rules.length }); setEditingId(null); setDialogOpen(true); }}>
+          {canAddItem && <Button onClick={() => { setRuleData({ ...emptyRule, sort_order: rules.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন রুল' : 'New Rule'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Summary Cards */}
@@ -307,13 +309,13 @@ const AdminValidationManager = () => {
                     <Switch checked={r.is_active} onCheckedChange={c => {
                       saveMutation.mutate({ ...r, config: r.config || {}, is_active: c });
                     }} />
-                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(r)}>
+                    {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(r)}>
                       <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                    </Button>}
+                    {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                       onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(r.id); }}>
                       <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    </Button>}
                   </div>
                 </CardContent>
               </Card>

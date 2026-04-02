@@ -15,6 +15,7 @@ import { bangladeshAddresses } from '@/data/bangladeshAddresses';
 import SearchableSelect from '@/components/SearchableSelect';
 import AddressLevelManager, { useAddressLevels } from '@/components/admin/AddressLevelManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const SUB_TYPES = [
   { value: 'upazila', label: 'Upazila', label_bn: 'উপজেলা' },
@@ -26,6 +27,7 @@ const AdminAddressManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/address-manager');
   const { data: levels = [] } = useAddressLevels();
   const [search, setSearch] = useState('');
   const [filterLevel, setFilterLevel] = useState('all');
@@ -213,9 +215,9 @@ const AdminAddressManager = () => {
 
           <TabsContent value="data" className="mt-4 space-y-4">
             <div className="flex justify-end">
-              <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
+              {canAddItem && <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
                 <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
-              </Button>
+              </Button>}
             </div>
 
         <div className="card-elevated p-4 flex flex-col sm:flex-row gap-4">
@@ -267,8 +269,8 @@ const AdminAddressManager = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{e.parent_path || '-'}</td>
                       <td className="px-4 py-3">{getActionBadge(e.action)}</td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
-                        <button onClick={() => openEdit(e)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={() => setDeleteId(e.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                        {canEditItem && <button onClick={() => openEdit(e)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>}
+                        {canDeleteItem && <button onClick={() => setDeleteId(e.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
                       </td>
                     </tr>
                   ))}

@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
@@ -191,6 +192,7 @@ const AdminFormBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/form-builder');
 
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -470,7 +472,7 @@ const AdminFormBuilder = () => {
             <TabsContent value="forms" className="mt-4">
           <div className="flex items-center justify-end">
             <div className="flex items-center gap-2">
-              <DropdownMenu>
+              {canAddItem && <DropdownMenu>
                <DropdownMenuTrigger asChild>
                  <Button><Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন ফর্ম' : 'New Form'} <ChevronDown className="h-4 w-4 ml-1" /></Button>
                </DropdownMenuTrigger>
@@ -489,7 +491,7 @@ const AdminFormBuilder = () => {
                    </DropdownMenuItem>
                  ))}
                </DropdownMenuContent>
-             </DropdownMenu>
+             </DropdownMenu>}
            </div>
          </div>
 
@@ -614,15 +616,15 @@ const AdminFormBuilder = () => {
                                </Badge>
                              </div>
                              <div className="flex gap-1 ml-2">
-                               <Button size="icon" variant="ghost" className="h-7 w-7" title={bn ? 'ডুপ্লিকেট' : 'Duplicate'} onClick={e => { e.stopPropagation(); duplicateForm.mutate(form.id); }}>
+                               {canAddItem && <Button size="icon" variant="ghost" className="h-7 w-7" title={bn ? 'ডুপ্লিকেট' : 'Duplicate'} onClick={e => { e.stopPropagation(); duplicateForm.mutate(form.id); }}>
                                  <Copy className="h-3.5 w-3.5" />
-                               </Button>
-                               <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditForm(form); }}>
+                               </Button>}
+                               {canEditItem && <Button size="icon" variant="ghost" className="h-7 w-7" onClick={e => { e.stopPropagation(); openEditForm(form); }}>
                                  <Edit2 className="h-3.5 w-3.5" />
-                               </Button>
-                               <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); if (confirm(bn ? 'ফর্মটি মুছে ফেলতে চান?' : 'Delete this form?')) deleteForm.mutate(form.id); }}>
+                               </Button>}
+                               {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={e => { e.stopPropagation(); if (confirm(bn ? 'ফর্মটি মুছে ফেলতে চান?' : 'Delete this form?')) deleteForm.mutate(form.id); }}>
                                  <Trash2 className="h-3.5 w-3.5" />
-                               </Button>
+                               </Button>}
                              </div>
                            </div>
                          </CardContent>

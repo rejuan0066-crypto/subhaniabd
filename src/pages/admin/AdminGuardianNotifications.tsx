@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import {
   MessageSquare, Send, Users, FileText, Loader2, Phone, Mail,
   CheckCircle2, XCircle, Clock, Filter, AlertCircle
@@ -21,6 +22,7 @@ import {
 const AdminGuardianNotifications = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem } = usePagePermissions('/admin/guardian-notifications');
 
   const [activeTab, setActiveTab] = useState('send');
   const [channel, setChannel] = useState<'sms' | 'email'>('sms');
@@ -267,10 +269,10 @@ const AdminGuardianNotifications = () => {
                     <Users className="w-4 h-4 mr-2" />
                     {bn ? `প্রিভিউ (${recipientsWithContact.length} প্রাপক)` : `Preview (${recipientsWithContact.length} recipients)`}
                   </Button>
-                  <Button onClick={handleSend} disabled={!message.trim() || sending || recipientsWithContact.length === 0}>
+                  {canAddItem && <Button onClick={handleSend} disabled={!message.trim() || sending || recipientsWithContact.length === 0}>
                     {sending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                     {sending ? (bn ? 'পাঠানো হচ্ছে...' : 'Sending...') : (bn ? 'বার্তা পাঠান' : 'Send Message')}
-                  </Button>
+                  </Button>}
                 </div>
               </div>
 

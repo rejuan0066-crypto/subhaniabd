@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye } from 'lucide-react';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লিটার', 'ফুট', 'মিটার', 'সেট', 'প্যাকেট', 'বস্তা', 'রিম'];
 const EXPENSE_METHODS = ['ক্যাশ', 'চেক', 'বিকাশ', 'নগদ', 'রকেট', 'ব্যাংক ট্রান্সফার', 'অন্যান্য'];
@@ -50,6 +51,7 @@ const getMonthYearOptions = (lang: string) => {
 const AdminExpenses = () => {
   const { language } = useLanguage();
   const qc = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/expenses');
   const bn = language === 'bn';
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
@@ -860,14 +862,14 @@ const AdminExpenses = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
-                  <Button size="sm" onClick={() => {
+                  {canAddItem && <Button size="sm" onClick={() => {
                     setReceiptFile(null);
                     setEditingExpenseId(null);
                     setExpenseForm({ ...defaultExpenseForm, project_id: selectedProjectId, category_id: selectedCategoryId });
                     setExpenseDialog(true);
                   }}>
                     <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}
-                  </Button>
+                  </Button>}
                 </div>
 
                 <div className="border rounded-lg overflow-auto">
@@ -904,8 +906,8 @@ const AdminExpenses = () => {
                           </TableCell>
                           <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
                           <TableCell className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => { setDeleteConfirmId(e.id); setDeleteConfirmType('expense'); }}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                            {canEditItem && <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>}
+                            {canDeleteItem && <Button variant="ghost" size="icon" onClick={() => { setDeleteConfirmId(e.id); setDeleteConfirmType('expense'); }}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -942,7 +944,7 @@ const AdminExpenses = () => {
                 <Button size="sm" variant="outline" onClick={handleDepositExcelDownload}>
                   <Download className="w-4 h-4 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
                 </Button>
-                <Dialog open={depositDialog} onOpenChange={resetDepositDialog}>
+                {canAddItem && <Dialog open={depositDialog} onOpenChange={resetDepositDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm"><Plus className="w-4 h-4 mr-1" />{bn ? 'জমা যোগ' : 'Add Deposit'}</Button>
                   </DialogTrigger>
@@ -982,7 +984,7 @@ const AdminExpenses = () => {
                       </Button>
                     </div>
                   </DialogContent>
-                </Dialog>
+                </Dialog>}
               </div>
             </div>
 

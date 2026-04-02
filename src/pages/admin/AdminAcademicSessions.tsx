@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
@@ -24,6 +25,7 @@ const AdminAcademicSessions = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/academic-sessions', 'academic_sessions');
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/academic-sessions');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -109,10 +111,10 @@ const AdminAcademicSessions = () => {
             <CalendarDays className="w-6 h-6 text-primary" />
             {language === 'bn' ? 'একাডেমিক সেশন' : 'Academic Sessions'}
           </h1>
-          <Button className="btn-primary-gradient" onClick={() => { resetForm(); setDialogOpen(true); }}>
+          {canAddItem && <Button className="btn-primary-gradient" onClick={() => { resetForm(); setDialogOpen(true); }}>
             <Plus className="w-4 h-4 mr-1" />
             {language === 'bn' ? 'নতুন সেশন' : 'New Session'}
-          </Button>
+          </Button>}
         </div>
 
         <div className="card-elevated">
@@ -140,15 +142,16 @@ const AdminAcademicSessions = () => {
                     <TableCell className="text-center">
                       <Switch
                         checked={s.is_active}
+                        disabled={!canEditItem}
                         onCheckedChange={(checked) => toggleActiveMutation.mutate({ id: s.id, active: checked })}
                       />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(s)}>
+                        {canEditItem && <Button variant="ghost" size="icon" onClick={() => openEdit(s)}>
                           <Pencil className="w-4 h-4" />
-                        </Button>
-                        <AlertDialog>
+                        </Button>}
+                        {canDeleteItem && <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
                               <Trash2 className="w-4 h-4" />
@@ -168,7 +171,7 @@ const AdminAcademicSessions = () => {
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
-                        </AlertDialog>
+                        </AlertDialog>}
                       </div>
                     </TableCell>
                   </TableRow>

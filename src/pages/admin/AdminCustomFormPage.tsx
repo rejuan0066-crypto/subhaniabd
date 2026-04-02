@@ -20,6 +20,7 @@ import AddressFields, { type AddressData } from '@/components/AddressFields';
 import { FileText, Send, List, Trash2, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Json } from '@/integrations/supabase/types';
 
 const AdminCustomFormPage = () => {
@@ -28,6 +29,7 @@ const AdminCustomFormPage = () => {
   const { user } = useAuth();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canDeleteItem } = usePagePermissions(`/admin/custom-form/${slug}`);
 
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -364,7 +366,7 @@ const AdminCustomFormPage = () => {
                     </div>
                   );
                 })}
-                {activeFields.length > 0 && (
+                {activeFields.length > 0 && canAddItem && (
                   <Button className="w-full mt-4" onClick={handleSubmit} disabled={submitMutation.isPending}>
                     <Send className="h-4 w-4 mr-1" />
                     {submitMutation.isPending ? (bn ? 'সাবমিট হচ্ছে...' : 'Submitting...') : (bn ? 'সাবমিট করুন' : 'Submit')}
@@ -406,10 +408,10 @@ const AdminCustomFormPage = () => {
                             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setViewSubmission(sub)}>
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
-                            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
+                            {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
                               onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(sub.id); }}>
                               <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                            </Button>}
                           </TableCell>
                         </TableRow>
                       ))}

@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Save, Plus, Trash2, Pencil, Eye, EyeOff, ChevronUp, ChevronDown, GripVertical, LayoutGrid } from 'lucide-react';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const ICON_OPTIONS = ['Users', 'UserCog', 'CreditCard', 'Heart', 'Receipt', 'BookOpen', 'FileText', 'GraduationCap', 'UserCheck', 'UserX', 'Layers', 'Star', 'Award', 'Clock'];
 const COLOR_PRESETS = [
@@ -49,6 +50,7 @@ const emptyWidget = (): WidgetConfig => ({
 const AdminWidgetBuilder = () => {
   const { language } = useLanguage();
   const { widgets, saveWidgets } = useWidgetSettings();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/widget-builder');
   const [list, setList] = useState<WidgetConfig[]>(widgets);
   const [editDialog, setEditDialog] = useState<{ open: boolean; widget: WidgetConfig | null; index: number }>({ open: false, widget: null, index: -1 });
   const bn = language === 'bn';
@@ -159,9 +161,9 @@ const AdminWidgetBuilder = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={addWidget}>
+            {canAddItem && <Button variant="outline" size="sm" onClick={addWidget}>
               <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন উইজেট' : 'New Widget'}
-            </Button>
+            </Button>}
             <Button size="sm" onClick={handleSave} disabled={saveWidgets.isPending}>
               <Save className="w-4 h-4 mr-1" />
               {saveWidgets.isPending ? (bn ? 'সেভ হচ্ছে...' : 'Saving...') : (bn ? 'সেভ করুন' : 'Save')}
@@ -191,21 +193,21 @@ const AdminWidgetBuilder = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => editWidget(idx)} className="p-1.5 rounded hover:bg-muted">
+                  {canEditItem && <button onClick={() => editWidget(idx)} className="p-1.5 rounded hover:bg-muted">
                     <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-                  </button>
-                  <button onClick={() => toggleVisible(idx)} className="p-1.5 rounded hover:bg-muted">
+                  </button>}
+                  {canEditItem && <button onClick={() => toggleVisible(idx)} className="p-1.5 rounded hover:bg-muted">
                     {w.visible ? <Eye className="w-3.5 h-3.5 text-primary" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
-                  </button>
-                  <button onClick={() => moveWidget(idx, -1)} disabled={idx === 0} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
+                  </button>}
+                  {canEditItem && <button onClick={() => moveWidget(idx, -1)} disabled={idx === 0} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
                     <ChevronUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => moveWidget(idx, 1)} disabled={idx === list.length - 1} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
+                  </button>}
+                  {canEditItem && <button onClick={() => moveWidget(idx, 1)} disabled={idx === list.length - 1} className="p-1.5 rounded hover:bg-muted disabled:opacity-30">
                     <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={() => deleteWidget(idx)} className="p-1.5 rounded hover:bg-destructive/10">
+                  </button>}
+                  {canDeleteItem && <button onClick={() => deleteWidget(idx)} className="p-1.5 rounded hover:bg-destructive/10">
                     <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Save, Plus, Pencil, Trash2, Clock, Calendar, MapPin, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const CALC_METHODS = [
   { value: 1, label: 'University of Islamic Sciences, Karachi', labelBn: 'করাচী ইউনিভার্সিটি' },
@@ -57,6 +58,7 @@ const TYPE_COLORS: Record<string, string> = {
 const AdminPrayerCalendar = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/prayer-calendar');
   const {
     config, configLoading, updateConfig,
     holidays, holidaysLoading, addHoliday, updateHoliday, deleteHoliday,
@@ -272,9 +274,9 @@ const AdminPrayerCalendar = () => {
               </div>
             </div>
 
-            <Button className="btn-primary-gradient w-full" onClick={handleSaveConfig} disabled={updateConfig.isPending}>
+            {canEditItem && <Button className="btn-primary-gradient w-full" onClick={handleSaveConfig} disabled={updateConfig.isPending}>
               <Save className="w-4 h-4 mr-2" /> {bn ? 'সেটিংস সংরক্ষণ করুন' : 'Save Settings'}
-            </Button>
+            </Button>}
           </TabsContent>
 
           {/* Holidays Tab */}
@@ -379,12 +381,12 @@ const AdminPrayerCalendar = () => {
                         </td>
                         <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditHoliday(h); setDialogOpen(true); }}>
+                            {canEditItem && <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditHoliday(h); setDialogOpen(true); }}>
                               <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteHoliday(h.id)}>
+                            </Button>}
+                            {canDeleteItem && <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleDeleteHoliday(h.id)}>
                               <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                            </Button>}
                           </div>
                         </td>
                       </tr>
