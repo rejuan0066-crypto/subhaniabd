@@ -126,13 +126,15 @@ const AdminDivisions = () => {
               <Layers className="w-5 h-5 text-primary" />
               {language === 'bn' ? 'বিভাগসমূহ' : 'Divisions'}
             </h3>
-            <div className="flex gap-2 mb-4">
-              <Input placeholder={language === 'bn' ? 'বিভাগের নাম (বাংলা)' : 'Division Name (BN)'} value={newDivName} onChange={(e) => setNewDivName(e.target.value)} className="bg-background" />
-              <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newDivNameEn} onChange={(e) => setNewDivNameEn(e.target.value)} className="bg-background" />
-              <Button onClick={() => { if (!newDivName.trim()) { toast.error(language === 'bn' ? 'বিভাগের নাম লিখুন' : 'Enter division name'); return; } addDivMutation.mutate(); }} size="sm" className="shrink-0 btn-primary-gradient" disabled={addDivMutation.isPending}>
-                {addDivMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-              </Button>
-            </div>
+            {canAddItem && (
+              <div className="flex gap-2 mb-4">
+                <Input placeholder={language === 'bn' ? 'বিভাগের নাম (বাংলা)' : 'Division Name (BN)'} value={newDivName} onChange={(e) => setNewDivName(e.target.value)} className="bg-background" />
+                <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newDivNameEn} onChange={(e) => setNewDivNameEn(e.target.value)} className="bg-background" />
+                <Button onClick={() => { if (!newDivName.trim()) { toast.error(language === 'bn' ? 'বিভাগের নাম লিখুন' : 'Enter division name'); return; } addDivMutation.mutate(); }} size="sm" className="shrink-0 btn-primary-gradient" disabled={addDivMutation.isPending}>
+                  {addDivMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                </Button>
+              </div>
+            )}
             {isLoading ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : (
