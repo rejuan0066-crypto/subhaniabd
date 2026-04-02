@@ -613,6 +613,29 @@ const AdminUserManagement = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-center gap-1">
+                            {/* Approve/Reject status */}
+                            {u.role !== 'admin' && u.status !== 'approved' && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                onClick={() => handleStatusChange(u.id, 'approved')}
+                                title={bn ? 'অনুমোদন করুন' : 'Approve'}
+                              >
+                                <ShieldCheck className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {u.role !== 'admin' && u.status === 'approved' && (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                onClick={() => handleStatusChange(u.id, 'pending')}
+                                title={bn ? 'স্থগিত করুন' : 'Suspend'}
+                              >
+                                <AlertTriangle className="w-4 h-4" />
+                              </Button>
+                            )}
                             {/* Role edit */}
                             <Button
                               size="icon"
