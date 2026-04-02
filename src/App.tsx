@@ -124,6 +124,7 @@ const App = () => (
               <Route path="/admin/academic-sessions" element={<ProtectedRoute><AdminAcademicSessions /></ProtectedRoute>} />
               <Route path="/admin/address-manager" element={<ProtectedRoute><AdminAddressManager /></ProtectedRoute>} />
               <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
+              <Route path="/admin/user-management" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
