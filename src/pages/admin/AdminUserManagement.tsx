@@ -601,6 +601,13 @@ const AdminUserManagement = () => {
                         <TableCell className="font-medium">{u.full_name || '—'}</TableCell>
                         <TableCell>{u.email}</TableCell>
                         <TableCell>{roleBadge(u.role)}</TableCell>
+                        <TableCell>
+                          {u.status === 'approved' ? (
+                            <Badge variant="default" className="bg-green-600">{bn ? 'অনুমোদিত' : 'Approved'}</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>
+                          )}
+                        </TableCell>
                         <TableCell className="text-muted-foreground text-sm">
                           {new Date(u.created_at).toLocaleDateString(bn ? 'bn-BD' : 'en-US')}
                         </TableCell>
