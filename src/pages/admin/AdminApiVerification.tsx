@@ -294,8 +294,8 @@ const AdminApiVerification = () => {
                     </>
                   ) : (
                     <>
-                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                        <p className="text-sm text-green-700 dark:text-green-400 font-medium mb-1">
+                      <div className="p-3 rounded-lg bg-accent/50 border border-accent">
+                        <p className="text-sm text-accent-foreground font-medium mb-1">
                           {bn ? '✅ কোড পাঠানো হয়েছে' : '✅ Code Sent'}
                         </p>
                         <p className="text-xs text-muted-foreground">
