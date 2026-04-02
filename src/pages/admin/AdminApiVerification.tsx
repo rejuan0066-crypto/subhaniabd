@@ -186,7 +186,7 @@ const AdminApiVerification = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout title={bn ? 'API ভেরিফিকেশন' : 'API Verification'}>
+      <AdminLayout>
         <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
       </AdminLayout>
     );
@@ -195,7 +195,7 @@ const AdminApiVerification = () => {
   // Password gate
   if (!unlocked) {
     return (
-      <AdminLayout title={bn ? 'API ভেরিফিকেশন সেটিংস' : 'API Verification Settings'}>
+      <AdminLayout>
         <div className="max-w-md mx-auto mt-12">
           <Card>
             <CardHeader className="text-center">
@@ -244,7 +244,7 @@ const AdminApiVerification = () => {
   }
 
   return (
-    <AdminLayout title={bn ? 'API ভেরিফিকেশন সেটিংস' : 'API Verification Settings'}>
+    <AdminLayout>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Service Toggle */}
         <Card>
