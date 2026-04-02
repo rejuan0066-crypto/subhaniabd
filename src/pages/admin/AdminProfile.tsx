@@ -70,6 +70,21 @@ const AdminProfile = () => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [countdown]);
 
+  // PW Countdown timer
+  useEffect(() => {
+    if (pwCountdown <= 0) {
+      if (pwTimerRef.current) clearInterval(pwTimerRef.current);
+      return;
+    }
+    pwTimerRef.current = setInterval(() => {
+      setPwCountdown(prev => {
+        if (prev <= 1) { if (pwTimerRef.current) clearInterval(pwTimerRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => { if (pwTimerRef.current) clearInterval(pwTimerRef.current); };
+  }, [pwCountdown]);
+
   // ─── Email Change: Direct (password only) ───
   const handleDirectEmailChange = useCallback(async () => {
     const targetEmail = newEmail.trim();
