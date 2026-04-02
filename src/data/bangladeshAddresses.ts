@@ -309,7 +309,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Mongla পৌরসভা",
+            "name": "মোংলা পৌরসভা",
             "nameEn": "Mongla Pourashava",
             "unions": [
               {
@@ -352,7 +352,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Morrelganj পৌরসভা",
+            "name": "মোড়েলগঞ্জ পৌরসভা",
             "nameEn": "Morrelganj Pourashava",
             "unions": [
               {
@@ -395,7 +395,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Fakirhat পৌরসভা",
+            "name": "ফকিরহাট পৌরসভা",
             "nameEn": "Fakirhat Pourashava",
             "unions": [
               {
@@ -587,7 +587,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Alamdanga পৌরসভা",
+            "name": "আলমডাঙ্গা পৌরসভা",
             "nameEn": "Alamdanga Pourashava",
             "unions": [
               {
@@ -630,7 +630,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Damurhuda পৌরসভা",
+            "name": "দামুড়হুদা পৌরসভা",
             "nameEn": "Damurhuda Pourashava",
             "unions": [
               {
@@ -1085,7 +1085,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kaliganj পৌরসভা",
+            "name": "কালীগঞ্জ পৌরসভা",
             "nameEn": "Kaliganj Pourashava",
             "unions": [
               {
@@ -1128,7 +1128,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shailkupa পৌরসভা",
+            "name": "শৈলকুপা পৌরসভা",
             "nameEn": "Shailkupa Pourashava",
             "unions": [
               {
@@ -1171,7 +1171,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Maheshpur পৌরসভা",
+            "name": "মহেশপুর পৌরসভা",
             "nameEn": "Maheshpur Pourashava",
             "unions": [
               {
@@ -1550,7 +1550,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Phultala পৌরসভা",
+            "name": "ফুলতলা পৌরসভা",
             "nameEn": "Phultala Pourashava",
             "unions": [
               {
@@ -1593,7 +1593,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dumuria পৌরসভা",
+            "name": "ডুমুরিয়া পৌরসভা",
             "nameEn": "Dumuria Pourashava",
             "unions": [
               {
@@ -1636,7 +1636,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Paikgachha পৌরসভা",
+            "name": "পাইকগাছা পৌরসভা",
             "nameEn": "Paikgachha Pourashava",
             "unions": [
               {
@@ -1679,7 +1679,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Batiaghata পৌরসভা",
+            "name": "বটিয়াঘাটা পৌরসভা",
             "nameEn": "Batiaghata Pourashava",
             "unions": [
               {
@@ -1933,7 +1933,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kumarkhali পৌরসভা",
+            "name": "কুমারখালী পৌরসভা",
             "nameEn": "Kumarkhali Pourashava",
             "unions": [
               {
@@ -1976,7 +1976,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mirpur পৌরসভা",
+            "name": "মিরপুর পৌরসভা",
             "nameEn": "Mirpur Pourashava",
             "unions": [
               {
@@ -2019,7 +2019,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bheramara পৌরসভা",
+            "name": "ভেড়ামারা পৌরসভা",
             "nameEn": "Bheramara Pourashava",
             "unions": [
               {
@@ -2191,7 +2191,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Mohammadpur পৌরসভা",
+            "name": "মোহাম্মদপুর পৌরসভা",
             "nameEn": "Mohammadpur Pourashava",
             "unions": [
               {
@@ -2234,7 +2234,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shalikha পৌরসভা",
+            "name": "শালিখা পৌরসভা",
             "nameEn": "Shalikha Pourashava",
             "unions": [
               {
@@ -2277,7 +2277,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sreepur পৌরসভা",
+            "name": "শ্রীপুর পৌরসভা",
             "nameEn": "Sreepur Pourashava",
             "unions": [
               {
@@ -2434,7 +2434,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Gangni পৌরসভা",
+            "name": "গাংনী পৌরসভা",
             "nameEn": "Gangni Pourashava",
             "unions": [
               {
@@ -2477,7 +2477,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mujibnagar পৌরসভা",
+            "name": "মুজিবনগর পৌরসভা",
             "nameEn": "Mujibnagar Pourashava",
             "unions": [
               {
@@ -2626,7 +2626,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Lohagara পৌরসভা",
+            "name": "লোহাগাড়া পৌরসভা",
             "nameEn": "Lohagara Pourashava",
             "unions": [
               {
@@ -2669,7 +2669,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalia পৌরসভা",
+            "name": "কালিয়া পৌরসভা",
             "nameEn": "Kalia Pourashava",
             "unions": [
               {
@@ -2914,7 +2914,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kalaroa পৌরসভা",
+            "name": "কলারোয়া পৌরসভা",
             "nameEn": "Kalaroa Pourashava",
             "unions": [
               {
@@ -2957,7 +2957,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tala পৌরসভা",
+            "name": "তালা পৌরসভা",
             "nameEn": "Tala Pourashava",
             "unions": [
               {
@@ -3000,7 +3000,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shyamnagar পৌরসভা",
+            "name": "শ্যামনগর পৌরসভা",
             "nameEn": "Shyamnagar Pourashava",
             "unions": [
               {
@@ -3043,7 +3043,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Debhata পৌরসভা",
+            "name": "দেবহাটা পৌরসভা",
             "nameEn": "Debhata Pourashava",
             "unions": [
               {
@@ -3741,7 +3741,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Hajiganj পৌরসভা",
+            "name": "হাজীগঞ্জ পৌরসভা",
             "nameEn": "Hajiganj Pourashava",
             "unions": [
               {
@@ -3784,7 +3784,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shahrasti পৌরসভা",
+            "name": "শাহরাস্তি পৌরসভা",
             "nameEn": "Shahrasti Pourashava",
             "unions": [
               {
@@ -3827,7 +3827,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Matlab পৌরসভা",
+            "name": "মতলব পৌরসভা",
             "nameEn": "Matlab Pourashava",
             "unions": [
               {
@@ -5256,7 +5256,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Daganbhuiyan পৌরসভা",
+            "name": "দাগনভূঞা পৌরসভা",
             "nameEn": "Daganbhuiyan Pourashava",
             "unions": [
               {
@@ -5299,7 +5299,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sonagazi পৌরসভা",
+            "name": "সোনাগাজী পৌরসভা",
             "nameEn": "Sonagazi Pourashava",
             "unions": [
               {
@@ -5342,7 +5342,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chhagalnaiya পৌরসভা",
+            "name": "ছাগলনাইয়া পৌরসভা",
             "nameEn": "Chhagalnaiya Pourashava",
             "unions": [
               {
@@ -5385,7 +5385,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Parshuram পৌরসভা",
+            "name": "পরশুরাম পৌরসভা",
             "nameEn": "Parshuram Pourashava",
             "unions": [
               {
@@ -6024,7 +6024,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Begumganj পৌরসভা",
+            "name": "বেগমগঞ্জ পৌরসভা",
             "nameEn": "Begumganj Pourashava",
             "unions": [
               {
@@ -6067,7 +6067,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Senbagh পৌরসভা",
+            "name": "সেনবাগ পৌরসভা",
             "nameEn": "Senbagh Pourashava",
             "unions": [
               {
@@ -6110,7 +6110,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chatkhil পৌরসভা",
+            "name": "চাটখিল পৌরসভা",
             "nameEn": "Chatkhil Pourashava",
             "unions": [
               {
@@ -6153,7 +6153,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Companiganj পৌরসভা",
+            "name": "কোম্পানীগঞ্জ পৌরসভা",
             "nameEn": "Companiganj Pourashava",
             "unions": [
               {
@@ -6196,7 +6196,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Hatiya পৌরসভা",
+            "name": "হাতিয়া পৌরসভা",
             "nameEn": "Hatiya Pourashava",
             "unions": [
               {
@@ -6462,7 +6462,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kaptai পৌরসভা",
+            "name": "কাপ্তাই পৌরসভা",
             "nameEn": "Kaptai Pourashava",
             "unions": [
               {
@@ -6505,7 +6505,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Langadu পৌরসভা",
+            "name": "লংগদু পৌরসভা",
             "nameEn": "Langadu Pourashava",
             "unions": [
               {
@@ -7217,7 +7217,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Savar পৌরসভা",
+            "name": "সাভার পৌরসভা",
             "nameEn": "Savar Pourashava",
             "unions": [
               {
@@ -7260,7 +7260,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dhamrai পৌরসভা",
+            "name": "ধামরাই পৌরসভা",
             "nameEn": "Dhamrai Pourashava",
             "unions": [
               {
@@ -7303,7 +7303,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Keraniganj পৌরসভা",
+            "name": "কেরানীগঞ্জ পৌরসভা",
             "nameEn": "Keraniganj Pourashava",
             "unions": [
               {
@@ -7346,7 +7346,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nawabganj পৌরসভা",
+            "name": "নবাবগঞ্জ পৌরসভা",
             "nameEn": "Nawabganj Pourashava",
             "unions": [
               {
@@ -7389,7 +7389,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dohar পৌরসভা",
+            "name": "দোহার পৌরসভা",
             "nameEn": "Dohar Pourashava",
             "unions": [
               {
@@ -7692,7 +7692,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bhanga পৌরসভা",
+            "name": "ভাঙ্গা পৌরসভা",
             "nameEn": "Bhanga Pourashava",
             "unions": [
               {
@@ -7735,7 +7735,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Boalmari পৌরসভা",
+            "name": "বোয়ালমারী পৌরসভা",
             "nameEn": "Boalmari Pourashava",
             "unions": [
               {
@@ -7778,7 +7778,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Madhukhali পৌরসভা",
+            "name": "মধুখালী পৌরসভা",
             "nameEn": "Madhukhali Pourashava",
             "unions": [
               {
@@ -7821,7 +7821,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nagarkanda পৌরসভা",
+            "name": "নগরকান্দা পৌরসভা",
             "nameEn": "Nagarkanda Pourashava",
             "unions": [
               {
@@ -7864,7 +7864,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sadarpur পৌরসভা",
+            "name": "সদরপুর পৌরসভা",
             "nameEn": "Sadarpur Pourashava",
             "unions": [
               {
@@ -8231,7 +8231,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kaliakair পৌরসভা",
+            "name": "কালিয়াকৈর পৌরসভা",
             "nameEn": "Kaliakair Pourashava",
             "unions": [
               {
@@ -8274,7 +8274,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kaliganj পৌরসভা",
+            "name": "কালীগঞ্জ পৌরসভা",
             "nameEn": "Kaliganj Pourashava",
             "unions": [
               {
@@ -8317,7 +8317,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kapasia পৌরসভা",
+            "name": "কাপাসিয়া পৌরসভা",
             "nameEn": "Kapasia Pourashava",
             "unions": [
               {
@@ -8360,7 +8360,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sreepur পৌরসভা",
+            "name": "শ্রীপুর পৌরসভা",
             "nameEn": "Sreepur Pourashava",
             "unions": [
               {
@@ -8403,7 +8403,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tongi পৌরসভা",
+            "name": "টঙ্গী পৌরসভা",
             "nameEn": "Tongi Pourashava",
             "unions": [
               {
@@ -8602,7 +8602,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kashiani পৌরসভা",
+            "name": "কাশিয়ানী পৌরসভা",
             "nameEn": "Kashiani Pourashava",
             "unions": [
               {
@@ -8645,7 +8645,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kotalipara পৌরসভা",
+            "name": "কোটালীপাড়া পৌরসভা",
             "nameEn": "Kotalipara Pourashava",
             "unions": [
               {
@@ -8688,7 +8688,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tungipara পৌরসভা",
+            "name": "টুঙ্গিপাড়া পৌরসভা",
             "nameEn": "Tungipara Pourashava",
             "unions": [
               {
@@ -8731,7 +8731,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Muksudpur পৌরসভা",
+            "name": "মুকসুদপুর পৌরসভা",
             "nameEn": "Muksudpur Pourashava",
             "unions": [
               {
@@ -9062,7 +9062,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bhairab পৌরসভা",
+            "name": "ভৈরব পৌরসভা",
             "nameEn": "Bhairab Pourashava",
             "unions": [
               {
@@ -9105,7 +9105,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bajitpur পৌরসভা",
+            "name": "বাজিতপুর পৌরসভা",
             "nameEn": "Bajitpur Pourashava",
             "unions": [
               {
@@ -9148,7 +9148,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kuliarchar পৌরসভা",
+            "name": "কুলিয়ারচর পৌরসভা",
             "nameEn": "Kuliarchar Pourashava",
             "unions": [
               {
@@ -9191,7 +9191,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Pakundia পৌরসভা",
+            "name": "পাকুন্দিয়া পৌরসভা",
             "nameEn": "Pakundia Pourashava",
             "unions": [
               {
@@ -9234,7 +9234,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Hossainpur পৌরসভা",
+            "name": "হোসেনপুর পৌরসভা",
             "nameEn": "Hossainpur Pourashava",
             "unions": [
               {
@@ -9277,7 +9277,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Katiadi পৌরসভা",
+            "name": "কটিয়াদি পৌরসভা",
             "nameEn": "Katiadi Pourashava",
             "unions": [
               {
@@ -9457,7 +9457,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Rajoir পৌরসভা",
+            "name": "রাজৈর পৌরসভা",
             "nameEn": "Rajoir Pourashava",
             "unions": [
               {
@@ -9500,7 +9500,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shibchar পৌরসভা",
+            "name": "শিবচর পৌরসভা",
             "nameEn": "Shibchar Pourashava",
             "unions": [
               {
@@ -9543,7 +9543,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalkini পৌরসভা",
+            "name": "কালকিনি পৌরসভা",
             "nameEn": "Kalkini Pourashava",
             "unions": [
               {
@@ -9803,7 +9803,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Singair পৌরসভা",
+            "name": "সিংগাইর পৌরসভা",
             "nameEn": "Singair Pourashava",
             "unions": [
               {
@@ -9846,7 +9846,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shibalaya পৌরসভা",
+            "name": "শিবালয় পৌরসভা",
             "nameEn": "Shibalaya Pourashava",
             "unions": [
               {
@@ -9889,7 +9889,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Saturia পৌরসভা",
+            "name": "সাটুরিয়া পৌরসভা",
             "nameEn": "Saturia Pourashava",
             "unions": [
               {
@@ -9932,7 +9932,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Harirampur পৌরসভা",
+            "name": "হরিরামপুর পৌরসভা",
             "nameEn": "Harirampur Pourashava",
             "unions": [
               {
@@ -9975,7 +9975,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ghior পৌরসভা",
+            "name": "ঘিওর পৌরসভা",
             "nameEn": "Ghior Pourashava",
             "unions": [
               {
@@ -10018,7 +10018,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Daulatpur পৌরসভা",
+            "name": "দৌলতপুর পৌরসভা",
             "nameEn": "Daulatpur Pourashava",
             "unions": [
               {
@@ -10244,7 +10244,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Tongibari পৌরসভা",
+            "name": "টঙ্গিবাড়ী পৌরসভা",
             "nameEn": "Tongibari Pourashava",
             "unions": [
               {
@@ -10287,7 +10287,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sreenagar পৌরসভা",
+            "name": "শ্রীনগর পৌরসভা",
             "nameEn": "Sreenagar Pourashava",
             "unions": [
               {
@@ -10330,7 +10330,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sirajdikhan পৌরসভা",
+            "name": "সিরাজদিখান পৌরসভা",
             "nameEn": "Sirajdikhan Pourashava",
             "unions": [
               {
@@ -10373,7 +10373,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gazaria পৌরসভা",
+            "name": "গজারিয়া পৌরসভা",
             "nameEn": "Gazaria Pourashava",
             "unions": [
               {
@@ -10416,7 +10416,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Lohajang পৌরসভা",
+            "name": "লৌহজং পৌরসভা",
             "nameEn": "Lohajang Pourashava",
             "unions": [
               {
@@ -10800,7 +10800,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Araihazar পৌরসভা",
+            "name": "আড়াইহাজার পৌরসভা",
             "nameEn": "Araihazar Pourashava",
             "unions": [
               {
@@ -10843,7 +10843,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bandar পৌরসভা",
+            "name": "বন্দর পৌরসভা",
             "nameEn": "Bandar Pourashava",
             "unions": [
               {
@@ -10886,7 +10886,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sonargaon পৌরসভা",
+            "name": "সোনারগাঁও পৌরসভা",
             "nameEn": "Sonargaon Pourashava",
             "unions": [
               {
@@ -10929,7 +10929,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Rupganj পৌরসভা",
+            "name": "রূপগঞ্জ পৌরসভা",
             "nameEn": "Rupganj Pourashava",
             "unions": [
               {
@@ -11279,7 +11279,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Goalanda পৌরসভা",
+            "name": "গোয়ালন্দ পৌরসভা",
             "nameEn": "Goalanda Pourashava",
             "unions": [
               {
@@ -11322,7 +11322,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Pangsha পৌরসভা",
+            "name": "পাংশা পৌরসভা",
             "nameEn": "Pangsha Pourashava",
             "unions": [
               {
@@ -11365,7 +11365,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Baliakandi পৌরসভা",
+            "name": "বালিয়াকান্দি পৌরসভা",
             "nameEn": "Baliakandi Pourashava",
             "unions": [
               {
@@ -11408,7 +11408,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalukhali পৌরসভা",
+            "name": "কালুখালী পৌরসভা",
             "nameEn": "Kalukhali Pourashava",
             "unions": [
               {
@@ -11606,7 +11606,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Gosairhat পৌরসভা",
+            "name": "গোসাইরহাট পৌরসভা",
             "nameEn": "Gosairhat Pourashava",
             "unions": [
               {
@@ -11649,7 +11649,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Naria পৌরসভা",
+            "name": "নড়িয়া পৌরসভা",
             "nameEn": "Naria Pourashava",
             "unions": [
               {
@@ -11692,7 +11692,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Zanjira পৌরসভা",
+            "name": "জাজিরা পৌরসভা",
             "nameEn": "Zanjira Pourashava",
             "unions": [
               {
@@ -11735,7 +11735,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bhedarganj পৌরসভা",
+            "name": "ভেদরগঞ্জ পৌরসভা",
             "nameEn": "Bhedarganj Pourashava",
             "unions": [
               {
@@ -11778,7 +11778,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Damudya পৌরসভা",
+            "name": "দামুদ্যা পৌরসভা",
             "nameEn": "Damudya Pourashava",
             "unions": [
               {
@@ -12122,7 +12122,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Mirzapur পৌরসভা",
+            "name": "মির্জাপুর পৌরসভা",
             "nameEn": "Mirzapur Pourashava",
             "unions": [
               {
@@ -12165,7 +12165,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gopalpur পৌরসভা",
+            "name": "গোপালপুর পৌরসভা",
             "nameEn": "Gopalpur Pourashava",
             "unions": [
               {
@@ -12208,7 +12208,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sakhipur পৌরসভা",
+            "name": "সখিপুর পৌরসভা",
             "nameEn": "Sakhipur Pourashava",
             "unions": [
               {
@@ -12251,7 +12251,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Madhupur পৌরসভা",
+            "name": "মধুপুর পৌরসভা",
             "nameEn": "Madhupur Pourashava",
             "unions": [
               {
@@ -12294,7 +12294,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ghatail পৌরসভা",
+            "name": "ঘাটাইল পৌরসভা",
             "nameEn": "Ghatail Pourashava",
             "unions": [
               {
@@ -12337,7 +12337,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalihati পৌরসভা",
+            "name": "কালিহাতি পৌরসভা",
             "nameEn": "Kalihati Pourashava",
             "unions": [
               {
@@ -12380,7 +12380,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nagarpur পৌরসভা",
+            "name": "নাগরপুর পৌরসভা",
             "nameEn": "Nagarpur Pourashava",
             "unions": [
               {
@@ -12423,7 +12423,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Basail পৌরসভা",
+            "name": "বাসাইল পৌরসভা",
             "nameEn": "Basail Pourashava",
             "unions": [
               {
@@ -12466,7 +12466,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Delduar পৌরসভা",
+            "name": "দেলদুয়ার পৌরসভা",
             "nameEn": "Delduar Pourashava",
             "unions": [
               {
@@ -12509,7 +12509,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bhuapur পৌরসভা",
+            "name": "ভুয়াপুর পৌরসভা",
             "nameEn": "Bhuapur Pourashava",
             "unions": [
               {
@@ -12552,7 +12552,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dhanbari পৌরসভা",
+            "name": "ধনবাড়ী পৌরসভা",
             "nameEn": "Dhanbari Pourashava",
             "unions": [
               {
@@ -12595,7 +12595,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Elenga পৌরসভা",
+            "name": "এলেঙ্গা পৌরসভা",
             "nameEn": "Elenga Pourashava",
             "unions": [
               {
@@ -12819,7 +12819,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Amtali পৌরসভা",
+            "name": "আমতলী পৌরসভা",
             "nameEn": "Amtali Pourashava",
             "unions": [
               {
@@ -12862,7 +12862,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Betagi পৌরসভা",
+            "name": "বেতাগী পৌরসভা",
             "nameEn": "Betagi Pourashava",
             "unions": [
               {
@@ -12905,7 +12905,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bamna পৌরসভা",
+            "name": "বামনা পৌরসভা",
             "nameEn": "Bamna Pourashava",
             "unions": [
               {
@@ -12948,7 +12948,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Patharghata পৌরসভা",
+            "name": "পাথরঘাটা পৌরসভা",
             "nameEn": "Patharghata Pourashava",
             "unions": [
               {
@@ -13350,7 +13350,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bakerganj পৌরসভা",
+            "name": "বাকেরগঞ্জ পৌরসভা",
             "nameEn": "Bakerganj Pourashava",
             "unions": [
               {
@@ -13393,7 +13393,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Babuganj পৌরসভা",
+            "name": "বাবুগঞ্জ পৌরসভা",
             "nameEn": "Babuganj Pourashava",
             "unions": [
               {
@@ -13436,7 +13436,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Banaripara পৌরসভা",
+            "name": "বানারীপাড়া পৌরসভা",
             "nameEn": "Banaripara Pourashava",
             "unions": [
               {
@@ -13479,7 +13479,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gournadi পৌরসভা",
+            "name": "গৌরনদী পৌরসভা",
             "nameEn": "Gournadi Pourashava",
             "unions": [
               {
@@ -13522,7 +13522,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Agailjhara পৌরসভা",
+            "name": "আগৈলঝাড়া পৌরসভা",
             "nameEn": "Agailjhara Pourashava",
             "unions": [
               {
@@ -13565,7 +13565,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Muladi পৌরসভা",
+            "name": "মুলাদী পৌরসভা",
             "nameEn": "Muladi Pourashava",
             "unions": [
               {
@@ -13608,7 +13608,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mehendiganj পৌরসভা",
+            "name": "মেহেন্দিগঞ্জ পৌরসভা",
             "nameEn": "Mehendiganj Pourashava",
             "unions": [
               {
@@ -13651,7 +13651,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Hizla পৌরসভা",
+            "name": "হিজলা পৌরসভা",
             "nameEn": "Hizla Pourashava",
             "unions": [
               {
@@ -13694,7 +13694,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Wazirpur পৌরসভা",
+            "name": "উজিরপুর পৌরসভা",
             "nameEn": "Wazirpur Pourashava",
             "unions": [
               {
@@ -13923,7 +13923,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Borhanuddin পৌরসভা",
+            "name": "বোরহানউদ্দিন পৌরসভা",
             "nameEn": "Borhanuddin Pourashava",
             "unions": [
               {
@@ -13966,7 +13966,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Charfassion পৌরসভা",
+            "name": "চরফ্যাশন পৌরসভা",
             "nameEn": "Charfassion Pourashava",
             "unions": [
               {
@@ -14009,7 +14009,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Daulatkhan পৌরসভা",
+            "name": "দৌলতখান পৌরসভা",
             "nameEn": "Daulatkhan Pourashava",
             "unions": [
               {
@@ -14052,7 +14052,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Lalmohan পৌরসভা",
+            "name": "লালমোহন পৌরসভা",
             "nameEn": "Lalmohan Pourashava",
             "unions": [
               {
@@ -14095,7 +14095,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tazumuddin পৌরসভা",
+            "name": "তজুমদ্দিন পৌরসভা",
             "nameEn": "Tazumuddin Pourashava",
             "unions": [
               {
@@ -14138,7 +14138,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Manpura পৌরসভা",
+            "name": "মনপুরা পৌরসভা",
             "nameEn": "Manpura Pourashava",
             "unions": [
               {
@@ -14314,7 +14314,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Kathalia পৌরসভা",
+            "name": "কাঠালিয়া পৌরসভা",
             "nameEn": "Kathalia Pourashava",
             "unions": [
               {
@@ -14357,7 +14357,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nalchity পৌরসভা",
+            "name": "নলছিটি পৌরসভা",
             "nameEn": "Nalchity Pourashava",
             "unions": [
               {
@@ -14400,7 +14400,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Rajapur পৌরসভা",
+            "name": "রাজাপুর পৌরসভা",
             "nameEn": "Rajapur Pourashava",
             "unions": [
               {
@@ -14656,7 +14656,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Galachipa পৌরসভা",
+            "name": "গলাচিপা পৌরসভা",
             "nameEn": "Galachipa Pourashava",
             "unions": [
               {
@@ -14699,7 +14699,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dashmina পৌরসভা",
+            "name": "দশমিনা পৌরসভা",
             "nameEn": "Dashmina Pourashava",
             "unions": [
               {
@@ -14742,7 +14742,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalapara পৌরসভা",
+            "name": "কলাপাড়া পৌরসভা",
             "nameEn": "Kalapara Pourashava",
             "unions": [
               {
@@ -14785,7 +14785,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mirzaganj পৌরসভা",
+            "name": "মির্জাগঞ্জ পৌরসভা",
             "nameEn": "Mirzaganj Pourashava",
             "unions": [
               {
@@ -14828,7 +14828,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dumki পৌরসভা",
+            "name": "দুমকি পৌরসভা",
             "nameEn": "Dumki Pourashava",
             "unions": [
               {
@@ -14871,7 +14871,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bauphal পৌরসভা",
+            "name": "বাউফল পৌরসভা",
             "nameEn": "Bauphal Pourashava",
             "unions": [
               {
@@ -14914,7 +14914,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Rangabali পৌরসভা",
+            "name": "রাঙ্গাবালী পৌরসভা",
             "nameEn": "Rangabali Pourashava",
             "unions": [
               {
@@ -15155,7 +15155,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bhandaria পৌরসভা",
+            "name": "ভাণ্ডারিয়া পৌরসভা",
             "nameEn": "Bhandaria Pourashava",
             "unions": [
               {
@@ -15198,7 +15198,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kawkhali পৌরসভা",
+            "name": "কাউখালী পৌরসভা",
             "nameEn": "Kawkhali Pourashava",
             "unions": [
               {
@@ -15241,7 +15241,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mathbaria পৌরসভা",
+            "name": "মঠবাড়িয়া পৌরসভা",
             "nameEn": "Mathbaria Pourashava",
             "unions": [
               {
@@ -15284,7 +15284,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nazirpur পৌরসভা",
+            "name": "নাজিরপুর পৌরসভা",
             "nameEn": "Nazirpur Pourashava",
             "unions": [
               {
@@ -15327,7 +15327,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nesarabad পৌরসভা",
+            "name": "নেছারাবাদ পৌরসভা",
             "nameEn": "Nesarabad Pourashava",
             "unions": [
               {
@@ -15370,7 +15370,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Indurkani পৌরসভা",
+            "name": "ইন্দুরকানি পৌরসভা",
             "nameEn": "Indurkani Pourashava",
             "unions": [
               {
@@ -16482,7 +16482,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Birampur পৌরসভা",
+            "name": "বিরামপুর পৌরসভা",
             "nameEn": "Birampur Pourashava",
             "unions": [
               {
@@ -16525,7 +16525,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Birganj পৌরসভা",
+            "name": "বীরগঞ্জ পৌরসভা",
             "nameEn": "Birganj Pourashava",
             "unions": [
               {
@@ -16568,7 +16568,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Biral পৌরসভা",
+            "name": "বিরল পৌরসভা",
             "nameEn": "Biral Pourashava",
             "unions": [
               {
@@ -16611,7 +16611,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bochaganj পৌরসভা",
+            "name": "বোচাগঞ্জ পৌরসভা",
             "nameEn": "Bochaganj Pourashava",
             "unions": [
               {
@@ -16654,7 +16654,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chirirbandar পৌরসভা",
+            "name": "চিরিরবন্দর পৌরসভা",
             "nameEn": "Chirirbandar Pourashava",
             "unions": [
               {
@@ -16697,7 +16697,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Fulbari পৌরসভা",
+            "name": "ফুলবাড়ী পৌরসভা",
             "nameEn": "Fulbari Pourashava",
             "unions": [
               {
@@ -16740,7 +16740,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ghoraghat পৌরসভা",
+            "name": "ঘোড়াঘাট পৌরসভা",
             "nameEn": "Ghoraghat Pourashava",
             "unions": [
               {
@@ -16783,7 +16783,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Hakimpur পৌরসভা",
+            "name": "হাকিমপুর পৌরসভা",
             "nameEn": "Hakimpur Pourashava",
             "unions": [
               {
@@ -16826,7 +16826,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kaharole পৌরসভা",
+            "name": "কাহারোল পৌরসভা",
             "nameEn": "Kaharole Pourashava",
             "unions": [
               {
@@ -16869,7 +16869,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Khansama পৌরসভা",
+            "name": "খানসামা পৌরসভা",
             "nameEn": "Khansama Pourashava",
             "unions": [
               {
@@ -16912,7 +16912,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nawabganj পৌরসভা",
+            "name": "নবাবগঞ্জ পৌরসভা",
             "nameEn": "Nawabganj Pourashava",
             "unions": [
               {
@@ -16955,7 +16955,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Parbatipur পৌরসভা",
+            "name": "পার্বতীপুর পৌরসভা",
             "nameEn": "Parbatipur Pourashava",
             "unions": [
               {
@@ -17424,7 +17424,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Fulchhari পৌরসভা",
+            "name": "ফুলছড়ি পৌরসভা",
             "nameEn": "Fulchhari Pourashava",
             "unions": [
               {
@@ -17467,7 +17467,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gobindaganj পৌরসভা",
+            "name": "গোবিন্দগঞ্জ পৌরসভা",
             "nameEn": "Gobindaganj Pourashava",
             "unions": [
               {
@@ -17510,7 +17510,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Palashbari পৌরসভা",
+            "name": "পলাশবাড়ী পৌরসভা",
             "nameEn": "Palashbari Pourashava",
             "unions": [
               {
@@ -17553,7 +17553,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sadullapur পৌরসভা",
+            "name": "সাদুল্লাপুর পৌরসভা",
             "nameEn": "Sadullapur Pourashava",
             "unions": [
               {
@@ -17596,7 +17596,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Saghata পৌরসভা",
+            "name": "সাঘাটা পৌরসভা",
             "nameEn": "Saghata Pourashava",
             "unions": [
               {
@@ -17639,7 +17639,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sundarganj পৌরসভা",
+            "name": "সুন্দরগঞ্জ পৌরসভা",
             "nameEn": "Sundarganj Pourashava",
             "unions": [
               {
@@ -18086,7 +18086,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bhurungamari পৌরসভা",
+            "name": "ভুরুঙ্গামারী পৌরসভা",
             "nameEn": "Bhurungamari Pourashava",
             "unions": [
               {
@@ -18129,7 +18129,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Char Rajibpur পৌরসভা",
+            "name": "চর রাজিবপুর পৌরসভা",
             "nameEn": "Char Rajibpur Pourashava",
             "unions": [
               {
@@ -18172,7 +18172,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chilmari পৌরসভা",
+            "name": "চিলমারী পৌরসভা",
             "nameEn": "Chilmari Pourashava",
             "unions": [
               {
@@ -18215,7 +18215,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nageshwari পৌরসভা",
+            "name": "নাগেশ্বরী পৌরসভা",
             "nameEn": "Nageshwari Pourashava",
             "unions": [
               {
@@ -18258,7 +18258,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Phulbari পৌরসভা",
+            "name": "ফুলবাড়ী পৌরসভা",
             "nameEn": "Phulbari Pourashava",
             "unions": [
               {
@@ -18301,7 +18301,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Rajarhat পৌরসভা",
+            "name": "রাজারহাট পৌরসভা",
             "nameEn": "Rajarhat Pourashava",
             "unions": [
               {
@@ -18344,7 +18344,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Raumari পৌরসভা",
+            "name": "রৌমারী পৌরসভা",
             "nameEn": "Raumari Pourashava",
             "unions": [
               {
@@ -18387,7 +18387,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ulipur পৌরসভা",
+            "name": "উলিপুর পৌরসভা",
             "nameEn": "Ulipur Pourashava",
             "unions": [
               {
@@ -18694,7 +18694,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Aditmari পৌরসভা",
+            "name": "আদিতমারী পৌরসভা",
             "nameEn": "Aditmari Pourashava",
             "unions": [
               {
@@ -18737,7 +18737,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Hatibandha পৌরসভা",
+            "name": "হাতীবান্ধা পৌরসভা",
             "nameEn": "Hatibandha Pourashava",
             "unions": [
               {
@@ -18780,7 +18780,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kaliganj পৌরসভা",
+            "name": "কালীগঞ্জ পৌরসভা",
             "nameEn": "Kaliganj Pourashava",
             "unions": [
               {
@@ -18823,7 +18823,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Patgram পৌরসভা",
+            "name": "পাটগ্রাম পৌরসভা",
             "nameEn": "Patgram Pourashava",
             "unions": [
               {
@@ -19197,7 +19197,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Dimla পৌরসভা",
+            "name": "ডিমলা পৌরসভা",
             "nameEn": "Dimla Pourashava",
             "unions": [
               {
@@ -19240,7 +19240,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Domar পৌরসভা",
+            "name": "ডোমার পৌরসভা",
             "nameEn": "Domar Pourashava",
             "unions": [
               {
@@ -19283,7 +19283,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Jaldhaka পৌরসভা",
+            "name": "জলঢাকা পৌরসভা",
             "nameEn": "Jaldhaka Pourashava",
             "unions": [
               {
@@ -19326,7 +19326,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kishoreganj পৌরসভা",
+            "name": "কিশোরগঞ্জ পৌরসভা",
             "nameEn": "Kishoreganj Pourashava",
             "unions": [
               {
@@ -19369,7 +19369,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Saidpur পৌরসভা",
+            "name": "সৈয়দপুর পৌরসভা",
             "nameEn": "Saidpur Pourashava",
             "unions": [
               {
@@ -19668,7 +19668,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Atwari পৌরসভা",
+            "name": "আটোয়ারী পৌরসভা",
             "nameEn": "Atwari Pourashava",
             "unions": [
               {
@@ -19711,7 +19711,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Boda পৌরসভা",
+            "name": "বোদা পৌরসভা",
             "nameEn": "Boda Pourashava",
             "unions": [
               {
@@ -19754,7 +19754,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Debiganj পৌরসভা",
+            "name": "দেবীগঞ্জ পৌরসভা",
             "nameEn": "Debiganj Pourashava",
             "unions": [
               {
@@ -19797,7 +19797,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tetulia পৌরসভা",
+            "name": "তেতুলিয়া পৌরসভা",
             "nameEn": "Tetulia Pourashava",
             "unions": [
               {
@@ -20349,7 +20349,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Badarganj পৌরসভা",
+            "name": "বদরগঞ্জ পৌরসভা",
             "nameEn": "Badarganj Pourashava",
             "unions": [
               {
@@ -20392,7 +20392,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gangachara পৌরসভা",
+            "name": "গঙ্গাচড়া পৌরসভা",
             "nameEn": "Gangachara Pourashava",
             "unions": [
               {
@@ -20435,7 +20435,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kaunia পৌরসভা",
+            "name": "কাউনিয়া পৌরসভা",
             "nameEn": "Kaunia Pourashava",
             "unions": [
               {
@@ -20478,7 +20478,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mithapukur পৌরসভা",
+            "name": "মিঠাপুকুর পৌরসভা",
             "nameEn": "Mithapukur Pourashava",
             "unions": [
               {
@@ -20521,7 +20521,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Pirgachha পৌরসভা",
+            "name": "পীরগাছা পৌরসভা",
             "nameEn": "Pirgachha Pourashava",
             "unions": [
               {
@@ -20564,7 +20564,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Pirganj পৌরসভা",
+            "name": "পীরগঞ্জ পৌরসভা",
             "nameEn": "Pirganj Pourashava",
             "unions": [
               {
@@ -20607,7 +20607,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Taraganj পৌরসভা",
+            "name": "তারাগঞ্জ পৌরসভা",
             "nameEn": "Taraganj Pourashava",
             "unions": [
               {
@@ -20946,7 +20946,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Baliadangi পৌরসভা",
+            "name": "বালিয়াডাঙ্গী পৌরসভা",
             "nameEn": "Baliadangi Pourashava",
             "unions": [
               {
@@ -20989,7 +20989,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Haripur পৌরসভা",
+            "name": "হরিপুর পৌরসভা",
             "nameEn": "Haripur Pourashava",
             "unions": [
               {
@@ -21032,7 +21032,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Pirganj পৌরসভা",
+            "name": "পীরগঞ্জ পৌরসভা",
             "nameEn": "Pirganj Pourashava",
             "unions": [
               {
@@ -21075,7 +21075,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ranisankail পৌরসভা",
+            "name": "রাণীশংকৈল পৌরসভা",
             "nameEn": "Ranisankail Pourashava",
             "unions": [
               {
@@ -21701,7 +21701,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Akkelpur পৌরসভা",
+            "name": "আক্কেলপুর পৌরসভা",
             "nameEn": "Akkelpur Pourashava",
             "unions": [
               {
@@ -21744,7 +21744,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kalai পৌরসভা",
+            "name": "কালাই পৌরসভা",
             "nameEn": "Kalai Pourashava",
             "unions": [
               {
@@ -21787,7 +21787,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Khetlal পৌরসভা",
+            "name": "ক্ষেতলাল পৌরসভা",
             "nameEn": "Khetlal Pourashava",
             "unions": [
               {
@@ -21830,7 +21830,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Panchbibi পৌরসভা",
+            "name": "পাঁচবিবি পৌরসভা",
             "nameEn": "Panchbibi Pourashava",
             "unions": [
               {
@@ -22123,7 +22123,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Patnitala পৌরসভা",
+            "name": "পত্নীতলা পৌরসভা",
             "nameEn": "Patnitala Pourashava",
             "unions": [
               {
@@ -22166,7 +22166,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sapahar পৌরসভা",
+            "name": "সাপাহার পৌরসভা",
             "nameEn": "Sapahar Pourashava",
             "unions": [
               {
@@ -22209,7 +22209,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Porsha পৌরসভা",
+            "name": "পোরশা পৌরসভা",
             "nameEn": "Porsha Pourashava",
             "unions": [
               {
@@ -22252,7 +22252,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dhamoirhat পৌরসভা",
+            "name": "ধামইরহাট পৌরসভা",
             "nameEn": "Dhamoirhat Pourashava",
             "unions": [
               {
@@ -22295,7 +22295,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Badalgachhi পৌরসভা",
+            "name": "বদলগাছী পৌরসভা",
             "nameEn": "Badalgachhi Pourashava",
             "unions": [
               {
@@ -22338,7 +22338,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Manda পৌরসভা",
+            "name": "মান্দা পৌরসভা",
             "nameEn": "Manda Pourashava",
             "unions": [
               {
@@ -22381,7 +22381,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Atrai পৌরসভা",
+            "name": "আত্রাই পৌরসভা",
             "nameEn": "Atrai Pourashava",
             "unions": [
               {
@@ -22424,7 +22424,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Raninagar পৌরসভা",
+            "name": "রাণীনগর পৌরসভা",
             "nameEn": "Raninagar Pourashava",
             "unions": [
               {
@@ -22467,7 +22467,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mahadebpur পৌরসভা",
+            "name": "মহাদেবপুর পৌরসভা",
             "nameEn": "Mahadebpur Pourashava",
             "unions": [
               {
@@ -22510,7 +22510,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Niamatpur পৌরসভা",
+            "name": "নিয়ামতপুর পৌরসভা",
             "nameEn": "Niamatpur Pourashava",
             "unions": [
               {
@@ -22735,7 +22735,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bagatipara পৌরসভা",
+            "name": "বাগাতিপাড়া পৌরসভা",
             "nameEn": "Bagatipara Pourashava",
             "unions": [
               {
@@ -22778,7 +22778,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Baraigram পৌরসভা",
+            "name": "বড়াইগ্রাম পৌরসভা",
             "nameEn": "Baraigram Pourashava",
             "unions": [
               {
@@ -22821,7 +22821,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gurudaspur পৌরসভা",
+            "name": "গুরুদাসপুর পৌরসভা",
             "nameEn": "Gurudaspur Pourashava",
             "unions": [
               {
@@ -22864,7 +22864,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Lalpur পৌরসভা",
+            "name": "লালপুর পৌরসভা",
             "nameEn": "Lalpur Pourashava",
             "unions": [
               {
@@ -22907,7 +22907,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Singra পৌরসভা",
+            "name": "সিংড়া পৌরসভা",
             "nameEn": "Singra Pourashava",
             "unions": [
               {
@@ -23190,7 +23190,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Atgharia পৌরসভা",
+            "name": "আটঘরিয়া পৌরসভা",
             "nameEn": "Atgharia Pourashava",
             "unions": [
               {
@@ -23233,7 +23233,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bera পৌরসভা",
+            "name": "বেড়া পৌরসভা",
             "nameEn": "Bera Pourashava",
             "unions": [
               {
@@ -23276,7 +23276,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bhangura পৌরসভা",
+            "name": "ভাঙ্গুড়া পৌরসভা",
             "nameEn": "Bhangura Pourashava",
             "unions": [
               {
@@ -23319,7 +23319,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chatmohar পৌরসভা",
+            "name": "চাটমোহর পৌরসভা",
             "nameEn": "Chatmohar Pourashava",
             "unions": [
               {
@@ -23362,7 +23362,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Faridpur পৌরসভা",
+            "name": "ফরিদপুর পৌরসভা",
             "nameEn": "Faridpur Pourashava",
             "unions": [
               {
@@ -23405,7 +23405,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ishwardi পৌরসভা",
+            "name": "ঈশ্বরদী পৌরসভা",
             "nameEn": "Ishwardi Pourashava",
             "unions": [
               {
@@ -23448,7 +23448,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Santhia পৌরসভা",
+            "name": "সাঁথিয়া পৌরসভা",
             "nameEn": "Santhia Pourashava",
             "unions": [
               {
@@ -23491,7 +23491,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sujanagar পৌরসভা",
+            "name": "সুজানগর পৌরসভা",
             "nameEn": "Sujanagar Pourashava",
             "unions": [
               {
@@ -23842,7 +23842,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Bagha পৌরসভা",
+            "name": "বাঘা পৌরসভা",
             "nameEn": "Bagha Pourashava",
             "unions": [
               {
@@ -23885,7 +23885,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bagmara পৌরসভা",
+            "name": "বাগমারা পৌরসভা",
             "nameEn": "Bagmara Pourashava",
             "unions": [
               {
@@ -23928,7 +23928,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Charghat পৌরসভা",
+            "name": "চারঘাট পৌরসভা",
             "nameEn": "Charghat Pourashava",
             "unions": [
               {
@@ -23971,7 +23971,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Durgapur পৌরসভা",
+            "name": "দুর্গাপুর পৌরসভা",
             "nameEn": "Durgapur Pourashava",
             "unions": [
               {
@@ -24014,7 +24014,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Godagari পৌরসভা",
+            "name": "গোদাগাড়ী পৌরসভা",
             "nameEn": "Godagari Pourashava",
             "unions": [
               {
@@ -24057,7 +24057,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Mohanpur পৌরসভা",
+            "name": "মোহনপুর পৌরসভা",
             "nameEn": "Mohanpur Pourashava",
             "unions": [
               {
@@ -24100,7 +24100,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Paba পৌরসভা",
+            "name": "পবা পৌরসভা",
             "nameEn": "Paba Pourashava",
             "unions": [
               {
@@ -24143,7 +24143,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Puthia পৌরসভা",
+            "name": "পুঠিয়া পৌরসভা",
             "nameEn": "Puthia Pourashava",
             "unions": [
               {
@@ -24186,7 +24186,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tanore পৌরসভা",
+            "name": "তানোর পৌরসভা",
             "nameEn": "Tanore Pourashava",
             "unions": [
               {
@@ -24461,7 +24461,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Belkuchi পৌরসভা",
+            "name": "বেলকুচি পৌরসভা",
             "nameEn": "Belkuchi Pourashava",
             "unions": [
               {
@@ -24504,7 +24504,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Chauhali পৌরসভা",
+            "name": "চৌহালি পৌরসভা",
             "nameEn": "Chauhali Pourashava",
             "unions": [
               {
@@ -24547,7 +24547,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kamarkhanda পৌরসভা",
+            "name": "কামারখন্দ পৌরসভা",
             "nameEn": "Kamarkhanda Pourashava",
             "unions": [
               {
@@ -24590,7 +24590,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kazipur পৌরসভা",
+            "name": "কাজীপুর পৌরসভা",
             "nameEn": "Kazipur Pourashava",
             "unions": [
               {
@@ -24633,7 +24633,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Raiganj পৌরসভা",
+            "name": "রায়গঞ্জ পৌরসভা",
             "nameEn": "Raiganj Pourashava",
             "unions": [
               {
@@ -24676,7 +24676,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shahjadpur পৌরসভা",
+            "name": "শাহজাদপুর পৌরসভা",
             "nameEn": "Shahjadpur Pourashava",
             "unions": [
               {
@@ -24719,7 +24719,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tarash পৌরসভা",
+            "name": "তাড়াশ পৌরসভা",
             "nameEn": "Tarash Pourashava",
             "unions": [
               {
@@ -24762,7 +24762,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ullahpara পৌরসভা",
+            "name": "উল্লাপাড়া পৌরসভা",
             "nameEn": "Ullahpara Pourashava",
             "unions": [
               {
@@ -25235,7 +25235,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Chunarughat পৌরসভা",
+            "name": "চুনারুঘাট পৌরসভা",
             "nameEn": "Chunarughat Pourashava",
             "unions": [
               {
@@ -25278,7 +25278,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bahubal পৌরসভা",
+            "name": "বাহুবল পৌরসভা",
             "nameEn": "Bahubal Pourashava",
             "unions": [
               {
@@ -25321,7 +25321,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Nabiganj পৌরসভা",
+            "name": "নবীগঞ্জ পৌরসভা",
             "nameEn": "Nabiganj Pourashava",
             "unions": [
               {
@@ -25364,7 +25364,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Baniachong পৌরসভা",
+            "name": "বানিয়াচং পৌরসভা",
             "nameEn": "Baniachong Pourashava",
             "unions": [
               {
@@ -25407,7 +25407,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Lakhai পৌরসভা",
+            "name": "লাখাই পৌরসভা",
             "nameEn": "Lakhai Pourashava",
             "unions": [
               {
@@ -25450,7 +25450,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Madhabpur পৌরসভা",
+            "name": "মাধবপুর পৌরসভা",
             "nameEn": "Madhabpur Pourashava",
             "unions": [
               {
@@ -25493,7 +25493,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Ajmiriganj পৌরসভা",
+            "name": "আজমিরীগঞ্জ পৌরসভা",
             "nameEn": "Ajmiriganj Pourashava",
             "unions": [
               {
@@ -25536,7 +25536,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Shaistaganj পৌরসভা",
+            "name": "শায়েস্তাগঞ্জ পৌরসভা",
             "nameEn": "Shaistaganj Pourashava",
             "unions": [
               {
@@ -25945,7 +25945,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Sreemangal পৌরসভা",
+            "name": "শ্রীমঙ্গল পৌরসভা",
             "nameEn": "Sreemangal Pourashava",
             "unions": [
               {
@@ -25988,7 +25988,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kamalganj পৌরসভা",
+            "name": "কমলগঞ্জ পৌরসভা",
             "nameEn": "Kamalganj Pourashava",
             "unions": [
               {
@@ -26031,7 +26031,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kulaura পৌরসভা",
+            "name": "কুলাউড়া পৌরসভা",
             "nameEn": "Kulaura Pourashava",
             "unions": [
               {
@@ -26074,7 +26074,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Rajnagar পৌরসভা",
+            "name": "রাজনগর পৌরসভা",
             "nameEn": "Rajnagar Pourashava",
             "unions": [
               {
@@ -26117,7 +26117,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Barlekha পৌরসভা",
+            "name": "বড়লেখা পৌরসভা",
             "nameEn": "Barlekha Pourashava",
             "unions": [
               {
@@ -26160,7 +26160,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Juri পৌরসভা",
+            "name": "জুড়ী পৌরসভা",
             "nameEn": "Juri Pourashava",
             "unions": [
               {
@@ -26684,7 +26684,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Chhatak পৌরসভা",
+            "name": "ছাতক পৌরসভা",
             "nameEn": "Chhatak Pourashava",
             "unions": [
               {
@@ -26727,7 +26727,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Jagannathpur পৌরসভা",
+            "name": "জগন্নাথপুর পৌরসভা",
             "nameEn": "Jagannathpur Pourashava",
             "unions": [
               {
@@ -26770,7 +26770,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Tahirpur পৌরসভা",
+            "name": "তাহিরপুর পৌরসভা",
             "nameEn": "Tahirpur Pourashava",
             "unions": [
               {
@@ -26813,7 +26813,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bishwamvarpur পৌরসভা",
+            "name": "বিশ্বম্ভরপুর পৌরসভা",
             "nameEn": "Bishwamvarpur Pourashava",
             "unions": [
               {
@@ -26856,7 +26856,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dharmapasha পৌরসভা",
+            "name": "ধর্মপাশা পৌরসভা",
             "nameEn": "Dharmapasha Pourashava",
             "unions": [
               {
@@ -26899,7 +26899,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Jamalganj পৌরসভা",
+            "name": "জামালগঞ্জ পৌরসভা",
             "nameEn": "Jamalganj Pourashava",
             "unions": [
               {
@@ -26942,7 +26942,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Derai পৌরসভা",
+            "name": "দিরাই পৌরসভা",
             "nameEn": "Derai Pourashava",
             "unions": [
               {
@@ -26985,7 +26985,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Sulla পৌরসভা",
+            "name": "শাল্লা পৌরসভা",
             "nameEn": "Sulla Pourashava",
             "unions": [
               {
@@ -27028,7 +27028,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Dowarabazar পৌরসভা",
+            "name": "দোয়ারাবাজার পৌরসভা",
             "nameEn": "Dowarabazar Pourashava",
             "unions": [
               {
@@ -27699,7 +27699,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "upazila"
           },
           {
-            "name": "Beanibazar পৌরসভা",
+            "name": "বিয়ানীবাজার পৌরসভা",
             "nameEn": "Beanibazar Pourashava",
             "unions": [
               {
@@ -27742,7 +27742,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Bishwanath পৌরসভা",
+            "name": "বিশ্বনাথ পৌরসভা",
             "nameEn": "Bishwanath Pourashava",
             "unions": [
               {
@@ -27785,7 +27785,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Companiganj পৌরসভা",
+            "name": "কোম্পানীগঞ্জ পৌরসভা",
             "nameEn": "Companiganj Pourashava",
             "unions": [
               {
@@ -27828,7 +27828,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Golapganj পৌরসভা",
+            "name": "গোলাপগঞ্জ পৌরসভা",
             "nameEn": "Golapganj Pourashava",
             "unions": [
               {
@@ -27871,7 +27871,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Gowainghat পৌরসভা",
+            "name": "গোয়াইনঘাট পৌরসভা",
             "nameEn": "Gowainghat Pourashava",
             "unions": [
               {
@@ -27914,7 +27914,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Jaintiapur পৌরসভা",
+            "name": "জৈন্তাপুর পৌরসভা",
             "nameEn": "Jaintiapur Pourashava",
             "unions": [
               {
@@ -27957,7 +27957,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Kanaighat পৌরসভা",
+            "name": "কানাইঘাট পৌরসভা",
             "nameEn": "Kanaighat Pourashava",
             "unions": [
               {
@@ -28000,7 +28000,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Zakiganj পৌরসভা",
+            "name": "জকিগঞ্জ পৌরসভা",
             "nameEn": "Zakiganj Pourashava",
             "unions": [
               {
@@ -28043,7 +28043,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Balaganj পৌরসভা",
+            "name": "বালাগঞ্জ পৌরসভা",
             "nameEn": "Balaganj Pourashava",
             "unions": [
               {
@@ -28086,7 +28086,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Fenchuganj পৌরসভা",
+            "name": "ফেঞ্চুগঞ্জ পৌরসভা",
             "nameEn": "Fenchuganj Pourashava",
             "unions": [
               {
@@ -28129,7 +28129,7 @@ export const bangladeshAddresses: Division[] = [
             "type": "municipality"
           },
           {
-            "name": "Osmaninagar পৌরসভা",
+            "name": "ওসমানীনগর পৌরসভা",
             "nameEn": "Osmaninagar Pourashava",
             "unions": [
               {
