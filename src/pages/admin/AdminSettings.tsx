@@ -101,7 +101,77 @@ const AdminSettings = () => {
     }
   };
 
-  return (
+  const loadSmtpConfig = async () => {
+    const { data } = await supabase
+      .from('smtp_config')
+      .select('*')
+      .limit(1)
+      .maybeSingle();
+    if (data) {
+      setSmtp({
+        smtp_host: data.smtp_host,
+        smtp_port: data.smtp_port,
+        smtp_username: data.smtp_username,
+        smtp_password: data.smtp_password,
+        from_email: data.from_email,
+        from_name: data.from_name,
+        is_enabled: data.is_enabled,
+        use_tls: data.use_tls,
+      });
+      if (data.is_enabled) setEmailProvider('custom_domain');
+    }
+    setSmtpLoading(false);
+  };
+
+  const saveSmtpConfig = async () => {
+    setSmtpSaving(true);
+    const { data: existing } = await supabase
+      .from('smtp_config')
+      .select('id')
+      .limit(1)
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      ({ error } = await supabase
+        .from('smtp_config')
+        .update({ ...smtp, updated_at: new Date().toISOString() })
+        .eq('id', existing.id));
+    } else {
+      ({ error } = await supabase.from('smtp_config').insert(smtp));
+    }
+
+    setSmtpSaving(false);
+    if (error) {
+      toast.error(bn ? 'সংরক্ষণ ব্যর্থ' : 'Failed to save');
+    } else {
+      toast.success(bn ? 'SMTP সেটিংস সংরক্ষিত' : 'SMTP settings saved');
+    }
+  };
+
+  const testSmtpConnection = async () => {
+    if (!smtp.smtp_host || !smtp.smtp_username || !smtp.from_email) {
+      toast.error(bn ? 'সব ফিল্ড পূরণ করুন' : 'Please fill all required fields');
+      return;
+    }
+    setSmtpTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-smtp', {
+        body: { ...smtp },
+      });
+      if (error) throw error;
+      if (data?.success) {
+        toast.success(bn ? 'SMTP সংযোগ সফল!' : 'SMTP connection successful!');
+      } else {
+        toast.error(data?.error || (bn ? 'সংযোগ ব্যর্থ' : 'Connection failed'));
+      }
+    } catch {
+      toast.error(bn ? 'SMTP টেস্ট ব্যর্থ' : 'SMTP test failed');
+    }
+    setSmtpTesting(false);
+  };
+
+
     <AdminLayout>
       <div className="space-y-6 max-w-3xl">
         <h1 className="text-2xl font-display font-bold text-foreground">{bn ? 'সেটিংস' : 'Settings'}</h1>
