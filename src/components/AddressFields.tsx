@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SearchableSelect, { type SelectOption } from '@/components/SearchableSelect';
 import { bangladeshAddresses, type District, type Upazila, type Union, type PostOffice } from '@/data/bangladeshAddresses';
 
 export interface AddressData {
@@ -23,6 +23,7 @@ interface AddressFieldsProps {
 
 const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps) => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
   const [districts, setDistricts] = useState<District[]>([]);
   const [upazilas, setUpazilas] = useState<Upazila[]>([]);
   const [unions, setUnions] = useState<Union[]>([]);
@@ -57,13 +58,6 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
     }
   }, [value.upazila, upazilas]);
 
-  const groupedUpazilas = useMemo(() => {
-    const cityCorps = upazilas.filter(u => u.type === 'city_corporation');
-    const municipalities = upazilas.filter(u => u.type === 'municipality');
-    const regular = upazilas.filter(u => !u.type || u.type === 'upazila');
-    return { cityCorps, municipalities, regular };
-  }, [upazilas]);
-
   const update = (field: keyof AddressData, val: string) => {
     const newData = { ...value, [field]: val };
     if (field === 'division') { newData.district = ''; newData.upazila = ''; newData.union = ''; newData.postOffice = ''; }
@@ -72,100 +66,112 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
     onChange(newData);
   };
 
+  const divisionOptions: SelectOption[] = bangladeshAddresses.map(d => ({
+    value: d.nameEn, label: bn ? d.name : d.nameEn,
+  }));
+
+  const districtOptions: SelectOption[] = districts.map(d => ({
+    value: d.nameEn, label: bn ? d.name : d.nameEn,
+  }));
+
+  const upazilaOptions: SelectOption[] = useMemo(() => {
+    return upazilas.map(u => ({
+      value: u.nameEn,
+      label: bn ? u.name : u.nameEn,
+      group: u.type === 'city_corporation' ? 'cc' : u.type === 'municipality' ? 'muni' : 'upazila',
+    }));
+  }, [upazilas, bn]);
+
+  const upazilaGroups = useMemo(() => {
+    const groups = [];
+    if (upazilas.some(u => u.type === 'city_corporation')) groups.push({ key: 'cc', label: bn ? '🏛️ সিটি কর্পোরেশন' : '🏛️ City Corporation' });
+    if (upazilas.some(u => u.type === 'municipality')) groups.push({ key: 'muni', label: bn ? '🏘️ পৌরসভা' : '🏘️ Municipality' });
+    if (upazilas.some(u => !u.type || u.type === 'upazila')) groups.push({ key: 'upazila', label: bn ? '🏡 উপজেলা' : '🏡 Upazila' });
+    return groups;
+  }, [upazilas, bn]);
+
+  const unionOptions: SelectOption[] = unions.map(u => ({
+    value: u.nameEn, label: bn ? u.name : u.nameEn,
+  }));
+
+  const postOfficeOptions: SelectOption[] = postOffices.map(po => ({
+    value: `${po.nameEn} - ${po.code}`, label: `${po.nameEn} - ${po.code}`,
+  }));
+
+  const placeholder = bn ? 'নির্বাচন করুন' : 'Select';
+  const searchPh = bn ? 'টাইপ করে খুঁজুন...' : 'Type to search...';
+
   return (
     <div>
       <h3 className="text-md font-display font-semibold text-foreground mb-3">{label}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <Label>{language === 'bn' ? 'বিভাগ' : 'Division'}</Label>
-          <Select value={value.division} onValueChange={(v) => update('division', v)} disabled={disabled}>
-            <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-            <SelectContent>
-              {bangladeshAddresses.map(d => (
-                <SelectItem key={d.nameEn} value={d.nameEn}>{language === 'bn' ? d.name : d.nameEn}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>{bn ? 'বিভাগ' : 'Division'}</Label>
+          <SearchableSelect
+            options={divisionOptions}
+            value={value.division}
+            onValueChange={(v) => update('division', v)}
+            placeholder={placeholder}
+            searchPlaceholder={searchPh}
+            disabled={disabled}
+            className="mt-1"
+          />
         </div>
         <div>
-          <Label>{language === 'bn' ? 'জেলা' : 'District'}</Label>
-          <Select value={value.district} onValueChange={(v) => update('district', v)} disabled={disabled || !value.division}>
-            <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-            <SelectContent>
-              {districts.map(d => (
-                <SelectItem key={d.nameEn} value={d.nameEn}>{language === 'bn' ? d.name : d.nameEn}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>{bn ? 'জেলা' : 'District'}</Label>
+          <SearchableSelect
+            options={districtOptions}
+            value={value.district}
+            onValueChange={(v) => update('district', v)}
+            placeholder={placeholder}
+            searchPlaceholder={searchPh}
+            disabled={disabled || !value.division}
+            className="mt-1"
+          />
         </div>
         <div>
-          <Label>{language === 'bn' ? 'উপজেলা / সিটি কর্পোরেশন / পৌরসভা' : 'Upazila / City Corp / Municipality'}</Label>
-          <Select value={value.upazila} onValueChange={(v) => update('upazila', v)} disabled={disabled || !value.district}>
-            <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-            <SelectContent>
-              {groupedUpazilas.cityCorps.length > 0 && (
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-bold text-primary">
-                    {language === 'bn' ? '🏛️ সিটি কর্পোরেশন' : '🏛️ City Corporation'}
-                  </SelectLabel>
-                  {groupedUpazilas.cityCorps.map(u => (
-                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
-              {groupedUpazilas.municipalities.length > 0 && (
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-bold text-primary">
-                    {language === 'bn' ? '🏘️ পৌরসভা' : '🏘️ Municipality'}
-                  </SelectLabel>
-                  {groupedUpazilas.municipalities.map(u => (
-                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
-              {groupedUpazilas.regular.length > 0 && (
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-bold text-muted-foreground">
-                    {language === 'bn' ? '🏡 উপজেলা' : '🏡 Upazila'}
-                  </SelectLabel>
-                  {groupedUpazilas.regular.map(u => (
-                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
-            </SelectContent>
-          </Select>
+          <Label>{bn ? 'উপজেলা / সিটি কর্পোরেশন / পৌরসভা' : 'Upazila / City Corp / Municipality'}</Label>
+          <SearchableSelect
+            options={upazilaOptions}
+            value={value.upazila}
+            onValueChange={(v) => update('upazila', v)}
+            placeholder={placeholder}
+            searchPlaceholder={searchPh}
+            disabled={disabled || !value.district}
+            groups={upazilaGroups}
+            className="mt-1"
+          />
         </div>
         <div>
-          <Label>{language === 'bn' ? 'ইউনিয়ন / ওয়ার্ড' : 'Union / Ward'}</Label>
-          <Select value={value.union} onValueChange={(v) => update('union', v)} disabled={disabled || !value.upazila}>
-            <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-            <SelectContent>
-              {unions.map(u => (
-                <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>{bn ? 'ইউনিয়ন / ওয়ার্ড' : 'Union / Ward'}</Label>
+          <SearchableSelect
+            options={unionOptions}
+            value={value.union}
+            onValueChange={(v) => update('union', v)}
+            placeholder={placeholder}
+            searchPlaceholder={searchPh}
+            disabled={disabled || !value.upazila}
+            className="mt-1"
+          />
         </div>
         <div>
-          <Label>{language === 'bn' ? 'পোস্ট অফিস' : 'Post Office'}</Label>
+          <Label>{bn ? 'পোস্ট অফিস' : 'Post Office'}</Label>
           {postOffices.length > 0 ? (
-            <Select value={value.postOffice} onValueChange={(v) => update('postOffice', v)} disabled={disabled || !value.upazila}>
-              <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-              <SelectContent>
-                {postOffices.map(po => (
-                  <SelectItem key={po.code} value={`${po.nameEn} - ${po.code}`}>
-                    {po.nameEn} - {po.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              options={postOfficeOptions}
+              value={value.postOffice}
+              onValueChange={(v) => update('postOffice', v)}
+              placeholder={placeholder}
+              searchPlaceholder={searchPh}
+              disabled={disabled || !value.upazila}
+              className="mt-1"
+            />
           ) : (
-            <Input className="bg-background mt-1" value={value.postOffice} onChange={(e) => update('postOffice', e.target.value)} disabled={disabled} placeholder={language === 'bn' ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} />
+            <Input className="bg-background mt-1" value={value.postOffice} onChange={(e) => update('postOffice', e.target.value)} disabled={disabled} placeholder={bn ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} />
           )}
         </div>
         <div>
-          <Label>{language === 'bn' ? 'গ্রাম' : 'Village'}</Label>
+          <Label>{bn ? 'গ্রাম' : 'Village'}</Label>
           <Input className="bg-background mt-1" value={value.village} onChange={(e) => update('village', e.target.value)} disabled={disabled} />
         </div>
       </div>
