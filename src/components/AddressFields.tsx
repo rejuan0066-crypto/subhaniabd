@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { bangladeshAddresses, type District, type Upazila, type Union } from '@/data/bangladeshAddresses';
 
 export interface AddressData {
@@ -54,6 +54,13 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
     }
   }, [value.upazila, upazilas]);
 
+  const groupedUpazilas = useMemo(() => {
+    const cityCorps = upazilas.filter(u => u.type === 'city_corporation');
+    const municipalities = upazilas.filter(u => u.type === 'municipality');
+    const regular = upazilas.filter(u => !u.type || u.type === 'upazila');
+    return { cityCorps, municipalities, regular };
+  }, [upazilas]);
+
   const update = (field: keyof AddressData, val: string) => {
     const newData = { ...value, [field]: val };
     if (field === 'division') { newData.district = ''; newData.upazila = ''; newData.union = ''; }
@@ -89,18 +96,45 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
           </Select>
         </div>
         <div>
-          <Label>{language === 'bn' ? 'উপজেলা' : 'Upazila'}</Label>
+          <Label>{language === 'bn' ? 'উপজেলা / সিটি কর্পোরেশন / পৌরসভা' : 'Upazila / City Corp / Municipality'}</Label>
           <Select value={value.upazila} onValueChange={(v) => update('upazila', v)} disabled={disabled || !value.district}>
             <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
             <SelectContent>
-              {upazilas.map(u => (
-                <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
-              ))}
+              {groupedUpazilas.cityCorps.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-bold text-primary">
+                    {language === 'bn' ? '🏛️ সিটি কর্পোরেশন' : '🏛️ City Corporation'}
+                  </SelectLabel>
+                  {groupedUpazilas.cityCorps.map(u => (
+                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
+              {groupedUpazilas.municipalities.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-bold text-primary">
+                    {language === 'bn' ? '🏘️ পৌরসভা' : '🏘️ Municipality'}
+                  </SelectLabel>
+                  {groupedUpazilas.municipalities.map(u => (
+                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
+              {groupedUpazilas.regular.length > 0 && (
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-bold text-muted-foreground">
+                    {language === 'bn' ? '🏡 উপজেলা' : '🏡 Upazila'}
+                  </SelectLabel>
+                  {groupedUpazilas.regular.map(u => (
+                    <SelectItem key={u.nameEn} value={u.nameEn}>{language === 'bn' ? u.name : u.nameEn}</SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>{language === 'bn' ? 'ইউনিয়ন' : 'Union'}</Label>
+          <Label>{language === 'bn' ? 'ইউনিয়ন / ওয়ার্ড' : 'Union / Ward'}</Label>
           <Select value={value.union} onValueChange={(v) => update('union', v)} disabled={disabled || !value.upazila}>
             <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
             <SelectContent>
