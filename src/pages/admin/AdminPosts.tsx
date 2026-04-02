@@ -101,9 +101,11 @@ const AdminPosts = () => {
         attachments: f.attachments as any,
       };
       if (f.id) {
+        if (await checkApproval('edit', payload, f.id, `পোস্ট সম্পাদনা: ${f.title}`)) return;
         const { error } = await supabase.from('posts').update(payload).eq('id', f.id);
         if (error) throw error;
       } else {
+        if (await checkApproval('add', payload, undefined, `পোস্ট যোগ: ${f.title}`)) return;
         const { error } = await supabase.from('posts').insert(payload);
         if (error) throw error;
       }
