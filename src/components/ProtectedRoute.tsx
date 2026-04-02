@@ -5,11 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
-// Paths that are always accessible to any authenticated+approved user
-const ALWAYS_ALLOWED = [
-  '/admin',           // dashboard
-  '/admin/profile',   // own profile
-];
+// No always-allowed admin paths for non-admins except profile
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, role, userStatus } = useAuth();
