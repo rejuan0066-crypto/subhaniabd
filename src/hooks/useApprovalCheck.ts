@@ -17,7 +17,7 @@ export const useApprovalCheck = (menuPath: string, targetTable: string) => {
     targetId?: string,
     description?: string
   ): Promise<boolean> => {
-    if (!needsApproval(menuPath)) return false;
+    if (!needsApproval(menuPath, actionType)) return false;
 
     const success = await submitForApproval({
       actionType,
