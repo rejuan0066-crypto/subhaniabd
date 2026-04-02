@@ -786,6 +786,21 @@ const AdminStaffForm = () => {
                 </div>
                 <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />
                 <div>
+                  <Label className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" /> {bn ? 'ইমেইল' : 'Email'}
+                    {emailVerified && <CheckCircle className="w-4 h-4 text-green-500" />}
+                  </Label>
+                  <Input
+                    type="email"
+                    className="bg-background mt-1"
+                    value={staffEmail}
+                    onChange={(e) => { setStaffEmail(e.target.value); setEmailVerified(false); }}
+                    placeholder={bn ? 'ইমেইল এড্রেস (ঐচ্ছিক)' : 'Email address (optional)'}
+                  />
+                  {staffEmail && !emailVerified && !isEditMode && (
+                    <p className="text-xs text-amber-600 mt-1">{bn ? 'সাবমিটের সময় ইমেইল যাচাই করা হবে' : 'Email will be verified on submit'}</p>
+                  )}
+                </div>
                   <Label>{bn ? 'চাকরির ধরন' : 'Employment Type'} <span className="text-destructive">*</span></Label>
                   <Select value={employmentType} onValueChange={setEmploymentType}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['employment_type'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
