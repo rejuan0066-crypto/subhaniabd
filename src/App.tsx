@@ -61,6 +61,7 @@ import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import StaffDashboard from "./pages/StaffDashboard";
+import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
 import NotFound from "./pages/NotFound";
 
