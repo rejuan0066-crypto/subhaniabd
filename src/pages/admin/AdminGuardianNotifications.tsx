@@ -22,6 +22,7 @@ import {
 const AdminGuardianNotifications = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem } = usePagePermissions('/admin/guardian-notifications');
 
   const [activeTab, setActiveTab] = useState('send');
   const [channel, setChannel] = useState<'sms' | 'email'>('sms');

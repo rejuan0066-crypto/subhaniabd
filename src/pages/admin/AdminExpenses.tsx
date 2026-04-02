@@ -51,6 +51,7 @@ const getMonthYearOptions = (lang: string) => {
 const AdminExpenses = () => {
   const { language } = useLanguage();
   const qc = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/expenses');
   const bn = language === 'bn';
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);

@@ -58,6 +58,7 @@ const TYPE_COLORS: Record<string, string> = {
 const AdminPrayerCalendar = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/prayer-calendar');
   const {
     config, configLoading, updateConfig,
     holidays, holidaysLoading, addHoliday, updateHoliday, deleteHoliday,

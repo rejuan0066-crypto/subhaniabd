@@ -73,6 +73,7 @@ const AdminValidationManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/validation-manager');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [ruleData, setRuleData] = useState<RuleData>(emptyRule);

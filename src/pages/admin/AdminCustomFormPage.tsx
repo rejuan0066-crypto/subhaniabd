@@ -29,6 +29,7 @@ const AdminCustomFormPage = () => {
   const { user } = useAuth();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canDeleteItem } = usePagePermissions(`/admin/custom-form/${slug}`);
 
   const [formValues, setFormValues] = useState<Record<string, any>>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});

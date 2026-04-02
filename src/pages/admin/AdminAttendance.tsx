@@ -49,6 +49,7 @@ const AdminAttendance = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/attendance');
   const { timeFormat, setTimeFormat } = useTimeFormat();
   const fmt = (t: string) => formatTimeDisplay(t, timeFormat);
 

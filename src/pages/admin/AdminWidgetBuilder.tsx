@@ -50,6 +50,7 @@ const emptyWidget = (): WidgetConfig => ({
 const AdminWidgetBuilder = () => {
   const { language } = useLanguage();
   const { widgets, saveWidgets } = useWidgetSettings();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/widget-builder');
   const [list, setList] = useState<WidgetConfig[]>(widgets);
   const [editDialog, setEditDialog] = useState<{ open: boolean; widget: WidgetConfig | null; index: number }>({ open: false, widget: null, index: -1 });
   const bn = language === 'bn';

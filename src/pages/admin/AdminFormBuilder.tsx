@@ -192,6 +192,7 @@ const AdminFormBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/form-builder');
 
   const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   const [formDialogOpen, setFormDialogOpen] = useState(false);

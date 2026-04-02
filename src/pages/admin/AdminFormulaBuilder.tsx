@@ -90,6 +90,7 @@ const AdminFormulaBuilder = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/formula-builder');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formulaData, setFormulaData] = useState<FormulaData>(emptyFormula);
