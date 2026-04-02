@@ -12,6 +12,8 @@ import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 const AdminDivisions = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
+  const { checkApproval: checkDivApproval } = useApprovalCheck('/admin/divisions', 'divisions');
+  const { checkApproval: checkClassApproval } = useApprovalCheck('/admin/divisions', 'classes');
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
   const [newDivName, setNewDivName] = useState('');
   const [newDivNameEn, setNewDivNameEn] = useState('');
