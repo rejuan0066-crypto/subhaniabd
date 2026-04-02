@@ -235,7 +235,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ফকিরহাট উপজেলা",
-            "nameEn": "Kachua",
+            "nameEn": "Fakirhat",
             "unions": [
               {
                 "name": "কচুয়া",
@@ -276,7 +276,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মোংলা উপজেলা",
-            "nameEn": "Mollahat",
+            "nameEn": "Mongla",
             "unions": [
               {
                 "name": "মোল্লাহাট",
@@ -335,7 +335,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মোড়েলগঞ্জ উপজেলা",
-            "nameEn": "Mongla",
+            "nameEn": "Morrelganj",
             "unions": [
               {
                 "name": "মোংলা",
@@ -784,7 +784,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আলমডাঙ্গা উপজেলা",
-            "nameEn": "Chuadanga Sadar",
+            "nameEn": "Alamdanga",
             "unions": [
               {
                 "name": "চুয়াডাঙ্গা সদর",
@@ -867,7 +867,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দামুড়হুদা উপজেলা",
-            "nameEn": "Jibannagar",
+            "nameEn": "Damurhuda",
             "unions": [
               {
                 "name": "জীবননগর",
@@ -1503,7 +1503,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কালীগঞ্জ উপজেলা",
-            "nameEn": "Jhenaidah Sadar",
+            "nameEn": "Kaliganj",
             "unions": [
               {
                 "name": "ঝিনাইদহ সদর",
@@ -1605,7 +1605,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "শৈলকুপা উপজেলা",
-            "nameEn": "Moheshpur",
+            "nameEn": "Shailkupa",
             "unions": [
               {
                 "name": "মহেশপুর",
@@ -2064,7 +2064,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ডুমুরিয়া উপজেলা",
-            "nameEn": "Dacope",
+            "nameEn": "Dumuria",
             "unions": [
               {
                 "name": "দাকোপ",
@@ -2290,7 +2290,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বটিয়াঘাটা উপজেলা",
-            "nameEn": "Rupsa",
+            "nameEn": "Batiaghata",
             "unions": [
               {
                 "name": "রূপসা",
@@ -2757,7 +2757,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কুমারখালী উপজেলা",
-            "nameEn": "Daulatpur",
+            "nameEn": "Kumarkhali",
             "unions": [
               {
                 "name": "দৌলতপুর",
@@ -2867,7 +2867,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ভেড়ামারা উপজেলা",
-            "nameEn": "Kushtia Sadar",
+            "nameEn": "Bheramara",
             "unions": [
               {
                 "name": "কুষ্টিয়া সদর",
@@ -3672,7 +3672,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "গাংনী উপজেলা",
-            "nameEn": "Meherpur Sadar",
+            "nameEn": "Gangni",
             "unions": [
               {
                 "name": "মেহেরপুর সদর",
@@ -3964,7 +3964,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কালিয়া উপজেলা",
-            "nameEn": "Lohagara",
+            "nameEn": "Kalia",
             "unions": [
               {
                 "name": "লোহাগাড়া সদর",
@@ -4366,7 +4366,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তালা উপজেলা",
-            "nameEn": "Satkhira Sadar",
+            "nameEn": "Tala",
             "unions": [
               {
                 "name": "সাতক্ষীরা সদর",
@@ -4411,7 +4411,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দেবহাটা উপজেলা",
-            "nameEn": "Shyamnagar",
+            "nameEn": "Debhata",
             "unions": [
               {
                 "name": "শ্যামনগর",
@@ -4460,7 +4460,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "শ্যামনগর উপজেলা",
-            "nameEn": "Tala",
+            "nameEn": "Shyamnagar",
             "unions": [
               {
                 "name": "তালা",
@@ -8525,7 +8525,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "সোনাগাজী",
-            "nameEn": "Feni Sadar",
+            "nameEn": "Sonagazi",
             "unions": [
               {
                 "name": "ফেনী সদর",
@@ -10992,7 +10992,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "লংগদু",
-            "nameEn": "Belaichari",
+            "nameEn": "Langadu",
             "unions": [
               {
                 "name": "বিলাইছড়ি",
@@ -11166,7 +11166,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কাপ্তাই",
-            "nameEn": "Rajosthali",
+            "nameEn": "Kaptai",
             "unions": [
               {
                 "name": "রাজস্থলী",
@@ -11890,7 +11890,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "সাভার উপজেলা",
-            "nameEn": "Dhamrai",
+            "nameEn": "Savar",
             "unions": [
               {
                 "name": "ধামরাই",
@@ -11929,7 +11929,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ধামরাই উপজেলা",
-            "nameEn": "Dohar",
+            "nameEn": "Dhamrai",
             "unions": [
               {
                 "name": "দোহার",
@@ -11964,7 +11964,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দোহার উপজেলা",
-            "nameEn": "Keraniganj",
+            "nameEn": "Dohar",
             "unions": [
               {
                 "name": "কেরানীগঞ্জ",
@@ -12013,7 +12013,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কেরানীগঞ্জ উপজেলা",
-            "nameEn": "Nawabganj",
+            "nameEn": "Keraniganj",
             "unions": [
               {
                 "name": "নবাবগঞ্জ",
@@ -12064,7 +12064,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নবাবগঞ্জ উপজেলা",
-            "nameEn": "Savar",
+            "nameEn": "Nawabganj",
             "unions": [
               {
                 "name": "সাভার",
@@ -12617,7 +12617,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বোয়ালমারী উপজেলা",
-            "nameEn": "Bhanga",
+            "nameEn": "Boalmari",
             "unions": [
               {
                 "name": "ভাঙ্গা",
@@ -12682,7 +12682,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মধুখালী উপজেলা",
-            "nameEn": "Charbhadrasan",
+            "nameEn": "Madhukhali",
             "unions": [
               {
                 "name": "চরভদ্রাসন",
@@ -12704,7 +12704,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ভাঙ্গা উপজেলা",
-            "nameEn": "Faridpur Sadar",
+            "nameEn": "Bhanga",
             "unions": [
               {
                 "name": "ফরিদপুর সদর",
@@ -12745,7 +12745,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নগরকান্দা উপজেলা",
-            "nameEn": "Madhukhali",
+            "nameEn": "Nagarkanda",
             "unions": [
               {
                 "name": "মধুখালী",
@@ -14059,7 +14059,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মুকসুদপুর উপজেলা",
-            "nameEn": "Kasiani",
+            "nameEn": "Muksudpur",
             "unions": [
               {
                 "name": "কাশিয়ানী",
@@ -14612,7 +14612,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কটিয়াদি উপজেলা",
-            "nameEn": "Itna",
+            "nameEn": "Katiadi",
             "unions": [
               {
                 "name": "ইটনা",
@@ -14638,7 +14638,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কুলিয়ারচর উপজেলা",
-            "nameEn": "Karimganj",
+            "nameEn": "Kuliarchar",
             "unions": [
               {
                 "name": "করিমগঞ্জ",
@@ -14736,7 +14736,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পাকুন্দিয়া উপজেলা",
-            "nameEn": "Kuliarchar",
+            "nameEn": "Pakundia",
             "unions": [
               {
                 "name": "কুলিয়ারচর",
@@ -14767,7 +14767,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাজিতপুর উপজেলা",
-            "nameEn": "Mithamoin",
+            "nameEn": "Bajitpur",
             "unions": [
               {
                 "name": "মিঠামইন",
@@ -14794,7 +14794,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ভৈরব উপজেলা",
-            "nameEn": "Nikli",
+            "nameEn": "Bhairab",
             "unions": [
               {
                 "name": "নিকলী",
@@ -14846,7 +14846,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "হোসেনপুর উপজেলা",
-            "nameEn": "Tarail",
+            "nameEn": "Hossainpur",
             "unions": [
               {
                 "name": "তাড়াইল",
@@ -15303,7 +15303,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "শিবচর উপজেলা",
-            "nameEn": "Madaripur Sadar",
+            "nameEn": "Shibchar",
             "unions": [
               {
                 "name": "মাদারীপুর সদর",
@@ -15384,7 +15384,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "রাজৈর উপজেলা",
-            "nameEn": "Shibchar",
+            "nameEn": "Rajoir",
             "unions": [
               {
                 "name": "শিবচর",
@@ -15714,7 +15714,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ঘিওর উপজেলা",
-            "nameEn": "Harirampur",
+            "nameEn": "Ghior",
             "unions": [
               {
                 "name": "হরিরামপুর",
@@ -15750,7 +15750,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দৌলতপুর উপজেলা",
-            "nameEn": "Manikganj Sadar",
+            "nameEn": "Daulatpur",
             "unions": [
               {
                 "name": "মানিকগঞ্জ সদর",
@@ -15831,7 +15831,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "সাটুরিয়া উপজেলা",
-            "nameEn": "Shivalaya",
+            "nameEn": "Saturia",
             "unions": [
               {
                 "name": "শিবালয়",
@@ -15912,7 +15912,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "হরিরামপুর উপজেলা",
-            "nameEn": "হরিরামপুর",
+            "nameEn": "Harirampur",
             "unions": [
               {
                 "name": "হরিরামপুর",
@@ -16395,7 +16395,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "শ্রীনগর সদর উপজেলা",
-            "nameEn": "Lauhajong",
+            "nameEn": "Sreenagar",
             "unions": [
               {
                 "name": "লৌহজং",
@@ -16626,7 +16626,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "গজারিয়া উপজেলা",
-            "nameEn": "Tongibari",
+            "nameEn": "Gazaria",
             "unions": [
               {
                 "name": "টঙ্গীবাড়ী",
@@ -17409,7 +17409,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নারায়ণগঞ্জ সদর উপজেলা",
-            "nameEn": "Araihazar",
+            "nameEn": "Narayanganj Sadar",
             "unions": [
               {
                 "name": "আড়াইহাজার",
@@ -17482,7 +17482,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আড়াইহাজার উপজেলা",
-            "nameEn": "Narayanganj Sadar",
+            "nameEn": "Araihazar",
             "unions": [
               {
                 "name": "নারায়ণগঞ্জ সদর",
@@ -18291,7 +18291,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পাংশা উপজেলা",
-            "nameEn": "Kalukhali",
+            "nameEn": "Pangsha",
             "unions": [
               {
                 "name": "কালুখালী",
@@ -18327,7 +18327,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বালিয়াকান্দি উপজেলা",
-            "nameEn": "Pangsha",
+            "nameEn": "Baliakandi",
             "unions": [
               {
                 "name": "পাংশা",
@@ -18372,7 +18372,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কালুখালী উপজেলা",
-            "nameEn": "Rajbari Sadar",
+            "nameEn": "Kalukhali",
             "unions": [
               {
                 "name": "রাজবাড়ী সদর",
@@ -18762,7 +18762,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নড়িয়া উপজেলা",
-            "nameEn": "Goshairhat",
+            "nameEn": "Naria",
             "unions": [
               {
                 "name": "গোসাইরহাট",
@@ -18784,7 +18784,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ভেদরগঞ্জ উপজেলা",
-            "nameEn": "Janjira",
+            "nameEn": "Bhedarganj",
             "unions": [
               {
                 "name": "জাজিরা",
@@ -19288,7 +19288,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কালিহাতি উপজেলা",
-            "nameEn": "Bhuapur",
+            "nameEn": "Kalihati",
             "unions": [
               {
                 "name": "ভূঞাপুর",
@@ -19314,7 +19314,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ঘাটাইল উপজেলা",
-            "nameEn": "Delduar",
+            "nameEn": "Ghatail",
             "unions": [
               {
                 "name": "দেলদুয়ার",
@@ -19365,7 +19365,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাসাইল উপজেলা",
-            "nameEn": "Dhanbari",
+            "nameEn": "Basail",
             "unions": [
               {
                 "name": "ধনবাড়ী",
@@ -19411,7 +19411,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "গোপালপুর উপজেলা",
-            "nameEn": "Ghatail",
+            "nameEn": "Gopalpur",
             "unions": [
               {
                 "name": "ঘাটাইল",
@@ -19461,7 +19461,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মির্জাপুর উপজেলা",
-            "nameEn": "Gopalpur",
+            "nameEn": "Mirzapur",
             "unions": [
               {
                 "name": "গোপালপুর",
@@ -19558,7 +19558,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নাগরপুর উপজেলা",
-            "nameEn": "Madhupur",
+            "nameEn": "Nagarpur",
             "unions": [
               {
                 "name": "মধুপুর",
@@ -19593,7 +19593,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মধুপুর উপজেলা",
-            "nameEn": "Mirzapur",
+            "nameEn": "Madhupur",
             "unions": [
               {
                 "name": "মির্জাপুর",
@@ -19676,7 +19676,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দেলদুয়ার উপজেলা",
-            "nameEn": "Shakhipur",
+            "nameEn": "Delduar",
             "unions": [
               {
                 "name": "সখিপুর",
@@ -19703,7 +19703,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ধনবাড়ী উপজেলা",
-            "nameEn": "Tangail Sadar",
+            "nameEn": "Dhanbari",
             "unions": [
               {
                 "name": "টাঙ্গাইল সদর",
@@ -20621,7 +20621,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আমতলী",
-            "nameEn": "Bamna",
+            "nameEn": "Amtali",
             "unions": [
               {
                 "name": "বামনা",
@@ -20647,7 +20647,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বেতাগী",
-            "nameEn": "Barguna Sadar",
+            "nameEn": "Betagi",
             "unions": [
               {
                 "name": "বরগুনা সদর",
@@ -20682,7 +20682,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বামনা",
-            "nameEn": "Betagi",
+            "nameEn": "Bamna",
             "unions": [
               {
                 "name": "বেতাগী",
@@ -22392,7 +22392,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তজুমদ্দিন",
-            "nameEn": "Monpura",
+            "nameEn": "Tazumuddin",
             "unions": [
               {
                 "name": "মনপুরা",
@@ -22419,7 +22419,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চরফ্যাশন",
-            "nameEn": "Tazumuddin",
+            "nameEn": "Charfassion",
             "unions": [
               {
                 "name": "তজুমউদ্দিন",
@@ -22970,7 +22970,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নলছিটি উপজেলা",
-            "nameEn": "Kathalia",
+            "nameEn": "Nalchity",
             "unions": [
               {
                 "name": "কাঠালিয়া",
@@ -23341,7 +23341,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাউফল উপজেলা",
-            "nameEn": "Dashmina",
+            "nameEn": "Bauphal",
             "unions": [
               {
                 "name": "দশমিনা",
@@ -23367,7 +23367,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দশমিনা উপজেলা",
-            "nameEn": "Dumki",
+            "nameEn": "Dashmina",
             "unions": [
               {
                 "name": "দুমকী",
@@ -23515,7 +23515,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দুমকি উপজেলা",
-            "nameEn": "Patuakhali Sadar",
+            "nameEn": "Dumki",
             "unions": [
               {
                 "name": "পটুয়াখালী সদর",
@@ -24309,7 +24309,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নেছারাবাদ উপজেলা",
-            "nameEn": "Pirojpur Sadar",
+            "nameEn": "Nesarabad",
             "unions": [
               {
                 "name": "পিরোজপুর সদর",
@@ -26103,7 +26103,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বিরামপুর",
-            "nameEn": "Birganj",
+            "nameEn": "Birampur",
             "unions": [
               {
                 "name": "বীরগঞ্জ",
@@ -26129,7 +26129,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বীরগঞ্জ",
-            "nameEn": "Birol",
+            "nameEn": "Birganj",
             "unions": [
               {
                 "name": "বিরল",
@@ -26181,7 +26181,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ফুলবাড়ী",
-            "nameEn": "Chirirbandar",
+            "nameEn": "Fulbari",
             "unions": [
               {
                 "name": "চিরিরবন্দর",
@@ -26212,7 +26212,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চিরিরবন্দর",
-            "nameEn": "Dinajpur Sadar",
+            "nameEn": "Chirirbandar",
             "unions": [
               {
                 "name": "দিনাজপুর সদর",
@@ -26243,7 +26243,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ঘোড়াঘাট",
-            "nameEn": "Fulbari",
+            "nameEn": "Ghoraghat",
             "unions": [
               {
                 "name": "ফুলবাড়ী",
@@ -26269,7 +26269,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "হাকিমপুর",
-            "nameEn": "Ghoraghat",
+            "nameEn": "Hakimpur",
             "unions": [
               {
                 "name": "ঘোড়াঘাট",
@@ -26295,7 +26295,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কাহারোল",
-            "nameEn": "Hakimpur",
+            "nameEn": "Kaharol",
             "unions": [
               {
                 "name": "হাকিমপুর",
@@ -26347,7 +26347,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নবাবগঞ্জ",
-            "nameEn": "Khanshama",
+            "nameEn": "Nawabganj",
             "unions": [
               {
                 "name": "খানসামা",
@@ -26378,7 +26378,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পার্বতীপুর",
-            "nameEn": "Nawabganj",
+            "nameEn": "Parbatipur",
             "unions": [
               {
                 "name": "নবাবগঞ্জ সদর",
@@ -28016,7 +28016,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "উলিপুর উপজেলা",
-            "nameEn": "Chilmari",
+            "nameEn": "Ulipur",
             "unions": [
               {
                 "name": "দূর্গাপুর ইউনিয়ন",
@@ -28087,7 +28087,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চর রাজিবপুর",
-            "nameEn": "Fulbari",
+            "nameEn": "Rajibpur",
             "unions": [
               {
                 "name": "রাজিবপুর ইউনিয়ন",
@@ -28113,7 +28113,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চিলমারী উপজেলা",
-            "nameEn": "Kurigram Sadar",
+            "nameEn": "Chilmari",
             "unions": [
               {
                 "name": "অষ্টমির চর ইউনিয়ন",
@@ -28274,7 +28274,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ভুরুঙ্গামারী উপজেলা",
-            "nameEn": "Rajibpur",
+            "nameEn": "Bhurungamari",
             "unions": [
               {
                 "name": "পাথরডুবী ইউনিয়ন",
@@ -28328,7 +28328,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "রাজারহাট উপজেলা",
-            "nameEn": "Rowmari",
+            "nameEn": "Rajarhat",
             "unions": [
               {
                 "name": "ঘড়িয়ালডাঙ্গা ইউনিয়ন",
@@ -28944,7 +28944,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আদিতমারী উপজেলা",
-            "nameEn": "Hatibandha",
+            "nameEn": "Aditmari",
             "unions": [
               {
                 "name": "কমলাবাড়ী",
@@ -29051,7 +29051,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পাটগ্রাম উপজেলা",
-            "nameEn": "Lalmonirhat Sadar",
+            "nameEn": "Patgram",
             "unions": [
               {
                 "name": "শ্রীরামপুর",
@@ -29107,7 +29107,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "হাতীবান্ধা উপজেলা",
-            "nameEn": "Patgram",
+            "nameEn": "Hatibandha",
             "unions": [
               {
                 "name": "বড়খাতা",
@@ -29603,7 +29603,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ডিমলা উপজেলা",
-            "nameEn": "Jaldhaka",
+            "nameEn": "Dimla",
             "unions": [
               {
                 "name": "পশ্চিম ছাতনাই",
@@ -29657,7 +29657,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "জলঢাকা উপজেলা",
-            "nameEn": "Kishoreganj",
+            "nameEn": "Jaldhaka",
             "unions": [
               {
                 "name": "গোলমুন্ডা",
@@ -29715,7 +29715,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কিশোরগঞ্জ উপজেলা",
-            "nameEn": "Nilphamari Sadar",
+            "nameEn": "Kishoreganj",
             "unions": [
               {
                 "name": "কিশোরগঞ্জ",
@@ -30199,7 +30199,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দেবীগঞ্জ উপজেলা",
-            "nameEn": "Boda",
+            "nameEn": "Debiganj",
             "unions": [
               {
                 "name": "চিলাহাটি",
@@ -30253,7 +30253,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তেতুলিয়া উপজেলা",
-            "nameEn": "Debiganj",
+            "nameEn": "Tetulia",
             "unions": [
               {
                 "name": "বাংলাবান্ধা",
@@ -30295,7 +30295,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আটোয়ারী উপজেলা",
-            "nameEn": "Panchagarh Sadar",
+            "nameEn": "Atwari",
             "unions": [
               {
                 "name": "মিরজাপুর",
@@ -30333,7 +30333,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বোদা উপজেলা",
-            "nameEn": "Tetulia",
+            "nameEn": "Boda",
             "unions": [
               {
                 "name": "ঝলইশালশিরি",
@@ -30764,7 +30764,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "রংপুর সদর উপজেলা",
-            "nameEn": "Badarganj",
+            "nameEn": "Rangpur Sadar",
             "unions": [
               {
                 "name": "মমিনপুর",
@@ -30803,7 +30803,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বদরগঞ্জ উপজেলা",
-            "nameEn": "Gangachara",
+            "nameEn": "Badarganj",
             "unions": [
               {
                 "name": "কুতুবপুর",
@@ -30916,7 +30916,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কাউনিয়া উপজেলা",
-            "nameEn": "Mithapukur",
+            "nameEn": "Kaunia",
             "unions": [
               {
                 "name": "সারাই",
@@ -30954,7 +30954,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মিঠাপুকুর উপজেলা",
-            "nameEn": "Pirgacha",
+            "nameEn": "Mithapukur",
             "unions": [
               {
                 "name": "ইমাদপুর",
@@ -31763,7 +31763,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পীরগঞ্জ উপজেলা",
-            "nameEn": "Haripur",
+            "nameEn": "Pirganj",
             "unions": [
               {
                 "name": "ভোমরাদহ",
@@ -31832,7 +31832,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বালিয়াডাঙ্গী উপজেলা",
-            "nameEn": "Pirganj",
+            "nameEn": "Baliadangi",
             "unions": [
               {
                 "name": "পাড়িয়া ইউনিয়ন",
@@ -31934,7 +31934,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "হরিপুর উপজেলা",
-            "nameEn": "Thakurgaon Sadar",
+            "nameEn": "Haripur",
             "unions": [
               {
                 "name": "গেদুড়া ইউনিয়ন",
@@ -32976,7 +32976,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পাঁচবিবি",
-            "nameEn": "Joypurhat Sadar",
+            "nameEn": "Panchbibi",
             "unions": [
               {
                 "name": "জয়পুরহাট সদর",
@@ -33054,7 +33054,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আক্কেলপুর",
-            "nameEn": "Panchbibi",
+            "nameEn": "Akkelpur",
             "unions": [
               {
                 "name": "পাঁচবিবি",
@@ -33372,7 +33372,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পত্নীতলা",
-            "nameEn": "Badalgachi",
+            "nameEn": "Patnitala",
             "unions": [
               {
                 "name": "বদলগাছী",
@@ -33539,7 +33539,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "মান্দা",
-            "nameEn": "Patnitala",
+            "nameEn": "Manda",
             "unions": [
               {
                 "name": "পত্নীতলা",
@@ -33565,7 +33565,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নিয়ামতপুর",
-            "nameEn": "Porsha",
+            "nameEn": "Niamatpur",
             "unions": [
               {
                 "name": "পোরশা",
@@ -33591,7 +33591,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "আত্রাই",
-            "nameEn": "Raninagar",
+            "nameEn": "Atrai",
             "unions": [
               {
                 "name": "রাণীনগর",
@@ -33622,7 +33622,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "রাণীনগর",
-            "nameEn": "Shapahar",
+            "nameEn": "Raninagar",
             "unions": [
               {
                 "name": "সাপাহার",
@@ -34286,7 +34286,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাগাতিপাড়া",
-            "nameEn": "Baraigram",
+            "nameEn": "Bagatipara",
             "unions": [
               {
                 "name": "বড়াইগ্রাম",
@@ -34353,7 +34353,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "গুরুদাসপুর",
-            "nameEn": "Lalpur",
+            "nameEn": "Gurudaspur",
             "unions": [
               {
                 "name": "লালপুর",
@@ -34385,7 +34385,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "লালপুর",
-            "nameEn": "Naldanga",
+            "nameEn": "Lalpur",
             "unions": [
               {
                 "name": "নলডাঙ্গা",
@@ -34416,7 +34416,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "সিংড়া",
-            "nameEn": "Natore Sadar",
+            "nameEn": "Singra",
             "unions": [
               {
                 "name": "নাটোর সদর",
@@ -34940,7 +34940,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ঈশ্বরদী",
-            "nameEn": "Bhangura",
+            "nameEn": "Ishwardi",
             "unions": [
               {
                 "name": "ভাঙ্গুড়া",
@@ -35029,7 +35029,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বেড়া",
-            "nameEn": "Ishwardi",
+            "nameEn": "Bera",
             "unions": [
               {
                 "name": "ঈশ্বরদী",
@@ -35833,7 +35833,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পুঠিয়া",
-            "nameEn": "Bagmara",
+            "nameEn": "Puthia",
             "unions": [
               {
                 "name": "বাগমারা",
@@ -35898,7 +35898,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "পবা",
-            "nameEn": "Charghat",
+            "nameEn": "Paba",
             "unions": [
               {
                 "name": "চারঘাট",
@@ -35929,7 +35929,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাগমারা",
-            "nameEn": "Durgapur",
+            "nameEn": "Bagmara",
             "unions": [
               {
                 "name": "দুর্গাপুর",
@@ -35951,7 +35951,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তানোর",
-            "nameEn": "Godagari",
+            "nameEn": "Tanore",
             "unions": [
               {
                 "name": "গোদাগাড়ী",
@@ -36008,7 +36008,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চারঘাট",
-            "nameEn": "Paba",
+            "nameEn": "Charghat",
             "unions": [
               {
                 "name": "পবা",
@@ -36828,7 +36828,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কাজীপুর",
-            "nameEn": "Kamarkhand",
+            "nameEn": "Kazipur",
             "unions": [
               {
                 "name": "কামারখন্দ",
@@ -36850,7 +36850,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কামারখন্দ",
-            "nameEn": "Kazipur",
+            "nameEn": "Kamarkhand",
             "unions": [
               {
                 "name": "কাজীপুর",
@@ -36922,7 +36922,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তাড়াশ",
-            "nameEn": "Shahzadpur",
+            "nameEn": "Tarash",
             "unions": [
               {
                 "name": "শাহজাদপুর",
@@ -36963,7 +36963,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বেলকুচি",
-            "nameEn": "Sirajganj Sadar",
+            "nameEn": "Belkuchi",
             "unions": [
               {
                 "name": "সিরাজগঞ্জ সদর",
@@ -36999,7 +36999,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "রায়গঞ্জ",
-            "nameEn": "Tarash",
+            "nameEn": "Raiganj",
             "unions": [
               {
                 "name": "তাড়াশ",
@@ -37694,7 +37694,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "চুনারুঘাট উপজেলা",
-            "nameEn": "Baniachong",
+            "nameEn": "Chunarughat",
             "unions": [
               {
                 "name": "গাজীপুর ইউনিয়ন",
@@ -37758,7 +37758,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "নবীগঞ্জ উপজেলা",
-            "nameEn": "Chunarughat",
+            "nameEn": "Nabiganj",
             "unions": [
               {
                 "name": "বড়ভাকৈর পশ্চিম ইউনিয়ন",
@@ -37834,7 +37834,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বানিয়াচং উপজেলা",
-            "nameEn": "Habiganj Sadar",
+            "nameEn": "Baniachong",
             "unions": [
               {
                 "name": "বানিয়াচং উত্তর পূর্ব ইউনিয়ন",
@@ -37918,7 +37918,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বাহুবল উপজেলা",
-            "nameEn": "Lakhai",
+            "nameEn": "Bahubal",
             "unions": [
               {
                 "name": "স্নানঘাট ইউনিয়ন",
@@ -38038,7 +38038,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "লাখাই উপজেলা",
-            "nameEn": "Nabiganj",
+            "nameEn": "Lakhai",
             "unions": [
               {
                 "name": "লাখাই ইউনিয়ন",
@@ -38673,7 +38673,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কমলগঞ্জ উপজেলা",
-            "nameEn": "Barlekha",
+            "nameEn": "Kamalganj",
             "unions": [
               {
                 "name": "রহিমপুর",
@@ -38738,7 +38738,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কুলাউড়া উপজেলা",
-            "nameEn": "Juri",
+            "nameEn": "Kulaura",
             "unions": [
               {
                 "name": "বরমচাল",
@@ -38819,7 +38819,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "জুড়ী উপজেলা",
-            "nameEn": "Kamalganj",
+            "nameEn": "Juri",
             "unions": [
               {
                 "name": "পূর্ব জুড়ী",
@@ -38877,7 +38877,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বড়লেখা উপজেলা",
-            "nameEn": "Kulaura",
+            "nameEn": "Barlekha",
             "unions": [
               {
                 "name": "বর্ণি",
@@ -39620,7 +39620,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "জামালগঞ্জ",
-            "nameEn": "Biswamvarpur",
+            "nameEn": "Jamalganj",
             "unions": [
               {
                 "name": "জামালগঞ্জ",
@@ -39654,7 +39654,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ধর্মপাশা",
-            "nameEn": "Chatak",
+            "nameEn": "Dharmapasha",
             "unions": [
               {
                 "name": "ধর্মপাশা",
@@ -39777,7 +39777,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "তাহিরপুর",
-            "nameEn": "Derai",
+            "nameEn": "Tahirpur",
             "unions": [
               {
                 "name": "শ্রীপুর উত্তর",
@@ -39829,7 +39829,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "শাল্লা",
-            "nameEn": "Dharmapasha",
+            "nameEn": "Sulla",
             "unions": [
               {
                 "name": "আটগাঁও",
@@ -39905,7 +39905,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "দিরাই",
-            "nameEn": "Jagannathpur",
+            "nameEn": "Derai",
             "unions": [
               {
                 "name": "রফিনগর",
@@ -39980,7 +39980,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "জগন্নাথপুর",
-            "nameEn": "Jamalganj",
+            "nameEn": "Jagannathpur",
             "unions": [
               {
                 "name": "কলকলিয়া ইউপি",
@@ -41044,7 +41044,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "সিলেট সদর উপজেলা",
-            "nameEn": "Balaganj",
+            "nameEn": "Sylhet Sadar",
             "unions": [
               {
                 "name": "কান্দিগাঁও ইউনিয়ন",
@@ -41135,7 +41135,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বালাগঞ্জ উপজেলা",
-            "nameEn": "Beanibazar",
+            "nameEn": "Balaganj",
             "unions": [
               {
                 "name": "পূর্ব পৈলনপুর ইউনিয়ন",
@@ -41198,7 +41198,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "বিয়ানীবাজার উপজেলা",
-            "nameEn": "Biswanath",
+            "nameEn": "Beanibazar",
             "unions": [
               {
                 "name": "আলীনগর ইউনিয়ন",
@@ -41318,7 +41318,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "কোম্পানীগঞ্জ উপজেলা",
-            "nameEn": "Dakshin Surma",
+            "nameEn": "Companiganj",
             "unions": [
               {
                 "name": "ইসলামপুর পশ্চিম ইউনিয়ন",
@@ -41702,7 +41702,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "জকিগঞ্জ উপজেলা",
-            "nameEn": "Osmaninagar",
+            "nameEn": "Zakiganj",
             "unions": [
               {
                 "name": "বারহাল ইউনিয়ন",
@@ -41876,7 +41876,7 @@ export const bangladeshAddresses: Division[] = [
           },
           {
             "name": "ওসমানীনগর উপজেলা",
-            "nameEn": "Zakiganj",
+            "nameEn": "Osmaninagar",
             "unions": [
               {
                 "name": "উমরপুর ইউনিয়ন",
