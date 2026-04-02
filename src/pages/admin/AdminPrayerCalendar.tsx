@@ -274,9 +274,9 @@ const AdminPrayerCalendar = () => {
               </div>
             </div>
 
-            <Button className="btn-primary-gradient w-full" onClick={handleSaveConfig} disabled={updateConfig.isPending}>
+            {canEditItem && <Button className="btn-primary-gradient w-full" onClick={handleSaveConfig} disabled={updateConfig.isPending}>
               <Save className="w-4 h-4 mr-2" /> {bn ? 'সেটিংস সংরক্ষণ করুন' : 'Save Settings'}
-            </Button>
+            </Button>}
           </TabsContent>
 
           {/* Holidays Tab */}
