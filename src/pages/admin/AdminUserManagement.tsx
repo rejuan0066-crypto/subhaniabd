@@ -718,6 +718,11 @@ const AdminUserManagement = () => {
               )}
             </div>
           </TabsContent>
+
+          {/* ===== ACCESS CONTROL TAB ===== */}
+          <TabsContent value="access" className="space-y-4">
+            <AccessControlTab />
+          </TabsContent>
         </Tabs>
 
         {/* Role Edit Dialog */}
