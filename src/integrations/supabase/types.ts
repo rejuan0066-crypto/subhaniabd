@@ -427,6 +427,51 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_roles: {
+        Row: {
+          base_role: string
+          created_at: string | null
+          description: string | null
+          description_bn: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          name: string
+          name_bn: string
+          permissions_template: Json | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          base_role?: string
+          created_at?: string | null
+          description?: string | null
+          description_bn?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name: string
+          name_bn: string
+          permissions_template?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          base_role?: string
+          created_at?: string | null
+          description?: string | null
+          description_bn?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          name?: string
+          name_bn?: string
+          permissions_template?: Json | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       deposits: {
         Row: {
           amount: number
