@@ -86,6 +86,50 @@ export type Database = {
         }
         Relationships: []
       }
+      address_levels: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          key: string
+          label: string
+          label_bn: string
+          parent_level_key: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key: string
+          label: string
+          label_bn: string
+          parent_level_key?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key?: string
+          label?: string
+          label_bn?: string
+          parent_level_key?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "address_levels_parent_level_key_fkey"
+            columns: ["parent_level_key"]
+            isOneToOne: false
+            referencedRelation: "address_levels"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           attendance_date: string
