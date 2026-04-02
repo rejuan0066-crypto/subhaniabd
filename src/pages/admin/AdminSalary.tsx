@@ -820,7 +820,7 @@ const AdminSalary = () => {
               <div className="flex gap-2 shrink-0 flex-wrap">
                 {canAddItem && <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
                   <Calculator className="h-3 w-3 mr-1" /> {bn ? 'জেনারেট' : 'Generate'}
-                </Button>
+                </Button>}
                 <Button size="sm" variant="outline" onClick={exportCSV}>
                   <Download className="h-3 w-3 mr-1" /> CSV
                 </Button>
