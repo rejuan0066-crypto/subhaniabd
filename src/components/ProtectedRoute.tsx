@@ -27,8 +27,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { canView, isLoading: permLoading } = usePermissions();
   const location = useLocation();
 
-  // Load dynamic admin-only paths from website_settings
-  const { data: adminOnlyPaths } = useQuery({
+  // Load dynamic access control from website_settings
+  const { data: accessControl } = useQuery({
     queryKey: ['admin-only-paths'],
     queryFn: async () => {
       const { data } = await supabase
@@ -36,15 +36,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         .select('value')
         .eq('key', 'admin_only_paths')
         .maybeSingle();
-      if (data?.value && Array.isArray((data.value as any)?.paths)) {
-        return (data.value as any).paths as string[];
+      if (data?.value) {
+        const val = data.value as any;
+        // New format with per-role access map
+        if (val.access_map && typeof val.access_map === 'object') {
+          return { accessMap: val.access_map as Record<string, Record<string, boolean>>, paths: val.paths as string[] || [] };
+        }
+        // Old format: just admin-only paths
+        if (Array.isArray(val.paths)) {
+          return { accessMap: null, paths: val.paths as string[] };
+        }
       }
-      return DEFAULT_ADMIN_ONLY_PATHS;
+      return { accessMap: null, paths: DEFAULT_ADMIN_ONLY_PATHS };
     },
     staleTime: 60000,
   });
-
-  const ADMIN_ONLY = adminOnlyPaths ?? DEFAULT_ADMIN_ONLY_PATHS;
 
   if (loading || permLoading) {
     return (
