@@ -202,7 +202,7 @@ const AdminFormulaBuilder = () => {
               {bn ? 'ফি, বেতন, গ্রেড ইত্যাদির হিসাবের ফর্মুলা তৈরি ও এডিট করুন' : 'Create and edit formulas for fee, salary, grade calculations'}
             </p>
           </div>
-          <Button onClick={() => { setFormulaData({ ...emptyFormula, sort_order: formulas.length }); setEditingId(null); setDialogOpen(true); }}>
+          {canAddItem && <Button onClick={() => { setFormulaData({ ...emptyFormula, sort_order: formulas.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন ফর্মুলা' : 'New Formula'}
           </Button>
         </div>
