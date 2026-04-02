@@ -28,7 +28,10 @@ const AdminApiVerification = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
-  const [resetConfirmInput, setResetConfirmInput] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
 
   // Form state
   const [apiUrl, setApiUrl] = useState('');
@@ -68,22 +71,54 @@ const AdminApiVerification = () => {
     }
   };
 
-  const handleForgotReset = async () => {
-    if (resetConfirmInput !== 'RESET') {
-      toast.error(bn ? 'অনুগ্রহ করে RESET টাইপ করুন' : 'Please type RESET to confirm');
+  const handleSendOtp = async () => {
+    setSendingOtp(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      toast.error(bn ? 'ইমেইল পাওয়া যায়নি' : 'Email not found');
+      setSendingOtp(false);
       return;
     }
-    if (!config?.id) return;
-    const { error } = await supabase
-      .from('api_verification_config')
-      .update({ master_password: '', updated_at: new Date().toISOString() })
-      .eq('id', config.id);
+    setAdminEmail(user.email);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: user.email,
+      options: { shouldCreateUser: false }
+    });
+    setSendingOtp(false);
     if (error) {
       toast.error(error.message);
     } else {
+      setOtpSent(true);
+      toast.success(bn ? `ভেরিফিকেশন কোড ${user.email} এ পাঠানো হয়েছে` : `Verification code sent to ${user.email}`);
+    }
+  };
+
+  const handleVerifyAndReset = async () => {
+    if (!otpCode.trim()) {
+      toast.error(bn ? 'কোড দিন' : 'Enter the code');
+      return;
+    }
+    const { error } = await supabase.auth.verifyOtp({
+      email: adminEmail,
+      token: otpCode,
+      type: 'email'
+    });
+    if (error) {
+      toast.error(bn ? 'ভুল কোড বা কোডের মেয়াদ শেষ' : 'Invalid or expired code');
+      return;
+    }
+    if (!config?.id) return;
+    const { error: resetError } = await supabase
+      .from('api_verification_config')
+      .update({ master_password: '', updated_at: new Date().toISOString() })
+      .eq('id', config.id);
+    if (resetError) {
+      toast.error(resetError.message);
+    } else {
       toast.success(bn ? 'পাসওয়ার্ড রিসেট হয়েছে। নতুন পাসওয়ার্ড সেট করুন।' : 'Password reset. Please set a new password.');
       setForgotMode(false);
-      setResetConfirmInput('');
+      setOtpSent(false);
+      setOtpCode('');
       setUnlocked(true);
       queryClient.invalidateQueries({ queryKey: ['api-verification-config'] });
     }
@@ -242,25 +277,50 @@ const AdminApiVerification = () => {
             <CardContent>
               {forgotMode ? (
                 <div className="space-y-4">
-                  <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <p className="text-sm text-destructive font-medium mb-1">
-                      {bn ? '⚠️ সতর্কতা' : '⚠️ Warning'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {bn ? 'পাসওয়ার্ড রিসেট করলে পুরাতন পাসওয়ার্ড মুছে যাবে। নিশ্চিত করতে নিচে RESET টাইপ করুন।' : 'Resetting will remove the old password. Type RESET below to confirm.'}
-                    </p>
-                  </div>
-                  <Input
-                    value={resetConfirmInput}
-                    onChange={e => setResetConfirmInput(e.target.value)}
-                    placeholder={bn ? 'RESET টাইপ করুন' : 'Type RESET'}
-                    className="font-mono text-center tracking-widest"
-                    onKeyDown={e => e.key === 'Enter' && handleForgotReset()}
-                  />
-                  <Button className="w-full" variant="destructive" onClick={handleForgotReset}>
-                    {bn ? 'পাসওয়ার্ড রিসেট করুন' : 'Reset Password'}
-                  </Button>
-                  <Button className="w-full" variant="ghost" onClick={() => { setForgotMode(false); setResetConfirmInput(''); }}>
+                  {!otpSent ? (
+                    <>
+                      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                        <p className="text-sm text-foreground font-medium mb-1">
+                          {bn ? '📧 ইমেইল ভেরিফিকেশন' : '📧 Email Verification'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {bn ? 'আপনার লগইন ইমেইলে একটি ভেরিফিকেশন কোড পাঠানো হবে।' : 'A verification code will be sent to your login email.'}
+                        </p>
+                      </div>
+                      <Button className="w-full btn-primary-gradient" onClick={handleSendOtp} disabled={sendingOtp}>
+                        {sendingOtp ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
+                        {bn ? 'কোড পাঠান' : 'Send Code'}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-3 rounded-lg bg-accent/50 border border-accent">
+                        <p className="text-sm text-accent-foreground font-medium mb-1">
+                          {bn ? '✅ কোড পাঠানো হয়েছে' : '✅ Code Sent'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {bn ? `${adminEmail} এ ভেরিফিকেশন কোড পাঠানো হয়েছে।` : `Verification code sent to ${adminEmail}.`}
+                        </p>
+                      </div>
+                      <Input
+                        value={otpCode}
+                        onChange={e => setOtpCode(e.target.value)}
+                        placeholder={bn ? '৬ ডিজিট কোড' : '6-digit code'}
+                        className="font-mono text-center tracking-widest text-lg"
+                        maxLength={6}
+                        onKeyDown={e => e.key === 'Enter' && handleVerifyAndReset()}
+                      />
+                      <Button className="w-full btn-primary-gradient" onClick={handleVerifyAndReset}>
+                        <Shield className="w-4 h-4 mr-2" />
+                        {bn ? 'ভেরিফাই ও রিসেট করুন' : 'Verify & Reset'}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full" onClick={handleSendOtp} disabled={sendingOtp}>
+                        {sendingOtp ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        {bn ? 'আবার কোড পাঠান' : 'Resend Code'}
+                      </Button>
+                    </>
+                  )}
+                  <Button className="w-full" variant="ghost" onClick={() => { setForgotMode(false); setOtpSent(false); setOtpCode(''); }}>
                     {bn ? 'বাতিল' : 'Cancel'}
                   </Button>
                 </div>
