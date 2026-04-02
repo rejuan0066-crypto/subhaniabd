@@ -456,6 +456,14 @@ const AdminUserManagement = () => {
                             <TableCell className="text-center">
                               <Checkbox checked={allOn} onCheckedChange={() => toggleAllForPath(perm.menu_path)} />
                             </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox
+                                checked={perm.requires_approval}
+                                onCheckedChange={() => toggleApproval(perm.menu_path)}
+                                className="border-yellow-500 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
+                                disabled={!perm.can_view && !perm.can_add && !perm.can_edit && !perm.can_delete}
+                              />
+                            </TableCell>
                           </TableRow>
                         );
                       })}
