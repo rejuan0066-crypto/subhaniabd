@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import LanguageToggle from '@/components/LanguageToggle';
 import {
   User, Wallet, CalendarDays, Bell, LogOut, GraduationCap,
-  Phone, MapPin, Briefcase, Calendar, Clock, CheckCircle, XCircle, AlertTriangle
+  Phone, MapPin, Briefcase, Calendar, Clock, CheckCircle, XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -21,17 +21,37 @@ const StaffDashboard = () => {
   const bn = language === 'bn';
   const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
 
-  // Get staff record linked to current user
+  // Get staff record linked to current user — auto-create if missing
   const { data: staffRecord, isLoading: staffLoading } = useQuery({
     queryKey: ['my-staff-record', user?.id],
     queryFn: async () => {
+      // First try to find existing staff record
       const { data, error } = await supabase
         .from('staff')
         .select('*')
         .eq('user_id', user!.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      
+      if (data) return data;
+
+      // No staff record found — auto-create via edge function
+      const { data: result, error: fnError } = await supabase.functions.invoke('manage-users', {
+        body: { action: 'ensure_staff' },
+      });
+      
+      if (fnError || !result?.success) {
+        console.error('Failed to auto-create staff profile:', fnError || result?.error);
+        return null;
+      }
+
+      // Re-fetch the newly created staff record
+      const { data: newData } = await supabase
+        .from('staff')
+        .select('*')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      return newData;
     },
     enabled: !!user?.id,
   });
@@ -128,7 +148,6 @@ const StaffDashboard = () => {
     return <Badge variant={l.variant}>{bn ? l.bn : l.en}</Badge>;
   };
 
-  const hasStaff = !!staffRecord;
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,98 +183,30 @@ const StaffDashboard = () => {
 
       {/* Content */}
       <main className="max-w-5xl mx-auto px-4 py-6">
-        {/* Warning banner if no staff profile linked */}
-        {!hasStaff && !staffLoading && (
-          <Card className="mb-4 border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20">
-            <CardContent className="p-4 flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
-              <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                {bn
-                  ? 'আপনার স্টাফ প্রোফাইল এখনো লিঙ্ক হয়নি। বেতন ও হাজিরা দেখতে অ্যাডমিনের সাথে যোগাযোগ করুন।'
-                  : 'Your staff profile is not linked yet. Contact admin to view salary & attendance details.'}
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
-        <Tabs defaultValue={hasStaff ? 'profile' : 'basic-profile'} className="space-y-4">
-          <TabsList className={`w-full grid h-auto ${hasStaff ? 'grid-cols-4' : 'grid-cols-2'}`}>
-            {hasStaff ? (
-              <>
-                <TabsTrigger value="profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">{bn ? 'প্রোফাইল' : 'Profile'}</span>
-                </TabsTrigger>
-                <TabsTrigger value="salary" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                  <Wallet className="h-4 w-4" />
-                  <span className="hidden sm:inline">{bn ? 'বেতন' : 'Salary'}</span>
-                </TabsTrigger>
-                <TabsTrigger value="attendance" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                  <CalendarDays className="h-4 w-4" />
-                  <span className="hidden sm:inline">{bn ? 'হাজিরা' : 'Attendance'}</span>
-                </TabsTrigger>
-              </>
-            ) : (
-              <TabsTrigger value="basic-profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
-                <User className="h-4 w-4" />
-                <span className="hidden sm:inline">{bn ? 'প্রোফাইল' : 'Profile'}</span>
-              </TabsTrigger>
-            )}
+        <Tabs defaultValue="profile" className="space-y-4">
+          <TabsList className="w-full grid h-auto grid-cols-4">
+            <TabsTrigger value="profile" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">{bn ? 'প্রোফাইল' : 'Profile'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="salary" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+              <Wallet className="h-4 w-4" />
+              <span className="hidden sm:inline">{bn ? 'বেতন' : 'Salary'}</span>
+            </TabsTrigger>
+            <TabsTrigger value="attendance" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
+              <CalendarDays className="h-4 w-4" />
+              <span className="hidden sm:inline">{bn ? 'হাজিরা' : 'Attendance'}</span>
+            </TabsTrigger>
             <TabsTrigger value="notices" className="flex items-center gap-1.5 py-2 text-xs sm:text-sm">
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">{bn ? 'নোটিশ' : 'Notices'}</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Basic Profile Tab (no staff record) */}
-          {!hasStaff && (
-            <TabsContent value="basic-profile">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    {bn ? 'ব্যক্তিগত তথ্য' : 'Personal Information'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-start gap-2">
-                      <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'নাম' : 'Name'}</p>
-                        <p className="text-sm font-medium text-foreground">{profileRecord?.full_name || '—'}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}</p>
-                        <p className="text-sm font-medium text-foreground">{profileRecord?.phone || '—'}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'ইমেইল' : 'Email'}</p>
-                        <p className="text-sm font-medium text-foreground">{user?.email || '—'}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Briefcase className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">{bn ? 'রোল' : 'Role'}</p>
-                        <Badge variant="outline">{role || '—'}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
 
-          {/* Full Profile Tab (with staff record) */}
-          {hasStaff && (
-            <TabsContent value="profile">
+          {/* Profile Tab */}
+          <TabsContent value="profile">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -298,11 +249,9 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
 
           {/* Salary Tab */}
-          {hasStaff && (
-            <TabsContent value="salary">
+          <TabsContent value="salary">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -367,11 +316,9 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
 
           {/* Attendance Tab */}
-          {hasStaff && (
-            <TabsContent value="attendance">
+          <TabsContent value="attendance">
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between flex-wrap gap-3">
@@ -432,7 +379,6 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
 
           {/* Notices Tab */}
           <TabsContent value="notices">

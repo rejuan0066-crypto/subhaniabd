@@ -147,6 +147,24 @@ Deno.serve(async (req) => {
       // Link to staff record if staff_id provided
       if (body.staff_id) {
         await supabaseAdmin.from("staff").update({ user_id: newUser.user.id }).eq("id", body.staff_id);
+      } else if (role && (role === 'staff' || role === 'teacher' || role === 'admin')) {
+        // Auto-create staff record if no staff_id provided
+        const { data: existingStaff } = await supabaseAdmin
+          .from("staff")
+          .select("id")
+          .eq("user_id", newUser.user.id)
+          .maybeSingle();
+
+        if (!existingStaff) {
+          await supabaseAdmin.from("staff").insert({
+            user_id: newUser.user.id,
+            name_bn: full_name || email.split('@')[0],
+            name_en: full_name || '',
+            email: email,
+            department: role === 'teacher' ? 'teaching' : 'general',
+            status: 'active',
+          });
+        }
       }
 
       return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), {
@@ -272,7 +290,97 @@ Deno.serve(async (req) => {
           status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      // Auto-create staff record when approving
+      if (status === 'approved') {
+        const { data: existingStaff } = await supabaseAdmin
+          .from("staff")
+          .select("id")
+          .eq("user_id", targetUserId)
+          .maybeSingle();
+
+        if (!existingStaff) {
+          // Get user info
+          const { data: profile } = await supabaseAdmin
+            .from("profiles")
+            .select("full_name, phone")
+            .eq("id", targetUserId)
+            .maybeSingle();
+          
+          const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(targetUserId);
+          
+          const { data: roleData } = await supabaseAdmin
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", targetUserId)
+            .maybeSingle();
+
+          const userRole = roleData?.role || 'staff';
+
+          await supabaseAdmin.from("staff").insert({
+            user_id: targetUserId,
+            name_bn: profile?.full_name || authUser?.email?.split('@')[0] || 'Unknown',
+            name_en: profile?.full_name || '',
+            email: authUser?.email || '',
+            phone: profile?.phone || '',
+            department: userRole === 'teacher' ? 'teaching' : 'general',
+            status: 'active',
+          });
+        }
+      }
+
       return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ENSURE STAFF - auto-create staff record for logged-in user
+    if (action === "ensure_staff") {
+      const { data: existingStaff } = await supabaseAdmin
+        .from("staff")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (existingStaff) {
+        return new Response(JSON.stringify({ success: true, staff_id: existingStaff.id, already_exists: true }), {
+          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("full_name, phone")
+        .eq("id", userId)
+        .maybeSingle();
+      
+      const { data: { user: authUser } } = await supabaseAdmin.auth.admin.getUserById(userId);
+      
+      const { data: roleData } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const userRole = roleData?.role || 'staff';
+
+      const { data: newStaff, error: staffError } = await supabaseAdmin.from("staff").insert({
+        user_id: userId,
+        name_bn: profile?.full_name || authUser?.email?.split('@')[0] || 'Unknown',
+        name_en: profile?.full_name || '',
+        email: authUser?.email || '',
+        phone: profile?.phone || '',
+        department: userRole === 'teacher' ? 'teaching' : 'general',
+        status: 'active',
+      }).select('id').single();
+
+      if (staffError) {
+        return new Response(JSON.stringify({ error: "Failed to create staff profile: " + staffError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, staff_id: newStaff.id, created: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
