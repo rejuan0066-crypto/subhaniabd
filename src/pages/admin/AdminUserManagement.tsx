@@ -590,6 +590,7 @@ const AdminUserManagement = () => {
                       <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
                       <TableHead>{bn ? 'ইমেইল' : 'Email'}</TableHead>
                       <TableHead>{bn ? 'রোল' : 'Role'}</TableHead>
+                      <TableHead>{bn ? 'স্ট্যাটাস' : 'Status'}</TableHead>
                       <TableHead>{bn ? 'তৈরির তারিখ' : 'Created'}</TableHead>
                       <TableHead className="w-32 text-center">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
                     </TableRow>
