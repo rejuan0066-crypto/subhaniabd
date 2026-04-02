@@ -120,6 +120,8 @@ const AdminPosts = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      const post = posts.find((p: any) => p.id === id);
+      if (await checkApproval('delete', { id, title: post?.title }, id, `পোস্ট মুছুন: ${post?.title}`)) return;
       const { error } = await supabase.from('posts').delete().eq('id', id);
       if (error) throw error;
     },
