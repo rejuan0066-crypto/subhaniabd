@@ -52,6 +52,7 @@ const AdminNotices = () => {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, is_published }: { id: string; is_published: boolean }) => {
+      if (await checkApproval('edit', { id, is_published }, id, `নোটিশ ${is_published ? 'প্রকাশ' : 'অপ্রকাশিত'}`)) return;
       const { error } = await supabase.from('notices').update({
         is_published,
         published_at: is_published ? new Date().toISOString() : null,
