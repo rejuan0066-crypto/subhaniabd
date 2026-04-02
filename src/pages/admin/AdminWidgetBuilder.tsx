@@ -207,7 +207,7 @@ const AdminWidgetBuilder = () => {
                   </button>}
                   {canDeleteItem && <button onClick={() => deleteWidget(idx)} className="p-1.5 rounded hover:bg-destructive/10">
                     <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                  </button>
+                  </button>}
                 </div>
               </div>
             ))}
