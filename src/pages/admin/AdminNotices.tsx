@@ -8,6 +8,7 @@ import { Plus, Check, X, Edit, RotateCcw, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 
 const AdminNotices = () => {
   const { language } = useLanguage();
