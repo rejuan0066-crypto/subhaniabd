@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { bangladeshAddresses, type District, type Upazila, type Union } from '@/data/bangladeshAddresses';
+import { bangladeshAddresses, type District, type Upazila, type Union, type PostOffice } from '@/data/bangladeshAddresses';
 
 export interface AddressData {
   division: string;
@@ -26,6 +26,7 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
   const [districts, setDistricts] = useState<District[]>([]);
   const [upazilas, setUpazilas] = useState<Upazila[]>([]);
   const [unions, setUnions] = useState<Union[]>([]);
+  const [postOffices, setPostOffices] = useState<PostOffice[]>([]);
 
   useEffect(() => {
     if (value.division) {
@@ -49,8 +50,10 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
     if (value.upazila) {
       const upz = upazilas.find(u => u.nameEn === value.upazila);
       setUnions(upz?.unions || []);
+      setPostOffices(upz?.postOffices || []);
     } else {
       setUnions([]);
+      setPostOffices([]);
     }
   }, [value.upazila, upazilas]);
 
@@ -63,9 +66,9 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
 
   const update = (field: keyof AddressData, val: string) => {
     const newData = { ...value, [field]: val };
-    if (field === 'division') { newData.district = ''; newData.upazila = ''; newData.union = ''; }
-    if (field === 'district') { newData.upazila = ''; newData.union = ''; }
-    if (field === 'upazila') { newData.union = ''; }
+    if (field === 'division') { newData.district = ''; newData.upazila = ''; newData.union = ''; newData.postOffice = ''; }
+    if (field === 'district') { newData.upazila = ''; newData.union = ''; newData.postOffice = ''; }
+    if (field === 'upazila') { newData.union = ''; newData.postOffice = ''; }
     onChange(newData);
   };
 
@@ -146,7 +149,20 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
         </div>
         <div>
           <Label>{language === 'bn' ? 'পোস্ট অফিস' : 'Post Office'}</Label>
-          <Input className="bg-background mt-1" value={value.postOffice} onChange={(e) => update('postOffice', e.target.value)} disabled={disabled} />
+          {postOffices.length > 0 ? (
+            <Select value={value.postOffice} onValueChange={(v) => update('postOffice', v)} disabled={disabled || !value.upazila}>
+              <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+              <SelectContent>
+                {postOffices.map(po => (
+                  <SelectItem key={po.code} value={`${po.nameEn} - ${po.code}`}>
+                    {po.nameEn} - {po.code}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input className="bg-background mt-1" value={value.postOffice} onChange={(e) => update('postOffice', e.target.value)} disabled={disabled} placeholder={language === 'bn' ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} />
+          )}
         </div>
         <div>
           <Label>{language === 'bn' ? 'গ্রাম' : 'Village'}</Label>
