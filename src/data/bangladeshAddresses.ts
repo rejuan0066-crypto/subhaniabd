@@ -1759,6 +1759,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "খুলনা সিটি কর্পোরেশন",
             "nameEn": "Khulna City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -5672,6 +5673,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "চট্টগ্রাম সিটি কর্পোরেশন",
             "nameEn": "Chattogram City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -6908,6 +6910,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "কুমিল্লা সিটি কর্পোরেশন",
             "nameEn": "Cumilla City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -16172,6 +16175,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "নারায়ণগঞ্জ সিটি কর্পোরেশন",
             "nameEn": "Narayanganj City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -19935,6 +19939,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "বরিশাল সিটি কর্পোরেশন",
             "nameEn": "Barishal City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -23941,6 +23946,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "ময়মনসিংহ সিটি কর্পোরেশন",
             "nameEn": "Mymensingh City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -29396,6 +29402,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "রংপুর সিটি কর্পোরেশন",
             "nameEn": "Rangpur City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -34001,6 +34008,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "রাজশাহী সিটি কর্পোরেশন",
             "nameEn": "Rajshahi City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
@@ -38996,6 +39004,7 @@ export const bangladeshAddresses: Division[] = [
           {
             "name": "সিলেট সিটি কর্পোরেশন",
             "nameEn": "Sylhet City Corporation",
+            "type": "city_corporation",
             "unions": [
               {
                 "name": "ওয়ার্ড নং-1",
