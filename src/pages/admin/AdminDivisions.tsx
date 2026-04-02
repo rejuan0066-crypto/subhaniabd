@@ -65,6 +65,8 @@ const AdminDivisions = () => {
 
   const deleteDivMutation = useMutation({
     mutationFn: async (id: string) => {
+      const div = divisions.find(d => d.id === id);
+      if (await checkDivApproval('delete', { id, name_bn: div?.name_bn }, id, `বিভাগ মুছুন: ${div?.name_bn}`)) return;
       const { error } = await supabase.from('divisions').delete().eq('id', id);
       if (error) throw error;
     },
