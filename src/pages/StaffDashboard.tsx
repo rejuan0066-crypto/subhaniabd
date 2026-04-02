@@ -380,7 +380,6 @@ const StaffDashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
 
           {/* Notices Tab */}
           <TabsContent value="notices">
