@@ -49,10 +49,10 @@ Deno.serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const action = url.searchParams.get("action");
+    let action = url.searchParams.get("action");
 
     // LIST users
-    if (req.method === "GET" || action === "list") {
+    if (req.method === "GET" && !action) {
       const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       if (listError) {
         return new Response(JSON.stringify({ error: listError.message }), {
