@@ -170,9 +170,10 @@ const AdminUserManagement = () => {
     if (!email.trim()) { toast.error(bn ? 'ইমেইল দিন' : 'Enter email'); return; }
     if (!password || password.length < 6) { toast.error(bn ? 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর' : 'Password min 6 chars'); return; }
 
-    // Find the base role for custom roles (role can be empty for permission-only users)
-    const customRole = role ? customRoles.find(r => r.name === role) : null;
-    const actualRole = role ? (customRole?.base_role || role) : '';
+    // Find the base role for custom roles (role can be empty/'none' for permission-only users)
+    const effectiveRole = (role && role !== 'none') ? role : '';
+    const customRole = effectiveRole ? customRoles.find(r => r.name === effectiveRole) : null;
+    const actualRole = effectiveRole ? (customRole?.base_role || effectiveRole) : '';
 
     setCreating(true);
     try {
