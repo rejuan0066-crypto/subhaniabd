@@ -28,7 +28,10 @@ interface UserPerm {
   can_add: boolean;
   can_edit: boolean;
   can_delete: boolean;
-  requires_approval: boolean;
+  approval_view: boolean;
+  approval_add: boolean;
+  approval_edit: boolean;
+  approval_delete: boolean;
 }
 
 const MENU_PATHS = [
