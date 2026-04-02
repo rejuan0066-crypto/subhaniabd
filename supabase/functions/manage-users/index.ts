@@ -62,18 +62,19 @@ Deno.serve(async (req) => {
 
       // Get all roles
       const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role");
-      const { data: profiles } = await supabaseAdmin.from("profiles").select("id, full_name");
+      const { data: profiles } = await supabaseAdmin.from("profiles").select("id, full_name, status");
 
       const roleMap: Record<string, string> = {};
       (roles || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
-      const nameMap: Record<string, string> = {};
-      (profiles || []).forEach((p: any) => { nameMap[p.id] = p.full_name || ''; });
+      const profileMap: Record<string, { name: string; status: string }> = {};
+      (profiles || []).forEach((p: any) => { profileMap[p.id] = { name: p.full_name || '', status: p.status || 'pending' }; });
 
       const userList = users.map((u: any) => ({
         id: u.id,
         email: u.email,
         role: roleMap[u.id] || 'none',
-        full_name: nameMap[u.id] || '',
+        full_name: profileMap[u.id]?.name || '',
+        status: profileMap[u.id]?.status || 'pending',
         created_at: u.created_at,
       }));
 
