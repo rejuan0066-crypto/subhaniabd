@@ -60,6 +60,7 @@ import AdminAddressManager from "./pages/admin/AdminAddressManager";
 import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import StaffDashboard from "./pages/StaffDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
