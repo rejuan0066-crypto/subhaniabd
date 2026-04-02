@@ -100,6 +100,7 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
 
   const placeholder = bn ? 'নির্বাচন করুন' : 'Select';
   const searchPh = bn ? 'টাইপ করে খুঁজুন...' : 'Type to search...';
+  const addLabel = bn ? 'যোগ করুন' : 'Add';
 
   return (
     <div>
