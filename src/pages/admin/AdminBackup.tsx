@@ -42,6 +42,7 @@ const TABLES = [
 const AdminBackup = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canAddItem, canEditItem } = usePagePermissions('/admin/backup');
   const [loading, setLoading] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
 

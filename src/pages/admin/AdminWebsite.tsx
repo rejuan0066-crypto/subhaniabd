@@ -42,6 +42,7 @@ const INFO_LINK_ICONS = [
 const AdminWebsite = () => {
   const { language } = useLanguage();
   const { settings, isLoading, updateMultiple } = useWebsiteSettings();
+  const { canEditItem } = usePagePermissions('/admin/website');
   const { menuConfig, saveMenuConfig } = useMenuSettings();
   const [form, setForm] = useState<WebsiteSettings | null>(null);
   const [publicMenu, setPublicMenu] = useState<MenuItemConfig[]>([]);

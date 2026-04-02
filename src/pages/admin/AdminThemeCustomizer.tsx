@@ -28,6 +28,7 @@ const ColorPreview = ({ hue, sat, light, label }: { hue: number; sat: number; li
 const AdminThemeCustomizer = () => {
   const { language } = useLanguage();
   const { theme, saveTheme } = useThemeSettings();
+  const { canEditItem } = usePagePermissions('/admin/theme-customizer');
   const [draft, setDraft] = useState<ThemeSettings>(theme);
   const [previewActive, setPreviewActive] = useState(false);
 

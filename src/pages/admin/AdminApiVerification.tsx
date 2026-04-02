@@ -19,6 +19,7 @@ const AdminApiVerification = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { canEditItem } = usePagePermissions('/admin/api-verification');
   const navigate = useNavigate();
   const { data: config, isLoading } = useApiVerificationConfig();
 

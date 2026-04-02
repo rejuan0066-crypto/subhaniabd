@@ -33,6 +33,7 @@ interface EditDialogState {
 const AdminMenuManager = () => {
   const { language } = useLanguage();
   const { menuConfig, saveMenuConfig } = useMenuSettings();
+  const { canEditItem } = usePagePermissions('/admin/menu-manager');
   const [sidebar, setSidebar] = useState<MenuItemConfig[]>(menuConfig.sidebar);
   const [publicMenu, setPublicMenu] = useState<MenuItemConfig[]>(menuConfig.public);
   const [editDialog, setEditDialog] = useState<EditDialogState>({ open: false, item: null, parentIdx: null, childIdx: null, type: 'sidebar' });

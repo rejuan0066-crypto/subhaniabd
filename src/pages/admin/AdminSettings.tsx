@@ -14,6 +14,7 @@ import { usePagePermissions } from '@/hooks/usePagePermissions';
 const AdminSettings = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { canEditItem } = usePagePermissions('/admin/settings');
   const [emailProvider, setEmailProvider] = useState<'emailjs' | 'custom_domain'>('emailjs');
   const [settings, setSettings] = useState({
     twoFactorAuth: true,
