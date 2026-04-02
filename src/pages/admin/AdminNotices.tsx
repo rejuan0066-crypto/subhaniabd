@@ -30,14 +30,16 @@ const AdminNotices = () => {
 
   const addMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('notices').insert({
+      const payload = {
         title: newTitle.trim(),
         title_bn: newTitle.trim(),
         content: newContent.trim() || null,
         content_bn: newContent.trim() || null,
         category: 'general',
         is_published: false,
-      });
+      };
+      if (await checkApproval('add', payload, undefined, `নোটিশ যোগ: ${newTitle.trim()}`)) return;
+      const { error } = await supabase.from('notices').insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
