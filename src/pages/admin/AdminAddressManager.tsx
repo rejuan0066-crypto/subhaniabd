@@ -13,14 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { bangladeshAddresses } from '@/data/bangladeshAddresses';
 import SearchableSelect from '@/components/SearchableSelect';
-
-const LEVELS = [
-  { value: 'division', label: 'Division', label_bn: 'বিভাগ' },
-  { value: 'district', label: 'District', label_bn: 'জেলা' },
-  { value: 'upazila', label: 'Upazila', label_bn: 'উপজেলা' },
-  { value: 'union', label: 'Union', label_bn: 'ইউনিয়ন' },
-  { value: 'post_office', label: 'Post Office', label_bn: 'পোস্ট অফিস' },
-];
+import AddressLevelManager, { useAddressLevels } from '@/components/admin/AddressLevelManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const SUB_TYPES = [
   { value: 'upazila', label: 'Upazila', label_bn: 'উপজেলা' },
@@ -32,6 +26,7 @@ const AdminAddressManager = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const { data: levels = [] } = useAddressLevels();
   const [search, setSearch] = useState('');
   const [filterLevel, setFilterLevel] = useState('all');
   const [showForm, setShowForm] = useState(false);
@@ -184,7 +179,7 @@ const AdminAddressManager = () => {
   });
 
   const getLevelLabel = (level: string) => {
-    const l = LEVELS.find(lv => lv.value === level);
+    const l = levels.find(lv => lv.key === level);
     return bn ? l?.label_bn : l?.label;
   };
 
@@ -196,18 +191,32 @@ const AdminAddressManager = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-primary" />
-              {bn ? 'ঠিকানা ব্যবস্থাপনা' : 'Address Manager'}
-            </h1>
-            <p className="text-sm text-muted-foreground">{bn ? 'বিভাগ, জেলা, উপজেলা, ইউনিয়ন ও পোস্ট অফিস যোগ/সংশোধন করুন' : 'Add or edit divisions, districts, upazilas, unions & post offices'}</p>
-          </div>
-          <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
-            <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
-          </Button>
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <MapPin className="w-6 h-6 text-primary" />
+            {bn ? 'ঠিকানা ব্যবস্থাপনা' : 'Address Manager'}
+          </h1>
+          <p className="text-sm text-muted-foreground">{bn ? 'ঠিকানা ডেটা ও লেভেল যোগ/সংশোধন করুন' : 'Manage address data & levels'}</p>
         </div>
+
+        <Tabs defaultValue="data" className="w-full">
+          <TabsList>
+            <TabsTrigger value="data">{bn ? 'ঠিকানা ডেটা' : 'Address Data'}</TabsTrigger>
+            <TabsTrigger value="levels">{bn ? 'লেভেল ব্যবস্থাপনা' : 'Level Management'}</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="levels" className="mt-4">
+            <div className="card-elevated p-6">
+              <AddressLevelManager />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="data" className="mt-4 space-y-4">
+            <div className="flex justify-end">
+              <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
+                <Plus className="w-4 h-4" /> {bn ? 'নতুন যোগ করুন' : 'Add New'}
+              </Button>
+            </div>
 
         <div className="card-elevated p-4 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1 max-w-md">
@@ -220,7 +229,7 @@ const AdminAddressManager = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{bn ? 'সব লেভেল' : 'All Levels'}</SelectItem>
-              {LEVELS.map(l => <SelectItem key={l.value} value={l.value}>{bn ? l.label_bn : l.label}</SelectItem>)}
+              {levels.map(l => <SelectItem key={l.key} value={l.key}>{bn ? l.label_bn : l.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -295,7 +304,7 @@ const AdminAddressManager = () => {
                   <Select value={formLevel} onValueChange={v => { setFormLevel(v); setSelDivision(''); setSelDistrict(''); setSelUpazila(''); }}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {LEVELS.map(l => <SelectItem key={l.value} value={l.value}>{bn ? l.label_bn : l.label}</SelectItem>)}
+                      {levels.map(l => <SelectItem key={l.key} value={l.key}>{bn ? l.label_bn : l.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -404,6 +413,8 @@ const AdminAddressManager = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+          </TabsContent>
+        </Tabs>
       </div>
     </AdminLayout>
   );
