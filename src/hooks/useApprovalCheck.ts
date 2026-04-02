@@ -41,5 +41,5 @@ export const useApprovalCheck = (menuPath: string, targetTable: string) => {
     return true;
   };
 
-  return { checkApproval, needsApproval: () => needsApproval(menuPath) };
+  return { checkApproval, needsApproval: (action?: 'view' | 'add' | 'edit' | 'delete') => needsApproval(menuPath, action) };
 };
