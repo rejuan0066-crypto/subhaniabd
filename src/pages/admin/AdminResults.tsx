@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
+import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const getGrade = (avg: number) => {
   if (avg >= 80) return { grade: 'A+', gpa: '5.00' };

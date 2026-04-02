@@ -14,6 +14,7 @@ const AdminDivisions = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const { checkApproval: checkDivApproval } = useApprovalCheck('/admin/divisions', 'divisions');
+  const { canAddItem, canDeleteItem } = usePagePermissions('/admin/divisions');
   const { checkApproval: checkClassApproval } = useApprovalCheck('/admin/divisions', 'classes');
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
   const [newDivName, setNewDivName] = useState('');
