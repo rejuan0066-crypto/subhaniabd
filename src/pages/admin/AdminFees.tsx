@@ -8,6 +8,7 @@ import { CreditCard, Printer, CheckCircle, Clock, Loader2, Plus } from 'lucide-r
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 
 type FeeTab = 'admission' | 'monthly' | 'exam';
 
