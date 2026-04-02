@@ -59,6 +59,7 @@ import AdminAcademicSessions from "./pages/admin/AdminAcademicSessions";
 import AdminAddressManager from "./pages/admin/AdminAddressManager";
 import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
+import AdminUserManagement from "./pages/admin/AdminUserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -123,6 +124,7 @@ const App = () => (
               <Route path="/admin/academic-sessions" element={<ProtectedRoute><AdminAcademicSessions /></ProtectedRoute>} />
               <Route path="/admin/address-manager" element={<ProtectedRoute><AdminAddressManager /></ProtectedRoute>} />
               <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
+              <Route path="/admin/user-management" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
