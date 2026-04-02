@@ -80,12 +80,9 @@ const AdminDivisions = () => {
 
   const addClassMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('classes' as any).insert({
-        division_id: selectedDiv,
-        name_bn: newClassName.trim(),
-        name: newClassNameEn.trim() || newClassName.trim(),
-        sort_order: classes.length,
-      } as any);
+      const payload = { division_id: selectedDiv, name_bn: newClassName.trim(), name: newClassNameEn.trim() || newClassName.trim(), sort_order: classes.length };
+      if (await checkClassApproval('add', payload, undefined, `শ্রেণী যোগ: ${newClassName.trim()}`)) return;
+      const { error } = await supabase.from('classes' as any).insert(payload as any);
       if (error) throw error;
     },
     onSuccess: () => {
