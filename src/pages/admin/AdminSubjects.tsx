@@ -15,6 +15,7 @@ const AdminSubjects = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/subjects', 'subjects');
+  const { canAddItem, canDeleteItem } = usePagePermissions('/admin/subjects');
   const [newName, setNewName] = useState('');
   const [newNameEn, setNewNameEn] = useState('');
   const [newCode, setNewCode] = useState('');

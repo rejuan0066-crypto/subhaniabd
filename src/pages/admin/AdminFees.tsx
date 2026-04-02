@@ -17,6 +17,7 @@ const AdminFees = () => {
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/fees', 'fee_payments');
+  const { canAddItem, canEditItem } = usePagePermissions('/admin/fees');
   const [tab, setTab] = useState<FeeTab>('monthly');
   const [selectedDivision, setSelectedDivision] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
