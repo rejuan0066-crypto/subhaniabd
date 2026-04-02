@@ -171,9 +171,9 @@ const AdminModuleManager = () => {
               {bn ? 'সিস্টেমের সকল মডিউল কানেক্ট/ডিসকানেক্ট ও কনফিগার করুন' : 'Connect/disconnect and configure all system modules'}
             </p>
           </div>
-          <Button onClick={() => { setModuleData({ ...emptyModule, sort_order: modules.length }); setEditingId(null); setDialogOpen(true); }}>
+          {canAddItem && <Button onClick={() => { setModuleData({ ...emptyModule, sort_order: modules.length }); setEditingId(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" /> {bn ? 'নতুন মডিউল' : 'New Module'}
-          </Button>
+          </Button>}
         </div>
 
         {/* Stats */}
