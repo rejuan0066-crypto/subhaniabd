@@ -862,14 +862,14 @@ const AdminExpenses = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
-                  <Button size="sm" onClick={() => {
+                  {canAddItem && <Button size="sm" onClick={() => {
                     setReceiptFile(null);
                     setEditingExpenseId(null);
                     setExpenseForm({ ...defaultExpenseForm, project_id: selectedProjectId, category_id: selectedCategoryId });
                     setExpenseDialog(true);
                   }}>
                     <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}
-                  </Button>
+                  </Button>}
                 </div>
 
                 <div className="border rounded-lg overflow-auto">
