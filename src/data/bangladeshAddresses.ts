@@ -32881,13 +32881,6 @@ export const bangladeshAddresses: Division[] = [
               }
             ]
           }
-        ],
-        "postOffices": [
-          {
-            "name": "Shibganj",
-            "nameEn": "Shibganj",
-            "code": "5810"
-          }
         ]
       },
       {
