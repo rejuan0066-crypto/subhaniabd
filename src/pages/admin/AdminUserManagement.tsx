@@ -914,6 +914,85 @@ const AdminUserManagement = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Role Permission Dialog */}
+        <Dialog open={rolePermDialogOpen} onOpenChange={setRolePermDialogOpen}>
+          <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-primary" />
+                {bn ? 'রোল পারমিশন' : 'Role Permissions'}
+                {rolePermRole && (
+                  <Badge variant="outline" className="ml-2 font-normal">
+                    {bn ? rolePermRole.name_bn : rolePermRole.name}
+                  </Badge>
+                )}
+              </DialogTitle>
+            </DialogHeader>
+
+            {rolePermLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-4 pt-2">
+                <p className="text-xs text-muted-foreground">
+                  {bn
+                    ? 'এই রোলের ইউজাররা কোন কোন মেনু/ফিচারে কী কী করতে পারবে তা নির্ধারণ করুন।'
+                    : 'Set what users with this role can do on each menu/feature.'}
+                </p>
+
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="min-w-[140px]">{bn ? 'মেনু' : 'Menu'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'দেখা' : 'View'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'যোগ' : 'Add'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'সম্পাদনা' : 'Edit'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'মুছুন' : 'Delete'}</TableHead>
+                        <TableHead className="text-center w-16">{bn ? 'সব' : 'All'}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rolePerms.map(perm => {
+                        const menuInfo = MENU_PATHS.find(m => m.path === perm.menu_path);
+                        const allOn = perm.can_view && perm.can_add && perm.can_edit && perm.can_delete;
+                        return (
+                          <TableRow key={perm.menu_path}>
+                            <TableCell className="font-medium text-sm">
+                              {bn ? menuInfo?.label_bn : menuInfo?.label_en}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox checked={perm.can_view} onCheckedChange={() => toggleRolePerm(perm.menu_path, 'can_view')} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox checked={perm.can_add} onCheckedChange={() => toggleRolePerm(perm.menu_path, 'can_add')} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox checked={perm.can_edit} onCheckedChange={() => toggleRolePerm(perm.menu_path, 'can_edit')} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox checked={perm.can_delete} onCheckedChange={() => toggleRolePerm(perm.menu_path, 'can_delete')} />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Checkbox checked={allOn} onCheckedChange={() => toggleAllRolePerms(perm.menu_path)} />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <Button onClick={saveRolePermissions} disabled={rolePermSaving} className="w-full btn-primary-gradient">
+                  {rolePermSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+                  {bn ? 'পারমিশন সেভ করুন' : 'Save Permissions'}
+                </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
