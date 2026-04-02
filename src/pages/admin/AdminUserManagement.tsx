@@ -672,8 +672,17 @@ const AdminUserManagement = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button size="icon" variant="ghost" onClick={() => openRoleDialog(r)} disabled={r.is_system}>
+                            <Button size="icon" variant="ghost" onClick={() => openRoleDialog(r)} title={bn ? 'এডিট' : 'Edit'}>
                               <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-primary hover:text-primary hover:bg-primary/10"
+                              onClick={() => openRolePermDialog(r)}
+                              title={bn ? 'পারমিশন সেট করুন' : 'Set Permissions'}
+                            >
+                              <KeyRound className="w-4 h-4" />
                             </Button>
                             {!r.is_system && (
                               <Button
