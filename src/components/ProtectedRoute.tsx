@@ -54,7 +54,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const path = location.pathname;
   const isAdminRoute = path.startsWith('/admin');
 
-  console.log('[ProtectedRoute]', { path, role, email: user?.email, acLoaded: !!accessControl, acPaths: accessControl?.paths?.length });
+  
 
   // Admin has full access
   if (role === 'admin') {
