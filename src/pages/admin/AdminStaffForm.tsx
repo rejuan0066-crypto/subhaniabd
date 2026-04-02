@@ -385,7 +385,7 @@ const AdminStaffForm = () => {
         name_en: fullName,
         designation: desigLabel,
         phone: mobile ? `${mobileCode}${mobile}` : null,
-        department: designation?.includes('teacher') ? 'শিক্ষা বিভাগ' : 'প্রশাসন',
+        email: staffEmail || null,
         address: formatAddress(permanentAddr) || null,
         salary: salary ? parseFloat(salary) : null,
         photo_url: photoUrl || null,
