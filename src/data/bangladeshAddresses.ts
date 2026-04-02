@@ -29703,7 +29703,14 @@ export const bangladeshAddresses: Division[] = [
                 "nameEn": "কৈমারী"
               }
             ],
-            "type": "upazila"
+            "type": "upazila",
+            "postOffices": [
+              {
+                "name": "Kishoriganj",
+                "nameEn": "Kishoriganj",
+                "code": "5320"
+              }
+            ]
           },
           {
             "name": "কিশোরগঞ্জ উপজেলা",
@@ -35002,7 +35009,29 @@ export const bangladeshAddresses: Division[] = [
                 "nameEn": "বিলমাড়িয়া"
               }
             ],
-            "type": "upazila"
+            "type": "upazila",
+            "postOffices": [
+              {
+                "name": "Ambikapur",
+                "nameEn": "Ambikapur",
+                "code": "7802"
+              },
+              {
+                "name": "Baitulaman Politecni",
+                "nameEn": "Baitulaman Politecni",
+                "code": "7803"
+              },
+              {
+                "name": "Faridpursadar",
+                "nameEn": "Faridpursadar",
+                "code": "7800"
+              },
+              {
+                "name": "Kanaipur",
+                "nameEn": "Kanaipur",
+                "code": "7801"
+              }
+            ]
           },
           {
             "name": "বেড়া",
