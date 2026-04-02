@@ -69,6 +69,7 @@ const MENU_PATHS = [
   { path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification' },
   { path: '/admin/user-management', label_bn: 'ইউজার ম্যানেজমেন্ট', label_en: 'User Management' },
   { path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings' },
+  { path: '/admin/approvals', label_bn: 'অনুমোদন ব্যবস্থাপনা', label_en: 'Approvals' },
 ];
 
 const AdminUserManagement = () => {

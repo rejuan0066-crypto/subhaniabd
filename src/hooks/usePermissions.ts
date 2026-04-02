@@ -35,10 +35,10 @@ export const usePermissions = () => {
       if (!user?.id) return [];
       const { data, error } = await supabase
         .from('user_permissions')
-        .select('menu_path, can_view, can_add, can_edit, can_delete')
+        .select('*')
         .eq('user_id', user.id);
       if (error) throw error;
-      return data as Permission[];
+      return (data || []) as (Permission & { requires_approval?: boolean })[];
     },
     enabled: !!user?.id,
   });
