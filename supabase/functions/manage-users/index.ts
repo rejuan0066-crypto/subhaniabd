@@ -25,15 +25,14 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Verify caller using JWT claims (more reliable than getUser for edge functions)
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    // Verify caller
+    const { data: { user: callerUser }, error: userError } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (userError || !callerUser) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub;
+    const userId = callerUser.id;
 
     const { data: roleData } = await supabaseAdmin
       .from("user_roles")
@@ -49,10 +48,10 @@ Deno.serve(async (req) => {
     }
 
     const url = new URL(req.url);
-    const action = url.searchParams.get("action");
+    let action = url.searchParams.get("action");
 
     // LIST users
-    if (req.method === "GET" || action === "list") {
+    if (req.method === "GET" && !action) {
       const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       if (listError) {
         return new Response(JSON.stringify({ error: listError.message }), {
@@ -83,6 +82,11 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
+    
+    // Allow action from body if not in URL params
+    if (!action && body.action) {
+      action = body.action;
+    }
 
     // CREATE user
     if (action === "create") {
