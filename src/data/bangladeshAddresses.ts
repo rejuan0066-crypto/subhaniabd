@@ -22,6 +22,13 @@ export interface Upazila {
   nameEn: string;
   type?: 'upazila' | 'city_corporation' | 'municipality';
   unions: Union[];
+  postOffices?: PostOffice[];
+}
+
+export interface PostOffice {
+  name: string;
+  nameEn: string;
+  code: string;
 }
 
 export interface Union {
@@ -21556,6 +21563,9 @@ export const bangladeshAddresses: Division[] = [
             ],
             "type": "upazila"
           }
+        ],
+        "postOffices": [
+          { "name": "Shibganj", "nameEn": "Shibganj", "code": "5810" }
         ]
       },
       {
