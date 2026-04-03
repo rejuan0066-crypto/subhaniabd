@@ -249,6 +249,7 @@ export interface WebsiteSettings {
   login_bg_blur: number;
   login_institution_name_bn: string;
   login_institution_name_en: string;
+  logo_shape: 'square' | 'rounded' | 'circle';
 }
 
 const DEFAULT_SETTINGS: WebsiteSettings = {
