@@ -142,6 +142,7 @@ const App = () => (
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
