@@ -60,6 +60,8 @@ const AdminMenuManager = () => {
   const [selectedParent, setSelectedParent] = useState<string>('');
   const [addDialog, setAddDialog] = useState<AddMenuDialogState>({ open: false, type: 'sidebar' });
   const [newItem, setNewItem] = useState({ id: '', path: '', label_bn: '', label_en: '', icon: 'FileBox' });
+  const [tabDialog, setTabDialog] = useState<MoveToTabState>({ open: false, itemId: null, parentIdx: null, childIdx: null });
+  const [selectedTabParent, setSelectedTabParent] = useState<string>('');
 
   const bn = language === 'bn';
 
