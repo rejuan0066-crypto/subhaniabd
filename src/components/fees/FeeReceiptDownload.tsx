@@ -46,9 +46,19 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     },
   });
 
+  // Count how many fields are filled
+  const filledCount = [selectedSession, selectedClass, rollNumber.trim(), regNumber.trim()].filter(Boolean).length;
+  const hasSession = !!selectedSession;
+  const hasSecondField = !!(selectedClass || rollNumber.trim() || regNumber.trim());
+  const canDownload = hasSession && hasSecondField;
+
   const handleDownload = async () => {
     if (!selectedSession) {
       toast.error(bn ? 'সেশন নির্বাচন করুন' : 'Select session');
+      return;
+    }
+    if (!hasSecondField) {
+      toast.error(bn ? 'ক্লাস / রোল / রেজিস্ট্রেশন এর যেকোনো একটি দিন' : 'Provide class, roll, or registration');
       return;
     }
 
@@ -57,20 +67,15 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       const session = sessions.find((s: any) => s.id === selectedSession);
       const sessionName = session?.name || '';
 
-      // Get students based on search type
       let studentQuery = supabase
         .from('students')
         .select('*, divisions(name_bn, name), classes(name_bn, name)')
         .eq('status', 'active')
         .eq('admission_session', sessionName);
 
-      if (searchType === 'session_class' && selectedClass) {
-        studentQuery = studentQuery.eq('class_id', selectedClass);
-      } else if (searchType === 'session_roll' && rollNumber) {
-        studentQuery = studentQuery.eq('roll_number', rollNumber.trim());
-      } else if (searchType === 'session_reg' && regNumber) {
-        studentQuery = studentQuery.eq('student_id', regNumber.trim());
-      }
+      if (selectedClass) studentQuery = studentQuery.eq('class_id', selectedClass);
+      if (rollNumber.trim()) studentQuery = studentQuery.eq('roll_number', rollNumber.trim());
+      if (regNumber.trim()) studentQuery = studentQuery.eq('student_id', regNumber.trim());
 
       const { data: students, error: studErr } = await studentQuery.order('roll_number');
       if (studErr) throw studErr;
@@ -79,7 +84,6 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         return;
       }
 
-      // Get payments for these students
       const studentIds = students.map((s: any) => s.id);
       const { data: payments, error: payErr } = await supabase
         .from('payments')
@@ -94,11 +98,8 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         return;
       }
 
-      // Get approver info for paid payments
       let approverName = '';
       if (statusFilter === 'success') {
-        // Check pending_actions for approval info
-        const txnIds = payments.map((p: any) => p.transaction_id);
         const { data: approvals } = await supabase
           .from('pending_actions')
           .select('payload, reviewed_by, user_name')
@@ -106,7 +107,6 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
           .eq('target_table', 'payments');
 
         if (approvals && approvals.length > 0) {
-          // Get the admin profile who approved
           const reviewerIds = [...new Set(approvals.map((a: any) => a.reviewed_by).filter(Boolean))];
           if (reviewerIds.length > 0) {
             const { data: profiles } = await supabase
@@ -120,17 +120,14 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         }
       }
 
-      // Build student map
       const studentMap = new Map(students.map((s: any) => [s.id, s]));
 
-      // Extract collector name from payment notes
       const getCollectorFromNotes = (notes: string) => {
         const match = notes?.match(/আদায়কারী: (.+?)(?:\||$)/);
         return match ? match[1].trim() : collectorName;
       };
 
-      // Generate printable receipt
-      const className = searchType === 'session_class'
+      const className = selectedClass
         ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
         : '';
 
@@ -144,7 +141,6 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         approverName,
         statusFilter,
         bn,
-        searchType,
       });
     } catch (e: any) {
       toast.error(e.message || 'Error');
@@ -172,79 +168,46 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         </button>
       </div>
 
-      {/* Search type tabs */}
-      <Tabs value={searchType} onValueChange={(v) => setSearchType(v as any)} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="session_class">{bn ? 'সেশন + ক্লাস' : 'Session + Class'}</TabsTrigger>
-          <TabsTrigger value="session_roll">{bn ? 'সেশন + রোল' : 'Session + Roll'}</TabsTrigger>
-          <TabsTrigger value="session_reg">{bn ? 'সেশন + রেজি.' : 'Session + Reg.'}</TabsTrigger>
-        </TabsList>
+      <p className="text-xs text-muted-foreground">
+        {bn ? 'সেশন আবশ্যক + নিচের যেকোনো একটি ফিল্ড দিন (ক্লাস / রোল / রেজিস্ট্রেশন)' : 'Session required + any one field below (Class / Roll / Registration)'}
+      </p>
 
-        <TabsContent value="session_class" className="mt-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'সেশন' : 'Session'}</label>
-              <Select value={selectedSession} onValueChange={setSelectedSession}>
-                <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
-                <SelectContent>
-                  {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'ক্লাস' : 'Class'}</label>
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
-                <SelectContent>
-                  {classes.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name_bn} ({c.divisions?.name_bn || ''})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </TabsContent>
+      {/* All fields in one form */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'সেশন *' : 'Session *'}</label>
+          <Select value={selectedSession} onValueChange={setSelectedSession}>
+            <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+            <SelectContent>
+              {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'ক্লাস' : 'Class'}</label>
+          <Select value={selectedClass} onValueChange={setSelectedClass}>
+            <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সব ক্লাস' : 'All Classes'}</SelectItem>
+              {classes.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name_bn} ({c.divisions?.name_bn || ''})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
+          <Input className="bg-background" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} placeholder={bn ? 'রোল' : 'Roll'} />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'}</label>
+          <Input className="bg-background" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
+        </div>
+      </div>
 
-        <TabsContent value="session_roll" className="mt-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'সেশন' : 'Session'}</label>
-              <Select value={selectedSession} onValueChange={setSelectedSession}>
-                <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
-                <SelectContent>
-                  {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
-              <Input className="bg-background" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} placeholder={bn ? 'রোল' : 'Roll'} />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="session_reg" className="mt-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'সেশন' : 'Session'}</label>
-              <Select value={selectedSession} onValueChange={setSelectedSession}>
-                <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
-                <SelectContent>
-                  {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'}</label>
-              <Input className="bg-background" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <Button onClick={handleDownload} disabled={loading} className="btn-primary-gradient w-full">
+      <Button onClick={handleDownload} disabled={loading || !canDownload} className="btn-primary-gradient w-full">
         {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
         {bn ? 'রিসিট ডাউনলোড করুন' : 'Download Receipt'}
       </Button>
@@ -262,7 +225,6 @@ interface PrintReceiptParams {
   approverName: string;
   statusFilter: 'pending' | 'success';
   bn: boolean;
-  searchType: 'session_class' | 'session_roll' | 'session_reg';
 }
 
 const feeTypeLabels: Record<string, { bn: string; en: string }> = {
@@ -272,7 +234,7 @@ const feeTypeLabels: Record<string, { bn: string; en: string }> = {
 };
 
 function printReceipt(params: PrintReceiptParams) {
-  const { payments, studentMap, sessionName, className, institution, collectorName, approverName, statusFilter, bn, searchType } = params;
+  const { payments, studentMap, sessionName, className, institution, collectorName, approverName, statusFilter, bn } = params;
 
   const totalAmount = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
   const statusLabel = statusFilter === 'pending'
@@ -307,7 +269,7 @@ function printReceipt(params: PrintReceiptParams) {
   .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
   .header h1 { font-size: 22px; margin-bottom: 4px; }
   .header p { font-size: 13px; color: #555; }
-  .meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; }
+  .meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 13px; flex-wrap: wrap; gap: 8px; }
   .meta-item { }
   .meta-item strong { color: #333; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
@@ -318,7 +280,6 @@ function printReceipt(params: PrintReceiptParams) {
   .sig-box { text-align: center; width: 200px; }
   .sig-line { border-top: 1px solid #333; padding-top: 8px; font-size: 13px; font-weight: 600; }
   .sig-name { font-size: 12px; color: #555; margin-top: 4px; }
-  .status-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
   @media print {
     body { padding: 15px; }
     @page { margin: 15mm; }
