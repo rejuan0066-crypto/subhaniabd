@@ -672,16 +672,50 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     setProcessing(false);
   };
 
+  const downloadBgResult = () => {
+    if (!bgResult) return;
+    const fmt = bgDownloadFormat;
+    if (fmt === 'png') {
+      const a = document.createElement('a'); a.href = bgResult; a.download = `no-bg-${Date.now()}.png`; a.click();
+      return;
+    }
+    // Convert base64 PNG to other formats via canvas
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      const ctx = canvas.getContext('2d')!;
+      if (fmt === 'jpeg') { ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      ctx.drawImage(img, 0, 0);
+      if (fmt === 'svg') {
+        const dataUrl = canvas.toDataURL('image/png');
+        const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${img.width}" height="${img.height}"><image href="${dataUrl}" width="${img.width}" height="${img.height}"/></svg>`;
+        const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `no-bg-${Date.now()}.svg`; a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/webp';
+        canvas.toBlob(blob => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `no-bg-${Date.now()}.${fmt === 'jpeg' ? 'jpg' : fmt}`; a.click();
+          URL.revokeObjectURL(url);
+        }, mime, 0.95);
+      }
+    };
+    img.src = bgResult;
+  };
+
   const download = () => {
-    const url = activeTab === 'bg-remove' ? bgResult : result?.url;
+    if (activeTab === 'bg-remove') { downloadBgResult(); return; }
+    const url = result?.url;
     if (!url) return;
     const a = document.createElement('a');
     a.href = url;
-    a.download = activeTab === 'bg-remove'
-      ? `no-bg-${Date.now()}.png`
-      : activeTab === 'crop'
-        ? 'cropped.png'
-        : `resized.${result?.format || 'jpg'}`;
+    a.download = activeTab === 'crop'
+      ? 'cropped.png'
+      : `resized.${result?.format || 'jpg'}`;
     a.click();
   };
 
