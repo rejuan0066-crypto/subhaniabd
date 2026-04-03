@@ -311,6 +311,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (activeTab !== 'crop' || (resultUrl && !showOriginal)) return;
+    e.preventDefault();
     const { x, y } = getImageRelativeCoords(e);
     setDragging(true);
     setDragStart({ x, y });
