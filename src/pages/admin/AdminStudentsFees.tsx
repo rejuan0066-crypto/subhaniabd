@@ -8,6 +8,9 @@ import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, Use
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { useApprovalCheck } from '@/hooks/useApprovalCheck';
+import FeeReceiptDownload from '@/components/fees/FeeReceiptDownload';
 
 type FeeType = 'admission_fee' | 'monthly_fee' | 'exam_fee';
 type PaymentMethod = 'cash' | 'online';
@@ -32,6 +35,8 @@ type SearchMode = 'registration' | 'session_roll';
 const AdminStudentsFees = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { user } = useAuth();
+  const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState<FeeType | ''>('');
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
@@ -52,6 +57,29 @@ const AdminStudentsFees = () => {
       const { data } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
       return data || [];
     },
+  });
+
+  // Get logged-in user's staff/profile name for collector
+  const { data: collectorName = '' } = useQuery({
+    queryKey: ['collector_name', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return '';
+      // Try staff table first
+      const { data: staffData } = await supabase
+        .from('staff')
+        .select('name_bn, name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (staffData) return staffData.name_bn || staffData.name || '';
+      // Fallback to profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      return profile?.full_name || user.email || '';
+    },
+    enabled: !!user?.id,
   });
 
   const searchStudent = async () => {
@@ -90,25 +118,32 @@ const AdminStudentsFees = () => {
       const txnId = generateTransactionId();
       setTransactionId(txnId);
       const isCash = paymentMethod === 'cash';
-      const { error } = await supabase.from('payments').insert({
+      const payload = {
         fee_type: feeType,
         amount: parseFloat(amount),
         transaction_id: txnId,
-        status: isCash ? 'success' : 'pending',
+        status: isCash ? 'pending' : 'pending',
         student_id: foundStudent.id,
         payer_name: foundStudent.name_bn,
         payment_method: isCash ? 'cash' : 'online',
-        notes: `Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}${isCash ? ' | Cash Payment' : ''}`,
-      });
+        notes: `${bn ? 'আদায়কারী' : 'Collector'}: ${collectorName} | Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}${isCash ? ' | Cash Payment' : ''}`,
+      };
+
+      // Check if approval is needed
+      if (await checkApproval('add', payload, undefined, `${bn ? 'ফি আদায়' : 'Fee Collection'}: ৳${amount} - ${foundStudent.name_bn}`)) {
+        return txnId;
+      }
+
+      const { error } = await supabase.from('payments').insert(payload);
       if (error) throw error;
       return txnId;
     },
     onSuccess: (txnId) => {
       setStep('done');
       if (paymentMethod === 'cash') {
-        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Cash payment saved successfully');
+        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে (অনুমোদনের অপেক্ষায়)' : 'Cash payment saved (awaiting approval)');
       } else {
-        toast.success(bn ? 'পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Payment saved successfully');
+        toast.success(bn ? 'পেমেন্ট সংরক্ষিত হয়েছে' : 'Payment saved');
         setTimeout(() => {
           window.open(`https://payment-gateway.example.com/pay?txn=${txnId}&amount=${amount}`, '_blank');
         }, 1500);
@@ -260,6 +295,16 @@ const AdminStudentsFees = () => {
                 </div>
               </div>
 
+              {/* Collector name display for cash */}
+              {paymentMethod === 'cash' && collectorName && (
+                <div className="bg-accent/50 border border-accent rounded-lg p-3 flex items-center gap-2">
+                  <User className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-foreground">
+                    <strong>{bn ? 'আদায়কারী' : 'Collector'}:</strong> {collectorName}
+                  </span>
+                </div>
+              )}
+
               <div>
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'পরিমাণ (৳)' : 'Amount (৳)'} <span className="text-destructive">*</span>
@@ -306,6 +351,12 @@ const AdminStudentsFees = () => {
                   {paymentMethod === 'cash' ? <><Banknote className="w-4 h-4" /> {bn ? 'ক্যাশ' : 'Cash'}</> : <><Globe className="w-4 h-4" /> {bn ? 'অনলাইন' : 'Online'}</>}
                 </span>
               </div>
+              {paymentMethod === 'cash' && collectorName && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{bn ? 'আদায়কারী' : 'Collector'}</span>
+                  <span className="font-semibold text-foreground">{collectorName}</span>
+                </div>
+              )}
               <div className="border-t border-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-foreground">{bn ? 'মোট পরিমাণ' : 'Total Amount'}</span>
@@ -336,8 +387,8 @@ const AdminStudentsFees = () => {
                 : (bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!')}
             </h3>
             {paymentMethod === 'cash' && (
-              <p className="text-sm text-green-600 font-medium">
-                {bn ? 'পেমেন্ট সফলভাবে গৃহীত হয়েছে' : 'Payment received successfully'}
+              <p className="text-sm text-amber-600 font-medium">
+                {bn ? 'অনুমোদনের অপেক্ষায় রয়েছে' : 'Awaiting admin approval'}
               </p>
             )}
             <p className="text-sm text-muted-foreground">
@@ -357,6 +408,9 @@ const AdminStudentsFees = () => {
             </Button>
           </div>
         )}
+
+        {/* Receipt Download Section */}
+        <FeeReceiptDownload collectorName={collectorName} />
       </div>
     </AdminLayout>
   );
