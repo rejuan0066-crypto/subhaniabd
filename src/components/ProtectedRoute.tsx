@@ -49,7 +49,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   // Pending users must go to waiting-approval page
-  if (userStatus === 'pending' && role !== 'admin') {
+  if (userStatus === 'pending' && !isAdminRole(role)) {
     const path = location.pathname;
     if (path !== '/waiting-approval') {
       return <Navigate to="/waiting-approval" replace />;
