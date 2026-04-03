@@ -1,4 +1,5 @@
 import { ReactNode, useRef, useState } from 'react';
+import BackButton from './BackButton';
 import AdminPageWithTabs from './AdminPageWithTabs';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useIsEmbedded } from '@/contexts/EmbeddedContext';
@@ -313,6 +314,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {/* Content */}
         <main className="flex-1 p-4 sm:p-6">
           <AdminPageWithTabs>{children}</AdminPageWithTabs>
+          <BackButton />
         </main>
       </div>
     </div>

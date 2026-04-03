@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react';
+import BackButton from './BackButton';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
@@ -195,7 +196,10 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       </header>
 
       {/* Main */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {children}
+        <div className="container mx-auto px-4"><BackButton /></div>
+      </main>
 
       {/* Footer */}
       <footer

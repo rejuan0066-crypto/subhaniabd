@@ -69,6 +69,9 @@ import StaffDashboard from "./pages/StaffDashboard";
 import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/ScrollToTop";
+import BackButton from "./components/BackButton";
+import RouteLoader from "./components/RouteLoader";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +86,8 @@ const App = () => (
           <Sonner />
           <DynamicFavicon />
           <BrowserRouter>
+            <RouteLoader />
+            <ScrollToTop />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />

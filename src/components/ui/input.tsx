@@ -3,7 +3,18 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, onChange, ...props }, ref) => {
+    const handleChange = type === 'number' && onChange
+      ? (e: React.ChangeEvent<HTMLInputElement>) => {
+          // Allow empty value so backspace works without resetting to 0
+          if (e.target.value === '') {
+            onChange(e);
+            return;
+          }
+          onChange(e);
+        }
+      : onChange;
+
     return (
       <input
         type={type}
@@ -12,6 +23,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className,
         )}
         ref={ref}
+        onChange={handleChange}
         {...props}
       />
     );
