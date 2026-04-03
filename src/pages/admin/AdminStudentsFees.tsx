@@ -300,6 +300,12 @@ const AdminStudentsFees = () => {
                   {feeType && (bn ? feeTypeLabels[feeType].bn : feeTypeLabels[feeType].en)}
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">{bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'}</span>
+                <span className="font-semibold text-foreground flex items-center gap-1">
+                  {paymentMethod === 'cash' ? <><Banknote className="w-4 h-4" /> {bn ? 'ক্যাশ' : 'Cash'}</> : <><Globe className="w-4 h-4" /> {bn ? 'অনলাইন' : 'Online'}</>}
+                </span>
+              </div>
               <div className="border-t border-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-foreground">{bn ? 'মোট পরিমাণ' : 'Total Amount'}</span>
@@ -312,8 +318,8 @@ const AdminStudentsFees = () => {
               </Button>
               <Button onClick={() => payMutation.mutate()} className="btn-primary-gradient flex-1" disabled={payMutation.isPending}>
                 {payMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                <CheckCircle className="w-4 h-4 mr-1" />
-                {bn ? 'নিশ্চিত করুন ও পরিশোধ করুন' : 'Confirm & Pay'}
+                {paymentMethod === 'cash' ? <Banknote className="w-4 h-4 mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+                {paymentMethod === 'cash' ? (bn ? 'ক্যাশ পরিশোধ নিশ্চিত করুন' : 'Confirm Cash Payment') : (bn ? 'নিশ্চিত করুন ও পরিশোধ করুন' : 'Confirm & Pay')}
               </Button>
             </div>
           </div>
