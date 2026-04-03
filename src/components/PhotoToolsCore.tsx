@@ -347,19 +347,44 @@ const CropControls = ({ language, cropW, cropH, canCrop, onCrop, hasResult, onRe
 );
 
 // ─── BG Remove Controls ───
-const BgRemoveControls = ({ language, processing, onRemove, downloadFormat, onFormatChange, bgResult, onDownload }: {
+const BG_MODES = [
+  { key: 'auto', labelBn: 'অটো', labelEn: 'Auto', descBn: 'AI স্বয়ংক্রিয়ভাবে চিনবে', descEn: 'AI auto-detects subject' },
+  { key: 'person', labelBn: 'ব্যক্তি', labelEn: 'Person', descBn: 'মানুষের ছবি থেকে BG রিমুভ', descEn: 'Person/portrait cutout' },
+  { key: 'object', labelBn: 'অবজেক্ট', labelEn: 'Object', descBn: 'পণ্য/বস্তু থেকে BG রিমুভ', descEn: 'Product/object cutout' },
+  { key: 'design', labelBn: 'ডিজাইন', labelEn: 'Design', descBn: 'ব্যানার/গ্রাফিক্সের BG রিমুভ', descEn: 'Banner/graphic BG remove' },
+];
+
+const BgRemoveControls = ({ language, processing, onRemove, downloadFormat, onFormatChange, bgResult, onDownload, mode, onModeChange }: {
   language: string; processing: boolean; onRemove: () => void;
   downloadFormat: string; onFormatChange: (f: string) => void;
   bgResult: string | null; onDownload: () => void;
+  mode: string; onModeChange: (m: string) => void;
 }) => (
   <div className="space-y-4">
     <GlassPanel>
       <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
-        {language === 'bn' ? 'ব্যাকগ্রাউন্ড রিমুভ' : 'Background Removal'}
+        {language === 'bn' ? 'রিমুভ মোড' : 'Removal Mode'}
       </Label>
-      <p className="text-xs text-muted-foreground">
-        {language === 'bn' ? 'AI ব্যবহার করে ছবির ব্যাকগ্রাউন্ড মুছে ফেলুন।' : 'AI-powered background removal.'}
-      </p>
+      <div className="grid grid-cols-2 gap-1.5">
+        {BG_MODES.map(m => (
+          <button
+            key={m.key}
+            onClick={() => onModeChange(m.key)}
+            className={`py-2 px-2 rounded-lg text-left transition-all duration-200 border ${
+              mode === m.key
+                ? 'bg-primary/10 border-primary/40 shadow-sm'
+                : 'bg-muted/20 border-border/20 hover:bg-muted/40'
+            }`}
+          >
+            <span className={`text-[11px] font-semibold block ${mode === m.key ? 'text-primary' : 'text-foreground'}`}>
+              {language === 'bn' ? m.labelBn : m.labelEn}
+            </span>
+            <span className="text-[9px] text-muted-foreground leading-tight block">
+              {language === 'bn' ? m.descBn : m.descEn}
+            </span>
+          </button>
+        ))}
+      </div>
     </GlassPanel>
     <Button className="w-full h-10 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" onClick={onRemove} disabled={processing}>
       {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Eraser className="w-4 h-4 mr-2" />}
@@ -533,6 +558,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
   const [cropH, setCropH] = useState(0);
   const [showOriginal, setShowOriginal] = useState(false);
   const [bgDownloadFormat, setBgDownloadFormat] = useState('png');
+  const [bgMode, setBgMode] = useState('auto');
 
   const handleFile = (f: File) => {
     const objUrl = URL.createObjectURL(f);
@@ -664,7 +690,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
         reader.onloadend = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
       });
-      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: base64 } });
+      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: base64, mode: bgMode } });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); setProcessing(false); return; }
       if (data?.image) { setBgResult(data.image); toast.success(language === 'bn' ? 'ব্যাকগ্রাউন্ড রিমুভ সফল!' : 'Background removed!'); }
@@ -819,7 +845,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
             <CropControls language={language} cropW={cropW} cropH={cropH} canCrop={!!(cropData && cropData.w >= 5)} onCrop={doCrop} hasResult={!!result} onRecrop={() => { setResult(null); setCropData(null); setCropW(0); setCropH(0); setShowOriginal(false); }} />
           )}
           {activeTab === 'bg-remove' && (
-            <BgRemoveControls language={language} processing={processing} onRemove={removeBg} downloadFormat={bgDownloadFormat} onFormatChange={setBgDownloadFormat} bgResult={bgResult} onDownload={downloadBgResult} />
+            <BgRemoveControls language={language} processing={processing} onRemove={removeBg} downloadFormat={bgDownloadFormat} onFormatChange={setBgDownloadFormat} bgResult={bgResult} onDownload={downloadBgResult} mode={bgMode} onModeChange={setBgMode} />
           )}
         </div>
       </div>
