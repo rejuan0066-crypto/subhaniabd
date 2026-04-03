@@ -378,8 +378,8 @@ const AdminStudentsFees = () => {
 
         {step === 'done' && (
           <div className="card-elevated p-6 text-center space-y-4">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${paymentMethod === 'cash' ? 'bg-green-500/10' : 'bg-primary/10'}`}>
-              {paymentMethod === 'cash' ? <Banknote className="w-8 h-8 text-green-600" /> : <CheckCircle className="w-8 h-8 text-primary" />}
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${paymentMethod === 'cash' ? 'bg-primary/10' : 'bg-primary/10'}`}>
+              {paymentMethod === 'cash' ? <Banknote className="w-8 h-8 text-primary" /> : <CheckCircle className="w-8 h-8 text-primary" />}
             </div>
             <h3 className="font-display font-bold text-foreground text-lg">
               {paymentMethod === 'cash'
@@ -387,7 +387,7 @@ const AdminStudentsFees = () => {
                 : (bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!')}
             </h3>
             {paymentMethod === 'cash' && (
-              <p className="text-sm text-amber-600 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 {bn ? 'অনুমোদনের অপেক্ষায় রয়েছে' : 'Awaiting admin approval'}
               </p>
             )}
