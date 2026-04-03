@@ -64,26 +64,26 @@ const ImageUpload = ({ value, onChange, folder = 'general', label, className = '
   return (
     <div className={className}>
       {label && <label className="text-sm font-medium text-foreground mb-1 block">{label}</label>}
-      <div className="relative">
+      <div className={`relative inline-block ${aspectRatio}`}>
         {value ? (
-          <div className="relative group">
-            <img src={value} alt="" className={`w-full ${aspectRatio} object-cover rounded-lg border border-border`} />
+          <div className="relative group h-full w-full">
+            <img src={value} alt="" className="h-full w-full object-cover rounded-lg border border-border" />
             <button
               onClick={() => onChange('')}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-1 right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3 h-3" />
             </button>
           </div>
         ) : (
-          <label className={`flex flex-col items-center justify-center ${aspectRatio} rounded-lg border-2 border-dashed border-border bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors`}>
+          <label className="flex flex-col items-center justify-center h-full w-full rounded-lg border-2 border-dashed border-border bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors">
             {uploading ? (
-              <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
+              <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
             ) : (
               <>
-                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                <span className="text-xs text-muted-foreground">
-                  {language === 'bn' ? 'ছবি আপলোড করুন' : 'Upload Image'}
+                <Upload className="w-6 h-6 text-muted-foreground mb-1" />
+                <span className="text-[10px] text-muted-foreground text-center px-1">
+                  {language === 'bn' ? 'আপলোড' : 'Upload'}
                 </span>
               </>
             )}
