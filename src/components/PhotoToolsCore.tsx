@@ -347,8 +347,10 @@ const CropControls = ({ language, cropW, cropH, canCrop, onCrop, hasResult, onRe
 );
 
 // ─── BG Remove Controls ───
-const BgRemoveControls = ({ language, processing, onRemove }: {
+const BgRemoveControls = ({ language, processing, onRemove, downloadFormat, onFormatChange, bgResult, onDownload }: {
   language: string; processing: boolean; onRemove: () => void;
+  downloadFormat: string; onFormatChange: (f: string) => void;
+  bgResult: string | null; onDownload: () => void;
 }) => (
   <div className="space-y-4">
     <GlassPanel>
@@ -356,13 +358,39 @@ const BgRemoveControls = ({ language, processing, onRemove }: {
         {language === 'bn' ? 'ব্যাকগ্রাউন্ড রিমুভ' : 'Background Removal'}
       </Label>
       <p className="text-xs text-muted-foreground">
-        {language === 'bn' ? 'AI ব্যবহার করে ছবির ব্যাকগ্রাউন্ড মুছে ফেলুন। ট্রান্সপারেন্ট PNG তৈরি হবে।' : 'AI-powered background removal. Creates a transparent PNG output.'}
+        {language === 'bn' ? 'AI ব্যবহার করে ছবির ব্যাকগ্রাউন্ড মুছে ফেলুন।' : 'AI-powered background removal.'}
       </p>
     </GlassPanel>
     <Button className="w-full h-10 text-sm font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-md shadow-primary/20" onClick={onRemove} disabled={processing}>
       {processing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Eraser className="w-4 h-4 mr-2" />}
       {language === 'bn' ? (processing ? 'AI প্রসেসিং... (১০-৩০s)' : 'ব্যাকগ্রাউন্ড রিমুভ') : (processing ? 'AI Processing...' : 'Remove Background')}
     </Button>
+    {bgResult && (
+      <GlassPanel>
+        <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+          {language === 'bn' ? 'ডাউনলোড ফরম্যাট' : 'Download Format'}
+        </Label>
+        <div className="flex gap-1.5 mb-3">
+          {['png', 'jpeg', 'webp', 'svg'].map(fmt => (
+            <button
+              key={fmt}
+              onClick={() => onFormatChange(fmt)}
+              className={`flex-1 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-200 ${
+                downloadFormat === fmt
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/40 text-muted-foreground hover:bg-muted/70'
+              }`}
+            >
+              {fmt.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <Button className="w-full h-9 text-xs font-semibold rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white shadow-md shadow-green-600/20" onClick={onDownload}>
+          <Download className="w-3.5 h-3.5 mr-1.5" />
+          {language === 'bn' ? `${downloadFormat.toUpperCase()} ডাউনলোড` : `Download ${downloadFormat.toUpperCase()}`}
+        </Button>
+      </GlassPanel>
+    )}
   </div>
 );
 
