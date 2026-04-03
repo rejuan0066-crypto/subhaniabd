@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 type FeeType = 'admission_fee' | 'monthly_fee' | 'exam_fee';
+type PaymentMethod = 'cash' | 'online';
 
 const feeTypeLabels: Record<FeeType, { bn: string; en: string }> = {
   admission_fee: { bn: 'ভর্তি ফি', en: 'Admission Fee' },
