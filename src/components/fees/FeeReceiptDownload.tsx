@@ -214,10 +214,15 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
               </SelectContent>
             </Select>
           </div>
-        ) : (
+        ) : searchType === 'session_roll' ? (
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
             <Input className="bg-background" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} placeholder={bn ? 'রোল' : 'Roll'} />
+          </div>
+        ) : (
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'}</label>
+            <Input className="bg-background" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
           </div>
         )}
       </div>
