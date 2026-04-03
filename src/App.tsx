@@ -139,6 +139,7 @@ const App = () => (
               <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
               <Route path="/admin/user-management" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
               <Route path="/admin/approvals" element={<ProtectedRoute><AdminApprovals /></ProtectedRoute>} />
+              <Route path="/admin/photo-tools" element={<ProtectedRoute><AdminPhotoTools /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
