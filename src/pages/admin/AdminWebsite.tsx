@@ -31,6 +31,7 @@ const AVAILABLE_PAGES = [
   { path: '/donation', label_bn: 'দান', label_en: 'Donation' },
   { path: '/fee-payment', label_bn: 'ফি প্রদান', label_en: 'Fee Payment' },
   { path: '/contact', label_bn: 'যোগাযোগ', label_en: 'Contact' },
+  { path: '/photo-tools', label_bn: 'ফটো টুলস', label_en: 'Photo Tools' },
   { path: '/posts', label_bn: 'পোস্ট/সংবাদ', label_en: 'Posts/News' },
 ];
 
