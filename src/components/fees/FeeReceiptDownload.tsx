@@ -15,10 +15,11 @@ interface Props {
 const FeeReceiptDownload = ({ collectorName }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const [searchType, setSearchType] = useState<'session_class' | 'session_roll'>('session_class');
+  const [searchType, setSearchType] = useState<'session_class' | 'session_roll' | 'session_reg'>('session_class');
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
+  const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success'>('pending');
   const [loading, setLoading] = useState(false);
 
@@ -68,6 +69,8 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         studentQuery = studentQuery.eq('class_id', selectedClass);
       } else if (searchType === 'session_roll' && rollNumber) {
         studentQuery = studentQuery.eq('roll_number', rollNumber.trim());
+      } else if (searchType === 'session_reg' && regNumber) {
+        studentQuery = studentQuery.eq('student_id', regNumber.trim());
       }
 
       const { data: students, error: studErr } = await studentQuery.order('roll_number');
@@ -171,7 +174,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       </div>
 
       {/* Search type */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button onClick={() => setSearchType('session_class')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_class' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'সেশন + ক্লাস' : 'Session + Class'}
@@ -179,6 +182,10 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         <button onClick={() => setSearchType('session_roll')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_roll' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'সেশন + রোল' : 'Session + Roll'}
+        </button>
+        <button onClick={() => setSearchType('session_reg')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_reg' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
+          {bn ? 'সেশন + রেজিস্ট্রেশন' : 'Session + Registration'}
         </button>
       </div>
 
@@ -207,10 +214,15 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
               </SelectContent>
             </Select>
           </div>
-        ) : (
+        ) : searchType === 'session_roll' ? (
           <div>
             <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
             <Input className="bg-background" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} placeholder={bn ? 'রোল' : 'Roll'} />
+          </div>
+        ) : (
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'}</label>
+            <Input className="bg-background" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
           </div>
         )}
       </div>
@@ -233,7 +245,7 @@ interface PrintReceiptParams {
   approverName: string;
   statusFilter: 'pending' | 'success';
   bn: boolean;
-  searchType: 'session_class' | 'session_roll';
+  searchType: 'session_class' | 'session_roll' | 'session_reg';
 }
 
 const feeTypeLabels: Record<string, { bn: string; en: string }> = {
