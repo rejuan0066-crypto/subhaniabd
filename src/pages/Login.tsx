@@ -102,6 +102,8 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="bg-background"
+              name="password"
+              autoComplete="current-password"
             />
           </div>
           <div className="text-right">
