@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
-import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User } from 'lucide-react';
+import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User, Banknote, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 type FeeType = 'admission_fee' | 'monthly_fee' | 'exam_fee';
+type PaymentMethod = 'cash' | 'online';
 
 const feeTypeLabels: Record<FeeType, { bn: string; en: string }> = {
   admission_fee: { bn: 'ভর্তি ফি', en: 'Admission Fee' },
@@ -33,6 +34,7 @@ const AdminStudentsFees = () => {
   const bn = language === 'bn';
   const [feeType, setFeeType] = useState<FeeType | ''>('');
   const [amount, setAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
   const [transactionId, setTransactionId] = useState('');
 
@@ -87,24 +89,30 @@ const AdminStudentsFees = () => {
       if (!feeType || !foundStudent || !amount) throw new Error('All fields are required');
       const txnId = generateTransactionId();
       setTransactionId(txnId);
+      const isCash = paymentMethod === 'cash';
       const { error } = await supabase.from('payments').insert({
         fee_type: feeType,
         amount: parseFloat(amount),
         transaction_id: txnId,
-        status: 'pending',
+        status: isCash ? 'success' : 'pending',
         student_id: foundStudent.id,
         payer_name: foundStudent.name_bn,
-        notes: `Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}`,
+        payment_method: isCash ? 'cash' : 'online',
+        notes: `Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}${isCash ? ' | Cash Payment' : ''}`,
       });
       if (error) throw error;
       return txnId;
     },
     onSuccess: (txnId) => {
       setStep('done');
-      toast.success(bn ? 'পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Payment saved successfully');
-      setTimeout(() => {
-        window.open(`https://payment-gateway.example.com/pay?txn=${txnId}&amount=${amount}`, '_blank');
-      }, 1500);
+      if (paymentMethod === 'cash') {
+        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Cash payment saved successfully');
+      } else {
+        toast.success(bn ? 'পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Payment saved successfully');
+        setTimeout(() => {
+          window.open(`https://payment-gateway.example.com/pay?txn=${txnId}&amount=${amount}`, '_blank');
+        }, 1500);
+      }
     },
     onError: (e: any) => toast.error(e.message || 'Error saving payment'),
   });
@@ -120,6 +128,7 @@ const AdminStudentsFees = () => {
     setStep('form');
     setFeeType('');
     setAmount('');
+    setPaymentMethod('cash');
     setTransactionId('');
     setFoundStudent(null);
     setRegNo('');
@@ -232,6 +241,25 @@ const AdminStudentsFees = () => {
                 </Select>
               </div>
 
+              {/* Payment Method */}
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2 block">
+                  {bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'} <span className="text-destructive">*</span>
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button onClick={() => setPaymentMethod('cash')}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === 'cash' ? 'border-primary bg-primary/5 text-primary' : 'border-border bg-background text-muted-foreground hover:border-primary/40'}`}>
+                    <Banknote className="w-5 h-5" />
+                    {bn ? 'ক্যাশ পেমেন্ট' : 'Cash Payment'}
+                  </button>
+                  <button onClick={() => setPaymentMethod('online')}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${paymentMethod === 'online' ? 'border-primary bg-primary/5 text-primary' : 'border-border bg-background text-muted-foreground hover:border-primary/40'}`}>
+                    <Globe className="w-5 h-5" />
+                    {bn ? 'অনলাইন পেমেন্ট' : 'Online Payment'}
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'পরিমাণ (৳)' : 'Amount (৳)'} <span className="text-destructive">*</span>
@@ -272,6 +300,12 @@ const AdminStudentsFees = () => {
                   {feeType && (bn ? feeTypeLabels[feeType].bn : feeTypeLabels[feeType].en)}
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">{bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'}</span>
+                <span className="font-semibold text-foreground flex items-center gap-1">
+                  {paymentMethod === 'cash' ? <><Banknote className="w-4 h-4" /> {bn ? 'ক্যাশ' : 'Cash'}</> : <><Globe className="w-4 h-4" /> {bn ? 'অনলাইন' : 'Online'}</>}
+                </span>
+              </div>
               <div className="border-t border-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-foreground">{bn ? 'মোট পরিমাণ' : 'Total Amount'}</span>
@@ -284,8 +318,8 @@ const AdminStudentsFees = () => {
               </Button>
               <Button onClick={() => payMutation.mutate()} className="btn-primary-gradient flex-1" disabled={payMutation.isPending}>
                 {payMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                <CheckCircle className="w-4 h-4 mr-1" />
-                {bn ? 'নিশ্চিত করুন ও পরিশোধ করুন' : 'Confirm & Pay'}
+                {paymentMethod === 'cash' ? <Banknote className="w-4 h-4 mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+                {paymentMethod === 'cash' ? (bn ? 'ক্যাশ পরিশোধ নিশ্চিত করুন' : 'Confirm Cash Payment') : (bn ? 'নিশ্চিত করুন ও পরিশোধ করুন' : 'Confirm & Pay')}
               </Button>
             </div>
           </div>
@@ -293,22 +327,31 @@ const AdminStudentsFees = () => {
 
         {step === 'done' && (
           <div className="card-elevated p-6 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8 text-primary" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${paymentMethod === 'cash' ? 'bg-green-500/10' : 'bg-primary/10'}`}>
+              {paymentMethod === 'cash' ? <Banknote className="w-8 h-8 text-green-600" /> : <CheckCircle className="w-8 h-8 text-primary" />}
             </div>
             <h3 className="font-display font-bold text-foreground text-lg">
-              {bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!'}
+              {paymentMethod === 'cash'
+                ? (bn ? 'ক্যাশ পেমেন্ট সম্পন্ন!' : 'Cash Payment Complete!')
+                : (bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!')}
             </h3>
+            {paymentMethod === 'cash' && (
+              <p className="text-sm text-green-600 font-medium">
+                {bn ? 'পেমেন্ট সফলভাবে গৃহীত হয়েছে' : 'Payment received successfully'}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
-              {bn ? 'আপনার ট্রানজেকশন আইডি:' : 'Your Transaction ID:'}
+              {bn ? 'ট্রানজেকশন আইডি:' : 'Transaction ID:'}
             </p>
             <div className="bg-secondary/50 rounded-lg px-4 py-3 font-mono text-lg font-bold text-foreground">
               {transactionId}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...'}
-              <ExternalLink className="w-3 h-3 inline ml-1" />
-            </p>
+            {paymentMethod === 'online' && (
+              <p className="text-xs text-muted-foreground">
+                {bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...'}
+                <ExternalLink className="w-3 h-3 inline ml-1" />
+              </p>
+            )}
             <Button variant="outline" onClick={handleReset} className="mt-4">
               {bn ? 'নতুন পেমেন্ট' : 'New Payment'}
             </Button>
