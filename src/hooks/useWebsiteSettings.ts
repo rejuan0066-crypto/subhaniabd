@@ -388,6 +388,7 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   login_bg_blur: 0,
   login_institution_name_bn: '',
   login_institution_name_en: '',
+  logo_shape: 'square',
 };
 
 export const useWebsiteSettings = () => {
