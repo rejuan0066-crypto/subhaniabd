@@ -314,6 +314,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {/* Content */}
         <main className="flex-1 p-4 sm:p-6">
           <AdminPageWithTabs>{children}</AdminPageWithTabs>
+          <BackButton />
         </main>
       </div>
     </div>
