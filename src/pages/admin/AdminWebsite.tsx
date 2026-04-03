@@ -1487,7 +1487,21 @@ const AdminWebsite = () => {
                     <Label>{language === 'bn' ? 'প্রতিষ্ঠানের নাম দেখান' : 'Show Institution Name'}</Label>
                   </div>
                 </div>
-                <Button size="sm" className="btn-primary-gradient" onClick={() => saveSection(['login_show_logo', 'login_show_institution_name'])} disabled={saving}>
+                {form.login_show_institution_name && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label>{language === 'bn' ? 'প্রতিষ্ঠানের নাম (বাংলা) - লগইনে' : 'Institution Name (Bangla) - Login'}</Label>
+                      <Input className="bg-background mt-1" value={form.login_institution_name_bn} onChange={e => updateField('login_institution_name_bn', e.target.value)} placeholder={settings.institution_name} />
+                      <p className="text-xs text-muted-foreground mt-1">{language === 'bn' ? 'খালি রাখলে মূল নাম দেখাবে' : 'Leave empty to use main name'}</p>
+                    </div>
+                    <div>
+                      <Label>{language === 'bn' ? 'প্রতিষ্ঠানের নাম (ইংরেজি) - লগইনে' : 'Institution Name (English) - Login'}</Label>
+                      <Input className="bg-background mt-1" value={form.login_institution_name_en} onChange={e => updateField('login_institution_name_en', e.target.value)} placeholder={settings.institution_name_en} />
+                      <p className="text-xs text-muted-foreground mt-1">{language === 'bn' ? 'খালি রাখলে মূল নাম দেখাবে' : 'Leave empty to use main name'}</p>
+                    </div>
+                  </div>
+                )}
+                <Button size="sm" className="btn-primary-gradient" onClick={() => saveSection(['login_show_logo', 'login_show_institution_name', 'login_institution_name_bn', 'login_institution_name_en'])} disabled={saving}>
                   <Save className="w-3 h-3 mr-1" /> {language === 'bn' ? 'সেভ' : 'Save'}
                 </Button>
               </div>

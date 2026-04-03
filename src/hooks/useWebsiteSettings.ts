@@ -384,6 +384,9 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   login_form_bg_color: '',
   login_form_border_radius: 12,
   login_form_shadow: true,
+  login_bg_blur: 0,
+  login_institution_name_bn: '',
+  login_institution_name_en: '',
 };
 
 export const useWebsiteSettings = () => {

@@ -99,7 +99,9 @@ const Login = () => {
           )}
           {showName && (
             <h1 className="text-xl font-display font-bold text-foreground">
-              {language === 'bn' ? settings.institution_name : settings.institution_name_en}
+              {language === 'bn'
+                ? (settings.login_institution_name_bn || settings.institution_name)
+                : (settings.login_institution_name_en || settings.institution_name_en)}
             </h1>
           )}
           <p className="text-lg font-semibold text-foreground mt-1">{welcomeMsg}</p>
