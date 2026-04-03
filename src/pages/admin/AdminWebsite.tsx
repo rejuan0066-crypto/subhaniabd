@@ -410,8 +410,19 @@ const AdminWebsite = () => {
                     aspectRatio="aspect-square w-32"
                   />
                 </div>
+                <div>
+                  <Label>{language === 'bn' ? 'ফেভিকন / লোডার লোগো (আলাদা)' : 'Favicon / Loader Logo (Separate)'}</Label>
+                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'ব্রাউজার ট্যাব ও পেজ লোডারে আলাদা লোগো দেখাতে চাইলে আপলোড করুন। না দিলে মূল লোগো ব্যবহৃত হবে।' : 'Upload a separate logo for browser tab & page loader. Falls back to main logo if empty.'}</p>
+                  <ImageUpload
+                    value={form.favicon_url}
+                    onChange={(url) => updateField('favicon_url', url)}
+                    folder="logo"
+                    className="mt-1"
+                    aspectRatio="aspect-square w-24"
+                  />
+                </div>
               </div>
-              <Button className="btn-primary-gradient" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url'])} disabled={saving}>
+              <Button className="btn-primary-gradient" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url'])} disabled={saving}>
                 <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সংরক্ষণ' : 'Save'}
               </Button>
             </div>
