@@ -310,6 +310,36 @@ const AdminStudentsFees = () => {
                     {bn ? 'অনলাইন পেমেন্ট' : 'Online Payment'}
                   </button>
                 </div>
+
+                {/* Online payment gateway status */}
+                {paymentMethod === 'online' && !isGatewayReady && (
+                  <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-warning shrink-0" />
+                      <span className="text-sm font-medium text-warning">
+                        {bn ? 'পেমেন্ট গেটওয়ে সেটআপ করা হয়নি' : 'Payment gateway not configured'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {bn
+                        ? 'অনলাইন পেমেন্ট ব্যবহার করতে প্রথমে পেমেন্ট গেটওয়ে (bKash, Nagad, SSLCommerz ইত্যাদি) সেটআপ করুন।'
+                        : 'To accept online payments, configure a payment gateway (bKash, Nagad, SSLCommerz, etc.) first.'}
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-1" onClick={() => navigate('/admin/settings')}>
+                      <Settings className="w-3.5 h-3.5 mr-1.5" />
+                      {bn ? 'গেটওয়ে সেটআপ করুন' : 'Setup Gateway'}
+                    </Button>
+                  </div>
+                )}
+
+                {paymentMethod === 'online' && isGatewayReady && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm text-foreground">
+                      {bn ? `${gatewayConfig?.provider_name || gatewayConfig?.provider} গেটওয়ে সক্রিয়` : `${gatewayConfig?.provider_name || gatewayConfig?.provider} gateway active`}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Collector name display for cash */}
