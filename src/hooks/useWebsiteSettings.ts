@@ -237,6 +237,15 @@ export interface WebsiteSettings {
   };
   divisions: Array<{ name: string; nameEn: string; icon: string }>;
   info_links: InfoLink[];
+  login_bg_image_url: string;
+  login_bg_color: string;
+  login_show_logo: boolean;
+  login_show_institution_name: boolean;
+  login_welcome_bn: string;
+  login_welcome_en: string;
+  login_form_bg_color: string;
+  login_form_border_radius: number;
+  login_form_shadow: boolean;
 }
 
 const DEFAULT_SETTINGS: WebsiteSettings = {
