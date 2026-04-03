@@ -36,6 +36,11 @@ interface MoveToSubMenuState {
   itemIndex: number | null;
 }
 
+interface AddMenuDialogState {
+  open: boolean;
+  type: 'sidebar' | 'public';
+}
+
 const AdminMenuManager = () => {
   const { language } = useLanguage();
   const { menuConfig, saveMenuConfig } = useMenuSettings();
@@ -46,6 +51,8 @@ const AdminMenuManager = () => {
   const [editForm, setEditForm] = useState({ label_bn: '', label_en: '', icon: '' });
   const [moveDialog, setMoveDialog] = useState<MoveToSubMenuState>({ open: false, itemIndex: null });
   const [selectedParent, setSelectedParent] = useState<string>('');
+  const [addDialog, setAddDialog] = useState<AddMenuDialogState>({ open: false, type: 'sidebar' });
+  const [newItem, setNewItem] = useState({ id: '', path: '', label_bn: '', label_en: '', icon: 'FileBox' });
 
   const bn = language === 'bn';
 
