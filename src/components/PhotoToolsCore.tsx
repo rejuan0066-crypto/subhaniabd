@@ -300,9 +300,8 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
   }, []);
 
   const getImageRelativeCoords = (e: React.MouseEvent) => {
-    const img = imgRef.current;
-    if (!img) return { x: 0, y: 0 };
-    const rect = img.getBoundingClientRect();
+    // Use the wrapper div (e.currentTarget) since img has pointer-events-none
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     return {
       x: Math.max(0, Math.min(e.clientX - rect.left, rect.width)),
       y: Math.max(0, Math.min(e.clientY - rect.top, rect.height)),
