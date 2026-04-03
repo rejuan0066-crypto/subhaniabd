@@ -510,6 +510,20 @@ const StaffDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* Permission-based module tabs */}
+          {permittedModules.map(mod => (
+            <TabsContent key={mod.key} value={`module-${mod.key}`}>
+              <ErrorBoundary>
+                <Suspense fallback={
+                  <div className="min-h-[200px] flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                }>
+                  <mod.component />
+                </Suspense>
+              </ErrorBoundary>
+            </TabsContent>
+          ))}
         </Tabs>
       </main>
     </div>
