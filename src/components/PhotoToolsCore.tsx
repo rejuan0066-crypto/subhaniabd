@@ -459,7 +459,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     <div className="flex flex-col lg:flex-row gap-4 min-h-[40vh]">
       {/* ─── Left: Canvas ─── */}
       <div className="flex-1 flex flex-col gap-3">
-        <div className="relative flex-1 min-h-[140px] max-h-[32vh] rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden lg:sticky lg:top-4">
+        <div className="relative flex-1 min-h-[200px] rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden lg:sticky lg:top-4">
           {processing && <ProcessingOverlay language={language} />}
           <CanvasPreview
             preview={preview}
@@ -467,7 +467,18 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
             activeTab={activeTab}
             language={language}
             onCropData={handleCropData}
+            showOriginal={showOriginal}
           />
+          {/* Preview toggle button */}
+          {hasResult && activeTab !== 'crop' && (
+            <button
+              onClick={() => setShowOriginal(!showOriginal)}
+              className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-background/80 backdrop-blur-sm border border-border/30 text-foreground hover:bg-background/95 transition-all duration-200 shadow-sm"
+            >
+              {showOriginal ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+              {showOriginal ? (language === 'bn' ? 'ফলাফল দেখুন' : 'Show Result') : (language === 'bn' ? 'মূল ছবি দেখুন' : 'Show Original')}
+            </button>
+          )}
         </div>
 
         {/* Result info bar */}
