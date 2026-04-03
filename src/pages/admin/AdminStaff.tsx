@@ -23,6 +23,7 @@ const AdminStaff = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/staff', 'staff');
+  const { role } = useAuth();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
