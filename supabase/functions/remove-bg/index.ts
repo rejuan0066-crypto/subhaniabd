@@ -6,11 +6,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PROMPTS: Record<string, string> = {
+  person: `Remove the background from this photo of a person. Keep the person (face, hair, body, clothing, accessories) 100% intact with sharp, clean edges. Make the background fully transparent (alpha=0). Preserve all skin tones, hair strands, and fine details. No halos, no color bleeding, no erosion of edges. Return a clean PNG with transparent background.`,
+  object: `Remove the background from this product/object image. Keep the entire object intact — preserve all edges, colors, textures, shadows, reflections, and fine details exactly as they are. Make the background fully transparent (alpha=0). Do NOT remove any part of the object even if it is white, cream, or light-colored. No halos, no fringing. Return a clean PNG with transparent background.`,
+  design: `Remove ONLY the solid/plain outer background color from this design/banner/graphic image and make it transparent. CRITICAL: This is a decorative design — preserve ALL elements including patterns, ornaments, borders, text, gradients, light-colored areas, and every decorative detail. Only remove the outermost uniform background color. If in doubt, keep the pixel. Return a clean PNG with transparent background.`,
+  auto: `Perform intelligent background removal on this image. Identify the main subject (person, object, or design) and remove only the true background. Make removed areas fully transparent (alpha=0). CRITICAL RULES: 1) Preserve ALL foreground content including white, cream, beige, gold, and light-colored elements that are part of the subject. 2) Keep sharp, clean edges with no halos or color bleeding. 3) If ambiguous, prefer keeping pixels rather than removing them. 4) Preserve original colors, textures, shadows, and fine details. Return a clean PNG with transparent background.`,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { image_base64 } = await req.json();
+    const { image_base64, mode = "auto" } = await req.json();
     if (!image_base64) {
       return new Response(JSON.stringify({ error: "image_base64 is required" }), {
         status: 400,
@@ -26,6 +33,8 @@ serve(async (req) => {
       });
     }
 
+    const prompt = PROMPTS[mode] || PROMPTS.auto;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -38,14 +47,8 @@ serve(async (req) => {
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: "Perform a high-precision background removal on this exact image. NON-NEGOTIABLE RULES: 1) Remove ONLY the true outer/background area and make it fully transparent (alpha=0). 2) Preserve the ENTIRE foreground subject exactly as-is, including all white, off-white, cream, beige, gold, pale gray, and low-contrast regions that belong to the subject. 3) If any part is ambiguous, prefer keeping the pixel rather than deleting subject detail. 4) Do not let foreground colors blend into the transparent background. 5) Preserve original color, opacity, texture, ornament, shadows, and edge shape of the subject; no tint shift, desaturation, erosion, or glow. 6) Avoid halos, cut edges, holes, missing borders, or semi-transparent fringing. 7) Keep thin outlines, decorative borders, and subtle light details fully intact. 8) Return only a clean PNG of the same subject with transparent background.",
-              },
-              {
-                type: "image_url",
-                image_url: { url: image_base64 },
-              },
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: image_base64 } },
             ],
           },
         ],
