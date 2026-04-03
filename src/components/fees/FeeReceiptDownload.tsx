@@ -174,7 +174,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       </div>
 
       {/* Search type */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <button onClick={() => setSearchType('session_class')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_class' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'সেশন + ক্লাস' : 'Session + Class'}
@@ -182,6 +182,10 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         <button onClick={() => setSearchType('session_roll')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_roll' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'সেশন + রোল' : 'Session + Roll'}
+        </button>
+        <button onClick={() => setSearchType('session_reg')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchType === 'session_reg' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
+          {bn ? 'সেশন + রেজিস্ট্রেশন' : 'Session + Registration'}
         </button>
       </div>
 
