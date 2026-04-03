@@ -392,6 +392,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
 // ─── Main Component ───
 export const PhotoToolsCore = ({ language, onReset: externalReset }: { language: string; onReset?: () => void }) => {
   const [preview, setPreview] = useState('');
+  const [previewObjUrl, setPreviewObjUrl] = useState('');
   const [originalInfo, setOriginalInfo] = useState({ width: 0, height: 0, size: 0 });
   const [activeTab, setActiveTab] = useState<'resize' | 'crop' | 'bg-remove'>('resize');
   const [processing, setProcessing] = useState(false);
@@ -404,6 +405,8 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
 
   const handleFile = (f: File, src: string) => {
     setPreview(src);
+    const objUrl = URL.createObjectURL(f);
+    setPreviewObjUrl(objUrl);
     const img = new window.Image();
     img.onload = () => setOriginalInfo({ width: img.width, height: img.height, size: f.size });
     img.src = src;
