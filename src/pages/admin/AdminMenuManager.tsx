@@ -500,6 +500,76 @@ const AdminMenuManager = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add New Menu Item Dialog */}
+      <Dialog open={addDialog.open} onOpenChange={open => !open && setAddDialog({ open: false, type: 'sidebar' })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              {bn ? 'নতুন মেনু আইটেম যোগ করুন' : 'Add New Menu Item'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>{bn ? 'আইডি (ইউনিক)' : 'ID (unique)'}</Label>
+                <Input
+                  value={newItem.id}
+                  onChange={e => {
+                    const id = e.target.value.toLowerCase().replace(/\s+/g, '-');
+                    setNewItem(prev => ({ ...prev, id, path: id ? `/admin/${id}` : '' }));
+                  }}
+                  placeholder="e.g. my-menu"
+                />
+              </div>
+              <div>
+                <Label>{bn ? 'পাথ' : 'Path'}</Label>
+                <Input
+                  value={newItem.path}
+                  onChange={e => setNewItem(prev => ({ ...prev, path: e.target.value }))}
+                  placeholder="/admin/my-menu"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>{bn ? 'বাংলা নাম' : 'Bengali Name'}</Label>
+              <Input value={newItem.label_bn} onChange={e => setNewItem(prev => ({ ...prev, label_bn: e.target.value }))} placeholder={bn ? 'মেনু নাম' : 'Menu name in Bengali'} />
+            </div>
+            <div>
+              <Label>{bn ? 'ইংরেজি নাম' : 'English Name'}</Label>
+              <Input value={newItem.label_en} onChange={e => setNewItem(prev => ({ ...prev, label_en: e.target.value }))} placeholder="Menu name in English" />
+            </div>
+            {addDialog.type === 'sidebar' && (
+              <div>
+                <Label>{bn ? 'আইকন' : 'Icon'}</Label>
+                <div className="flex flex-wrap gap-2 mt-2 max-h-32 overflow-y-auto p-2 border rounded-lg">
+                  {ICON_OPTIONS.map(icon => (
+                    <button
+                      key={icon}
+                      onClick={() => setNewItem(prev => ({ ...prev, icon }))}
+                      className={`px-3 py-1.5 text-xs rounded-md border transition-all ${
+                        newItem.icon === icon ? 'border-primary bg-primary/10 text-primary font-medium' : 'border-border hover:bg-muted'
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialog({ open: false, type: 'sidebar' })}>
+              {bn ? 'বাতিল' : 'Cancel'}
+            </Button>
+            <Button onClick={addNewMenuItem}>
+              <Plus className="w-4 h-4 mr-1" />
+              {bn ? 'যোগ করুন' : 'Add'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
