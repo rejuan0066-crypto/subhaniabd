@@ -391,6 +391,8 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   login_institution_name_bn: '',
   login_institution_name_en: '',
   logo_shape: 'square',
+  favicon_shape: 'square',
+  loader_logo_shape: 'square',
 };
 
 export const useWebsiteSettings = () => {
