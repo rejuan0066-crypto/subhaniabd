@@ -395,7 +395,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
   const [originalInfo, setOriginalInfo] = useState({ width: 0, height: 0, size: 0 });
   const [activeTab, setActiveTab] = useState<'resize' | 'crop' | 'bg-remove'>('resize');
   const [processing, setProcessing] = useState(false);
-  const [result, setResult] = useState<{ url: string; size: number; w: number; h: number } | null>(null);
+  const [result, setResult] = useState<{ url: string; size: number; w: number; h: number; format?: 'jpeg' | 'png' | 'webp' } | null>(null);
   const [bgResult, setBgResult] = useState<string | null>(null);
   const [cropData, setCropData] = useState<{ x: number; y: number; w: number; h: number; scale: number } | null>(null);
   const [cropW, setCropW] = useState(0);
@@ -428,26 +428,46 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     setProcessing(true);
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => {
+    img.onload = async () => {
       try {
-        const c = document.createElement('canvas'); c.width = width; c.height = height;
-        const ctx = c.getContext('2d')!; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        const c = document.createElement('canvas');
+        c.width = width;
+        c.height = height;
+        const ctx = c.getContext('2d')!;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
-        const mimeType = `image/${format}`;
-        const q = format === 'png' ? undefined : quality / 100;
-        c.toBlob(blob => {
-          if (blob) {
-            setResult({ url: URL.createObjectURL(blob), size: blob.size, w: width, h: height });
-            setShowOriginal(false);
-            toast.success(language === 'bn' ? `রিসাইজ সফল! (${formatSize(blob.size)})` : `Resized! (${formatSize(blob.size)})`);
-          } else {
-            toast.error(language === 'bn' ? 'প্রসেস ব্যর্থ হয়েছে' : 'Processing failed');
+
+        const makeBlob = (q?: number) => new Promise<Blob | null>((resolve) => {
+          c.toBlob(resolve, `image/${format}`, q);
+        });
+
+        let blob: Blob | null = null;
+
+        if (format === 'png') {
+          blob = await makeBlob();
+        } else {
+          const qualitySteps = Array.from(new Set([quality, 80, 70, 60, 50, 40, 30, 20, 10]))
+            .filter((value) => value <= quality)
+            .sort((a, b) => b - a);
+
+          for (const step of qualitySteps) {
+            blob = await makeBlob(step / 100);
+            if (blob && blob.size < originalInfo.size) break;
           }
-          setProcessing(false);
-        }, mimeType, q);
+        }
+
+        if (blob) {
+          setResult({ url: URL.createObjectURL(blob), size: blob.size, w: width, h: height, format });
+          setShowOriginal(false);
+          toast.success(language === 'bn' ? `রিসাইজ সফল! (${formatSize(blob.size)})` : `Resized! (${formatSize(blob.size)})`);
+        } else {
+          toast.error(language === 'bn' ? 'প্রসেস ব্যর্থ হয়েছে' : 'Processing failed');
+        }
       } catch (err) {
         console.error('Resize error:', err);
         toast.error(language === 'bn' ? 'প্রসেস ব্যর্থ হয়েছে' : 'Processing failed');
+      } finally {
         setProcessing(false);
       }
     };
@@ -503,7 +523,11 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     if (!url) return;
     const a = document.createElement('a');
     a.href = url;
-    a.download = activeTab === 'bg-remove' ? `no-bg-${Date.now()}.png` : activeTab === 'crop' ? 'cropped.png' : 'resized.jpg';
+    a.download = activeTab === 'bg-remove'
+      ? `no-bg-${Date.now()}.png`
+      : activeTab === 'crop'
+        ? 'cropped.png'
+        : `resized.${result?.format || 'jpg'}`;
     a.click();
   };
 
