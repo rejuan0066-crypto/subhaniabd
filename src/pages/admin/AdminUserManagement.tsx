@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { isAdminRole } from '@/lib/roles';
 
 interface UserItem {
   id: string;
@@ -902,6 +903,16 @@ const AdminUserManagement = () => {
             {permLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : isAdminRole(permUser?.role) ? (
+              <div className="py-8 text-center space-y-2">
+                <ShieldCheck className="w-10 h-10 text-primary mx-auto" />
+                <p className="text-sm font-medium text-foreground">
+                  {bn ? 'অ্যাডমিন হিসেবে এই ইউজারের কাছে সব পারমিশন ডিফল্টভাবে আছে।' : 'As an Admin, this user has full access to all permissions by default.'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {bn ? 'ব্যক্তিগত পারমিশন সেট করার প্রয়োজন নেই।' : 'No need to set individual permissions.'}
+                </p>
               </div>
             ) : (
               <div className="space-y-4 pt-2">
