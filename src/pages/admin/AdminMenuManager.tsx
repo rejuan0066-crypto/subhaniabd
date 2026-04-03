@@ -360,13 +360,18 @@ const AdminMenuManager = () => {
 
           <TabsContent value="sidebar" className="mt-4">
             <Card>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 flex flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   {bn ? 'সাইডবার মেনু আইটেম' : 'Sidebar Menu Items'}
                   <span className="text-xs font-normal text-muted-foreground">
                     ({bn ? '→ সাব-মেনুতে সরান, ← মূল মেনুতে ফেরান' : '→ Move to sub-menu, ← Promote to main'})
                   </span>
                 </CardTitle>
+                {canEditItem && (
+                  <Button size="sm" variant="outline" onClick={() => { setAddDialog({ open: true, type: 'sidebar' }); setNewItem({ id: '', path: '', label_bn: '', label_en: '', icon: 'FileBox' }); }}>
+                    <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন মেনু' : 'Add Menu'}
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="space-y-2">
                 {sidebar.map((item, idx) => (
