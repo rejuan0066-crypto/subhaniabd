@@ -62,7 +62,9 @@ import AdminAcademicSessions from "./pages/admin/AdminAcademicSessions";
 import AdminAddressManager from "./pages/admin/AdminAddressManager";
 import AdminApiVerification from "./pages/admin/AdminApiVerification";
 import PostsPage from "./pages/PostsPage";
+import PhotoToolsPage from "./pages/PhotoToolsPage";
 import AdminUserManagement from "./pages/admin/AdminUserManagement";
+import AdminPhotoTools from "./pages/admin/AdminPhotoTools";
 import StaffDashboard from "./pages/StaffDashboard";
 import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
@@ -93,6 +95,7 @@ const App = () => (
               <Route path="/donation" element={<DonationPage />} />
               <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
               <Route path="/posts" element={<PostsPage />} />
+              <Route path="/photo-tools" element={<PhotoToolsPage />} />
               <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
               <Route path="/waiting-approval" element={<WaitingApproval />} />
               <Route path="/login" element={<Login />} />
@@ -136,6 +139,7 @@ const App = () => (
               <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
               <Route path="/admin/user-management" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
               <Route path="/admin/approvals" element={<ProtectedRoute><AdminApprovals /></ProtectedRoute>} />
+              <Route path="/admin/photo-tools" element={<ProtectedRoute><AdminPhotoTools /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
