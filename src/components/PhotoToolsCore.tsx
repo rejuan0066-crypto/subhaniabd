@@ -622,7 +622,15 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
   const removeBg = async () => {
     setProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: preview } });
+      // Convert blob URL to base64 for the edge function
+      const resp = await fetch(preview);
+      const blob = await resp.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: base64 } });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); setProcessing(false); return; }
       if (data?.image) { setBgResult(data.image); toast.success(language === 'bn' ? 'ব্যাকগ্রাউন্ড রিমুভ সফল!' : 'Background removed!'); }
