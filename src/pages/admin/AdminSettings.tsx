@@ -218,8 +218,30 @@ const AdminSettings = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6">
         <h1 className="text-2xl font-display font-bold text-foreground">{bn ? 'সেটিংস' : 'Settings'}</h1>
+
+        <Tabs defaultValue="email" className="w-full">
+          <TabsList className="w-full justify-start overflow-x-auto">
+            <TabsTrigger value="email" className="gap-1.5">
+              <Mail className="w-4 h-4" /> {bn ? 'ইমেইল' : 'Email'}
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="gap-1.5">
+              <CreditCard className="w-4 h-4" /> {bn ? 'পেমেন্ট' : 'Payment'}
+            </TabsTrigger>
+            <TabsTrigger value="sms" className="gap-1.5">
+              <MessageSquare className="w-4 h-4" /> {bn ? 'SMS' : 'SMS'}
+            </TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5">
+              <Shield className="w-4 h-4" /> {bn ? 'নিরাপত্তা' : 'Security'}
+            </TabsTrigger>
+            <TabsTrigger value="general" className="gap-1.5">
+              <Palette className="w-4 h-4" /> {bn ? 'সাধারণ' : 'General'}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="email" className="mt-6">
+            <div className="space-y-6 max-w-3xl">
 
         {/* Email Provider Selection */}
         <div className="card-elevated p-5">
