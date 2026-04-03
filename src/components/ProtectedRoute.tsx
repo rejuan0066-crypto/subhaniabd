@@ -60,8 +60,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const path = location.pathname;
   const isAdminRoute = path.startsWith('/admin');
 
-  // Admin has full access
-  if (role === 'admin') {
+  // Admin/Super Admin has full access
+  if (isAdminRole(role)) {
     return <>{children}</>;
   }
 

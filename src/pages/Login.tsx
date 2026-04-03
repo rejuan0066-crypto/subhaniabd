@@ -31,7 +31,7 @@ const Login = () => {
 
   if (user) {
     // Admin always goes to admin panel
-    if (role === 'admin') {
+    if (isAdminRole(role)) {
       return <Navigate to="/admin" replace />;
     }
     // Pending users go to waiting page

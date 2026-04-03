@@ -11,8 +11,8 @@ export const usePagePermissions = (menuPath: string) => {
   const { role } = useAuth();
   const { canView, canAdd, canEdit, canDelete, isLoading } = usePermissions();
 
-  // Admin has full access
-  if (role === 'admin') {
+  // Admin/Super Admin has full access
+  if (isAdminRole(role)) {
     return {
       canViewPage: true,
       canAddItem: true,
