@@ -31,7 +31,7 @@ const AdminStaff = () => {
   const [selectedStaff, setSelectedStaff] = useState<any>(null);
   const [accEmail, setAccEmail] = useState('');
   const [accPassword, setAccPassword] = useState('');
-  const [accRole, setAccRole] = useState('staff');
+  const [accRole, setAccRole] = useState('none');
   const [accCreating, setAccCreating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -68,7 +68,7 @@ const AdminStaff = () => {
     setSelectedStaff(staff);
     setAccEmail(staff.email || '');
     setAccPassword('');
-    setAccRole('staff');
+    setAccRole('none');
     setShowPassword(false);
     setAccountDialogOpen(true);
   };
@@ -84,7 +84,7 @@ const AdminStaff = () => {
           action: 'create',
           email: accEmail.trim(),
           password: accPassword,
-          role: accRole,
+          role: accRole === 'none' ? undefined : accRole,
           full_name: selectedStaff?.name_bn || selectedStaff?.name_en || '',
           staff_id: selectedStaff?.id,
         },
@@ -257,6 +257,7 @@ const AdminStaff = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">{bn ? '🚫 রোল ছাড়া (ঐচ্ছিক)' : '🚫 No Role (Optional)'}</SelectItem>
                       <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
                       <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
                     </SelectContent>
