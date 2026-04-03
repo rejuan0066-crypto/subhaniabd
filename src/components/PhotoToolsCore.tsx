@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -264,6 +264,13 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
   const [displayScale, setDisplayScale] = useState(1);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  useEffect(() => {
+    if (resultUrl && !showOriginal) {
+      setCropBox({ x: 0, y: 0, w: 0, h: 0 });
+      setDragging(false);
+    }
+  }, [resultUrl, showOriginal]);
+
   const imgLoaded = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const el = e.currentTarget;
     const natW = el.naturalWidth;
@@ -283,7 +290,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (activeTab !== 'crop') return;
+    if (activeTab !== 'crop' || (resultUrl && !showOriginal)) return;
     const { x, y } = getImageRelativeCoords(e);
     setDragging(true);
     setDragStart({ x, y });
@@ -291,7 +298,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging || activeTab !== 'crop') return;
+    if (!dragging || activeTab !== 'crop' || (resultUrl && !showOriginal)) return;
     const { x, y } = getImageRelativeCoords(e);
     const newBox = { x: Math.min(dragStart.x, x), y: Math.min(dragStart.y, y), w: Math.abs(x - dragStart.x), h: Math.abs(y - dragStart.y) };
     setCropBox(newBox);
@@ -305,15 +312,17 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
     }
   };
 
+  const isShowingResult = !!resultUrl && !showOriginal;
   const isCropMode = activeTab === 'crop';
-  const displayUrl = (showOriginal || !resultUrl || isCropMode) ? preview : resultUrl;
+  const isInteractiveCropMode = isCropMode && !isShowingResult;
+  const displayUrl = isShowingResult ? resultUrl : preview;
 
   return (
     <div className="relative w-full h-full flex items-center justify-center rounded-2xl overflow-hidden"
       style={{ background: 'repeating-conic-gradient(hsl(var(--muted)/0.5) 0% 25%, transparent 0% 50%) 50% / 20px 20px' }}
     >
       <div
-        className={`relative inline-block ${isCropMode ? 'cursor-crosshair' : ''}`}
+        className={`relative inline-block ${isInteractiveCropMode ? 'cursor-crosshair' : ''}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -327,7 +336,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
           className="max-w-full max-h-[45vh] lg:max-h-[55vh] object-contain select-none"
           draggable={false}
         />
-        {isCropMode && cropBox.w > 0 && cropBox.h > 0 && (
+        {isInteractiveCropMode && cropBox.w > 0 && cropBox.h > 0 && (
           <>
             <div className="absolute inset-0 bg-black/40 pointer-events-none transition-opacity duration-200" />
             <div
@@ -348,7 +357,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
       </div>
 
       {/* Preview label */}
-      {resultUrl && !isCropMode && (
+      {resultUrl && (
         <div className="absolute top-2 left-2 px-2 py-1 rounded-md text-[10px] font-medium bg-background/80 backdrop-blur-sm border border-border/30 text-muted-foreground">
           {showOriginal ? (language === 'bn' ? '🔵 মূল ছবি' : '🔵 Original') : (language === 'bn' ? '🟢 ফলাফল' : '🟢 Result')}
         </div>
@@ -379,7 +388,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
 
   const reset = () => {
     setPreview(''); setOriginalInfo({ width: 0, height: 0, size: 0 });
-    setResult(null); setBgResult(null); setCropData(null);
+    setResult(null); setBgResult(null); setCropData(null); setShowOriginal(false);
     externalReset?.();
   };
 
@@ -422,7 +431,13 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     img.onload = () => {
       ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
       canvas.toBlob(blob => {
-        if (blob) setResult({ url: URL.createObjectURL(blob), size: blob.size, w: canvas.width, h: canvas.height });
+        if (blob) {
+          setResult({ url: URL.createObjectURL(blob), size: blob.size, w: canvas.width, h: canvas.height });
+          setShowOriginal(false);
+          setCropData(null);
+          setCropW(0);
+          setCropH(0);
+        }
         setProcessing(false);
       }, 'image/png');
     };
@@ -470,7 +485,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
             showOriginal={showOriginal}
           />
           {/* Preview toggle button */}
-          {hasResult && activeTab !== 'crop' && (
+          {hasResult && (
             <button
               onClick={() => setShowOriginal(!showOriginal)}
               className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium bg-background/80 backdrop-blur-sm border border-border/30 text-foreground hover:bg-background/95 transition-all duration-200 shadow-sm"
