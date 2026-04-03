@@ -47,7 +47,7 @@ export const usePermissions = () => {
   const isLoading = roleLoading || userLoading;
 
   const hasPermission = (menuPath: string, action: 'view' | 'add' | 'edit' | 'delete'): boolean => {
-    if (role === 'admin') return true;
+    if (isAdminRole(role)) return true;
 
     // Check user-level permissions first (higher priority)
     const userPerm = userPermissions.find(p => p.menu_path === menuPath);
