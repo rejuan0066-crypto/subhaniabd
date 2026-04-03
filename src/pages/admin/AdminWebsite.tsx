@@ -400,42 +400,54 @@ const AdminWebsite = () => {
                   <Label>{language === 'bn' ? 'ইমেইল' : 'Email'}</Label>
                   <Input className="bg-background mt-1" value={form.email} onChange={e => updateField('email', e.target.value)} />
                 </div>
-                <div>
-                  <Label>{language === 'bn' ? 'লোগো' : 'Logo'}</Label>
+              </div>
+              <Button className="btn-primary-gradient mt-3" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email'])} disabled={saving}>
+                <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'তথ্য সংরক্ষণ' : 'Save Info'}
+              </Button>
+
+              <hr className="my-4 border-border" />
+
+              <h4 className="text-sm font-semibold text-foreground mb-3">{language === 'bn' ? 'লোগো ও ব্র্যান্ডিং' : 'Logo & Branding'}</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col items-center">
+                  <Label className="mb-1 text-center">{language === 'bn' ? 'মূল লোগো' : 'Main Logo'}</Label>
                   <ImageUpload
                     value={form.logo_url}
                     onChange={(url) => updateField('logo_url', url)}
                     folder="logo"
-                    className="mt-1"
-                    aspectRatio="aspect-square w-28"
+                    aspectRatio="aspect-square w-24"
                   />
+                  <Button size="sm" variant="outline" className="mt-2 text-xs" onClick={() => saveSection(['logo_url'])} disabled={saving}>
+                    <Save className="w-3 h-3 mr-1" /> {language === 'bn' ? 'সেভ' : 'Save'}
+                  </Button>
                 </div>
-                <div>
-                  <Label>{language === 'bn' ? 'ফেভিকন (ব্রাউজার ট্যাব)' : 'Favicon (Browser Tab)'}</Label>
-                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'ব্রাউজার ট্যাবে আলাদা আইকন দেখাতে আপলোড করুন। না দিলে মূল লোগো ব্যবহৃত হবে।' : 'Separate icon for browser tab. Falls back to main logo.'}</p>
+                <div className="flex flex-col items-center">
+                  <Label className="mb-1 text-center">{language === 'bn' ? 'ফেভিকন' : 'Favicon'}</Label>
+                  <p className="text-[10px] text-muted-foreground text-center mb-1">{language === 'bn' ? 'ব্রাউজার ট্যাব' : 'Browser Tab'}</p>
                   <ImageUpload
                     value={form.favicon_url}
                     onChange={(url) => updateField('favicon_url', url)}
                     folder="logo"
-                    className="mt-1"
                     aspectRatio="aspect-square w-20"
                   />
+                  <Button size="sm" variant="outline" className="mt-2 text-xs" onClick={() => saveSection(['favicon_url'])} disabled={saving}>
+                    <Save className="w-3 h-3 mr-1" /> {language === 'bn' ? 'সেভ' : 'Save'}
+                  </Button>
                 </div>
-                <div>
-                  <Label>{language === 'bn' ? 'লোডার লোগো (পেজ লোডিং)' : 'Loader Logo (Page Loading)'}</Label>
-                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'পেজ লোড হওয়ার সময় আলাদা লোগো দেখাতে আপলোড করুন। না দিলে ফেভিকন বা মূল লোগো ব্যবহৃত হবে।' : 'Separate logo for page loader. Falls back to favicon or main logo.'}</p>
+                <div className="flex flex-col items-center">
+                  <Label className="mb-1 text-center">{language === 'bn' ? 'লোডার লোগো' : 'Loader Logo'}</Label>
+                  <p className="text-[10px] text-muted-foreground text-center mb-1">{language === 'bn' ? 'পেজ লোডিং' : 'Page Loading'}</p>
                   <ImageUpload
                     value={form.loader_logo_url || ''}
                     onChange={(url) => updateField('loader_logo_url', url)}
                     folder="logo"
-                    className="mt-1"
-                    aspectRatio="aspect-square w-24"
+                    aspectRatio="aspect-square w-20"
                   />
+                  <Button size="sm" variant="outline" className="mt-2 text-xs" onClick={() => saveSection(['loader_logo_url'])} disabled={saving}>
+                    <Save className="w-3 h-3 mr-1" /> {language === 'bn' ? 'সেভ' : 'Save'}
+                  </Button>
                 </div>
               </div>
-              <Button className="btn-primary-gradient" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url', 'loader_logo_url'])} disabled={saving}>
-                <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সংরক্ষণ' : 'Save'}
-              </Button>
             </div>
           </TabsContent>
 
