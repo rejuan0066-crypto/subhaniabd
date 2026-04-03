@@ -155,15 +155,31 @@ const AdminStudentsFees = () => {
       if (error) throw error;
       return txnId;
     },
-    onSuccess: (txnId) => {
+    onSuccess: async (txnId) => {
       setStep('done');
       if (paymentMethod === 'cash') {
         toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে (অনুমোদনের অপেক্ষায়)' : 'Cash payment saved (awaiting approval)');
       } else {
-        toast.success(bn ? 'পেমেন্ট সংরক্ষিত হয়েছে' : 'Payment saved');
-        setTimeout(() => {
-          window.open(`https://payment-gateway.example.com/pay?txn=${txnId}&amount=${amount}`, '_blank');
-        }, 1500);
+        // Call process-payment edge function
+        try {
+          const { data, error } = await supabase.functions.invoke('process-payment', {
+            body: {
+              action: 'initiate',
+              amount: parseFloat(amount),
+              student_id: foundStudent?.id,
+              fee_type_id: feeType,
+            },
+          });
+          if (error) throw error;
+          if (data?.payment_url) {
+            toast.success(bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...');
+            setTimeout(() => window.open(data.payment_url, '_blank'), 1000);
+          } else {
+            toast.success(bn ? 'পেমেন্ট সংরক্ষিত হয়েছে' : 'Payment saved');
+          }
+        } catch (e: any) {
+          toast.error(bn ? 'গেটওয়ে ত্রুটি, পেমেন্ট পেন্ডিং আছে' : 'Gateway error, payment is pending');
+        }
       }
     },
     onError: (e: any) => toast.error(e.message || 'Error saving payment'),
