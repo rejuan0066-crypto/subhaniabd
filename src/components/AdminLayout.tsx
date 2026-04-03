@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
+import { isAdminRole } from '@/lib/roles';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
 import LanguageToggle from './LanguageToggle';
