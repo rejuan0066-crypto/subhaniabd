@@ -164,6 +164,7 @@ const AdminStaff = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.department || '-'}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.phone || '-'}</td>
+                      {isAdminRole(role) && (
                       <td className="px-4 py-3">
                         {s.user_id ? (
                           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
@@ -179,6 +180,7 @@ const AdminStaff = () => {
                           </button>
                         )}
                       </td>
+                      )}
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${s.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                           {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
