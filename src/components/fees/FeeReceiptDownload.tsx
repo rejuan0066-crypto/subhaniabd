@@ -15,10 +15,11 @@ interface Props {
 const FeeReceiptDownload = ({ collectorName }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const [searchType, setSearchType] = useState<'session_class' | 'session_roll'>('session_class');
+  const [searchType, setSearchType] = useState<'session_class' | 'session_roll' | 'session_reg'>('session_class');
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
+  const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success'>('pending');
   const [loading, setLoading] = useState(false);
 
