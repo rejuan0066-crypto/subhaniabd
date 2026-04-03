@@ -371,6 +371,9 @@ const AdminWebsite = () => {
             <TabsTrigger value="form-settings" className="text-xs py-2 px-2.5">
               <SlidersHorizontal className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'ফর্ম সেটিংস' : 'Form Settings'}
             </TabsTrigger>
+            <TabsTrigger value="login-page" className="text-xs py-2 px-2.5">
+              <LogIn className="w-3.5 h-3.5 mr-1" /> {language === 'bn' ? 'লগইন পেইজ' : 'Login Page'}
+            </TabsTrigger>
           </TabsList>
 
           {/* Institution Tab */}
