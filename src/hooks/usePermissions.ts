@@ -94,7 +94,7 @@ export const usePermissions = () => {
   };
 
   const requiresApproval = (menuPath: string, action?: 'view' | 'add' | 'edit' | 'delete'): boolean => {
-    if (role === 'admin') return false;
+    if (isAdminRole(role)) return false;
     const userPerm = userPermissions.find(p => p.menu_path === menuPath);
     if (!userPerm) return false;
     if (action) {
