@@ -315,7 +315,7 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData }: 
           src={displayUrl}
           alt="Preview"
           onLoad={imgLoaded}
-          className="max-w-full max-h-[40vh] lg:max-h-[50vh] object-contain select-none"
+          className="max-w-full max-h-[30vh] lg:max-h-[38vh] object-contain select-none"
           draggable={false}
         />
         {isCropMode && cropBox.w > 0 && cropBox.h > 0 && (
@@ -443,7 +443,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
     <div className="flex flex-col lg:flex-row gap-4 min-h-[60vh]">
       {/* ─── Left: Canvas ─── */}
       <div className="flex-1 flex flex-col gap-3">
-        <div className="relative flex-1 min-h-[250px] rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden lg:sticky lg:top-4">
+        <div className="relative flex-1 min-h-[180px] max-h-[42vh] rounded-2xl border border-border/30 bg-card/40 backdrop-blur-sm overflow-hidden lg:sticky lg:top-4">
           {processing && <ProcessingOverlay language={language} />}
           <CanvasPreview
             preview={preview}
