@@ -79,6 +79,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <DynamicFavicon />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Home />} />
