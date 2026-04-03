@@ -55,7 +55,7 @@ const ImageUploadArea = ({ onFile, language }: { onFile: (f: File, src: string) 
   return (
     <div className="flex items-center justify-center min-h-[40vh]">
       <label
-        className={`flex flex-col items-center justify-center w-full max-w-xl py-20 px-8 border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 ${
+        className={`flex flex-col items-center justify-center w-full max-w-xl py-12 px-8 border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 ${
           dragOver
             ? 'border-primary bg-primary/5 scale-[1.02] shadow-lg shadow-primary/10'
             : 'border-border/40 bg-card/50 backdrop-blur-sm hover:border-primary/40 hover:bg-card/80 hover:shadow-lg'
