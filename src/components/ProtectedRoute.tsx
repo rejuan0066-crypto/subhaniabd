@@ -3,37 +3,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { isAdminRole } from '@/lib/roles';
 
-// No always-allowed admin paths for non-admins except profile
-
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, role, userStatus } = useAuth();
-  const { canView, hasUserPermission, isLoading: permLoading } = usePermissions();
   const location = useLocation();
 
-  // Load dynamic access control from website_settings
-  const { data: accessControl, isLoading: acLoading } = useQuery({
-    queryKey: ['admin-only-paths'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('website_settings')
-        .select('value')
-        .eq('key', 'admin_only_paths')
-        .maybeSingle();
-      if (data?.value) {
-        const val = data.value as any;
-        if (val.access_map && typeof val.access_map === 'object') {
-          return { accessMap: val.access_map as Record<string, Record<string, boolean>>, paths: val.paths as string[] || [] };
-        }
-        if (Array.isArray(val.paths)) {
-          return { accessMap: null, paths: val.paths as string[] };
-        }
-      }
-      return null;
-    },
-    staleTime: 60000,
-  });
-
-  if (loading || permLoading || acLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
