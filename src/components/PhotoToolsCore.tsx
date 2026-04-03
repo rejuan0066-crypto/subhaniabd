@@ -109,14 +109,39 @@ const ResizeControls = ({ originalInfo, language, onProcess, processing }: {
   onProcess: (w: number, h: number, q: number, fmt: 'jpeg' | 'png' | 'webp') => void;
   processing: boolean;
 }) => {
+  const [unit, setUnit] = useState<'px' | 'inch' | 'cm'>('px');
+  const [dpi, setDpi] = useState(72);
   const [width, setWidth] = useState(originalInfo.width);
   const [height, setHeight] = useState(originalInfo.height);
   const [keepRatio, setKeepRatio] = useState(true);
   const [quality, setQuality] = useState(80);
   const [format, setFormat] = useState<'jpeg' | 'png' | 'webp'>('jpeg');
 
-  const onW = (v: number) => { setWidth(v); if (keepRatio && originalInfo.width) setHeight(Math.round((v / originalInfo.width) * originalInfo.height)); };
-  const onH = (v: number) => { setHeight(v); if (keepRatio && originalInfo.height) setWidth(Math.round((v / originalInfo.height) * originalInfo.width)); };
+  // Unit conversion helpers
+  const pxToUnit = (px: number) => {
+    if (unit === 'inch') return +(px / dpi).toFixed(2);
+    if (unit === 'cm') return +(px / dpi * 2.54).toFixed(2);
+    return px;
+  };
+  const unitToPx = (val: number) => {
+    if (unit === 'inch') return Math.round(val * dpi);
+    if (unit === 'cm') return Math.round(val / 2.54 * dpi);
+    return Math.round(val);
+  };
+
+  const displayW = pxToUnit(width);
+  const displayH = pxToUnit(height);
+
+  const onDisplayW = (v: number) => {
+    const px = unitToPx(v);
+    setWidth(px);
+    if (keepRatio && originalInfo.width) setHeight(Math.round((px / originalInfo.width) * originalInfo.height));
+  };
+  const onDisplayH = (v: number) => {
+    const px = unitToPx(v);
+    setHeight(px);
+    if (keepRatio && originalInfo.height) setWidth(Math.round((px / originalInfo.height) * originalInfo.width));
+  };
 
   // Live estimated file size
   const pixelRatio = (width * height) / (originalInfo.width * originalInfo.height || 1);
@@ -132,12 +157,15 @@ const ResizeControls = ({ originalInfo, language, onProcess, processing }: {
     { l: '256px', s: 256 }, { l: '512px', s: 512 }, { l: '1024px', s: 1024 },
   ];
 
+  const unitLabel = unit === 'px' ? 'px' : unit === 'inch' ? '"' : 'cm';
+  const stepVal = unit === 'px' ? 1 : 0.01;
+
   return (
     <div className="space-y-4">
       {/* Original Info */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <ImageIcon className="w-3.5 h-3.5" />
-        <span>{originalInfo.width}×{originalInfo.height} • {formatSize(originalInfo.size)}</span>
+        <span>{originalInfo.width}×{originalInfo.height}px • {formatSize(originalInfo.size)}</span>
       </div>
 
       {/* Live Size Estimation */}
@@ -159,21 +187,64 @@ const ResizeControls = ({ originalInfo, language, onProcess, processing }: {
         </span>
       </div>
 
+      {/* Unit & DPI Selector */}
+      <GlassPanel>
+        <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
+          {language === 'bn' ? 'একক ও DPI' : 'Unit & DPI'}
+        </Label>
+        <div className="flex gap-1.5 mb-2">
+          {(['px', 'inch', 'cm'] as const).map(u => (
+            <button
+              key={u}
+              onClick={() => setUnit(u)}
+              className={`flex-1 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-200 ${
+                unit === u
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/40 text-muted-foreground hover:bg-muted/70'
+              }`}
+            >
+              {u === 'px' ? 'Pixel' : u === 'inch' ? 'Inch' : 'CM'}
+            </button>
+          ))}
+        </div>
+        {unit !== 'px' && (
+          <div className="flex items-center gap-2 mt-2">
+            <Label className="text-[11px] text-muted-foreground whitespace-nowrap">DPI:</Label>
+            <div className="flex gap-1">
+              {[72, 96, 150, 300].map(d => (
+                <button
+                  key={d}
+                  onClick={() => setDpi(d)}
+                  className={`px-2 py-1 text-[10px] font-medium rounded-md transition-all ${
+                    dpi === d ? 'bg-primary/15 text-primary ring-1 ring-primary/25' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </GlassPanel>
+
       {/* Dimensions */}
       <GlassPanel>
         <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2 block">
-          {language === 'bn' ? 'ডাইমেনশন' : 'Dimensions'}
+          {language === 'bn' ? 'ডাইমেনশন' : 'Dimensions'} <span className="text-primary">({unitLabel})</span>
         </Label>
         <div className="grid grid-cols-2 gap-2">
           <div className="relative">
             <MoveHorizontal className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/60" />
-            <Input type="number" min={1} value={width} onChange={e => onW(+e.target.value)} className="h-9 text-sm pl-8 bg-background/50" placeholder="Width" />
+            <Input type="number" min={stepVal} step={stepVal} value={displayW} onChange={e => onDisplayW(+e.target.value)} className="h-9 text-sm pl-8 bg-background/50" placeholder="Width" />
           </div>
           <div className="relative">
             <MoveVertical className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/60" />
-            <Input type="number" min={1} value={height} onChange={e => onH(+e.target.value)} className="h-9 text-sm pl-8 bg-background/50" placeholder="Height" />
+            <Input type="number" min={stepVal} step={stepVal} value={displayH} onChange={e => onDisplayH(+e.target.value)} className="h-9 text-sm pl-8 bg-background/50" placeholder="Height" />
           </div>
         </div>
+        {unit !== 'px' && (
+          <p className="mt-1.5 text-[10px] text-muted-foreground">{width}×{height} px @ {dpi} DPI</p>
+        )}
         <button
           onClick={() => setKeepRatio(!keepRatio)}
           className={`mt-2 flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg transition-all duration-200 ${keepRatio ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : 'bg-muted/50 text-muted-foreground'}`}
