@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState } from 'react';
-import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User, Banknote, Globe } from 'lucide-react';
+import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User, Banknote, Globe, AlertCircle, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -36,6 +37,7 @@ const AdminStudentsFees = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState<FeeType | ''>('');
   const [amount, setAmount] = useState('');
@@ -58,6 +60,21 @@ const AdminStudentsFees = () => {
       return data || [];
     },
   });
+
+  // Check if payment gateway is configured
+  const { data: gatewayConfig } = useQuery({
+    queryKey: ['payment_gateway_config_check'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('payment_gateway_config')
+        .select('id, provider, provider_name, is_enabled')
+        .eq('is_enabled', true)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+  const isGatewayReady = !!gatewayConfig;
 
   // Get logged-in user's staff/profile name for collector
   const { data: collectorName = '' } = useQuery({
@@ -138,15 +155,31 @@ const AdminStudentsFees = () => {
       if (error) throw error;
       return txnId;
     },
-    onSuccess: (txnId) => {
+    onSuccess: async (txnId) => {
       setStep('done');
       if (paymentMethod === 'cash') {
         toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে (অনুমোদনের অপেক্ষায়)' : 'Cash payment saved (awaiting approval)');
       } else {
-        toast.success(bn ? 'পেমেন্ট সংরক্ষিত হয়েছে' : 'Payment saved');
-        setTimeout(() => {
-          window.open(`https://payment-gateway.example.com/pay?txn=${txnId}&amount=${amount}`, '_blank');
-        }, 1500);
+        // Call process-payment edge function
+        try {
+          const { data, error } = await supabase.functions.invoke('process-payment', {
+            body: {
+              action: 'initiate',
+              amount: parseFloat(amount),
+              student_id: foundStudent?.id,
+              fee_type_id: feeType,
+            },
+          });
+          if (error) throw error;
+          if (data?.payment_url) {
+            toast.success(bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...');
+            setTimeout(() => window.open(data.payment_url, '_blank'), 1000);
+          } else {
+            toast.success(bn ? 'পেমেন্ট সংরক্ষিত হয়েছে' : 'Payment saved');
+          }
+        } catch (e: any) {
+          toast.error(bn ? 'গেটওয়ে ত্রুটি, পেমেন্ট পেন্ডিং আছে' : 'Gateway error, payment is pending');
+        }
       }
     },
     onError: (e: any) => toast.error(e.message || 'Error saving payment'),
@@ -156,6 +189,10 @@ const AdminStudentsFees = () => {
     if (!feeType) { toast.error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type'); return; }
     if (!foundStudent) { toast.error(bn ? 'প্রথমে ছাত্র খুঁজুন' : 'Search student first'); return; }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid amount'); return; }
+    if (paymentMethod === 'online' && !isGatewayReady) {
+      toast.error(bn ? 'প্রথমে পেমেন্ট গেটওয়ে সেটআপ করুন' : 'Please setup payment gateway first');
+      return;
+    }
     setStep('summary');
   };
 
@@ -293,6 +330,36 @@ const AdminStudentsFees = () => {
                     {bn ? 'অনলাইন পেমেন্ট' : 'Online Payment'}
                   </button>
                 </div>
+
+                {/* Online payment gateway status */}
+                {paymentMethod === 'online' && !isGatewayReady && (
+                  <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-warning shrink-0" />
+                      <span className="text-sm font-medium text-warning">
+                        {bn ? 'পেমেন্ট গেটওয়ে সেটআপ করা হয়নি' : 'Payment gateway not configured'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {bn
+                        ? 'অনলাইন পেমেন্ট ব্যবহার করতে প্রথমে পেমেন্ট গেটওয়ে (bKash, Nagad, SSLCommerz ইত্যাদি) সেটআপ করুন।'
+                        : 'To accept online payments, configure a payment gateway (bKash, Nagad, SSLCommerz, etc.) first.'}
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-1" onClick={() => navigate('/admin/settings')}>
+                      <Settings className="w-3.5 h-3.5 mr-1.5" />
+                      {bn ? 'গেটওয়ে সেটআপ করুন' : 'Setup Gateway'}
+                    </Button>
+                  </div>
+                )}
+
+                {paymentMethod === 'online' && isGatewayReady && (
+                  <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                    <span className="text-sm text-foreground">
+                      {bn ? `${gatewayConfig?.provider_name || gatewayConfig?.provider} গেটওয়ে সক্রিয়` : `${gatewayConfig?.provider_name || gatewayConfig?.provider} gateway active`}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Collector name display for cash */}
