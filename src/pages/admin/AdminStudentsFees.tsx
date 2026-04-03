@@ -34,6 +34,7 @@ const AdminStudentsFees = () => {
   const bn = language === 'bn';
   const [feeType, setFeeType] = useState<FeeType | ''>('');
   const [amount, setAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
   const [transactionId, setTransactionId] = useState('');
 
