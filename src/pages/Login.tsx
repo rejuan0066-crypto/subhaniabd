@@ -88,6 +88,8 @@ const Login = () => {
               placeholder={language === 'bn' ? 'ইমেইল এড্রেস' : 'Email address'}
               className="bg-background"
               type="email"
+              name="email"
+              autoComplete="email"
             />
           </div>
           <div>
