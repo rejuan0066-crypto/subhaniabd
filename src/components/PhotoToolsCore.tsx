@@ -344,18 +344,20 @@ const CanvasPreview = ({ preview, resultUrl, activeTab, language, onCropData, sh
       style={{ background: 'repeating-conic-gradient(hsl(var(--muted)/0.5) 0% 25%, transparent 0% 50%) 50% / 20px 20px' }}
     >
       <div
-        className={`relative inline-block ${isInteractiveCropMode ? 'cursor-crosshair' : ''}`}
+        className={`relative ${isInteractiveCropMode ? 'cursor-crosshair' : ''}`}
+        style={{ display: 'inline-block', userSelect: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={() => setDragging(false)}
+        onMouseLeave={() => { if (dragging) { setDragging(false); onCropData({ ...cropBox, scale: displayScale }); } }}
+        onDragStart={e => e.preventDefault()}
       >
         <img
           ref={imgRef}
           src={displayUrl}
           alt="Preview"
           onLoad={imgLoaded}
-          className="max-w-full max-h-[45vh] lg:max-h-[55vh] object-contain select-none"
+          className="max-w-full max-h-[45vh] lg:max-h-[55vh] object-contain select-none pointer-events-none"
           draggable={false}
         />
         {isInteractiveCropMode && cropBox.w > 0 && cropBox.h > 0 && (
