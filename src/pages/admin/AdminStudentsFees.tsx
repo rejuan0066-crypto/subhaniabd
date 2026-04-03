@@ -67,10 +67,10 @@ const AdminStudentsFees = () => {
       // Try staff table first
       const { data: staffData } = await supabase
         .from('staff')
-        .select('name_bn, name')
+        .select('name_bn, name_en')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (staffData) return staffData.name_bn || staffData.name || '';
+      if (staffData) return staffData.name_bn || staffData.name_en || '';
       // Fallback to profile
       const { data: profile } = await supabase
         .from('profiles')
