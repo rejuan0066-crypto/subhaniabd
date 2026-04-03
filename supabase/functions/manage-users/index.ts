@@ -190,6 +190,14 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Protect super_admin from role changes by non-super_admin
+      const { data: targetRole } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", targetUserId).maybeSingle();
+      if (targetRole?.role === 'super_admin' && !callerIsSuperAdmin) {
+        return new Response(JSON.stringify({ error: "Cannot modify super admin role" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       // Remove role entirely
       if (remove_role) {
         await supabaseAdmin.from("user_roles").delete().eq("user_id", targetUserId);
