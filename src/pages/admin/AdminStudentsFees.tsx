@@ -37,6 +37,7 @@ const AdminStudentsFees = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState<FeeType | ''>('');
   const [amount, setAmount] = useState('');
