@@ -34,14 +34,20 @@ const ImageUpload = ({ value, onChange, folder = 'general', label, className = '
 
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
+      const ext = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('website-assets')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file, { 
+          upsert: true,
+          contentType: file.type,
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
         .from('website-assets')
