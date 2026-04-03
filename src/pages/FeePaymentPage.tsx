@@ -135,8 +135,13 @@ const FeePaymentPage = () => {
       <div class="card">
         <div class="header">
           <div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          ${institution?.logo_url ? `<img src="${institution.logo_url}" style="height:50px;margin:0 auto 8px" />` : ''}
           <div class="inst-name">${institution?.name || 'প্রতিষ্ঠানের নাম'}</div>
+          ${institution?.name_en ? `<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:2px">${institution.name_en}</div>` : ''}
           <div class="inst-addr">${institution?.address || ''}</div>
+          ${institution?.phone ? `<div class="inst-addr">${language === 'bn' ? 'ফোন' : 'Phone'}: ${institution.phone}</div>` : ''}
+          ${institution?.email ? `<div class="inst-addr">${language === 'bn' ? 'ইমেইল' : 'Email'}: ${institution.email}</div>` : ''}
+          ${institution?.other_info ? `<div class="inst-addr" style="margin-top:2px">${institution.other_info}</div>` : ''}
           <div class="receipt-label">Payment Receipt</div>
         </div>
         <div class="section">
@@ -237,11 +242,26 @@ const FeePaymentPage = () => {
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <CheckCircle2 className="w-7 h-7 text-white" />
                   </div>
+                  {institution?.logo_url && (
+                    <img src={institution.logo_url} alt="Logo" className="h-10 mx-auto mb-2 object-contain" />
+                  )}
                   <div className="flex items-center justify-center gap-2 mb-1">
                     <Building2 className="w-4 h-4 text-muted-foreground" />
                     <h2 className="text-lg font-bold text-foreground">{institution?.name || 'প্রতিষ্ঠান'}</h2>
                   </div>
+                  {institution?.name_en && (
+                    <p className="text-sm font-semibold text-foreground/80">{institution.name_en}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">{institution?.address || ''}</p>
+                  {institution?.phone && (
+                    <p className="text-xs text-muted-foreground">{language === 'bn' ? 'ফোন' : 'Phone'}: {institution.phone}</p>
+                  )}
+                  {institution?.email && (
+                    <p className="text-xs text-muted-foreground">{language === 'bn' ? 'ইমেইল' : 'Email'}: {institution.email}</p>
+                  )}
+                  {institution?.other_info && (
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">{institution.other_info}</p>
+                  )}
                   <p className="text-[11px] uppercase tracking-[3px] text-muted-foreground/60 mt-3 font-medium">
                     {language === 'bn' ? 'পেমেন্ট রসিদ' : 'Payment Receipt'}
                   </p>
