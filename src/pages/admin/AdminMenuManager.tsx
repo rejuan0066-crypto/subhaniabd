@@ -316,6 +316,15 @@ const AdminMenuManager = () => {
             </button>
           </>
         )}
+
+        {/* Delete */}
+        <button
+          onClick={() => deleteMenuItem(list, setList, index, isChild || false, parentIdx)}
+          className="p-1.5 rounded hover:bg-destructive/10"
+          title={bn ? 'মুছুন' : 'Delete'}
+        >
+          <Trash2 className="w-3.5 h-3.5 text-destructive/70" />
+        </button>
       </div>
     </div>
   );
