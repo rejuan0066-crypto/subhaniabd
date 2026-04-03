@@ -210,9 +210,9 @@ const PaymentGatewaySettings = () => {
           </Button>
 
           {config.is_sandbox && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 text-sm">
-              <AlertCircle className="w-4 h-4 text-yellow-600 shrink-0" />
-              <span className="text-yellow-700 dark:text-yellow-400">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 text-sm">
+              <AlertCircle className="w-4 h-4 text-warning shrink-0" />
+              <span className="text-warning">
                 {bn ? 'স্যান্ডবক্স মোড চালু আছে। লাইভ পেমেন্টের জন্য বন্ধ করুন।' : 'Sandbox mode is on. Turn off for live payments.'}
               </span>
             </div>
