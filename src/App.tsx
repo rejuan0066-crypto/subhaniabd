@@ -68,6 +68,7 @@ import AdminPhotoTools from "./pages/admin/AdminPhotoTools";
 import StaffDashboard from "./pages/StaffDashboard";
 import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
+import AdminPayments from "./pages/admin/AdminPayments";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import BackButton from "./components/BackButton";
