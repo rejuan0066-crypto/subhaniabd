@@ -36,6 +36,13 @@ interface MoveToSubMenuState {
   itemIndex: number | null;
 }
 
+interface MoveToTabState {
+  open: boolean;
+  itemId: string | null;
+  parentIdx: number | null; // null = top-level, otherwise index in sidebar
+  childIdx: number | null;
+}
+
 interface AddMenuDialogState {
   open: boolean;
   type: 'sidebar' | 'public';
