@@ -88,6 +88,8 @@ const Login = () => {
               placeholder={language === 'bn' ? 'ইমেইল এড্রেস' : 'Email address'}
               className="bg-background"
               type="email"
+              name="email"
+              autoComplete="email"
             />
           </div>
           <div>
@@ -100,6 +102,8 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               className="bg-background"
+              name="password"
+              autoComplete="current-password"
             />
           </div>
           <div className="text-right">
