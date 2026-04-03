@@ -38,6 +38,13 @@ const MENU_SCROLL_STORAGE_KEYS = {
 const getIcon = (name: string): LucideIcon => ICON_MAP[name] || FileBox;
 
 const AdminLayout = ({ children }: { children: ReactNode }) => {
+  const isEmbedded = useIsEmbedded();
+
+  // When embedded in StaffDashboard, skip the entire admin layout shell
+  if (isEmbedded) {
+    return <>{children}</>;
+  }
+
   const { t, language } = useLanguage();
   const { signOut, role } = useAuth();
   const { canView, hasUserPermission } = usePermissions();
