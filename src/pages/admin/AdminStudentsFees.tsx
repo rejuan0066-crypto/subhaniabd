@@ -327,22 +327,31 @@ const AdminStudentsFees = () => {
 
         {step === 'done' && (
           <div className="card-elevated p-6 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <CheckCircle className="w-8 h-8 text-primary" />
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${paymentMethod === 'cash' ? 'bg-green-500/10' : 'bg-primary/10'}`}>
+              {paymentMethod === 'cash' ? <Banknote className="w-8 h-8 text-green-600" /> : <CheckCircle className="w-8 h-8 text-primary" />}
             </div>
             <h3 className="font-display font-bold text-foreground text-lg">
-              {bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!'}
+              {paymentMethod === 'cash'
+                ? (bn ? 'ক্যাশ পেমেন্ট সম্পন্ন!' : 'Cash Payment Complete!')
+                : (bn ? 'পেমেন্ট সংরক্ষিত!' : 'Payment Saved!')}
             </h3>
+            {paymentMethod === 'cash' && (
+              <p className="text-sm text-green-600 font-medium">
+                {bn ? 'পেমেন্ট সফলভাবে গৃহীত হয়েছে' : 'Payment received successfully'}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
-              {bn ? 'আপনার ট্রানজেকশন আইডি:' : 'Your Transaction ID:'}
+              {bn ? 'ট্রানজেকশন আইডি:' : 'Transaction ID:'}
             </p>
             <div className="bg-secondary/50 rounded-lg px-4 py-3 font-mono text-lg font-bold text-foreground">
               {transactionId}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...'}
-              <ExternalLink className="w-3 h-3 inline ml-1" />
-            </p>
+            {paymentMethod === 'online' && (
+              <p className="text-xs text-muted-foreground">
+                {bn ? 'পেমেন্ট গেটওয়েতে রিডাইরেক্ট হচ্ছে...' : 'Redirecting to payment gateway...'}
+                <ExternalLink className="w-3 h-3 inline ml-1" />
+              </p>
+            )}
             <Button variant="outline" onClick={handleReset} className="mt-4">
               {bn ? 'নতুন পেমেন্ট' : 'New Payment'}
             </Button>
