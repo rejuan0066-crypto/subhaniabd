@@ -50,7 +50,7 @@ const STAFF_MODULES: StaffModule[] = [
   { key: 'subjects', menuPath: '/admin/subjects', labelBn: 'বিষয়', labelEn: 'Subjects', icon: BookOpen, component: AdminSubjects },
   { key: 'results', menuPath: '/admin/results', labelBn: 'ফলাফল', labelEn: 'Results', icon: FileText, component: AdminResults },
   { key: 'notices', menuPath: '/admin/notices', labelBn: 'নোটিশ', labelEn: 'Notices', icon: Bell, component: AdminNotices },
-  { key: 'fees', menuPath: '/admin/fees', labelBn: 'ফি', labelEn: 'Fees', icon: CreditCard, component: AdminFees },
+  { key: 'fees', menuPath: '/admin/students-fees', labelBn: 'ছাত্র ফি', labelEn: 'Student Fees', icon: CreditCard, component: AdminStudentsFees },
   { key: 'attendance', menuPath: '/admin/attendance', labelBn: 'হাজিরা ব্যবস্থাপনা', labelEn: 'Attendance Mgmt', icon: CalendarDays, component: AdminAttendance },
   { key: 'expenses', menuPath: '/admin/expenses', labelBn: 'খরচ', labelEn: 'Expenses', icon: Wallet, component: AdminExpenses },
   { key: 'donors', menuPath: '/admin/donors', labelBn: 'দাতা', labelEn: 'Donors', icon: Users, component: AdminDonors },
