@@ -558,6 +558,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
   const [cropH, setCropH] = useState(0);
   const [showOriginal, setShowOriginal] = useState(false);
   const [bgDownloadFormat, setBgDownloadFormat] = useState('png');
+  const [bgMode, setBgMode] = useState('auto');
 
   const handleFile = (f: File) => {
     const objUrl = URL.createObjectURL(f);
