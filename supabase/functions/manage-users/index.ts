@@ -266,6 +266,14 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Protect super_admin from deletion by non-super_admin
+      const { data: targetRole2 } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", user_id).maybeSingle();
+      if (targetRole2?.role === 'super_admin' && !callerIsSuperAdmin) {
+        return new Response(JSON.stringify({ error: "Cannot delete super admin" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user_id);
       if (deleteError) {
         return new Response(JSON.stringify({ error: deleteError.message }), {
