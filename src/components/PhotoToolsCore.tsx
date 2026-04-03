@@ -690,7 +690,7 @@ export const PhotoToolsCore = ({ language, onReset: externalReset }: { language:
         reader.onloadend = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
       });
-      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: base64 } });
+      const { data, error } = await supabase.functions.invoke('remove-bg', { body: { image_base64: base64, mode: bgMode } });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); setProcessing(false); return; }
       if (data?.image) { setBgResult(data.image); toast.success(language === 'bn' ? 'ব্যাকগ্রাউন্ড রিমুভ সফল!' : 'Background removed!'); }
