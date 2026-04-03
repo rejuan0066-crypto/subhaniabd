@@ -407,22 +407,33 @@ const AdminWebsite = () => {
                     onChange={(url) => updateField('logo_url', url)}
                     folder="logo"
                     className="mt-1"
-                    aspectRatio="aspect-square w-32"
+                    aspectRatio="aspect-square w-28"
                   />
                 </div>
                 <div>
-                  <Label>{language === 'bn' ? 'ফেভিকন / লোডার লোগো (আলাদা)' : 'Favicon / Loader Logo (Separate)'}</Label>
-                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'ব্রাউজার ট্যাব ও পেজ লোডারে আলাদা লোগো দেখাতে চাইলে আপলোড করুন। না দিলে মূল লোগো ব্যবহৃত হবে।' : 'Upload a separate logo for browser tab & page loader. Falls back to main logo if empty.'}</p>
+                  <Label>{language === 'bn' ? 'ফেভিকন (ব্রাউজার ট্যাব)' : 'Favicon (Browser Tab)'}</Label>
+                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'ব্রাউজার ট্যাবে আলাদা আইকন দেখাতে আপলোড করুন। না দিলে মূল লোগো ব্যবহৃত হবে।' : 'Separate icon for browser tab. Falls back to main logo.'}</p>
                   <ImageUpload
                     value={form.favicon_url}
                     onChange={(url) => updateField('favicon_url', url)}
+                    folder="logo"
+                    className="mt-1"
+                    aspectRatio="aspect-square w-20"
+                  />
+                </div>
+                <div>
+                  <Label>{language === 'bn' ? 'লোডার লোগো (পেজ লোডিং)' : 'Loader Logo (Page Loading)'}</Label>
+                  <p className="text-xs text-muted-foreground mb-1">{language === 'bn' ? 'পেজ লোড হওয়ার সময় আলাদা লোগো দেখাতে আপলোড করুন। না দিলে ফেভিকন বা মূল লোগো ব্যবহৃত হবে।' : 'Separate logo for page loader. Falls back to favicon or main logo.'}</p>
+                  <ImageUpload
+                    value={form.loader_logo_url || ''}
+                    onChange={(url) => updateField('loader_logo_url', url)}
                     folder="logo"
                     className="mt-1"
                     aspectRatio="aspect-square w-24"
                   />
                 </div>
               </div>
-              <Button className="btn-primary-gradient" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url'])} disabled={saving}>
+              <Button className="btn-primary-gradient" onClick={() => saveSection(['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url', 'loader_logo_url'])} disabled={saving}>
                 <Save className="w-4 h-4 mr-1" /> {language === 'bn' ? 'সংরক্ষণ' : 'Save'}
               </Button>
             </div>
@@ -1262,9 +1273,9 @@ const AdminWebsite = () => {
                       category_bn: 'প্রতিষ্ঠান তথ্য',
                       category_en: 'Institution Info',
                       icon: <Globe className="w-4 h-4" />,
-                      keys: ['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url'],
-                      labels_bn: ['বাংলা নাম', 'ইংরেজি নাম', 'ঠিকানা', 'ফোন', 'ইমেইল', 'লোগো', 'ফেভিকন লোগো'],
-                      labels_en: ['Bangla Name', 'English Name', 'Address', 'Phone', 'Email', 'Logo', 'Favicon Logo'],
+                      keys: ['institution_name', 'institution_name_en', 'address', 'phone', 'email', 'logo_url', 'favicon_url', 'loader_logo_url'],
+                      labels_bn: ['বাংলা নাম', 'ইংরেজি নাম', 'ঠিকানা', 'ফোন', 'ইমেইল', 'লোগো', 'ফেভিকন', 'লোডার লোগো'],
+                      labels_en: ['Bangla Name', 'English Name', 'Address', 'Phone', 'Email', 'Logo', 'Favicon', 'Loader Logo'],
                     },
                     {
                       category_bn: 'হিরো ব্যানার',
