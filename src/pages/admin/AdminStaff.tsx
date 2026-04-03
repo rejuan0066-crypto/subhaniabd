@@ -12,6 +12,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { useAuth } from '@/hooks/useAuth';
+import { isAdminRole } from '@/lib/roles';
 import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +23,7 @@ const AdminStaff = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/staff', 'staff');
+  const { role } = useAuth();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
@@ -137,7 +140,7 @@ const AdminStaff = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবী' : 'Designation'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিভাগ' : 'Department'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'মোবাইল' : 'Mobile'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকাউন্ট' : 'Account'}</th>
+                    {isAdminRole(role) && <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকাউন্ট' : 'Account'}</th>}
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
@@ -161,6 +164,7 @@ const AdminStaff = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.department || '-'}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.phone || '-'}</td>
+                      {isAdminRole(role) && (
                       <td className="px-4 py-3">
                         {s.user_id ? (
                           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
@@ -176,6 +180,7 @@ const AdminStaff = () => {
                           </button>
                         )}
                       </td>
+                      )}
                       <td className="px-4 py-3">
                         <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${s.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                           {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
