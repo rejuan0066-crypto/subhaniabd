@@ -61,6 +61,21 @@ const AdminStudentsFees = () => {
     },
   });
 
+  // Check if payment gateway is configured
+  const { data: gatewayConfig } = useQuery({
+    queryKey: ['payment_gateway_config_check'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('payment_gateway_config')
+        .select('id, provider, provider_name, is_enabled')
+        .eq('is_enabled', true)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+  const isGatewayReady = !!gatewayConfig;
+
   // Get logged-in user's staff/profile name for collector
   const { data: collectorName = '' } = useQuery({
     queryKey: ['collector_name', user?.id],
