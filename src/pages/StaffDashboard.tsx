@@ -520,7 +520,9 @@ const StaffDashboard = () => {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 }>
-                  <mod.component />
+                  <EmbeddedProvider>
+                    <mod.component />
+                  </EmbeddedProvider>
                 </Suspense>
               </ErrorBoundary>
             </TabsContent>
