@@ -100,7 +100,7 @@ const AdminDonors = () => {
   };
 
   const handleReset = () => {
-    setForm({ donorName: '', donorPhone: '', donorAddress: '', donationAmount: '', donationType: '', purpose: '', receiptSerial: '', date: '', paymentMethod: '' });
+    setForm({ donorName: '', donorPhone: '', donorAddress: '', donationAmount: '', donationType: '', purpose: '', receiptSerial: '', date: '', paymentMethod: '', transactionId: '', paymentTimestamp: '' });
     toast.info(bn ? 'ফর্ম রিসেট হয়েছে' : 'Form reset');
   };
 
