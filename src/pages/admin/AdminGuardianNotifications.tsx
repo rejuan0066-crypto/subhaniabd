@@ -174,19 +174,18 @@ const AdminGuardianNotifications = () => {
           </CardContent>
         </Card>
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {[
-            { key: 'send', icon: Send, bn: 'বার্তা পাঠান', en: 'Send' },
-            { key: 'history', icon: Clock, bn: 'ইতিহাস', en: 'History' },
-          ].map(t => (
-            <button key={t.key} onClick={() => setActiveTab(t.key)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === t.key ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
-              <t.icon className="w-4 h-4" />{bn ? t.bn : t.en}
-            </button>
-          ))}
-        </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="hidden">
-          <TabsList className="hidden"></TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[
+              { key: 'send', icon: Send, bn: 'বার্তা পাঠান', en: 'Send' },
+              { key: 'history', icon: Clock, bn: 'ইতিহাস', en: 'History' },
+            ].map(t => (
+              <button key={t.key} onClick={() => setActiveTab(t.key)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === t.key ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
+                <t.icon className="w-4 h-4" />{bn ? t.bn : t.en}
+              </button>
+            ))}
+          </div>
 
           <TabsContent value="send" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
