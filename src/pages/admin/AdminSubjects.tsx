@@ -131,7 +131,7 @@ const AdminSubjects = () => {
                       <td className="px-4 py-3 text-sm font-medium text-foreground flex items-center gap-2"><BookOpen className="w-4 h-4 text-primary" />{s.name_bn}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.name}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.code || '-'}</td>
-                      <td className="px-4 py-3 text-sm"><span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{language === 'bn' ? s.divisions?.name_bn : s.divisions?.name || '-'}</span></td>
+                      <td className="px-4 py-3 text-sm"><span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{language === 'bn' ? s.classes?.name_bn : s.classes?.name || '-'}</span></td>
                       <td className="px-4 py-3 text-right">
                         {canDeleteItem && <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
                       </td>
