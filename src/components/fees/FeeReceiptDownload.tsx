@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import { useReceiptSettings, ReceiptDesignConfig } from '@/hooks/useReceiptSettings';
 import { generatePrintHtml } from '@/components/admin/receipt-designer/ReceiptDesignerMain';
 import { Link } from 'react-router-dom';
-import { toast } from 'sonner';
 
 interface Props {
   collectorName: string;
