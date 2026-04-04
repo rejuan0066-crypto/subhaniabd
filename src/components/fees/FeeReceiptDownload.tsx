@@ -8,8 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Download, FileText, Loader2, Palette, Printer } from 'lucide-react';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { toast } from 'sonner';
-import { useReceiptSettings, ReceiptDesignConfig } from '@/hooks/useReceiptSettings';
-import { generatePrintHtml } from '@/components/admin/receipt-designer/ReceiptDesignerMain';
+import { useReceiptSettings } from '@/hooks/useReceiptSettings';
 import { Link } from 'react-router-dom';
 import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData } from './receiptPrintLayouts';
 
