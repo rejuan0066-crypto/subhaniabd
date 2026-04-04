@@ -350,7 +350,11 @@ const AdminStudents = () => {
                   <Plus className="w-6 h-6 text-primary" />
                   {bn ? 'নতুন ভর্তি ফর্ম' : 'New Admission Form'}
                 </h1>
-                <AdmissionForm open={true} onOpenChange={() => {}} inline />
+                <p className="text-muted-foreground text-sm">{bn ? 'নতুন ছাত্র ভর্তি করতে নিচের বাটনে ক্লিক করুন' : 'Click below to open the admission form'}</p>
+                <Button onClick={() => setShowAdd(true)} className="btn-primary-gradient">
+                  <Plus className="w-4 h-4 mr-2" /> {bn ? 'ভর্তি ফর্ম খুলুন' : 'Open Admission Form'}
+                </Button>
+                <AdmissionForm open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) setEditStudent(null); }} editStudent={editStudent} />
               </div>
             ),
           }] : []),
