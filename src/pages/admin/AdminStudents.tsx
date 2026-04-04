@@ -266,7 +266,6 @@ const AdminStudents = () => {
             </div>
           )}
         </div>
-      </div>
 
       {/* Dynamic Admission Form */}
       <AdmissionForm open={showAdd} onOpenChange={(o) => { setShowAdd(o); if (!o) setEditStudent(null); }} editStudent={editStudent} />
