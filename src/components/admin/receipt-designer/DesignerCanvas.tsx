@@ -63,6 +63,8 @@ const DesignerCanvas = ({ config, selectedId, onSelect, onUpdateElement, scale =
       display: 'flex',
       alignItems: 'center',
       justifyContent: el.textAlign === 'center' ? 'center' : el.textAlign === 'right' ? 'flex-end' : 'flex-start',
+      paddingLeft: el.textAlign !== 'right' && el.textAlign !== 'center' ? 1 * scale : 0,
+      paddingRight: el.textAlign === 'right' ? 2 * scale : 0,
       cursor: dragging?.id === el.id ? 'grabbing' : 'grab',
       outline: isSelected ? `${2}px solid hsl(var(--primary))` : 'none',
       outlineOffset: 1,
