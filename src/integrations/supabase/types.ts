@@ -1648,6 +1648,30 @@ export type Database = {
         }
         Relationships: []
       }
+      receipt_counter: {
+        Row: {
+          current_year: number
+          id: string
+          last_number: number
+          prefix: string
+          updated_at: string | null
+        }
+        Insert: {
+          current_year?: number
+          id?: string
+          last_number?: number
+          prefix?: string
+          updated_at?: string | null
+        }
+        Update: {
+          current_year?: number
+          id?: string
+          last_number?: number
+          prefix?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       receipt_settings: {
         Row: {
           created_at: string | null
@@ -2462,6 +2486,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_next_receipt_serial: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
