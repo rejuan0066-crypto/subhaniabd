@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, forwardRef } from 'react';
-import type { Ref } from 'react';
+import type { ForwardedRef, MutableRefObject } from 'react';
 import { ReceiptElement, ReceiptDesignConfig } from '@/hooks/useReceiptSettings';
 
 interface Props {
@@ -10,13 +10,13 @@ interface Props {
   scale?: number;
 }
 
-const assignRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null) => {
+const assignRef = (ref: ForwardedRef<HTMLDivElement>, node: HTMLDivElement | null) => {
   if (!ref) return;
   if (typeof ref === 'function') {
     ref(node);
     return;
   }
-  ref.current = node;
+  (ref as MutableRefObject<HTMLDivElement | null>).current = node;
 };
 
 const DesignerCanvas = forwardRef<HTMLDivElement, Props>(({ config, selectedId, onSelect, onUpdateElement, scale = 2 }, ref) => {
