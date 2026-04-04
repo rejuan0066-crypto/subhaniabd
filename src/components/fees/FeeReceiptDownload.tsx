@@ -10,7 +10,7 @@ import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { toast } from 'sonner';
 import { useReceiptSettings } from '@/hooks/useReceiptSettings';
 import { Link } from 'react-router-dom';
-import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData } from './receiptPrintLayouts';
+import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData, ReceiptStyleConfig } from './receiptPrintLayouts';
 
 interface Props {
   collectorName: string;
@@ -197,13 +197,14 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         return;
       }
 
+      // Load style from saved settings if available
+      const savedStyle: ReceiptStyleConfig | undefined = defaultSetting?.design_config as any;
+
       let html: string;
       if (receiptList.length === 1 || isSingleStudent) {
-        // Mode 1: Single student → 2 copies (Office + Student) on 1 A4
-        html = buildSingleStudentPrintHtml(receiptList[0]);
+        html = buildSingleStudentPrintHtml(receiptList[0], savedStyle);
       } else {
-        // Mode 2: Bulk class → 6 receipts per A4 (3 students × 2 copies)
-        html = buildBulkClassPrintHtml(receiptList);
+        html = buildBulkClassPrintHtml(receiptList, savedStyle);
       }
 
       if (mode === 'pdf') {
