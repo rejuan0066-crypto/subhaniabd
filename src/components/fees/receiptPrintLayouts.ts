@@ -14,6 +14,7 @@ export interface ReceiptData {
   feeType: string;
   amount: string;
   transactionId: string;
+  receiptSerial: string;
   date: string;
   status: string;
   statusColor: string;
