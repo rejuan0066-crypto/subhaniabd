@@ -229,6 +229,14 @@ const ReceiptDesignerMain = () => {
               <Label className="text-xs">{bn ? 'QR কোড' : 'QR Code'}</Label>
               <Switch checked={style.showQr} onCheckedChange={(v) => setStyle(p => ({ ...p, showQr: v }))} />
             </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">{bn ? 'ট্রানজেকশন আইডি (TrxID)' : 'Transaction ID (TrxID)'}</Label>
+              <Switch checked={style.showTrxId} onCheckedChange={(v) => setStyle(p => ({ ...p, showTrxId: v }))} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">{bn ? 'পেমেন্ট সময় (Timestamp)' : 'Payment Timestamp'}</Label>
+              <Switch checked={style.showTimestamp} onCheckedChange={(v) => setStyle(p => ({ ...p, showTimestamp: v }))} />
+            </div>
           </div>
 
           <p className="text-[11px] text-muted-foreground border-t pt-3">
