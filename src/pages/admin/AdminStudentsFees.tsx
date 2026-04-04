@@ -224,7 +224,6 @@ const AdminStudentsFees = () => {
           <CreditCard className="w-6 h-6 text-primary" />
           {bn ? 'ছাত্র ফি পরিশোধ' : 'Student Fee Payment'}
         </h1>
-        </h1>
 
         {step === 'form' && (
           <div className="card-elevated p-6 space-y-5">
