@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useReceiptSettings, DEFAULT_DESIGN, ReceiptDesignConfig, ReceiptElement } from '@/hooks/useReceiptSettings';
+import { useReceiptSettings, DEFAULT_DESIGN, GREEN_CAPSULE_PRESET, ReceiptDesignConfig, ReceiptElement } from '@/hooks/useReceiptSettings';
 import DesignerCanvas from './DesignerCanvas';
 import DesignerToolbar from './DesignerToolbar';
 import { Save, Loader2, RotateCcw, FileDown, Plus, Download } from 'lucide-react';
@@ -11,6 +11,11 @@ import { toast } from 'sonner';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+
+const cloneConfig = (preset: ReceiptDesignConfig): ReceiptDesignConfig => ({
+  ...preset,
+  elements: preset.elements.map((el) => ({ ...el })),
+});
 
 const ReceiptDesignerMain = () => {
   const { language } = useLanguage();
@@ -26,9 +31,9 @@ const ReceiptDesignerMain = () => {
   });
 
   const [selectedSettingId, setSelectedSettingId] = useState<string>('');
-  const [name, setName] = useState('Default Receipt');
-  const [nameBn, setNameBn] = useState('ডিফল্ট রিসিট');
-  const [config, setConfig] = useState<ReceiptDesignConfig>({ ...DEFAULT_DESIGN });
+  const [name, setName] = useState('Green Capsule Receipt');
+  const [nameBn, setNameBn] = useState('গ্রিন ক্যাপসুল রিসিট');
+  const [config, setConfig] = useState<ReceiptDesignConfig>(() => cloneConfig(GREEN_CAPSULE_PRESET));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDefault, setIsDefault] = useState(true);
 
@@ -82,7 +87,7 @@ const ReceiptDesignerMain = () => {
   }, []);
 
   const handleLoadPreset = useCallback((preset: ReceiptDesignConfig) => {
-    setConfig({ ...preset, elements: preset.elements.map(el => ({ ...el })) });
+    setConfig(cloneConfig(preset));
     setSelectedId(null);
     toast.info(bn ? 'টেমপ্লেট লোড হয়েছে' : 'Template loaded');
   }, [bn]);
@@ -104,9 +109,9 @@ const ReceiptDesignerMain = () => {
   };
 
   const handleReset = () => {
-    setConfig({ ...DEFAULT_DESIGN });
+    setConfig(cloneConfig(GREEN_CAPSULE_PRESET));
     setSelectedId(null);
-    toast.info(bn ? 'ডিফল্ট ডিজাইনে রিসেট হয়েছে' : 'Reset to default design');
+    toast.info(bn ? 'গ্রিন ক্যাপসুল ডিজাইনে রিসেট হয়েছে' : 'Reset to green capsule design');
   };
 
   const getInstitutionData = () => ({
@@ -155,7 +160,6 @@ const ReceiptDesignerMain = () => {
 
   return (
     <div className="space-y-3">
-      {/* Header Controls */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex-1 min-w-[200px]">
           <Select value={selectedSettingId} onValueChange={loadSetting}>
@@ -178,7 +182,7 @@ const ReceiptDesignerMain = () => {
           {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />}
           {bn ? 'PDF ডাউনলোড' : 'PDF Download'}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => { setSelectedSettingId(''); setName(''); setNameBn(''); setConfig({ ...DEFAULT_DESIGN }); }}>
+        <Button variant="outline" size="sm" onClick={() => { setSelectedSettingId(''); setName('Green Capsule Receipt'); setNameBn('গ্রিন ক্যাপসুল রিসিট'); setConfig(cloneConfig(GREEN_CAPSULE_PRESET)); setSelectedId(null); }}>
           <Plus className="w-4 h-4 mr-1" />{bn ? 'নতুন' : 'New'}
         </Button>
         <Button onClick={handleSave} disabled={saveMutation.isPending} className="btn-primary-gradient">
@@ -187,7 +191,6 @@ const ReceiptDesignerMain = () => {
         </Button>
       </div>
 
-      {/* Designer Area */}
       <div className="flex border rounded-lg overflow-hidden bg-background" style={{ height: 'calc(100vh - 260px)', minHeight: 400 }}>
         <DesignerToolbar
           config={config}
