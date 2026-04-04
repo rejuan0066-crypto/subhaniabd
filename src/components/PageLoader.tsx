@@ -8,6 +8,7 @@ const CACHE_SHAPE_KEY = 'cached_loader_logo_shape';
 
 const PageLoader = () => {
   const { settings, isLoading } = useWebsiteSettings();
+  const { language } = useLanguage();
   
   // Use cached logo immediately to avoid flash of default
   const [cachedLogo] = useState(() => localStorage.getItem(CACHE_KEY) || '');
