@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useReceiptSettings, DEFAULT_DESIGN, GREEN_CAPSULE_PRESET, ReceiptDesignConfig, ReceiptElement } from '@/hooks/useReceiptSettings';
 import DesignerCanvas from './DesignerCanvas';
 import DesignerToolbar from './DesignerToolbar';
-import { Save, Loader2, RotateCcw, FileDown, Plus, Download } from 'lucide-react';
+import { Save, Loader2, RotateCcw, FileDown, Plus, Download, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { supabase } from '@/integrations/supabase/client';
