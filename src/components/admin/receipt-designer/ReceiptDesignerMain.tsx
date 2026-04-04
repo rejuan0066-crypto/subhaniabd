@@ -108,6 +108,20 @@ const ReceiptDesignerMain = () => {
     }
   };
 
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const handleDownloadBlankPdf = async () => {
+    setPdfLoading(true);
+    try {
+      const printHtml = generatePrintHtml(config, null, bn);
+      await downloadReceiptAsPdf(printHtml, `blank-receipt-${Date.now()}.pdf`);
+      toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
+    } catch (e: any) {
+      toast.error(e.message || 'PDF error');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   const selectedElement = selectedId ? config.elements.find(el => el.id === selectedId) || null : null;
 
   return (
