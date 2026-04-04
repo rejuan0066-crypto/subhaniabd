@@ -10,7 +10,7 @@ import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { toast } from 'sonner';
 import { useReceiptSettings } from '@/hooks/useReceiptSettings';
 import { Link } from 'react-router-dom';
-import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData } from './receiptPrintLayouts';
+import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData, ReceiptStyleConfig } from './receiptPrintLayouts';
 
 interface Props {
   collectorName: string;
