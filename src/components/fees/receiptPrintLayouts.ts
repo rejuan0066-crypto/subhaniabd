@@ -207,10 +207,11 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* Title row */
   .title-row { display: flex; align-items: center; justify-content: space-between; padding: 1mm 2.5mm 0; position: relative; z-index: 1; }
-  .serial-box { display: flex; align-items: center; gap: 0.5mm; }
-  .title-date-group { display: flex; align-items: center; gap: 3mm; }
-  .date-dotted { font-weight: 600; color: #555; white-space: nowrap; }
-  .date-dots { margin-left: 1mm; color: #111; letter-spacing: 0.5px; }
+  .serial-box { display: flex; align-items: center; gap: 1mm; }
+  .serial-capsule { font-weight: 700; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 6px; min-width: 20px; text-align: center; }
+  .date-box-row { display: flex; align-items: center; gap: 1mm; }
+  .date-label-text { font-weight: 600; color: #555; white-space: nowrap; }
+  .date-capsule { font-weight: 600; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0 6px; color: #111; white-space: nowrap; }
   .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 12px; border-radius: 8px; white-space: nowrap; }
 
   .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0 2.5mm; position: relative; z-index: 1; }
