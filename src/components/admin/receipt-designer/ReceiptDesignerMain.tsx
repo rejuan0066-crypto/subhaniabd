@@ -218,7 +218,7 @@ function generatePrintHtml(config: ReceiptDesignConfig, data: any, bn: boolean):
 
       let content = el.content || el.placeholder || '';
       if (data) {
-        content = content.replace(/\{(\w+)\}/g, (_, key) => data[key] || '');
+        content = content.replace(/\{(\w+)\}/g, (_, key) => data[key] || '___________');
       } else {
         content = content.replace(/\{(\w+)\}/g, '___________');
       }
