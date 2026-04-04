@@ -84,10 +84,10 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
       <!-- Title Row -->
       <div class="title-row">
         <div class="serial-box">
+          ${style.showQr !== false ? `<img src="${qrUrl}" class="qr-title-img" alt="QR" />` : ''}
           <span class="serial-label" style="font-size:${6 * fs}px">ক্রমিক নং:</span>
           <span class="serial-val" style="font-size:${6 * fs}px;font-weight:700;color:${pc}">${data.receiptSerial || data.transactionId.slice(-6)}</span>
         </div>
-        ${style.showQr !== false ? `<div class="qr-title-box"><img src="${qrUrl}" class="qr-title-img" alt="QR" /></div>` : ''}
         <div class="title-capsule" style="background:${pc};font-size:${8.5 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
         <div class="date-box">
           <span class="date-label" style="font-size:${6 * fs}px">তারিখ:</span>
