@@ -66,6 +66,8 @@ const ReceiptDesignerMain = () => {
     amount: '',
     transactionId: '______',
     receiptSerial: '',
+    gatewayTrxId: style.showTrxId ? '9L25XJ47Z' : '',
+    paymentTimestamp: style.showTimestamp ? '05/04/2026 10:30 AM' : '',
     date: '',
     status: '',
     statusColor: '#22c55e',
