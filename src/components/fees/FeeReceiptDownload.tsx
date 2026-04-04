@@ -5,7 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { Download, FileText, Loader2 } from 'lucide-react';
+import { Download, FileText, Loader2, Palette } from 'lucide-react';
+import { toast } from 'sonner';
+import { useReceiptSettings, ReceiptDesignConfig } from '@/hooks/useReceiptSettings';
+import { generatePrintHtml } from '@/components/admin/receipt-designer/ReceiptDesignerMain';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 interface Props {
