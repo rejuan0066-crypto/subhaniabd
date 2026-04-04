@@ -94,6 +94,13 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
         </div>
       </div>
 
+      <!-- TrxID & Timestamp Row -->
+      ${(style.showTrxId !== false && data.gatewayTrxId) || (style.showTimestamp !== false && data.paymentTimestamp) ? `
+      <div class="trx-row">
+        ${style.showTrxId !== false && data.gatewayTrxId ? `<span class="trx-item" style="font-size:${6 * fs}px">TrxID: <strong>${data.gatewayTrxId}</strong></span>` : ''}
+        ${style.showTimestamp !== false && data.paymentTimestamp ? `<span class="trx-item" style="font-size:${6 * fs}px">সময়: ${data.paymentTimestamp}</span>` : ''}
+      </div>` : ''}
+
       <!-- Form Fields -->
       <div class="form-body">
         <div class="form-row">
