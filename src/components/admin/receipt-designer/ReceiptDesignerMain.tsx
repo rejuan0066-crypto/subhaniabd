@@ -20,7 +20,7 @@ const cloneConfig = (preset: ReceiptDesignConfig): ReceiptDesignConfig => ({
 const ReceiptDesignerMain = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const { settings, isLoading, saveMutation } = useReceiptSettings();
+  const { settings, isLoading, saveMutation, deleteMutation } = useReceiptSettings();
 
   const { data: institution } = useQuery({
     queryKey: ['institution_designer'],
