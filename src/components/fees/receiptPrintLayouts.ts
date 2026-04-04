@@ -88,10 +88,8 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
           <span class="serial-label" style="font-size:${6 * fs}px">ক্রমিক নং:</span>
           <span class="serial-val" style="font-size:${6 * fs}px;font-weight:700;color:${pc}">${data.receiptSerial || data.transactionId.slice(-6)}</span>
         </div>
-        <div class="title-date-group">
-          <div class="title-capsule" style="background:${pc};font-size:${8.5 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
-          <div class="date-dotted" style="font-size:${6 * fs}px">তারিখ:<span class="date-dots">${data.date || '......./............./...............'}</span></div>
-        </div>
+        <div class="title-capsule" style="background:${pc};font-size:${8.5 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
+        <div class="date-dotted" style="font-size:${6 * fs}px">তারিখ:<span class="date-dots">${data.date || '......./............./...............'}</span></div>
       </div>
 
       <!-- TrxID & Timestamp Row -->
