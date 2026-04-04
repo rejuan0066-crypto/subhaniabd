@@ -64,9 +64,9 @@ const AdminDonors = () => {
 
   const getReceiptData = (): DonationReceiptData => ({
     ...form,
-    transactionId: '',
-    gatewayTrxId: '',
-    paymentTimestamp: '',
+    transactionId: form.transactionId,
+    gatewayTrxId: form.transactionId,
+    paymentTimestamp: form.paymentTimestamp,
     collectorName: '',
     approverName: '',
     institutionName: institution?.name || 'মডেল মাদরাসা',
