@@ -278,7 +278,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               className="sidebar-item w-full text-destructive/80 hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="w-5 h-5" />
-              <span>লগআউট</span>
+              <span>{language === 'bn' ? 'লগআউট' : 'Logout'}</span>
             </button>
           </div>
         )}
