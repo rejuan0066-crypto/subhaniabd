@@ -18,6 +18,7 @@ interface Props {
 const FeeReceiptDownload = ({ collectorName }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { defaultSetting } = useReceiptSettings();
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
