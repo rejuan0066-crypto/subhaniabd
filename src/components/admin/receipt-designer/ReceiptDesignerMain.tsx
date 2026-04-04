@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useReceiptSettings, DEFAULT_DESIGN, ReceiptDesignConfig, ReceiptElement } from '@/hooks/useReceiptSettings';
 import DesignerCanvas from './DesignerCanvas';
 import DesignerToolbar from './DesignerToolbar';
-import { Save, Loader2, RotateCcw, FileDown, Plus } from 'lucide-react';
+import { Save, Loader2, RotateCcw, FileDown, Plus, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 
 const ReceiptDesignerMain = () => {
   const { language } = useLanguage();
