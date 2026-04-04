@@ -47,6 +47,8 @@ const AdminDonors = () => {
     receiptSerial: '',
     date: '',
     paymentMethod: '',
+    transactionId: '',
+    paymentTimestamp: '',
   });
 
   const updateField = (key: string, value: string) => setForm(p => ({ ...p, [key]: value }));
