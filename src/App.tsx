@@ -69,6 +69,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 import WaitingApproval from "./pages/WaitingApproval";
 import AdminApprovals from "./pages/admin/AdminApprovals";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminReceiptDesigner from "./pages/admin/AdminReceiptDesigner";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import BackButton from "./components/BackButton";
