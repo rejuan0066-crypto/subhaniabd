@@ -1,4 +1,5 @@
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { BookOpen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
