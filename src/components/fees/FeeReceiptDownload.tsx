@@ -186,8 +186,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
           await downloadReceiptAsPdf(result.html, `receipt-${Date.now()}.pdf`);
           toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
         } else {
-          // For builtin, generate html first then convert
-          const html = generateBuiltinHtml(result.params);
+          const html = buildPrintReceiptHtml(result.params);
           await downloadReceiptAsPdf(html, `receipt-${Date.now()}.pdf`);
           toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
         }
