@@ -328,6 +328,36 @@ const AdminStudents = () => {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+
+  return (
+    <AdminLayout>
+      <TabContainer
+        tabs={[
+          {
+            id: 'list',
+            label: bn ? 'ছাত্র তালিকা' : 'Student List',
+            icon: Eye,
+            content: studentListContent,
+          },
+          ...(canAddItem ? [{
+            id: 'admission',
+            label: bn ? 'নতুন ভর্তি' : 'New Admission',
+            icon: Plus,
+            content: (
+              <div className="space-y-4">
+                <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+                  <Plus className="w-6 h-6 text-primary" />
+                  {bn ? 'নতুন ভর্তি ফর্ম' : 'New Admission Form'}
+                </h1>
+                <AdmissionForm open={true} onOpenChange={() => {}} inline />
+              </div>
+            ),
+          }] : []),
+        ]}
+        paramKey="tab"
+      />
     </AdminLayout>
   );
 };
