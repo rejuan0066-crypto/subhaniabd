@@ -88,10 +88,11 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
           <span class="serial-val" style="font-size:${6 * fs}px;font-weight:700;color:${pc}">${data.receiptSerial || data.transactionId.slice(-6)}</span>
         </div>
         <div class="title-capsule" style="background:${pc};font-size:${8.5 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
+        ${style.showQr !== false ? `<div class="qr-title-box"><img src="${qrUrl}" class="qr-title-img" alt="QR" /></div>` : `
         <div class="date-box">
           <span class="date-label" style="font-size:${6 * fs}px">তারিখ:</span>
           <span class="date-val" style="font-size:${6 * fs}px">${data.date}</span>
-        </div>
+        </div>`}
       </div>
 
       <!-- TrxID & Timestamp Row -->
@@ -129,10 +130,6 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
             <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor};font-weight:700">${data.status}</span></div>
           </div>
         </div>
-        ${style.showQr !== false ? `
-        <div class="qr-corner">
-          <img src="${qrUrl}" class="qr-img" alt="QR" />
-        </div>` : ''}
       </div>
 
       <!-- Signatures -->
@@ -231,9 +228,9 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .field-value { color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .amt-val { font-weight: 700; color: ${pc}; }
 
-  /* QR corner */
-  .qr-corner { position: absolute; bottom: 0; right: 2.5mm; z-index: 2; }
-  .qr-img { width: 30px; height: 30px; }
+  /* QR in title row */
+  .qr-title-box { display: flex; align-items: center; justify-content: center; }
+  .qr-title-img { width: 28px; height: 28px; }
 
   /* Signatures */
   .sig-footer { display: flex; justify-content: space-between; padding: 0 2.5mm 1.5mm; margin-top: auto; position: relative; z-index: 1; }
