@@ -15,6 +15,8 @@ export interface ReceiptData {
   amount: string;
   transactionId: string;
   receiptSerial: string;
+  gatewayTrxId: string;
+  paymentTimestamp: string;
   date: string;
   status: string;
   statusColor: string;
