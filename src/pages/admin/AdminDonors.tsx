@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, Loader2, CheckCircle, Clock, Printer, Trash2 } from 'lucide-react';
+import { Heart, Loader2, CheckCircle, Clock, Printer, Trash2, Banknote, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
