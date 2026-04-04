@@ -26,6 +26,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success'>('pending');
   const [loading, setLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions_receipt'],
