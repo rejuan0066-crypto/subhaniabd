@@ -207,7 +207,8 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* Title row */
   .title-row { display: flex; align-items: center; justify-content: space-between; padding: 1mm 2.5mm 0; position: relative; z-index: 1; }
-  .serial-box, .date-box { display: flex; align-items: center; gap: 0.5mm; }
+  .serial-box { display: flex; align-items: center; gap: 0.5mm; }
+  .date-box { display: flex; align-items: center; gap: 0.5mm; margin-right: auto; margin-left: 2mm; }
   .serial-label, .date-label { font-weight: 600; color: #555; }
   .serial-val, .date-val { color: #111; }
   .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 12px; border-radius: 8px; white-space: nowrap; }
