@@ -48,6 +48,7 @@ const AdminDonors = () => {
   const payMutation = useMutation({
     mutationFn: async () => {
       if (!form.donorName || !form.donationAmount) throw new Error(bn ? 'দাতার নাম ও পরিমাণ আবশ্যক' : 'Donor name and amount required');
+      if (paymentMethod === 'online' && !form.transactionId) throw new Error(bn ? 'ট্রানজেকশন আইডি আবশ্যক' : 'Transaction ID required');
 
       const payload = {
         name_bn: form.donorName,
@@ -58,6 +59,7 @@ const AdminDonors = () => {
         purpose: form.purpose || null,
         donation_date: form.donationDate || new Date().toISOString().split('T')[0],
         status: 'active',
+        notes: paymentMethod === 'online' ? `TrxID: ${form.transactionId}${form.paymentGateway ? ` | Gateway: ${form.paymentGateway}` : ''}` : `পদ্ধতি: ক্যাশ`,
       };
 
       if (await checkApproval('add', payload, undefined, `দান: ৳${form.donationAmount}`)) return;
