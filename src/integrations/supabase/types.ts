@@ -2239,6 +2239,7 @@ export type Database = {
       }
       subjects: {
         Row: {
+          class_id: string | null
           code: string | null
           created_at: string | null
           division_id: string | null
@@ -2249,6 +2250,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          class_id?: string | null
           code?: string | null
           created_at?: string | null
           division_id?: string | null
@@ -2259,6 +2261,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          class_id?: string | null
           code?: string | null
           created_at?: string | null
           division_id?: string | null
@@ -2269,6 +2272,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subjects_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subjects_division_id_fkey"
             columns: ["division_id"]

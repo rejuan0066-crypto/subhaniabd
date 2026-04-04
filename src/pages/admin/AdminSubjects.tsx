@@ -19,13 +19,13 @@ const AdminSubjects = () => {
   const [newName, setNewName] = useState('');
   const [newNameEn, setNewNameEn] = useState('');
   const [newCode, setNewCode] = useState('');
-  const [newDivision, setNewDivision] = useState('');
-  const [filterDivision, setFilterDivision] = useState('all');
+  const [newClass, setNewClass] = useState('');
+  const [filterClass, setFilterClass] = useState('all');
 
-  const { data: divisions = [] } = useQuery({
-    queryKey: ['divisions'],
+  const { data: classes = [] } = useQuery({
+    queryKey: ['classes'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('divisions').select('*').eq('is_active', true).order('sort_order');
+      const { data, error } = await supabase.from('classes').select('*, divisions(name, name_bn)').eq('is_active', true).order('sort_order');
       if (error) throw error;
       return data;
     },
@@ -34,7 +34,7 @@ const AdminSubjects = () => {
   const { data: subjects = [], isLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('subjects').select('*, divisions(name, name_bn)').order('name_bn');
+      const { data, error } = await supabase.from('subjects').select('*, classes(name, name_bn, divisions(name, name_bn))').order('name_bn');
       if (error) throw error;
       return data;
     },
@@ -46,7 +46,7 @@ const AdminSubjects = () => {
         name_bn: newName.trim(),
         name: newNameEn.trim() || newName.trim(),
         code: newCode.trim() || null,
-        division_id: newDivision || null,
+        class_id: newClass || null,
       };
       if (await checkApproval('add', payload, undefined, `বিষয় যোগ: ${newName.trim()}`)) return;
       const { error } = await supabase.from('subjects').insert(payload);
@@ -54,7 +54,7 @@ const AdminSubjects = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
-      setNewName(''); setNewNameEn(''); setNewCode(''); setNewDivision('');
+      setNewName(''); setNewNameEn(''); setNewCode(''); setNewClass('');
       toast.success(language === 'bn' ? 'বিষয় যোগ হয়েছে' : 'Subject added');
     },
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
@@ -74,7 +74,7 @@ const AdminSubjects = () => {
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
   });
 
-  const filtered = filterDivision === 'all' ? subjects : subjects.filter((s: any) => s.division_id === filterDivision);
+  const filtered = filterClass === 'all' ? subjects : subjects.filter((s: any) => s.class_id === filterClass);
 
   return (
     <AdminLayout>
@@ -88,9 +88,9 @@ const AdminSubjects = () => {
               <Input placeholder={language === 'bn' ? 'বিষয়ের নাম (বাংলা)' : 'Subject Name (BN)'} value={newName} onChange={(e) => setNewName(e.target.value)} className="bg-background" />
               <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newNameEn} onChange={(e) => setNewNameEn(e.target.value)} className="bg-background" />
               <Input placeholder={language === 'bn' ? 'কোড' : 'Code'} value={newCode} onChange={(e) => setNewCode(e.target.value)} className="bg-background w-24" />
-              <Select value={newDivision} onValueChange={setNewDivision}>
-                <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
-                <SelectContent>{divisions.map(d => <SelectItem key={d.id} value={d.id}>{language === 'bn' ? d.name_bn : d.name}</SelectItem>)}</SelectContent>
+              <Select value={newClass} onValueChange={setNewClass}>
+                <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'ক্লাস নির্বাচন' : 'Select Class'} /></SelectTrigger>
+                <SelectContent>{classes.map((c: any) => <SelectItem key={c.id} value={c.id}>{language === 'bn' ? `${c.name_bn} (${c.divisions?.name_bn || ''})` : `${c.name} (${c.divisions?.name || ''})`}</SelectItem>)}</SelectContent>
               </Select>
               <Button onClick={() => { if (!newName.trim()) { toast.error(language === 'bn' ? 'বিষয়ের নাম লিখুন' : 'Enter subject name'); return; } addMutation.mutate(); }} className="btn-primary-gradient shrink-0" disabled={addMutation.isPending}>
                 {addMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
@@ -103,11 +103,11 @@ const AdminSubjects = () => {
         <div className="card-elevated p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display font-bold text-foreground">{language === 'bn' ? 'বিষয় তালিকা' : 'Subject List'}</h3>
-            <Select value={filterDivision} onValueChange={setFilterDivision}>
+            <Select value={filterClass} onValueChange={setFilterClass}>
               <SelectTrigger className="bg-background w-48"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{language === 'bn' ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
-                {divisions.map(d => <SelectItem key={d.id} value={d.id}>{language === 'bn' ? d.name_bn : d.name}</SelectItem>)}
+                <SelectItem value="all">{language === 'bn' ? 'সকল ক্লাস' : 'All Classes'}</SelectItem>
+                {classes.map((c: any) => <SelectItem key={c.id} value={c.id}>{language === 'bn' ? `${c.name_bn} (${c.divisions?.name_bn || ''})` : `${c.name} (${c.divisions?.name || ''})`}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -121,7 +121,7 @@ const AdminSubjects = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'বিষয়' : 'Subject'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'ইংরেজি নাম' : 'English Name'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'কোড' : 'Code'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'বিভাগ' : 'Division'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'ক্লাস' : 'Class'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
@@ -131,7 +131,7 @@ const AdminSubjects = () => {
                       <td className="px-4 py-3 text-sm font-medium text-foreground flex items-center gap-2"><BookOpen className="w-4 h-4 text-primary" />{s.name_bn}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.name}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.code || '-'}</td>
-                      <td className="px-4 py-3 text-sm"><span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{language === 'bn' ? s.divisions?.name_bn : s.divisions?.name || '-'}</span></td>
+                      <td className="px-4 py-3 text-sm"><span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">{language === 'bn' ? s.classes?.name_bn : s.classes?.name || '-'}</span></td>
                       <td className="px-4 py-3 text-right">
                         {canDeleteItem && <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
                       </td>
