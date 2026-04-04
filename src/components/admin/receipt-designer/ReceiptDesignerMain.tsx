@@ -2,20 +2,25 @@ import { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useReceiptSettings, DEFAULT_DESIGN, GREEN_CAPSULE_PRESET, ReceiptDesignConfig, ReceiptElement } from '@/hooks/useReceiptSettings';
-import DesignerCanvas from './DesignerCanvas';
-import DesignerToolbar from './DesignerToolbar';
-import { Save, Loader2, RotateCcw, FileDown, Plus, Download, Trash2 } from 'lucide-react';
+import { useReceiptSettings } from '@/hooks/useReceiptSettings';
+import { Save, Loader2, RotateCcw, FileDown, Download, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { buildSingleStudentPrintHtml, ReceiptData, ReceiptStyleConfig } from '@/components/fees/receiptPrintLayouts';
 
-const cloneConfig = (preset: ReceiptDesignConfig): ReceiptDesignConfig => ({
-  ...preset,
-  elements: preset.elements.map((el) => ({ ...el })),
-});
+const DEFAULT_STYLE: ReceiptStyleConfig = {
+  primaryColor: '#1a5c2e',
+  fontSize: 100,
+  receiptTitle: 'রশিদ বই',
+  showWatermark: true,
+  showQr: true,
+};
 
 const ReceiptDesignerMain = () => {
   const { language } = useLanguage();
@@ -30,12 +35,11 @@ const ReceiptDesignerMain = () => {
     },
   });
 
-  const [selectedSettingId, setSelectedSettingId] = useState<string>('');
-  const [name, setName] = useState('Green Capsule Receipt');
-  const [nameBn, setNameBn] = useState('গ্রিন ক্যাপসুল রিসিট');
-  const [config, setConfig] = useState<ReceiptDesignConfig>(() => cloneConfig(GREEN_CAPSULE_PRESET));
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isDefault, setIsDefault] = useState(true);
+  const [selectedSettingId, setSelectedSettingId] = useState('');
+  const [name, setName] = useState('রশিদ বই');
+  const [nameBn, setNameBn] = useState('রশিদ বই');
+  const [style, setStyle] = useState<ReceiptStyleConfig>({ ...DEFAULT_STYLE });
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const loadSetting = useCallback((id: string) => {
     const s = settings?.find((s: any) => s.id === id);
@@ -43,111 +47,54 @@ const ReceiptDesignerMain = () => {
       setSelectedSettingId(s.id);
       setName(s.name);
       setNameBn(s.name_bn);
-      setIsDefault(s.is_default || false);
       const dc = s.design_config as any;
-      if (dc && dc.elements) {
-        setConfig(dc as ReceiptDesignConfig);
+      if (dc?.primaryColor !== undefined) {
+        setStyle(dc as ReceiptStyleConfig);
       }
     }
   }, [settings]);
 
-  const handleConfigChange = useCallback((updates: Partial<ReceiptDesignConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  const handleUpdateElement = useCallback((id: string, updates: Partial<ReceiptElement>) => {
-    setConfig(prev => ({
-      ...prev,
-      elements: prev.elements.map(el => el.id === id ? { ...el, ...updates } : el),
-    }));
-  }, []);
-
-  const handleAddElement = useCallback((type: ReceiptElement['type'], extra?: Partial<ReceiptElement>) => {
-    const id = `${type}_${Date.now()}`;
-    const newEl: ReceiptElement = {
-      id,
-      type,
-      x: 20,
-      y: 20,
-      width: type === 'line' ? 100 : type === 'qr' ? 50 : type === 'logo' ? 30 : type === 'field' ? 200 : 80,
-      height: type === 'line' ? 2 : type === 'qr' ? 50 : type === 'logo' ? 30 : type === 'field' ? 16 : 14,
-      content: type === 'text' ? (bn ? 'নতুন টেক্সট' : 'New Text') : '',
-      fontSize: 10,
-      color: '#000000',
-      fontFamily: 'bengali',
-      ...extra,
-    };
-    setConfig(prev => ({ ...prev, elements: [...prev.elements, newEl] }));
-    setSelectedId(id);
-  }, [bn]);
-
-  const handleDeleteElement = useCallback((id: string) => {
-    setConfig(prev => ({ ...prev, elements: prev.elements.filter(el => el.id !== id) }));
-    setSelectedId(null);
-  }, []);
-
-  const handleLoadPreset = useCallback((preset: ReceiptDesignConfig) => {
-    setConfig(cloneConfig(preset));
-    setSelectedId(null);
-    toast.info(bn ? 'টেমপ্লেট লোড হয়েছে' : 'Template loaded');
-  }, [bn]);
-
-  const handleSave = async () => {
-    try {
-      await saveMutation.mutateAsync({
-        id: selectedSettingId || undefined,
-        name,
-        name_bn: nameBn,
-        paper_size: config.paperSize,
-        design_config: config,
-        is_default: isDefault,
-      });
-      toast.success(bn ? 'রিসিট ডিজাইন সেভ হয়েছে' : 'Receipt design saved');
-    } catch (e: any) {
-      toast.error(e.message);
-    }
-  };
-
-  const handleReset = () => {
-    setConfig(cloneConfig(GREEN_CAPSULE_PRESET));
-    setSelectedId(null);
-    toast.info(bn ? 'গ্রিন ক্যাপসুল ডিজাইনে রিসেট হয়েছে' : 'Reset to green capsule design');
-  };
-
-  const getInstitutionData = () => ({
-    institution_name: institution?.name || '',
-    institution_address: institution?.address || '',
-    phone: institution?.phone || '',
-    logo_url: institution?.logo_url || '',
-    student_name: '',
-    student_id: '',
-    roll_no: '',
-    amount: '',
-    fee_type: '',
-    date: '',
-    receipt_no: '',
-    transaction_id: '',
-    status: '',
-    collector_name: '',
-    approver_name: '',
-    address: '',
+  const getSampleData = (): ReceiptData => ({
+    studentName: 'মোঃ আব্দুল করিম',
+    studentId: 'STU-2026-001',
+    rollNumber: '০১',
+    className: 'প্রথম শ্রেণি',
+    sessionName: '২০২৬',
+    feeType: style.receiptTitle === 'রশিদ বই' ? 'ভর্তি ফি' : style.receiptTitle,
+    amount: '৫,০০০',
+    transactionId: 'STU-20260404-0001',
+    date: new Date().toLocaleDateString('bn-BD'),
+    status: 'পেইড',
+    statusColor: '#22c55e',
+    paymentMethod: 'Cash',
+    collectorName: 'মোঃ জাহিদ হাসান',
+    approverName: 'মোঃ নজরুল ইসলাম',
+    institutionName: institution?.name || 'মডেল মাদরাসা',
+    institutionNameEn: institution?.name_en || 'MODEL MADRASA',
+    institutionAddress: institution?.address || 'ঢাকা, বাংলাদেশ',
+    institutionPhone: institution?.phone || '০১৭০০-০০০০০০',
+    institutionEmail: institution?.email || '',
+    institutionOtherInfo: institution?.other_info || '',
+    logoUrl: institution?.logo_url || '',
+    bn: true,
   });
 
-  const handleDownloadBlank = () => {
-    const printHtml = generatePrintHtml(config, getInstitutionData(), bn);
-    const win = window.open('', '_blank');
-    if (win) {
-      win.document.write(printHtml);
-      win.document.close();
-    }
+  const getPreviewHtml = () => {
+    const sampleData = getSampleData();
+    return buildSingleStudentPrintHtml(sampleData, style);
   };
 
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const handleDownloadBlankPdf = async () => {
+  const handlePreview = () => {
+    const html = getPreviewHtml();
+    const win = window.open('', '_blank');
+    if (win) { win.document.write(html); win.document.close(); }
+  };
+
+  const handleDownloadPdf = async () => {
     setPdfLoading(true);
     try {
-      const printHtml = generatePrintHtml(config, getInstitutionData(), bn);
-      await downloadReceiptAsPdf(printHtml, `blank-receipt-${Date.now()}.pdf`);
+      const html = getPreviewHtml();
+      await downloadReceiptAsPdf(html, `receipt-preview-${Date.now()}.pdf`);
       toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
     } catch (e: any) {
       toast.error(e.message || 'PDF error');
@@ -156,15 +103,38 @@ const ReceiptDesignerMain = () => {
     }
   };
 
-  const selectedElement = selectedId ? config.elements.find(el => el.id === selectedId) || null : null;
+  const handleSave = async () => {
+    try {
+      await saveMutation.mutateAsync({
+        id: selectedSettingId || undefined,
+        name,
+        name_bn: nameBn,
+        paper_size: 'a4',
+        design_config: style as any,
+        is_default: true,
+      });
+      toast.success(bn ? 'রিসিট সেটিংস সেভ হয়েছে' : 'Receipt settings saved');
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  };
+
+  const handleReset = () => {
+    setStyle({ ...DEFAULT_STYLE });
+    toast.info(bn ? 'ডিফল্ট সেটিংসে রিসেট হয়েছে' : 'Reset to defaults');
+  };
+
+  // Generate live preview iframe
+  const previewSrc = `data:text/html;charset=utf-8,${encodeURIComponent(getPreviewHtml().replace(/<script>.*?<\/script>/gs, ''))}`;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Top bar */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-[180px]">
           <Select value={selectedSettingId} onValueChange={loadSetting}>
             <SelectTrigger className="h-9">
-              <SelectValue placeholder={bn ? 'ডিজাইন নির্বাচন বা নতুন তৈরি' : 'Select design or create new'} />
+              <SelectValue placeholder={bn ? 'সেভ করা ডিজাইন নির্বাচন' : 'Select saved design'} />
             </SelectTrigger>
             <SelectContent>
               {(settings || []).map((s: any) => (
@@ -173,36 +143,25 @@ const ReceiptDesignerMain = () => {
             </SelectContent>
           </Select>
         </div>
-        <Input className="h-9 w-40" placeholder={bn ? 'নাম (EN)' : 'Name (EN)'} value={name} onChange={(e) => setName(e.target.value)} />
-        <Input className="h-9 w-40" placeholder={bn ? 'নাম (বাংলা)' : 'Name (BN)'} value={nameBn} onChange={(e) => setNameBn(e.target.value)} />
-
         <Button variant="outline" size="sm" onClick={handleReset}><RotateCcw className="w-4 h-4 mr-1" />{bn ? 'রিসেট' : 'Reset'}</Button>
-        <Button variant="outline" size="sm" onClick={handleDownloadBlank}><FileDown className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}</Button>
-        <Button variant="outline" size="sm" onClick={handleDownloadBlankPdf} disabled={pdfLoading}>
+        <Button variant="outline" size="sm" onClick={handlePreview}><Eye className="w-4 h-4 mr-1" />{bn ? 'প্রিভিউ' : 'Preview'}</Button>
+        <Button variant="outline" size="sm" onClick={handleDownloadPdf} disabled={pdfLoading}>
           {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Download className="w-4 h-4 mr-1" />}
-          {bn ? 'PDF ডাউনলোড' : 'PDF Download'}
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => { setSelectedSettingId(''); setName('Green Capsule Receipt'); setNameBn('গ্রিন ক্যাপসুল রিসিট'); setConfig(cloneConfig(GREEN_CAPSULE_PRESET)); setSelectedId(null); }}>
-          <Plus className="w-4 h-4 mr-1" />{bn ? 'নতুন' : 'New'}
+          PDF
         </Button>
         {selectedSettingId && (
           <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/10"
             disabled={deleteMutation.isPending}
             onClick={async () => {
-              if (!confirm(bn ? 'এই ডিজাইন ডিলিট করতে চান?' : 'Delete this design?')) return;
+              if (!confirm(bn ? 'ডিলিট করতে চান?' : 'Delete?')) return;
               try {
                 await deleteMutation.mutateAsync(selectedSettingId);
                 setSelectedSettingId('');
-                setName('Green Capsule Receipt');
-                setNameBn('গ্রিন ক্যাপসুল রিসিট');
-                setConfig(cloneConfig(GREEN_CAPSULE_PRESET));
-                toast.success(bn ? 'ডিজাইন ডিলিট হয়েছে' : 'Design deleted');
-              } catch (e: any) {
-                toast.error(e.message);
-              }
+                setStyle({ ...DEFAULT_STYLE });
+                toast.success(bn ? 'ডিলিট হয়েছে' : 'Deleted');
+              } catch (e: any) { toast.error(e.message); }
             }}>
-            {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />}
-            {bn ? 'ডিলিট' : 'Delete'}
+            <Trash2 className="w-4 h-4 mr-1" />{bn ? 'ডিলিট' : 'Delete'}
           </Button>
         )}
         <Button onClick={handleSave} disabled={saveMutation.isPending} className="btn-primary-gradient">
@@ -211,107 +170,81 @@ const ReceiptDesignerMain = () => {
         </Button>
       </div>
 
-      <div className="flex border rounded-lg overflow-hidden bg-background" style={{ height: 'calc(100vh - 260px)', minHeight: 400 }}>
-        <DesignerToolbar
-          config={config}
-          selectedElement={selectedElement}
-          onConfigChange={handleConfigChange}
-          onUpdateElement={handleUpdateElement}
-          onAddElement={handleAddElement}
-          onDeleteElement={handleDeleteElement}
-          onLoadPreset={handleLoadPreset}
-        />
-        <DesignerCanvas
-          config={config}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onUpdateElement={handleUpdateElement}
-        />
+      {/* Main layout: Settings + Preview */}
+      <div className="flex flex-col lg:flex-row gap-4" style={{ minHeight: 'calc(100vh - 300px)' }}>
+        {/* Settings Panel */}
+        <div className="w-full lg:w-80 flex-shrink-0 space-y-4 card-elevated p-4 rounded-lg">
+          <h3 className="font-display font-semibold text-sm text-foreground">{bn ? 'কাস্টমাইজেশন' : 'Customization'}</h3>
+
+          {/* Name */}
+          <div className="space-y-1">
+            <Label className="text-xs">{bn ? 'সেভের নাম' : 'Save Name'}</Label>
+            <Input className="h-8 text-sm" value={nameBn} onChange={(e) => { setNameBn(e.target.value); setName(e.target.value); }} />
+          </div>
+
+          {/* Receipt Title */}
+          <div className="space-y-1">
+            <Label className="text-xs">{bn ? 'রিসিটের শিরোনাম' : 'Receipt Title'}</Label>
+            <Input className="h-8 text-sm" value={style.receiptTitle} onChange={(e) => setStyle(p => ({ ...p, receiptTitle: e.target.value }))}
+              placeholder="রশিদ বই / মাসিক ফি / ভর্তি রিসিট" />
+          </div>
+
+          {/* Primary Color */}
+          <div className="space-y-1">
+            <Label className="text-xs">{bn ? 'প্রাইমারি কালার' : 'Primary Color'}</Label>
+            <div className="flex gap-2 items-center">
+              <Input type="color" className="h-8 w-12 p-0.5 cursor-pointer" value={style.primaryColor}
+                onChange={(e) => setStyle(p => ({ ...p, primaryColor: e.target.value }))} />
+              <Input className="h-8 text-xs flex-1" value={style.primaryColor}
+                onChange={(e) => setStyle(p => ({ ...p, primaryColor: e.target.value }))} />
+            </div>
+            <div className="flex gap-1 mt-1">
+              {['#1a5c2e', '#1e3a5f', '#7c2d12', '#4a1d96', '#0f766e', '#1e293b'].map(c => (
+                <button key={c} className="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
+                  style={{ backgroundColor: c, borderColor: c === style.primaryColor ? '#000' : 'transparent' }}
+                  onClick={() => setStyle(p => ({ ...p, primaryColor: c }))} />
+              ))}
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="space-y-1">
+            <Label className="text-xs">{bn ? 'ফন্ট সাইজ' : 'Font Size'}: {style.fontSize}%</Label>
+            <Slider value={[style.fontSize]} min={70} max={130} step={5}
+              onValueChange={([v]) => setStyle(p => ({ ...p, fontSize: v }))} />
+          </div>
+
+          {/* Toggles */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">{bn ? 'ওয়াটারমার্ক লোগো' : 'Watermark Logo'}</Label>
+              <Switch checked={style.showWatermark} onCheckedChange={(v) => setStyle(p => ({ ...p, showWatermark: v }))} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">{bn ? 'QR কোড' : 'QR Code'}</Label>
+              <Switch checked={style.showQr} onCheckedChange={(v) => setStyle(p => ({ ...p, showQr: v }))} />
+            </div>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground border-t pt-3">
+            {bn ? 'লোগো পরিবর্তন করতে প্রতিষ্ঠানের প্রোফাইল থেকে আপলোড করুন। এই সেটিংস সেভ করলে রিসিট ডাউনলোডে স্বয়ংক্রিয় প্রয়োগ হবে।' : 'Upload logo from institution profile. Saved settings auto-apply to receipt downloads.'}
+          </p>
+        </div>
+
+        {/* Preview */}
+        <div className="flex-1 bg-muted/30 rounded-lg overflow-hidden border" style={{ minHeight: 500 }}>
+          <iframe
+            key={JSON.stringify(style)}
+            src={previewSrc}
+            className="w-full h-full border-0"
+            style={{ minHeight: 500 }}
+            title="Receipt Preview"
+            sandbox="allow-same-origin"
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-function generatePrintHtml(config: ReceiptDesignConfig, data: any, bn: boolean): string {
-  const scale = 2.5;
-  const renderElements = (elements: ReceiptElement[], copyLabel: string) => {
-    return elements.map(el => {
-      const fontFam = el.fontFamily === 'bengali' ? "'Noto Sans Bengali',sans-serif" : el.fontFamily === 'monospace' ? 'monospace' : 'sans-serif';
-      const justify = el.textAlign === 'center' ? 'center' : el.textAlign === 'right' ? 'flex-end' : 'flex-start';
-      const baseStyle = `position:absolute;left:${el.x * scale}px;top:${el.y * scale}px;width:${el.width * scale}px;height:${el.height * scale}px;font-size:${(el.fontSize || 10) * scale}px;font-weight:${el.fontWeight || 'normal'};font-style:${el.fontStyle || 'normal'};text-align:${el.textAlign || 'left'};color:${el.color || '#000'};font-family:${fontFam};display:flex;align-items:center;justify-content:${justify};overflow:hidden;line-height:1.2;opacity:${el.opacity ?? 1};padding:0 ${2 * scale}px;`;
-
-      let content = el.content || el.placeholder || '';
-      if (data) {
-        content = content.replace(/\{(\w+)\}/g, (_, key) => data[key] || '___________');
-      } else {
-        content = content.replace(/\{(\w+)\}/g, '___________');
-      }
-
-      if (el.type === 'field') {
-        const labelW = 28 * scale;
-        let inputHtml = '';
-        if (el.lineStyle === 'rounded-fill') {
-          inputHtml = `<div style="flex:1;height:80%;background:#f0f0f0;border-radius:${10 * scale}px;border:${scale}px solid ${el.borderColor || '#ddd'};display:flex;align-items:center;padding:0 ${4 * scale}px;"><span style="color:#999;font-style:italic;font-size:0.85em;">${content}</span></div>`;
-        } else {
-          inputHtml = `<div style="flex:1;height:80%;border-bottom:${scale}px ${el.lineStyle || 'solid'} ${el.borderColor || '#333'};display:flex;align-items:center;"><span style="color:#999;font-style:italic;font-size:0.85em;">${content}</span></div>`;
-        }
-        return `<div style="${baseStyle}"><span style="width:${labelW}px;flex-shrink:0;font-weight:600;">${el.fieldLabel || ''}</span>${inputHtml}</div>`;
-      }
-
-      if (el.type === 'line') {
-        return `<div style="${baseStyle}border-bottom:${(el.borderWidth || 1) * scale}px solid ${el.color || '#333'};"></div>`;
-      }
-      if (el.type === 'qr') {
-        if (data) {
-          const qrData = encodeURIComponent(`TXN:${data.transaction_id || ''}|AMT:${data.amount || ''}`);
-          return `<div style="${baseStyle}"><img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${qrData}" style="width:100%;height:100%;" /></div>`;
-        }
-        return `<div style="${baseStyle}border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;"><span style="font-size:${8 * scale}px;color:#999">QR</span></div>`;
-      }
-      if (el.type === 'logo') {
-        if (data?.logo_url) {
-          return `<div style="${baseStyle}"><img src="${data.logo_url}" style="width:100%;height:100%;object-fit:contain;" /></div>`;
-        }
-        return `<div style="${baseStyle}border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;"><span style="font-size:${7 * scale}px;color:#999">Logo</span></div>`;
-      }
-      if (el.type === 'shape') {
-        const br = el.shapeType === 'circle' ? '50%' : `${(el.borderRadius || 0) * scale}px`;
-        return `<div style="${baseStyle}background:${el.bgColor || 'transparent'};border:${(el.borderWidth || 1) * scale}px solid ${el.borderColor || '#333'};border-radius:${br};"></div>`;
-      }
-      return `<div style="${baseStyle}">${content}</div>`;
-    }).join('');
-  };
-
-  const w = config.receiptWidth * scale;
-  const h = config.receiptHeight * scale;
-
-  const buildReceipt = (label: string) => `
-    <div style="position:relative;width:${w}px;height:${h}px;border:${config.borderWidth * scale}px solid ${config.borderColor};background:${config.bgColor};overflow:hidden;">
-      <div style="position:absolute;top:${2 * scale}px;right:${3 * scale}px;font-size:${7 * scale}px;font-weight:700;color:#666;z-index:2;">${label}</div>
-      ${renderElements(config.elements, label)}
-    </div>`;
-
-  const receiptsPerPage = config.receiptsPerPage || 3;
-  const pairs: string[] = [];
-  for (let i = 0; i < receiptsPerPage; i++) {
-    const row = config.duplicateCopy
-      ? `<div style="display:flex;"><div>${buildReceipt(bn ? 'অফিস কপি' : 'Office Copy')}</div><div style="border-left:1px dashed #aaa;margin:0 2px;"></div><div>${buildReceipt(bn ? 'ছাত্র কপি' : 'Student Copy')}</div></div>`
-      : buildReceipt('');
-    pairs.push(row);
-  }
-
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${bn ? 'ব্ল্যাংক রিসিট' : 'Blank Receipt'}</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans Bengali',sans-serif}
-.page{width:210mm;min-height:297mm;padding:5mm;display:flex;flex-direction:column;justify-content:flex-start;page-break-after:always}
-.cut-h{border-top:1px dashed #aaa;margin:2px 0}
-@media print{@page{size:A4;margin:0}.page{padding:5mm}}
-@media screen{body{background:#f0f0f0;padding:20px}.page{background:white;margin:0 auto 20px;box-shadow:0 2px 10px rgba(0,0,0,.15)}}
-</style></head><body>
-<div class="page">${pairs.join('<div class="cut-h"></div>')}</div>
-<script>document.fonts.ready.then(()=>{setTimeout(()=>window.print(),800)})</script>
-</body></html>`;
-}
-
-export { generatePrintHtml };
 export default ReceiptDesignerMain;
