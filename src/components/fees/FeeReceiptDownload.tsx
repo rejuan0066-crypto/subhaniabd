@@ -137,40 +137,52 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     return match ? match[1].trim() : collectorName;
   };
 
-  const buildReceiptHtml = (data: any) => {
-    const { payments, studentMap, sessionName, className, approverName } = data;
-    const savedDesign = defaultSetting?.design_config as unknown as ReceiptDesignConfig | undefined;
+  const isSingleStudent = !!(rollNumber.trim() || regNumber.trim());
+  const isBulkClass = !!selectedClass && !rollNumber.trim() && !regNumber.trim();
 
-    if (savedDesign && savedDesign.elements && savedDesign.elements.length > 0) {
-      const dataMap: Record<string, string> = {
-        student_name: (studentMap.get(payments[0].student_id))?.name_bn || '-',
-        student_id: (studentMap.get(payments[0].student_id))?.student_id || '-',
-        roll_no: (studentMap.get(payments[0].student_id))?.roll_number || '-',
-        class_name: className,
-        session: sessionName,
-        fee_type: bn ? (feeTypeLabels[payments[0].fee_type]?.bn || payments[0].fee_type) : (feeTypeLabels[payments[0].fee_type]?.en || payments[0].fee_type),
-        amount: `৳ ${payments[0].amount}`,
-        transaction_id: payments[0].transaction_id,
-        date: new Date(payments[0].created_at || Date.now()).toLocaleDateString('bn-BD'),
-        status: statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পেইড' : 'Paid'),
-        payment_method: payments[0].payment_method || 'Cash',
-        collector_name: getCollectorFromNotes(payments[0].notes || ''),
-        approver_name: approverName || (bn ? 'এডমিন' : 'Admin'),
-        institution_name: institution?.name || '',
-        institution_address: institution?.address || '',
-        phone: institution?.phone || '',
-        logo_url: institution?.logo_url || '',
-      };
-      return { type: 'custom' as const, html: generatePrintHtml(savedDesign, dataMap, bn) };
-    }
-    return {
-      type: 'builtin' as const,
-      params: {
-        payments, studentMap, sessionName, className, institution,
-        collectorName: getCollectorFromNotes(payments[0]?.notes || ''),
-        approverName, statusFilter, bn,
-      }
-    };
+  const buildReceiptDataList = (data: any): ReceiptData[] => {
+    const { payments, studentMap, sessionName, className, approverName } = data;
+    
+    // Group payments by student
+    const studentPayments = new Map<string, any[]>();
+    payments.forEach((p: any) => {
+      const list = studentPayments.get(p.student_id) || [];
+      list.push(p);
+      studentPayments.set(p.student_id, list);
+    });
+
+    const receiptList: ReceiptData[] = [];
+    studentPayments.forEach((payList, studentId) => {
+      const student = studentMap.get(studentId);
+      if (!student) return;
+      payList.forEach((p: any) => {
+        receiptList.push({
+          studentName: student?.name_bn || '-',
+          studentId: student?.student_id || '-',
+          rollNumber: student?.roll_number || '-',
+          className: student?.classes?.name_bn || className || '-',
+          sessionName,
+          feeType: bn ? (feeTypeLabels[p.fee_type]?.bn || p.fee_type) : (feeTypeLabels[p.fee_type]?.en || p.fee_type),
+          amount: String(p.amount),
+          transactionId: p.transaction_id,
+          date: new Date(p.created_at || Date.now()).toLocaleDateString('bn-BD'),
+          status: statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পেইড' : 'Paid'),
+          statusColor: statusFilter === 'pending' ? '#f59e0b' : '#22c55e',
+          paymentMethod: p.payment_method || 'Cash',
+          collectorName: getCollectorFromNotes(p.notes || ''),
+          approverName: statusFilter === 'success' ? (approverName || (bn ? 'এডমিন' : 'Admin')) : '',
+          institutionName: institution?.name || '',
+          institutionNameEn: institution?.name_en || '',
+          institutionAddress: institution?.address || '',
+          institutionPhone: institution?.phone || '',
+          institutionEmail: institution?.email || '',
+          institutionOtherInfo: institution?.other_info || '',
+          logoUrl: institution?.logo_url || '',
+          bn,
+        });
+      });
+    });
+    return receiptList;
   };
 
   const handleDownload = async (mode: 'print' | 'pdf') => {
@@ -180,24 +192,27 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       const data = await fetchReceiptData();
       if (!data) return;
 
-      const result = buildReceiptHtml(data);
+      const receiptList = buildReceiptDataList(data);
+      if (receiptList.length === 0) {
+        toast.error(bn ? 'কোনো রিসিট তৈরি হয়নি' : 'No receipts generated');
+        return;
+      }
+
+      let html: string;
+      if (receiptList.length === 1 || isSingleStudent) {
+        // Mode 1: Single student → 2 copies (Office + Student) on 1 A4
+        html = buildSingleStudentPrintHtml(receiptList[0]);
+      } else {
+        // Mode 2: Bulk class → 6 receipts per A4 (3 students × 2 copies)
+        html = buildBulkClassPrintHtml(receiptList);
+      }
 
       if (mode === 'pdf') {
-        if (result.type === 'custom') {
-          await downloadReceiptAsPdf(result.html, `receipt-${Date.now()}.pdf`);
-          toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
-        } else {
-          const html = buildPrintReceiptHtml(result.params);
-          await downloadReceiptAsPdf(html, `receipt-${Date.now()}.pdf`);
-          toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
-        }
+        await downloadReceiptAsPdf(html, `receipt-${Date.now()}.pdf`);
+        toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
       } else {
-        if (result.type === 'custom') {
-          const win = window.open('', '_blank');
-          if (win) { win.document.write(result.html); win.document.close(); }
-        } else {
-          printReceipt(result.params);
-        }
+        const win = window.open('', '_blank');
+        if (win) { win.document.write(html); win.document.close(); }
       }
     } catch (e: any) {
       toast.error(e.message || 'Error');
