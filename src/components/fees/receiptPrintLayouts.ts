@@ -79,7 +79,7 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
       <div class="title-row">
         <div class="serial-box">
           <span class="serial-label" style="font-size:${7 * fs}px">ক্রমিক নং:</span>
-          <span class="serial-val" style="font-size:${7 * fs}px">${data.transactionId.slice(-6)}</span>
+          <span class="serial-val" style="font-size:${7 * fs}px;font-weight:700;color:${pc}">${data.receiptSerial || data.transactionId.slice(-6)}</span>
         </div>
         <div class="title-capsule" style="background:${pc};font-size:${10 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
         <div class="date-box">

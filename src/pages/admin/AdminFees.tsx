@@ -70,6 +70,11 @@ const AdminFees = () => {
   const payMutation = useMutation({
     mutationFn: async () => {
       if (!selectedStudent || !paidAmount || !selectedFeeType) throw new Error('Fill all fields');
+
+      // Get atomic serial number
+      const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
+      if (serialErr) throw new Error('Serial number generation failed');
+
       const payload = {
         student_id: selectedStudent,
         fee_type_id: selectedFeeType,
@@ -79,6 +84,7 @@ const AdminFees = () => {
         year: new Date().getFullYear(),
         status: 'paid',
         paid_at: new Date().toISOString(),
+        receipt_number: serialNumber,
       };
       if (await checkApproval('add', payload, undefined, `ফি পরিশোধ: ৳${paidAmount}`)) return;
       const { error } = await supabase.from('fee_payments').insert(payload);

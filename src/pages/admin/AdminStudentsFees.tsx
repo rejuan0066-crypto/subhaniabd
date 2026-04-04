@@ -135,6 +135,11 @@ const AdminStudentsFees = () => {
       const txnId = generateTransactionId();
       setTransactionId(txnId);
       const isCash = paymentMethod === 'cash';
+
+      // Get atomic serial number
+      const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
+      if (serialErr) throw new Error('Serial number generation failed');
+
       const payload = {
         fee_type: feeType,
         amount: parseFloat(amount),
@@ -143,7 +148,7 @@ const AdminStudentsFees = () => {
         student_id: foundStudent.id,
         payer_name: foundStudent.name_bn,
         payment_method: isCash ? 'cash' : 'online',
-        notes: `${bn ? 'আদায়কারী' : 'Collector'}: ${collectorName} | Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}${isCash ? ' | Cash Payment' : ''}`,
+        notes: `${bn ? 'আদায়কারী' : 'Collector'}: ${collectorName} | Reg: ${foundStudent.registration_no || ''}, Roll: ${foundStudent.roll_number || ''}${isCash ? ' | Cash Payment' : ''} | Serial: ${serialNumber}`,
       };
 
       // Check if approval is needed
