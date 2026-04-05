@@ -383,6 +383,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     setFatherNidError(''); setMotherNidError('');
     setGuardianNidError(''); setBirthRegError('');
     setOldRoll(''); setOldSession(''); setOldClass('');
+    setSelectedDivisionId('');
   };
 
   const buildAdmissionData = (): Record<string, any> => ({
@@ -422,7 +423,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       phone: form.father_phone || null,
       guardian_phone: form.guardian_type === 'other' ? form.guardian_phone : (form.guardian_type === 'mother' ? form.mother_phone : form.father_phone) || null,
       address: formatAddress(permanentAddr) || null,
-      division_id: form.admission_class ? (classes.find((c: any) => c.id === form.admission_class) as any)?.division_id || null : null,
+      division_id: selectedDivisionId || (form.admission_class ? (classes.find((c: any) => c.id === form.admission_class) as any)?.division_id || null : null),
       class_id: form.admission_class || null,
       gender: form.gender,
       date_of_birth: form.date_of_birth || null,
@@ -501,6 +502,11 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         errors[key] = bn ? `${f.label_bn} আবশ্যক` : `${f.label} is required`;
       }
     });
+
+    // Division is required
+    if (!selectedDivisionId) {
+      errors['admission_class'] = bn ? 'বিভাগ নির্বাচন আবশ্যক' : 'Division selection is required';
+    }
 
     // Special validations
     if (isFieldActive('birth_reg_no') && form.birth_reg_no && form.birth_reg_no.length !== 17) {
@@ -680,7 +686,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="space-y-2">
             {/* Division select before class */}
             <div>
-              <Label className="text-sm font-medium text-foreground">{bn ? 'বিভাগ' : 'Division'}</Label>
+              <Label className="text-sm font-medium text-foreground">{bn ? 'বিভাগ' : 'Division'} <span className="text-destructive">*</span></Label>
               <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setForm(prev => ({ ...prev, admission_class: '' })); }}>
                 <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
                 <SelectContent>{divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}</SelectContent>
@@ -688,10 +694,10 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             </div>
             <div>
               <Label className={errorLabel}>{label} {reqStar}</Label>
-              <Select value={form.admission_class} onValueChange={v => setForm(prev => ({ ...prev, admission_class: v }))}>
-                <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+              <Select value={form.admission_class} onValueChange={v => setForm(prev => ({ ...prev, admission_class: v }))} disabled={!selectedDivisionId}>
+                <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={!selectedDivisionId ? (bn ? 'প্রথমে বিভাগ নির্বাচন করুন' : 'Select Division first') : (bn ? 'নির্বাচন' : 'Select')} /></SelectTrigger>
                 <SelectContent>
-                  {filteredClasses.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}{c.divisions ? ` (${bn ? c.divisions.name_bn : c.divisions.name})` : ''}</SelectItem>)}
+                  {filteredClasses.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
                   {filteredClasses.length === 0 && <SelectItem value="none" disabled>{bn ? 'এই বিভাগে কোনো শ্রেণী নেই' : 'No classes in this division'}</SelectItem>}
                 </SelectContent>
               </Select>
