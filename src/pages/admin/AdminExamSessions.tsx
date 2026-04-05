@@ -35,6 +35,16 @@ const AdminExamSessions = () => {
     },
   });
 
+  // Fetch divisions
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('divisions').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Fetch all classes with divisions
   const { data: classes = [] } = useQuery({
     queryKey: ['classes_with_divisions'],
@@ -44,6 +54,11 @@ const AdminExamSessions = () => {
       return data;
     },
   });
+
+  // Filter classes by selected division
+  const filteredClasses = selectedDivisionId
+    ? classes.filter((c: any) => c.division_id === selectedDivisionId)
+    : classes;
 
   // Count students per class for selected academic session
   const { data: studentCounts = {} } = useQuery({
