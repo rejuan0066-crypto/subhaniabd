@@ -39,12 +39,24 @@ const AdminFees = () => {
   const { data: students = [] } = useQuery({
     queryKey: ['students-for-fees', selectedDivision],
     queryFn: async () => {
-      let q = supabase.from('students').select('*').eq('status', 'active');
+      let q = supabase.from('students').select('*, divisions(name_bn)').eq('status', 'active');
       if (selectedDivision) q = q.eq('division_id', selectedDivision);
       const { data, error } = await q.order('roll_number');
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fee waivers for selected student
+  const { data: studentWaivers = [] } = useQuery({
+    queryKey: ['fee_waivers', selectedStudent],
+    queryFn: async () => {
+      if (!selectedStudent) return [];
+      const { data, error } = await supabase.from('fee_waivers').select('*').eq('student_id', selectedStudent).eq('is_active', true);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedStudent,
   });
 
   const { data: feeTypes = [] } = useQuery({
