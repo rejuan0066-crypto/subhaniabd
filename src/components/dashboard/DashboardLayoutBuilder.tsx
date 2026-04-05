@@ -104,9 +104,8 @@ export const DashboardLayoutDialog = ({ open, onClose }: DialogProps) => {
     });
   };
 
-  if (!open) return null;
 
-  const { Dialog, DialogContent, DialogHeader, DialogTitle } = require('@/components/ui/dialog');
+  return (
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
