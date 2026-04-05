@@ -14,6 +14,14 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const resolvePrimaryRole = (roles: Array<string | null | undefined>): string | null => {
+  const normalizedRoles = roles.filter((value): value is string => Boolean(value));
+
+  if (normalizedRoles.includes('super_admin')) return 'super_admin';
+  if (normalizedRoles.includes('admin')) return 'admin';
+  return normalizedRoles[0] ?? null;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -22,15 +30,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userStatus, setUserStatus] = useState<string | null>(null);
 
   const fetchRoleAndStatus = async (userId: string) => {
-    // Fetch role and profile status in parallel
-    const [roleResult, profileResult] = await Promise.all([
-      supabase.from('user_roles').select('role').eq('user_id', userId).maybeSingle(),
-      supabase.from('profiles').select('status').eq('id', userId).maybeSingle(),
-    ]);
+    setLoading(true);
 
-    setRole(roleResult.data?.role ?? null);
-    setUserStatus(profileResult.data?.status ?? 'pending');
-    setLoading(false);
+    try {
+      const [rolesResult, profileResult] = await Promise.all([
+        supabase.from('user_roles').select('role').eq('user_id', userId),
+        supabase.from('profiles').select('status').eq('id', userId).maybeSingle(),
+      ]);
+
+      if (rolesResult.error) {
+        console.error('Failed to fetch user roles:', rolesResult.error);
+      }
+
+      if (profileResult.error) {
+        console.error('Failed to fetch user status:', profileResult.error);
+      }
+
+      const resolvedRole = resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role));
+      setRole(resolvedRole);
+      setUserStatus(profileResult.data?.status ?? 'pending');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -43,8 +64,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(nextSession?.user ?? null);
 
       if (nextSession?.user) {
-        // Keep loading true until role is fetched
-        setLoading(true);
         queueMicrotask(() => {
           void fetchRoleAndStatus(nextSession.user.id);
         });
