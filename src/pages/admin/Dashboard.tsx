@@ -317,7 +317,7 @@ const Dashboard = () => {
               {getTitle(sec)}
             </h3>
             {visibleFees.map(f => (
-              <DashboardFeeSection key={f.key} category={f.category} titleBn={f.titleBn} titleEn={f.titleEn} />
+              <DashboardFeeSection key={f.key} category={f.category as 'monthly' | 'exam' | 'admission'} titleBn={f.titleBn} titleEn={f.titleEn} />
             ))}
           </div>
         ) : null;
