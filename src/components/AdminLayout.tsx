@@ -395,34 +395,38 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="bg-card border-b px-4 lg:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40" style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={headerStyle}>
           <div className="flex items-center gap-3">
             <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
               <Menu className="w-5 h-5 text-muted-foreground" />
             </button>
             {/* Breadcrumbs */}
-            <nav className="hidden sm:flex items-center gap-1 text-sm">
-              {breadcrumbs.map((crumb, i) => (
-                <span key={crumb.path} className="flex items-center gap-1">
-                  {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
-                  {i === breadcrumbs.length - 1 ? (
-                    <span className="text-foreground font-medium">{crumb.label}</span>
-                  ) : (
-                    <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
-                  )}
-                </span>
-              ))}
-            </nav>
+            {adminTheme.headerShowBreadcrumb && (
+              <nav className="hidden sm:flex items-center gap-1 text-sm">
+                {breadcrumbs.map((crumb, i) => (
+                  <span key={crumb.path} className="flex items-center gap-1">
+                    {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
+                    {i === breadcrumbs.length - 1 ? (
+                      <span className="text-foreground font-medium">{crumb.label}</span>
+                    ) : (
+                      <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
+                    )}
+                  </span>
+                ))}
+              </nav>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {/* Search */}
-            <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
-              <Search className="w-4 h-4 shrink-0" />
-              <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                Ctrl+K
-              </kbd>
-            </div>
+            {adminTheme.headerShowSearch && (
+              <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
+                <Search className="w-4 h-4 shrink-0" />
+                <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
+                <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  Ctrl+K
+                </kbd>
+              </div>
+            )}
             <DarkModeToggle />
             <NotificationPanel />
             <LanguageToggle />
