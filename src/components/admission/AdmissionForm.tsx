@@ -150,6 +150,15 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     },
   });
 
+  const { data: studentCategories = [] } = useQuery({
+    queryKey: ['student_categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('student_categories').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
 
   // Pre-fill division from edit student
