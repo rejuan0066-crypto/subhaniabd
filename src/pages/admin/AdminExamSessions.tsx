@@ -21,6 +21,7 @@ const AdminExamSessions = () => {
   const [nameBn, setNameBn] = useState('');
   const [academicSessionId, setAcademicSessionId] = useState('');
   const [examType, setExamType] = useState('annual');
+  const [selectedDivisionId, setSelectedDivisionId] = useState('');
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
