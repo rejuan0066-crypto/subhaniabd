@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useState } from 'react';
+import { ReactNode, useRef, useState, useEffect } from 'react';
 import BackButton from './BackButton';
 import AdminPageWithTabs from './AdminPageWithTabs';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { isAdminRole } from '@/lib/roles';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
+import { useThemeSettings } from '@/hooks/useThemeSettings';
 import LanguageToggle from './LanguageToggle';
 import NotificationPanel from './NotificationPanel';
 import DarkModeToggle from './DarkModeToggle';
@@ -48,10 +49,41 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { menuConfig } = useMenuSettings();
+  const { theme: adminTheme } = useThemeSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
+
+  // Apply default theme mode from settings
+  useEffect(() => {
+    const stored = localStorage.getItem('theme');
+    if (!stored && adminTheme.defaultThemeMode !== 'system') {
+      if (adminTheme.defaultThemeMode === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [adminTheme.defaultThemeMode]);
+
+  // Compute dynamic styles from theme
+  const sidebarWidthMap = { narrow: 'w-[200px]', default: 'w-[260px]', wide: 'w-[300px]' };
+  const sidebarWidthClass = sidebarWidthMap[adminTheme.sidebarWidth] || 'w-[260px]';
+  const iconSizeMap = { small: 'w-4 h-4', medium: 'w-[18px] h-[18px]', large: 'w-5 h-5' };
+  const iconSizeClass = iconSizeMap[adminTheme.sidebarIconSize] || 'w-[18px] h-[18px]';
+  const headerHeightMap = { compact: 'py-1.5', default: 'py-2.5', tall: 'py-4' };
+  const headerPadClass = headerHeightMap[adminTheme.headerHeight] || 'py-2.5';
+
+  const sidebarStyle: React.CSSProperties = {
+    ...(adminTheme.sidebarBgColor ? { backgroundColor: adminTheme.sidebarBgColor } : {}),
+    ...(adminTheme.sidebarTextColor ? { color: adminTheme.sidebarTextColor } : {}),
+  };
+  const headerStyle: React.CSSProperties = {
+    boxShadow: 'var(--shadow-soft)',
+    ...(adminTheme.headerBgColor ? { backgroundColor: adminTheme.headerBgColor } : {}),
+    ...(adminTheme.headerTextColor ? { color: adminTheme.headerTextColor } : {}),
+  };
 
   // When embedded in StaffDashboard, skip the entire admin layout shell
   if (isEmbedded) {
@@ -227,7 +259,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           onClick={() => setMobileSidebarOpen(false)}
         />
       )}
-      <div className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300' : sidebarOpen ? 'w-[260px]' : 'w-16'} bg-sidebar flex flex-col h-full transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}>
+      <div
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300' : sidebarOpen ? sidebarWidthClass : 'w-16'} bg-sidebar flex flex-col h-full transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        style={sidebarStyle}
+      >
         {/* Logo */}
         <div className="px-4 py-5 flex items-center gap-3 border-b border-sidebar-border shrink-0">
           <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
@@ -360,34 +395,38 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="bg-card border-b px-4 lg:px-6 py-2.5 flex items-center justify-between sticky top-0 z-40" style={{ boxShadow: 'var(--shadow-soft)' }}>
+        <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={headerStyle}>
           <div className="flex items-center gap-3">
             <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
               <Menu className="w-5 h-5 text-muted-foreground" />
             </button>
             {/* Breadcrumbs */}
-            <nav className="hidden sm:flex items-center gap-1 text-sm">
-              {breadcrumbs.map((crumb, i) => (
-                <span key={crumb.path} className="flex items-center gap-1">
-                  {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
-                  {i === breadcrumbs.length - 1 ? (
-                    <span className="text-foreground font-medium">{crumb.label}</span>
-                  ) : (
-                    <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
-                  )}
-                </span>
-              ))}
-            </nav>
+            {adminTheme.headerShowBreadcrumb && (
+              <nav className="hidden sm:flex items-center gap-1 text-sm">
+                {breadcrumbs.map((crumb, i) => (
+                  <span key={crumb.path} className="flex items-center gap-1">
+                    {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
+                    {i === breadcrumbs.length - 1 ? (
+                      <span className="text-foreground font-medium">{crumb.label}</span>
+                    ) : (
+                      <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
+                    )}
+                  </span>
+                ))}
+              </nav>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {/* Search */}
-            <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
-              <Search className="w-4 h-4 shrink-0" />
-              <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
-              <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                Ctrl+K
-              </kbd>
-            </div>
+            {adminTheme.headerShowSearch && (
+              <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
+                <Search className="w-4 h-4 shrink-0" />
+                <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
+                <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  Ctrl+K
+                </kbd>
+              </div>
+            )}
             <DarkModeToggle />
             <NotificationPanel />
             <LanguageToggle />
