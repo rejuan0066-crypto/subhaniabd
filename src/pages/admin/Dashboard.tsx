@@ -15,7 +15,7 @@ import DashboardSearch from '@/components/dashboard/DashboardSearch';
 import DashboardFeeSection from '@/components/dashboard/DashboardFeeSection';
 import DashboardStatsList from '@/components/dashboard/DashboardStatsList';
 import DashboardCustomWidgets from '@/components/dashboard/DashboardCustomWidgets';
-import DashboardLayoutBuilder from '@/components/dashboard/DashboardLayoutBuilder';
+import { DashboardLayoutDialog } from '@/components/dashboard/DashboardLayoutBuilder';
 import { useDashboardLayout } from '@/hooks/useDashboardLayout';
 import { Button } from '@/components/ui/button';
 
@@ -340,7 +340,7 @@ const Dashboard = () => {
         />
 
         {/* Dashboard Layout Builder */}
-        <DashboardLayoutBuilder open={builderOpen} onClose={() => setBuilderOpen(false)} />
+        <DashboardLayoutDialog open={builderOpen} onClose={() => setBuilderOpen(false)} />
       </div>
     </AdminLayout>
   );
