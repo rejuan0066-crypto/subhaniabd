@@ -200,19 +200,39 @@ const Dashboard = () => {
     const mobileCols = section.style?.columnsMobile || 2;
     const gap = section.style?.gap || 12;
     const cardExtra = getCardSizeClasses(section);
+    const hover = section.style?.hover || {};
+    const speed = hover.speed || 200;
+
+    // Build hover CSS for this section
+    const hoverScale = hover.scale && hover.scale !== 1 ? `scale(${hover.scale})` : '';
+    const hoverLift = hover.lift ? `translateY(-${hover.lift}px)` : '';
+    const hoverTransform = [hoverScale, hoverLift].filter(Boolean).join(' ') || '';
+    const shadowMap: Record<string, string> = {
+      none: 'none', sm: '0 1px 3px rgba(0,0,0,0.12)', md: '0 4px 12px rgba(0,0,0,0.15)',
+      lg: '0 8px 24px rgba(0,0,0,0.18)', xl: '0 12px 36px rgba(0,0,0,0.22)',
+    };
+    const hoverShadow = hover.shadow ? shadowMap[hover.shadow] || '' : '';
+    const hoverBrightness = hover.brightness && hover.brightness !== 1 ? `brightness(${hover.brightness})` : '';
+    const hoverBorderGlow = hover.borderGlow ? '0 0 0 2px hsl(var(--primary) / 0.4)' : '';
+    const hoverBoxShadow = [hoverShadow, hoverBorderGlow].filter(Boolean).join(', ');
+
+    const hoverCssId = `hover-${section.id}`;
 
     return (
-      <div
-        className="grid"
-        style={{
-          gridTemplateColumns: `repeat(${mobileCols}, 1fr)`,
-          gap: `${gap}px`,
-        }}
-      >
-        <style>{`@media (min-width: 640px) { .sec-grid-${section.id} { grid-template-columns: repeat(${Math.min(cols, 3)}, 1fr) !important; } } @media (min-width: 1024px) { .sec-grid-${section.id} { grid-template-columns: repeat(${cols}, 1fr) !important; } }`}</style>
+      <div>
+        <style>{`
+          .${hoverCssId} { transition: all ${speed}ms ease; }
+          .${hoverCssId}:hover {
+            ${hoverTransform ? `transform: ${hoverTransform};` : ''}
+            ${hoverBoxShadow ? `box-shadow: ${hoverBoxShadow};` : ''}
+            ${hoverBrightness ? `filter: ${hoverBrightness};` : ''}
+          }
+          @media (min-width: 640px) { .sec-grid-${section.id} { grid-template-columns: repeat(${Math.min(cols, 3)}, 1fr) !important; } }
+          @media (min-width: 1024px) { .sec-grid-${section.id} { grid-template-columns: repeat(${cols}, 1fr) !important; } }
+        `}</style>
         <div className={`grid sec-grid-${section.id}`} style={{ gridTemplateColumns: `repeat(${mobileCols}, 1fr)`, gap: `${gap}px` }}>
           {filtered.map((s, i) => (
-            <div key={i} onClick={s.onClick} className={`stat-card flex items-center gap-3 ${s.onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${cardExtra}`}>
+            <div key={i} onClick={s.onClick} className={`stat-card flex items-center gap-3 ${hoverCssId} ${s.onClick ? 'cursor-pointer' : ''} ${cardExtra}`}>
               <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
                 <s.icon className={`w-5 h-5 ${s.color}`} />
               </div>
