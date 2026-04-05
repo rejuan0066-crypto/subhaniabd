@@ -686,7 +686,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           <div className="space-y-2">
             {/* Division select before class */}
             <div>
-              <Label className="text-sm font-medium text-foreground">{bn ? 'বিভাগ' : 'Division'}</Label>
+              <Label className="text-sm font-medium text-foreground">{bn ? 'বিভাগ' : 'Division'} <span className="text-destructive">*</span></Label>
               <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setForm(prev => ({ ...prev, admission_class: '' })); }}>
                 <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
                 <SelectContent>{divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}</SelectContent>
