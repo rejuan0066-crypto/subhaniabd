@@ -24,6 +24,7 @@ const AdminStudents = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [showDetail, setShowDetail] = useState<any>(null);
   const [editStudent, setEditStudent] = useState<any>(null);
+  const [filterDivisionId, setFilterDivisionId] = useState('all');
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
   const [filterApproval, setFilterApproval] = useState('all');
