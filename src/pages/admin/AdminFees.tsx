@@ -79,18 +79,41 @@ const AdminFees = () => {
     },
   });
 
+  // Check if selected student is free
+  const selectedStudentData = students.find((s: any) => s.id === selectedStudent);
+  const isFreeStudent = selectedStudentData?.is_free === true;
+  const selectedFeeTypeData = feeTypes.find((f: any) => f.id === selectedFeeType);
+
+  // Calculate waiver for selected fee type
+  const getWaiverPercent = () => {
+    if (isFreeStudent && selectedFeeTypeData?.fee_category === 'monthly') return 100;
+    const waiver = studentWaivers.find((w: any) => w.fee_type_id === selectedFeeType);
+    return waiver ? Number(waiver.waiver_percent) : 0;
+  };
+
+  const waiverPercent = getWaiverPercent();
+  const originalAmount = selectedFeeTypeData ? Number(selectedFeeTypeData.amount) : 0;
+  const discountAmount = Math.round(originalAmount * waiverPercent / 100);
+  const netAmount = originalAmount - discountAmount;
+
+  // Auto-fill amount when fee type changes
+  useEffect(() => {
+    if (selectedFeeType && selectedFeeTypeData) {
+      setPaidAmount(netAmount.toString());
+    }
+  }, [selectedFeeType, selectedStudent, netAmount]);
+
   const payMutation = useMutation({
     mutationFn: async () => {
       if (!selectedStudent || !paidAmount || !selectedFeeType) throw new Error('Fill all fields');
 
-      // Get atomic serial number
       const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
       if (serialErr) throw new Error('Serial number generation failed');
 
       const payload = {
         student_id: selectedStudent,
         fee_type_id: selectedFeeType,
-        amount: parseFloat(paidAmount),
+        amount: originalAmount,
         paid_amount: parseFloat(paidAmount),
         month: paymentMonth || null,
         year: new Date().getFullYear(),
