@@ -35,6 +35,15 @@ const FeeTypeManager = () => {
     },
   });
 
+  const { data: feeCategories = [] } = useQuery({
+    queryKey: ['fee_categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fee_categories').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!form.name_bn || !form.amount) throw new Error(bn ? 'নাম ও পরিমাণ আবশ্যক' : 'Name and amount required');
@@ -86,11 +95,7 @@ const FeeTypeManager = () => {
     setOpen(true);
   };
 
-  const categories = [
-    { key: 'monthly', bn: 'মাসিক', en: 'Monthly' },
-    { key: 'exam', bn: 'পরীক্ষা', en: 'Exam' },
-    { key: 'admission', bn: 'ভর্তি', en: 'Admission' },
-  ];
+  const categories = feeCategories.map((c: any) => ({ key: c.name, bn: c.name_bn, en: c.name }));
 
   return (
     <div className="space-y-4">
