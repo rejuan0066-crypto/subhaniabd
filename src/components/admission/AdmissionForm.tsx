@@ -422,7 +422,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       phone: form.father_phone || null,
       guardian_phone: form.guardian_type === 'other' ? form.guardian_phone : (form.guardian_type === 'mother' ? form.mother_phone : form.father_phone) || null,
       address: formatAddress(permanentAddr) || null,
-      division_id: form.admission_class ? (classes.find((c: any) => c.id === form.admission_class) as any)?.division_id || null : null,
+      division_id: selectedDivisionId || (form.admission_class ? (classes.find((c: any) => c.id === form.admission_class) as any)?.division_id || null : null),
       class_id: form.admission_class || null,
       gender: form.gender,
       date_of_birth: form.date_of_birth || null,
@@ -688,10 +688,10 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             </div>
             <div>
               <Label className={errorLabel}>{label} {reqStar}</Label>
-              <Select value={form.admission_class} onValueChange={v => setForm(prev => ({ ...prev, admission_class: v }))}>
-                <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+              <Select value={form.admission_class} onValueChange={v => setForm(prev => ({ ...prev, admission_class: v }))} disabled={!selectedDivisionId}>
+                <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={!selectedDivisionId ? (bn ? 'প্রথমে বিভাগ নির্বাচন করুন' : 'Select Division first') : (bn ? 'নির্বাচন' : 'Select')} /></SelectTrigger>
                 <SelectContent>
-                  {filteredClasses.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}{c.divisions ? ` (${bn ? c.divisions.name_bn : c.divisions.name})` : ''}</SelectItem>)}
+                  {filteredClasses.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
                   {filteredClasses.length === 0 && <SelectItem value="none" disabled>{bn ? 'এই বিভাগে কোনো শ্রেণী নেই' : 'No classes in this division'}</SelectItem>}
                 </SelectContent>
               </Select>
