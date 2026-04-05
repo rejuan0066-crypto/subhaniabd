@@ -238,6 +238,7 @@ const AdminStudents = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'আইডি' : 'ID'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রোল' : 'Roll'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিভাগ' : 'Division'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সেশন' : 'Session'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শ্রেণী' : 'Class'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অনুমোদন' : 'Approval'}</th>
@@ -264,6 +265,7 @@ const AdminStudents = () => {
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.student_id}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.roll_number || '-'}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{bn ? s.divisions?.name_bn : s.divisions?.name || '-'}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
                       <td className="px-4 py-3">{getApprovalBadge(s.approval_status || 'pending')}</td>
