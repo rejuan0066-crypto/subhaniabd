@@ -383,6 +383,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     setFatherNidError(''); setMotherNidError('');
     setGuardianNidError(''); setBirthRegError('');
     setOldRoll(''); setOldSession(''); setOldClass('');
+    setSelectedDivisionId('');
   };
 
   const buildAdmissionData = (): Record<string, any> => ({
@@ -501,6 +502,11 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         errors[key] = bn ? `${f.label_bn} আবশ্যক` : `${f.label} is required`;
       }
     });
+
+    // Division is required
+    if (!selectedDivisionId) {
+      errors['admission_class'] = bn ? 'বিভাগ নির্বাচন আবশ্যক' : 'Division selection is required';
+    }
 
     // Special validations
     if (isFieldActive('birth_reg_no') && form.birth_reg_no && form.birth_reg_no.length !== 17) {
