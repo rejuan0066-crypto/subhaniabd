@@ -139,6 +139,24 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     }
   }, [editStudent, open]);
 
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('divisions').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const [selectedDivisionId, setSelectedDivisionId] = useState('');
+
+  // Pre-fill division from edit student
+  useEffect(() => {
+    if (editStudent && open && editStudent.division_id) {
+      setSelectedDivisionId(editStudent.division_id);
+    }
+  }, [editStudent, open]);
+
   const { data: classes = [] } = useQuery({
     queryKey: ['classes'],
     queryFn: async () => {
@@ -147,6 +165,11 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       return data;
     },
   });
+
+  // Filter classes by selected division
+  const filteredClasses = selectedDivisionId
+    ? classes.filter((c: any) => c.division_id === selectedDivisionId)
+    : classes;
 
   const { data: academicSessions = [] } = useQuery({
     queryKey: ['academic-sessions-active'],
