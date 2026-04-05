@@ -1025,6 +1025,36 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             </div>
           )}
 
+          {/* Student Category & Free Student - prominent placement */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 rounded-lg border border-primary/20 bg-primary/5">
+            <div>
+              <Label className="text-sm font-medium">{bn ? 'ছাত্রের ক্যাটাগরি' : 'Student Category'} <span className="text-destructive">*</span></Label>
+              <Select value={form.student_category} onValueChange={v => {
+                setForm(prev => ({
+                  ...prev,
+                  student_category: v,
+                  is_orphan: v === 'orphan',
+                  is_poor: v === 'poor',
+                }));
+              }}>
+                <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">{bn ? 'সাধারণ' : 'General'}</SelectItem>
+                  <SelectItem value="orphan">{bn ? 'এতিম' : 'Orphan'}</SelectItem>
+                  <SelectItem value="poor">{bn ? 'গরীব' : 'Poor'}</SelectItem>
+                  <SelectItem value="teacher_child">{bn ? 'শিক্ষক সন্তান' : "Teacher's Child"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background self-end">
+              <Switch id="isFree" checked={form.is_free} onCheckedChange={v => setForm(prev => ({ ...prev, is_free: !!v }))} />
+              <Label htmlFor="isFree" className="text-sm font-medium cursor-pointer">
+                {bn ? 'বিনা বেতন (Free Student)' : 'Free Student (No Fee)'}
+              </Label>
+              {form.is_free && <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">{bn ? 'সক্রিয়' : 'Active'}</span>}
+            </div>
+          </div>
+
           {/* Other fields in grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {otherFields.map(f => {
@@ -1033,36 +1063,6 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
               return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
-          </div>
-
-          {/* Student Category Dropdown */}
-          <div>
-            <Label className="text-sm font-medium">{bn ? 'ছাত্রের ধরন' : 'Student Category'}</Label>
-            <Select value={form.student_category} onValueChange={v => {
-              setForm(prev => ({
-                ...prev,
-                student_category: v,
-                is_orphan: v === 'orphan',
-                is_poor: v === 'poor',
-              }));
-            }}>
-              <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general">{bn ? 'সাধারণ' : 'General'}</SelectItem>
-                <SelectItem value="orphan">{bn ? 'এতিম' : 'Orphan'}</SelectItem>
-                <SelectItem value="poor">{bn ? 'গরীব' : 'Poor'}</SelectItem>
-                <SelectItem value="teacher_child">{bn ? 'শিক্ষক সন্তান' : "Teacher's Child"}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Free Student Toggle */}
-          <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background">
-            <Switch id="isFree" checked={form.is_free} onCheckedChange={v => setForm(prev => ({ ...prev, is_free: !!v }))} />
-            <Label htmlFor="isFree" className="text-sm font-medium cursor-pointer">
-              {bn ? 'বিনা বেতন (Free Student)' : 'Free Student (No Fee)'}
-            </Label>
-            {form.is_free && <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success font-medium">{bn ? 'সক্রিয়' : 'Active'}</span>}
           </div>
         </div>
       );
