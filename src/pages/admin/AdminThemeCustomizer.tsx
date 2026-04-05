@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Palette, Type, Layout, RotateCcw, Save, Eye, Monitor, PanelLeft, LayoutDashboard } from 'lucide-react';
+import DashboardLayoutBuilder from '@/components/dashboard/DashboardLayoutBuilder';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const ColorPreview = ({ hue, sat, light, label }: { hue: number; sat: number; light: number; label: string }) => (
@@ -100,11 +101,12 @@ const AdminThemeCustomizer = () => {
         </div>
 
         <Tabs defaultValue="colors">
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
             <TabsTrigger value="colors" className="gap-1"><Palette className="w-4 h-4" /> {bn ? 'কালার' : 'Colors'}</TabsTrigger>
             <TabsTrigger value="typography" className="gap-1"><Type className="w-4 h-4" /> {bn ? 'ফন্ট' : 'Fonts'}</TabsTrigger>
             <TabsTrigger value="layout" className="gap-1"><Layout className="w-4 h-4" /> {bn ? 'লেআউট' : 'Layout'}</TabsTrigger>
             <TabsTrigger value="appearance" className="gap-1"><Monitor className="w-4 h-4" /> {bn ? 'অ্যাপিয়ারেন্স' : 'Appearance'}</TabsTrigger>
+            <TabsTrigger value="dashboard" className="gap-1"><LayoutDashboard className="w-4 h-4" /> {bn ? 'ড্যাশবোর্ড' : 'Dashboard'}</TabsTrigger>
           </TabsList>
 
           {/* COLORS TAB */}
@@ -658,6 +660,11 @@ const AdminThemeCustomizer = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* DASHBOARD BUILDER TAB */}
+          <TabsContent value="dashboard" className="mt-4">
+            <DashboardLayoutBuilder />
           </TabsContent>
         </Tabs>
 
