@@ -80,9 +80,14 @@ const SectionEditor = ({ section, bn, onChange }: {
   const cards = SECTION_CARDS[section.id] || [];
   const style = section.style || {};
   const hiddenCards = section.hiddenCards || [];
+  const hover = style.hover || {};
 
   const updateStyle = (key: keyof SectionStyle, value: any) => {
     onChange({ ...section, style: { ...style, [key]: value } });
+  };
+
+  const updateHover = (key: keyof HoverEffect, value: any) => {
+    onChange({ ...section, style: { ...style, hover: { ...hover, [key]: value } } });
   };
 
   const toggleCard = (cardKey: string) => {
