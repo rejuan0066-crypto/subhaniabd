@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useDashboardLayout, DashboardSection, DEFAULT_SECTIONS, SECTION_CARDS, SECTION_ICONS, SectionStyle } from '@/hooks/useDashboardLayout';
+import { useDashboardLayout, DashboardSection, DEFAULT_SECTIONS, SECTION_CARDS, SECTION_ICONS, SectionStyle, HoverEffect } from '@/hooks/useDashboardLayout';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -80,9 +80,14 @@ const SectionEditor = ({ section, bn, onChange }: {
   const cards = SECTION_CARDS[section.id] || [];
   const style = section.style || {};
   const hiddenCards = section.hiddenCards || [];
+  const hover = style.hover || {};
 
   const updateStyle = (key: keyof SectionStyle, value: any) => {
     onChange({ ...section, style: { ...style, [key]: value } });
+  };
+
+  const updateHover = (key: keyof HoverEffect, value: any) => {
+    onChange({ ...section, style: { ...style, hover: { ...hover, [key]: value } } });
   };
 
   const toggleCard = (cardKey: string) => {
@@ -179,6 +184,50 @@ const SectionEditor = ({ section, bn, onChange }: {
               <Checkbox checked={style.showShadow !== false} onCheckedChange={v => updateStyle('showShadow', !!v)} />
               {bn ? 'শ্যাডো দেখান' : 'Show Shadow'}
             </label>
+          </div>
+
+          {/* Hover Effects */}
+          <div className="space-y-3 pt-2 border-t border-border">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{bn ? '🎯 হোভার ইফেক্ট' : '🎯 Hover Effects'}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">{bn ? 'স্কেল (বড় হওয়া)' : 'Scale'}: {(hover.scale || 1).toFixed(2)}x</Label>
+                <Slider value={[hover.scale ? hover.scale * 100 : 100]} min={100} max={115} step={1} onValueChange={([v]) => updateHover('scale', v / 100)} />
+              </div>
+              <div>
+                <Label className="text-xs">{bn ? 'উপরে ওঠা' : 'Lift'}: {hover.lift || 0}px</Label>
+                <Slider value={[hover.lift || 0]} min={0} max={8} step={1} onValueChange={([v]) => updateHover('lift', v)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">{bn ? 'শ্যাডো' : 'Shadow'}</Label>
+                <Select value={hover.shadow || 'md'} onValueChange={v => updateHover('shadow', v)}>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{bn ? 'নেই' : 'None'}</SelectItem>
+                    <SelectItem value="sm">{bn ? 'ছোট' : 'Small'}</SelectItem>
+                    <SelectItem value="md">{bn ? 'মাঝারি' : 'Medium'}</SelectItem>
+                    <SelectItem value="lg">{bn ? 'বড়' : 'Large'}</SelectItem>
+                    <SelectItem value="xl">{bn ? 'অনেক বড়' : 'Extra Large'}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">{bn ? 'ব্রাইটনেস' : 'Brightness'}: {((hover.brightness || 1) * 100).toFixed(0)}%</Label>
+                <Slider value={[hover.brightness ? hover.brightness * 100 : 100]} min={90} max={120} step={1} onValueChange={([v]) => updateHover('brightness', v / 100)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">{bn ? 'গতি (ট্রানজিশন)' : 'Speed'}: {hover.speed || 200}ms</Label>
+                <Slider value={[hover.speed || 200]} min={100} max={500} step={50} onValueChange={([v]) => updateHover('speed', v)} />
+              </div>
+              <label className="flex items-center gap-2 text-xs pt-5">
+                <Checkbox checked={hover.borderGlow === true} onCheckedChange={v => updateHover('borderGlow', !!v)} />
+                {bn ? 'বর্ডার গ্লো' : 'Border Glow'}
+              </label>
+            </div>
           </div>
         </div>
       )}
