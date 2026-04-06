@@ -19,12 +19,14 @@ const AdminDivisions = () => {
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
   const [newDivName, setNewDivName] = useState('');
   const [newDivNameEn, setNewDivNameEn] = useState('');
+  const [newDivPrefix, setNewDivPrefix] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [newClassNameEn, setNewClassNameEn] = useState('');
 
   const [editingDivId, setEditingDivId] = useState<string | null>(null);
   const [editDivName, setEditDivName] = useState('');
   const [editDivNameEn, setEditDivNameEn] = useState('');
+  const [editDivPrefix, setEditDivPrefix] = useState('');
   const [editingClassId, setEditingClassId] = useState<string | null>(null);
   const [editClassName, setEditClassName] = useState('');
   const [editClassNameEn, setEditClassNameEn] = useState('');
