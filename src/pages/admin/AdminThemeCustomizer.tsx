@@ -615,7 +615,6 @@ const AdminThemeCustomizer = () => {
                        />
                      </div>
                      </div>
-                   </div>
                    <div>
                      <Label className="text-xs">{bn ? 'ক্লিক/অ্যাক্টিভ ব্যাকগ্রাউন্ড কালার' : 'Click/Active Bg Color'}</Label>
                      <div className="flex items-center gap-2 mt-1">
