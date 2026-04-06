@@ -62,18 +62,29 @@ const AdminResults = () => {
     enabled: !!examSessionId,
   });
 
-  // Fetch subjects for selected class (via division)
-  const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
-  const divisionId = selectedClassObj?.division_id;
-
+  // Fetch subjects from exam_session_subjects (selected during exam session creation)
   const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects', divisionId],
+    queryKey: ['exam-session-subjects', examSessionId, selectedClass],
     queryFn: async () => {
-      const { data, error } = await supabase.from('subjects').select('*').eq('is_active', true).eq('division_id', divisionId).order('name_bn');
+      // Get subjects linked to this exam session
+      const { data, error } = await supabase
+        .from('exam_session_subjects')
+        .select('subject_id, subjects(*)')
+        .eq('exam_session_id', examSessionId);
       if (error) throw error;
-      return data;
+      
+      // Filter: include subjects that match the selected class's division or class_id
+      const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
+      const divId = selectedClassObj?.division_id;
+      
+      const allSubjects = data?.map((es: any) => es.subjects).filter(Boolean) || [];
+      
+      // Filter subjects relevant to selected class (by division_id or class_id match)
+      return allSubjects.filter((s: any) => 
+        s.division_id === divId || s.class_id === selectedClass
+      ).sort((a: any, b: any) => (a.name_bn || '').localeCompare(b.name_bn || ''));
     },
-    enabled: !!divisionId,
+    enabled: !!examSessionId && !!selectedClass && examClasses.length > 0,
   });
 
   // Fetch students for selected class
