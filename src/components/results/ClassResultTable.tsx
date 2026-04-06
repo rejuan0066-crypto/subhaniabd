@@ -29,7 +29,7 @@ interface ClassResultTableProps {
 const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet }: ClassResultTableProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const { getGrade: getDynamicGrade, maxMarks, minMarks } = useGradingSystem();
+  const { getOverallGrade, maxMarks, minMarks, passMark } = useGradingSystem();
 
   if (students.length === 0 || subjects.length === 0) {
     return (
@@ -78,7 +78,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
               const studentMarks = subjects.map((sub: any) => marksMap[`${st.id}_${sub.id}`] ?? 0);
               const total = studentMarks.reduce((a, b) => a + b, 0);
               const avg = subjects.length > 0 ? total / subjects.length : 0;
-              const { grade, gpa, color } = getDynamicGrade(avg);
+              const { grade, gpa, color, hasFail } = getOverallGrade(studentMarks);
               return (
                 <tr key={st.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-3 py-2 text-muted-foreground text-xs">{idx + 1}</td>
