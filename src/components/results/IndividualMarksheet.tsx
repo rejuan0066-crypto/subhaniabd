@@ -164,7 +164,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
     <div class="row"><span class="label">${bn ? 'রোল নম্বর:' : 'Roll:'}</span><span class="value">${student.roll_number || '-'}</span></div>
     <div class="row"><span class="label">${bn ? 'রেজিস্ট্রেশন:' : 'Reg:'}</span><span class="value">${student.registration_number || student.student_id || '-'}</span></div>
     <div class="row"><span class="label">${bn ? 'পিতার নাম:' : "Father:"}</span><span class="value">${student.father_name_bn || student.father_name || '-'}</span></div>
-    ${student.date_of_birth ? `<div class="row"><span class="label">${bn ? 'জন্ম তারিখ:' : 'DOB:'}</span><span class="value">${student.date_of_birth}</span></div>` : ''}
+    <div class="row"><span class="label">${bn ? 'জন্ম তারিখ:' : 'DOB:'}</span><span class="value">${student.date_of_birth || '-'}</span></div>
   </div>
 </div>
 
