@@ -642,53 +642,113 @@ const AdminExamSessions = () => {
           {examSessions.length === 0 ? (
             <p className="text-center py-8 text-muted-foreground text-sm">{bn ? 'কোনো এক্সাম সেশন নেই' : 'No exam sessions yet'}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'শিক্ষাবর্ষ' : 'Session'}</th>
-                    <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ধরন' : 'Type'}</th>
-                    <th className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">{bn ? 'ক্লাস' : 'Classes'}</th>
-                    <th className="px-4 py-2 text-center text-xs font-semibold text-muted-foreground">{bn ? 'ছাত্র' : 'Students'}</th>
-                    <th className="px-4 py-2 text-right text-xs font-semibold text-muted-foreground">{bn ? 'অ্যাকশন' : 'Action'}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {examSessions.map((es: any) => {
-                    const esClasses = examSessionClasses.filter((c: any) => c.exam_session_id === es.id);
-                    const totalStudents = esClasses.reduce((s: number, c: any) => s + (c.student_count || 0), 0);
-                    return (
-                      <tr key={es.id} className="hover:bg-secondary/30">
-                        <td className="px-4 py-3 font-medium text-foreground">{bn ? es.name_bn : es.name}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}</td>
-                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{getTypeLabel(es.exam_type)}</span></td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex flex-wrap justify-center gap-1">
-                            {esClasses.map((c: any) => (
-                              <span key={c.id} className="text-xs bg-secondary px-2 py-0.5 rounded">{bn ? c.classes?.name_bn : c.classes?.name}</span>
-                            ))}
+            <div className="space-y-2">
+              {examSessions.map((es: any) => {
+                const esClasses = examSessionClasses.filter((c: any) => c.exam_session_id === es.id);
+                const totalStudents = esClasses.reduce((s: number, c: any) => s + (c.student_count || 0), 0);
+                const isExpanded = expandedSessionId === es.id;
+
+                return (
+                  <div key={es.id} className="border border-border rounded-lg overflow-hidden">
+                    {/* Session Header Row */}
+                    <div
+                      className="flex items-center gap-3 px-4 py-3 bg-background hover:bg-secondary/30 cursor-pointer transition-colors"
+                      onClick={() => setExpandedSessionId(isExpanded ? null : es.id)}
+                    >
+                      <button className="p-0.5 text-muted-foreground">
+                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-foreground text-sm">{bn ? es.name_bn : es.name}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{getTypeLabel(es.exam_type)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {esClasses.length} {bn ? 'ক্লাস' : 'classes'} • {totalStudents} {bn ? 'ছাত্র' : 'students'}
+                      </span>
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
+                          <GraduationCap className="w-3.5 h-3.5" />
+                          {bn ? 'ফলাফল তৈরি' : 'Create Result'}
+                        </Button>
+                        {canDeleteItem && (
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Expanded: Class-wise Result List */}
+                    {isExpanded && esClasses.length > 0 && (
+                      <div className="border-t border-border bg-muted/20">
+                        <div className="px-4 py-2 bg-muted/40 border-b border-border">
+                          <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-muted-foreground">
+                            <div className="col-span-1">#</div>
+                            <div className="col-span-4">{bn ? 'শ্রেণী' : 'Class'}</div>
+                            <div className="col-span-2 text-center">{bn ? 'ছাত্র' : 'Students'}</div>
+                            <div className="col-span-2 text-center">{bn ? 'ফলাফল' : 'Result'}</div>
+                            <div className="col-span-3 text-right">{bn ? 'অ্যাকশন' : 'Action'}</div>
                           </div>
-                        </td>
-                        <td className="px-4 py-3 text-center font-medium text-foreground">{totalStudents}</td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center gap-1 justify-end">
-                            <Button variant="outline" size="sm" className="h-8 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
-                              <GraduationCap className="w-3.5 h-3.5" />
-                              {bn ? 'ফলাফল তৈরি' : 'Create Result'}
-                            </Button>
-                            {canDeleteItem && (
-                              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                        </div>
+                        {esClasses.map((ec: any, idx: number) => {
+                          const divisionId = ec.classes?.division_id;
+                          const resultKey = `${es.name}_${es.exam_type}_${divisionId}`;
+                          const resultInfo = (examResultCounts as Record<string, any>)[resultKey];
+                          const hasResults = resultInfo && resultInfo.resultCount > 0;
+
+                          return (
+                            <div key={ec.id} className="grid grid-cols-12 gap-2 items-center px-4 py-2.5 border-b border-border/50 last:border-b-0 hover:bg-secondary/20 transition-colors text-sm">
+                              <div className="col-span-1 text-xs text-muted-foreground">{idx + 1}</div>
+                              <div className="col-span-4 font-medium text-foreground">{bn ? ec.classes?.name_bn : ec.classes?.name}</div>
+                              <div className="col-span-2 text-center text-muted-foreground">{ec.student_count || 0}</div>
+                              <div className="col-span-2 text-center">
+                                {hasResults ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                                    <Check className="w-3 h-3" />
+                                    {bn ? 'সংরক্ষিত' : 'Saved'}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+                                    {bn ? 'অপেক্ষমান' : 'Pending'}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="col-span-3 text-right">
+                                <div className="flex items-center gap-1 justify-end">
+                                  {hasResults ? (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 gap-1 text-xs"
+                                      onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
+                                      {bn ? 'দেখুন' : 'View'}
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 gap-1 text-xs"
+                                      onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
+                                    >
+                                      <GraduationCap className="w-3.5 h-3.5" />
+                                      {bn ? 'এন্ট্রি' : 'Entry'}
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
