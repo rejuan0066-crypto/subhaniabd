@@ -578,6 +578,39 @@ const AdminThemeCustomizer = () => {
                         placeholder="#3b82f6"
                         className="flex-1"
                       />
+                   </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{bn ? 'হবভার টেক্সট কালার' : 'Hover Text Color'}</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="color"
+                        value={draft.sidebarHoverTextColor || '#ffffff'}
+                        onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
+                        className="w-10 h-10 rounded border cursor-pointer"
+                      />
+                      <Input
+                        value={draft.sidebarHoverTextColor}
+                        onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
+                        placeholder="#ffffff"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1 block">{bn ? 'সাইডবার ফন্ট সাইজ' : 'Sidebar Font Size'}</Label>
+                    <div className="flex gap-2">
+                      {(['small', 'medium', 'large'] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => updateDraft('sidebarFontSize', s)}
+                          className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
+                            draft.sidebarFontSize === s ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                          }`}
+                        >
+                          {s === 'small' ? (bn ? 'ছোট (12px)' : 'Small (12px)') : s === 'medium' ? (bn ? 'মাঝারি (13px)' : 'Medium (13px)') : (bn ? 'বড় (14px)' : 'Large (14px)')}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <div>
