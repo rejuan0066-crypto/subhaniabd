@@ -121,7 +121,7 @@ const AdminExamSessions = () => {
     }
   }, [subjects]);
 
-
+  const { data: studentCounts = {} } = useQuery({
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
       if (!academicSessionId) return {};
