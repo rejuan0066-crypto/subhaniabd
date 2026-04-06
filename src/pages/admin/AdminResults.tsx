@@ -14,7 +14,7 @@ import { useGradingSystem } from '@/hooks/useGradingSystem';
 import IndividualMarksheet from '@/components/results/IndividualMarksheet';
 import GradingChart from '@/components/results/GradingChart';
 import { GraduationCap } from 'lucide-react';
-import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
+import { exportResultCSV, exportResultPDF, printResultSheet } from '@/lib/resultExport';
 
 const AdminResults = () => {
   const { language } = useLanguage();
@@ -392,10 +392,7 @@ const AdminResults = () => {
 
       if (type === 'csv') exportResultCSV(params);
       else if (type === 'pdf') exportResultPDF(params);
-      else if (type === 'print') {
-        // For print, we'll export PDF as a workaround
-        exportResultPDF(params);
-      }
+      else if (type === 'print') printResultSheet(params);
     } catch (e: any) {
       toast.error(e.message || 'Export failed');
     } finally {
