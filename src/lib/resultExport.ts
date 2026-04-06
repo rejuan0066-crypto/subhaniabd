@@ -8,6 +8,9 @@ interface ExportData {
   getOverallGrade: (marks: number[]) => { grade: string; gpa: string; title?: string; title_bn?: string; hasFail: boolean };
   bn: boolean;
   institutionName?: string;
+  institutionLogo?: string;
+  institutionAddress?: string;
+  institutionPhone?: string;
 }
 
 export const exportResultCSV = ({ title, students, subjects, marksMap, getOverallGrade, bn }: ExportData) => {
@@ -132,7 +135,7 @@ export const exportResultPDF = ({ title, students, subjects, marksMap, getOveral
   doc.save(`${title.replace(/[^a-zA-Z0-9\s]/g, '_')}.pdf`);
 };
 
-export const printResultSheet = ({ title, students, subjects, marksMap, getOverallGrade, bn, institutionName }: ExportData) => {
+export const printResultSheet = ({ title, students, subjects, marksMap, getOverallGrade, bn, institutionName, institutionLogo, institutionAddress, institutionPhone }: ExportData) => {
   const subjectHeaders = subjects.map((s: any) => `<th style="padding:4px 6px;text-align:center;font-size:11px;border:1px solid #ccc;background:#f5f5f5;">${bn ? s.name_bn : s.name}</th>`).join('');
 
   const rows = students.map((st: any, idx: number) => {
@@ -164,8 +167,10 @@ export const printResultSheet = ({ title, students, subjects, marksMap, getOvera
   body { font-family:'Noto Sans Bengali',sans-serif; padding:15mm; }
   @media print { body { padding:10mm; } }
   .header { text-align:center; margin-bottom:16px; }
-  .header h1 { font-size:18px; margin-bottom:4px; }
-  .header h2 { font-size:14px; color:#555; }
+  .header-logo { width:50px; height:50px; object-fit:contain; margin:0 auto 8px; display:block; }
+  .header h1 { font-size:18px; margin-bottom:2px; }
+  .header h2 { font-size:14px; color:#555; margin-bottom:2px; }
+  .header .info { font-size:11px; color:#777; }
   table { width:100%; border-collapse:collapse; margin-top:12px; }
   .signatures { display:flex; justify-content:space-between; margin-top:60px; padding:0 20px; }
   .sig-block { text-align:center; min-width:150px; }
@@ -175,7 +180,10 @@ export const printResultSheet = ({ title, students, subjects, marksMap, getOvera
 </style>
 </head><body>
 <div class="header">
+  ${institutionLogo ? `<img src="${institutionLogo}" class="header-logo" crossorigin="anonymous" />` : ''}
   <h1>${institutionName || ''}</h1>
+  ${institutionAddress ? `<p class="info">${institutionAddress}</p>` : ''}
+  ${institutionPhone ? `<p class="info">${bn ? 'ফোন' : 'Phone'}: ${institutionPhone}</p>` : ''}
   <h2>${title}</h2>
 </div>
 <table>
