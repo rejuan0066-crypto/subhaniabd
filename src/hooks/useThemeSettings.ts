@@ -158,6 +158,10 @@ export const useThemeSettings = () => {
         .from('website_settings')
         .upsert({ key: 'theme', value: newTheme as unknown as Json, updated_at: new Date().toISOString() }, { onConflict: 'key' });
       if (error) throw error;
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('admin-sidebar-stable-nav', String(newTheme.sidebarStableNav));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['theme-settings'] });
