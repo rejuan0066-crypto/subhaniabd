@@ -91,9 +91,21 @@ export const useGradingSystem = () => {
     return { grade: last.grade, gpa: last.gpa, color: colorMap[last.color] || colorMap.destructive };
   };
 
+  /** Check if any single subject is below pass mark — if so, overall grade is F */
+  const getOverallGrade = (subjectMarks: number[]) => {
+    const hasFail = subjectMarks.some(m => m < (passMarkConfig ?? 33));
+    if (hasFail && subjectMarks.length > 0) {
+      const failScale = scales.find(s => s.grade === 'F') || DEFAULT_SCALES[DEFAULT_SCALES.length - 1];
+      return { grade: 'F', gpa: '0.00', color: colorMap[failScale.color] || colorMap.destructive, hasFail: true };
+    }
+    const avg = subjectMarks.length > 0 ? subjectMarks.reduce((a, b) => a + b, 0) / subjectMarks.length : 0;
+    return { ...getGrade(avg), hasFail: false };
+  };
+
   return {
     scales,
     getGrade,
+    getOverallGrade,
     maxMarks: marksConfig?.max ?? 100,
     minMarks: marksConfig?.min ?? 0,
     passMark: passMarkConfig ?? 33,
