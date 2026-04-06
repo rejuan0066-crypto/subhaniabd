@@ -16,6 +16,7 @@ const AdminExamSessions = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { canAddItem, canDeleteItem } = usePagePermissions('/admin/exam-sessions');
 
   const [name, setName] = useState('');
