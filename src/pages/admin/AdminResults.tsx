@@ -457,6 +457,16 @@ const AdminResults = () => {
           classes={examClasses}
           examSessions={examSessions}
           onSearch={handleSearch}
+          onReset={() => {
+            setExamYear('');
+            setExamSessionId('');
+            setSelectedClass('');
+            setRollNumber('');
+            setSelectedExamId(null);
+            setMarksMap({});
+            setShowResults(false);
+            setViewingStudentId(null);
+          }}
         />
 
         {/* Class list with status when year+session selected but no class */}
