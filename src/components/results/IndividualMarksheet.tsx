@@ -164,7 +164,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
     <div class="row"><span class="label">${bn ? 'রোল নম্বর:' : 'Roll:'}</span><span class="value">${student.roll_number || '-'}</span></div>
     <div class="row"><span class="label">${bn ? 'রেজিস্ট্রেশন:' : 'Reg:'}</span><span class="value">${student.registration_number || student.student_id || '-'}</span></div>
     <div class="row"><span class="label">${bn ? 'পিতার নাম:' : "Father:"}</span><span class="value">${student.father_name_bn || student.father_name || '-'}</span></div>
-    ${student.date_of_birth ? `<div class="row"><span class="label">${bn ? 'জন্ম তারিখ:' : 'DOB:'}</span><span class="value">${student.date_of_birth}</span></div>` : ''}
+    <div class="row"><span class="label">${bn ? 'জন্ম তারিখ:' : 'DOB:'}</span><span class="value">${student.date_of_birth || '-'}</span></div>
   </div>
 </div>
 
@@ -289,12 +289,10 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
                 <span className="text-muted-foreground text-xs">{bn ? 'পিতার নাম' : "Father's Name"}:</span>
                 <p className="font-bold text-foreground">{student.father_name_bn || student.father_name || '-'}</p>
               </div>
-              {student.date_of_birth && (
-                <div>
-                  <span className="text-muted-foreground text-xs">{bn ? 'জন্ম তারিখ' : 'Date of Birth'}:</span>
-                  <p className="font-bold text-foreground">{student.date_of_birth}</p>
-                </div>
-              )}
+              <div>
+                <span className="text-muted-foreground text-xs">{bn ? 'জন্ম তারিখ' : 'Date of Birth'}:</span>
+                <p className="font-bold text-foreground">{student.date_of_birth || '-'}</p>
+              </div>
             </div>
           </div>
         </div>
