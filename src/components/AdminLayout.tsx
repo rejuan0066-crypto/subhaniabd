@@ -256,7 +256,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300' : sidebarOpen ? sidebarWidthClass : 'w-16'} bg-sidebar flex flex-col h-full transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} bg-sidebar flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
         style={sidebarStyle}
       >
         {/* Logo */}
