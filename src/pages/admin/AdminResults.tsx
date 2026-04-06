@@ -26,13 +26,22 @@ const AdminResults = () => {
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/results', 'results');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/results');
-  const [examYear, setExamYear] = useState('2026');
+  const [examYear, setExamYear] = useState('');
   const [examSession, setExamSession] = useState('');
   const [examType, setExamType] = useState('');
   const [selectedDivision, setSelectedDivision] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [marksMap, setMarksMap] = useState<Record<string, number>>({});
+
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic-sessions-results'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
@@ -141,11 +150,11 @@ const AdminResults = () => {
           <h3 className="font-display font-bold text-foreground mb-4">{language === 'bn' ? 'ফলাফল অনুসন্ধান / তৈরি' : 'Search / Create Result'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <Select value={examYear} onValueChange={setExamYear}>
-              <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'বছর' : 'Year'} /></SelectTrigger>
+              <SelectTrigger className="bg-background"><SelectValue placeholder={language === 'bn' ? 'শিক্ষাবর্ষ' : 'Academic Year'} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="2026">২০২৬</SelectItem>
-                <SelectItem value="2025">২০২৫</SelectItem>
-                <SelectItem value="2024">২০২৪</SelectItem>
+                {academicSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.name}>{language === 'bn' ? (s.name_bn || s.name) : s.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Input placeholder={language === 'bn' ? 'সেশন' : 'Session'} value={examSession} onChange={(e) => setExamSession(e.target.value)} className="bg-background" />
