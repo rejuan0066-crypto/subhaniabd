@@ -186,6 +186,7 @@ const AdminDivisions = () => {
     setEditingDivId(d.id);
     setEditDivName(d.name_bn);
     setEditDivNameEn(d.name);
+    setEditDivPrefix((d as any).prefix || '');
   };
 
   const startEditClass = (c: any) => {
