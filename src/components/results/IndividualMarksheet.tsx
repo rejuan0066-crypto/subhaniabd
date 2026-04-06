@@ -15,13 +15,22 @@ interface IndividualMarksheetProps {
   onBack: () => void;
 }
 
+const getMorjada = (grade: string) => {
+  if (grade === 'A+') return 'মুমতাজ';
+  if (grade === 'A') return 'জায়্যিদ জিদ্দান';
+  if (grade === 'B') return 'জায়্যিদ';
+  if (grade === 'C') return 'মকবুল';
+  if (grade === 'D') return 'মকবুল';
+  return 'রাসেব'; // F
+};
+
 const getGradeColor = (grade: string) => {
   if (grade === 'F') return { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' };
   if (grade === 'D') return { bg: '#fffbeb', text: '#d97706', border: '#fde68a' };
   if (grade === 'C') return { bg: '#fefce8', text: '#ca8a04', border: '#fef08a' };
   if (grade === 'B') return { bg: '#eff6ff', text: '#2563eb', border: '#bfdbfe' };
   if (grade === 'A') return { bg: '#f0fdf4', text: '#16a34a', border: '#bbf7d0' };
-  return { bg: '#ecfdf5', text: '#059669', border: '#a7f3d0' }; // A+
+  return { bg: '#ecfdf5', text: '#059669', border: '#a7f3d0' };
 };
 
 const getGradeTwColor = (grade: string) => {
