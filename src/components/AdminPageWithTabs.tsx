@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
@@ -85,12 +85,9 @@ const AdminPageWithTabs = ({ children }: Props) => {
 
   const [activeTab, setActiveTab] = useState('main');
 
-  // Reset to main tab when route changes
-  const [prevPath, setPrevPath] = useState(location.pathname);
-  if (prevPath !== location.pathname) {
-    setPrevPath(location.pathname);
+  useEffect(() => {
     setActiveTab('main');
-  }
+  }, [location.pathname]);
 
   if (tabItems.length === 0) {
     return <>{children}</>;
