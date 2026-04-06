@@ -23,7 +23,7 @@ const AdminResults = () => {
   const [searchParams] = useSearchParams();
   const { checkApproval } = useApprovalCheck('/admin/results', 'results');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/results');
-  const { getGrade } = useGradingSystem();
+  const { getGrade, getOverallGrade } = useGradingSystem();
 
   const [searchMode, setSearchMode] = useState<'class' | 'individual'>('class');
   const [examYear, setExamYear] = useState(searchParams.get('year') || '');
@@ -385,7 +385,7 @@ const AdminResults = () => {
         students: exportStudents,
         subjects: exportSubjects,
         marksMap: exportMarksMap,
-        getOverallGrade: getGradingOverall,
+        getOverallGrade,
         bn,
         institutionName: instName,
       };
