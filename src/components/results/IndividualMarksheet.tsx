@@ -15,13 +15,22 @@ interface IndividualMarksheetProps {
   onBack: () => void;
 }
 
+const getMorjada = (grade: string) => {
+  if (grade === 'A+') return 'মুমতাজ';
+  if (grade === 'A') return 'জায়্যিদ জিদ্দান';
+  if (grade === 'B') return 'জায়্যিদ';
+  if (grade === 'C') return 'মকবুল';
+  if (grade === 'D') return 'মকবুল';
+  return 'রাসেব'; // F
+};
+
 const getGradeColor = (grade: string) => {
   if (grade === 'F') return { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' };
   if (grade === 'D') return { bg: '#fffbeb', text: '#d97706', border: '#fde68a' };
   if (grade === 'C') return { bg: '#fefce8', text: '#ca8a04', border: '#fef08a' };
   if (grade === 'B') return { bg: '#eff6ff', text: '#2563eb', border: '#bfdbfe' };
   if (grade === 'A') return { bg: '#f0fdf4', text: '#16a34a', border: '#bbf7d0' };
-  return { bg: '#ecfdf5', text: '#059669', border: '#a7f3d0' }; // A+
+  return { bg: '#ecfdf5', text: '#059669', border: '#a7f3d0' };
 };
 
 const getGradeTwColor = (grade: string) => {
@@ -119,7 +128,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   .grade-b { background:#eff6ff; color:#2563eb; }
   .grade-a { background:#f0fdf4; color:#16a34a; }
   .grade-aplus { background:#ecfdf5; color:#059669; }
-  .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:16px 0; text-align:center; }
+  .summary { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:16px 0; text-align:center; }
   .summary-box { border-radius:12px; padding:14px 8px; }
   .summary-box .label { font-size:10px; font-weight:700; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
   .summary-box .val { font-size:24px; font-weight:800; line-height:1.1; }
@@ -128,6 +137,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   .box-avg { background:#fefce8; color:#ca8a04; border:2px solid #fde68a; }
   .box-grade { background:${overallGC.bg}; color:${overallGC.text}; border:2px solid ${overallGC.border}; }
   .box-gpa { background:#f0fdf4; color:#16a34a; border:2px solid #bbf7d0; }
+  .box-morjada { background:#faf5ff; color:#7c3aed; border:2px solid #ddd6fe; }
   .signatures { display:flex; justify-content:space-between; margin-top:50px; padding:0 10px; }
   .sig-block { text-align:center; min-width:140px; }
   .sig-line { border-top:1.5px dashed #9ca3af; padding-top:6px; margin-top:36px; }
@@ -175,6 +185,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   <div class="summary-box box-avg"><div class="label">${bn ? 'গড়' : 'Average'}</div><div class="val">${avgMarks.toFixed(1)}</div></div>
   <div class="summary-box box-grade"><div class="label">${bn ? 'গ্রেড' : 'Grade'}</div><div class="val">${overall.grade}</div></div>
   <div class="summary-box box-gpa"><div class="label">GPA</div><div class="val">${overall.gpa}</div></div>
+  <div class="summary-box box-morjada"><div class="label">${bn ? 'মর্যাদা' : 'Merit'}</div><div class="val" style="font-size:16px;">${getMorjada(overall.grade)}</div></div>
 </div>
 
 <div class="signatures">
@@ -322,7 +333,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
 
         {/* Summary - Colorful boxes */}
         <div className="relative z-10 p-5 border-t border-border">
-          <div className="grid grid-cols-4 gap-3 text-center">
+          <div className="grid grid-cols-5 gap-3 text-center">
             <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 border-2 border-blue-200 dark:border-blue-800">
               <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">{bn ? 'মোট নম্বর' : 'Total'}</p>
               <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{totalMarks}</p>
@@ -339,6 +350,10 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
             <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 p-3 border-2 border-emerald-200 dark:border-emerald-800">
               <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">GPA</p>
               <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{overall.gpa}</p>
+            </div>
+            <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-3 border-2 border-purple-200 dark:border-purple-800">
+              <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">{bn ? 'মর্যাদা' : 'Merit'}</p>
+              <p className="text-base font-extrabold text-purple-600 dark:text-purple-400">{getMorjada(overall.grade)}</p>
             </div>
           </div>
         </div>
