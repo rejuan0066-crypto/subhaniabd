@@ -38,7 +38,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
     queryFn: async () => {
-      const { data } = await supabase.from('institutions').select('name, name_en').eq('is_default', true).maybeSingle();
+      const { data } = await supabase.from('institutions').select('name, name_en, logo_url, address, phone').eq('is_default', true).maybeSingle();
       return data;
     },
     staleTime: 10 * 60 * 1000,
