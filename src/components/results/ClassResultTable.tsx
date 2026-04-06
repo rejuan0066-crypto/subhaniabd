@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Printer, Save, Loader2, Eye, FileDown, FileSpreadsheet } from 'lucide-react';
+import { Printer, Save, Loader2, Eye, FileDown, FileSpreadsheet, X } from 'lucide-react';
 import { useGradingSystem } from '@/hooks/useGradingSystem';
 import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
 import { useQuery } from '@tanstack/react-query';
@@ -27,6 +27,7 @@ interface ClassResultTableProps {
   isSaving: boolean;
   title: string;
   onViewMarksheet: (studentId: string) => void;
+  onClose?: () => void;
 }
 
 const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet }: ClassResultTableProps) => {
