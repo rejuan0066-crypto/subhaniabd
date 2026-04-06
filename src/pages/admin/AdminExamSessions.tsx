@@ -349,26 +349,33 @@ const AdminExamSessions = () => {
                   </SelectContent>
                 </Select>
 
-                <label className="text-sm font-medium text-muted-foreground mb-2 block mt-3">{bn ? 'ক্লাস' : 'Class'} *</label>
-                <Select value={selectedClassIds[0] || ''} onValueChange={(v) => setSelectedClassIds([v])}>
-                  <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue placeholder={bn ? 'ক্লাস নির্বাচন করুন' : 'Select Class'} /></SelectTrigger>
-                  <SelectContent>
-                    {filteredClasses.map((cls: any) => {
-                      const count = (studentCounts as Record<string, number>)[cls.id] || 0;
-                      const divName = cls.divisions ? (bn ? cls.divisions.name_bn : cls.divisions.name) : '';
-                      return (
-                        <SelectItem key={cls.id} value={cls.id}>
-                          {bn ? cls.name_bn : cls.name}{divName ? ` (${divName})` : ''} — {count} {bn ? 'জন' : 'students'}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block mt-3">{bn ? 'ক্লাস নির্বাচন করুন' : 'Select Classes'} *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {filteredClasses.map((cls: any) => {
+                    const count = (studentCounts as Record<string, number>)[cls.id] || 0;
+                    const divName = cls.divisions ? (bn ? cls.divisions.name_bn : cls.divisions.name) : '';
+                    return (
+                      <label key={cls.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedClassIds.includes(cls.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                        <Checkbox checked={selectedClassIds.includes(cls.id)} onCheckedChange={() => toggleClass(cls.id)} />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium text-foreground">{bn ? cls.name_bn : cls.name}</span>
+                          {divName && <span className="text-xs text-muted-foreground ml-1">({divName})</span>}
+                        </div>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${count > 0 ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                          <Users className="inline w-3 h-3 mr-0.5" />{count}
+                        </span>
+                      </label>
+                    );
+                  })}
+                  {filteredClasses.length === 0 && (
+                    <p className="text-sm text-muted-foreground col-span-full py-4 text-center">{bn ? 'এই বিভাগে কোনো ক্লাস নেই' : 'No classes in this division'}</p>
+                  )}
+                </div>
 
                 {selectedClassIds.length > 0 && (
                   <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
                     <p className="text-sm font-medium text-primary">
-                      {bn ? `${totalSelected} জন ছাত্র` : `${totalSelected} students`}
+                      {bn ? `মোট নির্বাচিত: ${selectedClassIds.length} টি ক্লাস — ${totalSelected} জন ছাত্র` : `Total selected: ${selectedClassIds.length} classes — ${totalSelected} students`}
                     </p>
                   </div>
                 )}
