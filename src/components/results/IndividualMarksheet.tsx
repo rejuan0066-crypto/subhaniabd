@@ -1,7 +1,9 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Printer, ArrowLeft, Award } from 'lucide-react';
+import { Printer, ArrowLeft } from 'lucide-react';
 import { getGrade } from './ClassResultTable';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface IndividualMarksheetProps {
   student: any;
@@ -15,6 +17,15 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   const { language } = useLanguage();
   const bn = language === 'bn';
 
+  const { data: institution } = useQuery({
+    queryKey: ['institution-default'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('*').eq('is_default', true).maybeSingle();
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
   const subjectResults = subjects.map((sub: any) => {
     const marks = marksMap[`${student.id}_${sub.id}`] ?? 0;
     const { grade, gpa, color } = getGrade(marks);
@@ -25,6 +36,8 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   const avgMarks = subjects.length > 0 ? totalMarks / subjects.length : 0;
   const overall = getGrade(avgMarks);
 
+  const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+
   return (
     <div className="space-y-4">
       <Button variant="ghost" size="sm" onClick={onBack} className="gap-1.5 text-muted-foreground hover:text-foreground">
@@ -32,16 +45,45 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
         {bn ? 'ফিরে যান' : 'Back to List'}
       </Button>
 
-      <div className="card-elevated rounded-xl overflow-hidden max-w-2xl mx-auto">
-        {/* Marksheet Header */}
-        <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent dark:from-primary/20 dark:via-primary/10 p-6 text-center border-b border-border">
-          <Award className="w-10 h-10 mx-auto text-primary mb-2" />
-          <h2 className="text-xl font-display font-bold text-foreground">{bn ? 'মার্কশিট' : 'Marksheet'}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{examTitle}</p>
+      <div className="card-elevated rounded-xl overflow-hidden max-w-2xl mx-auto relative">
+        {/* Logo Watermark */}
+        {institution?.logo_url && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
+            <img
+              src={institution.logo_url}
+              alt=""
+              className="w-64 h-64 object-contain opacity-[0.04] dark:opacity-[0.06]"
+            />
+          </div>
+        )}
+
+        {/* Institution Header */}
+        <div className="relative z-10 border-b border-border bg-background px-6 py-5 text-center">
+          <div className="flex items-center justify-center gap-4">
+            {institution?.logo_url && (
+              <img src={institution.logo_url} alt="" className="w-14 h-14 object-contain rounded" />
+            )}
+            <div>
+              <h2 className="text-lg font-bold text-foreground">{instName || ''}</h2>
+              {institution?.address && (
+                <p className="text-xs text-muted-foreground">{institution.address}</p>
+              )}
+              {institution?.phone && (
+                <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>
+              )}
+            </div>
+            {institution?.logo_url && (
+              <img src={institution.logo_url} alt="" className="w-14 h-14 object-contain rounded opacity-0" />
+            )}
+          </div>
+          <div className="mt-3 border-t border-border pt-3">
+            <h3 className="text-base font-display font-bold text-primary">{bn ? 'মার্কশিট' : 'Marksheet'}</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">{examTitle}</p>
+          </div>
         </div>
 
         {/* Student Info */}
-        <div className="p-5 bg-muted/20 border-b border-border">
+        <div className="relative z-10 p-5 bg-muted/20 border-b border-border">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">{bn ? 'নাম' : 'Name'}:</span>
@@ -63,7 +105,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
         </div>
 
         {/* Subject-wise Results */}
-        <div className="p-5">
+        <div className="relative z-10 p-5">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b-2 border-border">
@@ -95,7 +137,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
         </div>
 
         {/* Summary */}
-        <div className="p-5 border-t border-border bg-muted/20">
+        <div className="relative z-10 p-5 border-t border-border bg-muted/20">
           <div className="grid grid-cols-4 gap-4 text-center">
             <div className="rounded-lg bg-background p-3 border border-border">
               <p className="text-xs text-muted-foreground mb-1">{bn ? 'মোট নম্বর' : 'Total Marks'}</p>
