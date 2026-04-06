@@ -7,16 +7,18 @@ export interface GradeScale {
   max: number;
   gpa: string;
   color: string;
+  title?: string;
+  title_bn?: string;
 }
 
 const DEFAULT_SCALES: GradeScale[] = [
-  { grade: 'A+', min: 80, max: 100, gpa: '5.00', color: 'emerald' },
-  { grade: 'A', min: 70, max: 79, gpa: '4.00', color: 'emerald' },
-  { grade: 'A-', min: 60, max: 69, gpa: '3.50', color: 'sky' },
-  { grade: 'B', min: 50, max: 59, gpa: '3.00', color: 'sky' },
-  { grade: 'C', min: 40, max: 49, gpa: '2.00', color: 'amber' },
-  { grade: 'D', min: 33, max: 39, gpa: '1.00', color: 'orange' },
-  { grade: 'F', min: 0, max: 32, gpa: '0.00', color: 'destructive' },
+  { grade: 'A+', min: 80, max: 100, gpa: '5.00', color: 'emerald', title: 'Mumtaz', title_bn: 'মুমতাজ' },
+  { grade: 'A', min: 70, max: 79, gpa: '4.00', color: 'emerald', title: 'Jayyid Jiddan', title_bn: 'জায়্যিদ জিদ্দান' },
+  { grade: 'A-', min: 60, max: 69, gpa: '3.50', color: 'sky', title: 'Jayyid', title_bn: 'জায়্যিদ' },
+  { grade: 'B', min: 50, max: 59, gpa: '3.00', color: 'sky', title: 'Maqbul', title_bn: 'মাকবুল' },
+  { grade: 'C', min: 40, max: 49, gpa: '2.00', color: 'amber', title: 'Maqbul', title_bn: 'মাকবুল' },
+  { grade: 'D', min: 33, max: 39, gpa: '1.00', color: 'orange', title: 'Zayeef', title_bn: 'যয়ীফ' },
+  { grade: 'F', min: 0, max: 32, gpa: '0.00', color: 'destructive', title: 'Rasib', title_bn: 'রাসিব' },
 ];
 
 const colorMap: Record<string, string> = {
@@ -41,7 +43,7 @@ export const useGradingSystem = () => {
       if (error || !data?.length) return DEFAULT_SCALES;
       return data.map((r: any) => {
         const c = typeof r.config === 'object' ? r.config : {};
-        return { grade: c.grade, min: c.min, max: c.max, gpa: c.gpa, color: c.color } as GradeScale;
+        return { grade: c.grade, min: c.min, max: c.max, gpa: c.gpa, color: c.color, title: c.title, title_bn: c.title_bn } as GradeScale;
       });
     },
     staleTime: 5 * 60 * 1000,
@@ -84,11 +86,11 @@ export const useGradingSystem = () => {
   const getGrade = (avg: number) => {
     for (const s of scales) {
       if (avg >= s.min && avg <= s.max) {
-        return { grade: s.grade, gpa: s.gpa, color: colorMap[s.color] || colorMap.destructive };
+        return { grade: s.grade, gpa: s.gpa, color: colorMap[s.color] || colorMap.destructive, title: s.title, title_bn: s.title_bn };
       }
     }
     const last = scales[scales.length - 1] || DEFAULT_SCALES[DEFAULT_SCALES.length - 1];
-    return { grade: last.grade, gpa: last.gpa, color: colorMap[last.color] || colorMap.destructive };
+    return { grade: last.grade, gpa: last.gpa, color: colorMap[last.color] || colorMap.destructive, title: last.title, title_bn: last.title_bn };
   };
 
   /** Check if any single subject is below pass mark — if so, overall grade is F */
@@ -96,7 +98,7 @@ export const useGradingSystem = () => {
     const hasFail = subjectMarks.some(m => m < (passMarkConfig ?? 33));
     if (hasFail && subjectMarks.length > 0) {
       const failScale = scales.find(s => s.grade === 'F') || DEFAULT_SCALES[DEFAULT_SCALES.length - 1];
-      return { grade: 'F', gpa: '0.00', color: colorMap[failScale.color] || colorMap.destructive, hasFail: true };
+      return { grade: 'F', gpa: '0.00', color: colorMap[failScale.color] || colorMap.destructive, hasFail: true, title: failScale.title, title_bn: failScale.title_bn };
     }
     const avg = subjectMarks.length > 0 ? subjectMarks.reduce((a, b) => a + b, 0) / subjectMarks.length : 0;
     return { ...getGrade(avg), hasFail: false };
