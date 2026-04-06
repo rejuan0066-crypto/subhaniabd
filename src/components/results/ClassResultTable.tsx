@@ -57,9 +57,41 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
     );
   }
 
+  const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+
   return (
-    <div className="card-elevated rounded-xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
+    <div className="card-elevated rounded-xl overflow-hidden relative">
+      {/* Logo Watermark */}
+      {institution?.logo_url && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
+          <img
+            src={institution.logo_url}
+            alt=""
+            className="w-80 h-80 object-contain opacity-[0.03] dark:opacity-[0.05]"
+          />
+        </div>
+      )}
+
+      {/* Institution Header */}
+      <div className="relative z-10 border-b border-border bg-background px-5 py-4 text-center">
+        <div className="flex items-center justify-center gap-4">
+          {institution?.logo_url && (
+            <img src={institution.logo_url} alt="" className="w-12 h-12 object-contain rounded" />
+          )}
+          <div>
+            <h2 className="text-base font-bold text-foreground">{instName || ''}</h2>
+            {institution?.address && (
+              <p className="text-xs text-muted-foreground">{institution.address}</p>
+            )}
+            {institution?.phone && (
+              <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Title & Actions Bar */}
+      <div className="relative z-10 flex items-center justify-between px-5 py-3 border-b border-border bg-muted/20">
         <div className="flex items-center gap-2">
           {onClose && (
             <button onClick={onClose} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'বন্ধ করুন' : 'Close'}>
