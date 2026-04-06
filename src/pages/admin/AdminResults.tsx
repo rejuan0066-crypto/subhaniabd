@@ -264,6 +264,7 @@ const AdminResults = () => {
             isSaving={saveMutation.isPending}
             title={getExamTitle()}
             onViewMarksheet={(id) => setViewingStudentId(id)}
+            onClose={() => { setShowResults(false); setMarksMap({}); }}
           />
         ) : null}
       </div>

@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Printer, Save, Loader2, Eye, FileDown, FileSpreadsheet } from 'lucide-react';
+import { Printer, Save, Loader2, Eye, FileDown, FileSpreadsheet, X } from 'lucide-react';
 import { useGradingSystem } from '@/hooks/useGradingSystem';
 import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
 import { useQuery } from '@tanstack/react-query';
@@ -27,9 +27,10 @@ interface ClassResultTableProps {
   isSaving: boolean;
   title: string;
   onViewMarksheet: (studentId: string) => void;
+  onClose?: () => void;
 }
 
-const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet }: ClassResultTableProps) => {
+const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet, onClose }: ClassResultTableProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const { getOverallGrade, maxMarks, minMarks, passMark } = useGradingSystem();
@@ -59,7 +60,14 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
   return (
     <div className="card-elevated rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
-        <h3 className="font-display font-bold text-foreground text-lg">{title}</h3>
+        <div className="flex items-center gap-2">
+          {onClose && (
+            <button onClick={onClose} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'বন্ধ করুন' : 'Close'}>
+              <X className="w-5 h-5" />
+            </button>
+          )}
+          <h3 className="font-display font-bold text-foreground text-lg">{title}</h3>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => handleExport('csv')} className="gap-1.5">
             <FileSpreadsheet className="w-4 h-4" /> Excel
