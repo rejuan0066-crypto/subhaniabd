@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Printer, ArrowLeft } from 'lucide-react';
 import { getGrade } from './ClassResultTable';
 import { useQuery } from '@tanstack/react-query';
@@ -162,27 +164,20 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
         {/* Signature Section */}
         <div className="relative z-10 p-6 border-t border-border">
           <div className="grid grid-cols-3 gap-6 mt-8 pt-4">
-            <div className="text-center space-y-8">
-              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
-              <div>
-                <p className="text-xs font-semibold text-foreground">{bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller'}</p>
-                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+            {[
+              { label: bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller', key: 'examController' },
+              { label: bn ? 'শিক্ষা সচিব' : 'Education Secretary', key: 'eduSecretary' },
+              { label: bn ? 'মুহতামিম' : 'Principal', key: 'principal' },
+            ].map(sig => (
+              <div key={sig.key} className="text-center space-y-2">
+                <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+                <p className="text-xs font-semibold text-foreground">{sig.label}</p>
+                <Input
+                  className="text-center text-xs h-7 border-dashed"
+                  placeholder={bn ? 'নাম লিখুন' : 'Enter name'}
+                />
               </div>
-            </div>
-            <div className="text-center space-y-8">
-              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
-              <div>
-                <p className="text-xs font-semibold text-foreground">{bn ? 'শিক্ষা সচিব' : 'Education Secretary'}</p>
-                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
-              </div>
-            </div>
-            <div className="text-center space-y-8">
-              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
-              <div>
-                <p className="text-xs font-semibold text-foreground">{bn ? 'মুহতামিম' : 'Principal'}</p>
-                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
-              </div>
-            </div>
+            ))}
           </div>
 
           <div className="mt-6 flex justify-end">
