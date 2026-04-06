@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
-import { Plus, Trash2, ChevronRight, Layers, Loader2, BookOpen, GraduationCap, Edit2, Check, X } from 'lucide-react';
+import { Plus, Trash2, ChevronRight, Layers, Loader2, BookOpen, GraduationCap, Edit2, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,6 @@ const AdminDivisions = () => {
   const [newClassName, setNewClassName] = useState('');
   const [newClassNameEn, setNewClassNameEn] = useState('');
 
-  // Edit states
   const [editingDivId, setEditingDivId] = useState<string | null>(null);
   const [editDivName, setEditDivName] = useState('');
   const [editDivNameEn, setEditDivNameEn] = useState('');
@@ -47,12 +46,12 @@ const AdminDivisions = () => {
     queryFn: async () => {
       if (!selectedDiv) return [];
       const { data, error } = await supabase
-        .from('classes' as any)
+        .from('classes')
         .select('*')
         .eq('division_id', selectedDiv)
         .order('sort_order', { ascending: true });
       if (error) throw error;
-      return data as any[];
+      return data;
     },
     enabled: !!selectedDiv,
   });
@@ -102,11 +101,27 @@ const AdminDivisions = () => {
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
   });
 
+  const reorderDivMutation = useMutation({
+    mutationFn: async ({ id, direction }: { id: string; direction: 'up' | 'down' }) => {
+      const idx = divisions.findIndex(d => d.id === id);
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= divisions.length) return;
+      const current = divisions[idx];
+      const swap = divisions[swapIdx];
+      await Promise.all([
+        supabase.from('divisions').update({ sort_order: swap.sort_order ?? swapIdx }).eq('id', current.id),
+        supabase.from('divisions').update({ sort_order: current.sort_order ?? idx }).eq('id', swap.id),
+      ]);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['divisions'] }),
+    onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
+  });
+
   const addClassMutation = useMutation({
     mutationFn: async () => {
-      const payload = { division_id: selectedDiv, name_bn: newClassName.trim(), name: newClassNameEn.trim() || newClassName.trim(), sort_order: classes.length };
+      const payload = { division_id: selectedDiv!, name_bn: newClassName.trim(), name: newClassNameEn.trim() || newClassName.trim(), sort_order: classes.length };
       if (await checkClassApproval('add', payload, undefined, `শ্রেণী যোগ: ${newClassName.trim()}`)) return;
-      const { error } = await supabase.from('classes' as any).insert(payload as any);
+      const { error } = await supabase.from('classes').insert(payload);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -122,7 +137,7 @@ const AdminDivisions = () => {
     mutationFn: async (id: string) => {
       const cls = classes.find((c: any) => c.id === id);
       if (await checkClassApproval('delete', { id, name_bn: cls?.name_bn }, id, `শ্রেণী মুছুন: ${cls?.name_bn}`)) return;
-      const { error } = await supabase.from('classes' as any).delete().eq('id', id);
+      const { error } = await supabase.from('classes').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -135,7 +150,7 @@ const AdminDivisions = () => {
   const editClassMutation = useMutation({
     mutationFn: async ({ id, name_bn, name }: { id: string; name_bn: string; name: string }) => {
       if (await checkClassApproval('edit', { id, name_bn, name }, id, `শ্রেণী সম্পাদনা: ${name_bn}`)) return;
-      const { error } = await supabase.from('classes' as any).update({ name_bn, name } as any).eq('id', id);
+      const { error } = await supabase.from('classes').update({ name_bn, name }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -143,6 +158,22 @@ const AdminDivisions = () => {
       setEditingClassId(null);
       toast.success(language === 'bn' ? 'শ্রেণী আপডেট হয়েছে' : 'Class updated');
     },
+    onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
+  });
+
+  const reorderClassMutation = useMutation({
+    mutationFn: async ({ id, direction }: { id: string; direction: 'up' | 'down' }) => {
+      const idx = classes.findIndex((c: any) => c.id === id);
+      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= classes.length) return;
+      const current = classes[idx];
+      const swap = classes[swapIdx];
+      await Promise.all([
+        supabase.from('classes').update({ sort_order: swap.sort_order ?? swapIdx }).eq('id', current.id),
+        supabase.from('classes').update({ sort_order: current.sort_order ?? idx }).eq('id', swap.id),
+      ]);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['classes', selectedDiv] }),
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
   });
 
@@ -187,7 +218,7 @@ const AdminDivisions = () => {
               <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : (
               <div className="space-y-2">
-                {divisions.map(d => (
+                {divisions.map((d, idx) => (
                   <div key={d.id}
                     onClick={() => { if (editingDivId !== d.id) setSelectedDiv(d.id); }}
                     className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${selectedDiv === d.id ? 'bg-primary/10 border border-primary/30' : 'bg-secondary/50 hover:bg-secondary'}`}>
@@ -201,14 +232,21 @@ const AdminDivisions = () => {
                     ) : (
                       <>
                         <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-muted-foreground w-5 text-center">{idx + 1}</span>
                           <Layers className="w-5 h-5 text-primary" />
                           <div>
                             <p className="text-sm font-medium text-foreground">{language === 'bn' ? d.name_bn : d.name}</p>
                             <p className="text-xs text-muted-foreground">{d.description || ''}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          {canEditItem && <button onClick={(e) => { e.stopPropagation(); startEditDiv(d); }} className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary"><Edit2 className="w-4 h-4" /></button>}
+                        <div className="flex items-center gap-0.5">
+                          {canEditItem && (
+                            <>
+                              <button onClick={(e) => { e.stopPropagation(); if (idx > 0) reorderDivMutation.mutate({ id: d.id, direction: 'up' }); }} disabled={idx === 0 || reorderDivMutation.isPending} className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary disabled:opacity-30"><ArrowUp className="w-3.5 h-3.5" /></button>
+                              <button onClick={(e) => { e.stopPropagation(); if (idx < divisions.length - 1) reorderDivMutation.mutate({ id: d.id, direction: 'down' }); }} disabled={idx === divisions.length - 1 || reorderDivMutation.isPending} className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary disabled:opacity-30"><ArrowDown className="w-3.5 h-3.5" /></button>
+                              <button onClick={(e) => { e.stopPropagation(); startEditDiv(d); }} className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary"><Edit2 className="w-4 h-4" /></button>
+                            </>
+                          )}
                           {canDeleteItem && <button onClick={(e) => { e.stopPropagation(); deleteDivMutation.mutate(d.id); }} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
                           <ChevronRight className="w-4 h-4 text-muted-foreground" />
                         </div>
@@ -231,7 +269,6 @@ const AdminDivisions = () => {
             </h3>
             {selected ? (
               <div className="space-y-4">
-                {/* Division info */}
                 <div className="p-3 rounded-lg bg-secondary/50 space-y-1">
                   <p className="text-xs text-muted-foreground">{language === 'bn' ? 'বাংলা:' : 'BN:'} <span className="text-foreground font-medium">{selected.name_bn}</span> | {language === 'bn' ? 'ইংরেজি:' : 'EN:'} <span className="text-foreground font-medium">{selected.name}</span></p>
                   <p className="text-xs"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${selected.is_active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>{selected.is_active ? (language === 'bn' ? 'সক্রিয়' : 'Active') : (language === 'bn' ? 'নিষ্ক্রিয়' : 'Inactive')}</span></p>
@@ -247,12 +284,11 @@ const AdminDivisions = () => {
                   </div>
                 )}
 
-                {/* Class list */}
                 {classesLoading ? (
                   <div className="flex items-center justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
                 ) : (
                   <div className="space-y-2">
-                    {classes.map((c: any) => (
+                    {classes.map((c: any, idx: number) => (
                       <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
                         {editingClassId === c.id ? (
                           <div className="flex items-center gap-2 flex-1 mr-2">
@@ -264,14 +300,21 @@ const AdminDivisions = () => {
                         ) : (
                           <>
                             <div className="flex items-center gap-3">
+                              <span className="text-xs font-bold text-muted-foreground w-5 text-center">{idx + 1}</span>
                               <BookOpen className="w-4 h-4 text-primary" />
                               <div>
                                 <p className="text-sm font-medium text-foreground">{language === 'bn' ? c.name_bn : c.name}</p>
                                 <p className="text-xs text-muted-foreground">{language === 'bn' ? c.name : c.name_bn}</p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              {canEditItem && <button onClick={() => startEditClass(c)} className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary"><Edit2 className="w-4 h-4" /></button>}
+                            <div className="flex items-center gap-0.5">
+                              {canEditItem && (
+                                <>
+                                  <button onClick={() => { if (idx > 0) reorderClassMutation.mutate({ id: c.id, direction: 'up' }); }} disabled={idx === 0 || reorderClassMutation.isPending} className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary disabled:opacity-30"><ArrowUp className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => { if (idx < classes.length - 1) reorderClassMutation.mutate({ id: c.id, direction: 'down' }); }} disabled={idx === classes.length - 1 || reorderClassMutation.isPending} className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary disabled:opacity-30"><ArrowDown className="w-3.5 h-3.5" /></button>
+                                  <button onClick={() => startEditClass(c)} className="p-1.5 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary"><Edit2 className="w-4 h-4" /></button>
+                                </>
+                              )}
                               {canDeleteItem && (
                                 <button onClick={() => deleteClassMutation.mutate(c.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive">
                                   <Trash2 className="w-4 h-4" />
