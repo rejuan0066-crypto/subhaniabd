@@ -56,7 +56,14 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 24 },
   { id: 'user-management', path: '/admin/user-management', label_bn: 'ইউজার ম্যানেজমেন্ট', label_en: 'User Management', icon: 'UserPlus', visible: true, sort_order: 25 },
   { id: 'photo-tools', path: '/admin/photo-tools', label_bn: 'ফটো টুলস', label_en: 'Photo Tools', icon: 'Camera', visible: true, sort_order: 26 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 27 },
+  { id: 'posts', path: '/admin/posts', label_bn: 'পোস্ট ব্যবস্থাপনা', label_en: 'Post Management', icon: 'FileText', visible: true, sort_order: 27 },
+  { id: 'approvals', path: '/admin/approvals', label_bn: 'অনুমোদন', label_en: 'Approvals', icon: 'ShieldCheck', visible: true, sort_order: 28 },
+  { id: 'payments', path: '/admin/payments', label_bn: 'পেমেন্ট', label_en: 'Payments', icon: 'CreditCard', visible: true, sort_order: 29 },
+  { id: 'exam-sessions', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা সেশন', label_en: 'Exam Sessions', icon: 'CalendarDays', visible: true, sort_order: 30 },
+  { id: 'receipt-designer', path: '/admin/receipt-designer', label_bn: 'রসিদ ডিজাইনার', label_en: 'Receipt Designer', icon: 'ReceiptText', visible: true, sort_order: 31 },
+  { id: 'address-manager', path: '/admin/address-manager', label_bn: 'ঠিকানা ব্যবস্থাপনা', label_en: 'Address Manager', icon: 'MapPin', visible: true, sort_order: 32 },
+  { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 33 },
+  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 34 },
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [
@@ -93,6 +100,14 @@ const collectAllIds = (items: MenuItemConfig[]): Set<string> => {
 
 // Merge saved menu with defaults so newly added default items appear automatically
 const mergeWithDefaults = (saved: MenuItemConfig[], defaults: MenuItemConfig[]): MenuItemConfig[] => {
+  // Auto-fix known path corrections
+  saved = saved.map(item => {
+    if (item.id === 'fees' && item.path === '/admin/fees') {
+      return { ...item, path: '/admin/students-fees' };
+    }
+    return item;
+  });
+
   const savedIds = collectAllIds(saved);
   // Also collect child IDs from defaults to check
   const missingTopLevel = defaults.filter(d => !savedIds.has(d.id));
