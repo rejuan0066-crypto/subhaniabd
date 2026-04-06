@@ -100,6 +100,14 @@ const collectAllIds = (items: MenuItemConfig[]): Set<string> => {
 
 // Merge saved menu with defaults so newly added default items appear automatically
 const mergeWithDefaults = (saved: MenuItemConfig[], defaults: MenuItemConfig[]): MenuItemConfig[] => {
+  // Auto-fix known path corrections
+  saved = saved.map(item => {
+    if (item.id === 'fees' && item.path === '/admin/fees') {
+      return { ...item, path: '/admin/students-fees' };
+    }
+    return item;
+  });
+
   const savedIds = collectAllIds(saved);
   // Also collect child IDs from defaults to check
   const missingTopLevel = defaults.filter(d => !savedIds.has(d.id));
