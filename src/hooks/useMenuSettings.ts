@@ -42,7 +42,10 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'form-builder', path: '/admin/form-builder', label_bn: 'কাস্টম বিল্ডার', label_en: 'Custom Builder', icon: 'Wrench', visible: true, sort_order: 16, children: [
     { id: 'module-manager', path: '/admin/module-manager', label_bn: 'মডিউল ম্যানেজার', label_en: 'Module Manager', icon: 'Blocks', visible: true, sort_order: 0 },
     { id: 'formula-builder', path: '/admin/formula-builder', label_bn: 'ফর্মুলা বিল্ডার', label_en: 'Formula Builder', icon: 'FlaskConical', visible: true, sort_order: 1 },
-    { id: 'attendance', path: '/admin/attendance', label_bn: 'অ্যাটেন্ডেন্স', label_en: 'Attendance', icon: 'CalendarDays', visible: true, sort_order: 2 },
+    { id: 'attendance', path: '/admin/attendance', label_bn: 'অ্যাটেন্ডেন্স', label_en: 'Attendance', icon: 'CalendarDays', visible: true, sort_order: 2, children: [
+      { id: 'attendance-student', path: '/admin/attendance?tab=student', label_bn: 'ছাত্র উপস্থিতি', label_en: 'Student Attendance', icon: 'Users', visible: true, sort_order: 0 },
+      { id: 'attendance-staff', path: '/admin/attendance?tab=staff', label_bn: 'স্টাফ উপস্থিতি', label_en: 'Staff Attendance', icon: 'UserCog', visible: true, sort_order: 1 },
+    ]},
     { id: 'validation-manager', path: '/admin/validation-manager', label_bn: 'ভ্যালিডেশন ম্যানেজার', label_en: 'Validation Manager', icon: 'ShieldCheck', visible: true, sort_order: 3 },
     { id: 'reports', path: '/admin/reports', label_bn: 'রিপোর্ট ও অ্যানালিটিক্স', label_en: 'Reports & Analytics', icon: 'BarChart3', visible: true, sort_order: 4 },
   ]},
