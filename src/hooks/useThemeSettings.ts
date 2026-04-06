@@ -43,6 +43,11 @@ export interface ThemeSettings {
   fontBodyStyle: 'normal' | 'italic';
   fontBengaliWeight: string;
   fontBengaliStyle: 'normal' | 'italic';
+  // Extended style options
+  sidebarHoverTextColor: string;
+  sidebarFontSize: 'small' | 'medium' | 'large';
+  headerFontSize: 'small' | 'medium' | 'large';
+  baseFontSize: number;
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
@@ -84,6 +89,10 @@ export const DEFAULT_THEME: ThemeSettings = {
   fontBodyStyle: 'normal',
   fontBengaliWeight: '400',
   fontBengaliStyle: 'normal',
+  sidebarHoverTextColor: '',
+  sidebarFontSize: 'medium',
+  headerFontSize: 'medium',
+  baseFontSize: 14,
 };
 
 export const FONT_OPTIONS = [
