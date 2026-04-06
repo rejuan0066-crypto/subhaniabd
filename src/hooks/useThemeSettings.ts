@@ -48,6 +48,7 @@ export interface ThemeSettings {
   sidebarHoverBgColor: string;
   sidebarActiveBgColor: string;
   sidebarClickEffect: 'none' | 'scale' | 'ripple' | 'glow' | 'slide';
+  sidebarStableNav: boolean;
   sidebarFontSize: 'small' | 'medium' | 'large';
   headerFontSize: 'small' | 'medium' | 'large';
   baseFontSize: number;
@@ -96,6 +97,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   sidebarHoverBgColor: '',
   sidebarActiveBgColor: '',
   sidebarClickEffect: 'scale',
+  sidebarStableNav: false,
   sidebarFontSize: 'medium',
   headerFontSize: 'medium',
   baseFontSize: 14,

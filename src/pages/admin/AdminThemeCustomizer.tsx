@@ -632,8 +632,15 @@ const AdminThemeCustomizer = () => {
                        />
                      </div>
                    </div>
-                   <div>
-                     <Label className="text-xs mb-1 block">{bn ? 'ক্লিক ইফেক্ট' : 'Click Effect'}</Label>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-xs">{bn ? 'স্থিতিশীল নেভিগেশন (রিলোড বন্ধ)' : 'Stable Navigation (No Reload)'}</Label>
+                        <p className="text-[10px] text-muted-foreground">{bn ? 'মেনু ক্লিক করলে সাইডবার রিলোড হবে না' : 'Sidebar won\'t reload on menu click'}</p>
+                      </div>
+                      <Switch checked={draft.sidebarStableNav} onCheckedChange={v => updateDraft('sidebarStableNav', v)} />
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'ক্লিক ইফেক্ট' : 'Click Effect'}</Label>
                      <div className="flex flex-wrap gap-2">
                        {([
                          { value: 'none', label: bn ? 'নেই' : 'None' },
