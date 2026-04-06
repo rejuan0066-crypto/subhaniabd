@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useState, useEffect } from 'react';
+import { ReactNode, useRef, useState, useEffect, useMemo, useTransition } from 'react';
 import BackButton from './BackButton';
 import AdminPageWithTabs from './AdminPageWithTabs';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -281,6 +281,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           ref={(element) => restoreMenuScroll(element, mobile)}
           onScroll={(event) => persistMenuScroll(mobile, event.currentTarget.scrollTop)}
           className="flex-1 min-h-0 py-3 px-3 space-y-0.5 overflow-y-auto overscroll-contain scrollbar-thin"
+          data-current-path={location.pathname}
         >
           {/* Group items with labels */}
           {(() => {
@@ -314,7 +315,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       <div className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}>
                         <Link
                           to={item.path}
-                          onClick={() => mobile && setMobileSidebarOpen(false)}
+                          onClick={(e) => {
+                            if (mobile) setMobileSidebarOpen(false);
+                            if (adminTheme.sidebarStableNav) {
+                              e.preventDefault();
+                              startNavTransition(() => navigate(item.path));
+                            }
+                          }}
                           className="flex items-center gap-2.5 flex-1 min-w-0"
                           title={!sidebarOpen && !mobile ? item.label : undefined}
                         >
@@ -333,7 +340,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     ) : (
                       <Link
                         to={item.path}
-                        onClick={() => mobile && setMobileSidebarOpen(false)}
+                        onClick={(e) => {
+                          if (mobile) setMobileSidebarOpen(false);
+                          if (adminTheme.sidebarStableNav) {
+                            e.preventDefault();
+                            startNavTransition(() => navigate(item.path));
+                          }
+                        }}
                         className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}
                         title={!sidebarOpen && !mobile ? item.label : undefined}
                       >
@@ -352,7 +365,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           <Link
                             key={child.path}
                             to={child.path}
-                            onClick={() => mobile && setMobileSidebarOpen(false)}
+                            onClick={(e) => {
+                              if (mobile) setMobileSidebarOpen(false);
+                              if (adminTheme.sidebarStableNav) {
+                                e.preventDefault();
+                                startNavTransition(() => navigate(child.path));
+                              }
+                            }}
                             className={`sidebar-item text-xs py-1.5 ${childActive ? 'active' : ''}`}
                           >
                             <child.icon className="w-4 h-4 shrink-0" />
