@@ -211,17 +211,17 @@ export const printResultSheet = ({ title, students, subjects, marksMap, getOvera
 </div>
 </body></html>`;
 
-  const printWindow = window.open('', '_blank');
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const printWindow = window.open(url, '_blank');
   if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    const link = printWindow.document.querySelector('link[href*="fonts.googleapis"]');
-    if (link) {
-      (link as HTMLLinkElement).onload = () => {
-        setTimeout(() => printWindow.print(), 300);
-      };
-    } else {
-      setTimeout(() => printWindow.print(), 500);
-    }
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        URL.revokeObjectURL(url);
+      }, 600);
+    };
+  } else {
+    URL.revokeObjectURL(url);
   }
 };
