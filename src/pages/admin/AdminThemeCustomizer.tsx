@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useThemeSettings, DEFAULT_THEME, FONT_OPTIONS, ThemeSettings } from '@/hooks/useThemeSettings';
+import { useThemeSettings, DEFAULT_THEME, FONT_OPTIONS, BENGALI_FONT_OPTIONS, FONT_WEIGHT_OPTIONS, ThemeSettings } from '@/hooks/useThemeSettings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -238,6 +238,7 @@ const AdminThemeCustomizer = () => {
           {/* TYPOGRAPHY TAB */}
           <TabsContent value="typography" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Display Font */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{bn ? 'শিরোনাম ফন্ট' : 'Display Font'}</CardTitle>
@@ -251,17 +252,41 @@ const AdminThemeCustomizer = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'ওজন (Weight)' : 'Weight'}</Label>
+                      <Select value={draft.fontDisplayWeight} onValueChange={v => updateDraft('fontDisplayWeight', v)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FONT_WEIGHT_OPTIONS.map(w => (
+                            <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'স্টাইল' : 'Style'}</Label>
+                      <Select value={draft.fontDisplayStyle} onValueChange={v => updateDraft('fontDisplayStyle', v as any)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">{bn ? 'সাধারণ' : 'Normal'}</SelectItem>
+                          <SelectItem value="italic">{bn ? 'ইটালিক' : 'Italic'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   <div className="p-4 border rounded-lg bg-muted/30">
-                    <p style={{ fontFamily: `"${draft.fontDisplay}", serif` }} className="text-2xl font-bold text-foreground">
+                    <p style={{ fontFamily: `"${draft.fontDisplay}", serif`, fontWeight: Number(draft.fontDisplayWeight), fontStyle: draft.fontDisplayStyle }} className="text-2xl text-foreground">
                       {bn ? 'শিরোনাম প্রিভিউ' : 'Heading Preview'}
                     </p>
-                    <p style={{ fontFamily: `"${draft.fontDisplay}", serif` }} className="text-lg text-muted-foreground">
+                    <p style={{ fontFamily: `"${draft.fontDisplay}", serif`, fontWeight: Number(draft.fontDisplayWeight), fontStyle: draft.fontDisplayStyle }} className="text-lg text-muted-foreground">
                       {bn ? 'এটি একটি নমুনা শিরোনাম' : 'This is a sample heading'}
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Body Font */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">{bn ? 'বডি ফন্ট' : 'Body Font'}</CardTitle>
@@ -275,12 +300,86 @@ const AdminThemeCustomizer = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'ওজন (Weight)' : 'Weight'}</Label>
+                      <Select value={draft.fontBodyWeight} onValueChange={v => updateDraft('fontBodyWeight', v)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FONT_WEIGHT_OPTIONS.map(w => (
+                            <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'স্টাইল' : 'Style'}</Label>
+                      <Select value={draft.fontBodyStyle} onValueChange={v => updateDraft('fontBodyStyle', v as any)}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">{bn ? 'সাধারণ' : 'Normal'}</SelectItem>
+                          <SelectItem value="italic">{bn ? 'ইটালিক' : 'Italic'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   <div className="p-4 border rounded-lg bg-muted/30">
-                    <p style={{ fontFamily: `"${draft.fontBody}", sans-serif` }} className="text-base text-foreground">
+                    <p style={{ fontFamily: `"${draft.fontBody}", sans-serif`, fontWeight: Number(draft.fontBodyWeight), fontStyle: draft.fontBodyStyle }} className="text-base text-foreground">
                       {bn ? 'বডি টেক্সট প্রিভিউ - এটি একটি নমুনা প্যারাগ্রাফ।' : 'Body text preview - This is a sample paragraph.'}
                     </p>
-                    <p style={{ fontFamily: `"${draft.fontBody}", sans-serif` }} className="text-sm text-muted-foreground mt-2">
+                    <p style={{ fontFamily: `"${draft.fontBody}", sans-serif`, fontWeight: Number(draft.fontBodyWeight), fontStyle: draft.fontBodyStyle }} className="text-sm text-muted-foreground mt-2">
                       {bn ? 'ছোট টেক্সট নমুনা' : 'Small text sample'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Bengali Font */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">{bn ? '🅱 বাংলা ফন্ট সেটিংস' : '🅱 Bengali Font Settings'}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'বাংলা ফন্ট' : 'Bengali Font'}</Label>
+                      <Select value={draft.fontBengali} onValueChange={v => updateDraft('fontBengali', v)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {BENGALI_FONT_OPTIONS.map(f => (
+                            <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'ওজন (Weight)' : 'Weight'}</Label>
+                      <Select value={draft.fontBengaliWeight} onValueChange={v => updateDraft('fontBengaliWeight', v)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {FONT_WEIGHT_OPTIONS.map(w => (
+                            <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs mb-1 block">{bn ? 'স্টাইল' : 'Style'}</Label>
+                      <Select value={draft.fontBengaliStyle} onValueChange={v => updateDraft('fontBengaliStyle', v as any)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="normal">{bn ? 'সাধারণ' : 'Normal'}</SelectItem>
+                          <SelectItem value="italic">{bn ? 'ইটালিক' : 'Italic'}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg bg-muted/30">
+                    <p style={{ fontFamily: `"${draft.fontBengali}", sans-serif`, fontWeight: Number(draft.fontBengaliWeight), fontStyle: draft.fontBengaliStyle }} className="text-2xl text-foreground">
+                      বাংলা ফন্ট প্রিভিউ
+                    </p>
+                    <p style={{ fontFamily: `"${draft.fontBengali}", sans-serif`, fontWeight: Number(draft.fontBengaliWeight), fontStyle: draft.fontBengaliStyle }} className="text-base text-muted-foreground mt-1">
+                      এটি একটি নমুনা বাংলা প্যারাগ্রাফ। আপনার পছন্দের বাংলা ফন্ট নির্বাচন করুন।
                     </p>
                   </div>
                 </CardContent>
