@@ -233,10 +233,17 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   const websiteFooterText = websiteAdmissionSettings?.admission_footer_text as string | undefined;
 
   const getRollStartForClass = useCallback((classId: string) => {
-    const idx = classes.findIndex((c: any) => c.id === classId);
+    // Sort classes globally: first by division sort_order, then by class sort_order
+    const globalSorted = [...classes].sort((a: any, b: any) => {
+      const divA = divisions.findIndex((d: any) => d.id === a.division_id);
+      const divB = divisions.findIndex((d: any) => d.id === b.division_id);
+      if (divA !== divB) return divA - divB;
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+    });
+    const idx = globalSorted.findIndex((c: any) => c.id === classId);
     const order = idx >= 0 ? idx + 1 : 1;
     return order * 1000 + 1;
-  }, [classes]);
+  }, [classes, divisions]);
 
   // Auto-generate roll number based on class + session
   const generateRollNumber = useCallback(async (classId: string, sessionId?: string) => {
