@@ -308,8 +308,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     </div>
                   )}
                   <div className="flex items-center">
-                    {hasChildren ? (
-                      <div className={`sidebar-item flex-1 ${isActive ? 'active' : ''}`}>
+                    {(() => {
+                      const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
+                      return hasChildren ? (
+                      <div className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}>
                         <Link
                           to={item.path}
                           onClick={() => mobile && setMobileSidebarOpen(false)}
@@ -332,14 +334,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       <Link
                         to={item.path}
                         onClick={() => mobile && setMobileSidebarOpen(false)}
-                        className={`sidebar-item flex-1 ${isActive ? 'active' : ''}`}
+                        className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}
                         title={!sidebarOpen && !mobile ? item.label : undefined}
                       >
                         <item.icon className="w-[18px] h-[18px] shrink-0" />
                         {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         {isActive && (sidebarOpen || mobile) && <ChevronRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-50" />}
                       </Link>
-                    )}
+                    );
+                    })()}
                   </div>
                   {hasChildren && isGroupOpen && (sidebarOpen || mobile) && (
                     <div className="ml-7 mt-0.5 space-y-0.5 border-l border-sidebar-border/50 pl-2">
