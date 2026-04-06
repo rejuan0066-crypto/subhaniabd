@@ -212,8 +212,11 @@ const AdminExamSessions = () => {
         .select('id, class_id').eq('status', 'active').eq('session_id', academicSessionId).in('class_id', selectedClassIds);
       if (studError) throw studError;
 
-      if (students && students.length > 0) {
-        const studentMappings = students.map((s: any) => ({ exam_session_id: examSession.id, student_id: s.id, class_id: s.class_id }));
+      // Filter out excluded students
+      const includedStudents = (students || []).filter((s: any) => !excludedStudentIds.includes(s.id));
+
+      if (includedStudents.length > 0) {
+        const studentMappings = includedStudents.map((s: any) => ({ exam_session_id: examSession.id, student_id: s.id, class_id: s.class_id }));
         const { error: mapError } = await supabase.from('exam_session_students').insert(studentMappings);
         if (mapError) throw mapError;
       }
