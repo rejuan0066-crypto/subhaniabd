@@ -719,7 +719,26 @@ const AdminThemeCustomizer = () => {
                       ))}
                     </div>
                   </div>
-                </CardContent>
+                  <div>
+                    <Label className="text-xs mb-1 block">{bn ? 'হেডার ফন্ট সাইজ' : 'Header Font Size'}</Label>
+                    <div className="flex gap-2">
+                      {(['small', 'medium', 'large'] as const).map(s => (
+                        <button
+                          key={s}
+                          onClick={() => updateDraft('headerFontSize', s)}
+                          className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
+                            draft.headerFontSize === s ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                          }`}
+                        >
+                          {s === 'small' ? (bn ? 'ছোট (12px)' : 'Small (12px)') : s === 'medium' ? (bn ? 'মাঝারি (13px)' : 'Medium (13px)') : (bn ? 'বড় (14px)' : 'Large (14px)')}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">{bn ? 'বেস টেক্সট সাইজ' : 'Base Text Size'}: {draft.baseFontSize}px</Label>
+                    <Slider value={[draft.baseFontSize]} min={12} max={18} step={1} onValueChange={([v]) => updateDraft('baseFontSize', v)} />
+                  </div>
               </Card>
 
               {/* Card & Glassmorphism */}
