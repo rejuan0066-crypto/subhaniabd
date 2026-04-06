@@ -186,8 +186,22 @@ const AdminExamSessions = () => {
         if (mapError) throw mapError;
       }
 
-      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র যোগ হয়েছে` : `Exam session created — ${students?.length || 0} students added`);
-      setName(''); setNameBn(''); setSelectedClassIds([]);
+      // Save selected subjects
+      if (selectedSubjectIds.length > 0) {
+        const subjectMappings = selectedSubjectIds.map(subjectId => {
+          const subj = subjects.find((s: any) => s.id === subjectId);
+          return {
+            exam_session_id: examSession.id,
+            subject_id: subjectId,
+            class_id: subj?.class_id || null,
+          };
+        });
+        const { error: subjError } = await supabase.from('exam_session_subjects').insert(subjectMappings);
+        if (subjError) throw subjError;
+      }
+
+      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${students?.length || 0} students, ${selectedSubjectIds.length} subjects`);
+      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]);
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
     } catch (err: any) { toast.error(err.message || 'Error'); }
