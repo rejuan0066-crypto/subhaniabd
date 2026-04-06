@@ -117,7 +117,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="relative z-10 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-muted/40 border-b border-border">
