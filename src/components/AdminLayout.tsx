@@ -101,8 +101,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Check if user can see a menu path
   const canAccessPath = (path: string): boolean => {
     if (isAdmin) return true;
-    if (path === '/admin' || path === '/admin/profile') return true;
-    return canView(path) || hasUserPermission(path, 'view');
+    const basePath = path.split('?')[0];
+    if (basePath === '/admin' || basePath === '/admin/profile') return true;
+    return canView(basePath) || hasUserPermission(basePath, 'view');
   };
 
   const toggleGroup = (key: string) => {
@@ -222,13 +223,16 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Build breadcrumb from current path
   const getBreadcrumbs = () => {
     const crumbs = [{ label: language === 'bn' ? 'হোম' : 'Home', path: '/admin' }];
-    const currentItem = menuItems.find(i => i.path === location.pathname);
+    const fullPath = location.pathname + location.search;
+    const currentItem = menuItems.find(i => i.path === location.pathname || i.path === fullPath);
     if (currentItem && currentItem.path !== '/admin') {
       crumbs.push({ label: currentItem.label, path: currentItem.path });
     } else {
-      // Check children
       for (const item of menuItems) {
-        const child = item.children?.find(c => c.path === location.pathname);
+        const child = item.children?.find(c => {
+          const [cPath, cSearch] = c.path.split('?');
+          return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+        });
         if (child) {
           crumbs.push({ label: item.label, path: item.path });
           crumbs.push({ label: child.label, path: child.path });
@@ -240,9 +244,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const currentPageLabel = (() => {
+    const fullPath = location.pathname + location.search;
     for (const item of menuItems) {
-      if (item.path === location.pathname) return item.label;
-      const child = item.children?.find(c => c.path === location.pathname);
+      if (item.path === location.pathname || item.path === fullPath) return item.label;
+      const child = item.children?.find(c => {
+        const [cPath, cSearch] = c.path.split('?');
+        return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+      });
       if (child) return child.label;
     }
     return t('dashboard');
@@ -291,9 +299,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           {(() => {
             let lastGroup = '';
             return menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const currentFullPath = location.pathname + location.search;
+              const isActive = location.pathname === item.path || currentFullPath === item.path;
               const hasChildren = item.children && item.children.length > 0;
-              const isGroupOpen = openGroups[item.path] || item.children?.some(c => location.pathname === c.path);
+              const isGroupOpen = openGroups[item.path] || item.children?.some(c => {
+                const [cPath, cSearch] = c.path.split('?');
+                return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+              });
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -364,7 +376,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   {hasChildren && isGroupOpen && (sidebarOpen || mobile) && (
                     <div className="ml-7 mt-0.5 space-y-0.5 border-l border-sidebar-border/50 pl-2">
                       {item.children!.map(child => {
-                        const childActive = location.pathname === child.path;
+                        const [childPathname, childSearch] = child.path.split('?');
+                        const childActive = childSearch
+                          ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                          : location.pathname === child.path;
                         return (
                           <Link
                             key={child.path}

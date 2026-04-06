@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTimeFormat, formatTimeDisplay } from '@/hooks/useTimeFormat';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,8 +53,20 @@ const AdminAttendance = () => {
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/attendance');
   const { timeFormat, setTimeFormat } = useTimeFormat();
   const fmt = (t: string) => formatTimeDisplay(t, timeFormat);
+  const [searchParams] = useSearchParams();
 
-  const [entityType, setEntityType] = useState<'student' | 'staff'>('student');
+  // Read tab from URL: ?tab=student or ?tab=staff
+  const tabParam = searchParams.get('tab');
+  const initialTab = tabParam === 'staff' ? 'staff' : tabParam === 'student' ? 'student' : undefined;
+
+  const [entityType, setEntityType] = useState<'student' | 'staff'>(initialTab || 'student');
+
+  // Sync entityType when URL tab param changes
+  useEffect(() => {
+    if (initialTab) {
+      setEntityType(initialTab);
+    }
+  }, [initialTab]);
   const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential'>('all');
   const [staffSubTab, setStaffSubTab] = useState<'fulltime' | 'duty' | 'meal'>('fulltime');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
