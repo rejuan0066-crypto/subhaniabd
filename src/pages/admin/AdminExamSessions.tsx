@@ -340,7 +340,7 @@ const AdminExamSessions = () => {
             {/* Class Selection */}
             {academicSessionId && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ' : 'Division'}</label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ নির্বাচন করুন' : 'Select Division'}</label>
                 <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassIds([]); }}>
                   <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue /></SelectTrigger>
                   <SelectContent>
