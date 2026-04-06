@@ -133,10 +133,13 @@ const AdminResults = () => {
     if (!examSession) return;
 
     // Find or create exam for this session + class
+    const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
+    const classDivisionId = selectedClassObj?.division_id;
+
     const { data: existing } = await supabase.from('exams').select('*')
       .eq('exam_session', examSession.name)
       .eq('exam_type', examSession.exam_type)
-      .eq('division_id', divisionId)
+      .eq('division_id', classDivisionId)
       .maybeSingle();
 
     if (existing) {
@@ -150,7 +153,7 @@ const AdminResults = () => {
         exam_year: parseInt(yearStr) || new Date().getFullYear(),
         exam_session: examSession.name,
         exam_type: examSession.exam_type,
-        division_id: divisionId,
+        division_id: classDivisionId,
       }).select().single();
       if (error) { toast.error(error.message); return; }
       setSelectedExamId(newExam.id);
