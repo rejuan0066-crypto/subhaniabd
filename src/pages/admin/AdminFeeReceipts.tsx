@@ -41,6 +41,15 @@ const AdminFeeReceipts = () => {
     }
   });
 
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic-sessions-receipts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const { data: payments, isLoading } = useQuery({
     queryKey: ['fee-payments-receipts', selectedYear, selectedMonth, searchRoll],
     queryFn: async () => {
@@ -212,8 +221,8 @@ const AdminFeeReceipts = () => {
                 <SelectValue placeholder={language === 'bn' ? 'বছর' : 'Year'} />
               </SelectTrigger>
               <SelectContent>
-                {[2026, 2025, 2024].map(y => (
-                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                {academicSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.name}>{language === 'bn' ? (s.name_bn || s.name) : s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
