@@ -66,6 +66,25 @@ function applyTheme(t: ThemeSettings) {
   root.style.setProperty('--sidebar-border', `${t.primaryHue} 25% ${t.sidebarDarkness + 8}%`);
   root.style.setProperty('--sidebar-ring', `${t.accentHue} ${t.accentSaturation}% ${t.accentLightness}%`);
 
+  // Sidebar hover text color
+  if (t.sidebarHoverTextColor) {
+    const hsl = hexToHsl(t.sidebarHoverTextColor);
+    if (hsl) root.style.setProperty('--sidebar-hover-foreground', hsl);
+  } else {
+    root.style.removeProperty('--sidebar-hover-foreground');
+  }
+
+  // Sidebar font size
+  const sidebarFontSizeMap: Record<string, string> = { small: '12px', medium: '13px', large: '14px' };
+  root.style.setProperty('--sidebar-font-size', sidebarFontSizeMap[t.sidebarFontSize] || '13px');
+
+  // Header font size
+  const headerFontSizeMap: Record<string, string> = { small: '12px', medium: '13px', large: '14px' };
+  root.style.setProperty('--header-font-size', headerFontSizeMap[t.headerFontSize] || '13px');
+
+  // Base font size
+  root.style.setProperty('--base-font-size', `${t.baseFontSize || 14}px`);
+  root.style.fontSize = `${t.baseFontSize || 14}px`;
   // Border radius
   root.style.setProperty('--radius', `${t.borderRadius / 16}rem`);
 
