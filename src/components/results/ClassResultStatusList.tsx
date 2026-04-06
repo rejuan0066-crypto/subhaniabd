@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, Eye, PenLine, ChevronDown, ChevronRight } from 'lucide-react';
+import { CheckCircle, Clock, Eye, PenLine, ChevronDown, ChevronRight, FileSpreadsheet, FileDown, Printer, Loader2 } from 'lucide-react';
 
 interface ClassResultStatusListProps {
   classes: any[];
   resultStatusMap: Record<string, boolean>;
   onClassClick: (classId: string) => void;
+  onExport: (classId: string, type: 'csv' | 'pdf' | 'print') => void;
+  exportingClassId: string | null;
   examSessionName: string;
 }
 
@@ -15,6 +17,8 @@ const ClassResultStatusList = ({
   classes,
   resultStatusMap,
   onClassClick,
+  onExport,
+  exportingClassId,
   examSessionName,
 }: ClassResultStatusListProps) => {
   const { language } = useLanguage();
@@ -48,6 +52,7 @@ const ClassResultStatusList = ({
       {isOpen && <div className="divide-y divide-border">
         {classes.map((cls: any) => {
           const hasResults = resultStatusMap[cls.id] || false;
+          const isExporting = exportingClassId === cls.id;
           return (
             <div
               key={cls.id}
@@ -69,15 +74,48 @@ const ClassResultStatusList = ({
                   </Badge>
                 )}
               </div>
-              <Button
-                size="sm"
-                variant={hasResults ? 'outline' : 'default'}
-                className="gap-1.5"
-                onClick={() => onClassClick(cls.id)}
-              >
-                {hasResults ? <Eye className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />}
-                {hasResults ? (bn ? 'দেখুন' : 'View') : (bn ? 'এন্ট্রি' : 'Entry')}
-              </Button>
+              <div className="flex items-center gap-1.5">
+                {hasResults && (
+                  <>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="h-8 w-8"
+                      disabled={isExporting}
+                      onClick={() => onExport(cls.id, 'csv')}
+                      title="Excel"
+                    >
+                      {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+                    </Button>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="h-8 w-8"
+                      disabled={isExporting}
+                      onClick={() => onExport(cls.id, 'pdf')}
+                      title="PDF"
+                    >
+                      <FileDown className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="h-8 w-8"
+                      disabled={isExporting}
+                      onClick={() => onExport(cls.id, 'print')}
+                      title={bn ? 'প্রিন্ট' : 'Print'}
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                    </Button>
+                  </>
+                )}
+                <Button
+                  size="sm"
+                  variant={hasResults ? 'outline' : 'default'}
+                  className="gap-1.5"
+                  onClick={() => onClassClick(cls.id)}
+                >
+                  {hasResults ? <Eye className="w-3.5 h-3.5" /> : <PenLine className="w-3.5 h-3.5" />}
+                  {hasResults ? (bn ? 'দেখুন' : 'View') : (bn ? 'এন্ট্রি' : 'Entry')}
+                </Button>
+              </div>
             </div>
           );
         })}
