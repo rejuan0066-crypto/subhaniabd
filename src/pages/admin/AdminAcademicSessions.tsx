@@ -29,7 +29,9 @@ const AdminAcademicSessions = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [name, setName] = useState('');
+  const [nameBn, setNameBn] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const bn = language === 'bn';
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ['academic-sessions'],
@@ -45,8 +47,8 @@ const AdminAcademicSessions = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!name.trim()) throw new Error(language === 'bn' ? 'সেশনের নাম দিন' : 'Enter session name');
-      const payload = { name: name.trim(), is_active: isActive };
+      if (!name.trim()) throw new Error(bn ? 'ইংরেজি নাম দিন' : 'Enter English name');
+      const payload = { name: name.trim(), name_bn: nameBn.trim(), is_active: isActive } as any;
       if (editId) {
         if (await checkApproval('edit', payload, editId, `সেশন সম্পাদনা: ${name.trim()}`)) return;
         const { error } = await supabase.from('academic_sessions').update(payload).eq('id', editId);
@@ -93,12 +95,14 @@ const AdminAcademicSessions = () => {
     setDialogOpen(false);
     setEditId(null);
     setName('');
+    setNameBn('');
     setIsActive(true);
   };
 
   const openEdit = (session: any) => {
     setEditId(session.id);
     setName(session.name);
+    setNameBn(session.name_bn || '');
     setIsActive(session.is_active);
     setDialogOpen(true);
   };
@@ -130,15 +134,17 @@ const AdminAcademicSessions = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{language === 'bn' ? 'সেশন নাম' : 'Session Name'}</TableHead>
-                  <TableHead className="text-center">{language === 'bn' ? 'সক্রিয়' : 'Active'}</TableHead>
-                  <TableHead className="text-right">{language === 'bn' ? 'অ্যাকশন' : 'Actions'}</TableHead>
+                  <TableHead>{bn ? 'বাংলা নাম' : 'Bengali Name'}</TableHead>
+                  <TableHead>{bn ? 'ইংরেজি নাম' : 'English Name'}</TableHead>
+                  <TableHead className="text-center">{bn ? 'সক্রিয়' : 'Active'}</TableHead>
+                  <TableHead className="text-right">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sessions.map((s: any) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium text-foreground">{s.name}</TableCell>
+                    <TableCell className="font-medium text-foreground">{s.name_bn || '-'}</TableCell>
+                    <TableCell className="text-foreground">{s.name}</TableCell>
                     <TableCell className="text-center">
                       <Switch
                         checked={s.is_active}
@@ -193,10 +199,21 @@ const AdminAcademicSessions = () => {
             <div className="space-y-4 py-2">
               <div>
                 <label className="text-sm font-medium text-foreground mb-1 block">
-                  {language === 'bn' ? 'সেশন নাম' : 'Session Name'}
+                  {bn ? 'বাংলা নাম' : 'Bengali Name'}
                 </label>
                 <Input
-                  placeholder={language === 'bn' ? 'যেমন: 2025, 2025-26' : 'e.g. 2025, 2025-26'}
+                  placeholder={bn ? 'যেমন: ২০২৫, ২০২৫-২৬' : 'e.g. ২০২৫, ২০২৫-২৬'}
+                  value={nameBn}
+                  onChange={(e) => setNameBn(e.target.value)}
+                  className="bg-background"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">
+                  {bn ? 'ইংরেজি নাম' : 'English Name'} *
+                </label>
+                <Input
+                  placeholder={bn ? 'যেমন: 2025, 2025-26' : 'e.g. 2025, 2025-26'}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="bg-background"
