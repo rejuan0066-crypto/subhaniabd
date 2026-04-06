@@ -581,23 +581,40 @@ const AdminThemeCustomizer = () => {
                       />
                    </div>
                   </div>
-                  <div>
-                    <Label className="text-xs">{bn ? 'হবভার টেক্সট কালার' : 'Hover Text Color'}</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <input
-                        type="color"
-                        value={draft.sidebarHoverTextColor || '#ffffff'}
-                        onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
-                        className="w-10 h-10 rounded border cursor-pointer"
-                      />
-                      <Input
-                        value={draft.sidebarHoverTextColor}
-                        onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
-                        placeholder="#ffffff"
-                        className="flex-1"
-                      />
-                    </div>
-                  </div>
+                   <div>
+                     <Label className="text-xs">{bn ? 'হবভার টেক্সট কালার' : 'Hover Text Color'}</Label>
+                     <div className="flex items-center gap-2 mt-1">
+                       <input
+                         type="color"
+                         value={draft.sidebarHoverTextColor || '#ffffff'}
+                         onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
+                         className="w-10 h-10 rounded border cursor-pointer"
+                       />
+                       <Input
+                         value={draft.sidebarHoverTextColor}
+                         onChange={e => updateDraft('sidebarHoverTextColor', e.target.value)}
+                         placeholder="#ffffff"
+                         className="flex-1"
+                       />
+                     </div>
+                   </div>
+                   <div>
+                     <Label className="text-xs">{bn ? 'হবভার ব্যাকগ্রাউন্ড কালার' : 'Hover Background Color'}</Label>
+                     <div className="flex items-center gap-2 mt-1">
+                       <input
+                         type="color"
+                         value={draft.sidebarHoverBgColor || '#2a2a3a'}
+                         onChange={e => updateDraft('sidebarHoverBgColor', e.target.value)}
+                         className="w-10 h-10 rounded border cursor-pointer"
+                       />
+                       <Input
+                         value={draft.sidebarHoverBgColor}
+                         onChange={e => updateDraft('sidebarHoverBgColor', e.target.value)}
+                         placeholder="#2a2a3a"
+                         className="flex-1"
+                       />
+                     </div>
+                   </div>
                   <div>
                     <Label className="text-xs mb-1 block">{bn ? 'সাইডবার ফন্ট সাইজ' : 'Sidebar Font Size'}</Label>
                     <div className="flex gap-2">

@@ -153,6 +153,7 @@
   }
   .sidebar-item:hover {
     color: hsl(var(--sidebar-hover-foreground, var(--sidebar-foreground)));
+    background-color: hsl(var(--sidebar-hover-bg, var(--sidebar-accent)));
   }
   .sidebar-item.active {
     @apply bg-sidebar-accent font-semibold;
