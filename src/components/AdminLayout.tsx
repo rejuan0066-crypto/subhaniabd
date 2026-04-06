@@ -42,8 +42,11 @@ const MENU_SCROLL_STORAGE_KEYS = {
 
 const getIcon = (name: string): LucideIcon => ICON_MAP[name] || FileBox;
 
+const AdminLayoutNestingContext = createContext(false);
+
 const AdminLayout = ({ children }: { children: ReactNode }) => {
   const isEmbedded = useIsEmbedded();
+  const isNestedAdminLayout = useContext(AdminLayoutNestingContext);
   const { t, language } = useLanguage();
   const { signOut, role, user } = useAuth();
   const { canView, hasUserPermission } = usePermissions();
@@ -88,8 +91,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     ...(adminTheme.headerTextColor ? { color: adminTheme.headerTextColor } : {}),
   };
 
-  // When embedded in StaffDashboard, skip the entire admin layout shell
-  if (isEmbedded) {
+  // When embedded or already inside an admin shell, render only the page content
+  if (isEmbedded || isNestedAdminLayout) {
     return <>{children}</>;
   }
 
@@ -416,65 +419,67 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   );
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {renderSidebar(false)}
-      {mobileSidebarOpen && renderSidebar(true)}
+    <AdminLayoutNestingContext.Provider value>
+      <div className="min-h-screen flex bg-background">
+        {renderSidebar(false)}
+        {mobileSidebarOpen && renderSidebar(true)}
 
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top bar */}
-        <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)' }}>
-          <div className="flex items-center gap-3">
-            <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
-              <Menu className="w-5 h-5 text-muted-foreground" />
-            </button>
-            {/* Breadcrumbs */}
-            {adminTheme.headerShowBreadcrumb && (
-              <nav className="hidden sm:flex items-center gap-1 text-sm">
-                {breadcrumbs.map((crumb, i) => (
-                  <span key={crumb.path} className="flex items-center gap-1">
-                    {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
-                    {i === breadcrumbs.length - 1 ? (
-                      <span className="text-foreground font-medium">{crumb.label}</span>
-                    ) : (
-                      <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
-                    )}
-                  </span>
-                ))}
-              </nav>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5">
-            {/* Search */}
-            {adminTheme.headerShowSearch && (
-              <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
-                <Search className="w-4 h-4 shrink-0" />
-                <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
-                <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                  Ctrl+K
-                </kbd>
-              </div>
-            )}
-            <DarkModeToggle />
-            <NotificationPanel />
-            <LanguageToggle />
-            <Link to="/" className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
-              <Globe className="w-5 h-5" />
-            </Link>
-          </div>
-        </header>
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top bar */}
+          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)' }}>
+            <div className="flex items-center gap-3">
+              <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
+                <Menu className="w-5 h-5 text-muted-foreground" />
+              </button>
+              {/* Breadcrumbs */}
+              {adminTheme.headerShowBreadcrumb && (
+                <nav className="hidden sm:flex items-center gap-1 text-sm">
+                  {breadcrumbs.map((crumb, i) => (
+                    <span key={crumb.path} className="flex items-center gap-1">
+                      {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />}
+                      {i === breadcrumbs.length - 1 ? (
+                        <span className="text-foreground font-medium">{crumb.label}</span>
+                      ) : (
+                        <Link to={crumb.path} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
+                      )}
+                    </span>
+                  ))}
+                </nav>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              {/* Search */}
+              {adminTheme.headerShowSearch && (
+                <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
+                  <Search className="w-4 h-4 shrink-0" />
+                  <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
+                  <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    Ctrl+K
+                  </kbd>
+                </div>
+              )}
+              <DarkModeToggle />
+              <NotificationPanel />
+              <LanguageToggle />
+              <Link to="/" className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
+                <Globe className="w-5 h-5" />
+              </Link>
+            </div>
+          </header>
 
-        {/* Page title */}
-        <div className="px-4 lg:px-6 pt-5 pb-2">
-          <h1 className="text-xl font-bold text-foreground">{currentPageLabel}</h1>
+          {/* Page title */}
+          <div className="px-4 lg:px-6 pt-5 pb-2">
+            <h1 className="text-xl font-bold text-foreground">{currentPageLabel}</h1>
+          </div>
+
+          {/* Content */}
+          <main className="flex-1 px-4 lg:px-6 pb-6">
+            <AdminPageWithTabs>{children}</AdminPageWithTabs>
+            <BackButton />
+          </main>
         </div>
-
-        {/* Content */}
-        <main className="flex-1 px-4 lg:px-6 pb-6">
-          <AdminPageWithTabs>{children}</AdminPageWithTabs>
-          <BackButton />
-        </main>
       </div>
-    </div>
+    </AdminLayoutNestingContext.Provider>
   );
 };
 
