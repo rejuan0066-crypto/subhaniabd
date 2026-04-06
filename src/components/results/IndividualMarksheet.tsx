@@ -331,7 +331,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
 
         {/* Summary - Colorful boxes */}
         <div className="relative z-10 p-5 border-t border-border">
-          <div className="grid grid-cols-4 gap-3 text-center">
+          <div className="grid grid-cols-5 gap-3 text-center">
             <div className="rounded-xl bg-blue-50 dark:bg-blue-950/30 p-3 border-2 border-blue-200 dark:border-blue-800">
               <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">{bn ? 'মোট নম্বর' : 'Total'}</p>
               <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{totalMarks}</p>
@@ -348,6 +348,10 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
             <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/30 p-3 border-2 border-emerald-200 dark:border-emerald-800">
               <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">GPA</p>
               <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{overall.gpa}</p>
+            </div>
+            <div className="rounded-xl bg-purple-50 dark:bg-purple-950/30 p-3 border-2 border-purple-200 dark:border-purple-800">
+              <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-1">{bn ? 'মর্যাদা' : 'Merit'}</p>
+              <p className="text-base font-extrabold text-purple-600 dark:text-purple-400">{getMorjada(overall.grade)}</p>
             </div>
           </div>
         </div>
