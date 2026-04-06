@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState, useEffect } from 'react';
-import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2, BookMarked } from 'lucide-react';
+import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2, BookMarked, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +24,8 @@ const AdminExamSessions = () => {
   const [selectedDivisionIds, setSelectedDivisionIds] = useState<string[]>([]);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
+  const [excludedStudentIds, setExcludedStudentIds] = useState<string[]>([]);
+  const [showStudentSelection, setShowStudentSelection] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   // Exam type manager state
@@ -134,6 +136,29 @@ const AdminExamSessions = () => {
     enabled: !!academicSessionId,
   });
 
+  // Fetch students for selected classes
+  const { data: classStudents = [] } = useQuery({
+    queryKey: ['students_for_exam_selection', academicSessionId, selectedClassIds],
+    queryFn: async () => {
+      if (!academicSessionId || selectedClassIds.length === 0) return [];
+      const { data, error } = await supabase.from('students')
+        .select('id, name_bn, name_en, roll_number, student_id, class_id')
+        .eq('status', 'active')
+        .eq('session_id', academicSessionId)
+        .in('class_id', selectedClassIds)
+        .order('roll_number');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!academicSessionId && selectedClassIds.length > 0,
+  });
+
+  // Reset excluded students when classes change
+  useEffect(() => {
+    setExcludedStudentIds([]);
+    setShowStudentSelection(false);
+  }, [selectedClassIds.join(',')]);
+
   const { data: examSessions = [] } = useQuery({
     queryKey: ['exam_sessions_list'],
     queryFn: async () => {
@@ -187,8 +212,11 @@ const AdminExamSessions = () => {
         .select('id, class_id').eq('status', 'active').eq('session_id', academicSessionId).in('class_id', selectedClassIds);
       if (studError) throw studError;
 
-      if (students && students.length > 0) {
-        const studentMappings = students.map((s: any) => ({ exam_session_id: examSession.id, student_id: s.id, class_id: s.class_id }));
+      // Filter out excluded students
+      const includedStudents = (students || []).filter((s: any) => !excludedStudentIds.includes(s.id));
+
+      if (includedStudents.length > 0) {
+        const studentMappings = includedStudents.map((s: any) => ({ exam_session_id: examSession.id, student_id: s.id, class_id: s.class_id }));
         const { error: mapError } = await supabase.from('exam_session_students').insert(studentMappings);
         if (mapError) throw mapError;
       }
@@ -207,8 +235,8 @@ const AdminExamSessions = () => {
         if (subjError) throw subjError;
       }
 
-      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${students?.length || 0} students, ${selectedSubjectIds.length} subjects`);
-      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]);
+      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${includedStudents.length} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${includedStudents.length} students, ${selectedSubjectIds.length} subjects`);
+      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]); setExcludedStudentIds([]); setShowStudentSelection(false);
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
     } catch (err: any) { toast.error(err.message || 'Error'); }
@@ -491,6 +519,76 @@ const AdminExamSessions = () => {
                         </p>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Student Exclusion */}
+                {selectedClassIds.length > 0 && classStudents.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <UserMinus className="w-4 h-4" />
+                        {bn ? 'ছাত্র নির্বাচন / বাদ দিন' : 'Select / Exclude Students'}
+                        {excludedStudentIds.length > 0 && (
+                          <span className="text-xs text-destructive ml-1">({bn ? `${excludedStudentIds.length} জন বাদ` : `${excludedStudentIds.length} excluded`})</span>
+                        )}
+                      </label>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowStudentSelection(!showStudentSelection)}>
+                          {showStudentSelection ? (bn ? 'লুকান' : 'Hide') : (bn ? 'দেখান' : 'Show')}
+                        </Button>
+                        {showStudentSelection && (
+                          <>
+                            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setExcludedStudentIds([])}>
+                              {bn ? 'সব রাখুন' : 'Include All'}
+                            </Button>
+                            <Button variant="outline" size="sm" className="h-7 text-xs text-destructive" onClick={() => setExcludedStudentIds(classStudents.map((s: any) => s.id))}>
+                              {bn ? 'সব বাদ' : 'Exclude All'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {showStudentSelection && (
+                      <div className="space-y-3">
+                        {selectedClassIds.map(classId => {
+                          const cls = classes.find((c: any) => c.id === classId);
+                          const clsStudents = classStudents.filter((s: any) => s.class_id === classId);
+                          if (clsStudents.length === 0) return null;
+                          const excludedInClass = clsStudents.filter((s: any) => excludedStudentIds.includes(s.id)).length;
+                          return (
+                            <div key={classId} className="border border-border rounded-lg overflow-hidden">
+                              <div className="px-3 py-2 bg-secondary/50 flex items-center justify-between">
+                                <span className="text-sm font-medium text-foreground">
+                                  {bn ? cls?.name_bn : cls?.name}
+                                  <span className="text-xs text-muted-foreground ml-2">({clsStudents.length - excludedInClass}/{clsStudents.length})</span>
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 p-2">
+                                {clsStudents.map((st: any) => {
+                                  const isExcluded = excludedStudentIds.includes(st.id);
+                                  return (
+                                    <label key={st.id} className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors text-sm ${isExcluded ? 'bg-destructive/5 border border-destructive/20 line-through opacity-60' : 'border border-border hover:border-primary/50'}`}>
+                                      <Checkbox checked={!isExcluded} onCheckedChange={() => setExcludedStudentIds(prev => isExcluded ? prev.filter(id => id !== st.id) : [...prev, st.id])} />
+                                      <span className="flex-1 truncate">
+                                        {st.roll_number && <span className="font-medium mr-1">{st.roll_number}.</span>}
+                                        {bn ? st.name_bn : (st.name_en || st.name_bn)}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">{st.student_id}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
+                      <p className="text-xs font-medium text-primary">
+                        {bn ? `মোট: ${classStudents.length} জন — অন্তর্ভুক্ত: ${classStudents.length - excludedStudentIds.length} জন — বাদ: ${excludedStudentIds.length} জন` : `Total: ${classStudents.length} — Included: ${classStudents.length - excludedStudentIds.length} — Excluded: ${excludedStudentIds.length}`}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
