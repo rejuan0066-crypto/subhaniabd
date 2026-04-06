@@ -56,7 +56,7 @@ const AdminExamSessions = () => {
   });
 
   // Filter classes by selected division
-  const filteredClasses = selectedDivisionId
+  const filteredClasses = selectedDivisionId && selectedDivisionId !== '__all__'
     ? classes.filter((c: any) => c.division_id === selectedDivisionId)
     : classes;
 
