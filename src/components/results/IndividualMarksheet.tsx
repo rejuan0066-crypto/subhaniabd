@@ -137,6 +137,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   .box-avg { background:#fefce8; color:#ca8a04; border:2px solid #fde68a; }
   .box-grade { background:${overallGC.bg}; color:${overallGC.text}; border:2px solid ${overallGC.border}; }
   .box-gpa { background:#f0fdf4; color:#16a34a; border:2px solid #bbf7d0; }
+  .box-morjada { background:#faf5ff; color:#7c3aed; border:2px solid #ddd6fe; }
   .signatures { display:flex; justify-content:space-between; margin-top:50px; padding:0 10px; }
   .sig-block { text-align:center; min-width:140px; }
   .sig-line { border-top:1.5px dashed #9ca3af; padding-top:6px; margin-top:36px; }
