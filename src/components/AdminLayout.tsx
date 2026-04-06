@@ -101,8 +101,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Check if user can see a menu path
   const canAccessPath = (path: string): boolean => {
     if (isAdmin) return true;
-    if (path === '/admin' || path === '/admin/profile') return true;
-    return canView(path) || hasUserPermission(path, 'view');
+    const basePath = path.split('?')[0];
+    if (basePath === '/admin' || basePath === '/admin/profile') return true;
+    return canView(basePath) || hasUserPermission(basePath, 'view');
   };
 
   const toggleGroup = (key: string) => {
