@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useState } from 'react';
-import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2, BookMarked } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,7 @@ const AdminExamSessions = () => {
   const [examType, setExamType] = useState('');
   const [selectedDivisionIds, setSelectedDivisionIds] = useState<string[]>([]);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+  const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
   // Exam type manager state
@@ -84,6 +85,42 @@ const AdminExamSessions = () => {
     return (a.sort_order ?? 0) - (b.sort_order ?? 0);
   });
 
+  // Fetch subjects for selected classes/divisions
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects_for_exam', selectedClassIds],
+    queryFn: async () => {
+      if (selectedClassIds.length === 0) return [];
+      const divIds = [...new Set(selectedClassIds.map(cid => {
+        const cls = classes.find((c: any) => c.id === cid);
+        return cls?.division_id;
+      }).filter(Boolean))] as string[];
+
+      // Get subjects matching selected divisions or classes
+      let query = supabase.from('subjects').select('*').eq('is_active', true);
+      const orParts: string[] = [];
+      divIds.forEach(d => orParts.push(`division_id.eq.${d}`));
+      selectedClassIds.forEach(c => orParts.push(`class_id.eq.${c}`));
+      if (orParts.length > 0) {
+        query = query.or(orParts.join(','));
+      }
+      const { data, error } = await query.order('name_bn');
+      if (error) throw error;
+      return data;
+    },
+    enabled: selectedClassIds.length > 0,
+  });
+
+  const toggleSubject = (subjectId: string) => {
+    setSelectedSubjectIds(prev => prev.includes(subjectId) ? prev.filter(id => id !== subjectId) : [...prev, subjectId]);
+  };
+
+  // Auto-select all subjects when subjects list changes
+  useEffect(() => {
+    if (subjects.length > 0 && selectedSubjectIds.length === 0) {
+      setSelectedSubjectIds(subjects.map((s: any) => s.id));
+    }
+  }, [subjects]);
+
   const { data: studentCounts = {} } = useQuery({
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
@@ -116,7 +153,12 @@ const AdminExamSessions = () => {
   });
 
   const toggleClass = (classId: string) => {
-    setSelectedClassIds(prev => prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]);
+    setSelectedClassIds(prev => {
+      const next = prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId];
+      // Reset subjects when classes change
+      setSelectedSubjectIds([]);
+      return next;
+    });
   };
 
   const handleCreate = async () => {
@@ -151,8 +193,22 @@ const AdminExamSessions = () => {
         if (mapError) throw mapError;
       }
 
-      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র যোগ হয়েছে` : `Exam session created — ${students?.length || 0} students added`);
-      setName(''); setNameBn(''); setSelectedClassIds([]);
+      // Save selected subjects
+      if (selectedSubjectIds.length > 0) {
+        const subjectMappings = selectedSubjectIds.map(subjectId => {
+          const subj = subjects.find((s: any) => s.id === subjectId);
+          return {
+            exam_session_id: examSession.id,
+            subject_id: subjectId,
+            class_id: subj?.class_id || null,
+          };
+        });
+        const { error: subjError } = await supabase.from('exam_session_subjects').insert(subjectMappings);
+        if (subjError) throw subjError;
+      }
+
+      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${students?.length || 0} students, ${selectedSubjectIds.length} subjects`);
+      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]);
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
     } catch (err: any) { toast.error(err.message || 'Error'); }
@@ -391,6 +447,50 @@ const AdminExamSessions = () => {
                     <p className="text-sm font-medium text-primary">
                       {bn ? `মোট নির্বাচিত: ${selectedClassIds.length} টি ক্লাস — ${totalSelected} জন ছাত্র` : `Total selected: ${selectedClassIds.length} classes — ${totalSelected} students`}
                     </p>
+                  </div>
+                )}
+
+                {/* Subject Selection */}
+                {selectedClassIds.length > 0 && subjects.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <BookMarked className="w-4 h-4" />
+                        {bn ? 'বিষয় নির্বাচন করুন' : 'Select Subjects'}
+                      </label>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setSelectedSubjectIds(subjects.map((s: any) => s.id))}>
+                          {bn ? 'সব নির্বাচন' : 'Select All'}
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setSelectedSubjectIds([])}>
+                          {bn ? 'সব বাদ' : 'Deselect All'}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {subjects.map((subj: any) => {
+                        const subjClass = subj.class_id ? classes.find((c: any) => c.id === subj.class_id) : null;
+                        const subjDiv = subj.division_id ? divisions.find((d: any) => d.id === subj.division_id) : null;
+                        const context = subjClass ? (bn ? subjClass.name_bn : subjClass.name) : subjDiv ? (bn ? subjDiv.name_bn : subjDiv.name) : '';
+                        return (
+                          <label key={subj.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedSubjectIds.includes(subj.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                            <Checkbox checked={selectedSubjectIds.includes(subj.id)} onCheckedChange={() => toggleSubject(subj.id)} />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-foreground">{bn ? subj.name_bn : subj.name}</span>
+                              {subj.code && <span className="text-xs text-muted-foreground ml-1.5">({subj.code})</span>}
+                              {context && <p className="text-xs text-muted-foreground">{context}</p>}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {selectedSubjectIds.length > 0 && (
+                      <div className="mt-2 p-2 rounded-lg bg-accent/50 border border-accent">
+                        <p className="text-xs font-medium text-foreground">
+                          {bn ? `${selectedSubjectIds.length} টি বিষয় নির্বাচিত` : `${selectedSubjectIds.length} subjects selected`}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

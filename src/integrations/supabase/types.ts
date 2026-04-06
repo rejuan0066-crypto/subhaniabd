@@ -752,6 +752,52 @@ export type Database = {
           },
         ]
       }
+      exam_session_subjects: {
+        Row: {
+          class_id: string | null
+          created_at: string | null
+          exam_session_id: string
+          id: string
+          subject_id: string
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string | null
+          exam_session_id: string
+          id?: string
+          subject_id: string
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string | null
+          exam_session_id?: string
+          id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_session_subjects_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_session_subjects_exam_session_id_fkey"
+            columns: ["exam_session_id"]
+            isOneToOne: false
+            referencedRelation: "exam_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_session_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_sessions: {
         Row: {
           academic_session_id: string
