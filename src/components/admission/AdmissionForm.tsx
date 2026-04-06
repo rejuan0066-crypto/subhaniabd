@@ -274,13 +274,16 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
   // Convert Bengali digits to English
   const bnToEn = (str: string) => str.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)));
 
-  // Auto-generate registration number = session first 4 digits + roll number
+  // Auto-generate registration number = divisionPrefix + session first 4 digits + roll number
   const updateRegistrationFromRoll = useCallback((sessionYear: string, rollNumber: string) => {
     if (!sessionYear || !rollNumber || isEditMode) return;
     const year = bnToEn(sessionYear.trim()).slice(0, 4);
-    const regNo = `${year}${rollNumber}`;
+    // Find division prefix from selectedDivisionId
+    const div = divisions.find((d: any) => d.id === selectedDivisionId);
+    const prefix = (div as any)?.prefix || '';
+    const regNo = prefix ? `${prefix}-${year}${rollNumber}` : `${year}${rollNumber}`;
     setForm(prev => ({ ...prev, registration_no: regNo }));
-  }, [isEditMode]);
+  }, [isEditMode, divisions, selectedDivisionId]);
 
   // Trigger roll & registration generation when class or session changes
   useEffect(() => {
