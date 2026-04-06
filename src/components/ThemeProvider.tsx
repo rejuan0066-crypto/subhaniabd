@@ -70,9 +70,36 @@ function applyTheme(t: ThemeSettings) {
   root.style.setProperty('--radius', `${t.borderRadius / 16}rem`);
 
   // Fonts
-  root.style.setProperty('--font-display', `"${t.fontDisplay}", "Noto Sans Bengali", serif`);
-  root.style.setProperty('--font-body', `"${t.fontBody}", "Noto Sans Bengali", sans-serif`);
-  document.body.style.fontFamily = `"${t.fontBody}", "Noto Sans Bengali", sans-serif`;
+  const bengaliFont = t.fontBengali || 'Noto Sans Bengali';
+  root.style.setProperty('--font-display', `"${t.fontDisplay}", "${bengaliFont}", serif`);
+  root.style.setProperty('--font-body', `"${t.fontBody}", "${bengaliFont}", sans-serif`);
+  root.style.setProperty('--font-bengali', `"${bengaliFont}", sans-serif`);
+  document.body.style.fontFamily = `"${t.fontBody}", "${bengaliFont}", sans-serif`;
+
+  // Font weights & styles
+  root.style.setProperty('--font-display-weight', t.fontDisplayWeight || '700');
+  root.style.setProperty('--font-body-weight', t.fontBodyWeight || '400');
+  root.style.setProperty('--font-bengali-weight', t.fontBengaliWeight || '400');
+  root.style.setProperty('--font-display-style', t.fontDisplayStyle || 'normal');
+  root.style.setProperty('--font-body-style', t.fontBodyStyle || 'normal');
+  root.style.setProperty('--font-bengali-style', t.fontBengaliStyle || 'normal');
+  document.body.style.fontWeight = t.fontBodyWeight || '400';
+  document.body.style.fontStyle = t.fontBodyStyle || 'normal';
+
+  // Load Bengali font dynamically
+  if (bengaliFont !== 'Noto Sans Bengali') {
+    const fontLink = document.getElementById('dynamic-bengali-font') as HTMLLinkElement;
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(bengaliFont)}:wght@300;400;500;600;700;800&display=swap`;
+    if (fontLink) {
+      fontLink.href = fontUrl;
+    } else {
+      const link = document.createElement('link');
+      link.id = 'dynamic-bengali-font';
+      link.rel = 'stylesheet';
+      link.href = fontUrl;
+      document.head.appendChild(link);
+    }
+  }
 
   // Success/warning/info derived from primary
   root.style.setProperty('--success', `${t.primaryHue} ${t.primarySaturation}% 40%`);
