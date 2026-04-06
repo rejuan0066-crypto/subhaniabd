@@ -21,7 +21,7 @@ const AdminExamSessions = () => {
   const [nameBn, setNameBn] = useState('');
   const [academicSessionId, setAcademicSessionId] = useState('');
   const [examType, setExamType] = useState('');
-  const [selectedDivisionId, setSelectedDivisionId] = useState('__all__');
+  const [selectedDivisionIds, setSelectedDivisionIds] = useState<string[]>([]);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -74,8 +74,8 @@ const AdminExamSessions = () => {
     },
   });
 
-  const filteredClasses = selectedDivisionId && selectedDivisionId !== '__all__'
-    ? classes.filter((c: any) => c.division_id === selectedDivisionId)
+  const filteredClasses = selectedDivisionIds.length > 0
+    ? classes.filter((c: any) => selectedDivisionIds.includes(c.division_id))
     : classes;
 
   const { data: studentCounts = {} } = useQuery({
@@ -341,13 +341,21 @@ const AdminExamSessions = () => {
             {academicSessionId && (
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ নির্বাচন করুন' : 'Select Division'}</label>
-                <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassIds([]); }}>
-                  <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__all__">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
-                    {divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedDivisionIds.length === 0 ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                    <Checkbox checked={selectedDivisionIds.length === 0} onCheckedChange={() => { setSelectedDivisionIds([]); setSelectedClassIds([]); }} />
+                    <span className="text-sm font-medium text-foreground">{bn ? 'সকল বিভাগ' : 'All Divisions'}</span>
+                  </label>
+                  {divisions.map((d: any) => (
+                    <label key={d.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedDivisionIds.includes(d.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                      <Checkbox checked={selectedDivisionIds.includes(d.id)} onCheckedChange={() => {
+                        setSelectedDivisionIds(prev => prev.includes(d.id) ? prev.filter(id => id !== d.id) : [...prev, d.id]);
+                        setSelectedClassIds([]);
+                      }} />
+                      <span className="text-sm font-medium text-foreground">{bn ? d.name_bn : d.name}</span>
+                    </label>
+                  ))}
+                </div>
 
                 <label className="text-sm font-medium text-muted-foreground mb-2 block mt-3">{bn ? 'ক্লাস নির্বাচন করুন' : 'Select Classes'} *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
