@@ -14,6 +14,7 @@ import { useGradingSystem } from '@/hooks/useGradingSystem';
 import IndividualMarksheet from '@/components/results/IndividualMarksheet';
 import GradingChart from '@/components/results/GradingChart';
 import { GraduationCap } from 'lucide-react';
+import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
 
 const AdminResults = () => {
   const { language } = useLanguage();
