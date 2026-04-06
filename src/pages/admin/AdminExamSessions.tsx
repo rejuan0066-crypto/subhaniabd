@@ -174,10 +174,42 @@ const AdminExamSessions = () => {
   const { data: examSessionClasses = [] } = useQuery({
     queryKey: ['exam_session_classes_all'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('exam_session_classes').select('*, classes(name, name_bn)');
+      const { data, error } = await supabase.from('exam_session_classes').select('*, classes(name, name_bn, division_id)');
       if (error) throw error;
       return data;
     },
+  });
+
+  // Fetch result counts per exam (for showing which classes have results)
+  const { data: examResultCounts = {} } = useQuery({
+    queryKey: ['exam_result_counts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('exams').select('id, exam_session, exam_type, division_id');
+      if (error) throw error;
+      
+      // For each exam, count results
+      const counts: Record<string, { examId: string; resultCount: number }> = {};
+      if (data && data.length > 0) {
+        const examIds = data.map((e: any) => e.id);
+        const { data: results, error: rErr } = await supabase
+          .from('results')
+          .select('exam_id, id')
+          .in('exam_id', examIds);
+        if (!rErr && results) {
+          const resultsByExam: Record<string, number> = {};
+          results.forEach((r: any) => {
+            resultsByExam[r.exam_id] = (resultsByExam[r.exam_id] || 0) + 1;
+          });
+          data.forEach((exam: any) => {
+            // Key: exam_session + exam_type + division_id
+            const key = `${exam.exam_session}_${exam.exam_type}_${exam.division_id}`;
+            counts[key] = { examId: exam.id, resultCount: resultsByExam[exam.id] || 0 };
+          });
+        }
+      }
+      return counts;
+    },
+    staleTime: 30 * 1000,
   });
 
   const toggleClass = (classId: string) => {
