@@ -24,6 +24,8 @@ const AdminExamSessions = () => {
   const [selectedDivisionIds, setSelectedDivisionIds] = useState<string[]>([]);
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
+  const [excludedStudentIds, setExcludedStudentIds] = useState<string[]>([]);
+  const [showStudentSelection, setShowStudentSelection] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   // Exam type manager state
