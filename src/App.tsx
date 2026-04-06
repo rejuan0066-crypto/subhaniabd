@@ -2,7 +2,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ModuleGuard from "@/components/ModuleGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AdminLayout from "@/components/AdminLayout";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +11,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DynamicFavicon from "@/components/DynamicFavicon";
-import PageLoader from "@/components/PageLoader";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
@@ -73,93 +73,104 @@ import AdminReceiptDesigner from "./pages/admin/AdminReceiptDesigner";
 import AdminExamSessions from "./pages/admin/AdminExamSessions";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
-import BackButton from "./components/BackButton";
 import RouteLoader from "./components/RouteLoader";
 
 const queryClient = new QueryClient();
 
+const AdminShell = () => (
+  <ProtectedRoute>
+    <AdminLayout>
+      <Outlet />
+    </AdminLayout>
+  </ProtectedRoute>
+);
+
 const App = () => (
   <ErrorBoundary>
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <AuthProvider>
-        <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <DynamicFavicon />
-          <BrowserRouter>
-            <RouteLoader />
-            <ScrollToTop />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/gallery" element={<Gallery />} />
-              <Route path="/notices" element={<NoticePage />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/result" element={<ResultFind />} />
-              <Route path="/student-info" element={<StudentInfoPage />} />
-              <Route path="/admission" element={<AdmissionPage />} />
-              <Route path="/donation" element={<DonationPage />} />
-              <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
-              <Route path="/posts" element={<PostsPage />} />
-              <Route path="/photo-tools" element={<PhotoToolsPage />} />
-              <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
-              <Route path="/waiting-approval" element={<WaitingApproval />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/admin/students" element={<ProtectedRoute><ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/staff" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaff /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/staff/add" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/staff/edit/:id" element={<ProtectedRoute><ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/divisions" element={<ProtectedRoute><ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/subjects" element={<ProtectedRoute><ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/results" element={<ProtectedRoute><ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/notices" element={<ProtectedRoute><ModuleGuard menuPath="/admin/notices"><AdminNotices /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/students-fees" element={<ProtectedRoute><ModuleGuard menuPath="/admin/students-fees"><AdminStudentsFees /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/website" element={<ProtectedRoute><AdminWebsite /></ProtectedRoute>} />
-              <Route path="/admin/expenses" element={<ProtectedRoute><ModuleGuard menuPath="/admin/expenses"><AdminExpenses /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/donors" element={<ProtectedRoute><ModuleGuard menuPath="/admin/donors"><AdminDonors /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/profile" element={<ProtectedRoute><AdminProfile /></ProtectedRoute>} />
-              <Route path="/admin/fee-receipts" element={<ProtectedRoute><ModuleGuard menuPath="/admin/fee-receipts"><AdminFeeReceipts /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/resign-letters" element={<ProtectedRoute><AdminResignLetters /></ProtectedRoute>} />
-              <Route path="/admin/joining-letters" element={<ProtectedRoute><AdminJoiningLetters /></ProtectedRoute>} />
-              <Route path="/admin/admission-letters" element={<ProtectedRoute><AdminAdmissionLetters /></ProtectedRoute>} />
-              <Route path="/admin/designations" element={<ProtectedRoute><AdminDesignations /></ProtectedRoute>} />
-              <Route path="/admin/form-builder" element={<ProtectedRoute><AdminFormBuilder /></ProtectedRoute>} />
-              <Route path="/admin/custom/:slug" element={<ProtectedRoute><AdminCustomFormPage /></ProtectedRoute>} />
-              <Route path="/admin/module-manager" element={<ProtectedRoute><AdminModuleManager /></ProtectedRoute>} />
-              <Route path="/admin/formula-builder" element={<ProtectedRoute><AdminFormulaBuilder /></ProtectedRoute>} />
-              <Route path="/admin/attendance" element={<ProtectedRoute><ModuleGuard menuPath="/admin/attendance"><AdminAttendance /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/validation-manager" element={<ProtectedRoute><AdminValidationManager /></ProtectedRoute>} />
-              <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
-              <Route path="/admin/permissions" element={<ProtectedRoute><AdminPermissions /></ProtectedRoute>} />
-              <Route path="/admin/theme" element={<ProtectedRoute><AdminThemeCustomizer /></ProtectedRoute>} />
-              <Route path="/admin/menu-manager" element={<ProtectedRoute><AdminMenuManager /></ProtectedRoute>} />
-              <Route path="/admin/widget-builder" element={<ProtectedRoute><AdminWidgetBuilder /></ProtectedRoute>} />
-              <Route path="/admin/backup" element={<ProtectedRoute><AdminBackup /></ProtectedRoute>} />
-              <Route path="/admin/guardian-notify" element={<ProtectedRoute><AdminGuardianNotifications /></ProtectedRoute>} />
-              <Route path="/admin/salary" element={<ProtectedRoute><ModuleGuard menuPath="/admin/salary"><AdminSalary /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/posts" element={<ProtectedRoute><AdminPosts /></ProtectedRoute>} />
-              <Route path="/admin/prayer-calendar" element={<ProtectedRoute><AdminPrayerCalendar /></ProtectedRoute>} />
-              <Route path="/admin/academic-sessions" element={<ProtectedRoute><AdminAcademicSessions /></ProtectedRoute>} />
-              <Route path="/admin/address-manager" element={<ProtectedRoute><AdminAddressManager /></ProtectedRoute>} />
-              <Route path="/admin/api-verification" element={<ProtectedRoute><AdminApiVerification /></ProtectedRoute>} />
-              <Route path="/admin/user-management" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
-              <Route path="/admin/approvals" element={<ProtectedRoute><AdminApprovals /></ProtectedRoute>} />
-              <Route path="/admin/photo-tools" element={<ProtectedRoute><AdminPhotoTools /></ProtectedRoute>} />
-              <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
-              <Route path="/admin/receipt-designer" element={<ProtectedRoute><AdminReceiptDesigner /></ProtectedRoute>} />
-              <Route path="/admin/exam-sessions" element={<ProtectedRoute><ModuleGuard menuPath="/admin/exam-sessions"><AdminExamSessions /></ModuleGuard></ProtectedRoute>} />
-              <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <DynamicFavicon />
+              <BrowserRouter>
+                <RouteLoader />
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/notices" element={<NoticePage />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/result" element={<ResultFind />} />
+                  <Route path="/student-info" element={<StudentInfoPage />} />
+                  <Route path="/admission" element={<AdmissionPage />} />
+                  <Route path="/donation" element={<DonationPage />} />
+                  <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
+                  <Route path="/posts" element={<PostsPage />} />
+                  <Route path="/photo-tools" element={<PhotoToolsPage />} />
+                  <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
+                  <Route path="/waiting-approval" element={<WaitingApproval />} />
+                  <Route path="/login" element={<Login />} />
+
+                  <Route path="/admin" element={<AdminShell />}>
+                    <Route index element={<Dashboard />} />
+                    <Route path="students" element={<ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard>} />
+                    <Route path="staff" element={<ModuleGuard menuPath="/admin/staff"><AdminStaff /></ModuleGuard>} />
+                    <Route path="staff/add" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="staff/edit/:id" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="divisions" element={<ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard>} />
+                    <Route path="subjects" element={<ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard>} />
+                    <Route path="results" element={<ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard>} />
+                    <Route path="notices" element={<ModuleGuard menuPath="/admin/notices"><AdminNotices /></ModuleGuard>} />
+                    <Route path="students-fees" element={<ModuleGuard menuPath="/admin/students-fees"><AdminStudentsFees /></ModuleGuard>} />
+                    <Route path="website" element={<AdminWebsite />} />
+                    <Route path="expenses" element={<ModuleGuard menuPath="/admin/expenses"><AdminExpenses /></ModuleGuard>} />
+                    <Route path="donors" element={<ModuleGuard menuPath="/admin/donors"><AdminDonors /></ModuleGuard>} />
+                    <Route path="profile" element={<AdminProfile />} />
+                    <Route path="fee-receipts" element={<ModuleGuard menuPath="/admin/fee-receipts"><AdminFeeReceipts /></ModuleGuard>} />
+                    <Route path="resign-letters" element={<AdminResignLetters />} />
+                    <Route path="joining-letters" element={<AdminJoiningLetters />} />
+                    <Route path="admission-letters" element={<AdminAdmissionLetters />} />
+                    <Route path="designations" element={<AdminDesignations />} />
+                    <Route path="form-builder" element={<AdminFormBuilder />} />
+                    <Route path="custom/:slug" element={<AdminCustomFormPage />} />
+                    <Route path="module-manager" element={<AdminModuleManager />} />
+                    <Route path="formula-builder" element={<AdminFormulaBuilder />} />
+                    <Route path="attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminAttendance /></ModuleGuard>} />
+                    <Route path="validation-manager" element={<AdminValidationManager />} />
+                    <Route path="reports" element={<AdminReports />} />
+                    <Route path="permissions" element={<AdminPermissions />} />
+                    <Route path="theme" element={<AdminThemeCustomizer />} />
+                    <Route path="menu-manager" element={<AdminMenuManager />} />
+                    <Route path="widget-builder" element={<AdminWidgetBuilder />} />
+                    <Route path="backup" element={<AdminBackup />} />
+                    <Route path="guardian-notify" element={<AdminGuardianNotifications />} />
+                    <Route path="salary" element={<ModuleGuard menuPath="/admin/salary"><AdminSalary /></ModuleGuard>} />
+                    <Route path="posts" element={<AdminPosts />} />
+                    <Route path="prayer-calendar" element={<AdminPrayerCalendar />} />
+                    <Route path="academic-sessions" element={<AdminAcademicSessions />} />
+                    <Route path="address-manager" element={<AdminAddressManager />} />
+                    <Route path="api-verification" element={<AdminApiVerification />} />
+                    <Route path="user-management" element={<AdminUserManagement />} />
+                    <Route path="approvals" element={<AdminApprovals />} />
+                    <Route path="photo-tools" element={<AdminPhotoTools />} />
+                    <Route path="payments" element={<AdminPayments />} />
+                    <Route path="receipt-designer" element={<AdminReceiptDesigner />} />
+                    <Route path="exam-sessions" element={<ModuleGuard menuPath="/admin/exam-sessions"><AdminExamSessions /></ModuleGuard>} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
   </ErrorBoundary>
 );
 
