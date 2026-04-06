@@ -442,6 +442,50 @@ const AdminExamSessions = () => {
                     </p>
                   </div>
                 )}
+
+                {/* Subject Selection */}
+                {selectedClassIds.length > 0 && subjects.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        <BookMarked className="w-4 h-4" />
+                        {bn ? 'বিষয় নির্বাচন করুন' : 'Select Subjects'}
+                      </label>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setSelectedSubjectIds(subjects.map((s: any) => s.id))}>
+                          {bn ? 'সব নির্বাচন' : 'Select All'}
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setSelectedSubjectIds([])}>
+                          {bn ? 'সব বাদ' : 'Deselect All'}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {subjects.map((subj: any) => {
+                        const subjClass = subj.class_id ? classes.find((c: any) => c.id === subj.class_id) : null;
+                        const subjDiv = subj.division_id ? divisions.find((d: any) => d.id === subj.division_id) : null;
+                        const context = subjClass ? (bn ? subjClass.name_bn : subjClass.name) : subjDiv ? (bn ? subjDiv.name_bn : subjDiv.name) : '';
+                        return (
+                          <label key={subj.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedSubjectIds.includes(subj.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                            <Checkbox checked={selectedSubjectIds.includes(subj.id)} onCheckedChange={() => toggleSubject(subj.id)} />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-foreground">{bn ? subj.name_bn : subj.name}</span>
+                              {subj.code && <span className="text-xs text-muted-foreground ml-1.5">({subj.code})</span>}
+                              {context && <p className="text-xs text-muted-foreground">{context}</p>}
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {selectedSubjectIds.length > 0 && (
+                      <div className="mt-2 p-2 rounded-lg bg-accent/50 border border-accent">
+                        <p className="text-xs font-medium text-foreground">
+                          {bn ? `${selectedSubjectIds.length} টি বিষয় নির্বাচিত` : `${selectedSubjectIds.length} subjects selected`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
