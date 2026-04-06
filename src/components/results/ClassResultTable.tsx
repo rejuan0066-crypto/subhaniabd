@@ -2,7 +2,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Printer, Save, Loader2, Eye } from 'lucide-react';
+import { useGradingSystem } from '@/hooks/useGradingSystem';
 
+// Legacy export for backward compat
 const getGrade = (avg: number) => {
   if (avg >= 80) return { grade: 'A+', gpa: '5.00', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' };
   if (avg >= 70) return { grade: 'A', gpa: '4.00', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10' };
@@ -27,6 +29,7 @@ interface ClassResultTableProps {
 const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet }: ClassResultTableProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { getGrade: getDynamicGrade, maxMarks, minMarks } = useGradingSystem();
 
   if (students.length === 0 || subjects.length === 0) {
     return (
@@ -75,7 +78,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
               const studentMarks = subjects.map((sub: any) => marksMap[`${st.id}_${sub.id}`] ?? 0);
               const total = studentMarks.reduce((a, b) => a + b, 0);
               const avg = subjects.length > 0 ? total / subjects.length : 0;
-              const { grade, gpa, color } = getGrade(avg);
+              const { grade, gpa, color } = getDynamicGrade(avg);
               return (
                 <tr key={st.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-3 py-2 text-muted-foreground text-xs">{idx + 1}</td>
@@ -85,7 +88,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
                     <td key={sub.id} className="px-1 py-1.5 text-center">
                       <Input
                         className="w-16 h-8 text-center bg-background text-sm mx-auto border-border/50 focus:border-primary"
-                        type="number" min={0} max={100}
+                        type="number" min={minMarks} max={maxMarks}
                         value={marksMap[`${st.id}_${sub.id}`] === 0 ? '' : (marksMap[`${st.id}_${sub.id}`] ?? '')}
                         onChange={(e) => onMarksChange(`${st.id}_${sub.id}`, parseInt(e.target.value) || 0)}
                       />
