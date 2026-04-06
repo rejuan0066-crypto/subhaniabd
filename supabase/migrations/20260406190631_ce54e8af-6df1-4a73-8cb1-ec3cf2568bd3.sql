@@ -1,0 +1,1 @@
+ALTER TABLE public.divisions ADD COLUMN prefix text DEFAULT '';
