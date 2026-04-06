@@ -114,6 +114,12 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
                 <span className="text-muted-foreground">{bn ? 'পিতার নাম' : "Father's Name"}:</span>
                 <p className="font-semibold text-foreground">{student.father_name_bn || student.father_name || '-'}</p>
               </div>
+              {student.date_of_birth && (
+                <div>
+                  <span className="text-muted-foreground">{bn ? 'জন্ম তারিখ' : 'Date of Birth'}:</span>
+                  <p className="font-semibold text-foreground">{student.date_of_birth}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
