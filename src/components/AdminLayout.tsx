@@ -223,13 +223,16 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Build breadcrumb from current path
   const getBreadcrumbs = () => {
     const crumbs = [{ label: language === 'bn' ? 'হোম' : 'Home', path: '/admin' }];
-    const currentItem = menuItems.find(i => i.path === location.pathname);
+    const fullPath = location.pathname + location.search;
+    const currentItem = menuItems.find(i => i.path === location.pathname || i.path === fullPath);
     if (currentItem && currentItem.path !== '/admin') {
       crumbs.push({ label: currentItem.label, path: currentItem.path });
     } else {
-      // Check children
       for (const item of menuItems) {
-        const child = item.children?.find(c => c.path === location.pathname);
+        const child = item.children?.find(c => {
+          const [cPath, cSearch] = c.path.split('?');
+          return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+        });
         if (child) {
           crumbs.push({ label: item.label, path: item.path });
           crumbs.push({ label: child.label, path: child.path });
@@ -241,9 +244,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const currentPageLabel = (() => {
+    const fullPath = location.pathname + location.search;
     for (const item of menuItems) {
-      if (item.path === location.pathname) return item.label;
-      const child = item.children?.find(c => c.path === location.pathname);
+      if (item.path === location.pathname || item.path === fullPath) return item.label;
+      const child = item.children?.find(c => {
+        const [cPath, cSearch] = c.path.split('?');
+        return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+      });
       if (child) return child.label;
     }
     return t('dashboard');
