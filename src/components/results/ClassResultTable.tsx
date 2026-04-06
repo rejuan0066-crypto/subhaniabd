@@ -1,8 +1,11 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Printer, Save, Loader2, Eye } from 'lucide-react';
+import { Printer, Save, Loader2, Eye, FileDown, FileSpreadsheet } from 'lucide-react';
 import { useGradingSystem } from '@/hooks/useGradingSystem';
+import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 // Legacy export for backward compat
 const getGrade = (avg: number) => {
@@ -31,6 +34,20 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
   const bn = language === 'bn';
   const { getOverallGrade, maxMarks, minMarks, passMark } = useGradingSystem();
 
+  const { data: institution } = useQuery({
+    queryKey: ['institution-default'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('name, name_en').eq('is_default', true).maybeSingle();
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const handleExport = (type: 'csv' | 'pdf') => {
+    const params = { title, students, subjects, marksMap, getOverallGrade, bn, institutionName: bn ? institution?.name : (institution?.name_en || institution?.name) };
+    type === 'csv' ? exportResultCSV(params) : exportResultPDF(params);
+  };
+
   if (students.length === 0 || subjects.length === 0) {
     return (
       <div className="card-elevated rounded-xl p-12 text-center">
@@ -44,6 +61,12 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
       <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
         <h3 className="font-display font-bold text-foreground text-lg">{title}</h3>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => handleExport('csv')} className="gap-1.5">
+            <FileSpreadsheet className="w-4 h-4" /> Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => handleExport('pdf')} className="gap-1.5">
+            <FileDown className="w-4 h-4" /> PDF
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
             <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট' : 'Print'}
           </Button>
