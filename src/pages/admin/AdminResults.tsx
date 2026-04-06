@@ -14,6 +14,7 @@ import { useGradingSystem } from '@/hooks/useGradingSystem';
 import IndividualMarksheet from '@/components/results/IndividualMarksheet';
 import GradingChart from '@/components/results/GradingChart';
 import { GraduationCap } from 'lucide-react';
+import { exportResultCSV, exportResultPDF } from '@/lib/resultExport';
 
 const AdminResults = () => {
   const { language } = useLanguage();
@@ -22,7 +23,7 @@ const AdminResults = () => {
   const [searchParams] = useSearchParams();
   const { checkApproval } = useApprovalCheck('/admin/results', 'results');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/results');
-  const { getGrade } = useGradingSystem();
+  const { getGrade, getOverallGrade } = useGradingSystem();
 
   const [searchMode, setSearchMode] = useState<'class' | 'individual'>('class');
   const [examYear, setExamYear] = useState(searchParams.get('year') || '');
@@ -33,6 +34,7 @@ const AdminResults = () => {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [marksMap, setMarksMap] = useState<Record<string, number>>({});
   const [viewingStudentId, setViewingStudentId] = useState<string | null>(null);
+  const [exportingClassId, setExportingClassId] = useState<string | null>(null);
 
   // Show class list when we have year+session from URL but no class selected
   const showClassList = !!examYear && !!examSessionId && !selectedClass && !showResults;
@@ -322,6 +324,85 @@ const AdminResults = () => {
     return `${bn ? session?.name_bn : session?.name} — ${bn ? (year?.name_bn || year?.name) : year?.name}`;
   };
 
+  const { data: institution } = useQuery({
+    queryKey: ['institution-default'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('name, name_en').eq('is_default', true).maybeSingle();
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const handleClassExport = async (classId: string, type: 'csv' | 'pdf' | 'print') => {
+    setExportingClassId(classId);
+    try {
+      const examSession = examSessions.find((es: any) => es.id === examSessionId);
+      if (!examSession) return;
+
+      const cls = examClasses.find((c: any) => c.id === classId);
+      const classDivisionId = cls?.division_id;
+
+      // Get exam
+      const { data: existing } = await supabase
+        .from('exams')
+        .select('id')
+        .eq('exam_session', examSession.name)
+        .eq('exam_type', examSession.exam_type)
+        .eq('division_id', classDivisionId)
+        .maybeSingle();
+
+      if (!existing?.id) { toast.error(bn ? 'পরীক্ষা পাওয়া যায়নি' : 'Exam not found'); return; }
+
+      // Load results
+      const { data: results } = await supabase.from('results').select('*').eq('exam_id', existing.id);
+      const exportMarksMap: Record<string, number> = {};
+      results?.forEach((r: any) => { exportMarksMap[`${r.student_id}_${r.subject_id}`] = r.marks ?? 0; });
+
+      // Load students
+      const { data: studentData } = await supabase
+        .from('exam_session_students')
+        .select('student_id, students(*)')
+        .eq('exam_session_id', examSessionId)
+        .eq('class_id', classId);
+      const exportStudents = studentData?.map((es: any) => es.students).filter(Boolean).sort((a: any, b: any) => (a.roll_number || 0) - (b.roll_number || 0)) || [];
+
+      // Load subjects
+      const { data: subjectData } = await supabase
+        .from('exam_session_subjects')
+        .select('subject_id, subjects(*)')
+        .eq('exam_session_id', examSessionId);
+      const allSubjects = subjectData?.map((es: any) => es.subjects).filter(Boolean) || [];
+      const exportSubjects = allSubjects
+        .filter((s: any) => s.division_id === classDivisionId || s.class_id === classId)
+        .sort((a: any, b: any) => (a.name_bn || '').localeCompare(b.name_bn || ''));
+
+      const year = academicSessions.find((s: any) => s.id === examYear);
+      const exportTitle = `${bn ? examSession.name_bn : examSession.name} — ${bn ? cls?.name_bn : cls?.name} — ${bn ? (year?.name_bn || year?.name) : year?.name}`;
+      const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+
+      const params = {
+        title: exportTitle,
+        students: exportStudents,
+        subjects: exportSubjects,
+        marksMap: exportMarksMap,
+        getOverallGrade,
+        bn,
+        institutionName: instName,
+      };
+
+      if (type === 'csv') exportResultCSV(params);
+      else if (type === 'pdf') exportResultPDF(params);
+      else if (type === 'print') {
+        // For print, we'll export PDF as a workaround
+        exportResultPDF(params);
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Export failed');
+    } finally {
+      setExportingClassId(null);
+    }
+  };
+
   const viewingStudent = viewingStudentId ? students.find((st: any) => st.id === viewingStudentId) : null;
 
   return (
@@ -384,6 +465,8 @@ const AdminResults = () => {
             classes={examClasses}
             resultStatusMap={classResultStatus as Record<string, boolean>}
             onClassClick={handleClassFromList}
+            onExport={handleClassExport}
+            exportingClassId={exportingClassId}
             examSessionName={getExamSessionName()}
           />
         )}
