@@ -519,6 +519,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_bn: string
+          prefix: string | null
           sort_order: number | null
           updated_at: string | null
         }
@@ -529,6 +530,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_bn: string
+          prefix?: string | null
           sort_order?: number | null
           updated_at?: string | null
         }
@@ -539,6 +541,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_bn?: string
+          prefix?: string | null
           sort_order?: number | null
           updated_at?: string | null
         }

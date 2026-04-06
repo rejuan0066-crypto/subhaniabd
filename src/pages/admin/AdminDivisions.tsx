@@ -19,12 +19,14 @@ const AdminDivisions = () => {
   const [selectedDiv, setSelectedDiv] = useState<string | null>(null);
   const [newDivName, setNewDivName] = useState('');
   const [newDivNameEn, setNewDivNameEn] = useState('');
+  const [newDivPrefix, setNewDivPrefix] = useState('');
   const [newClassName, setNewClassName] = useState('');
   const [newClassNameEn, setNewClassNameEn] = useState('');
 
   const [editingDivId, setEditingDivId] = useState<string | null>(null);
   const [editDivName, setEditDivName] = useState('');
   const [editDivNameEn, setEditDivNameEn] = useState('');
+  const [editDivPrefix, setEditDivPrefix] = useState('');
   const [editingClassId, setEditingClassId] = useState<string | null>(null);
   const [editClassName, setEditClassName] = useState('');
   const [editClassNameEn, setEditClassNameEn] = useState('');
@@ -58,7 +60,7 @@ const AdminDivisions = () => {
 
   const addDivMutation = useMutation({
     mutationFn: async () => {
-      const payload = { name_bn: newDivName.trim(), name: newDivNameEn.trim() || newDivName.trim(), sort_order: divisions.length };
+      const payload = { name_bn: newDivName.trim(), name: newDivNameEn.trim() || newDivName.trim(), prefix: newDivPrefix.trim().toUpperCase(), sort_order: divisions.length };
       if (await checkDivApproval('add', payload, undefined, `বিভাগ যোগ: ${newDivName.trim()}`)) return;
       const { error } = await supabase.from('divisions').insert(payload);
       if (error) throw error;
@@ -67,6 +69,7 @@ const AdminDivisions = () => {
       queryClient.invalidateQueries({ queryKey: ['divisions'] });
       setNewDivName('');
       setNewDivNameEn('');
+      setNewDivPrefix('');
       toast.success(language === 'bn' ? 'বিভাগ যোগ হয়েছে' : 'Division added');
     },
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
@@ -88,9 +91,9 @@ const AdminDivisions = () => {
   });
 
   const editDivMutation = useMutation({
-    mutationFn: async ({ id, name_bn, name }: { id: string; name_bn: string; name: string }) => {
-      if (await checkDivApproval('edit', { id, name_bn, name }, id, `বিভাগ সম্পাদনা: ${name_bn}`)) return;
-      const { error } = await supabase.from('divisions').update({ name_bn, name }).eq('id', id);
+    mutationFn: async ({ id, name_bn, name, prefix }: { id: string; name_bn: string; name: string; prefix: string }) => {
+      if (await checkDivApproval('edit', { id, name_bn, name, prefix }, id, `বিভাগ সম্পাদনা: ${name_bn}`)) return;
+      const { error } = await supabase.from('divisions').update({ name_bn, name, prefix: prefix.toUpperCase() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -183,6 +186,7 @@ const AdminDivisions = () => {
     setEditingDivId(d.id);
     setEditDivName(d.name_bn);
     setEditDivNameEn(d.name);
+    setEditDivPrefix((d as any).prefix || '');
   };
 
   const startEditClass = (c: any) => {
@@ -209,6 +213,7 @@ const AdminDivisions = () => {
               <div className="flex gap-2 mb-4">
                 <Input placeholder={language === 'bn' ? 'বিভাগের নাম (বাংলা)' : 'Division Name (BN)'} value={newDivName} onChange={(e) => setNewDivName(e.target.value)} className="bg-background" />
                 <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newDivNameEn} onChange={(e) => setNewDivNameEn(e.target.value)} className="bg-background" />
+                <Input placeholder={language === 'bn' ? 'প্রিফিক্স' : 'Prefix'} value={newDivPrefix} onChange={(e) => setNewDivPrefix(e.target.value)} className="bg-background w-20 shrink-0 uppercase" maxLength={5} />
                 <Button onClick={() => { if (!newDivName.trim()) { toast.error(language === 'bn' ? 'বিভাগের নাম লিখুন' : 'Enter division name'); return; } addDivMutation.mutate(); }} size="sm" className="shrink-0 btn-primary-gradient" disabled={addDivMutation.isPending}>
                   {addDivMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 </Button>
@@ -226,7 +231,8 @@ const AdminDivisions = () => {
                       <div className="flex items-center gap-2 flex-1 mr-2" onClick={e => e.stopPropagation()}>
                         <Input value={editDivName} onChange={e => setEditDivName(e.target.value)} className="bg-background h-8 text-sm" placeholder="বাংলা নাম" />
                         <Input value={editDivNameEn} onChange={e => setEditDivNameEn(e.target.value)} className="bg-background h-8 text-sm" placeholder="English" />
-                        <button onClick={() => { if (!editDivName.trim()) return; editDivMutation.mutate({ id: d.id, name_bn: editDivName.trim(), name: editDivNameEn.trim() || editDivName.trim() }); }} className="p-1.5 rounded hover:bg-success/10 text-success"><Check className="w-4 h-4" /></button>
+                        <Input value={editDivPrefix} onChange={e => setEditDivPrefix(e.target.value)} className="bg-background h-8 text-sm w-20 shrink-0 uppercase" placeholder="প্রিফিক্স" maxLength={5} />
+                        <button onClick={() => { if (!editDivName.trim()) return; editDivMutation.mutate({ id: d.id, name_bn: editDivName.trim(), name: editDivNameEn.trim() || editDivName.trim(), prefix: editDivPrefix.trim() }); }} className="p-1.5 rounded hover:bg-success/10 text-success"><Check className="w-4 h-4" /></button>
                         <button onClick={() => setEditingDivId(null)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive"><X className="w-4 h-4" /></button>
                       </div>
                     ) : (
@@ -235,7 +241,10 @@ const AdminDivisions = () => {
                           <span className="text-xs font-bold text-muted-foreground w-5 text-center">{idx + 1}</span>
                           <Layers className="w-5 h-5 text-primary" />
                           <div>
-                            <p className="text-sm font-medium text-foreground">{language === 'bn' ? d.name_bn : d.name}</p>
+                            <p className="text-sm font-medium text-foreground">
+                              {(d as any).prefix ? <span className="text-xs font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded mr-2">{(d as any).prefix}</span> : null}
+                              {language === 'bn' ? d.name_bn : d.name}
+                            </p>
                             <p className="text-xs text-muted-foreground">{d.description || ''}</p>
                           </div>
                         </div>
@@ -270,7 +279,7 @@ const AdminDivisions = () => {
             {selected ? (
               <div className="space-y-4">
                 <div className="p-3 rounded-lg bg-secondary/50 space-y-1">
-                  <p className="text-xs text-muted-foreground">{language === 'bn' ? 'বাংলা:' : 'BN:'} <span className="text-foreground font-medium">{selected.name_bn}</span> | {language === 'bn' ? 'ইংরেজি:' : 'EN:'} <span className="text-foreground font-medium">{selected.name}</span></p>
+                  <p className="text-xs text-muted-foreground">{language === 'bn' ? 'বাংলা:' : 'BN:'} <span className="text-foreground font-medium">{selected.name_bn}</span> | {language === 'bn' ? 'ইংরেজি:' : 'EN:'} <span className="text-foreground font-medium">{selected.name}</span>{(selected as any).prefix ? <> | {language === 'bn' ? 'প্রিফিক্স:' : 'Prefix:'} <span className="font-mono text-primary font-bold">{(selected as any).prefix}</span></> : null}</p>
                   <p className="text-xs"><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${selected.is_active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>{selected.is_active ? (language === 'bn' ? 'সক্রিয়' : 'Active') : (language === 'bn' ? 'নিষ্ক্রিয়' : 'Inactive')}</span></p>
                 </div>
 
