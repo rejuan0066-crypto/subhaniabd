@@ -185,6 +185,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   <div class="summary-box box-avg"><div class="label">${bn ? 'গড়' : 'Average'}</div><div class="val">${avgMarks.toFixed(1)}</div></div>
   <div class="summary-box box-grade"><div class="label">${bn ? 'গ্রেড' : 'Grade'}</div><div class="val">${overall.grade}</div></div>
   <div class="summary-box box-gpa"><div class="label">GPA</div><div class="val">${overall.gpa}</div></div>
+  <div class="summary-box box-morjada"><div class="label">${bn ? 'মর্যাদা' : 'Merit'}</div><div class="val" style="font-size:16px;">${getMorjada(overall.grade)}</div></div>
 </div>
 
 <div class="signatures">
