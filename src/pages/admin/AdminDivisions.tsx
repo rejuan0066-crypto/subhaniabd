@@ -43,20 +43,30 @@ const AdminDivisions = () => {
     },
   });
 
-  const { data: classes = [], isLoading: classesLoading } = useQuery({
-    queryKey: ['classes', selectedDiv],
+  const { data: allClasses = [], isLoading: classesLoading } = useQuery({
+    queryKey: ['all-classes'],
     queryFn: async () => {
-      if (!selectedDiv) return [];
       const { data, error } = await supabase
         .from('classes')
         .select('*')
-        .eq('division_id', selectedDiv)
         .order('sort_order', { ascending: true });
       if (error) throw error;
       return data;
     },
-    enabled: !!selectedDiv,
   });
+
+  // Classes for the selected division
+  const classes = allClasses.filter((c: any) => c.division_id === selectedDiv);
+
+  // Compute global serial offset: count classes in divisions that come before the selected one
+  const globalClassOffset = (() => {
+    if (!selectedDiv) return 0;
+    const selectedDivIndex = divisions.findIndex(d => d.id === selectedDiv);
+    if (selectedDivIndex <= 0) return 0;
+    return divisions.slice(0, selectedDivIndex).reduce((sum, div) => {
+      return sum + allClasses.filter((c: any) => c.division_id === div.id).length;
+    }, 0);
+  })();
 
   const addDivMutation = useMutation({
     mutationFn: async () => {
@@ -309,7 +319,7 @@ const AdminDivisions = () => {
                         ) : (
                           <>
                             <div className="flex items-center gap-3">
-                              <span className="text-xs font-bold text-muted-foreground w-5 text-center">{idx + 1}</span>
+                              <span className="text-xs font-bold text-muted-foreground w-5 text-center">{globalClassOffset + idx + 1}</span>
                               <BookOpen className="w-4 h-4 text-primary" />
                               <div>
                                 <p className="text-sm font-medium text-foreground">{language === 'bn' ? c.name_bn : c.name}</p>
