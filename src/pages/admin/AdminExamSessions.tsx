@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
-import { Plus, Loader2, Trash2, Users, BookOpen } from 'lucide-react';
+import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,10 +20,29 @@ const AdminExamSessions = () => {
   const [name, setName] = useState('');
   const [nameBn, setNameBn] = useState('');
   const [academicSessionId, setAcademicSessionId] = useState('');
-  const [examType, setExamType] = useState('annual');
+  const [examType, setExamType] = useState('');
   const [selectedDivisionId, setSelectedDivisionId] = useState('');
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+
+  // Exam type manager state
+  const [showTypeManager, setShowTypeManager] = useState(false);
+  const [newTypeName, setNewTypeName] = useState('');
+  const [newTypeNameBn, setNewTypeNameBn] = useState('');
+  const [newTypeKey, setNewTypeKey] = useState('');
+  const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
+  const [editTypeName, setEditTypeName] = useState('');
+  const [editTypeNameBn, setEditTypeNameBn] = useState('');
+
+  // Fetch exam types from DB
+  const { data: examTypes = [] } = useQuery({
+    queryKey: ['exam_types'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('exam_types').select('*').order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Fetch academic sessions
   const { data: academicSessions = [] } = useQuery({
@@ -55,12 +74,10 @@ const AdminExamSessions = () => {
     },
   });
 
-  // Filter classes by selected division
   const filteredClasses = selectedDivisionId && selectedDivisionId !== '__all__'
     ? classes.filter((c: any) => c.division_id === selectedDivisionId)
     : classes;
 
-  // Count students per class for selected academic session
   const { data: studentCounts = {} } = useQuery({
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
@@ -68,15 +85,12 @@ const AdminExamSessions = () => {
       const { data, error } = await supabase.from('students').select('id, class_id').eq('status', 'active').eq('session_id', academicSessionId);
       if (error) throw error;
       const counts: Record<string, number> = {};
-      data?.forEach((s: any) => {
-        if (s.class_id) counts[s.class_id] = (counts[s.class_id] || 0) + 1;
-      });
+      data?.forEach((s: any) => { if (s.class_id) counts[s.class_id] = (counts[s.class_id] || 0) + 1; });
       return counts;
     },
     enabled: !!academicSessionId,
   });
 
-  // Fetch existing exam sessions
   const { data: examSessions = [] } = useQuery({
     queryKey: ['exam_sessions_list'],
     queryFn: async () => {
@@ -86,7 +100,6 @@ const AdminExamSessions = () => {
     },
   });
 
-  // Fetch exam session classes for display
   const { data: examSessionClasses = [] } = useQuery({
     queryKey: ['exam_session_classes_all'],
     queryFn: async () => {
@@ -97,79 +110,51 @@ const AdminExamSessions = () => {
   });
 
   const toggleClass = (classId: string) => {
-    setSelectedClassIds(prev =>
-      prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]
-    );
+    setSelectedClassIds(prev => prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]);
   };
 
   const handleCreate = async () => {
-    if (!nameBn.trim() || !academicSessionId || selectedClassIds.length === 0) {
-      toast.error(bn ? 'নাম, শিক্ষাবর্ষ ও ক্লাস নির্বাচন করুন' : 'Enter name, select session & classes');
+    if (!nameBn.trim() || !academicSessionId || selectedClassIds.length === 0 || !examType) {
+      toast.error(bn ? 'নাম, শিক্ষাবর্ষ, পরীক্ষার ধরন ও ক্লাস নির্বাচন করুন' : 'Enter name, select session, exam type & classes');
       return;
     }
-
     setIsCreating(true);
     try {
-      // Create exam session
       const { data: examSession, error: esError } = await supabase.from('exam_sessions').insert({
         name: name.trim() || nameBn.trim(),
         name_bn: nameBn.trim(),
         academic_session_id: academicSessionId,
         exam_type: examType,
       }).select().single();
-
       if (esError) throw esError;
 
-      // Create class mappings
       const classMappings = selectedClassIds.map(classId => ({
-        exam_session_id: examSession.id,
-        class_id: classId,
+        exam_session_id: examSession.id, class_id: classId,
         student_count: (studentCounts as Record<string, number>)[classId] || 0,
       }));
-
       const { error: classError } = await supabase.from('exam_session_classes').insert(classMappings);
       if (classError) throw classError;
 
-      // Auto-select students for each class
       const { data: students, error: studError } = await supabase.from('students')
-        .select('id, class_id')
-        .eq('status', 'active')
-        .eq('session_id', academicSessionId)
-        .in('class_id', selectedClassIds);
-
+        .select('id, class_id').eq('status', 'active').eq('session_id', academicSessionId).in('class_id', selectedClassIds);
       if (studError) throw studError;
 
       if (students && students.length > 0) {
-        const studentMappings = students.map((s: any) => ({
-          exam_session_id: examSession.id,
-          student_id: s.id,
-          class_id: s.class_id,
-        }));
-
+        const studentMappings = students.map((s: any) => ({ exam_session_id: examSession.id, student_id: s.id, class_id: s.class_id }));
         const { error: mapError } = await supabase.from('exam_session_students').insert(studentMappings);
         if (mapError) throw mapError;
       }
 
       toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র যোগ হয়েছে` : `Exam session created — ${students?.length || 0} students added`);
-
-      // Reset form
-      setName('');
-      setNameBn('');
-      setSelectedClassIds([]);
+      setName(''); setNameBn(''); setSelectedClassIds([]);
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
-    } catch (err: any) {
-      toast.error(err.message || 'Error');
-    } finally {
-      setIsCreating(false);
-    }
+    } catch (err: any) { toast.error(err.message || 'Error'); }
+    finally { setIsCreating(false); }
   };
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('exam_sessions').delete().eq('id', id);
-      if (error) throw error;
-    },
+    mutationFn: async (id: string) => { const { error } = await supabase.from('exam_sessions').delete().eq('id', id); if (error) throw error; },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
@@ -178,15 +163,137 @@ const AdminExamSessions = () => {
     onError: (e: any) => toast.error(e.message),
   });
 
+  // --- Exam Type CRUD ---
+  const addTypeMutation = useMutation({
+    mutationFn: async () => {
+      if (!newTypeNameBn.trim() || !newTypeKey.trim()) throw new Error(bn ? 'নাম ও কী দিন' : 'Name & key required');
+      const maxSort = examTypes.length > 0 ? Math.max(...examTypes.map((t: any) => t.sort_order || 0)) : 0;
+      const { error } = await supabase.from('exam_types').insert({
+        name: newTypeName.trim() || newTypeNameBn.trim(),
+        name_bn: newTypeNameBn.trim(),
+        key: newTypeKey.trim().toLowerCase().replace(/\s+/g, '_'),
+        sort_order: maxSort + 1,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exam_types'] });
+      setNewTypeName(''); setNewTypeNameBn(''); setNewTypeKey('');
+      toast.success(bn ? 'পরীক্ষার ধরন যোগ হয়েছে' : 'Exam type added');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateTypeMutation = useMutation({
+    mutationFn: async ({ id, name, name_bn }: { id: string; name: string; name_bn: string }) => {
+      const { error } = await supabase.from('exam_types').update({ name, name_bn, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exam_types'] });
+      setEditingTypeId(null);
+      toast.success(bn ? 'আপডেট হয়েছে' : 'Updated');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteTypeMutation = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from('exam_types').delete().eq('id', id); if (error) throw error; },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exam_types'] });
+      toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const getTypeLabel = (key: string) => {
+    const t = examTypes.find((et: any) => et.key === key);
+    return t ? (bn ? t.name_bn : t.name) : key;
+  };
+
   const totalSelected = selectedClassIds.reduce((sum, cid) => sum + ((studentCounts as Record<string, number>)[cid] || 0), 0);
 
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-display font-bold text-foreground">
-          <BookOpen className="inline w-6 h-6 mr-2" />
-          {bn ? 'এক্সাম সেশন ব্যবস্থাপনা' : 'Exam Session Management'}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-display font-bold text-foreground">
+            <BookOpen className="inline w-6 h-6 mr-2" />
+            {bn ? 'এক্সাম সেশন ব্যবস্থাপনা' : 'Exam Session Management'}
+          </h1>
+          <Button variant="outline" size="sm" onClick={() => setShowTypeManager(!showTypeManager)} className="gap-1.5">
+            <Settings2 className="w-4 h-4" />
+            {bn ? 'পরীক্ষার ধরন' : 'Exam Types'}
+          </Button>
+        </div>
+
+        {/* Exam Type Manager */}
+        {showTypeManager && (
+          <div className="card-elevated p-5 space-y-4 border-l-4 border-l-primary">
+            <h3 className="font-display font-bold text-foreground">
+              <Settings2 className="inline w-4 h-4 mr-1" />
+              {bn ? 'পরীক্ষার ধরন ব্যবস্থাপনা' : 'Exam Type Management'}
+            </h3>
+
+            {/* Add new type */}
+            {canAddItem && (
+              <div className="flex flex-wrap gap-2 items-end">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</label>
+                  <Input value={newTypeNameBn} onChange={e => setNewTypeNameBn(e.target.value)} placeholder={bn ? 'যেমন: নির্বাচনী' : 'e.g. নির্বাচনী'} className="bg-background w-44" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'নাম (ইংরেজি)' : 'Name (English)'}</label>
+                  <Input value={newTypeName} onChange={e => setNewTypeName(e.target.value)} placeholder="e.g. Selective" className="bg-background w-44" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'কী' : 'Key'} *</label>
+                  <Input value={newTypeKey} onChange={e => setNewTypeKey(e.target.value)} placeholder="e.g. selective" className="bg-background w-36" />
+                </div>
+                <Button size="sm" onClick={() => addTypeMutation.mutate()} disabled={addTypeMutation.isPending} className="btn-primary-gradient">
+                  {addTypeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  {bn ? 'যোগ' : 'Add'}
+                </Button>
+              </div>
+            )}
+
+            {/* List existing types */}
+            <div className="space-y-1.5">
+              {examTypes.map((et: any) => (
+                <div key={et.id} className="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-background hover:bg-secondary/30 transition-colors">
+                  {editingTypeId === et.id ? (
+                    <>
+                      <Input value={editTypeNameBn} onChange={e => setEditTypeNameBn(e.target.value)} className="bg-background h-8 w-40 text-sm" />
+                      <Input value={editTypeName} onChange={e => setEditTypeName(e.target.value)} className="bg-background h-8 w-40 text-sm" />
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-success" onClick={() => updateTypeMutation.mutate({ id: et.id, name: editTypeName, name_bn: editTypeNameBn })}>
+                        <Check className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingTypeId(null)}>
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium text-foreground flex-1">
+                        {bn ? et.name_bn : et.name}
+                        <span className="text-xs text-muted-foreground ml-2">({et.key})</span>
+                      </span>
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => { setEditingTypeId(et.id); setEditTypeName(et.name); setEditTypeNameBn(et.name_bn); }}>
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      {canDeleteItem && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => deleteTypeMutation.mutate(et.id)}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+              {examTypes.length === 0 && <p className="text-sm text-muted-foreground text-center py-3">{bn ? 'কোনো পরীক্ষার ধরন নেই' : 'No exam types'}</p>}
+            </div>
+          </div>
+        )}
 
         {/* Create Form */}
         {canAddItem && (
@@ -208,13 +315,13 @@ const AdminExamSessions = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-1 block">{bn ? 'পরীক্ষার ধরন' : 'Exam Type'}</label>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">{bn ? 'পরীক্ষার ধরন' : 'Exam Type'} *</label>
                 <Select value={examType} onValueChange={setExamType}>
-                  <SelectTrigger className="bg-background"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'ধরন নির্বাচন' : 'Select type'} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="annual">{bn ? 'বার্ষিক' : 'Annual'}</SelectItem>
-                    <SelectItem value="half_yearly">{bn ? 'অর্ধবার্ষিক' : 'Half Yearly'}</SelectItem>
-                    <SelectItem value="pre_test">{bn ? 'প্রাক-নির্বাচনী' : 'Pre-Test'}</SelectItem>
+                    {examTypes.filter((t: any) => t.is_active).map((t: any) => (
+                      <SelectItem key={t.id} value={t.key}>{bn ? t.name_bn : t.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -233,9 +340,7 @@ const AdminExamSessions = () => {
             {/* Class Selection */}
             {academicSessionId && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  {bn ? 'বিভাগ নির্বাচন করুন' : 'Select Division'}
-                </label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ নির্বাচন করুন' : 'Select Division'}</label>
                 <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassIds([]); }}>
                   <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue placeholder={bn ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
                   <SelectContent>
@@ -244,28 +349,16 @@ const AdminExamSessions = () => {
                   </SelectContent>
                 </Select>
 
-                <label className="text-sm font-medium text-muted-foreground mb-2 block mt-3">
-                  {bn ? 'ক্লাস নির্বাচন করুন' : 'Select Classes'} *
-                </label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block mt-3">{bn ? 'ক্লাস নির্বাচন করুন' : 'Select Classes'} *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {filteredClasses.map((cls: any) => {
                     const count = (studentCounts as Record<string, number>)[cls.id] || 0;
                     const divName = cls.divisions ? (bn ? cls.divisions.name_bn : cls.divisions.name) : '';
                     return (
-                      <label
-                        key={cls.id}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                          selectedClassIds.includes(cls.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <Checkbox
-                          checked={selectedClassIds.includes(cls.id)}
-                          onCheckedChange={() => toggleClass(cls.id)}
-                        />
+                      <label key={cls.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedClassIds.includes(cls.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                        <Checkbox checked={selectedClassIds.includes(cls.id)} onCheckedChange={() => toggleClass(cls.id)} />
                         <div className="flex-1">
-                          <span className="text-sm font-medium text-foreground">
-                            {bn ? cls.name_bn : cls.name}
-                          </span>
+                          <span className="text-sm font-medium text-foreground">{bn ? cls.name_bn : cls.name}</span>
                           {divName && <span className="text-xs text-muted-foreground ml-1">({divName})</span>}
                         </div>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${count > 0 ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
@@ -275,18 +368,14 @@ const AdminExamSessions = () => {
                     );
                   })}
                   {filteredClasses.length === 0 && (
-                    <p className="text-sm text-muted-foreground col-span-full py-4 text-center">
-                      {bn ? 'এই বিভাগে কোনো ক্লাস নেই' : 'No classes in this division'}
-                    </p>
+                    <p className="text-sm text-muted-foreground col-span-full py-4 text-center">{bn ? 'এই বিভাগে কোনো ক্লাস নেই' : 'No classes in this division'}</p>
                   )}
                 </div>
 
                 {selectedClassIds.length > 0 && (
                   <div className="mt-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
                     <p className="text-sm font-medium text-primary">
-                      {bn
-                        ? `মোট নির্বাচিত: ${selectedClassIds.length} টি ক্লাস — ${totalSelected} জন ছাত্র`
-                        : `Total selected: ${selectedClassIds.length} classes — ${totalSelected} students`}
+                      {bn ? `মোট নির্বাচিত: ${selectedClassIds.length} টি ক্লাস — ${totalSelected} জন ছাত্র` : `Total selected: ${selectedClassIds.length} classes — ${totalSelected} students`}
                     </p>
                   </div>
                 )}
@@ -322,18 +411,15 @@ const AdminExamSessions = () => {
                   {examSessions.map((es: any) => {
                     const esClasses = examSessionClasses.filter((c: any) => c.exam_session_id === es.id);
                     const totalStudents = esClasses.reduce((s: number, c: any) => s + (c.student_count || 0), 0);
-                    const typeLabel = es.exam_type === 'annual' ? (bn ? 'বার্ষিক' : 'Annual') : es.exam_type === 'half_yearly' ? (bn ? 'অর্ধবার্ষিক' : 'Half Yearly') : (bn ? 'প্রাক-নির্বাচনী' : 'Pre-Test');
                     return (
                       <tr key={es.id} className="hover:bg-secondary/30">
                         <td className="px-4 py-3 font-medium text-foreground">{bn ? es.name_bn : es.name}</td>
                         <td className="px-4 py-3 text-muted-foreground">{bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}</td>
-                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{typeLabel}</span></td>
+                        <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{getTypeLabel(es.exam_type)}</span></td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex flex-wrap justify-center gap-1">
                             {esClasses.map((c: any) => (
-                              <span key={c.id} className="text-xs bg-secondary px-2 py-0.5 rounded">
-                                {bn ? c.classes?.name_bn : c.classes?.name}
-                              </span>
+                              <span key={c.id} className="text-xs bg-secondary px-2 py-0.5 rounded">{bn ? c.classes?.name_bn : c.classes?.name}</span>
                             ))}
                           </div>
                         </td>
