@@ -128,7 +128,7 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   .grade-b { background:#eff6ff; color:#2563eb; }
   .grade-a { background:#f0fdf4; color:#16a34a; }
   .grade-aplus { background:#ecfdf5; color:#059669; }
-  .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:16px 0; text-align:center; }
+  .summary { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin:16px 0; text-align:center; }
   .summary-box { border-radius:12px; padding:14px 8px; }
   .summary-box .label { font-size:10px; font-weight:700; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
   .summary-box .val { font-size:24px; font-weight:800; line-height:1.1; }
