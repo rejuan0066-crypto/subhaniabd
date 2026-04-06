@@ -85,7 +85,36 @@ const AdminExamSessions = () => {
     return (a.sort_order ?? 0) - (b.sort_order ?? 0);
   });
 
-  const { data: studentCounts = {} } = useQuery({
+  // Fetch subjects for selected classes/divisions
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects_for_exam', selectedClassIds],
+    queryFn: async () => {
+      if (selectedClassIds.length === 0) return [];
+      const divIds = [...new Set(selectedClassIds.map(cid => {
+        const cls = classes.find((c: any) => c.id === cid);
+        return cls?.division_id;
+      }).filter(Boolean))] as string[];
+
+      // Get subjects matching selected divisions or classes
+      let query = supabase.from('subjects').select('*').eq('is_active', true);
+      const orParts: string[] = [];
+      divIds.forEach(d => orParts.push(`division_id.eq.${d}`));
+      selectedClassIds.forEach(c => orParts.push(`class_id.eq.${c}`));
+      if (orParts.length > 0) {
+        query = query.or(orParts.join(','));
+      }
+      const { data, error } = await query.order('name_bn');
+      if (error) throw error;
+      return data;
+    },
+    enabled: selectedClassIds.length > 0,
+  });
+
+  const toggleSubject = (subjectId: string) => {
+    setSelectedSubjectIds(prev => prev.includes(subjectId) ? prev.filter(id => id !== subjectId) : [...prev, subjectId]);
+  };
+
+
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
       if (!academicSessionId) return {};
