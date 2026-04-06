@@ -241,7 +241,10 @@ const AdminDivisions = () => {
                           <span className="text-xs font-bold text-muted-foreground w-5 text-center">{idx + 1}</span>
                           <Layers className="w-5 h-5 text-primary" />
                           <div>
-                            <p className="text-sm font-medium text-foreground">{language === 'bn' ? d.name_bn : d.name}</p>
+                            <p className="text-sm font-medium text-foreground">
+                              {(d as any).prefix ? <span className="text-xs font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded mr-2">{(d as any).prefix}</span> : null}
+                              {language === 'bn' ? d.name_bn : d.name}
+                            </p>
                             <p className="text-xs text-muted-foreground">{d.description || ''}</p>
                           </div>
                         </div>
