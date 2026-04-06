@@ -305,9 +305,9 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
         <div className="relative z-10 p-6 border-t border-border">
           <div className="grid grid-cols-3 gap-6 mt-8 pt-4">
             {[
-              { label: bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller', key: 'examController' },
-              { label: bn ? 'শিক্ষা সচিব' : 'Education Secretary', key: 'eduSecretary' },
-              { label: bn ? 'মুহতামিম' : 'Principal', key: 'principal' },
+              { label: bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller', key: 'examController' as const },
+              { label: bn ? 'শিক্ষা সচিব' : 'Education Secretary', key: 'eduSecretary' as const },
+              { label: bn ? 'মুহতামিম' : 'Principal', key: 'principal' as const },
             ].map(sig => (
               <div key={sig.key} className="text-center space-y-2">
                 <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
@@ -315,13 +315,15 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
                 <Input
                   className="text-center text-xs h-7 border-dashed"
                   placeholder={bn ? 'নাম লিখুন' : 'Enter name'}
+                  value={sigNames[sig.key]}
+                  onChange={(e) => setSigNames(prev => ({ ...prev, [sig.key]: e.target.value }))}
                 />
               </div>
             ))}
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5">
               <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট মার্কশিট' : 'Print Marksheet'}
             </Button>
           </div>
