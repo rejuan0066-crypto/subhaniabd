@@ -86,22 +86,34 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
 
         {/* Student Info */}
         <div className="relative z-10 p-5 bg-muted/20 border-b border-border">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground">{bn ? 'নাম' : 'Name'}:</span>
-              <p className="font-semibold text-foreground">{bn ? student.name_bn : (student.name_en || student.name_bn)}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{bn ? 'রোল নম্বর' : 'Roll Number'}:</span>
-              <p className="font-semibold text-foreground">{student.roll_number || '-'}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{bn ? 'রেজিস্ট্রেশন' : 'Registration'}:</span>
-              <p className="font-semibold text-foreground">{student.registration_number || student.student_id || '-'}</p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{bn ? 'পিতার নাম' : "Father's Name"}:</span>
-              <p className="font-semibold text-foreground">{student.father_name_bn || student.father_name || '-'}</p>
+          <div className="flex gap-4">
+            {/* Student Photo */}
+            {student.photo_url && (
+              <div className="flex-shrink-0">
+                <img
+                  src={student.photo_url}
+                  alt={student.name_bn || student.name_en}
+                  className="w-20 h-24 object-cover rounded border border-border"
+                />
+              </div>
+            )}
+            <div className="flex-1 grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">{bn ? 'নাম' : 'Name'}:</span>
+                <p className="font-semibold text-foreground">{bn ? student.name_bn : (student.name_en || student.name_bn)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{bn ? 'রোল নম্বর' : 'Roll Number'}:</span>
+                <p className="font-semibold text-foreground">{student.roll_number || '-'}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{bn ? 'রেজিস্ট্রেশন' : 'Registration'}:</span>
+                <p className="font-semibold text-foreground">{student.registration_number || student.student_id || '-'}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{bn ? 'পিতার নাম' : "Father's Name"}:</span>
+                <p className="font-semibold text-foreground">{student.father_name_bn || student.father_name || '-'}</p>
+              </div>
             </div>
           </div>
         </div>
