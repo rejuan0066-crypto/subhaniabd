@@ -271,7 +271,7 @@ const AdminStudentsFees = () => {
                     <Select value={selectedSession} onValueChange={setSelectedSession}>
                       <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                       <SelectContent>
-                        {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                        {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>

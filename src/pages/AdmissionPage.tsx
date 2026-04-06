@@ -523,7 +523,7 @@ const AdmissionPage = () => {
               <SelectTrigger className={`bg-background mt-1 ${errorBorder}`}><SelectValue placeholder={bn ? 'সেশন নির্বাচন' : 'Select Session'} /></SelectTrigger>
               <SelectContent>
                 {academicSessions.map((s: any) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
