@@ -29,7 +29,7 @@ interface ClassResultTableProps {
 const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave, isSaving, title, onViewMarksheet }: ClassResultTableProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const { getGrade: getDynamicGrade, maxMarks, minMarks } = useGradingSystem();
+  const { getOverallGrade, maxMarks, minMarks, passMark } = useGradingSystem();
 
   if (students.length === 0 || subjects.length === 0) {
     return (
@@ -78,22 +78,26 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
               const studentMarks = subjects.map((sub: any) => marksMap[`${st.id}_${sub.id}`] ?? 0);
               const total = studentMarks.reduce((a, b) => a + b, 0);
               const avg = subjects.length > 0 ? total / subjects.length : 0;
-              const { grade, gpa, color } = getDynamicGrade(avg);
+              const { grade, gpa, color, hasFail } = getOverallGrade(studentMarks);
               return (
                 <tr key={st.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-3 py-2 text-muted-foreground text-xs">{idx + 1}</td>
                   <td className="px-3 py-2 font-medium text-foreground">{st.roll_number || '-'}</td>
                   <td className="px-3 py-2 text-foreground">{bn ? st.name_bn : (st.name_en || st.name_bn)}</td>
-                  {subjects.map((sub: any) => (
-                    <td key={sub.id} className="px-1 py-1.5 text-center">
-                      <Input
-                        className="w-16 h-8 text-center bg-background text-sm mx-auto border-border/50 focus:border-primary"
-                        type="number" min={minMarks} max={maxMarks}
-                        value={marksMap[`${st.id}_${sub.id}`] === 0 ? '' : (marksMap[`${st.id}_${sub.id}`] ?? '')}
-                        onChange={(e) => onMarksChange(`${st.id}_${sub.id}`, parseInt(e.target.value) || 0)}
-                      />
-                    </td>
-                  ))}
+                  {subjects.map((sub: any) => {
+                    const mark = marksMap[`${st.id}_${sub.id}`] ?? 0;
+                    const isFail = mark < passMark && mark > 0;
+                    return (
+                      <td key={sub.id} className="px-1 py-1.5 text-center">
+                        <Input
+                          className={`w-16 h-8 text-center bg-background text-sm mx-auto focus:border-primary ${isFail ? 'border-destructive text-destructive' : 'border-border/50'}`}
+                          type="number" min={minMarks} max={maxMarks}
+                          value={mark === 0 ? '' : mark}
+                          onChange={(e) => onMarksChange(`${st.id}_${sub.id}`, parseInt(e.target.value) || 0)}
+                        />
+                      </td>
+                    );
+                  })}
                   <td className="px-3 py-2 text-center font-bold text-foreground">{total}</td>
                   <td className="px-3 py-2 text-center text-muted-foreground">{avg.toFixed(1)}</td>
                   <td className="px-3 py-2 text-center">
