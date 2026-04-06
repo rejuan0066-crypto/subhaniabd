@@ -35,6 +35,14 @@ export interface ThemeSettings {
   cardGlassBlur: number;
   cardGlassOpacity: number;
   cardBorderStyle: 'none' | 'subtle' | 'solid' | 'accent';
+  // Bengali & Font Style
+  fontBengali: string;
+  fontDisplayWeight: string;
+  fontBodyWeight: string;
+  fontDisplayStyle: 'normal' | 'italic';
+  fontBodyStyle: 'normal' | 'italic';
+  fontBengaliWeight: string;
+  fontBengaliStyle: 'normal' | 'italic';
 }
 
 export const DEFAULT_THEME: ThemeSettings = {
@@ -69,6 +77,13 @@ export const DEFAULT_THEME: ThemeSettings = {
   cardGlassBlur: 8,
   cardGlassOpacity: 80,
   cardBorderStyle: 'subtle',
+  fontBengali: 'Noto Sans Bengali',
+  fontDisplayWeight: '700',
+  fontBodyWeight: '400',
+  fontDisplayStyle: 'normal',
+  fontBodyStyle: 'normal',
+  fontBengaliWeight: '400',
+  fontBengaliStyle: 'normal',
 };
 
 export const FONT_OPTIONS = [
@@ -80,6 +95,25 @@ export const FONT_OPTIONS = [
   { value: 'Roboto', label: 'Roboto' },
   { value: 'Poppins', label: 'Poppins' },
   { value: 'Lora', label: 'Lora' },
+];
+
+export const BENGALI_FONT_OPTIONS = [
+  { value: 'Noto Sans Bengali', label: 'নোটো সেন্স বাংলা (Noto Sans Bengali)' },
+  { value: 'Hind Siliguri', label: 'হিন্দ শিলিগুড়ি (Hind Siliguri)' },
+  { value: 'Baloo Da 2', label: 'বালু দা ২ (Baloo Da 2)' },
+  { value: 'Galada', label: 'গালাদা (Galada)' },
+  { value: 'Anek Bangla', label: 'অনেক বাংলা (Anek Bangla)' },
+  { value: 'Tiro Bangla', label: 'তিরো বাংলা (Tiro Bangla)' },
+  { value: 'Noto Serif Bengali', label: 'নোটো সেরিফ বাংলা (Noto Serif Bengali)' },
+];
+
+export const FONT_WEIGHT_OPTIONS = [
+  { value: '300', label: 'Light (৩০০)' },
+  { value: '400', label: 'Regular (৪০০)' },
+  { value: '500', label: 'Medium (৫০০)' },
+  { value: '600', label: 'Semi Bold (৬০০)' },
+  { value: '700', label: 'Bold (৭০০)' },
+  { value: '800', label: 'Extra Bold (৮০০)' },
 ];
 
 export const useThemeSettings = () => {
