@@ -74,6 +74,14 @@ function applyTheme(t: ThemeSettings) {
     root.style.removeProperty('--sidebar-hover-foreground');
   }
 
+  // Sidebar hover background color
+  if (t.sidebarHoverBgColor) {
+    const hsl = hexToHsl(t.sidebarHoverBgColor);
+    if (hsl) root.style.setProperty('--sidebar-hover-bg', hsl);
+  } else {
+    root.style.removeProperty('--sidebar-hover-bg');
+  }
+
   // Sidebar font size
   const sidebarFontSizeMap: Record<string, string> = { small: '12px', medium: '13px', large: '14px' };
   root.style.setProperty('--sidebar-font-size', sidebarFontSizeMap[t.sidebarFontSize] || '13px');

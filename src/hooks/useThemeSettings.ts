@@ -45,6 +45,7 @@ export interface ThemeSettings {
   fontBengaliStyle: 'normal' | 'italic';
   // Extended style options
   sidebarHoverTextColor: string;
+  sidebarHoverBgColor: string;
   sidebarFontSize: 'small' | 'medium' | 'large';
   headerFontSize: 'small' | 'medium' | 'large';
   baseFontSize: number;
@@ -90,6 +91,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   fontBengaliWeight: '400',
   fontBengaliStyle: 'normal',
   sidebarHoverTextColor: '',
+  sidebarHoverBgColor: '',
   sidebarFontSize: 'medium',
   headerFontSize: 'medium',
   baseFontSize: 14,
