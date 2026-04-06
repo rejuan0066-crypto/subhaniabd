@@ -21,7 +21,7 @@ const AdminExamSessions = () => {
   const [nameBn, setNameBn] = useState('');
   const [academicSessionId, setAcademicSessionId] = useState('');
   const [examType, setExamType] = useState('');
-  const [selectedDivisionId, setSelectedDivisionId] = useState('');
+  const [selectedDivisionId, setSelectedDivisionId] = useState('__all__');
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -340,9 +340,9 @@ const AdminExamSessions = () => {
             {/* Class Selection */}
             {academicSessionId && (
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ নির্বাচন করুন' : 'Select Division'}</label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">{bn ? 'বিভাগ' : 'Division'}</label>
                 <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassIds([]); }}>
-                  <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue placeholder={bn ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
+                  <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__all__">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
                     {divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
