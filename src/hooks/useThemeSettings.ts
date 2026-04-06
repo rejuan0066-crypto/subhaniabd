@@ -46,6 +46,8 @@ export interface ThemeSettings {
   // Extended style options
   sidebarHoverTextColor: string;
   sidebarHoverBgColor: string;
+  sidebarActiveBgColor: string;
+  sidebarClickEffect: 'none' | 'scale' | 'ripple' | 'glow' | 'slide';
   sidebarFontSize: 'small' | 'medium' | 'large';
   headerFontSize: 'small' | 'medium' | 'large';
   baseFontSize: number;
@@ -92,6 +94,8 @@ export const DEFAULT_THEME: ThemeSettings = {
   fontBengaliStyle: 'normal',
   sidebarHoverTextColor: '',
   sidebarHoverBgColor: '',
+  sidebarActiveBgColor: '',
+  sidebarClickEffect: 'scale',
   sidebarFontSize: 'medium',
   headerFontSize: 'medium',
   baseFontSize: 14,

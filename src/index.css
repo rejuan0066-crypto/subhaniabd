@@ -156,8 +156,36 @@
     background-color: hsl(var(--sidebar-hover-bg, var(--sidebar-accent)));
   }
   .sidebar-item.active {
-    @apply bg-sidebar-accent font-semibold;
+    @apply font-semibold;
     color: hsl(var(--sidebar-primary));
+    background-color: hsl(var(--sidebar-active-bg, var(--sidebar-accent)));
+  }
+  .sidebar-item:active {
+    transition-duration: 80ms;
+  }
+  .sidebar-item.click-scale:active {
+    transform: scale(0.96);
+  }
+  .sidebar-item.click-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  .sidebar-item.click-ripple::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), hsl(var(--sidebar-primary) / 0.25) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .sidebar-item.click-ripple:active::after {
+    opacity: 1;
+  }
+  .sidebar-item.click-glow:active {
+    box-shadow: 0 0 12px 2px hsl(var(--sidebar-primary) / 0.4);
+  }
+  .sidebar-item.click-slide:active {
+    transform: translateX(4px);
   }
   .sidebar-group-label {
     @apply font-semibold uppercase tracking-wider px-3 py-2;

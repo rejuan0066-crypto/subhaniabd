@@ -82,6 +82,17 @@ function applyTheme(t: ThemeSettings) {
     root.style.removeProperty('--sidebar-hover-bg');
   }
 
+  // Sidebar active/click background color
+  if (t.sidebarActiveBgColor) {
+    const hsl = hexToHsl(t.sidebarActiveBgColor);
+    if (hsl) root.style.setProperty('--sidebar-active-bg', hsl);
+  } else {
+    root.style.removeProperty('--sidebar-active-bg');
+  }
+
+  // Sidebar click effect
+  root.style.setProperty('--sidebar-click-effect', t.sidebarClickEffect || 'scale');
+
   // Sidebar font size
   const sidebarFontSizeMap: Record<string, string> = { small: '12px', medium: '13px', large: '14px' };
   root.style.setProperty('--sidebar-font-size', sidebarFontSizeMap[t.sidebarFontSize] || '13px');
