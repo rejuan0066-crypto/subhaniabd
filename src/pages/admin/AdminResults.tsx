@@ -327,7 +327,7 @@ const AdminResults = () => {
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
     queryFn: async () => {
-      const { data } = await supabase.from('institutions').select('name, name_en').eq('is_default', true).maybeSingle();
+      const { data } = await supabase.from('institutions').select('name, name_en, logo_url, address, phone').eq('is_default', true).maybeSingle();
       return data;
     },
     staleTime: 10 * 60 * 1000,
@@ -388,6 +388,9 @@ const AdminResults = () => {
         getOverallGrade,
         bn,
         institutionName: instName,
+        institutionLogo: institution?.logo_url || undefined,
+        institutionAddress: institution?.address || undefined,
+        institutionPhone: institution?.phone || undefined,
       };
 
       if (type === 'csv') exportResultCSV(params);
