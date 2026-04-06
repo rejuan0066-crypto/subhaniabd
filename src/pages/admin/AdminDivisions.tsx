@@ -138,7 +138,7 @@ const AdminDivisions = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes', selectedDiv] });
+      queryClient.invalidateQueries({ queryKey: ['all-classes'] });
       setNewClassName('');
       setNewClassNameEn('');
       toast.success(language === 'bn' ? 'ক্লাস যোগ হয়েছে' : 'Class added');
@@ -154,7 +154,7 @@ const AdminDivisions = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes', selectedDiv] });
+      queryClient.invalidateQueries({ queryKey: ['all-classes'] });
       toast.success(language === 'bn' ? 'ক্লাস মুছে ফেলা হয়েছে' : 'Class deleted');
     },
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
@@ -167,7 +167,7 @@ const AdminDivisions = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['classes', selectedDiv] });
+      queryClient.invalidateQueries({ queryKey: ['all-classes'] });
       setEditingClassId(null);
       toast.success(language === 'bn' ? 'শ্রেণী আপডেট হয়েছে' : 'Class updated');
     },
@@ -186,7 +186,7 @@ const AdminDivisions = () => {
         supabase.from('classes').update({ sort_order: current.sort_order ?? idx }).eq('id', swap.id),
       ]);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['classes', selectedDiv] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['all-classes'] }),
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
   });
 
