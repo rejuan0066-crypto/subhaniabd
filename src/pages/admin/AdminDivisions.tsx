@@ -60,7 +60,7 @@ const AdminDivisions = () => {
 
   const addDivMutation = useMutation({
     mutationFn: async () => {
-      const payload = { name_bn: newDivName.trim(), name: newDivNameEn.trim() || newDivName.trim(), sort_order: divisions.length };
+      const payload = { name_bn: newDivName.trim(), name: newDivNameEn.trim() || newDivName.trim(), prefix: newDivPrefix.trim().toUpperCase(), sort_order: divisions.length };
       if (await checkDivApproval('add', payload, undefined, `বিভাগ যোগ: ${newDivName.trim()}`)) return;
       const { error } = await supabase.from('divisions').insert(payload);
       if (error) throw error;
