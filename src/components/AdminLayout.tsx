@@ -55,6 +55,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [, startNavTransition] = useTransition();
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
 
   // Apply default theme mode from settings
