@@ -1,6 +1,6 @@
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,6 +32,19 @@ const AdminResults = () => {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [marksMap, setMarksMap] = useState<Record<string, number>>({});
   const [viewingStudentId, setViewingStudentId] = useState<string | null>(null);
+
+  const loadResultsForExam = async (examId: string) => {
+    const { data, error } = await supabase.from('results').select('*').eq('exam_id', examId);
+    if (error) throw error;
+
+    const map: Record<string, number> = {};
+    data?.forEach((result: any) => {
+      map[`${result.student_id}_${result.subject_id}`] = result.marks ?? 0;
+    });
+    setMarksMap(map);
+
+    return data || [];
+  };
 
   // Fetch academic sessions
   const { data: academicSessions = [] } = useQuery({
@@ -69,23 +82,19 @@ const AdminResults = () => {
   const { data: subjects = [] } = useQuery({
     queryKey: ['exam-session-subjects', examSessionId, selectedClass],
     queryFn: async () => {
-      // Get subjects linked to this exam session
       const { data, error } = await supabase
         .from('exam_session_subjects')
         .select('subject_id, subjects(*)')
         .eq('exam_session_id', examSessionId);
       if (error) throw error;
-      
-      // Filter: include subjects that match the selected class's division or class_id
+
       const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
       const divId = selectedClassObj?.division_id;
-      
       const allSubjects = data?.map((es: any) => es.subjects).filter(Boolean) || [];
-      
-      // Filter subjects relevant to selected class (by division_id or class_id match)
-      return allSubjects.filter((s: any) => 
-        s.division_id === divId || s.class_id === selectedClass
-      ).sort((a: any, b: any) => (a.name_bn || '').localeCompare(b.name_bn || ''));
+
+      return allSubjects
+        .filter((s: any) => s.division_id === divId || s.class_id === selectedClass)
+        .sort((a: any, b: any) => (a.name_bn || '').localeCompare(b.name_bn || ''));
     },
     enabled: !!examSessionId && !!selectedClass && examClasses.length > 0,
   });
@@ -105,21 +114,6 @@ const AdminResults = () => {
     enabled: !!examSessionId && !!selectedClass,
   });
 
-  // Fetch results for exam
-  useQuery({
-    queryKey: ['results', selectedExamId],
-    queryFn: async () => {
-      if (!selectedExamId) return [];
-      const { data, error } = await supabase.from('results').select('*').eq('exam_id', selectedExamId);
-      if (error) throw error;
-      const map: Record<string, number> = {};
-      data?.forEach((r: any) => { map[`${r.student_id}_${r.subject_id}`] = r.marks ?? 0; });
-      setMarksMap(map);
-      return data;
-    },
-    enabled: !!selectedExamId,
-  });
-
   const handleSearch = async () => {
     if (!examYear || !examSessionId || !selectedClass) {
       toast.error(bn ? 'শিক্ষাবর্ষ, সেশন ও ক্লাস নির্বাচন করুন' : 'Select year, session and class');
@@ -131,23 +125,28 @@ const AdminResults = () => {
       return;
     }
 
-    // Get exam session details
     const examSession = examSessions.find((es: any) => es.id === examSessionId);
     if (!examSession) return;
 
-    // Find or create exam for this session + class
     const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
     const classDivisionId = selectedClassObj?.division_id;
 
-    const { data: existing } = await supabase.from('exams').select('*')
+    const { data: existing, error: existingError } = await supabase
+      .from('exams')
+      .select('*')
       .eq('exam_session', examSession.name)
       .eq('exam_type', examSession.exam_type)
       .eq('division_id', classDivisionId)
       .maybeSingle();
 
-    if (existing) {
-      setSelectedExamId(existing.id);
-    } else {
+    if (existingError) {
+      toast.error(existingError.message);
+      return;
+    }
+
+    let examId = existing?.id;
+
+    if (!examId) {
       const academicSession = academicSessions.find((s: any) => s.id === examYear);
       const yearStr = academicSession?.name || '';
       const { data: newExam, error } = await supabase.from('exams').insert({
@@ -158,11 +157,23 @@ const AdminResults = () => {
         exam_type: examSession.exam_type,
         division_id: classDivisionId,
       }).select().single();
-      if (error) { toast.error(error.message); return; }
-      setSelectedExamId(newExam.id);
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      examId = newExam.id;
     }
 
-    // For individual search, find student
+    try {
+      setSelectedExamId(examId);
+      await loadResultsForExam(examId);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to load saved results');
+      return;
+    }
+
     if (searchMode === 'individual') {
       const found = students.find((st: any) =>
         String(st.roll_number) === rollNumber.trim() ||
@@ -194,8 +205,11 @@ const AdminResults = () => {
       const { error } = await supabase.from('results').upsert(upserts, { onConflict: 'exam_id,student_id,subject_id' });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['results'] });
+      if (selectedExamId) {
+        await loadResultsForExam(selectedExamId);
+      }
       toast.success(bn ? 'ফলাফল সংরক্ষিত হয়েছে' : 'Results saved');
     },
     onError: (e: any) => toast.error(e.message || 'Error'),
@@ -213,7 +227,6 @@ const AdminResults = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-primary/10">
             <GraduationCap className="w-6 h-6 text-primary" />
@@ -224,16 +237,39 @@ const AdminResults = () => {
           </div>
         </div>
 
-        {/* Search Filters */}
         <ResultSearchFilters
           searchMode={searchMode}
-          onSearchModeChange={(m) => { setSearchMode(m); setShowResults(false); setViewingStudentId(null); }}
+          onSearchModeChange={(m) => {
+            setSearchMode(m);
+            setShowResults(false);
+            setSelectedExamId(null);
+            setMarksMap({});
+            setViewingStudentId(null);
+          }}
           examYear={examYear}
-          onExamYearChange={(v) => { setExamYear(v); setExamSessionId(''); setSelectedClass(''); setShowResults(false); }}
+          onExamYearChange={(v) => {
+            setExamYear(v);
+            setExamSessionId('');
+            setSelectedClass('');
+            setSelectedExamId(null);
+            setMarksMap({});
+            setShowResults(false);
+          }}
           examSession={examSessionId}
-          onExamSessionChange={(v) => { setExamSessionId(v); setSelectedClass(''); setShowResults(false); }}
+          onExamSessionChange={(v) => {
+            setExamSessionId(v);
+            setSelectedClass('');
+            setSelectedExamId(null);
+            setMarksMap({});
+            setShowResults(false);
+          }}
           selectedClass={selectedClass}
-          onClassChange={(v) => { setSelectedClass(v); setShowResults(false); }}
+          onClassChange={(v) => {
+            setSelectedClass(v);
+            setSelectedExamId(null);
+            setMarksMap({});
+            setShowResults(false);
+          }}
           rollNumber={rollNumber}
           onRollNumberChange={setRollNumber}
           academicSessions={academicSessions}
@@ -242,10 +278,8 @@ const AdminResults = () => {
           onSearch={handleSearch}
         />
 
-        {/* Grading Chart */}
         {showResults && <GradingChart />}
 
-        {/* Results */}
         {showResults && viewingStudent ? (
           <IndividualMarksheet
             student={viewingStudent}
@@ -264,7 +298,11 @@ const AdminResults = () => {
             isSaving={saveMutation.isPending}
             title={getExamTitle()}
             onViewMarksheet={(id) => setViewingStudentId(id)}
-            onClose={() => { setShowResults(false); setMarksMap({}); }}
+            onClose={() => {
+              setShowResults(false);
+              setSelectedExamId(null);
+              setMarksMap({});
+            }}
           />
         ) : null}
       </div>
