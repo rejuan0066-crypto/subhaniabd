@@ -18,6 +18,7 @@ interface IndividualMarksheetProps {
 const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }: IndividualMarksheetProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const [sigNames, setSigNames] = useState({ examController: '', eduSecretary: '', principal: '' });
 
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
@@ -39,6 +40,127 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
   const overall = getGrade(avgMarks);
 
   const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+  const studentName = bn ? student.name_bn : (student.name_en || student.name_bn);
+
+  const handlePrint = () => {
+    const subjectRows = subjectResults.map((r, idx) => `
+      <tr>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:12px;">${idx + 1}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;font-size:12px;">${bn ? r.subject.name_bn : r.subject.name}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:12px;">100</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:12px;font-weight:600;">${r.marks}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:12px;font-weight:600;">${r.grade}</td>
+        <td style="padding:6px 8px;border:1px solid #ddd;text-align:center;font-size:12px;font-weight:600;">${r.gpa}</td>
+      </tr>
+    `).join('');
+
+    const photoHtml = student.photo_url
+      ? `<img src="${student.photo_url}" style="width:80px;height:96px;object-fit:cover;border:1px solid #ccc;border-radius:4px;" crossorigin="anonymous" />`
+      : '';
+
+    const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>${examTitle} - ${studentName}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans Bengali',sans-serif; padding:15mm; max-width:700px; margin:0 auto; }
+  @media print { body { padding:10mm; } }
+  .header { text-align:center; margin-bottom:16px; border-bottom:2px solid #333; padding-bottom:12px; }
+  .header-logo { width:50px; height:50px; object-fit:contain; margin:0 auto 6px; display:block; }
+  .header h1 { font-size:18px; margin-bottom:2px; }
+  .header .sub { font-size:11px; color:#555; }
+  .header h2 { font-size:15px; color:#333; margin-top:8px; }
+  .student-info { display:flex; gap:16px; margin:16px 0; padding:12px; background:#f9f9f9; border-radius:6px; }
+  .student-photo { flex-shrink:0; }
+  .student-details { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:12px; }
+  .student-details .label { color:#888; font-size:11px; }
+  .student-details .value { font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin:16px 0; }
+  th { padding:8px; border:1px solid #ccc; background:#f0f0f0; font-size:11px; text-align:center; }
+  .summary { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0; text-align:center; }
+  .summary-box { border:1px solid #ddd; border-radius:6px; padding:10px; }
+  .summary-box .label { font-size:10px; color:#888; }
+  .summary-box .val { font-size:20px; font-weight:700; margin:4px 0; }
+  .signatures { display:flex; justify-content:space-between; margin-top:50px; padding:0 10px; }
+  .sig-block { text-align:center; min-width:140px; }
+  .sig-line { border-top:1px dashed #999; padding-top:6px; margin-top:36px; }
+  .sig-title { font-size:11px; font-weight:600; }
+  .sig-name { font-size:11px; color:#444; margin-top:2px; }
+</style>
+</head><body>
+<div class="header">
+  ${institution?.logo_url ? `<img src="${institution.logo_url}" class="header-logo" crossorigin="anonymous" />` : ''}
+  <h1>${instName || ''}</h1>
+  ${institution?.address ? `<p class="sub">${institution.address}</p>` : ''}
+  ${institution?.phone ? `<p class="sub">${bn ? 'ফোন' : 'Phone'}: ${institution.phone}</p>` : ''}
+  <h2>${bn ? 'মার্কশিট' : 'Marksheet'} — ${examTitle}</h2>
+</div>
+
+<div class="student-info">
+  ${photoHtml ? `<div class="student-photo">${photoHtml}</div>` : ''}
+  <div class="student-details">
+    <div><span class="label">${bn ? 'নাম' : 'Name'}</span><div class="value">${studentName}</div></div>
+    <div><span class="label">${bn ? 'রোল নম্বর' : 'Roll Number'}</span><div class="value">${student.roll_number || '-'}</div></div>
+    <div><span class="label">${bn ? 'রেজিস্ট্রেশন' : 'Registration'}</span><div class="value">${student.registration_number || student.student_id || '-'}</div></div>
+    <div><span class="label">${bn ? 'পিতার নাম' : "Father's Name"}</span><div class="value">${student.father_name_bn || student.father_name || '-'}</div></div>
+    ${student.date_of_birth ? `<div><span class="label">${bn ? 'জন্ম তারিখ' : 'Date of Birth'}</span><div class="value">${student.date_of_birth}</div></div>` : ''}
+  </div>
+</div>
+
+<table>
+  <thead><tr>
+    <th>#</th>
+    <th style="text-align:left;">${bn ? 'বিষয়' : 'Subject'}</th>
+    <th>${bn ? 'পূর্ণমান' : 'Full Marks'}</th>
+    <th>${bn ? 'প্রাপ্ত নম্বর' : 'Obtained'}</th>
+    <th>${bn ? 'গ্রেড' : 'Grade'}</th>
+    <th>GPA</th>
+  </tr></thead>
+  <tbody>${subjectRows}</tbody>
+</table>
+
+<div class="summary">
+  <div class="summary-box"><div class="label">${bn ? 'মোট নম্বর' : 'Total'}</div><div class="val">${totalMarks}</div><div class="label">/ ${subjects.length * 100}</div></div>
+  <div class="summary-box"><div class="label">${bn ? 'গড়' : 'Average'}</div><div class="val">${avgMarks.toFixed(1)}</div></div>
+  <div class="summary-box"><div class="label">${bn ? 'গ্রেড' : 'Grade'}</div><div class="val">${overall.grade}</div></div>
+  <div class="summary-box"><div class="label">GPA</div><div class="val">${overall.gpa}</div></div>
+</div>
+
+<div class="signatures">
+  <div class="sig-block">
+    <div class="sig-line"></div>
+    <p class="sig-title">${bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller'}</p>
+    ${sigNames.examController ? `<p class="sig-name">${sigNames.examController}</p>` : ''}
+  </div>
+  <div class="sig-block">
+    <div class="sig-line"></div>
+    <p class="sig-title">${bn ? 'শিক্ষা সচিব' : 'Education Secretary'}</p>
+    ${sigNames.eduSecretary ? `<p class="sig-name">${sigNames.eduSecretary}</p>` : ''}
+  </div>
+  <div class="sig-block">
+    <div class="sig-line"></div>
+    <p class="sig-title">${bn ? 'মুহতামিম' : 'Principal'}</p>
+    ${sigNames.principal ? `<p class="sig-name">${sigNames.principal}</p>` : ''}
+  </div>
+</div>
+</body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          URL.revokeObjectURL(url);
+        }, 600);
+      };
+    } else {
+      URL.revokeObjectURL(url);
+    }
+  };
 
   return (
     <div className="space-y-4">
