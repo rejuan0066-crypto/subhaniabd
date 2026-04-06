@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Palette, Type, Layout, RotateCcw, Save, Eye, Monitor, PanelLeft, LayoutDashboard, Layers } from 'lucide-react';
+import SidebarSectionEditor from '@/components/admin/SidebarSectionEditor';
 import DashboardLayoutBuilder from '@/components/dashboard/DashboardLayoutBuilder';
 import PageLayoutEditor from '@/components/admin/PageLayoutEditor';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
@@ -813,6 +814,8 @@ const AdminThemeCustomizer = () => {
                   </div>
                 </CardContent>
               </Card>
+              {/* Sidebar Section Editor */}
+              <SidebarSectionEditor />
             </div>
           </TabsContent>
 
