@@ -186,6 +186,33 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
           </tbody>
         </table>
       </div>
+
+      {/* Signature Section */}
+      <div className="relative z-10 px-5 py-6 border-t border-border">
+        <div className="grid grid-cols-3 gap-6 mt-6 pt-4">
+          <div className="text-center space-y-8">
+            <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+            <div>
+              <p className="text-xs font-semibold text-foreground">{bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller'}</p>
+              <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+            </div>
+          </div>
+          <div className="text-center space-y-8">
+            <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+            <div>
+              <p className="text-xs font-semibold text-foreground">{bn ? 'শিক্ষা সচিব' : 'Education Secretary'}</p>
+              <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+            </div>
+          </div>
+          <div className="text-center space-y-8">
+            <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+            <div>
+              <p className="text-xs font-semibold text-foreground">{bn ? 'মুহতামিম' : 'Principal'}</p>
+              <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

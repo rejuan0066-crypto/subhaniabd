@@ -157,8 +157,35 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
               <p className="text-xl font-bold text-primary">{overall.gpa}</p>
             </div>
           </div>
+        </div>
 
-          <div className="mt-4 flex justify-end">
+        {/* Signature Section */}
+        <div className="relative z-10 p-6 border-t border-border">
+          <div className="grid grid-cols-3 gap-6 mt-8 pt-4">
+            <div className="text-center space-y-8">
+              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+              <div>
+                <p className="text-xs font-semibold text-foreground">{bn ? 'পরীক্ষা নিয়ন্ত্রক' : 'Exam Controller'}</p>
+                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+              </div>
+            </div>
+            <div className="text-center space-y-8">
+              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+              <div>
+                <p className="text-xs font-semibold text-foreground">{bn ? 'শিক্ষা সচিব' : 'Education Secretary'}</p>
+                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+              </div>
+            </div>
+            <div className="text-center space-y-8">
+              <div className="border-b border-dashed border-muted-foreground/40 mx-4 pb-1 min-h-[40px]" />
+              <div>
+                <p className="text-xs font-semibold text-foreground">{bn ? 'মুহতামিম' : 'Principal'}</p>
+                <p className="text-[10px] text-muted-foreground">{bn ? 'স্বাক্ষর ও নাম' : 'Signature & Name'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end">
             <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
               <Printer className="w-4 h-4" /> {bn ? 'প্রিন্ট মার্কশিট' : 'Print Marksheet'}
             </Button>
