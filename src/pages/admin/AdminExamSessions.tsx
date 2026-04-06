@@ -235,8 +235,8 @@ const AdminExamSessions = () => {
         if (subjError) throw subjError;
       }
 
-      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${students?.length || 0} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${students?.length || 0} students, ${selectedSubjectIds.length} subjects`);
-      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]);
+      toast.success(bn ? `এক্সাম সেশন তৈরি হয়েছে — ${includedStudents.length} জন ছাত্র, ${selectedSubjectIds.length} টি বিষয়` : `Exam session created — ${includedStudents.length} students, ${selectedSubjectIds.length} subjects`);
+      setName(''); setNameBn(''); setSelectedClassIds([]); setSelectedSubjectIds([]); setExcludedStudentIds([]); setShowStudentSelection(false);
       queryClient.invalidateQueries({ queryKey: ['exam_sessions_list'] });
       queryClient.invalidateQueries({ queryKey: ['exam_session_classes_all'] });
     } catch (err: any) { toast.error(err.message || 'Error'); }
