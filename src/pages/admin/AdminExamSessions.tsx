@@ -247,7 +247,7 @@ const AdminExamSessions = () => {
                   <Input value={newTypeName} onChange={e => setNewTypeName(e.target.value)} placeholder="e.g. Selective" className="bg-background w-44" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'কী' : 'Key'} *</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'কি' : 'Key'} *</label>
                   <Input value={newTypeKey} onChange={e => setNewTypeKey(e.target.value)} placeholder="e.g. selective" className="bg-background w-36" />
                 </div>
                 <Button size="sm" onClick={() => addTypeMutation.mutate()} disabled={addTypeMutation.isPending} className="btn-primary-gradient">
