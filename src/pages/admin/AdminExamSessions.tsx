@@ -114,7 +114,7 @@ const AdminExamSessions = () => {
     setSelectedSubjectIds(prev => prev.includes(subjectId) ? prev.filter(id => id !== subjectId) : [...prev, subjectId]);
   };
 
-
+  const { data: studentCounts = {} } = useQuery({
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
       if (!academicSessionId) return {};
