@@ -213,6 +213,7 @@ const AdminDivisions = () => {
               <div className="flex gap-2 mb-4">
                 <Input placeholder={language === 'bn' ? 'বিভাগের নাম (বাংলা)' : 'Division Name (BN)'} value={newDivName} onChange={(e) => setNewDivName(e.target.value)} className="bg-background" />
                 <Input placeholder={language === 'bn' ? 'ইংরেজি নাম' : 'English Name'} value={newDivNameEn} onChange={(e) => setNewDivNameEn(e.target.value)} className="bg-background" />
+                <Input placeholder={language === 'bn' ? 'প্রিফিক্স' : 'Prefix'} value={newDivPrefix} onChange={(e) => setNewDivPrefix(e.target.value)} className="bg-background w-20 shrink-0 uppercase" maxLength={5} />
                 <Button onClick={() => { if (!newDivName.trim()) { toast.error(language === 'bn' ? 'বিভাগের নাম লিখুন' : 'Enter division name'); return; } addDivMutation.mutate(); }} size="sm" className="shrink-0 btn-primary-gradient" disabled={addDivMutation.isPending}>
                   {addDivMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 </Button>
