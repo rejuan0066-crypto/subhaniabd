@@ -11,6 +11,7 @@ import { isAdminRole } from '@/lib/roles';
 import { supabase } from '@/integrations/supabase/client';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
 import { useThemeSettings } from '@/hooks/useThemeSettings';
+import { useSidebarSections } from '@/hooks/useSidebarSections';
 import LanguageToggle from './LanguageToggle';
 import NotificationPanel from './NotificationPanel';
 import DarkModeToggle from './DarkModeToggle';
@@ -50,6 +51,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { menuConfig } = useMenuSettings();
   const { theme: adminTheme } = useThemeSettings();
+  const { sections: sidebarSections } = useSidebarSections();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -199,25 +201,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  // Group menu items by category for the reference-style grouped sidebar
-  const getGroupLabel = (path: string): string => {
-    const groupMap: Record<string, string> = {
-      '/admin': language === 'bn' ? 'প্রধান মেনু' : 'Main Menu',
-      '/admin/students': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/staff': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/divisions': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/subjects': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/attendance': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/results': language === 'bn' ? 'শিক্ষা ব্যবস্থা' : 'Academics',
-      '/admin/fees': language === 'bn' ? 'আর্থিক' : 'Finance',
-      '/admin/payments': language === 'bn' ? 'আর্থিক' : 'Finance',
-      '/admin/expenses': language === 'bn' ? 'আর্থিক' : 'Finance',
-      '/admin/donors': language === 'bn' ? 'আর্থিক' : 'Finance',
-      '/admin/website': language === 'bn' ? 'অন্যান্য' : 'Others',
-      '/admin/notices': language === 'bn' ? 'অন্যান্য' : 'Others',
-      '/admin/settings': language === 'bn' ? 'অন্যান্য' : 'Others',
-    };
-    return groupMap[path] || '';
+  // Group menu items by category using dynamic sidebar sections
+  const getGroupInfo = (path: string): { label: string; color?: string; bgColor?: string } | null => {
+    for (const sec of sidebarSections) {
+      if (sec.menuPaths.includes(path)) {
+        return {
+          label: language === 'bn' ? sec.labelBn : sec.labelEn,
+          color: sec.color || undefined,
+          bgColor: sec.bgColor || undefined,
+        };
+      }
+    }
+    return null;
   };
 
   // Build breadcrumb from current path
