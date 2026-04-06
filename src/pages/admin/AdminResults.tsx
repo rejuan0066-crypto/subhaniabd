@@ -10,6 +10,7 @@ import { usePagePermissions } from '@/hooks/usePagePermissions';
 import ResultSearchFilters from '@/components/results/ResultSearchFilters';
 import ClassResultTable, { getGrade } from '@/components/results/ClassResultTable';
 import IndividualMarksheet from '@/components/results/IndividualMarksheet';
+import GradingChart from '@/components/results/GradingChart';
 import { GraduationCap } from 'lucide-react';
 
 const AdminResults = () => {
@@ -238,6 +239,9 @@ const AdminResults = () => {
           examSessions={examSessions}
           onSearch={handleSearch}
         />
+
+        {/* Grading Chart */}
+        {showResults && <GradingChart />}
 
         {/* Results */}
         {showResults && viewingStudent ? (
