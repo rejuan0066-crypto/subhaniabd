@@ -230,7 +230,8 @@ const AdminDivisions = () => {
                       <div className="flex items-center gap-2 flex-1 mr-2" onClick={e => e.stopPropagation()}>
                         <Input value={editDivName} onChange={e => setEditDivName(e.target.value)} className="bg-background h-8 text-sm" placeholder="বাংলা নাম" />
                         <Input value={editDivNameEn} onChange={e => setEditDivNameEn(e.target.value)} className="bg-background h-8 text-sm" placeholder="English" />
-                        <button onClick={() => { if (!editDivName.trim()) return; editDivMutation.mutate({ id: d.id, name_bn: editDivName.trim(), name: editDivNameEn.trim() || editDivName.trim() }); }} className="p-1.5 rounded hover:bg-success/10 text-success"><Check className="w-4 h-4" /></button>
+                        <Input value={editDivPrefix} onChange={e => setEditDivPrefix(e.target.value)} className="bg-background h-8 text-sm w-20 shrink-0 uppercase" placeholder="প্রিফিক্স" maxLength={5} />
+                        <button onClick={() => { if (!editDivName.trim()) return; editDivMutation.mutate({ id: d.id, name_bn: editDivName.trim(), name: editDivNameEn.trim() || editDivName.trim(), prefix: editDivPrefix.trim() }); }} className="p-1.5 rounded hover:bg-success/10 text-success"><Check className="w-4 h-4" /></button>
                         <button onClick={() => setEditingDivId(null)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive"><X className="w-4 h-4" /></button>
                       </div>
                     ) : (
