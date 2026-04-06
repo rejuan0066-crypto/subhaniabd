@@ -80,7 +80,7 @@ const AdminExamSessions = () => {
   const { data: examSessions = [] } = useQuery({
     queryKey: ['exam_sessions_list'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('exam_sessions').select('*, academic_sessions(name)').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('exam_sessions').select('*, academic_sessions(name, name_bn)').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -202,7 +202,7 @@ const AdminExamSessions = () => {
                 <Select value={academicSessionId} onValueChange={setAcademicSessionId}>
                   <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'শিক্ষাবর্ষ নির্বাচন' : 'Select session'} /></SelectTrigger>
                   <SelectContent>
-                    {academicSessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                    {academicSessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -326,7 +326,7 @@ const AdminExamSessions = () => {
                     return (
                       <tr key={es.id} className="hover:bg-secondary/30">
                         <td className="px-4 py-3 font-medium text-foreground">{bn ? es.name_bn : es.name}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{es.academic_sessions?.name || '-'}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}</td>
                         <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{typeLabel}</span></td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex flex-wrap justify-center gap-1">
