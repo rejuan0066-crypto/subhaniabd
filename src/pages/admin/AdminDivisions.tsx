@@ -69,6 +69,7 @@ const AdminDivisions = () => {
       queryClient.invalidateQueries({ queryKey: ['divisions'] });
       setNewDivName('');
       setNewDivNameEn('');
+      setNewDivPrefix('');
       toast.success(language === 'bn' ? 'বিভাগ যোগ হয়েছে' : 'Division added');
     },
     onError: () => toast.error(language === 'bn' ? 'সমস্যা হয়েছে' : 'Error occurred'),
