@@ -70,6 +70,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
               <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">{bn ? 'গড়' : 'Avg'}</th>
               <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">{bn ? 'গ্রেড' : 'Grade'}</th>
               <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground">GPA</th>
+              <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground min-w-[80px]">{bn ? 'মর্যাদা' : 'Title'}</th>
               <th className="px-3 py-3 text-center text-xs font-semibold text-muted-foreground w-10"></th>
             </tr>
           </thead>
@@ -78,7 +79,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
               const studentMarks = subjects.map((sub: any) => marksMap[`${st.id}_${sub.id}`] ?? 0);
               const total = studentMarks.reduce((a, b) => a + b, 0);
               const avg = subjects.length > 0 ? total / subjects.length : 0;
-              const { grade, gpa, color, hasFail } = getOverallGrade(studentMarks);
+              const { grade, gpa, color, hasFail, title, title_bn } = getOverallGrade(studentMarks);
               return (
                 <tr key={st.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-3 py-2 text-muted-foreground text-xs">{idx + 1}</td>
@@ -106,6 +107,7 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
                     </span>
                   </td>
                   <td className="px-3 py-2 text-center font-semibold text-primary">{gpa}</td>
+                  <td className="px-3 py-2 text-center text-xs font-medium text-muted-foreground">{bn ? title_bn : title}</td>
                   <td className="px-2 py-2 text-center">
                     <button
                       onClick={() => onViewMarksheet(st.id)}
