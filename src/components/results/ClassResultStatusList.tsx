@@ -81,7 +81,7 @@ const ClassResultStatusList = ({
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 };
