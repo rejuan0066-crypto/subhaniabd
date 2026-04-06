@@ -291,9 +291,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           {(() => {
             let lastGroup = '';
             return menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const currentFullPath = location.pathname + location.search;
+              const isActive = location.pathname === item.path || currentFullPath === item.path;
               const hasChildren = item.children && item.children.length > 0;
-              const isGroupOpen = openGroups[item.path] || item.children?.some(c => location.pathname === c.path);
+              const isGroupOpen = openGroups[item.path] || item.children?.some(c => {
+                const [cPath, cSearch] = c.path.split('?');
+                return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+              });
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -364,7 +368,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   {hasChildren && isGroupOpen && (sidebarOpen || mobile) && (
                     <div className="ml-7 mt-0.5 space-y-0.5 border-l border-sidebar-border/50 pl-2">
                       {item.children!.map(child => {
-                        const childActive = location.pathname === child.path;
+                        const [childPathname, childSearch] = child.path.split('?');
+                        const childActive = childSearch
+                          ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                          : location.pathname === child.path;
                         return (
                           <Link
                             key={child.path}
