@@ -639,11 +639,17 @@ const AdminExamSessions = () => {
                         </td>
                         <td className="px-4 py-3 text-center font-medium text-foreground">{totalStudents}</td>
                         <td className="px-4 py-3 text-right">
-                          {canDeleteItem && (
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
-                              <Trash2 className="w-4 h-4" />
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button variant="outline" size="sm" className="h-8 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
+                              <GraduationCap className="w-3.5 h-3.5" />
+                              {bn ? 'ফলাফল তৈরি' : 'Create Result'}
                             </Button>
-                          )}
+                            {canDeleteItem && (
+                              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
