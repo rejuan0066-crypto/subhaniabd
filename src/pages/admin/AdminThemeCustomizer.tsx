@@ -614,7 +614,46 @@ const AdminThemeCustomizer = () => {
                          className="flex-1"
                        />
                      </div>
+                     </div>
                    </div>
+                   <div>
+                     <Label className="text-xs">{bn ? 'ক্লিক/অ্যাক্টিভ ব্যাকগ্রাউন্ড কালার' : 'Click/Active Bg Color'}</Label>
+                     <div className="flex items-center gap-2 mt-1">
+                       <input
+                         type="color"
+                         value={draft.sidebarActiveBgColor || '#2a2a3a'}
+                         onChange={e => updateDraft('sidebarActiveBgColor', e.target.value)}
+                         className="w-10 h-10 rounded border cursor-pointer"
+                       />
+                       <Input
+                         value={draft.sidebarActiveBgColor}
+                         onChange={e => updateDraft('sidebarActiveBgColor', e.target.value)}
+                         placeholder="#2a2a3a"
+                         className="flex-1"
+                       />
+                     </div>
+                   </div>
+                   <div>
+                     <Label className="text-xs mb-1 block">{bn ? 'ক্লিক ইফেক্ট' : 'Click Effect'}</Label>
+                     <div className="flex flex-wrap gap-2">
+                       {([
+                         { value: 'none', label: bn ? 'নেই' : 'None' },
+                         { value: 'scale', label: bn ? 'স্কেল' : 'Scale' },
+                         { value: 'ripple', label: bn ? 'রিপল' : 'Ripple' },
+                         { value: 'glow', label: bn ? 'গ্লো' : 'Glow' },
+                         { value: 'slide', label: bn ? 'স্লাইড' : 'Slide' },
+                       ] as const).map(eff => (
+                         <button
+                           key={eff.value}
+                           onClick={() => updateDraft('sidebarClickEffect', eff.value)}
+                           className={`px-3 py-1.5 rounded text-xs font-medium border transition-all ${
+                             draft.sidebarClickEffect === eff.value ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+                           }`}
+                         >
+                           {eff.label}
+                         </button>
+                       ))}
+                     </div>
                   <div>
                     <Label className="text-xs mb-1 block">{bn ? 'সাইডবার ফন্ট সাইজ' : 'Sidebar Font Size'}</Label>
                     <div className="flex gap-2">
