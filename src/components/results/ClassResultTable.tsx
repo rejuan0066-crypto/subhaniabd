@@ -60,7 +60,14 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
   return (
     <div className="card-elevated rounded-xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
-        <h3 className="font-display font-bold text-foreground text-lg">{title}</h3>
+        <div className="flex items-center gap-2">
+          {onClose && (
+            <button onClick={onClose} className="p-1.5 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'বন্ধ করুন' : 'Close'}>
+              <X className="w-5 h-5" />
+            </button>
+          )}
+          <h3 className="font-display font-bold text-foreground text-lg">{title}</h3>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => handleExport('csv')} className="gap-1.5">
             <FileSpreadsheet className="w-4 h-4" /> Excel
