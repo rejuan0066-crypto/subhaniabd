@@ -739,6 +739,7 @@ const AdminThemeCustomizer = () => {
                     <Label className="text-xs">{bn ? 'বেস টেক্সট সাইজ' : 'Base Text Size'}: {draft.baseFontSize}px</Label>
                     <Slider value={[draft.baseFontSize]} min={12} max={18} step={1} onValueChange={([v]) => updateDraft('baseFontSize', v)} />
                   </div>
+                </CardContent>
               </Card>
 
               {/* Card & Glassmorphism */}
