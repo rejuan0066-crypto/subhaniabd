@@ -8,7 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import ResultSearchFilters from '@/components/results/ResultSearchFilters';
-import ClassResultTable, { getGrade } from '@/components/results/ClassResultTable';
+import ClassResultTable from '@/components/results/ClassResultTable';
+import { useGradingSystem } from '@/hooks/useGradingSystem';
 import IndividualMarksheet from '@/components/results/IndividualMarksheet';
 import GradingChart from '@/components/results/GradingChart';
 import { GraduationCap } from 'lucide-react';
@@ -20,6 +21,7 @@ const AdminResults = () => {
   const [searchParams] = useSearchParams();
   const { checkApproval } = useApprovalCheck('/admin/results', 'results');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/results');
+  const { getGrade } = useGradingSystem();
 
   const [searchMode, setSearchMode] = useState<'class' | 'individual'>('class');
   const [examYear, setExamYear] = useState(searchParams.get('year') || '');
