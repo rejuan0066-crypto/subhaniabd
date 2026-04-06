@@ -289,14 +289,23 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               const isActive = location.pathname === item.path;
               const hasChildren = item.children && item.children.length > 0;
               const isGroupOpen = openGroups[item.path] || item.children?.some(c => location.pathname === c.path);
-              const group = getGroupLabel(item.path);
-              const showGroupLabel = group && group !== lastGroup;
-              if (group) lastGroup = group;
+              const groupInfo = getGroupInfo(item.path);
+              const groupLabel = groupInfo?.label || '';
+              const showGroupLabel = groupLabel && groupLabel !== lastGroup;
+              if (groupLabel) lastGroup = groupLabel;
 
               return (
                 <div key={item.path}>
                   {showGroupLabel && (
-                    <div className="sidebar-group-label mt-4 first:mt-0">{group}</div>
+                    <div
+                      className="sidebar-group-label mt-4 first:mt-0"
+                      style={{
+                        ...(groupInfo?.color ? { color: groupInfo.color } : {}),
+                        ...(groupInfo?.bgColor ? { backgroundColor: groupInfo.bgColor + '15', borderRadius: '6px', marginLeft: '-4px', marginRight: '-4px', paddingLeft: '16px' } : {}),
+                      }}
+                    >
+                      {groupLabel}
+                    </div>
                   )}
                   <div className="flex items-center">
                     {hasChildren ? (
