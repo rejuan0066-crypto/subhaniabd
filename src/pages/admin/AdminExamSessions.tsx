@@ -74,9 +74,15 @@ const AdminExamSessions = () => {
     },
   });
 
-  const filteredClasses = selectedDivisionIds.length > 0
+  const filteredClasses = (selectedDivisionIds.length > 0
     ? classes.filter((c: any) => selectedDivisionIds.includes(c.division_id))
-    : classes;
+    : classes
+  ).sort((a: any, b: any) => {
+    const divA = divisions.findIndex((d: any) => d.id === a.division_id);
+    const divB = divisions.findIndex((d: any) => d.id === b.division_id);
+    if (divA !== divB) return divA - divB;
+    return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+  });
 
   const { data: studentCounts = {} } = useQuery({
     queryKey: ['student_counts_by_class', academicSessionId],
