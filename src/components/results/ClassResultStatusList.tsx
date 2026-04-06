@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, Eye, PenLine } from 'lucide-react';
+import { CheckCircle, Clock, Eye, PenLine, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface ClassResultStatusListProps {
   classes: any[];
-  resultStatusMap: Record<string, boolean>; // classId -> hasResults
+  resultStatusMap: Record<string, boolean>;
   onClassClick: (classId: string) => void;
   examSessionName: string;
 }
@@ -18,6 +19,7 @@ const ClassResultStatusList = ({
 }: ClassResultStatusListProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!classes.length) {
     return (
@@ -27,14 +29,23 @@ const ClassResultStatusList = ({
     );
   }
 
+  const savedCount = classes.filter(c => resultStatusMap[c.id]).length;
+
   return (
     <div className="card-elevated rounded-xl overflow-hidden">
-      <div className="border-b border-border bg-muted/30 px-5 py-3">
-        <h3 className="font-semibold text-foreground">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3 hover:bg-muted/50 transition-colors cursor-pointer"
+      >
+        <h3 className="font-semibold text-foreground flex items-center gap-2">
+          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           {examSessionName} — {bn ? 'ক্লাস ভিত্তিক ফলাফল স্ট্যাটাস' : 'Class-wise Result Status'}
         </h3>
-      </div>
-      <div className="divide-y divide-border">
+        <Badge variant="outline" className="text-xs">
+          {savedCount}/{classes.length} {bn ? 'সম্পন্ন' : 'done'}
+        </Badge>
+      </button>
+      {isOpen && <div className="divide-y divide-border">
         {classes.map((cls: any) => {
           const hasResults = resultStatusMap[cls.id] || false;
           return (
