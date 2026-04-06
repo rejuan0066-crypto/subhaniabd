@@ -654,7 +654,8 @@ const AdminThemeCustomizer = () => {
                          </button>
                        ))}
                      </div>
-                  <div>
+                   </div>
+                   <div>
                     <Label className="text-xs mb-1 block">{bn ? 'সাইডবার ফন্ট সাইজ' : 'Sidebar Font Size'}</Label>
                     <div className="flex gap-2">
                       {(['small', 'medium', 'large'] as const).map(s => (
