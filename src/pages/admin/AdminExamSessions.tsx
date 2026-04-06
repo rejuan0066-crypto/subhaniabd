@@ -146,7 +146,12 @@ const AdminExamSessions = () => {
   });
 
   const toggleClass = (classId: string) => {
-    setSelectedClassIds(prev => prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId]);
+    setSelectedClassIds(prev => {
+      const next = prev.includes(classId) ? prev.filter(id => id !== classId) : [...prev, classId];
+      // Reset subjects when classes change
+      setSelectedSubjectIds([]);
+      return next;
+    });
   };
 
   const handleCreate = async () => {
