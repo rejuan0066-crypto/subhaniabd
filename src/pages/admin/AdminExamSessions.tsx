@@ -136,6 +136,29 @@ const AdminExamSessions = () => {
     enabled: !!academicSessionId,
   });
 
+  // Fetch students for selected classes
+  const { data: classStudents = [] } = useQuery({
+    queryKey: ['students_for_exam_selection', academicSessionId, selectedClassIds],
+    queryFn: async () => {
+      if (!academicSessionId || selectedClassIds.length === 0) return [];
+      const { data, error } = await supabase.from('students')
+        .select('id, name_bn, name_en, roll_number, student_id, class_id')
+        .eq('status', 'active')
+        .eq('session_id', academicSessionId)
+        .in('class_id', selectedClassIds)
+        .order('roll_number');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!academicSessionId && selectedClassIds.length > 0,
+  });
+
+  // Reset excluded students when classes change
+  useEffect(() => {
+    setExcludedStudentIds([]);
+    setShowStudentSelection(false);
+  }, [selectedClassIds.join(',')]);
+
   const { data: examSessions = [] } = useQuery({
     queryKey: ['exam_sessions_list'],
     queryFn: async () => {
