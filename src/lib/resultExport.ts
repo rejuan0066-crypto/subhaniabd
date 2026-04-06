@@ -42,13 +42,15 @@ export const exportResultCSV = ({ title, students, subjects, marksMap, getOveral
   });
 
   const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+  const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(csvBlob);
   const a = document.createElement('a');
   a.href = url;
   a.download = `${title.replace(/[^a-zA-Z0-9\u0980-\u09FF\s]/g, '_')}.csv`;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 };
 
 export const exportResultPDF = ({ title, students, subjects, marksMap, getOverallGrade, bn, institutionName }: ExportData) => {
