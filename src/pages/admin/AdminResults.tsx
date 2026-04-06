@@ -1,6 +1,7 @@
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,12 +16,13 @@ const AdminResults = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const { checkApproval } = useApprovalCheck('/admin/results', 'results');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/results');
 
   const [searchMode, setSearchMode] = useState<'class' | 'individual'>('class');
-  const [examYear, setExamYear] = useState('');
-  const [examSessionId, setExamSessionId] = useState('');
+  const [examYear, setExamYear] = useState(searchParams.get('year') || '');
+  const [examSessionId, setExamSessionId] = useState(searchParams.get('session') || '');
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [showResults, setShowResults] = useState(false);
