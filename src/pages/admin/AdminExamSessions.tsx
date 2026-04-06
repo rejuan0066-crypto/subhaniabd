@@ -56,7 +56,7 @@ const AdminExamSessions = () => {
   });
 
   // Filter classes by selected division
-  const filteredClasses = selectedDivisionId
+  const filteredClasses = selectedDivisionId && selectedDivisionId !== '__all__'
     ? classes.filter((c: any) => c.division_id === selectedDivisionId)
     : classes;
 
@@ -239,7 +239,7 @@ const AdminExamSessions = () => {
                 <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassIds([]); }}>
                   <SelectTrigger className="bg-background w-full sm:w-64"><SelectValue placeholder={bn ? 'বিভাগ নির্বাচন' : 'Select Division'} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
+                    <SelectItem value="__all__">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
                     {divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
