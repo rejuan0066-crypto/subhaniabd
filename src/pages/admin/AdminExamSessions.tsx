@@ -114,7 +114,14 @@ const AdminExamSessions = () => {
     setSelectedSubjectIds(prev => prev.includes(subjectId) ? prev.filter(id => id !== subjectId) : [...prev, subjectId]);
   };
 
-  const { data: studentCounts = {} } = useQuery({
+  // Auto-select all subjects when subjects list changes
+  useEffect(() => {
+    if (subjects.length > 0 && selectedSubjectIds.length === 0) {
+      setSelectedSubjectIds(subjects.map((s: any) => s.id));
+    }
+  }, [subjects]);
+
+
     queryKey: ['student_counts_by_class', academicSessionId],
     queryFn: async () => {
       if (!academicSessionId) return {};
