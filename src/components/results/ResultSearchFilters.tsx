@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, User, Users } from 'lucide-react';
+import { Search, User, Users, RotateCcw } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ResultSearchFiltersProps {
@@ -20,6 +20,7 @@ interface ResultSearchFiltersProps {
   classes: any[];
   examSessions: any[];
   onSearch: () => void;
+  onReset?: () => void;
 }
 
 const ResultSearchFilters = ({
@@ -29,7 +30,7 @@ const ResultSearchFilters = ({
   selectedClass, onClassChange,
   rollNumber, onRollNumberChange,
   academicSessions, classes, examSessions,
-  onSearch,
+  onSearch, onReset,
 }: ResultSearchFiltersProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -103,10 +104,17 @@ const ResultSearchFilters = ({
             />
           )}
 
-          <Button onClick={onSearch} className="btn-primary-gradient h-10">
-            <Search className="w-4 h-4 mr-2" />
-            {bn ? 'অনুসন্ধান' : 'Search'}
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={onSearch} className="btn-primary-gradient h-10 flex-1">
+              <Search className="w-4 h-4 mr-2" />
+              {bn ? 'অনুসন্ধান' : 'Search'}
+            </Button>
+            {(examYear || examSession || selectedClass || rollNumber) && onReset && (
+              <Button variant="outline" size="icon" className="h-10 w-10" onClick={onReset} title={bn ? 'রিসেট' : 'Reset'}>
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
