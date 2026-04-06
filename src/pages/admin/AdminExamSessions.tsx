@@ -1,11 +1,12 @@
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState, useEffect } from 'react';
-import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2, BookMarked, UserMinus } from 'lucide-react';
+import { Plus, Loader2, Trash2, Users, BookOpen, Edit2, Check, X, Settings2, BookMarked, UserMinus, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +16,7 @@ const AdminExamSessions = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { canAddItem, canDeleteItem } = usePagePermissions('/admin/exam-sessions');
 
   const [name, setName] = useState('');
@@ -637,11 +639,17 @@ const AdminExamSessions = () => {
                         </td>
                         <td className="px-4 py-3 text-center font-medium text-foreground">{totalStudents}</td>
                         <td className="px-4 py-3 text-right">
-                          {canDeleteItem && (
-                            <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
-                              <Trash2 className="w-4 h-4" />
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button variant="outline" size="sm" className="h-8 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
+                              <GraduationCap className="w-3.5 h-3.5" />
+                              {bn ? 'ফলাফল তৈরি' : 'Create Result'}
                             </Button>
-                          )}
+                            {canDeleteItem && (
+                              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
