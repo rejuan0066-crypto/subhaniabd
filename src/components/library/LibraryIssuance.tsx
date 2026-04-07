@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { isAdminRole } from '@/lib/roles';
+import { printIssuanceReceipt, printYearlyIssuanceList } from '@/lib/libraryIssuancePrint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import SearchableSelect from '@/components/SearchableSelect';
 import { toast } from 'sonner';
-import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle } from 'lucide-react';
+import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle, Printer, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 const LibraryIssuance = () => {
@@ -21,12 +23,22 @@ const LibraryIssuance = () => {
   const bn = language === 'bn';
   const qc = useQueryClient();
   const { user, role } = useAuth();
+  const { settings } = useWebsiteSettings();
 
   const [open, setOpen] = useState(false);
   const [lossOpen, setLossOpen] = useState(false);
   const [lossTarget, setLossTarget] = useState<any>(null);
   const [fineAmount, setFineAmount] = useState(0);
   const [search, setSearch] = useState('');
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
+
+  const institutionInfo = useMemo(() => ({
+    name: settings.institution_name,
+    nameEn: settings.institution_name_en,
+    address: settings.address,
+    phone: settings.phone,
+    logoUrl: settings.logo_url,
+  }), [settings]);
 
   // Issue form state
   const [bookId, setBookId] = useState('');
@@ -207,6 +219,21 @@ const LibraryIssuance = () => {
       if (distributionType === 'sale' && recipientType === 'student') {
         toast.info(bn ? `৳${sellingPrice} ছাত্রের লেজারে বকেয়া যোগ হয়েছে` : `৳${sellingPrice} added as due to student ledger`);
       }
+
+      // Print receipt
+      const selectedBook = books.find((b: any) => b.id === bookId);
+      printIssuanceReceipt({
+        bookTitle: bn ? (selectedBook?.title_bn || selectedBook?.title || '') : (selectedBook?.title || ''),
+        recipientName: selectedRecipient?.name_bn || selectedRecipient?.name_en || '',
+        recipientType,
+        distributionType,
+        bookCondition,
+        sellingPrice: Number(sellingPrice),
+        distributorName: distributorName || autoDistributorName || '',
+        issuedDate: format(new Date(), 'dd/MM/yyyy'),
+        recipientId: selectedRecipient?.student_id || selectedRecipient?.staff_id || '',
+      }, institutionInfo);
+
       resetForm();
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
@@ -283,10 +310,42 @@ const LibraryIssuance = () => {
   };
 
   const filteredIss = issuances.filter((i: any) => {
+    // Year filter
+    if (yearFilter && yearFilter !== 'all') {
+      const issYear = i.issued_date ? new Date(i.issued_date).getFullYear().toString() : '';
+      if (issYear !== yearFilter) return false;
+    }
     if (!search) return true;
     const q = search.toLowerCase();
     return i.recipient_name?.toLowerCase().includes(q) || i.library_books?.title?.toLowerCase().includes(q) || i.library_books?.title_bn?.includes(q);
   });
+
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    issuances.forEach((i: any) => {
+      if (i.issued_date) years.add(new Date(i.issued_date).getFullYear().toString());
+    });
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [issuances]);
+
+  const handlePrintSingleIssuance = (i: any) => {
+    printIssuanceReceipt({
+      bookTitle: bn ? (i.library_books?.title_bn || i.library_books?.title || '') : (i.library_books?.title || ''),
+      recipientName: i.recipient_name || '',
+      recipientType: i.recipient_type || 'student',
+      distributionType: i.distribution_type || 'free',
+      bookCondition: i.book_condition || 'new',
+      sellingPrice: i.selling_price || 0,
+      distributorName: i.distributor_name || '',
+      issuedDate: i.issued_date ? format(new Date(i.issued_date), 'dd/MM/yyyy') : '',
+      recipientId: i.students?.student_id || '',
+    }, institutionInfo);
+  };
+
+  const handlePrintYearlyList = () => {
+    const yr = yearFilter === 'all' ? new Date().getFullYear() : Number(yearFilter);
+    printYearlyIssuanceList(filteredIss, yr, institutionInfo);
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -302,13 +361,29 @@ const LibraryIssuance = () => {
   return (
     <div className="space-y-4 mt-4">
       <div className="flex flex-col sm:flex-row gap-3 justify-between">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder={bn ? 'ইস্যু খুঁজুন...' : 'Search issuances...'} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        <div className="flex flex-wrap gap-2 items-center flex-1">
+          <div className="relative flex-1 min-w-[180px] max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder={bn ? 'ইস্যু খুঁজুন...' : 'Search issuances...'} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          </div>
+          <Select value={yearFilter} onValueChange={setYearFilter}>
+            <SelectTrigger className="w-[120px]"><SelectValue placeholder={bn ? 'বছর' : 'Year'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সকল বছর' : 'All Years'}</SelectItem>
+              {availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-        <Button onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
-          <Plus className="w-4 h-4 mr-1.5" />{bn ? 'বই ইস্যু করুন' : 'Issue Book'}
-        </Button>
+        <div className="flex gap-2">
+          {filteredIss.length > 0 && (
+            <Button variant="outline" onClick={handlePrintYearlyList} title={bn ? 'বাৎসরিক তালিকা প্রিন্ট' : 'Print yearly list'}>
+              <FileText className="w-4 h-4 mr-1.5" />{bn ? 'তালিকা প্রিন্ট' : 'Print List'}
+            </Button>
+          )}
+          <Button onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
+            <Plus className="w-4 h-4 mr-1.5" />{bn ? 'বই ইস্যু করুন' : 'Issue Book'}
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -356,16 +431,21 @@ const LibraryIssuance = () => {
                   <TableCell className="text-center">{getStatusBadge(i.status)}</TableCell>
                   <TableCell className="text-right">{i.distribution_type === 'sale' ? `৳${i.selling_price}` : '—'}</TableCell>
                   <TableCell className="text-center">
-                    {i.status === 'issued' && (
-                      <div className="flex justify-center gap-1">
-                        <Button size="sm" variant="outline" onClick={() => returnMut.mutate(i)} title={bn ? 'ফেরত' : 'Return'}>
-                          <Undo2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => { setLossTarget(i); setFineAmount(0); setLossOpen(true); }} title={bn ? 'হারানো' : 'Lost'}>
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex justify-center gap-1">
+                      <Button size="sm" variant="outline" onClick={() => handlePrintSingleIssuance(i)} title={bn ? 'প্রিন্ট' : 'Print'}>
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+                      {i.status === 'issued' && (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => returnMut.mutate(i)} title={bn ? 'ফেরত' : 'Return'}>
+                            <Undo2 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => { setLossTarget(i); setFineAmount(0); setLossOpen(true); }} title={bn ? 'হারানো' : 'Lost'}>
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
