@@ -1488,6 +1488,220 @@ export type Database = {
         }
         Relationships: []
       }
+      library_books: {
+        Row: {
+          author: string | null
+          author_bn: string | null
+          available_copies: number
+          buying_price: number
+          class_id: string | null
+          condition: string
+          created_at: string | null
+          damaged_copies: number
+          id: string
+          is_active: boolean | null
+          lost_copies: number
+          notes: string | null
+          purchase_date: string
+          purchased_by: string | null
+          subject_id: string | null
+          title: string
+          title_bn: string | null
+          total_copies: number
+          updated_at: string | null
+        }
+        Insert: {
+          author?: string | null
+          author_bn?: string | null
+          available_copies?: number
+          buying_price?: number
+          class_id?: string | null
+          condition?: string
+          created_at?: string | null
+          damaged_copies?: number
+          id?: string
+          is_active?: boolean | null
+          lost_copies?: number
+          notes?: string | null
+          purchase_date?: string
+          purchased_by?: string | null
+          subject_id?: string | null
+          title: string
+          title_bn?: string | null
+          total_copies?: number
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string | null
+          author_bn?: string | null
+          available_copies?: number
+          buying_price?: number
+          class_id?: string | null
+          condition?: string
+          created_at?: string | null
+          damaged_copies?: number
+          id?: string
+          is_active?: boolean | null
+          lost_copies?: number
+          notes?: string | null
+          purchase_date?: string
+          purchased_by?: string | null
+          subject_id?: string | null
+          title?: string
+          title_bn?: string | null
+          total_copies?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_books_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_books_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_fines: {
+        Row: {
+          book_id: string
+          created_at: string | null
+          fine_amount: number
+          fine_type: string
+          id: string
+          issuance_id: string
+          notes: string | null
+          paid_amount: number | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          book_id: string
+          created_at?: string | null
+          fine_amount?: number
+          fine_type?: string
+          id?: string
+          issuance_id: string
+          notes?: string | null
+          paid_amount?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          book_id?: string
+          created_at?: string | null
+          fine_amount?: number
+          fine_type?: string
+          id?: string
+          issuance_id?: string
+          notes?: string | null
+          paid_amount?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_fines_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "library_books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_fines_issuance_id_fkey"
+            columns: ["issuance_id"]
+            isOneToOne: false
+            referencedRelation: "library_issuances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      library_issuances: {
+        Row: {
+          book_condition: string
+          book_id: string
+          created_at: string | null
+          distribution_type: string
+          id: string
+          issued_by: string | null
+          issued_date: string
+          notes: string | null
+          recipient_name: string | null
+          recipient_type: string
+          returned_date: string | null
+          selling_price: number | null
+          staff_id: string | null
+          status: string
+          student_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          book_condition?: string
+          book_id: string
+          created_at?: string | null
+          distribution_type?: string
+          id?: string
+          issued_by?: string | null
+          issued_date?: string
+          notes?: string | null
+          recipient_name?: string | null
+          recipient_type?: string
+          returned_date?: string | null
+          selling_price?: number | null
+          staff_id?: string | null
+          status?: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          book_condition?: string
+          book_id?: string
+          created_at?: string | null
+          distribution_type?: string
+          id?: string
+          issued_by?: string | null
+          issued_date?: string
+          notes?: string | null
+          recipient_name?: string | null
+          recipient_type?: string
+          returned_date?: string | null
+          selling_price?: number | null
+          staff_id?: string | null
+          status?: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_issuances_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "library_books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_issuances_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "library_issuances_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notices: {
         Row: {
           attachment_url: string | null

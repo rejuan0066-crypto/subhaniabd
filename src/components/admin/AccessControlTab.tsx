@@ -43,6 +43,7 @@ const ALL_ADMIN_PATHS = [
   { path: '/admin/resign-letters', label_en: 'Resign Letters', label_bn: 'পদত্যাগ পত্র' },
   { path: '/admin/joining-letters', label_en: 'Joining Letters', label_bn: 'যোগদান পত্র' },
   { path: '/admin/admission-letters', label_en: 'Admission Letters', label_bn: 'ভর্তি পত্র' },
+  { path: '/admin/library', label_en: 'Library', label_bn: 'লাইব্রেরি' },
 ];
 
 const BASE_ROLES = [
