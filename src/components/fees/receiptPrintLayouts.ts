@@ -102,33 +102,26 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
         ${style.showTimestamp !== false && data.paymentTimestamp ? `<span class="trx-item" style="font-size:${5.5 * fs}px">সময়: ${data.paymentTimestamp}</span>` : ''}
       </div>` : ''}
 
-      <!-- Form Fields -->
+      <!-- Form Fields - Grid Layout -->
       <div class="form-body">
-        <div class="form-row">
+        <div class="form-grid">
           <span class="field-label" style="font-size:${7 * fs}px">নাম:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.studentName}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentName}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">আইডি / রোল:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">ক্লাস / সেশন:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">বাবদ:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.feeType}</span></div>
-        </div>
-        <div class="form-row-split">
-          <div class="form-row half">
-            <span class="field-label" style="font-size:${7 * fs}px">টাকা:</span>
-            <div class="field-input amt"><span class="field-value amt-val" style="font-size:${7.5 * fs}px">৳ ${data.amount}</span></div>
-          </div>
-          <div class="form-row half">
-            <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
-            <div class="field-input${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
-          </div>
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.feeType}</span></div>
+
+          <span class="field-label" style="font-size:${7 * fs}px">টাকা:</span>
+          <div class="field-capsule amt"><span class="field-value amt-val" style="font-size:${7.5 * fs}px">৳ ${data.amount}</span></div>
+
+          <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
+          <div class="field-capsule${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
         </div>
       </div>
 
