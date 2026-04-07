@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useReceiptSettings } from '@/hooks/useReceiptSettings';
-import { Save, Loader2, RotateCcw, FileDown, Download, Trash2, Eye } from 'lucide-react';
+import { Save, Loader2, RotateCcw, FileDown, Download, Trash2, Eye, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { supabase } from '@/integrations/supabase/client';
