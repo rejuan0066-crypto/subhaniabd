@@ -372,40 +372,18 @@ const LibraryIssuance = () => {
               </div>
             )}
 
-            <div className="relative">
+            <div>
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
-              <Input
-                value={distributorName}
-                onChange={e => {
-                  const val = e.target.value;
-                  setDistributorName(val);
-                  setDistributorSearch(val);
-                  setShowDistributorList(true);
-                }}
-                onFocus={() => {
-                  if (!distributorName && autoDistributorName) {
-                    setDistributorName(autoDistributorName);
-                  }
-                  setShowDistributorList(true);
-                }}
-                onBlur={() => setTimeout(() => setShowDistributorList(false), 200)}
-                placeholder={autoDistributorName || (bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...')}
+              <SearchableSelect
+                options={distributorOptions}
+                value={distributorName || autoDistributorName}
+                onValueChange={setDistributorName}
+                placeholder={bn ? 'বিতরণকারীর নাম বাছুন' : 'Select distributor name'}
+                searchPlaceholder={bn ? 'স্টাফ/শিক্ষক খুঁজুন...' : 'Search staff/teacher...'}
+                allowCustom
+                customLabel={bn ? 'নতুন নাম লিখুন' : 'Use typed name'}
               />
-              {showDistributorList && distributorResults.length > 0 && (
-                <div className="absolute z-[100] w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
-                  {distributorResults.map((s: any) => (
-                    <button key={s.id} type="button" onMouseDown={e => e.preventDefault()} onClick={() => {
-                      setDistributorName(s.name_bn || s.name_en);
-                      setShowDistributorList(false);
-                      setDistributorSearch('');
-                    }}
-                      className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0">
-                      <span className="font-medium">{s.name_bn || s.name_en}</span>
-                      {s.staff_id && <span className="text-muted-foreground ml-2">({s.staff_id})</span>}
-                      {s.designation && <span className="text-muted-foreground ml-2">— {s.designation}</span>}
-                    </button>
-                  ))}
-                </div>
+            </div>
               )}
             </div>
 
