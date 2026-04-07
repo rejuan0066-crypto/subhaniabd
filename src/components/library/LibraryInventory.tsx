@@ -13,9 +13,19 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2, Search, BookOpen } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 
+const BOOK_CATEGORIES = [
+  { key: 'textbook', label: 'Textbook', label_bn: 'পাঠ্যবই' },
+  { key: 'reference', label: 'Reference', label_bn: 'রেফারেন্স' },
+  { key: 'religious', label: 'Religious', label_bn: 'ধর্মীয়' },
+  { key: 'general', label: 'General Knowledge', label_bn: 'সাধারণ জ্ঞান' },
+  { key: 'story', label: 'Story / Literature', label_bn: 'গল্প / সাহিত্য' },
+  { key: 'other', label: 'Other', label_bn: 'অন্যান্য' },
+];
+
 const emptyBook = {
   title: '', title_bn: '', author: '', author_bn: '',
-  class_id: '', subject_id: '', purchase_date: format(new Date(), 'yyyy-MM-dd'),
+  class_id: '', subject_id: '', book_category: 'textbook',
+  purchase_date: format(new Date(), 'yyyy-MM-dd'),
   buying_price: 0, total_copies: 1, purchased_by: '', notes: '',
 };
 
