@@ -94,6 +94,7 @@ const AdminStudentsFees = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const { data: sessions = [] } = useQuery({
     queryKey: ['academic_sessions_fee'],
     queryFn: async () => {
       const { data } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
