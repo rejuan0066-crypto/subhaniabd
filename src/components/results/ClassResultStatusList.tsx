@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, Eye, PenLine, ChevronDown, ChevronRight, FileSpreadsheet, FileDown, Printer, Loader2 } from 'lucide-react';
+import { CheckCircle, Clock, Eye, PenLine, ChevronDown, ChevronRight, FileSpreadsheet, FileDown, Printer, Loader2, Globe, GlobeLock } from 'lucide-react';
 
 interface ClassResultStatusListProps {
   classes: any[];
   resultStatusMap: Record<string, boolean>;
+  publishStatusMap?: Record<string, boolean>;
   onClassClick: (classId: string) => void;
   onExport: (classId: string, type: 'csv' | 'pdf' | 'print') => void;
+  onPublishToggle?: (classId: string, publish: boolean) => void;
   exportingClassId: string | null;
   examSessionName: string;
 }
@@ -16,8 +18,10 @@ interface ClassResultStatusListProps {
 const ClassResultStatusList = ({
   classes,
   resultStatusMap,
+  publishStatusMap = {},
   onClassClick,
   onExport,
+  onPublishToggle,
   exportingClassId,
   examSessionName,
 }: ClassResultStatusListProps) => {
@@ -52,6 +56,7 @@ const ClassResultStatusList = ({
       {isOpen && <div className="divide-y divide-border">
         {classes.map((cls: any) => {
           const hasResults = resultStatusMap[cls.id] || false;
+          const isPublished = publishStatusMap[cls.id] || false;
           const isExporting = exportingClassId === cls.id;
           return (
             <div
@@ -73,8 +78,25 @@ const ClassResultStatusList = ({
                     {bn ? 'অপেক্ষমান' : 'Pending'}
                   </Badge>
                 )}
+                {hasResults && isPublished && (
+                  <Badge className="bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30 gap-1">
+                    <Globe className="w-3 h-3" />
+                    {bn ? 'পাবলিশড' : 'Published'}
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-1.5">
+                {hasResults && onPublishToggle && (
+                  <Button
+                    variant={isPublished ? 'outline' : 'default'}
+                    size="sm"
+                    className={`gap-1.5 ${isPublished ? 'text-amber-600 border-amber-500/30 hover:bg-amber-500/10' : 'bg-sky-600 hover:bg-sky-700 text-white'}`}
+                    onClick={() => onPublishToggle(cls.id, !isPublished)}
+                  >
+                    {isPublished ? <GlobeLock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                    {isPublished ? (bn ? 'আনপাবলিশ' : 'Unpublish') : (bn ? 'পাবলিশ' : 'Publish')}
+                  </Button>
+                )}
                 {hasResults && (
                   <>
                     <Button
