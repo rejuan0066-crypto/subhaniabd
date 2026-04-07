@@ -116,7 +116,7 @@ const Dashboard = () => {
   const totalDonationAmount = donors.reduce((sum, d) => sum + Number(d.donation_amount || 0), 0);
   const activeDonors = donors.filter(d => d.status === 'active');
 
-  const openList = (title: string, table: 'students' | 'staff' | 'donors', filters: Record<string, any> = {}) => {
+  const openList = (title: string, table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results', filters: Record<string, any> = {}) => {
     setListDialog({ open: true, title, table, filters });
   };
 
