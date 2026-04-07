@@ -105,6 +105,8 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     }
 
     let approverName = '';
+    
+    // Try to get approver from pending_actions
     if (statusFilter === 'success') {
       const { data: approvals } = await supabase
         .from('pending_actions')
@@ -124,6 +126,25 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
           }
         }
       }
+    }
+
+    // Fallback: get principal/head from staff table
+    if (!approverName) {
+      const { data: headStaff } = await supabase
+        .from('staff')
+        .select('name_bn, name_en, designation')
+        .or('designation.ilike.%মুহতামিম%,designation.ilike.%প্রিন্সিপাল%,designation.ilike.%principal%,designation.ilike.%head%')
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+      if (headStaff) {
+        approverName = headStaff.name_bn || headStaff.name_en || '';
+      }
+    }
+
+    // Final fallback
+    if (!approverName) {
+      approverName = bn ? 'মুহতামিম' : 'Principal';
     }
 
     const studentMap = new Map(students.map((s: any) => [s.id, s]));
@@ -177,7 +198,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
           statusColor: statusFilter === 'pending' ? '#f59e0b' : '#22c55e',
           paymentMethod: p.payment_method || 'Cash',
           collectorName: getCollectorFromNotes(p.notes || ''),
-          approverName: statusFilter === 'success' ? (approverName || (bn ? 'এডমিন' : 'Admin')) : '',
+          approverName: approverName,
           institutionName: institution?.name || '',
           institutionNameEn: institution?.name_en || '',
           institutionAddress: institution?.address || '',
