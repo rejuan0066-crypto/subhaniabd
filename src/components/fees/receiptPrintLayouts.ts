@@ -188,14 +188,14 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
     font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.05); white-space: nowrap; pointer-events: none; z-index: 0; }
 
   /* Copy badge - vertical */
-  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 2px solid; border-radius: 4px;
-    padding: 3px 2px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 36px; z-index: 3; }
-  .copy-badge-text { font-size: 7px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 1.5px solid; border-radius: 3px;
+    padding: 2px 1.5px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 28px; z-index: 3; }
+  .copy-badge-text { font-size: 6px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
 
   /* Header */
-  .receipt-header { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 2.5mm; position: relative; z-index: 1; }
-  .header-logo { height: 22px; width: 22px; object-fit: contain; border-radius: 2px; flex-shrink: 0; background: rgba(255,255,255,0.15); padding: 1px; }
-  .header-logo-placeholder { height: 22px; width: 22px; flex-shrink: 0; }
+  .receipt-header { display: flex; align-items: center; gap: 1mm; padding: 1mm 2mm; position: relative; z-index: 1; }
+  .header-logo { height: 18px; width: 18px; object-fit: contain; border-radius: 2px; flex-shrink: 0; background: rgba(255,255,255,0.15); padding: 1px; }
+  .header-logo-placeholder { height: 18px; width: 18px; flex-shrink: 0; }
   .header-center { flex: 1; text-align: center; }
   .inst-name-bn { font-weight: 700; color: #fff; line-height: 1.2; }
   .inst-name-en { font-weight: 600; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 0.5px; }
