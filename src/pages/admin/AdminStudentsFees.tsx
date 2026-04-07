@@ -21,14 +21,7 @@ import FeeCategoryManager from '@/components/admin/FeeCategoryManager';
 
 const LazyPaymentDashboard = lazy(() => import('@/pages/admin/AdminPayments'));
 
-type FeeType = 'admission_fee' | 'monthly_fee' | 'exam_fee';
 type PaymentMethod = 'cash' | 'online';
-
-const feeTypeLabels: Record<FeeType, { bn: string; en: string }> = {
-  admission_fee: { bn: 'ভর্তি ফি', en: 'Admission Fee' },
-  monthly_fee: { bn: 'মাসিক ফি', en: 'Monthly Fee' },
-  exam_fee: { bn: 'পরীক্ষা ফি', en: 'Exam Fee' },
-};
 
 const generateTransactionId = () => {
   const now = new Date();
@@ -47,7 +40,8 @@ const AdminStudentsFees = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
-  const [feeType, setFeeType] = useState<FeeType | ''>('');
+  const [feeType, setFeeType] = useState('');
+  const [selectedFeeTypeObj, setSelectedFeeTypeObj] = useState<any>(null);
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
@@ -69,7 +63,25 @@ const AdminStudentsFees = () => {
     },
   });
 
-  // Check if payment gateway is configured
+  // Fetch dynamic fee types from fee_types table
+  const { data: dbFeeTypes = [] } = useQuery({
+    queryKey: ['fee_types_for_collection'],
+    queryFn: async () => {
+      const { data } = await supabase.from('fee_types').select('*, divisions(name_bn), classes(name_bn)').eq('is_active', true).order('fee_category').order('name_bn');
+      return data || [];
+    },
+  });
+
+  // Filter fee types based on found student's division/class
+  const applicableFeeTypes = foundStudent
+    ? dbFeeTypes.filter((ft: any) => {
+        if (ft.division_id && ft.division_id !== foundStudent.division_id) return false;
+        if (ft.class_id && ft.class_id !== foundStudent.class_id) return false;
+        return true;
+      })
+    : dbFeeTypes;
+
+
   const { data: gatewayConfig } = useQuery({
     queryKey: ['payment_gateway_config_check'],
     queryFn: async () => {
@@ -148,8 +160,10 @@ const AdminStudentsFees = () => {
       const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
       if (serialErr) throw new Error('Serial number generation failed');
 
+      const feeTypeName = selectedFeeTypeObj ? (bn ? selectedFeeTypeObj.name_bn : selectedFeeTypeObj.name) : feeType;
+
       const payload = {
-        fee_type: feeType,
+        fee_type: feeTypeName,
         amount: parseFloat(amount),
         transaction_id: txnId,
         status: isCash ? 'pending' : 'pending',
@@ -166,6 +180,21 @@ const AdminStudentsFees = () => {
 
       const { error } = await supabase.from('payments').insert(payload);
       if (error) throw error;
+
+      // Also insert into fee_payments for student profile tracking
+      const feePaymentPayload = {
+        fee_type_id: feeType,
+        student_id: foundStudent.id,
+        amount: parseFloat(amount),
+        paid_amount: isCash ? parseFloat(amount) : 0,
+        status: isCash ? 'paid' : 'pending',
+        receipt_number: serialNumber || txnId,
+        paid_at: isCash ? new Date().toISOString() : null,
+        month: new Date().toLocaleString('default', { month: 'long' }),
+        year: new Date().getFullYear(),
+      };
+      await supabase.from('fee_payments').insert(feePaymentPayload);
+
       return txnId;
     },
     onSuccess: async (txnId) => {
@@ -212,6 +241,7 @@ const AdminStudentsFees = () => {
   const handleReset = () => {
     setStep('form');
     setFeeType('');
+    setSelectedFeeTypeObj(null);
     setAmount('');
     setPaymentMethod('cash');
     setTransactionId('');
@@ -313,16 +343,30 @@ const AdminStudentsFees = () => {
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'ফি ধরন' : 'Fee Type'} <span className="text-destructive">*</span>
                 </label>
-                <Select value={feeType} onValueChange={(v) => setFeeType(v as FeeType)}>
+                <Select value={feeType} onValueChange={(v) => {
+                  setFeeType(v);
+                  const ftObj = applicableFeeTypes.find((ft: any) => ft.id === v);
+                  setSelectedFeeTypeObj(ftObj || null);
+                  if (ftObj) setAmount(String(ftObj.amount || ''));
+                }}>
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder={bn ? 'ফি ধরন নির্বাচন করুন' : 'Select Fee Type'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(feeTypeLabels) as FeeType[]).map((key) => (
-                      <SelectItem key={key} value={key}>{bn ? feeTypeLabels[key].bn : feeTypeLabels[key].en}</SelectItem>
+                    {applicableFeeTypes.map((ft: any) => (
+                      <SelectItem key={ft.id} value={ft.id}>
+                        {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
+                        {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
+                        {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {applicableFeeTypes.length === 0 && (
+                  <p className="text-xs text-destructive mt-1">
+                    {bn ? 'কোনো ফি ধরন পাওয়া যায়নি। প্রথমে "ফি ধরন" ট্যাব থেকে ফি যোগ করুন।' : 'No fee types found. Add fee types from the "Fee Types" tab first.'}
+                  </p>
+                )}
               </div>
 
               {/* Payment Method */}
@@ -421,7 +465,7 @@ const AdminStudentsFees = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">{bn ? 'ফি ধরন' : 'Fee Type'}</span>
                 <span className="font-semibold text-foreground">
-                  {feeType && (bn ? feeTypeLabels[feeType].bn : feeTypeLabels[feeType].en)}
+                  {selectedFeeTypeObj ? (bn ? selectedFeeTypeObj.name_bn : selectedFeeTypeObj.name) : feeType}
                 </span>
               </div>
               <div className="flex justify-between items-center">
