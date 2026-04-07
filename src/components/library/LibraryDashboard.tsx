@@ -125,13 +125,15 @@ const LibraryDashboard = () => {
           <div
             key={i}
             onClick={() => openList(s.label, s.type)}
-            className="card-elevated p-4 flex flex-col items-center text-center gap-2 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all"
+            className={`relative overflow-hidden rounded-xl p-4 flex flex-col items-center text-center gap-2 cursor-pointer hover:shadow-xl hover:scale-[1.03] transition-all bg-gradient-to-br ${s.gradient} text-white shadow-md`}
           >
-            <div className={`p-2 rounded-lg ${s.bg}`}>
-              <s.icon className={`w-5 h-5 ${s.color}`} />
+            <div className="p-2 rounded-lg bg-white/20 backdrop-blur-sm">
+              <s.icon className="w-5 h-5 text-white" />
             </div>
-            <p className="text-xl font-bold text-foreground">{s.value}</p>
-            <p className="text-xs text-muted-foreground">{s.label}</p>
+            <p className="text-2xl font-bold drop-shadow-sm">{s.value}</p>
+            <p className="text-xs text-white/90 font-medium">{s.label}</p>
+            <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10" />
+            <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-white/5" />
           </div>
         ))}
       </div>
