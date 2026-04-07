@@ -82,16 +82,16 @@ const LibraryDashboard = () => {
   };
 
   const stats = [
-    { label: bn ? 'মোট বই (টাইটেল)' : 'Total Books (Titles)', value: books.length, icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10', type: 'all-books' as ListType },
-    { label: bn ? 'মোট কপি' : 'Total Copies', value: totalCopies, icon: BookOpen, color: 'text-blue-600', bg: 'bg-blue-500/10', type: 'total-copies' as ListType },
-    { label: bn ? 'নতুন বই' : 'New Books', value: newBooks.length, icon: BookOpen, color: 'text-emerald-600', bg: 'bg-emerald-500/10', type: 'new-books' as ListType },
-    { label: bn ? 'পুরাতন বই' : 'Old Books', value: oldBooks.length, icon: BookOpen, color: 'text-amber-600', bg: 'bg-amber-500/10', type: 'old-books' as ListType },
-    { label: bn ? 'উপলব্ধ কপি' : 'Available Copies', value: availableCopies, icon: BookOpen, color: 'text-teal-600', bg: 'bg-teal-500/10', type: 'available' as ListType },
-    { label: bn ? 'ইস্যু আছে' : 'Currently Issued', value: activeIssuances.length, icon: ArrowRightLeft, color: 'text-indigo-600', bg: 'bg-indigo-500/10', type: 'issued' as ListType },
-    { label: bn ? 'হারানো' : 'Lost', value: lostCopies, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10', type: 'lost' as ListType },
-    { label: bn ? 'নষ্ট' : 'Damaged', value: damagedCopies, icon: BookX, color: 'text-orange-600', bg: 'bg-orange-500/10', type: 'damaged' as ListType },
-    { label: bn ? 'ইনভেন্টরি ভ্যালু' : 'Inventory Value', value: `৳${totalValue.toLocaleString()}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-500/10', type: 'value' as ListType },
-    { label: bn ? 'বিক্রয় আয়' : 'Sales Revenue', value: `৳${totalSaleValue.toLocaleString()}`, icon: DollarSign, color: 'text-cyan-600', bg: 'bg-cyan-500/10', type: 'sales' as ListType },
+    { label: bn ? 'মোট বই (টাইটেল)' : 'Total Books (Titles)', value: books.length, icon: BookOpen, gradient: 'from-violet-500 to-purple-600', type: 'all-books' as ListType },
+    { label: bn ? 'মোট কপি' : 'Total Copies', value: totalCopies, icon: BookOpen, gradient: 'from-blue-500 to-indigo-600', type: 'total-copies' as ListType },
+    { label: bn ? 'নতুন বই' : 'New Books', value: newBooks.length, icon: BookOpen, gradient: 'from-emerald-500 to-green-600', type: 'new-books' as ListType },
+    { label: bn ? 'পুরাতন বই' : 'Old Books', value: oldBooks.length, icon: BookOpen, gradient: 'from-amber-500 to-orange-600', type: 'old-books' as ListType },
+    { label: bn ? 'উপলব্ধ কপি' : 'Available Copies', value: availableCopies, icon: BookOpen, gradient: 'from-teal-500 to-cyan-600', type: 'available' as ListType },
+    { label: bn ? 'ইস্যু আছে' : 'Currently Issued', value: activeIssuances.length, icon: ArrowRightLeft, gradient: 'from-indigo-500 to-blue-600', type: 'issued' as ListType },
+    { label: bn ? 'হারানো' : 'Lost', value: lostCopies, icon: AlertTriangle, gradient: 'from-red-500 to-rose-600', type: 'lost' as ListType },
+    { label: bn ? 'নষ্ট' : 'Damaged', value: damagedCopies, icon: BookX, gradient: 'from-orange-500 to-red-500', type: 'damaged' as ListType },
+    { label: bn ? 'ইনভেন্টরি ভ্যালু' : 'Inventory Value', value: `৳${totalValue.toLocaleString()}`, icon: DollarSign, gradient: 'from-green-500 to-emerald-600', type: 'value' as ListType },
+    { label: bn ? 'বিক্রয় আয়' : 'Sales Revenue', value: `৳${totalSaleValue.toLocaleString()}`, icon: DollarSign, gradient: 'from-cyan-500 to-blue-500', type: 'sales' as ListType },
   ];
 
   // Get filtered list based on type
