@@ -104,32 +104,39 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       return null;
     }
 
-    let approverName = '';
-    
-    // Try to get approver from pending_actions
-    if (statusFilter === 'success') {
+    // Build a map of payment_id -> approver name from pending_actions
+    const approverMap = new Map<string, string>();
+    {
       const { data: approvals } = await supabase
         .from('pending_actions')
-        .select('payload, reviewed_by, user_name')
+        .select('target_id, reviewed_by, user_name')
         .eq('status', 'approved')
         .eq('target_table', 'payments');
 
       if (approvals && approvals.length > 0) {
         const reviewerIds = [...new Set(approvals.map((a: any) => a.reviewed_by).filter(Boolean))];
+        let profileMap = new Map<string, string>();
         if (reviewerIds.length > 0) {
           const { data: profiles } = await supabase
             .from('profiles')
             .select('id, full_name')
             .in('id', reviewerIds);
-          if (profiles && profiles.length > 0) {
-            approverName = profiles[0].full_name || '';
+          if (profiles) {
+            profiles.forEach((p: any) => profileMap.set(p.id, p.full_name || ''));
           }
         }
+        approvals.forEach((a: any) => {
+          if (a.target_id) {
+            const name = profileMap.get(a.reviewed_by) || a.user_name || '';
+            if (name) approverMap.set(a.target_id, name);
+          }
+        });
       }
     }
 
-    // Fallback: get principal/head from staff table
-    if (!approverName) {
+    // Fallback approver name from staff (principal/head)
+    let fallbackApprover = '';
+    {
       const { data: headStaff } = await supabase
         .from('staff')
         .select('name_bn, name_en, designation')
@@ -138,13 +145,11 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         .limit(1)
         .maybeSingle();
       if (headStaff) {
-        approverName = headStaff.name_bn || headStaff.name_en || '';
+        fallbackApprover = headStaff.name_bn || headStaff.name_en || '';
       }
     }
-
-    // Final fallback
-    if (!approverName) {
-      approverName = bn ? 'মুহতামিম' : 'Principal';
+    if (!fallbackApprover) {
+      fallbackApprover = bn ? 'মুহতামিম' : 'Principal';
     }
 
     const studentMap = new Map(students.map((s: any) => [s.id, s]));
@@ -152,7 +157,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
       : '';
 
-    return { payments, studentMap, sessionName, className, approverName };
+    return { payments, studentMap, sessionName, className, approverMap, fallbackApprover };
   };
 
   const getCollectorFromNotes = (notes: string) => {
