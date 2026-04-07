@@ -101,7 +101,7 @@ const LibraryIssuance = () => {
         issued_by: user?.id,
         status: 'issued',
         recipient_name: selectedRecipient.name_bn || selectedRecipient.name_en,
-        distributor_name: distributorName || null,
+        distributor_name: distributorName || autoDistributorName || null,
       };
       if (recipientType === 'student') payload.student_id = selectedRecipient.id;
       else payload.staff_id = selectedRecipient.id;
