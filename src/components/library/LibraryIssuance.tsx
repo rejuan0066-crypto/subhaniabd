@@ -229,14 +229,17 @@ const LibraryIssuance = () => {
     mutationFn: async (iss: any) => {
       await supabase.from('library_issuances').update({ status: 'returned', returned_date: format(new Date(), 'yyyy-MM-dd') }).eq('id', iss.id);
       const { data: book } = await supabase.from('library_books').select('available_copies').eq('id', iss.book_id).single();
-      await supabase.from('library_books').update({ available_copies: (book?.available_copies || 0) + 1 }).eq('id', iss.book_id);
+      await supabase.from('library_books').update({ 
+        available_copies: (book?.available_copies || 0) + 1,
+        condition: 'old'
+      }).eq('id', iss.book_id);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['library-issuances'] });
       qc.invalidateQueries({ queryKey: ['library-books-available'] });
       qc.invalidateQueries({ queryKey: ['library-books'] });
       qc.invalidateQueries({ queryKey: ['library-books-all'] });
-      toast.success(bn ? 'বই ফেরত নেওয়া হয়েছে' : 'Book returned');
+      toast.success(bn ? 'বই ফেরত নেওয়া হয়েছে (পুরাতন হিসেবে আপডেট)' : 'Book returned (marked as old)');
     },
   });
 
