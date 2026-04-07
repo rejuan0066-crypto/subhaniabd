@@ -4,36 +4,80 @@ import jsPDF from 'jspdf';
 /**
  * Takes receipt HTML string, renders it in a hidden iframe,
  * captures with html2canvas, and saves as PDF.
- * Ensures the output matches the designer preview exactly.
+ * Ensures the output matches the print preview exactly.
  */
 export async function downloadReceiptAsPdf(
   htmlContent: string,
   filename: string = 'receipt.pdf'
 ): Promise<void> {
-  // Strip <script> tags and @media screen blocks (handle multiple nested braces)
-  let cleanHtml = htmlContent
-    .replace(/<script>[\s\S]*?<\/script>/gi, '');
+  // Strip <script> tags
+  let cleanHtml = htmlContent.replace(/<script>[\s\S]*?<\/script>/gi, '');
 
-  // Remove @media screen { ... } blocks properly (handles multiple inner rules)
+  // Remove @media screen { ... } blocks (handle nested braces)
   cleanHtml = cleanHtml.replace(/@media\s+screen\s*\{([\s\S]*?)\n\s*\}/g, '');
 
-  // Inject PDF-specific overrides to match preview exactly
+  // Inject PDF-specific overrides to match print layout exactly
   const pdfOverrides = `
     <style>
-      html, body { 
-        background: #fff !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        width: 210mm !important;
+      html, body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 794px !important;
+        min-height: 1123px !important;
+        overflow: hidden !important;
       }
-      .page { 
-        background: #fff !important; 
-        margin: 0 !important; 
+      .page {
+        background: #fff !important;
+        margin: 0 !important;
         padding: 6mm 10mm !important;
-        box-shadow: none !important; 
+        box-shadow: none !important;
         border-radius: 0 !important;
-        width: 210mm !important;
-        max-width: 210mm !important;
+        width: 794px !important;
+        max-width: 794px !important;
+        min-height: 1123px !important;
+      }
+      /* Ensure mode-single fills the page height */
+      .mode-single {
+        min-height: calc(1123px - 12mm) !important;
+        align-items: stretch !important;
+      }
+      .mode-single .receipt-card {
+        min-height: calc(1123px - 14mm) !important;
+      }
+      /* Ensure mode-bulk fills properly */
+      .mode-bulk {
+        height: 1123px !important;
+        min-height: 1123px !important;
+      }
+      .mode-bulk .receipt-row {
+        height: calc(33.33% - 2mm) !important;
+      }
+      /* Force colors to render */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      /* Ensure receipt-card backgrounds and borders show */
+      .receipt-card {
+        background: #ffffff !important;
+      }
+      .receipt-header {
+        color: #fff !important;
+      }
+      /* Ensure field capsules render */
+      .field-capsule {
+        background: #f8f9fa !important;
+        border: 1px solid #e0e0e0 !important;
+      }
+      .field-capsule.amt {
+        background: #ecfdf5 !important;
+        border-color: #16a34a !important;
+      }
+      .field-capsule.status-paid {
+        background: #ecfdf5 !important;
+        border-color: #16a34a !important;
       }
     </style>
   `;
@@ -41,7 +85,8 @@ export async function downloadReceiptAsPdf(
 
   return new Promise((resolve, reject) => {
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1123px;border:none;';
+    // Use pixel dimensions matching A4 at 96dpi
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1123px;border:none;visibility:hidden;';
     document.body.appendChild(iframe);
 
     let hasCaptured = false;
@@ -76,7 +121,7 @@ export async function downloadReceiptAsPdf(
           await iframe.contentWindow.document.fonts.ready;
         }
 
-        // Wait for all images (logo, QR code)
+        // Wait for all images (logo, QR code, signature images)
         const images = Array.from(iframeDoc.images || []);
         await Promise.all(
           images.map(
@@ -93,7 +138,7 @@ export async function downloadReceiptAsPdf(
         );
 
         // Extra wait for font rendering & layout stabilization
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, 1200));
 
         const pages = iframeDoc.querySelectorAll('.page');
         const targets = pages.length > 0 ? Array.from(pages) : [iframeDoc.body];
@@ -104,22 +149,28 @@ export async function downloadReceiptAsPdf(
 
         for (let i = 0; i < targets.length; i++) {
           const target = targets[i] as HTMLElement;
+
+          // Force the target to have explicit dimensions for html2canvas
+          target.style.width = '794px';
+          target.style.minHeight = '1123px';
+
           const canvas = await html2canvas(target, {
-            scale: 3, // Higher quality for sharper text
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
             width: 794,
+            height: 1123,
             windowWidth: 794,
+            windowHeight: 1123,
             logging: false,
+            imageTimeout: 5000,
           });
 
-          const imgData = canvas.toDataURL('image/png'); // PNG for sharper text
-          const imgRatio = canvas.height / canvas.width;
-          const imgHeight = pdfWidth * imgRatio;
+          const imgData = canvas.toDataURL('image/png');
 
           if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         }
 
         pdf.save(filename);
@@ -138,6 +189,6 @@ export async function downloadReceiptAsPdf(
     // Fallback timeout
     setTimeout(() => {
       void captureAndDownload();
-    }, 4000);
+    }, 5000);
   });
 }
