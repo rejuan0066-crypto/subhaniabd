@@ -5,21 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CreditCard, Search, RefreshCw, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-type FeeTypeFilter = 'all' | 'admission_fee' | 'monthly_fee' | 'exam_fee' | 'donation';
-type StatusFilter = 'all' | 'pending' | 'success' | 'failed';
-
-const feeTypeLabels: Record<string, { bn: string; en: string }> = {
-  admission_fee: { bn: 'ভর্তি ফি', en: 'Admission Fee' },
-  monthly_fee: { bn: 'মাসিক ফি', en: 'Monthly Fee' },
-  exam_fee: { bn: 'পরীক্ষা ফি', en: 'Exam Fee' },
-  donation: { bn: 'দান', en: 'Donation' },
-};
 
 const statusConfig: Record<string, { bn: string; en: string; variant: 'default' | 'secondary' | 'destructive' }> = {
   pending: { bn: 'অপেক্ষমাণ', en: 'Pending', variant: 'secondary' },
@@ -32,23 +22,31 @@ const AdminPayments = () => {
   const bn = language === 'bn';
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [feeFilter, setFeeFilter] = useState<FeeTypeFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [feeFilter, setFeeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const { data: payments = [], isLoading } = useQuery({
-    queryKey: ['payments', feeFilter, statusFilter],
+    queryKey: ['payments', statusFilter],
     queryFn: async () => {
       let q = supabase
         .from('payments')
         .select('*, students(name_bn, name_en, roll_number)')
         .order('created_at', { ascending: false });
-      if (feeFilter !== 'all') q = q.eq('fee_type', feeFilter);
       if (statusFilter !== 'all') q = q.eq('status', statusFilter);
       const { data, error } = await q;
       if (error) throw error;
       return data;
     },
   });
+
+  // Dynamically extract unique fee_type values from payments
+  const feeTypeOptions = useMemo(() => {
+    const types = new Set<string>();
+    payments.forEach((p: any) => {
+      if (p.fee_type) types.add(p.fee_type);
+    });
+    return Array.from(types).sort();
+  }, [payments]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
@@ -63,12 +61,14 @@ const AdminPayments = () => {
   });
 
   const filtered = payments.filter((p: any) => {
+    if (feeFilter !== 'all' && p.fee_type !== feeFilter) return false;
     if (!search) return true;
     const term = search.toLowerCase();
     return (
       p.transaction_id?.toLowerCase().includes(term) ||
       p.payer_name?.toLowerCase().includes(term) ||
       p.payer_phone?.toLowerCase().includes(term) ||
+      p.fee_type?.toLowerCase().includes(term) ||
       p.students?.name_bn?.toLowerCase().includes(term) ||
       p.students?.name_en?.toLowerCase().includes(term) ||
       p.students?.roll_number?.toLowerCase().includes(term)
@@ -82,6 +82,20 @@ const AdminPayments = () => {
     failed: filtered.filter((p: any) => p.status === 'failed').length,
     amount: filtered.filter((p: any) => p.status === 'success').reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
   };
+
+  // Group by fee_type for category stats
+  const categoryStats = useMemo(() => {
+    const map: Record<string, { count: number; total: number; paid: number; pending: number }> = {};
+    filtered.forEach((p: any) => {
+      const key = p.fee_type || 'unknown';
+      if (!map[key]) map[key] = { count: 0, total: 0, paid: 0, pending: 0 };
+      map[key].count++;
+      map[key].total += Number(p.amount || 0);
+      if (p.status === 'success') map[key].paid += Number(p.amount || 0);
+      if (p.status === 'pending') map[key].pending += Number(p.amount || 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+  }, [filtered]);
 
   return (
     <AdminLayout>
@@ -116,6 +130,37 @@ const AdminPayments = () => {
           </div>
         </div>
 
+        {/* Category-wise Stats */}
+        {categoryStats.length > 0 && (
+          <div className="card-elevated p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">{bn ? 'ক্যাটাগরি অনুযায়ী সারাংশ' : 'Category-wise Summary'}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {categoryStats.map(([type, stats]) => (
+                <div key={type} className="rounded-lg border border-border p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs font-medium">{type}</Badge>
+                    <span className="text-xs text-muted-foreground">{stats.count} {bn ? 'টি' : ''}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div>
+                      <p className="font-bold text-foreground">৳{stats.total.toLocaleString()}</p>
+                      <p className="text-muted-foreground">{bn ? 'মোট' : 'Total'}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-success">৳{stats.paid.toLocaleString()}</p>
+                      <p className="text-muted-foreground">{bn ? 'আদায়' : 'Paid'}</p>
+                    </div>
+                    <div>
+                      <p className="font-bold text-warning">৳{stats.pending.toLocaleString()}</p>
+                      <p className="text-muted-foreground">{bn ? 'বকেয়া' : 'Pending'}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Filters */}
         <div className="card-elevated p-4">
           <div className="flex flex-col sm:flex-row gap-3">
@@ -128,19 +173,19 @@ const AdminPayments = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Select value={feeFilter} onValueChange={(v) => setFeeFilter(v as FeeTypeFilter)}>
-              <SelectTrigger className="w-full sm:w-44 bg-background">
+            <Select value={feeFilter} onValueChange={setFeeFilter}>
+              <SelectTrigger className="w-full sm:w-52 bg-background">
                 <Filter className="w-4 h-4 mr-1" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সব ধরন' : 'All Types'}</SelectItem>
-                {Object.entries(feeTypeLabels).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{bn ? v.bn : v.en}</SelectItem>
+                {feeTypeOptions.map((ft) => (
+                  <SelectItem key={ft} value={ft}>{ft}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-36 bg-background">
                 <SelectValue />
               </SelectTrigger>
@@ -184,24 +229,19 @@ const AdminPayments = () => {
               ) : (
                 filtered.map((p: any) => {
                   const st = statusConfig[p.status] || statusConfig.pending;
-                  const ft = feeTypeLabels[p.fee_type] || { bn: p.fee_type, en: p.fee_type };
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-mono text-xs">{p.transaction_id}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs">{bn ? ft.bn : ft.en}</Badge>
+                        <Badge variant="outline" className="text-xs">{p.fee_type}</Badge>
                       </TableCell>
                       <TableCell>
-                        {p.fee_type === 'donation' ? (
-                          <span className="text-muted-foreground">{p.payer_name || (bn ? 'বেনামী দাতা' : 'Anonymous')}</span>
-                        ) : (
-                          <div>
-                            <span className="font-medium text-foreground">{p.students?.name_bn || p.payer_name || '-'}</span>
-                            {p.students?.roll_number && (
-                              <span className="text-xs text-muted-foreground ml-1">(#{p.students.roll_number})</span>
-                            )}
-                          </div>
-                        )}
+                        <div>
+                          <span className="font-medium text-foreground">{p.students?.name_bn || p.payer_name || '-'}</span>
+                          {p.students?.roll_number && (
+                            <span className="text-xs text-muted-foreground ml-1">(#{p.students.roll_number})</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="font-bold text-foreground">৳{Number(p.amount).toLocaleString()}</TableCell>
                       <TableCell>
