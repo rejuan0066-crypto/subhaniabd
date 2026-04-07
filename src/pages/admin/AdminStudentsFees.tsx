@@ -342,16 +342,30 @@ const AdminStudentsFees = () => {
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'ফি ধরন' : 'Fee Type'} <span className="text-destructive">*</span>
                 </label>
-                <Select value={feeType} onValueChange={(v) => setFeeType(v as FeeType)}>
+                <Select value={feeType} onValueChange={(v) => {
+                  setFeeType(v);
+                  const ftObj = applicableFeeTypes.find((ft: any) => ft.id === v);
+                  setSelectedFeeTypeObj(ftObj || null);
+                  if (ftObj) setAmount(String(ftObj.amount || ''));
+                }}>
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder={bn ? 'ফি ধরন নির্বাচন করুন' : 'Select Fee Type'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(feeTypeLabels) as FeeType[]).map((key) => (
-                      <SelectItem key={key} value={key}>{bn ? feeTypeLabels[key].bn : feeTypeLabels[key].en}</SelectItem>
+                    {applicableFeeTypes.map((ft: any) => (
+                      <SelectItem key={ft.id} value={ft.id}>
+                        {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
+                        {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
+                        {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {applicableFeeTypes.length === 0 && (
+                  <p className="text-xs text-destructive mt-1">
+                    {bn ? 'কোনো ফি ধরন পাওয়া যায়নি। প্রথমে "ফি ধরন" ট্যাব থেকে ফি যোগ করুন।' : 'No fee types found. Add fee types from the "Fee Types" tab first.'}
+                  </p>
+                )}
               </div>
 
               {/* Payment Method */}
