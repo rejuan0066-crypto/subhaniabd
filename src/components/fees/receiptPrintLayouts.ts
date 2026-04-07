@@ -193,9 +193,10 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .watermark-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg);
     font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.04); white-space: nowrap; pointer-events: none; z-index: 0; }
 
-  /* Copy label */
-  .copy-label { position: absolute; top: 1.5mm; right: 1.5mm; font-size: 5.5px; font-weight: 700;
-    padding: 0.5px 6px; border-radius: 6px; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); z-index: 3; letter-spacing: 0.3px; }
+  /* Copy badge - vertical */
+  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 2px solid; border-radius: 4px;
+    padding: 3px 2px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 36px; z-index: 3; }
+  .copy-badge-text { font-size: 7px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
 
   /* Header */
   .receipt-header { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 2.5mm; position: relative; z-index: 1; }
