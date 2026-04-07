@@ -157,8 +157,13 @@ const AdminStudentsFees = () => {
       const isCash = paymentMethod === 'cash';
 
       // Get atomic serial number
-      const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
-      if (serialErr) throw new Error('Serial number generation failed');
+      let serialNumber = txnId; // fallback
+      try {
+        const { data: sn, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
+        if (!serialErr && sn) serialNumber = sn;
+      } catch (e) {
+        console.warn('Serial generation fallback to txnId');
+      }
 
       const feeTypeName = selectedFeeTypeObj ? (bn ? selectedFeeTypeObj.name_bn : selectedFeeTypeObj.name) : feeType;
 
