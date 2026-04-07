@@ -21,14 +21,7 @@ import FeeCategoryManager from '@/components/admin/FeeCategoryManager';
 
 const LazyPaymentDashboard = lazy(() => import('@/pages/admin/AdminPayments'));
 
-type FeeType = 'admission_fee' | 'monthly_fee' | 'exam_fee';
-type PaymentMethod = 'cash' | 'online';
-
-const feeTypeLabels: Record<FeeType, { bn: string; en: string }> = {
-  admission_fee: { bn: 'ভর্তি ফি', en: 'Admission Fee' },
-  monthly_fee: { bn: 'মাসিক ফি', en: 'Monthly Fee' },
-  exam_fee: { bn: 'পরীক্ষা ফি', en: 'Exam Fee' },
-};
+// Dynamic fee types from DB will be used instead of hardcoded ones
 
 const generateTransactionId = () => {
   const now = new Date();
