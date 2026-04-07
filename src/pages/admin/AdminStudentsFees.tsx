@@ -160,8 +160,10 @@ const AdminStudentsFees = () => {
       const { data: serialNumber, error: serialErr } = await supabase.rpc('get_next_receipt_serial');
       if (serialErr) throw new Error('Serial number generation failed');
 
+      const feeTypeName = selectedFeeTypeObj ? (bn ? selectedFeeTypeObj.name_bn : selectedFeeTypeObj.name) : feeType;
+
       const payload = {
-        fee_type: feeType,
+        fee_type: feeTypeName,
         amount: parseFloat(amount),
         transaction_id: txnId,
         status: isCash ? 'pending' : 'pending',
@@ -178,6 +180,21 @@ const AdminStudentsFees = () => {
 
       const { error } = await supabase.from('payments').insert(payload);
       if (error) throw error;
+
+      // Also insert into fee_payments for student profile tracking
+      const feePaymentPayload = {
+        fee_type_id: feeType,
+        student_id: foundStudent.id,
+        amount: parseFloat(amount),
+        paid_amount: isCash ? parseFloat(amount) : 0,
+        status: isCash ? 'paid' : 'pending',
+        receipt_number: serialNumber || txnId,
+        paid_at: isCash ? new Date().toISOString() : null,
+        month: new Date().toLocaleString('default', { month: 'long' }),
+        year: new Date().getFullYear(),
+      };
+      await supabase.from('fee_payments').insert(feePaymentPayload);
+
       return txnId;
     },
     onSuccess: async (txnId) => {
