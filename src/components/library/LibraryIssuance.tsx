@@ -458,12 +458,12 @@ const LibraryIssuance = () => {
             )}
 
             <div>
-              <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
+              <Label>{bn ? 'বিতরণকারী নাম' : 'Distributor Name'}</Label>
               <SearchableSelect
                 options={distributorOptions}
                 value={distributorName || autoDistributorName}
                 onValueChange={setDistributorName}
-                placeholder={bn ? 'বিতরণকারীর নাম বাছুন' : 'Select distributor name'}
+                placeholder={bn ? 'বিতরণকারী নাম বাছুন' : 'Select distributor name'}
                 searchPlaceholder={bn ? 'স্টাফ/শিক্ষক খুঁজুন...' : 'Search staff/teacher...'}
                 allowCustom
                 customLabel={bn ? 'নতুন নাম লিখুন' : 'Use typed name'}
