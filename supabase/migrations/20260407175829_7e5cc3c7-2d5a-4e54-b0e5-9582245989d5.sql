@@ -1,0 +1,1 @@
+ALTER TABLE public.library_books ADD COLUMN IF NOT EXISTS book_category text NOT NULL DEFAULT 'textbook';
