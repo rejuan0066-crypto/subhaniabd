@@ -396,6 +396,9 @@ const LibraryIssuance = () => {
               </Button>
             </>
           )}
+          <Button variant="outline" onClick={() => { setReturnSearch(''); setReturnOpen(true); }}>
+            <Undo2 className="w-4 h-4 mr-1.5" />{bn ? 'বই জমা নিন' : 'Accept Return'}
+          </Button>
           <Button onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
             <Plus className="w-4 h-4 mr-1.5" />{bn ? 'বই ইস্যু করুন' : 'Issue Book'}
           </Button>
