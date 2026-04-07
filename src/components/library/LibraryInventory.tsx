@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,7 +15,7 @@ import { Plus, Pencil, Trash2, Loader2, Search, BookOpen } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import SearchableSelect from '@/components/SearchableSelect';
 
-const BOOK_CATEGORIES = [
+const DEFAULT_BOOK_CATEGORIES = [
   { key: 'textbook', label: 'Textbook', label_bn: 'পাঠ্যবই' },
   { key: 'reference', label: 'Reference', label_bn: 'রেফারেন্স' },
   { key: 'religious', label: 'Religious', label_bn: 'ধর্মীয়' },
@@ -51,6 +51,24 @@ const LibraryInventory = () => {
       return data || [];
     },
   });
+
+  // Merge default categories with custom ones from existing books
+  const BOOK_CATEGORIES = useMemo(() => {
+    const defaultKeys = new Set(DEFAULT_BOOK_CATEGORIES.map(c => c.key));
+    const customCats = (books as any[])
+      .map(b => b.book_category)
+      .filter(c => c && !defaultKeys.has(c));
+    const uniqueCustom = [...new Set(customCats)];
+    return [
+      ...DEFAULT_BOOK_CATEGORIES,
+      ...uniqueCustom.map(c => ({ key: c, label: c, label_bn: c })),
+    ];
+  }, [books]);
+
+  const categoryOptions = useMemo(() =>
+    BOOK_CATEGORIES.map(c => ({ value: c.key, label: bn ? c.label_bn : c.label })),
+    [BOOK_CATEGORIES, bn]
+  );
 
   const { data: classes = [] } = useQuery({
     queryKey: ['classes-list'],
@@ -252,10 +270,15 @@ const LibraryInventory = () => {
             </div>
             <div>
               <Label>{bn ? 'ক্যাটাগরি' : 'Category'}</Label>
-              <Select value={form.book_category} onValueChange={v => setForm({ ...form, book_category: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{BOOK_CATEGORIES.map(c => <SelectItem key={c.key} value={c.key}>{bn ? c.label_bn : c.label}</SelectItem>)}</SelectContent>
-              </Select>
+              <SearchableSelect
+                options={categoryOptions}
+                value={form.book_category}
+                onValueChange={v => setForm({ ...form, book_category: v })}
+                placeholder={bn ? 'ক্যাটাগরি বাছুন' : 'Select category'}
+                searchPlaceholder={bn ? 'ক্যাটাগরি খুঁজুন...' : 'Search category...'}
+                allowCustom
+                customLabel={bn ? 'নতুন ক্যাটাগরি' : 'New category'}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
