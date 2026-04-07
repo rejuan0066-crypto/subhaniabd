@@ -82,9 +82,8 @@ const LibraryIssuance = () => {
   });
 
   const { data: distributorResults = [] } = useQuery({
-    queryKey: ['library-distributors', role],
+    queryKey: ['library-distributors'],
     queryFn: async () => {
-      // Fetch staff records
       const { data: staffData } = await supabase
         .from('staff')
         .select('id, user_id, name_bn, name_en, staff_id, designation, email')
@@ -94,7 +93,6 @@ const LibraryIssuance = () => {
       const staffRows = (staffData || []).map((entry: any) => ({ ...entry, source: 'staff' as const }));
       const staffUserIds = new Set(staffRows.filter((s: any) => s.user_id).map((s: any) => s.user_id));
 
-      // Also fetch profiles to get users not in staff table
       const { data: profilesData } = await supabase
         .from('profiles')
         .select('id, full_name, status');
@@ -106,17 +104,17 @@ const LibraryIssuance = () => {
       const roleMap: Record<string, string> = {};
       (rolesData || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
 
-      const mergedEntries = new Map<string, any>();
+      const entries: any[] = [];
 
-      // Add all staff first
+      // Add all staff
       staffRows.forEach((entry: any) => {
-        mergedEntries.set(entry.user_id || `staff-${entry.id}`, entry);
+        entries.push(entry);
       });
 
       // Add profiles not already in staff
       (profilesData || []).forEach((p: any) => {
         if (!staffUserIds.has(p.id) && p.full_name && p.status === 'approved') {
-          mergedEntries.set(p.id, {
+          entries.push({
             id: p.id,
             user_id: p.id,
             full_name: p.full_name,
@@ -126,7 +124,7 @@ const LibraryIssuance = () => {
         }
       });
 
-      return Array.from(mergedEntries.values()).sort((a, b) => {
+      return entries.sort((a, b) => {
         const nameA = a.name_bn || a.full_name || '';
         const nameB = b.name_bn || b.full_name || '';
         return nameA.localeCompare(nameB, 'bn');
