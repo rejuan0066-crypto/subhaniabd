@@ -39,7 +39,7 @@ const Dashboard = () => {
   const canViewStats = isAdmin || hasPermission('/admin', 'view');
   const [builderOpen, setBuilderOpen] = useState(false);
   const { sections } = useDashboardLayout();
-  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors'; filters: Record<string, any> }>({
+  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results'; filters: Record<string, any> }>({
     open: false, title: '', table: 'students', filters: {},
   });
 
@@ -116,7 +116,7 @@ const Dashboard = () => {
   const totalDonationAmount = donors.reduce((sum, d) => sum + Number(d.donation_amount || 0), 0);
   const activeDonors = donors.filter(d => d.status === 'active');
 
-  const openList = (title: string, table: 'students' | 'staff' | 'donors', filters: Record<string, any> = {}) => {
+  const openList = (title: string, table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results', filters: Record<string, any> = {}) => {
     setListDialog({ open: true, title, table, filters });
   };
 
@@ -141,7 +141,7 @@ const Dashboard = () => {
     { key: 'poor', label: bn ? 'গরীব ছাত্র' : 'Poor Students', value: poorStudents.length, icon: Users, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'গরীব ছাত্র' : 'Poor Students', 'students', { student_category: 'poor' }) },
     { key: 'teacher_child', label: bn ? 'শিক্ষক সন্তান' : "Teacher's Child", value: teacherChildStudents.length, icon: GraduationCap, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'শিক্ষক সন্তান' : "Teacher's Child", 'students', { student_category: 'teacher_child' }) },
     { key: 'free', label: bn ? 'বিনা বেতন ছাত্র' : 'Free Students', value: freeStudents.length, icon: Heart, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'বিনা বেতন ছাত্র' : 'Free Students', 'students', { is_free: true }) },
-    { key: 'general_paid', label: bn ? 'সাধারণ ছাত্র ও পরিশোধিত' : 'Non-Orphan&Poor + Amounts', value: `${generalStudents.length} (৳${generalPaidAmount.toLocaleString()})`, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { key: 'general_paid', label: bn ? 'সাধারণ ছাত্র ও পরিশোধিত' : 'Non-Orphan&Poor + Amounts', value: `${generalStudents.length} (৳${generalPaidAmount.toLocaleString()})`, icon: Users, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'সাধারণ ছাত্র' : 'General Students', 'students', { student_category: 'general' }) },
     { key: 'resident', label: bn ? 'আবাসিক ছাত্র' : 'Resident Students', value: residentStudents.length, icon: HomeIcon, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'আবাসিক ছাত্র' : 'Resident Students', 'students', { residence_type: 'resident' }) },
     { key: 'non_resident', label: bn ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', value: nonResidentStudents.length, icon: HomeIcon, color: 'text-muted-foreground', bg: 'bg-muted/50', onClick: () => openList(bn ? 'অনাবাসিক ছাত্র' : 'Non-Resident Students', 'students', { residence_type: 'non-resident' }) },
   ];
@@ -149,17 +149,17 @@ const Dashboard = () => {
   const studentDetailStats: StatCard[] = [
     { key: 'new_students', label: bn ? 'নতুন ছাত্র' : 'New Students', value: newStudents.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'নতুন ছাত্র' : 'New Students', 'students') },
     { key: 'old_students', label: bn ? 'পুরাতন ছাত্র' : 'Old Students', value: oldStudents.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'পুরাতন ছাত্র' : 'Old Students', 'students') },
-    { key: 'divisions', label: bn ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10' },
-    { key: 'subjects', label: bn ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10' },
-    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10' },
-    { key: 'results', label: bn ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
+    { key: 'divisions', label: bn ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'বিভাগসমূহ' : 'Divisions', 'divisions') },
+    { key: 'subjects', label: bn ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10', onClick: () => openList(bn ? 'বিষয়সমূহ' : 'Subjects', 'subjects') },
+    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'পরীক্ষাসমূহ' : 'Exams', 'exams') },
+    { key: 'results', label: bn ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'ফলাফলসমূহ' : 'Results', 'results') },
     { key: 'admission_history', label: bn ? 'ভর্তি ইতিহাস' : 'Admission History', value: students.length, icon: History, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'ভর্তি ইতিহাস' : 'Admission History', 'students') },
   ];
 
   const donorCards: StatCard[] = [
     { key: 'total_donors', label: bn ? 'মোট দাতা' : 'Total Donors', value: donors.length, icon: Heart, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'মোট দাতা' : 'Total Donors', 'donors') },
     { key: 'active_donors', label: bn ? 'সক্রিয় দাতা' : 'Active Donors', value: activeDonors.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'সক্রিয় দাতা' : 'Active Donors', 'donors', { status: 'active' }) },
-    { key: 'total_donations', label: bn ? 'মোট অনুদান' : 'Total Donations', value: `৳${totalDonationAmount.toLocaleString()}`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/10' },
+    { key: 'total_donations', label: bn ? 'মোট অনুদান' : 'Total Donations', value: `৳${totalDonationAmount.toLocaleString()}`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'সকল দাতা' : 'All Donors', 'donors') },
   ];
 
   const feeCategories = [
