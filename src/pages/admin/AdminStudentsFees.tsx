@@ -54,8 +54,46 @@ const AdminStudentsFees = () => {
   const [rollNumber, setRollNumber] = useState('');
   const [foundStudent, setFoundStudent] = useState<any>(null);
   const [searching, setSearching] = useState(false);
+  // Search history
+  const HISTORY_KEY = 'fee_search_history';
+  const MAX_HISTORY = 8;
+  const [searchHistory, setSearchHistory] = useState<{ value: string; label: string; mode: SearchMode; time: number }[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const historyRef = useRef<HTMLDivElement>(null);
 
-  const { data: sessions = [] } = useQuery({
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      setSearchHistory(saved);
+    } catch { setSearchHistory([]); }
+  }, []);
+
+  const addToHistory = useCallback((value: string, label: string, mode: SearchMode) => {
+    setSearchHistory(prev => {
+      const filtered = prev.filter(h => h.value !== value);
+      const next = [{ value, label, mode, time: Date.now() }, ...filtered].slice(0, MAX_HISTORY);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const removeFromHistory = useCallback((value: string) => {
+    setSearchHistory(prev => {
+      const next = prev.filter(h => h.value !== value);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Close history dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (historyRef.current && !historyRef.current.contains(e.target as Node)) setShowHistory(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
     queryKey: ['academic_sessions_fee'],
     queryFn: async () => {
       const { data } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
