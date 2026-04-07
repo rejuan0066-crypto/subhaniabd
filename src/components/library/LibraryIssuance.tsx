@@ -384,8 +384,6 @@ const LibraryIssuance = () => {
                 customLabel={bn ? 'নতুন নাম লিখুন' : 'Use typed name'}
               />
             </div>
-              )}
-            </div>
 
             <Button onClick={() => issueMut.mutate()} disabled={!bookId || !selectedRecipient || issueMut.isPending} className="btn-primary-gradient">
               {issueMut.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
