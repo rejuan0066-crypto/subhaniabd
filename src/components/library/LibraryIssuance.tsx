@@ -26,6 +26,8 @@ const LibraryIssuance = () => {
   const { settings } = useWebsiteSettings();
 
   const [open, setOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [returnSearch, setReturnSearch] = useState('');
   const [lossOpen, setLossOpen] = useState(false);
   const [lossTarget, setLossTarget] = useState<any>(null);
   const [fineAmount, setFineAmount] = useState(0);
