@@ -15,7 +15,7 @@ import { Plus, Pencil, Trash2, Loader2, Search, BookOpen } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import SearchableSelect from '@/components/SearchableSelect';
 
-const BOOK_CATEGORIES = [
+const DEFAULT_BOOK_CATEGORIES = [
   { key: 'textbook', label: 'Textbook', label_bn: 'পাঠ্যবই' },
   { key: 'reference', label: 'Reference', label_bn: 'রেফারেন্স' },
   { key: 'religious', label: 'Religious', label_bn: 'ধর্মীয়' },
