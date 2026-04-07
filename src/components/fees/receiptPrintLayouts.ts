@@ -127,7 +127,7 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
           </div>
           <div class="form-row half">
             <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
-            <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor};font-weight:700">${data.status}</span></div>
+            <div class="field-input${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   const pc = style.primaryColor || '#1a5c2e';
   return `
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans Bengali', sans-serif; background: #fff; color: #1a1a1a;
+  body { font-family: 'Noto Sans Bengali', sans-serif; background: #1a1d23; color: #e8eaed;
     -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
 
   .page { width: 210mm; min-height: auto; padding: 6mm 10mm; display: flex; flex-direction: column; page-break-after: always; overflow: hidden; position: relative; }
@@ -166,92 +166,95 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .mode-single { flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
   .mode-single .receipt-card { width: 50%; height: auto; }
   .mode-single .cut-v { 
-    width: 0; border-left: 1.5px dashed #aaa; position: relative; align-self: stretch;
+    width: 0; border-left: 1.5px dashed #555; position: relative; align-self: stretch;
   }
   .mode-single .cut-v::after {
-    content: '✂'; position: absolute; top: 4px; left: -7px; font-size: 10px; color: #999; background: #fff; padding: 2px 0;
+    content: '✂'; position: absolute; top: 4px; left: -7px; font-size: 10px; color: #777; background: #1e2128; padding: 2px 0;
   }
 
   /* MODE 2: Bulk - 3×2 grid */
   .mode-bulk { flex-wrap: wrap; flex-direction: row; gap: 0; height: 297mm; }
   .mode-bulk .receipt-row { display: flex; width: 100%; height: calc(33.33% - 2mm); }
   .mode-bulk .receipt-card { width: 50%; }
-  .mode-bulk .cut-v { width: 0; border-left: 1.5px dashed #aaa; }
-  .mode-bulk .cut-h { border-top: 1.5px dashed #aaa; width: 100%; position: relative; }
-  .mode-bulk .cut-h::after { content: '✂'; position: absolute; left: 4px; top: -7px; font-size: 10px; color: #999; background: #fff; padding: 0 3px; }
+  .mode-bulk .cut-v { width: 0; border-left: 1.5px dashed #555; }
+  .mode-bulk .cut-h { border-top: 1.5px dashed #555; width: 100%; position: relative; }
+  .mode-bulk .cut-h::after { content: '✂'; position: absolute; left: 4px; top: -7px; font-size: 10px; color: #777; background: #1e2128; padding: 0 3px; }
 
   .receipt-card {
     position: relative; overflow: hidden;
-    border: 1.5px solid ${pc}; border-radius: 3px;
+    border: 1.5px solid ${pc}; border-radius: 6px;
     padding: 0; display: flex; flex-direction: column;
+    background: #1e2430;
   }
 
   /* Watermark */
-  .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; opacity: 0.05; pointer-events: none; }
-  .watermark img { width: 60px; height: 60px; object-fit: contain; }
+  .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; opacity: 0.04; pointer-events: none; }
+  .watermark img { width: 70px; height: 70px; object-fit: contain; }
   .watermark-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg);
-    font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.04); white-space: nowrap; pointer-events: none; z-index: 0; }
+    font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.04); white-space: nowrap; pointer-events: none; z-index: 0; }
 
   /* Copy label */
   .copy-label { position: absolute; top: 1.5mm; right: 1.5mm; font-size: 5.5px; font-weight: 700;
-    padding: 0.5px 6px; border-radius: 6px; background: rgba(255,255,255,0.3); color: #fff; z-index: 3; letter-spacing: 0.3px; }
+    padding: 0.5px 6px; border-radius: 6px; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); z-index: 3; letter-spacing: 0.3px; }
 
-  /* Header - thinner */
+  /* Header */
   .receipt-header { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 2.5mm; position: relative; z-index: 1; }
   .header-logo { height: 22px; width: 22px; object-fit: contain; border-radius: 2px; flex-shrink: 0; background: rgba(255,255,255,0.15); padding: 1px; }
   .header-logo-placeholder { height: 22px; width: 22px; flex-shrink: 0; }
   .header-center { flex: 1; text-align: center; }
   .inst-name-bn { font-weight: 700; color: #fff; line-height: 1.2; }
-  .inst-name-en { font-weight: 600; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 0.5px; }
+  .inst-name-en { font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 0.5px; }
   .inst-detail { color: rgba(255,255,255,0.7); line-height: 1.2; }
 
   /* Title row */
-  .title-row { display: flex; align-items: center; justify-content: space-between; padding: 1mm 2.5mm 0; position: relative; z-index: 1; }
+  .title-row { display: flex; align-items: center; justify-content: space-between; padding: 1.5mm 2.5mm 0.5mm; position: relative; z-index: 1; }
   .serial-box { display: flex; align-items: center; gap: 1mm; }
-  .serial-capsule { font-weight: 700; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1px 6px; min-width: 40px; min-height: 12px; text-align: center; display: inline-block; }
+  .serial-label { font-weight: 600; color: #adb5bd; white-space: nowrap; }
+  .serial-capsule { font-weight: 700; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px; padding: 1px 6px; min-width: 40px; min-height: 14px; text-align: center; display: inline-block; color: #e8eaed; }
   .date-box-row { display: flex; align-items: center; gap: 1mm; }
-  .date-label-text { font-weight: 600; color: #555; white-space: nowrap; }
-  .date-capsule { font-weight: 600; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1px 6px; min-width: 55px; min-height: 12px; color: #111; white-space: nowrap; display: inline-block; }
+  .date-label-text { font-weight: 600; color: #adb5bd; white-space: nowrap; }
+  .date-capsule { font-weight: 600; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px; padding: 1px 6px; min-width: 55px; min-height: 14px; color: #e8eaed; white-space: nowrap; display: inline-block; }
   .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 12px; border-radius: 8px; white-space: nowrap; }
 
-  .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0 2.5mm; position: relative; z-index: 1; }
-  .trx-item { color: #666; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
-  .trx-item strong { color: #333; }
+  .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0.5mm 2.5mm; position: relative; z-index: 1; }
+  .trx-item { color: #8b95a5; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
+  .trx-item strong { color: #c8d0da; }
 
-  /* Form body - compact */
-  .form-body { flex: 1; padding: 2.5mm 2.5mm 1mm; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.5mm; }
-  .form-row { display: flex; align-items: center; gap: 1mm; }
-  .form-row-split { display: flex; gap: 1.5mm; }
+  /* Form body */
+  .form-body { flex: 1; padding: 2.5mm 2.5mm 1mm; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.8mm; }
+  .form-row { display: flex; align-items: center; gap: 1.5mm; }
+  .form-row-split { display: flex; gap: 2mm; }
   .form-row.half { flex: 1; }
-  .field-label { width: 62px; flex-shrink: 0; font-weight: 600; color: #444; white-space: nowrap; }
-  .field-input { flex: 1; min-height: 18px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
-    display: flex; align-items: center; padding: 2px 6px; }
-  .field-input.amt { background: #ecfdf5; border-color: ${pc}44; }
-  .field-value { color: #111; white-space: nowrap; overflow: visible; }
-  .amt-val { font-weight: 700; color: ${pc}; }
+  .field-label { width: 62px; flex-shrink: 0; font-weight: 600; color: #adb5bd; white-space: nowrap; text-align: left; }
+  .field-input { flex: 1; min-height: 18px; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px;
+    display: flex; align-items: center; padding: 2px 8px; }
+  .field-input.amt { background: #0d3320; border-color: #00e676; }
+  .field-value { color: #e8eaed; white-space: nowrap; overflow: visible; }
+  .amt-val { font-weight: 700; color: #00e676; }
+  .field-input.status-paid { background: #0d3320; border-color: #00e676; }
+  .field-input.status-paid .field-value { color: #00e676; font-weight: 700; }
 
   /* QR in title row */
   .qr-title-box { display: flex; align-items: center; justify-content: center; }
-  .qr-title-img { width: 28px; height: 28px; }
+  .qr-title-img { width: 28px; height: 28px; border-radius: 3px; }
 
   /* Signatures */
   .sig-footer { display: flex; justify-content: space-between; padding: 0 4mm 2mm; margin-top: auto; padding-top: 10mm; position: relative; z-index: 1; }
   .sig-block { text-align: center; width: 35%; }
-  .sig-line { border-top: 1px dashed; margin-bottom: 0.5mm; }
-  .sig-title { font-weight: 600; color: #555; }
-  .sig-name { color: #888; }
+  .sig-line { border-top: 1px dashed #4a5568; margin-bottom: 0.5mm; }
+  .sig-title { font-weight: 600; color: #8b95a5; }
+  .sig-name { color: #6b7688; }
 
   @media print {
     @page { size: A4; margin: 0; }
-    html, body { width: 210mm; background: #fff !important; }
+    html, body { width: 210mm; background: #1a1d23 !important; }
     body { padding: 0; }
     .page { padding: 6mm 10mm; break-inside: avoid; }
-    /* Hide everything except receipt */
     nav, header, aside, footer, .sidebar, .no-print { display: none !important; }
   }
   @media screen {
-    body { background: #e5e7eb; padding: 20px; }
-    .page { background: white; margin: 0 auto 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); max-width: 210mm; }
+    body { background: #12151a; padding: 20px; }
+    .page { background: #1a1d23; margin: 0 auto 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); max-width: 210mm; border-radius: 8px; }
   }
 `;
 }
