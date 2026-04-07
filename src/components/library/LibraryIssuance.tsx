@@ -84,67 +84,53 @@ const LibraryIssuance = () => {
   const { data: distributorResults = [] } = useQuery({
     queryKey: ['library-distributors', role],
     queryFn: async () => {
-      const { data: staffData, error: staffError } = await supabase
+      // Fetch staff records
+      const { data: staffData } = await supabase
         .from('staff')
         .select('id, user_id, name_bn, name_en, staff_id, designation, email')
         .order('name_bn')
         .limit(200);
 
-      if (staffError) throw staffError;
-
       const staffRows = (staffData || []).map((entry: any) => ({ ...entry, source: 'staff' as const }));
+      const staffUserIds = new Set(staffRows.filter((s: any) => s.user_id).map((s: any) => s.user_id));
 
-      if (!isAdminRole(role)) {
-        return staffRows;
-      }
+      // Also fetch profiles to get users not in staff table
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, status');
 
-      const { data: usersResponse, error: usersError } = await supabase.functions.invoke('manage-users', {
-        method: 'GET',
-      });
+      const { data: rolesData } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
 
-      if (usersError) {
-        console.error('Failed to fetch users for distributor list:', usersError);
-        return staffRows;
-      }
-
-      const allUsers = Array.isArray(usersResponse?.users) ? usersResponse.users : [];
-      const staffByUserId = new Map(
-        staffRows
-          .filter((entry: any) => entry.user_id)
-          .map((entry: any) => [entry.user_id, entry])
-      );
+      const roleMap: Record<string, string> = {};
+      (rolesData || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
 
       const mergedEntries = new Map<string, any>();
 
+      // Add all staff first
       staffRows.forEach((entry: any) => {
         mergedEntries.set(entry.user_id || `staff-${entry.id}`, entry);
       });
 
-      allUsers.forEach((account: any) => {
-        const linkedStaff = staffByUserId.get(account.id);
-
-        if (linkedStaff) {
-          mergedEntries.set(account.id, {
-            ...linkedStaff,
-            full_name: account.full_name,
-            email: account.email,
-            role: account.role,
-            source: 'staff' as const,
+      // Add profiles not already in staff
+      (profilesData || []).forEach((p: any) => {
+        if (!staffUserIds.has(p.id) && p.full_name && p.status === 'approved') {
+          mergedEntries.set(p.id, {
+            id: p.id,
+            user_id: p.id,
+            full_name: p.full_name,
+            role: roleMap[p.id] || 'none',
+            source: 'user' as const,
           });
-          return;
         }
-
-        mergedEntries.set(account.id, {
-          id: account.id,
-          user_id: account.id,
-          full_name: account.full_name,
-          email: account.email,
-          role: account.role,
-          source: 'user' as const,
-        });
       });
 
-      return Array.from(mergedEntries.values());
+      return Array.from(mergedEntries.values()).sort((a, b) => {
+        const nameA = a.name_bn || a.full_name || '';
+        const nameB = b.name_bn || b.full_name || '';
+        return nameA.localeCompare(nameB, 'bn');
+      });
     },
     enabled: open,
   });
