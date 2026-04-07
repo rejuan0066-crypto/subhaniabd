@@ -66,19 +66,17 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
         ? `<div class="watermark"><img src="${data.logoUrl}" /></div>`
         : `<div class="watermark-text">${data.institutionName}</div>`) : ''}
 
-      <!-- Copy Label -->
-      <div class="copy-label">${copyLabel}</div>
-
       <!-- Header -->
       <div class="receipt-header" style="background:linear-gradient(135deg, ${pc} 0%, ${pc}dd 100%);">
         ${data.logoUrl ? `<img src="${data.logoUrl}" class="header-logo" />` : '<div class="header-logo-placeholder"></div>'}
         <div class="header-center">
           <div class="inst-name-bn" style="font-size:${10 * fs}px">${data.institutionName}</div>
           ${data.institutionNameEn ? `<div class="inst-name-en" style="font-size:${6.5 * fs}px">${data.institutionNameEn}</div>` : ''}
-          <div class="inst-detail" style="font-size:${5.5 * fs}px">${data.institutionAddress}</div>
-          ${data.institutionPhone ? `<div class="inst-detail" style="font-size:${5.5 * fs}px">যোগাযোগ: ${data.institutionPhone}</div>` : ''}
+          <div class="inst-detail" style="font-size:${5.5 * fs}px">${data.institutionAddress}${data.institutionPhone ? ` | যোগাযোগ: ${data.institutionPhone}` : ''}</div>
         </div>
-        ${data.logoUrl ? `<img src="${data.logoUrl}" class="header-logo" />` : '<div class="header-logo-placeholder"></div>'}
+        <div class="copy-badge" style="border-color:${pc}">
+          <span class="copy-badge-text" style="color:${pc}">${copyLabel}</span>
+        </div>
       </div>
 
       <!-- Title Row -->
