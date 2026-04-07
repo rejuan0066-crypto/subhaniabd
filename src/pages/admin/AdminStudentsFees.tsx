@@ -464,7 +464,7 @@ const AdminStudentsFees = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">{bn ? 'ফি ধরন' : 'Fee Type'}</span>
                 <span className="font-semibold text-foreground">
-                  {feeType && (bn ? feeTypeLabels[feeType].bn : feeTypeLabels[feeType].en)}
+                  {selectedFeeTypeObj ? (bn ? selectedFeeTypeObj.name_bn : selectedFeeTypeObj.name) : feeType}
                 </span>
               </div>
               <div className="flex justify-between items-center">
