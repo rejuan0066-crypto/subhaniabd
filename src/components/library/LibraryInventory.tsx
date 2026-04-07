@@ -33,6 +33,7 @@ const emptyBook = {
 
 const LibraryInventory = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const bn = language === 'bn';
   const qc = useQueryClient();
 
