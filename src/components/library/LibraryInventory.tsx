@@ -63,6 +63,7 @@ const LibraryInventory = () => {
       const payload: any = {
         title: form.title, title_bn: form.title_bn, author: form.author, author_bn: form.author_bn,
         class_id: form.class_id || null, subject_id: form.subject_id || null,
+        book_category: form.book_category || 'textbook',
         purchase_date: form.purchase_date, buying_price: Number(form.buying_price) || 0,
         total_copies: Number(form.total_copies) || 1, purchased_by: form.purchased_by, notes: form.notes,
         available_copies: Number(form.total_copies) || 1,
