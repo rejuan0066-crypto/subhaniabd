@@ -26,6 +26,8 @@ const LibraryIssuance = () => {
   const { settings } = useWebsiteSettings();
 
   const [open, setOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [returnSearch, setReturnSearch] = useState('');
   const [lossOpen, setLossOpen] = useState(false);
   const [lossTarget, setLossTarget] = useState<any>(null);
   const [fineAmount, setFineAmount] = useState(0);
@@ -394,6 +396,9 @@ const LibraryIssuance = () => {
               </Button>
             </>
           )}
+          <Button variant="outline" onClick={() => { setReturnSearch(''); setReturnOpen(true); }}>
+            <Undo2 className="w-4 h-4 mr-1.5" />{bn ? 'বই জমা নিন' : 'Accept Return'}
+          </Button>
           <Button onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
             <Plus className="w-4 h-4 mr-1.5" />{bn ? 'বই ইস্যু করুন' : 'Issue Book'}
           </Button>
@@ -591,6 +596,84 @@ const LibraryIssuance = () => {
               {markLostMut.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
               {bn ? 'হারানো হিসেবে সেভ করুন' : 'Save as Lost'}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Return Book Dialog */}
+      <Dialog open={returnOpen} onOpenChange={setReturnOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{bn ? 'বই জমা নিন' : 'Accept Book Return'}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder={bn ? 'গ্রহীতার নাম বা বইয়ের নাম দিয়ে খুঁজুন...' : 'Search by recipient or book name...'}
+                value={returnSearch}
+                onChange={e => setReturnSearch(e.target.value)}
+                className="pl-9"
+                autoFocus
+              />
+            </div>
+            {(() => {
+              const issuedBooks = issuances.filter((i: any) => {
+                if (i.status !== 'issued') return false;
+                if (!returnSearch) return true;
+                const q = returnSearch.toLowerCase();
+                return i.recipient_name?.toLowerCase().includes(q) ||
+                  i.library_books?.title?.toLowerCase().includes(q) ||
+                  i.library_books?.title_bn?.includes(q);
+              });
+              if (issuedBooks.length === 0) {
+                return (
+                  <p className="text-center text-muted-foreground py-8">
+                    {bn ? 'কোনো ইস্যুকৃত বই পাওয়া যায়নি' : 'No issued books found'}
+                  </p>
+                );
+              }
+              return (
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{bn ? 'বই' : 'Book'}</TableHead>
+                        <TableHead>{bn ? 'গ্রহীতা' : 'Recipient'}</TableHead>
+                        <TableHead>{bn ? 'তারিখ' : 'Date'}</TableHead>
+                        <TableHead className="text-center">{bn ? 'জমা নিন' : 'Return'}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {issuedBooks.map((i: any) => (
+                        <TableRow key={i.id}>
+                          <TableCell className="font-medium">
+                            {bn ? (i.library_books?.title_bn || i.library_books?.title) : i.library_books?.title}
+                          </TableCell>
+                          <TableCell>
+                            <span>{i.recipient_name}</span>
+                            <br />
+                            <span className="text-xs text-muted-foreground">
+                              {i.recipient_type === 'student' ? (bn ? 'ছাত্র' : 'Student') : (bn ? 'স্টাফ' : 'Staff')}
+                            </span>
+                          </TableCell>
+                          <TableCell>{format(new Date(i.issued_date), 'dd/MM/yyyy')}</TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-emerald-600 border-emerald-300 hover:bg-emerald-50"
+                              disabled={returnMut.isPending}
+                              onClick={() => returnMut.mutate(i)}
+                            >
+                              <Undo2 className="w-3.5 h-3.5 mr-1" />
+                              {bn ? 'জমা নিন' : 'Return'}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })()}
           </div>
         </DialogContent>
       </Dialog>
