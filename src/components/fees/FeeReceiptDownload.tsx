@@ -151,7 +151,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const isBulkClass = !!selectedClass && !rollNumber.trim() && !regNumber.trim();
 
   const buildReceiptDataList = (data: any): ReceiptData[] => {
-    const { payments, studentMap, sessionName, className, approverMap, fallbackApprover } = data;
+    const { payments, studentMap, sessionName, className, approverMap } = data;
     
     // Group payments by student
     const studentPayments = new Map<string, any[]>();
@@ -169,7 +169,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         const serialMatch = p.notes?.match(/Serial: (SL-\d{4}-\d{4})/);
         const createdAt = new Date(p.created_at || Date.now());
         // Get approver name for this specific payment
-        const paymentApprover = approverMap.get(p.id) || fallbackApprover;
+        const paymentApprover = approverMap.get(p.id) || '';
         receiptList.push({
           studentName: student?.name_bn || '-',
           studentId: student?.student_id || '-',
