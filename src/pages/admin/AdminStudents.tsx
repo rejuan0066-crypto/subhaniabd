@@ -152,7 +152,7 @@ const AdminStudents = () => {
   const getSessionName = (sessionId: string | null, fallback: string | null) => {
     if (sessionId) {
       const session = academicSessions.find((s: any) => s.id === sessionId);
-      if (session) return session.name;
+      if (session) return bn ? (session.name_bn || session.name) : session.name;
     }
     return fallback || '-';
   };
@@ -197,7 +197,7 @@ const AdminStudents = () => {
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সকল সেশন' : 'All Sessions'}</SelectItem>
                 {academicSessions.map((s: any) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
