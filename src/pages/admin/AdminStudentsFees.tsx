@@ -180,6 +180,15 @@ const AdminStudentsFees = () => {
         return;
       }
       setFoundStudent(data);
+      // Save to search history
+      if (searchMode === 'registration') {
+        addToHistory(regNo.trim(), `${data.name_bn} (${regNo.trim()})`, 'registration');
+      } else {
+        const key = `${selectedSession}|${rollNumber.trim()}`;
+        const sessionObj = sessions.find((s: any) => s.id === selectedSession);
+        addToHistory(key, `${data.name_bn} (${sessionObj?.name || ''} রোল: ${rollNumber.trim()})`, 'session_roll');
+      }
+      setShowHistory(false);
       toast.success(bn ? 'ছাত্র পাওয়া গেছে' : 'Student found');
     } catch (e: any) {
       toast.error(e.message || 'Error');
