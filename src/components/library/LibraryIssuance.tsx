@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { isAdminRole } from '@/lib/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,13 +14,13 @@ import { Badge } from '@/components/ui/badge';
 import SearchableSelect from '@/components/SearchableSelect';
 import { toast } from 'sonner';
 import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle } from 'lucide-react';
-import { format, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 
 const LibraryIssuance = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [lossOpen, setLossOpen] = useState(false);
@@ -37,6 +38,24 @@ const LibraryIssuance = () => {
   const [bookCondition, setBookCondition] = useState('new');
   const [distributorName, setDistributorName] = useState('');
 
+  const getRoleLabel = (roleName?: string | null) => {
+    switch (roleName) {
+      case 'teacher':
+        return bn ? 'শিক্ষক' : 'Teacher';
+      case 'staff':
+        return bn ? 'স্টাফ' : 'Staff';
+      case 'admin':
+      case 'super_admin':
+        return bn ? 'অ্যাডমিন' : 'Admin';
+      default:
+        return bn ? 'ইউজার' : 'User';
+    }
+  };
+
+  const getDistributorDisplayName = (entry: any) => {
+    return entry.name_bn || entry.name_en || entry.full_name || entry.email || '';
+  };
+
   // Auto-fill distributor name from logged-in user's staff/profile record
   const { data: currentStaff } = useQuery({
     queryKey: ['current-staff-name', user?.id],
@@ -51,10 +70,69 @@ const LibraryIssuance = () => {
   });
 
   const { data: distributorResults = [] } = useQuery({
-    queryKey: ['library-distributors'],
+    queryKey: ['library-distributors', role],
     queryFn: async () => {
-      const { data } = await supabase.from('staff').select('id, name_bn, name_en, staff_id, designation').order('name_bn').limit(100);
-      return data || [];
+      const { data: staffData, error: staffError } = await supabase
+        .from('staff')
+        .select('id, user_id, name_bn, name_en, staff_id, designation, email')
+        .order('name_bn')
+        .limit(200);
+
+      if (staffError) throw staffError;
+
+      const staffRows = (staffData || []).map((entry: any) => ({ ...entry, source: 'staff' as const }));
+
+      if (!isAdminRole(role)) {
+        return staffRows;
+      }
+
+      const { data: usersResponse, error: usersError } = await supabase.functions.invoke('manage-users', {
+        method: 'GET',
+      });
+
+      if (usersError) {
+        console.error('Failed to fetch users for distributor list:', usersError);
+        return staffRows;
+      }
+
+      const allUsers = Array.isArray(usersResponse?.users) ? usersResponse.users : [];
+      const staffByUserId = new Map(
+        staffRows
+          .filter((entry: any) => entry.user_id)
+          .map((entry: any) => [entry.user_id, entry])
+      );
+
+      const mergedEntries = new Map<string, any>();
+
+      staffRows.forEach((entry: any) => {
+        mergedEntries.set(entry.user_id || `staff-${entry.id}`, entry);
+      });
+
+      allUsers.forEach((account: any) => {
+        const linkedStaff = staffByUserId.get(account.id);
+
+        if (linkedStaff) {
+          mergedEntries.set(account.id, {
+            ...linkedStaff,
+            full_name: account.full_name,
+            email: account.email,
+            role: account.role,
+            source: 'staff' as const,
+          });
+          return;
+        }
+
+        mergedEntries.set(account.id, {
+          id: account.id,
+          user_id: account.id,
+          full_name: account.full_name,
+          email: account.email,
+          role: account.role,
+          source: 'user' as const,
+        });
+      });
+
+      return Array.from(mergedEntries.values());
     },
     enabled: open,
   });
@@ -118,14 +196,7 @@ const LibraryIssuance = () => {
       const { error } = await supabase.from('library_issuances').insert(payload);
       if (error) throw error;
 
-      // Decrease available copies
       await supabase.from('library_books').update({ available_copies: (selectedBook?.available_copies || 1) - 1 }).eq('id', bookId);
-
-      // If sale to student, add as fee due (create fee_payment record)
-      if (distributionType === 'sale' && recipientType === 'student' && Number(sellingPrice) > 0) {
-        // We'll create a note in the issuance — actual fee integration would go to fee_payments
-        // For now, toast the user
-      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['library-issuances'] });
@@ -178,17 +249,31 @@ const LibraryIssuance = () => {
   const autoDistributorName = currentStaff?.name_bn || currentStaff?.name_en || '';
 
   const distributorOptions = useMemo(() => {
-    const options = distributorResults.map((staff: any) => ({
-      value: staff.name_bn || staff.name_en || staff.staff_id || staff.id,
-      label: `${staff.name_bn || staff.name_en}${staff.designation ? ` — ${staff.designation}` : ''}${staff.staff_id ? ` (${staff.staff_id})` : ''}`,
-    }));
+    const options = distributorResults
+      .map((entry: any) => {
+        const displayName = getDistributorDisplayName(entry);
+        if (!displayName) return null;
+
+        const meta: string[] = [];
+        if (entry.designation) meta.push(entry.designation);
+        if (entry.staff_id) meta.push(entry.staff_id);
+        if (!entry.staff_id && entry.email) meta.push(entry.email);
+        if (entry.source === 'user') meta.push(getRoleLabel(entry.role));
+
+        return {
+          value: displayName,
+          label: meta.length > 0 ? `${displayName} — ${meta.join(' • ')}` : displayName,
+        };
+      })
+      .filter((option): option is { value: string; label: string } => Boolean(option))
+      .sort((a, b) => a.label.localeCompare(b.label, 'bn'));
 
     if (autoDistributorName && !options.some(option => option.value === autoDistributorName)) {
       return [{ value: autoDistributorName, label: autoDistributorName }, ...options];
     }
 
     return options;
-  }, [autoDistributorName, distributorResults]);
+  }, [autoDistributorName, distributorResults, bn]);
 
   const resetForm = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
