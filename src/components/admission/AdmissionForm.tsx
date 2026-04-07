@@ -510,8 +510,10 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
 
   const handleSubmit = () => {
     const errors: Record<string, string> = {};
-
-    // Check required based on config
+    console.log('[AdmissionForm] handleSubmit called');
+    console.log('[AdmissionForm] form state:', JSON.stringify(form, null, 2));
+    console.log('[AdmissionForm] selectedDivisionId:', selectedDivisionId);
+    console.log('[AdmissionForm] configFields count:', configFields.length, 'isLoaded:', isLoaded);
     configFields.forEach(f => {
       const key = f.default_value;
       if (!key || !f.is_active || !f.is_required) return;
