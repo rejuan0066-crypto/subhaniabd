@@ -423,10 +423,17 @@ function buildDonationReceipt(data: DonationReceiptData, copyLabel: string, styl
           <div class="sig-name" style="font-size:${5 * fs}px">${data.collectorName}</div>
         </div>
         <div class="sig-block">
+          ${style.principalSignatureUrl ? `<img src="${style.principalSignatureUrl}" class="sig-img" />` : ''}
+          <div class="sig-line" style="border-color:${pc}"></div>
+          <div class="sig-title" style="font-size:${5.5 * fs}px">মুহতামিম / প্রিন্সিপাল</div>
+          <div class="sig-name" style="font-size:${5 * fs}px">${style.principalName || ''}</div>
+        </div>
+        ${data.approverName ? `
+        <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
           <div class="sig-title" style="font-size:${5.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
           <div class="sig-name" style="font-size:${5 * fs}px">${data.approverName}</div>
-        </div>
+        </div>` : ''}
       </div>
     </div>`;
 }
