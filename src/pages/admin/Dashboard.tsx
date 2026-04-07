@@ -159,7 +159,7 @@ const Dashboard = () => {
   const donorCards: StatCard[] = [
     { key: 'total_donors', label: bn ? 'মোট দাতা' : 'Total Donors', value: donors.length, icon: Heart, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'মোট দাতা' : 'Total Donors', 'donors') },
     { key: 'active_donors', label: bn ? 'সক্রিয় দাতা' : 'Active Donors', value: activeDonors.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'সক্রিয় দাতা' : 'Active Donors', 'donors', { status: 'active' }) },
-    { key: 'total_donations', label: bn ? 'মোট অনুদান' : 'Total Donations', value: `৳${totalDonationAmount.toLocaleString()}`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/10' },
+    { key: 'total_donations', label: bn ? 'মোট অনুদান' : 'Total Donations', value: `৳${totalDonationAmount.toLocaleString()}`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'সকল দাতা' : 'All Donors', 'donors') },
   ];
 
   const feeCategories = [
