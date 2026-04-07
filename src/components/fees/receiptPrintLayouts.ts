@@ -218,9 +218,9 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* Form body - CSS Grid */
   .form-body { flex: 1; padding: 2.5mm 3mm 1mm; position: relative; z-index: 1; }
-  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2mm 2mm; }
+  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.5mm 2mm; }
   .field-label { font-weight: 600; color: #555; white-space: nowrap; text-align: left; padding-right: 1mm; }
-  .field-capsule { height: 20px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px;
+  .field-capsule { height: 16px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
     display: flex; align-items: center; padding: 2px 8px; }
   .field-capsule.amt { background: #ecfdf5; border-color: #16a34a; }
   .field-value { color: #1a1a1a; white-space: nowrap; overflow: visible; }
