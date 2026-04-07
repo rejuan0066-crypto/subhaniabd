@@ -102,6 +102,7 @@ const LibraryInventory = () => {
     setForm({
       title: book.title || '', title_bn: book.title_bn || '', author: book.author || '', author_bn: book.author_bn || '',
       class_id: book.class_id || '', subject_id: book.subject_id || '',
+      book_category: book.book_category || 'textbook',
       purchase_date: book.purchase_date || format(new Date(), 'yyyy-MM-dd'),
       buying_price: book.buying_price || 0, total_copies: book.total_copies || 1,
       purchased_by: book.purchased_by || '', notes: book.notes || '',
