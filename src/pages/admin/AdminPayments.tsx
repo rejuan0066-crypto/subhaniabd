@@ -95,19 +95,21 @@ const AdminPayments = () => {
     amount: filtered.filter((p: any) => p.status === 'success').reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
   };
 
-  // Group by fee_type for category stats
+  // Group by fee_types (from fee_payments table) for accurate category stats
   const categoryStats = useMemo(() => {
-    const map: Record<string, { count: number; total: number; paid: number; pending: number }> = {};
-    filtered.forEach((p: any) => {
-      const key = p.fee_type || 'unknown';
-      if (!map[key]) map[key] = { count: 0, total: 0, paid: 0, pending: 0 };
+    const map: Record<string, { name: string; count: number; total: number; paid: number; pending: number; unpaid: number }> = {};
+    feePayments.forEach((fp: any) => {
+      const ftName = bn ? (fp.fee_types?.name_bn || fp.fee_types?.name || 'অজানা') : (fp.fee_types?.name || 'Unknown');
+      const key = fp.fee_type_id || 'unknown';
+      if (!map[key]) map[key] = { name: ftName, count: 0, total: 0, paid: 0, pending: 0, unpaid: 0 };
       map[key].count++;
-      map[key].total += Number(p.amount || 0);
-      if (p.status === 'success') map[key].paid += Number(p.amount || 0);
-      if (p.status === 'pending') map[key].pending += Number(p.amount || 0);
+      map[key].total += Number(fp.amount || 0);
+      if (fp.status === 'paid') map[key].paid += Number(fp.paid_amount || fp.amount || 0);
+      if (fp.status === 'pending') map[key].pending += Number(fp.amount || 0);
+      if (fp.status === 'unpaid') map[key].unpaid += Number(fp.amount || 0);
     });
     return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
-  }, [filtered]);
+  }, [feePayments, bn]);
 
   return (
     <AdminLayout>
