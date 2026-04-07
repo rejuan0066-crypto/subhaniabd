@@ -223,7 +223,7 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .form-row { display: flex; align-items: center; gap: 1mm; }
   .form-row-split { display: flex; gap: 1.5mm; }
   .form-row.half { flex: 1; }
-  .field-label { width: 48px; flex-shrink: 0; font-weight: 600; color: #444; white-space: nowrap; }
+  .field-label { width: 62px; flex-shrink: 0; font-weight: 600; color: #444; white-space: nowrap; }
   .field-input { flex: 1; min-height: 15px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
     display: flex; align-items: center; padding: 1px 5px; }
   .field-input.amt { background: #ecfdf5; border-color: ${pc}44; }
