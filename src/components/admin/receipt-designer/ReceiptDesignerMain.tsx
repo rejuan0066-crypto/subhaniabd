@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useReceiptSettings } from '@/hooks/useReceiptSettings';
-import { Save, Loader2, RotateCcw, FileDown, Download, Trash2, Eye } from 'lucide-react';
+import { Save, Loader2, RotateCcw, FileDown, Download, Trash2, Eye, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +42,36 @@ const ReceiptDesignerMain = () => {
   const [nameBn, setNameBn] = useState('রশিদ বই');
   const [style, setStyle] = useState<ReceiptStyleConfig>({ ...DEFAULT_STYLE });
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [sigUploading, setSigUploading] = useState(false);
+  const sigInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 300 * 1024) {
+      toast.error(bn ? 'সর্বোচ্চ ৩০০KB অনুমোদিত' : 'Max 300KB allowed');
+      return;
+    }
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error(bn ? 'শুধুমাত্র JPG, PNG, WEBP' : 'Only JPG, PNG, WEBP');
+      return;
+    }
+    setSigUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `signatures/principal-sig-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('institution-logos').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('institution-logos').getPublicUrl(path);
+      setStyle(p => ({ ...p, principalSignatureUrl: urlData.publicUrl }));
+      toast.success(bn ? 'স্বাক্ষর আপলোড হয়েছে' : 'Signature uploaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setSigUploading(false);
+      if (sigInputRef.current) sigInputRef.current.value = '';
+    }
+  };
 
   const loadSetting = useCallback((id: string) => {
     const s = settings?.find((s: any) => s.id === id);
@@ -241,6 +271,36 @@ const ReceiptDesignerMain = () => {
             <div className="flex items-center justify-between">
               <Label className="text-xs">{bn ? 'পেমেন্ট সময় (Timestamp)' : 'Payment Timestamp'}</Label>
               <Switch checked={style.showTimestamp} onCheckedChange={(v) => setStyle(p => ({ ...p, showTimestamp: v }))} />
+            </div>
+          </div>
+
+          {/* Principal Signature Section */}
+          <div className="space-y-2 border-t pt-3">
+            <h4 className="font-semibold text-xs text-foreground">{bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Muhtamim'}</h4>
+            <div className="space-y-1">
+              <Label className="text-xs">{bn ? 'নাম' : 'Name'}</Label>
+              <Input className="h-8 text-sm" value={style.principalName || ''} onChange={(e) => setStyle(p => ({ ...p, principalName: e.target.value }))}
+                placeholder={bn ? 'মুহতামিম / প্রিন্সিপালের নাম' : 'Principal name'} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">{bn ? 'স্বাক্ষর আপলোড' : 'Signature Upload'}</Label>
+              {style.principalSignatureUrl ? (
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded border">
+                  <img src={style.principalSignatureUrl} alt="Signature" className="h-8 max-w-[80px] object-contain" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setStyle(p => ({ ...p, principalSignatureUrl: '' }))}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={sigInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleSignatureUpload} />
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => sigInputRef.current?.click()} disabled={sigUploading}>
+                    {sigUploading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
+                    {bn ? 'স্বাক্ষর আপলোড' : 'Upload Signature'}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'সর্বোচ্চ ৩০০KB (PNG/JPG/WEBP)' : 'Max 300KB (PNG/JPG/WEBP)'}</p>
+                </div>
+              )}
             </div>
           </div>
 

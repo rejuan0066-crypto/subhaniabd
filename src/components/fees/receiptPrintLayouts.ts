@@ -41,6 +41,8 @@ export interface ReceiptStyleConfig {
   showQr: boolean;
   showTrxId: boolean;
   showTimestamp: boolean;
+  principalName?: string;
+  principalSignatureUrl?: string;
 }
 
 const DEFAULT_STYLE: ReceiptStyleConfig = {
@@ -132,16 +134,18 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
           <div class="sig-title" style="font-size:${4.5 * fs}px">আদায়কারী স্বাক্ষর</div>
           <div class="sig-name" style="font-size:${4 * fs}px">${data.collectorName}</div>
         </div>
+        <div class="sig-block">
+          ${style.principalSignatureUrl ? `<img src="${style.principalSignatureUrl}" class="sig-img" />` : ''}
+          <div class="sig-line" style="border-color:${pc}"></div>
+          <div class="sig-title" style="font-size:${4.5 * fs}px">মুহতামিম / প্রিন্সিপাল</div>
+          <div class="sig-name" style="font-size:${4 * fs}px">${style.principalName || ''}</div>
+        </div>
         ${data.approverName ? `
         <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
           <div class="sig-title" style="font-size:${4.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
           <div class="sig-name" style="font-size:${4 * fs}px">${data.approverName}</div>
-        </div>` : `
-        <div class="sig-block">
-          <div class="sig-line" style="border-color:${pc}"></div>
-          <div class="sig-title" style="font-size:${4.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
-        </div>`}
+        </div>` : ''}
       </div>
     </div>`;
 }
@@ -242,10 +246,11 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* Signatures */
   .sig-footer { display: flex; justify-content: space-between; padding: 0 3mm 1.5mm; margin-top: auto; padding-top: 6mm; position: relative; z-index: 1; }
-  .sig-block { text-align: center; width: 35%; }
+  .sig-block { text-align: center; width: 30%; }
   .sig-line { border-top: 1px dashed #aaa; margin-bottom: 0.5mm; }
   .sig-title { font-weight: 600; color: #555; }
   .sig-name { color: #777; }
+  .sig-img { height: 20px; max-width: 50px; object-fit: contain; margin: 0 auto 1px; display: block; }
 
   @media print {
     @page { size: A4; margin: 0; }
@@ -418,10 +423,17 @@ function buildDonationReceipt(data: DonationReceiptData, copyLabel: string, styl
           <div class="sig-name" style="font-size:${5 * fs}px">${data.collectorName}</div>
         </div>
         <div class="sig-block">
+          ${style.principalSignatureUrl ? `<img src="${style.principalSignatureUrl}" class="sig-img" />` : ''}
+          <div class="sig-line" style="border-color:${pc}"></div>
+          <div class="sig-title" style="font-size:${5.5 * fs}px">মুহতামিম / প্রিন্সিপাল</div>
+          <div class="sig-name" style="font-size:${5 * fs}px">${style.principalName || ''}</div>
+        </div>
+        ${data.approverName ? `
+        <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
           <div class="sig-title" style="font-size:${5.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
           <div class="sig-name" style="font-size:${5 * fs}px">${data.approverName}</div>
-        </div>
+        </div>` : ''}
       </div>
     </div>`;
 }
