@@ -332,18 +332,39 @@ const AdminStudentsFees = () => {
             {/* Search fields */}
             <div className="space-y-3">
               {searchMode === 'registration' ? (
-                <div>
+                <div ref={historyRef} className="relative">
                   <label className="text-sm font-medium text-foreground mb-1 block">
                     {bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration Number'} <span className="text-destructive">*</span>
                   </label>
                   <div className="flex gap-2">
-                    <Input className="bg-background flex-1" value={regNo} onChange={(e) => setRegNo(e.target.value)}
+                    <Input className="bg-background flex-1" value={regNo}
+                      onChange={(e) => setRegNo(e.target.value)}
                       placeholder={bn ? 'যেমন: 20261001' : 'e.g. 20261001'}
+                      onFocus={() => setShowHistory(true)}
                       onKeyDown={(e) => e.key === 'Enter' && searchStudent()} />
                     <Button onClick={searchStudent} disabled={searching} variant="outline" size="icon">
                       {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                     </Button>
                   </div>
+                  {/* Search History Dropdown */}
+                  {showHistory && searchHistory.filter(h => h.mode === 'registration').length > 0 && (
+                    <div className="absolute z-50 top-full left-0 right-10 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      <div className="px-3 py-1.5 text-xs text-muted-foreground font-medium border-b border-border flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {bn ? 'সাম্প্রতিক সার্চ' : 'Recent Searches'}
+                      </div>
+                      {searchHistory.filter(h => h.mode === 'registration').map(h => (
+                        <div key={h.value} className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group"
+                          onClick={() => { setRegNo(h.value); setShowHistory(false); }}>
+                          <Search className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <span className="text-sm text-foreground flex-1 truncate">{h.label}</span>
+                          <button onClick={(e) => { e.stopPropagation(); removeFromHistory(h.value); }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-destructive/10 rounded">
+                            <X className="w-3 h-3 text-muted-foreground" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
@@ -358,18 +379,42 @@ const AdminStudentsFees = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
+                  <div ref={searchMode === 'session_roll' ? historyRef : undefined} className="relative">
                     <label className="text-sm font-medium text-foreground mb-1 block">
                       {bn ? 'রোল নম্বর' : 'Roll Number'} <span className="text-destructive">*</span>
                     </label>
                     <div className="flex gap-2">
-                      <Input className="bg-background flex-1" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)}
+                      <Input className="bg-background flex-1" value={rollNumber}
+                        onChange={(e) => setRollNumber(e.target.value)}
                         placeholder={bn ? 'রোল' : 'Roll'}
+                        onFocus={() => setShowHistory(true)}
                         onKeyDown={(e) => e.key === 'Enter' && searchStudent()} />
                       <Button onClick={searchStudent} disabled={searching} variant="outline" size="icon">
                         {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                       </Button>
                     </div>
+                    {/* Search History Dropdown for session+roll */}
+                    {showHistory && searchHistory.filter(h => h.mode === 'session_roll').length > 0 && (
+                      <div className="absolute z-50 top-full left-0 right-10 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        <div className="px-3 py-1.5 text-xs text-muted-foreground font-medium border-b border-border flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {bn ? 'সাম্প্রতিক সার্চ' : 'Recent Searches'}
+                        </div>
+                        {searchHistory.filter(h => h.mode === 'session_roll').map(h => {
+                          const [sessId, roll] = h.value.split('|');
+                          return (
+                            <div key={h.value} className="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer group"
+                              onClick={() => { setSelectedSession(sessId); setRollNumber(roll); setShowHistory(false); }}>
+                              <Search className="w-3 h-3 text-muted-foreground shrink-0" />
+                              <span className="text-sm text-foreground flex-1 truncate">{h.label}</span>
+                              <button onClick={(e) => { e.stopPropagation(); removeFromHistory(h.value); }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-destructive/10 rounded">
+                                <X className="w-3 h-3 text-muted-foreground" />
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
