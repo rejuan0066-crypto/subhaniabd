@@ -127,7 +127,7 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
           </div>
           <div class="form-row half">
             <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
-            <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor};font-weight:700">${data.status}</span></div>
+            <div class="field-input${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
           </div>
         </div>
       </div>
