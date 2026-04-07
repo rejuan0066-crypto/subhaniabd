@@ -89,7 +89,6 @@ const AdminResults = () => {
       const examSession = examSessions.find((es: any) => es.id === examSessionId);
       if (!examSession) return {};
 
-      // Get all exams matching this session
       const { data: exams, error: examsError } = await supabase
         .from('exams')
         .select('id, division_id')
@@ -103,7 +102,6 @@ const AdminResults = () => {
         return map;
       }
 
-      // Get result counts per exam
       const examIds = exams.map(e => e.id);
       const { data: results, error: resultsError } = await supabase
         .from('results')
@@ -114,7 +112,6 @@ const AdminResults = () => {
       const examHasResults = new Set<string>();
       results?.forEach(r => examHasResults.add(r.exam_id));
 
-      // Map class -> has results (via division_id matching)
       const divisionExamMap: Record<string, boolean> = {};
       exams.forEach(e => {
         if (e.division_id) {
@@ -130,6 +127,70 @@ const AdminResults = () => {
     },
     enabled: showClassList && examClasses.length > 0 && examSessions.length > 0,
   });
+
+  // Fetch publish status for each class
+  const { data: classPublishStatus = {} } = useQuery({
+    queryKey: ['class-publish-status', examSessionId, examClasses.map((c: any) => c.id)],
+    queryFn: async () => {
+      const examSession = examSessions.find((es: any) => es.id === examSessionId);
+      if (!examSession) return {};
+
+      const { data: exams } = await supabase
+        .from('exams')
+        .select('id, division_id, is_published')
+        .eq('exam_session', examSession.name)
+        .eq('exam_type', examSession.exam_type);
+
+      if (!exams?.length) return {};
+
+      const divisionPublishMap: Record<string, boolean> = {};
+      exams.forEach(e => {
+        if (e.division_id) {
+          divisionPublishMap[e.division_id] = e.is_published || false;
+        }
+      });
+
+      const map: Record<string, boolean> = {};
+      examClasses.forEach((c: any) => {
+        map[c.id] = divisionPublishMap[c.division_id] || false;
+      });
+      return map;
+    },
+    enabled: showClassList && examClasses.length > 0 && examSessions.length > 0,
+  });
+
+  const handlePublishToggle = async (classId: string, publish: boolean) => {
+    const examSession = examSessions.find((es: any) => es.id === examSessionId);
+    if (!examSession) return;
+
+    const cls = examClasses.find((c: any) => c.id === classId);
+    const divisionId = cls?.division_id;
+
+    const { data: exam } = await supabase
+      .from('exams')
+      .select('id')
+      .eq('exam_session', examSession.name)
+      .eq('exam_type', examSession.exam_type)
+      .eq('division_id', divisionId)
+      .maybeSingle();
+
+    if (!exam?.id) {
+      toast.error(bn ? 'পরীক্ষা পাওয়া যায়নি' : 'Exam not found');
+      return;
+    }
+
+    const { error } = await supabase.from('exams').update({ is_published: publish }).eq('id', exam.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['class-publish-status'] });
+    toast.success(publish
+      ? (bn ? 'ফলাফল পাবলিশ করা হয়েছে' : 'Result published')
+      : (bn ? 'ফলাফল আনপাবলিশ করা হয়েছে' : 'Result unpublished')
+    );
+  };
 
   // Fetch subjects
   const { data: subjects = [] } = useQuery({
@@ -474,8 +535,10 @@ const AdminResults = () => {
           <ClassResultStatusList
             classes={examClasses}
             resultStatusMap={classResultStatus as Record<string, boolean>}
+            publishStatusMap={classPublishStatus as Record<string, boolean>}
             onClassClick={handleClassFromList}
             onExport={handleClassExport}
+            onPublishToggle={handlePublishToggle}
             exportingClassId={exportingClassId}
             examSessionName={getExamSessionName()}
           />

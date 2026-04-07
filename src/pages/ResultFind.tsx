@@ -3,44 +3,196 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search } from 'lucide-react';
+import { Search, GraduationCap, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useGradingSystem } from '@/hooks/useGradingSystem';
+import IndividualMarksheet from '@/components/results/IndividualMarksheet';
 
 const ResultFind = () => {
   const { t, language } = useLanguage();
+  const bn = language === 'bn';
+  const { getOverallGrade } = useGradingSystem();
+
+  const [examYear, setExamYear] = useState('');
+  const [examSessionId, setExamSessionId] = useState('');
+  const [rollNumber, setRollNumber] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [resultData, setResultData] = useState<any>(null);
+  const [error, setError] = useState('');
+
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['public-academic-sessions'],
+    queryFn: async () => {
+      const { data } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name', { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: examSessions = [] } = useQuery({
+    queryKey: ['public-exam-sessions', examYear],
+    queryFn: async () => {
+      const { data } = await supabase.from('exam_sessions').select('*').eq('academic_session_id', examYear).eq('is_active', true).order('name');
+      return data || [];
+    },
+    enabled: !!examYear,
+  });
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setResultData(null);
+
+    if (!examYear || !examSessionId || !rollNumber.trim()) {
+      setError(bn ? 'সব ফিল্ড পূরণ করুন' : 'Please fill all fields');
+      return;
+    }
+
+    setSearching(true);
+    try {
+      const examSession = examSessions.find((es: any) => es.id === examSessionId);
+      if (!examSession) throw new Error('Session not found');
+
+      // Find published exams for this session
+      const { data: exams } = await supabase
+        .from('exams')
+        .select('id, division_id')
+        .eq('exam_session', examSession.name)
+        .eq('exam_type', examSession.exam_type)
+        .eq('is_published', true);
+
+      if (!exams?.length) {
+        setError(bn ? 'এই সেশনে কোনো প্রকাশিত ফলাফল নেই' : 'No published results for this session');
+        return;
+      }
+
+      // Find student by roll number in exam session
+      const { data: sessionStudents } = await supabase
+        .from('exam_session_students')
+        .select('student_id, class_id, students(*)')
+        .eq('exam_session_id', examSessionId);
+
+      const found = sessionStudents?.find((es: any) => {
+        const st = es.students;
+        return st && (
+          String(st.roll_number) === rollNumber.trim() ||
+          st.student_id === rollNumber.trim() ||
+          st.registration_number === rollNumber.trim()
+        );
+      });
+
+      if (!found?.students) {
+        setError(bn ? 'ছাত্র পাওয়া যায়নি' : 'Student not found');
+        return;
+      }
+
+      const student = found.students;
+      const classId = found.class_id;
+
+      // Get class info to find division
+      const { data: classInfo } = await supabase.from('classes').select('*').eq('id', classId).single();
+      const divisionId = classInfo?.division_id;
+
+      // Find the published exam for this division
+      const exam = exams.find(e => e.division_id === divisionId);
+      if (!exam) {
+        setError(bn ? 'এই ক্লাসের ফলাফল এখনো প্রকাশিত হয়নি' : 'Results not published for this class yet');
+        return;
+      }
+
+      // Load results
+      const { data: results } = await supabase.from('results').select('*').eq('exam_id', exam.id);
+      const marksMap: Record<string, number> = {};
+      results?.forEach((r: any) => {
+        marksMap[`${r.student_id}_${r.subject_id}`] = r.marks ?? 0;
+      });
+
+      // Load subjects
+      const { data: subjectData } = await supabase
+        .from('exam_session_subjects')
+        .select('subject_id, subjects(*)')
+        .eq('exam_session_id', examSessionId);
+      const allSubjects = subjectData?.map((es: any) => es.subjects).filter(Boolean) || [];
+      const subjects = allSubjects
+        .filter((s: any) => s.division_id === divisionId || s.class_id === classId)
+        .sort((a: any, b: any) => (a.name_bn || '').localeCompare(b.name_bn || ''));
+
+      const year = academicSessions.find((s: any) => s.id === examYear);
+      const examTitle = `${bn ? examSession.name_bn : examSession.name} — ${bn ? classInfo?.name_bn : classInfo?.name} — ${bn ? (year?.name_bn || year?.name) : year?.name}`;
+
+      setResultData({ student, subjects, marksMap, examTitle });
+    } catch (err: any) {
+      setError(err.message || 'Error');
+    } finally {
+      setSearching(false);
+    }
+  };
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-display font-bold text-foreground mb-8">{t('result')}</h1>
-        <div className="card-elevated p-8 max-w-2xl mx-auto">
-          <h2 className="text-xl font-display font-bold mb-6 text-center">
-            {language === 'bn' ? 'ফলাফল অনুসন্ধান' : 'Search Result'}
-          </h2>
-          <form className="space-y-4">
-            <Select>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder={language === 'bn' ? 'পরীক্ষার বছর নির্বাচন' : 'Select Exam Year'} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="2026">২০২৬</SelectItem>
-                <SelectItem value="2025">২০২৫</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select>
-              <SelectTrigger className="bg-background">
-                <SelectValue placeholder={language === 'bn' ? 'শ্রেণী নির্বাচন' : 'Select Class'} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">১ম শ্রেণী</SelectItem>
-                <SelectItem value="2">২য় শ্রেণী</SelectItem>
-                <SelectItem value="3">৩য় শ্রেণী</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input placeholder={language === 'bn' ? 'রোল নম্বর' : 'Roll Number'} className="bg-background" />
-            <Button className="btn-primary-gradient w-full flex items-center gap-2">
-              <Search className="w-4 h-4" /> {t('search')}
-            </Button>
-          </form>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2.5 rounded-xl bg-primary/10">
+            <GraduationCap className="w-7 h-7 text-primary" />
+          </div>
+          <h1 className="text-3xl font-display font-bold text-foreground">{t('result')}</h1>
         </div>
+
+        {resultData ? (
+          <IndividualMarksheet
+            student={resultData.student}
+            subjects={resultData.subjects}
+            marksMap={resultData.marksMap}
+            examTitle={resultData.examTitle}
+            onBack={() => setResultData(null)}
+          />
+        ) : (
+          <div className="card-elevated p-8 max-w-2xl mx-auto">
+            <h2 className="text-xl font-display font-bold mb-6 text-center">
+              {bn ? 'ফলাফল অনুসন্ধান' : 'Search Result'}
+            </h2>
+            <form className="space-y-4" onSubmit={handleSearch}>
+              <Select value={examYear} onValueChange={(v) => { setExamYear(v); setExamSessionId(''); }}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder={bn ? 'শিক্ষাবর্ষ নির্বাচন' : 'Select Academic Year'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {academicSessions.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={examSessionId} onValueChange={setExamSessionId} disabled={!examYear}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder={bn ? 'পরীক্ষা সেশন নির্বাচন' : 'Select Exam Session'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {examSessions.map((es: any) => (
+                    <SelectItem key={es.id} value={es.id}>{bn ? es.name_bn : es.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder={bn ? 'রোল / রেজিস্ট্রেশন নম্বর' : 'Roll / Registration Number'}
+                className="bg-background"
+                value={rollNumber}
+                onChange={(e) => setRollNumber(e.target.value)}
+              />
+
+              {error && (
+                <p className="text-sm text-destructive text-center">{error}</p>
+              )}
+
+              <Button type="submit" className="btn-primary-gradient w-full flex items-center gap-2" disabled={searching}>
+                {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                {t('search')}
+              </Button>
+            </form>
+          </div>
+        )}
       </div>
     </PublicLayout>
   );
