@@ -274,6 +274,36 @@ const ReceiptDesignerMain = () => {
             </div>
           </div>
 
+          {/* Principal Signature Section */}
+          <div className="space-y-2 border-t pt-3">
+            <h4 className="font-semibold text-xs text-foreground">{bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Muhtamim'}</h4>
+            <div className="space-y-1">
+              <Label className="text-xs">{bn ? 'নাম' : 'Name'}</Label>
+              <Input className="h-8 text-sm" value={style.principalName || ''} onChange={(e) => setStyle(p => ({ ...p, principalName: e.target.value }))}
+                placeholder={bn ? 'মুহতামিম / প্রিন্সিপালের নাম' : 'Principal name'} />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">{bn ? 'স্বাক্ষর আপলোড' : 'Signature Upload'}</Label>
+              {style.principalSignatureUrl ? (
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded border">
+                  <img src={style.principalSignatureUrl} alt="Signature" className="h-8 max-w-[80px] object-contain" />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setStyle(p => ({ ...p, principalSignatureUrl: '' }))}>
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <input ref={sigInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleSignatureUpload} />
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => sigInputRef.current?.click()} disabled={sigUploading}>
+                    {sigUploading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Upload className="w-4 h-4 mr-1" />}
+                    {bn ? 'স্বাক্ষর আপলোড' : 'Upload Signature'}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'সর্বোচ্চ ৩০০KB (PNG/JPG/WEBP)' : 'Max 300KB (PNG/JPG/WEBP)'}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           <p className="text-[11px] text-muted-foreground border-t pt-3">
             {bn ? 'লোগো পরিবর্তন করতে প্রতিষ্ঠানের প্রোফাইল থেকে আপলোড করুন। এই সেটিংস সেভ করলে রিসিট ডাউনলোডে স্বয়ংক্রিয় প্রয়োগ হবে।' : 'Upload logo from institution profile. Saved settings auto-apply to receipt downloads.'}
           </p>
