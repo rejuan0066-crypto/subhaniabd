@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2, Search, BookOpen } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
+import SearchableSelect from '@/components/SearchableSelect';
 
 const BOOK_CATEGORIES = [
   { key: 'textbook', label: 'Textbook', label_bn: 'পাঠ্যবই' },
@@ -31,6 +33,7 @@ const emptyBook = {
 
 const LibraryInventory = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const bn = language === 'bn';
   const qc = useQueryClient();
 
@@ -58,6 +61,37 @@ const LibraryInventory = () => {
     queryKey: ['subjects-list'],
     queryFn: async () => { const { data } = await supabase.from('subjects').select('id, name, name_bn').eq('is_active', true).order('name_bn'); return data || []; },
   });
+
+  const { data: purchaserOptions = [] } = useQuery({
+    queryKey: ['library-purchasers'],
+    queryFn: async () => {
+      const { data: staffData } = await supabase.from('staff').select('id, user_id, name_bn, name_en').order('name_bn').limit(200);
+      const staffRows = (staffData || []).map((s: any) => ({ ...s, source: 'staff' }));
+      const staffUserIds = new Set(staffRows.filter((s: any) => s.user_id).map((s: any) => s.user_id));
+
+      const { data: profilesData } = await supabase.from('profiles').select('id, full_name, status');
+
+      const entries: { value: string; label: string }[] = [];
+      staffRows.forEach((s: any) => {
+        entries.push({ value: s.name_bn || s.name_en || s.id, label: s.name_bn || s.name_en });
+      });
+      (profilesData || []).forEach((p: any) => {
+        if (!staffUserIds.has(p.id) && p.full_name && p.status === 'approved') {
+          entries.push({ value: p.full_name, label: p.full_name });
+        }
+      });
+      return entries.sort((a, b) => a.label.localeCompare(b.label, 'bn'));
+    },
+    enabled: open,
+  });
+
+  // Auto-set purchaser to current user name
+  const autoSetPurchaser = () => {
+    if (!form.purchased_by && user) {
+      const profile = purchaserOptions.find(o => o.value === (user.user_metadata?.full_name || ''));
+      if (profile) setForm(f => ({ ...f, purchased_by: profile.value }));
+    }
+  };
 
   const saveMut = useMutation({
     mutationFn: async () => {
@@ -244,7 +278,17 @@ const LibraryInventory = () => {
               <div><Label>{bn ? 'দাম (৳)' : 'Price (৳)'}</Label><Input type="number" value={form.buying_price || ''} onChange={e => setForm({ ...form, buying_price: Number(e.target.value) })} /></div>
               <div><Label>{bn ? 'কপি সংখ্যা' : 'Copies'}</Label><Input type="number" min={1} value={form.total_copies || ''} onChange={e => setForm({ ...form, total_copies: Number(e.target.value) })} /></div>
             </div>
-            <div><Label>{bn ? 'ক্রয়কারী নাম' : 'Purchaser Name'}</Label><Input value={form.purchased_by} onChange={e => setForm({ ...form, purchased_by: e.target.value })} /></div>
+            <div><Label>{bn ? 'ক্রয়কারী নাম' : 'Purchaser Name'}</Label>
+              <SearchableSelect
+                options={purchaserOptions}
+                value={form.purchased_by}
+                onValueChange={v => setForm({ ...form, purchased_by: v })}
+                placeholder={bn ? 'ক্রয়কারী নির্বাচন করুন' : 'Select purchaser'}
+                searchPlaceholder={bn ? 'নাম খুঁজুন...' : 'Search name...'}
+                allowCustom
+                customLabel={bn ? 'যোগ করুন' : 'Add'}
+              />
+            </div>
             <div><Label>{bn ? 'নোট' : 'Notes'}</Label><Input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
             <Button onClick={() => saveMut.mutate()} disabled={!form.title.trim() && !form.title_bn.trim() || saveMut.isPending} className="btn-primary-gradient">
               {saveMut.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
