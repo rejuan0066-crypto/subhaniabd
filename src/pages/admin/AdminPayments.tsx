@@ -147,12 +147,12 @@ const AdminPayments = () => {
         {/* Category-wise Stats */}
         {categoryStats.length > 0 && (
           <div className="card-elevated p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">{bn ? 'ক্যাটাগরি অনুযায়ী সারাংশ' : 'Category-wise Summary'}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{bn ? 'ফি ধরন অনুযায়ী সারাংশ' : 'Fee Type-wise Summary'}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {categoryStats.map(([type, stats]) => (
-                <div key={type} className="rounded-lg border border-border p-3 space-y-2">
+              {categoryStats.map(([key, stats]) => (
+                <div key={key} className="rounded-lg border border-border p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs font-medium">{type}</Badge>
+                    <Badge variant="outline" className="text-xs font-medium">{stats.name}</Badge>
                     <span className="text-xs text-muted-foreground">{stats.count} {bn ? 'টি' : ''}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center text-xs">
@@ -165,8 +165,8 @@ const AdminPayments = () => {
                       <p className="text-muted-foreground">{bn ? 'আদায়' : 'Paid'}</p>
                     </div>
                     <div>
-                      <p className="font-bold text-warning">৳{stats.pending.toLocaleString()}</p>
-                      <p className="text-muted-foreground">{bn ? 'বকেয়া' : 'Pending'}</p>
+                      <p className="font-bold text-destructive">৳{(stats.pending + stats.unpaid).toLocaleString()}</p>
+                      <p className="text-muted-foreground">{bn ? 'বকেয়া' : 'Due'}</p>
                     </div>
                   </div>
                 </div>
