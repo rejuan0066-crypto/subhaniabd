@@ -270,10 +270,15 @@ const LibraryInventory = () => {
             </div>
             <div>
               <Label>{bn ? 'ক্যাটাগরি' : 'Category'}</Label>
-              <Select value={form.book_category} onValueChange={v => setForm({ ...form, book_category: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{BOOK_CATEGORIES.map(c => <SelectItem key={c.key} value={c.key}>{bn ? c.label_bn : c.label}</SelectItem>)}</SelectContent>
-              </Select>
+              <SearchableSelect
+                options={categoryOptions}
+                value={form.book_category}
+                onValueChange={v => setForm({ ...form, book_category: v })}
+                placeholder={bn ? 'ক্যাটাগরি বাছুন' : 'Select category'}
+                searchPlaceholder={bn ? 'ক্যাটাগরি খুঁজুন...' : 'Search category...'}
+                allowCustom
+                customLabel={bn ? 'নতুন ক্যাটাগরি' : 'New category'}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
