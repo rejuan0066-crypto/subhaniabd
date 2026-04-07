@@ -134,30 +134,12 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       }
     }
 
-    // Fallback approver name from staff (principal/head)
-    let fallbackApprover = '';
-    {
-      const { data: headStaff } = await supabase
-        .from('staff')
-        .select('name_bn, name_en, designation')
-        .or('designation.ilike.%মুহতামিম%,designation.ilike.%প্রিন্সিপাল%,designation.ilike.%principal%,designation.ilike.%head%')
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle();
-      if (headStaff) {
-        fallbackApprover = headStaff.name_bn || headStaff.name_en || '';
-      }
-    }
-    if (!fallbackApprover) {
-      fallbackApprover = bn ? 'মুহতামিম' : 'Principal';
-    }
-
     const studentMap = new Map(students.map((s: any) => [s.id, s]));
     const className = selectedClass
       ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
       : '';
 
-    return { payments, studentMap, sessionName, className, approverMap, fallbackApprover };
+    return { payments, studentMap, sessionName, className, approverMap };
   };
 
   const getCollectorFromNotes = (notes: string) => {
@@ -169,7 +151,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const isBulkClass = !!selectedClass && !rollNumber.trim() && !regNumber.trim();
 
   const buildReceiptDataList = (data: any): ReceiptData[] => {
-    const { payments, studentMap, sessionName, className, approverMap, fallbackApprover } = data;
+    const { payments, studentMap, sessionName, className, approverMap } = data;
     
     // Group payments by student
     const studentPayments = new Map<string, any[]>();
@@ -187,7 +169,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         const serialMatch = p.notes?.match(/Serial: (SL-\d{4}-\d{4})/);
         const createdAt = new Date(p.created_at || Date.now());
         // Get approver name for this specific payment
-        const paymentApprover = approverMap.get(p.id) || fallbackApprover;
+        const paymentApprover = approverMap.get(p.id) || '';
         receiptList.push({
           studentName: student?.name_bn || '-',
           studentId: student?.student_id || '-',
