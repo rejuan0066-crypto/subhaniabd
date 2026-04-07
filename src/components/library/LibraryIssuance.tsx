@@ -5,7 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { isAdminRole } from '@/lib/roles';
-import { printIssuanceReceipt, printYearlyIssuanceList } from '@/lib/libraryIssuancePrint';
+import { printIssuanceReceipt, printYearlyIssuanceList, downloadIssuanceReceipt, downloadYearlyIssuanceList } from '@/lib/libraryIssuancePrint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import SearchableSelect from '@/components/SearchableSelect';
 import { toast } from 'sonner';
-import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle, Printer, FileText } from 'lucide-react';
+import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle, Printer, FileText, Download } from 'lucide-react';
 import { format } from 'date-fns';
 
 const LibraryIssuance = () => {
@@ -347,6 +347,31 @@ const LibraryIssuance = () => {
     printYearlyIssuanceList(filteredIss, yr, institutionInfo);
   };
 
+  const handleDownloadSingleIssuance = async (i: any) => {
+    try {
+      await downloadIssuanceReceipt({
+        bookTitle: bn ? (i.library_books?.title_bn || i.library_books?.title || '') : (i.library_books?.title || ''),
+        recipientName: i.recipient_name || '',
+        recipientType: i.recipient_type || 'student',
+        distributionType: i.distribution_type || 'free',
+        bookCondition: i.book_condition || 'new',
+        sellingPrice: i.selling_price || 0,
+        distributorName: i.distributor_name || '',
+        issuedDate: i.issued_date ? format(new Date(i.issued_date), 'dd/MM/yyyy') : '',
+        recipientId: i.students?.student_id || '',
+      }, institutionInfo);
+      toast.success(bn ? 'ডাউনলোড সম্পন্ন' : 'Download complete');
+    } catch { toast.error(bn ? 'ডাউনলোড ব্যর্থ' : 'Download failed'); }
+  };
+
+  const handleDownloadYearlyList = async () => {
+    const yr = yearFilter === 'all' ? new Date().getFullYear() : Number(yearFilter);
+    try {
+      await downloadYearlyIssuanceList(filteredIss, yr, institutionInfo);
+      toast.success(bn ? 'ডাউনলোড সম্পন্ন' : 'Download complete');
+    } catch { toast.error(bn ? 'ডাউনলোড ব্যর্থ' : 'Download failed'); }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'issued': return <Badge className="bg-blue-500/10 text-blue-600">{bn ? 'ইস্যু' : 'Issued'}</Badge>;
@@ -376,9 +401,14 @@ const LibraryIssuance = () => {
         </div>
         <div className="flex gap-2">
           {filteredIss.length > 0 && (
-            <Button variant="outline" onClick={handlePrintYearlyList} title={bn ? 'বাৎসরিক তালিকা প্রিন্ট' : 'Print yearly list'}>
-              <FileText className="w-4 h-4 mr-1.5" />{bn ? 'তালিকা প্রিন্ট' : 'Print List'}
-            </Button>
+            <>
+              <Button variant="outline" onClick={handleDownloadYearlyList} title={bn ? 'বাৎসরিক তালিকা ডাউনলোড' : 'Download yearly list'}>
+                <Download className="w-4 h-4 mr-1.5" />{bn ? 'তালিকা ডাউনলোড' : 'Download List'}
+              </Button>
+              <Button variant="outline" onClick={handlePrintYearlyList} title={bn ? 'বাৎসরিক তালিকা প্রিন্ট' : 'Print yearly list'}>
+                <FileText className="w-4 h-4 mr-1.5" />{bn ? 'তালিকা প্রিন্ট' : 'Print List'}
+              </Button>
+            </>
           )}
           <Button onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
             <Plus className="w-4 h-4 mr-1.5" />{bn ? 'বই ইস্যু করুন' : 'Issue Book'}
@@ -432,6 +462,9 @@ const LibraryIssuance = () => {
                   <TableCell className="text-right">{i.distribution_type === 'sale' ? `৳${i.selling_price}` : '—'}</TableCell>
                   <TableCell className="text-center">
                     <div className="flex justify-center gap-1">
+                      <Button size="sm" variant="outline" onClick={() => handleDownloadSingleIssuance(i)} title={bn ? 'ডাউনলোড' : 'Download'}>
+                        <Download className="w-3.5 h-3.5" />
+                      </Button>
                       <Button size="sm" variant="outline" onClick={() => handlePrintSingleIssuance(i)} title={bn ? 'প্রিন্ট' : 'Print'}>
                         <Printer className="w-3.5 h-3.5" />
                       </Button>
