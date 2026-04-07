@@ -35,6 +35,8 @@ const LibraryIssuance = () => {
   const [sellingPrice, setSellingPrice] = useState(0);
   const [bookCondition, setBookCondition] = useState('new');
   const [distributorName, setDistributorName] = useState('');
+  const [distributorSearch, setDistributorSearch] = useState('');
+  const [showDistributorList, setShowDistributorList] = useState(false);
 
   // Auto-fill distributor name from logged-in user's staff/profile record
   const { data: currentStaff } = useQuery({
@@ -43,11 +45,21 @@ const LibraryIssuance = () => {
       if (!user?.id) return null;
       const { data } = await supabase.from('staff').select('name_bn, name_en').eq('user_id', user.id).maybeSingle();
       if (data) return data;
-      // Fallback to profile
       const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
       return profile ? { name_bn: profile.full_name, name_en: profile.full_name } : null;
     },
     enabled: !!user?.id,
+  });
+
+  // Distributor search (staff + teachers)
+  const { data: distributorResults = [] } = useQuery({
+    queryKey: ['distributor-search', distributorSearch],
+    queryFn: async () => {
+      if (distributorSearch.length < 2) return [];
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en, staff_id, designation').or(`name_bn.ilike.%${distributorSearch}%,name_en.ilike.%${distributorSearch}%,staff_id.ilike.%${distributorSearch}%`).limit(10);
+      return data || [];
+    },
+    enabled: distributorSearch.length >= 2,
   });
 
   const { data: books = [] } = useQuery({
@@ -172,7 +184,7 @@ const LibraryIssuance = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
     setRecipientSearch(''); setSelectedRecipient(null);
     setDistributionType('free'); setSellingPrice(0); setBookCondition('new');
-    setDistributorName(autoDistributorName);
+    setDistributorName(autoDistributorName); setDistributorSearch(''); setShowDistributorList(false);
   };
 
   const filteredIss = issuances.filter((i: any) => {
@@ -350,11 +362,34 @@ const LibraryIssuance = () => {
               </div>
             )}
 
-            <div>
+            <div className="relative">
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
-              <Input value={distributorName || autoDistributorName} onChange={e => setDistributorName(e.target.value)} placeholder={bn ? 'বিতরণকারীর নাম লিখুন...' : 'Enter distributor name...'} />
-              {autoDistributorName && !distributorName && (
-                <p className="text-xs text-muted-foreground mt-1">{bn ? 'অটো: ' : 'Auto: '}{autoDistributorName}</p>
+              <Input
+                value={distributorName || autoDistributorName}
+                onChange={e => {
+                  const val = e.target.value;
+                  setDistributorName(val);
+                  setDistributorSearch(val);
+                  setShowDistributorList(val.length >= 2);
+                }}
+                onFocus={() => { if ((distributorName || autoDistributorName).length >= 2) setShowDistributorList(true); }}
+                placeholder={bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...'}
+              />
+              {showDistributorList && distributorResults.length > 0 && (
+                <div className="absolute z-50 w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
+                  {distributorResults.map((s: any) => (
+                    <button key={s.id} onClick={() => {
+                      setDistributorName(s.name_bn || s.name_en);
+                      setShowDistributorList(false);
+                      setDistributorSearch('');
+                    }}
+                      className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0">
+                      <span className="font-medium">{s.name_bn || s.name_en}</span>
+                      {s.staff_id && <span className="text-muted-foreground ml-2">({s.staff_id})</span>}
+                      {s.designation && <span className="text-muted-foreground ml-2">— {s.designation}</span>}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 
