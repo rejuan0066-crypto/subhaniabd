@@ -368,16 +368,21 @@ const LibraryIssuance = () => {
             <div className="relative">
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
               <Input
-                value={distributorName || autoDistributorName}
+                value={distributorName}
                 onChange={e => {
                   const val = e.target.value;
                   setDistributorName(val);
                   setDistributorSearch(val);
                   setShowDistributorList(true);
                 }}
-                onFocus={() => setShowDistributorList(true)}
+                onFocus={() => {
+                  if (!distributorName && autoDistributorName) {
+                    setDistributorName(autoDistributorName);
+                  }
+                  setShowDistributorList(true);
+                }}
                 onBlur={() => setTimeout(() => setShowDistributorList(false), 200)}
-                placeholder={bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...'}
+                placeholder={autoDistributorName || (bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...')}
               />
               {showDistributorList && distributorResults.length > 0 && (
                 <div className="absolute z-[100] w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
