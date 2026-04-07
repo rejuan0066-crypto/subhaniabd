@@ -80,8 +80,8 @@ const ResultFind = () => {
 
       // Get student info from public view (non-sensitive fields only)
       const studentIds = sessionStudents.map((s: any) => s.student_id);
-      const { data: publicStudents } = await supabase
-        .from('students_public' as any)
+      const { data: publicStudents } = await (supabase as any)
+        .from('students_public')
         .select('*')
         .in('id', studentIds);
 
