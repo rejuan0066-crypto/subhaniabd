@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import SearchableSelect from '@/components/SearchableSelect';
 import { toast } from 'sonner';
 import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
@@ -35,8 +36,6 @@ const LibraryIssuance = () => {
   const [sellingPrice, setSellingPrice] = useState(0);
   const [bookCondition, setBookCondition] = useState('new');
   const [distributorName, setDistributorName] = useState('');
-  const [distributorSearch, setDistributorSearch] = useState('');
-  const [showDistributorList, setShowDistributorList] = useState(false);
 
   // Auto-fill distributor name from logged-in user's staff/profile record
   const { data: currentStaff } = useQuery({
@@ -51,18 +50,13 @@ const LibraryIssuance = () => {
     enabled: !!user?.id,
   });
 
-  // Distributor search (staff + teachers) - load all on empty search for dropdown
   const { data: distributorResults = [] } = useQuery({
-    queryKey: ['distributor-search', distributorSearch],
+    queryKey: ['library-distributors'],
     queryFn: async () => {
-      let query = supabase.from('staff').select('id, name_bn, name_en, staff_id, designation');
-      if (distributorSearch.length >= 2) {
-        query = query.or(`name_bn.ilike.%${distributorSearch}%,name_en.ilike.%${distributorSearch}%,staff_id.ilike.%${distributorSearch}%`);
-      }
-      const { data } = await query.order('name_bn').limit(15);
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en, staff_id, designation').order('name_bn').limit(100);
       return data || [];
     },
-    enabled: showDistributorList,
+    enabled: open,
   });
 
   const { data: books = [] } = useQuery({
@@ -183,11 +177,24 @@ const LibraryIssuance = () => {
 
   const autoDistributorName = currentStaff?.name_bn || currentStaff?.name_en || '';
 
+  const distributorOptions = useMemo(() => {
+    const options = distributorResults.map((staff: any) => ({
+      value: staff.name_bn || staff.name_en || staff.staff_id || staff.id,
+      label: `${staff.name_bn || staff.name_en}${staff.designation ? ` — ${staff.designation}` : ''}${staff.staff_id ? ` (${staff.staff_id})` : ''}`,
+    }));
+
+    if (autoDistributorName && !options.some(option => option.value === autoDistributorName)) {
+      return [{ value: autoDistributorName, label: autoDistributorName }, ...options];
+    }
+
+    return options;
+  }, [autoDistributorName, distributorResults]);
+
   const resetForm = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
     setRecipientSearch(''); setSelectedRecipient(null);
     setDistributionType('free'); setSellingPrice(0); setBookCondition('new');
-    setDistributorName(autoDistributorName); setDistributorSearch(''); setShowDistributorList(false);
+    setDistributorName(autoDistributorName);
   };
 
   const filteredIss = issuances.filter((i: any) => {
@@ -365,41 +372,17 @@ const LibraryIssuance = () => {
               </div>
             )}
 
-            <div className="relative">
+            <div>
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
-              <Input
-                value={distributorName}
-                onChange={e => {
-                  const val = e.target.value;
-                  setDistributorName(val);
-                  setDistributorSearch(val);
-                  setShowDistributorList(true);
-                }}
-                onFocus={() => {
-                  if (!distributorName && autoDistributorName) {
-                    setDistributorName(autoDistributorName);
-                  }
-                  setShowDistributorList(true);
-                }}
-                onBlur={() => setTimeout(() => setShowDistributorList(false), 200)}
-                placeholder={autoDistributorName || (bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...')}
+              <SearchableSelect
+                options={distributorOptions}
+                value={distributorName || autoDistributorName}
+                onValueChange={setDistributorName}
+                placeholder={bn ? 'বিতরণকারীর নাম বাছুন' : 'Select distributor name'}
+                searchPlaceholder={bn ? 'স্টাফ/শিক্ষক খুঁজুন...' : 'Search staff/teacher...'}
+                allowCustom
+                customLabel={bn ? 'নতুন নাম লিখুন' : 'Use typed name'}
               />
-              {showDistributorList && distributorResults.length > 0 && (
-                <div className="absolute z-[100] w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
-                  {distributorResults.map((s: any) => (
-                    <button key={s.id} type="button" onMouseDown={e => e.preventDefault()} onClick={() => {
-                      setDistributorName(s.name_bn || s.name_en);
-                      setShowDistributorList(false);
-                      setDistributorSearch('');
-                    }}
-                      className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0">
-                      <span className="font-medium">{s.name_bn || s.name_en}</span>
-                      {s.staff_id && <span className="text-muted-foreground ml-2">({s.staff_id})</span>}
-                      {s.designation && <span className="text-muted-foreground ml-2">— {s.designation}</span>}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
             <Button onClick={() => issueMut.mutate()} disabled={!bookId || !selectedRecipient || issueMut.isPending} className="btn-primary-gradient">
