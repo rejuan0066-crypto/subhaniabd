@@ -129,8 +129,13 @@ const ReceiptDesignerMain = () => {
     toast.info(bn ? 'ডিফল্ট সেটিংসে রিসেট হয়েছে' : 'Reset to defaults');
   };
 
-  // Generate live preview iframe
-  const previewSrc = `data:text/html;charset=utf-8,${encodeURIComponent(getPreviewHtml().replace(/<script>.*?<\/script>/gs, ''))}`;
+  // Generate live preview iframe - strip auto-print script but keep screen styles for preview
+  const previewHtml = getPreviewHtml()
+    .replace(/<script>[\s\S]*?<\/script>/gi, '')
+    .replace('</head>', `<style>
+      @media screen { body { background: #fff !important; padding: 8px !important; } .page { box-shadow: none !important; } }
+    </style></head>`);
+  const previewSrc = `data:text/html;charset=utf-8,${encodeURIComponent(previewHtml)}`;
 
   return (
     <div className="space-y-4">
