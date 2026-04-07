@@ -35,6 +35,8 @@ const LibraryIssuance = () => {
   const [sellingPrice, setSellingPrice] = useState(0);
   const [bookCondition, setBookCondition] = useState('new');
   const [distributorName, setDistributorName] = useState('');
+  const [distributorSearch, setDistributorSearch] = useState('');
+  const [showDistributorList, setShowDistributorList] = useState(false);
 
   // Auto-fill distributor name from logged-in user's staff/profile record
   const { data: currentStaff } = useQuery({
@@ -43,11 +45,21 @@ const LibraryIssuance = () => {
       if (!user?.id) return null;
       const { data } = await supabase.from('staff').select('name_bn, name_en').eq('user_id', user.id).maybeSingle();
       if (data) return data;
-      // Fallback to profile
       const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
       return profile ? { name_bn: profile.full_name, name_en: profile.full_name } : null;
     },
     enabled: !!user?.id,
+  });
+
+  // Distributor search (staff + teachers)
+  const { data: distributorResults = [] } = useQuery({
+    queryKey: ['distributor-search', distributorSearch],
+    queryFn: async () => {
+      if (distributorSearch.length < 2) return [];
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en, staff_id, designation').or(`name_bn.ilike.%${distributorSearch}%,name_en.ilike.%${distributorSearch}%,staff_id.ilike.%${distributorSearch}%`).limit(10);
+      return data || [];
+    },
+    enabled: distributorSearch.length >= 2,
   });
 
   const { data: books = [] } = useQuery({
