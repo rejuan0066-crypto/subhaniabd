@@ -149,10 +149,10 @@ const Dashboard = () => {
   const studentDetailStats: StatCard[] = [
     { key: 'new_students', label: bn ? 'নতুন ছাত্র' : 'New Students', value: newStudents.length, icon: UserCheck, color: 'text-success', bg: 'bg-success/10', onClick: () => openList(bn ? 'নতুন ছাত্র' : 'New Students', 'students') },
     { key: 'old_students', label: bn ? 'পুরাতন ছাত্র' : 'Old Students', value: oldStudents.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'পুরাতন ছাত্র' : 'Old Students', 'students') },
-    { key: 'divisions', label: bn ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10' },
-    { key: 'subjects', label: bn ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10' },
-    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10' },
-    { key: 'results', label: bn ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10' },
+    { key: 'divisions', label: bn ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'বিভাগসমূহ' : 'Divisions', 'divisions') },
+    { key: 'subjects', label: bn ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10', onClick: () => openList(bn ? 'বিষয়সমূহ' : 'Subjects', 'subjects') },
+    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'পরীক্ষাসমূহ' : 'Exams', 'exams') },
+    { key: 'results', label: bn ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'ফলাফলসমূহ' : 'Results', 'results') },
     { key: 'admission_history', label: bn ? 'ভর্তি ইতিহাস' : 'Admission History', value: students.length, icon: History, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'ভর্তি ইতিহাস' : 'Admission History', 'students') },
   ];
 
