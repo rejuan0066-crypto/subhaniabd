@@ -241,6 +241,7 @@ const AdminStudentsFees = () => {
   const handleReset = () => {
     setStep('form');
     setFeeType('');
+    setSelectedFeeTypeObj(null);
     setAmount('');
     setPaymentMethod('cash');
     setTransactionId('');
