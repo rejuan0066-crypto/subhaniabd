@@ -102,33 +102,26 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
         ${style.showTimestamp !== false && data.paymentTimestamp ? `<span class="trx-item" style="font-size:${5.5 * fs}px">সময়: ${data.paymentTimestamp}</span>` : ''}
       </div>` : ''}
 
-      <!-- Form Fields -->
+      <!-- Form Fields - Grid Layout -->
       <div class="form-body">
-        <div class="form-row">
+        <div class="form-grid">
           <span class="field-label" style="font-size:${7 * fs}px">নাম:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.studentName}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentName}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">আইডি / রোল:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">ক্লাস / সেশন:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
-        </div>
-        <div class="form-row">
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
+
           <span class="field-label" style="font-size:${7 * fs}px">বাবদ:</span>
-          <div class="field-input"><span class="field-value" style="font-size:${7 * fs}px">${data.feeType}</span></div>
-        </div>
-        <div class="form-row-split">
-          <div class="form-row half">
-            <span class="field-label" style="font-size:${7 * fs}px">টাকা:</span>
-            <div class="field-input amt"><span class="field-value amt-val" style="font-size:${7.5 * fs}px">৳ ${data.amount}</span></div>
-          </div>
-          <div class="form-row half">
-            <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
-            <div class="field-input${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
-          </div>
+          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.feeType}</span></div>
+
+          <span class="field-label" style="font-size:${7 * fs}px">টাকা:</span>
+          <div class="field-capsule amt"><span class="field-value amt-val" style="font-size:${7.5 * fs}px">৳ ${data.amount}</span></div>
+
+          <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
+          <div class="field-capsule${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#00e676' : data.statusColor};font-weight:700">${data.status}</span></div>
         </div>
       </div>
 
@@ -222,19 +215,17 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .trx-item { color: #8b95a5; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
   .trx-item strong { color: #c8d0da; }
 
-  /* Form body */
-  .form-body { flex: 1; padding: 2.5mm 2.5mm 1mm; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.8mm; }
-  .form-row { display: flex; align-items: center; gap: 1.5mm; }
-  .form-row-split { display: flex; gap: 2mm; }
-  .form-row.half { flex: 1; }
-  .field-label { width: 62px; flex-shrink: 0; font-weight: 600; color: #adb5bd; white-space: nowrap; text-align: left; }
-  .field-input { flex: 1; min-height: 18px; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px;
+  /* Form body - CSS Grid */
+  .form-body { flex: 1; padding: 2.5mm 3mm 1mm; position: relative; z-index: 1; }
+  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2mm 2mm; }
+  .field-label { font-weight: 600; color: #adb5bd; white-space: nowrap; text-align: left; padding-right: 1mm; }
+  .field-capsule { height: 20px; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px;
     display: flex; align-items: center; padding: 2px 8px; }
-  .field-input.amt { background: #0d3320; border-color: #00e676; }
+  .field-capsule.amt { background: #0d3320; border-color: #00e676; }
   .field-value { color: #e8eaed; white-space: nowrap; overflow: visible; }
   .amt-val { font-weight: 700; color: #00e676; }
-  .field-input.status-paid { background: #0d3320; border-color: #00e676; }
-  .field-input.status-paid .field-value { color: #00e676; font-weight: 700; }
+  .field-capsule.status-paid { background: #0d3320; border-color: #00e676; }
+  .field-capsule.status-paid .field-value { color: #00e676; font-weight: 700; }
 
   /* QR in title row */
   .qr-title-box { display: flex; align-items: center; justify-content: center; }
