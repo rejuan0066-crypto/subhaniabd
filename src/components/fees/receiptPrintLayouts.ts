@@ -70,9 +70,9 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
       <div class="receipt-header" style="background:linear-gradient(135deg, ${pc} 0%, ${pc}dd 100%);">
         ${data.logoUrl ? `<img src="${data.logoUrl}" class="header-logo" />` : '<div class="header-logo-placeholder"></div>'}
         <div class="header-center">
-          <div class="inst-name-bn" style="font-size:${10 * fs}px">${data.institutionName}</div>
-          ${data.institutionNameEn ? `<div class="inst-name-en" style="font-size:${6.5 * fs}px">${data.institutionNameEn}</div>` : ''}
-          <div class="inst-detail" style="font-size:${5.5 * fs}px">${data.institutionAddress}${data.institutionPhone ? ` | যোগাযোগ: ${data.institutionPhone}` : ''}</div>
+          <div class="inst-name-bn" style="font-size:${8.5 * fs}px">${data.institutionName}</div>
+          ${data.institutionNameEn ? `<div class="inst-name-en" style="font-size:${5.5 * fs}px">${data.institutionNameEn}</div>` : ''}
+          <div class="inst-detail" style="font-size:${4.5 * fs}px">${data.institutionAddress}${data.institutionPhone ? ` | যোগাযোগ: ${data.institutionPhone}` : ''}</div>
         </div>
         <div class="copy-badge" style="border-color:${pc}">
           <span class="copy-badge-text" style="color:${pc}">${copyLabel}</span>
@@ -83,45 +83,45 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
       <div class="title-row">
         <div class="title-left">
           ${style.showQr !== false ? `<img src="${qrUrl}" class="qr-title-img" alt="QR" />` : ''}
-          <span class="serial-label" style="font-size:${6 * fs}px">ক্রমিক নং:</span>
-          <span class="serial-capsule" style="font-size:${6 * fs}px;color:${pc}">${data.receiptSerial || ''}</span>
+          <span class="serial-label" style="font-size:${5 * fs}px">ক্রমিক নং:</span>
+          <span class="serial-capsule" style="font-size:${5 * fs}px;color:${pc}">${data.receiptSerial || ''}</span>
         </div>
         <div class="title-center">
-          <div class="title-capsule" style="background:${pc};font-size:${8.5 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
+          <div class="title-capsule" style="background:${pc};font-size:${7 * fs}px">${style.receiptTitle || 'রশিদ বই'}</div>
         </div>
         <div class="title-right">
-          <span class="date-label-text" style="font-size:${6 * fs}px">তারিখ:</span>
-          <span class="date-capsule" style="font-size:${6 * fs}px">${data.date || ''}</span>
+          <span class="date-label-text" style="font-size:${5 * fs}px">তারিখ:</span>
+          <span class="date-capsule" style="font-size:${5 * fs}px">${data.date || ''}</span>
         </div>
       </div>
 
       <!-- TrxID & Timestamp Row -->
       ${(style.showTrxId !== false && data.gatewayTrxId) || (style.showTimestamp !== false && data.paymentTimestamp) ? `
       <div class="trx-row">
-        ${style.showTrxId !== false && data.gatewayTrxId ? `<span class="trx-item" style="font-size:${5.5 * fs}px">TrxID: <strong>${data.gatewayTrxId}</strong></span>` : ''}
-        ${style.showTimestamp !== false && data.paymentTimestamp ? `<span class="trx-item" style="font-size:${5.5 * fs}px">সময়: ${data.paymentTimestamp}</span>` : ''}
+        ${style.showTrxId !== false && data.gatewayTrxId ? `<span class="trx-item" style="font-size:${4.5 * fs}px">TrxID: <strong>${data.gatewayTrxId}</strong></span>` : ''}
+        ${style.showTimestamp !== false && data.paymentTimestamp ? `<span class="trx-item" style="font-size:${4.5 * fs}px">সময়: ${data.paymentTimestamp}</span>` : ''}
       </div>` : ''}
 
       <!-- Form Fields - Grid Layout -->
       <div class="form-body">
         <div class="form-grid">
-          <span class="field-label" style="font-size:${7 * fs}px">নাম:</span>
-          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentName}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">নাম:</span>
+          <div class="field-capsule"><span class="field-value" style="font-size:${6 * fs}px">${data.studentName}</span></div>
 
-          <span class="field-label" style="font-size:${7 * fs}px">আইডি / রোল:</span>
-          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">আইডি / রোল:</span>
+          <div class="field-capsule"><span class="field-value" style="font-size:${6 * fs}px">${data.studentId || data.rollNumber ? [data.studentId, data.rollNumber ? 'রোল: ' + data.rollNumber : ''].filter(Boolean).join(' | ') : ''}</span></div>
 
-          <span class="field-label" style="font-size:${7 * fs}px">ক্লাস / সেশন:</span>
-          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">ক্লাস / সেশন:</span>
+          <div class="field-capsule"><span class="field-value" style="font-size:${6 * fs}px">${data.className || data.sessionName ? [data.className, data.sessionName].filter(Boolean).join(' | ') : ''}</span></div>
 
-          <span class="field-label" style="font-size:${7 * fs}px">বাবদ:</span>
-          <div class="field-capsule"><span class="field-value" style="font-size:${7 * fs}px">${data.feeType}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">বাবদ:</span>
+          <div class="field-capsule"><span class="field-value" style="font-size:${6 * fs}px">${data.feeType}</span></div>
 
-          <span class="field-label" style="font-size:${7 * fs}px">টাকা:</span>
-          <div class="field-capsule amt"><span class="field-value amt-val" style="font-size:${7.5 * fs}px">৳ ${data.amount}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">টাকা:</span>
+          <div class="field-capsule amt"><span class="field-value amt-val" style="font-size:${6.5 * fs}px">৳ ${data.amount}</span></div>
 
-          <span class="field-label" style="font-size:${7 * fs}px">স্ট্যাটাস:</span>
-          <div class="field-capsule${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${7 * fs}px;color:${data.statusColor === '#22c55e' ? '#16a34a' : data.statusColor};font-weight:700">${data.status}</span></div>
+          <span class="field-label" style="font-size:${6 * fs}px">স্ট্যাটাস:</span>
+          <div class="field-capsule${data.statusColor === '#22c55e' ? ' status-paid' : ''}"><span class="field-value" style="font-size:${6 * fs}px;color:${data.statusColor === '#22c55e' ? '#16a34a' : data.statusColor};font-weight:700">${data.status}</span></div>
         </div>
       </div>
 
@@ -129,18 +129,18 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
       <div class="sig-footer">
         <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
-          <div class="sig-title" style="font-size:${5.5 * fs}px">আদায়কারী স্বাক্ষর</div>
-          <div class="sig-name" style="font-size:${5 * fs}px">${data.collectorName}</div>
+          <div class="sig-title" style="font-size:${4.5 * fs}px">আদায়কারী স্বাক্ষর</div>
+          <div class="sig-name" style="font-size:${4 * fs}px">${data.collectorName}</div>
         </div>
         ${data.approverName ? `
         <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
-          <div class="sig-title" style="font-size:${5.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
-          <div class="sig-name" style="font-size:${5 * fs}px">${data.approverName}</div>
+          <div class="sig-title" style="font-size:${4.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
+          <div class="sig-name" style="font-size:${4 * fs}px">${data.approverName}</div>
         </div>` : `
         <div class="sig-block">
           <div class="sig-line" style="border-color:${pc}"></div>
-          <div class="sig-title" style="font-size:${5.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
+          <div class="sig-title" style="font-size:${4.5 * fs}px">গ্রহণকারী স্বাক্ষর</div>
         </div>`}
       </div>
     </div>`;
@@ -188,40 +188,40 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
     font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.05); white-space: nowrap; pointer-events: none; z-index: 0; }
 
   /* Copy badge - vertical */
-  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 2px solid; border-radius: 4px;
-    padding: 3px 2px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 36px; z-index: 3; }
-  .copy-badge-text { font-size: 7px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 1.5px solid; border-radius: 3px;
+    padding: 2px 1.5px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 28px; z-index: 3; }
+  .copy-badge-text { font-size: 6px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; }
 
   /* Header */
-  .receipt-header { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 2.5mm; position: relative; z-index: 1; }
-  .header-logo { height: 22px; width: 22px; object-fit: contain; border-radius: 2px; flex-shrink: 0; background: rgba(255,255,255,0.15); padding: 1px; }
-  .header-logo-placeholder { height: 22px; width: 22px; flex-shrink: 0; }
+  .receipt-header { display: flex; align-items: center; gap: 1mm; padding: 1mm 2mm; position: relative; z-index: 1; }
+  .header-logo { height: 18px; width: 18px; object-fit: contain; border-radius: 2px; flex-shrink: 0; background: rgba(255,255,255,0.15); padding: 1px; }
+  .header-logo-placeholder { height: 18px; width: 18px; flex-shrink: 0; }
   .header-center { flex: 1; text-align: center; }
   .inst-name-bn { font-weight: 700; color: #fff; line-height: 1.2; }
   .inst-name-en { font-weight: 600; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 0.5px; }
   .inst-detail { color: rgba(255,255,255,0.8); line-height: 1.2; }
 
   /* Title row */
-  .title-row { display: flex; align-items: center; padding: 1.5mm 3mm 0.5mm; position: relative; z-index: 1; }
-  .title-left { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-start; }
+  .title-row { display: flex; align-items: center; padding: 1mm 2.5mm 0.5mm; position: relative; z-index: 1; }
+  .title-left { flex: 1; display: flex; align-items: center; gap: 0.8mm; justify-content: flex-start; }
   .title-center { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-  .title-right { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-end; }
+  .title-right { flex: 1; display: flex; align-items: center; gap: 0.8mm; justify-content: flex-end; }
   .serial-label { font-weight: 600; color: #555; white-space: nowrap; }
-  .serial-capsule { font-weight: 700; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 1px 6px; min-width: 40px; min-height: 14px; text-align: center; display: inline-block; color: #333; }
+  .serial-capsule { font-weight: 700; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 0.5px 5px; min-width: 36px; min-height: 12px; text-align: center; display: inline-block; color: #333; }
   .date-label-text { font-weight: 600; color: #555; white-space: nowrap; }
-  .date-capsule { font-weight: 600; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 1px 6px; min-width: 55px; min-height: 14px; color: #333; white-space: nowrap; display: inline-block; }
-  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 1px 14px; border-radius: 8px; white-space: nowrap; }
+  .date-capsule { font-weight: 600; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 0.5px 5px; min-width: 48px; min-height: 12px; color: #333; white-space: nowrap; display: inline-block; }
+  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 10px; border-radius: 6px; white-space: nowrap; }
 
   .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0.5mm 2.5mm; position: relative; z-index: 1; }
   .trx-item { color: #777; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
   .trx-item strong { color: #333; }
 
   /* Form body - CSS Grid */
-  .form-body { flex: 1; padding: 2.5mm 3mm 1mm; position: relative; z-index: 1; }
-  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.5mm 2mm; }
-  .field-label { font-weight: 600; color: #555; white-space: nowrap; text-align: left; padding-right: 1mm; }
-  .field-capsule { height: 16px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
-    display: flex; align-items: center; padding: 2px 8px; }
+  .form-body { flex: 1; padding: 1.5mm 2.5mm 1mm; position: relative; z-index: 1; }
+  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.2mm 1.5mm; }
+  .field-label { font-weight: 600; color: #555; white-space: nowrap; text-align: left; padding-right: 0.5mm; }
+  .field-capsule { height: 14px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 5px;
+    display: flex; align-items: center; padding: 1px 6px; }
   .field-capsule.amt { background: #ecfdf5; border-color: #16a34a; }
   .field-value { color: #1a1a1a; white-space: nowrap; overflow: visible; }
   .amt-val { font-weight: 700; color: #16a34a; }
@@ -238,10 +238,10 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* QR in title row */
   .qr-title-box { display: flex; align-items: center; justify-content: center; }
-  .qr-title-img { width: 28px; height: 28px; border-radius: 3px; }
+  .qr-title-img { width: 22px; height: 22px; border-radius: 2px; }
 
   /* Signatures */
-  .sig-footer { display: flex; justify-content: space-between; padding: 0 4mm 2mm; margin-top: auto; padding-top: 10mm; position: relative; z-index: 1; }
+  .sig-footer { display: flex; justify-content: space-between; padding: 0 3mm 1.5mm; margin-top: auto; padding-top: 6mm; position: relative; z-index: 1; }
   .sig-block { text-align: center; width: 35%; }
   .sig-line { border-top: 1px dashed #aaa; margin-bottom: 0.5mm; }
   .sig-title { font-weight: 600; color: #555; }
