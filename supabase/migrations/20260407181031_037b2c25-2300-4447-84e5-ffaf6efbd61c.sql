@@ -1,0 +1,1 @@
+ALTER TABLE public.library_issuances ADD COLUMN IF NOT EXISTS distributor_name text;

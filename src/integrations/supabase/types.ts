@@ -1632,6 +1632,7 @@ export type Database = {
           book_id: string
           created_at: string | null
           distribution_type: string
+          distributor_name: string | null
           id: string
           issued_by: string | null
           issued_date: string
@@ -1650,6 +1651,7 @@ export type Database = {
           book_id: string
           created_at?: string | null
           distribution_type?: string
+          distributor_name?: string | null
           id?: string
           issued_by?: string | null
           issued_date?: string
@@ -1668,6 +1670,7 @@ export type Database = {
           book_id?: string
           created_at?: string | null
           distribution_type?: string
+          distributor_name?: string | null
           id?: string
           issued_by?: string | null
           issued_date?: string
