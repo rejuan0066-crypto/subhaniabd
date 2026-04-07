@@ -87,6 +87,7 @@ const LibraryIssuance = () => {
         issued_by: user?.id,
         status: 'issued',
         recipient_name: selectedRecipient.name_bn || selectedRecipient.name_en,
+        distributor_name: distributorName || null,
       };
       if (recipientType === 'student') payload.student_id = selectedRecipient.id;
       else payload.staff_id = selectedRecipient.id;
@@ -155,6 +156,7 @@ const LibraryIssuance = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
     setRecipientSearch(''); setSelectedRecipient(null);
     setDistributionType('free'); setSellingPrice(0); setBookCondition('new');
+    setDistributorName('');
   };
 
   const filteredIss = issuances.filter((i: any) => {
@@ -331,6 +333,11 @@ const LibraryIssuance = () => {
                 <Input type="number" value={sellingPrice || ''} onChange={e => setSellingPrice(Number(e.target.value))} />
               </div>
             )}
+
+            <div>
+              <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
+              <Input value={distributorName} onChange={e => setDistributorName(e.target.value)} placeholder={bn ? 'বিতরণকারীর নাম লিখুন...' : 'Enter distributor name...'} />
+            </div>
 
             <Button onClick={() => issueMut.mutate()} disabled={!bookId || !selectedRecipient || issueMut.isPending} className="btn-primary-gradient">
               {issueMut.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
