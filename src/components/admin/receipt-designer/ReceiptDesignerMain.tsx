@@ -42,6 +42,36 @@ const ReceiptDesignerMain = () => {
   const [nameBn, setNameBn] = useState('রশিদ বই');
   const [style, setStyle] = useState<ReceiptStyleConfig>({ ...DEFAULT_STYLE });
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [sigUploading, setSigUploading] = useState(false);
+  const sigInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 300 * 1024) {
+      toast.error(bn ? 'সর্বোচ্চ ৩০০KB অনুমোদিত' : 'Max 300KB allowed');
+      return;
+    }
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error(bn ? 'শুধুমাত্র JPG, PNG, WEBP' : 'Only JPG, PNG, WEBP');
+      return;
+    }
+    setSigUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `signatures/principal-sig-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('institution-logos').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('institution-logos').getPublicUrl(path);
+      setStyle(p => ({ ...p, principalSignatureUrl: urlData.publicUrl }));
+      toast.success(bn ? 'স্বাক্ষর আপলোড হয়েছে' : 'Signature uploaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setSigUploading(false);
+      if (sigInputRef.current) sigInputRef.current.value = '';
+    }
+  };
 
   const loadSetting = useCallback((id: string) => {
     const s = settings?.find((s: any) => s.id === id);
