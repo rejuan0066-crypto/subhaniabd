@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { isAdminRole } from '@/lib/roles';
+import { printIssuanceReceipt, printYearlyIssuanceList } from '@/lib/libraryIssuancePrint';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import SearchableSelect from '@/components/SearchableSelect';
 import { toast } from 'sonner';
-import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle } from 'lucide-react';
+import { Plus, Loader2, Search, ArrowRightLeft, Undo2, AlertTriangle, Printer, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 const LibraryIssuance = () => {
