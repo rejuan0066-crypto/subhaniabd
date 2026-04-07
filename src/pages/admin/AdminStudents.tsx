@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, BookOpen } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, BookOpen, Banknote, BadgePercent, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -366,11 +366,47 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     },
   });
 
+  const { data: feePayments = [], isLoading: feeLoading } = useQuery({
+    queryKey: ['student-fee-payments', student.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('fee_payments')
+        .select('*, fee_types(name, name_bn, amount)')
+        .eq('student_id', student.id)
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: feeWaivers = [], isLoading: waiverLoading } = useQuery({
+    queryKey: ['student-fee-waivers', student.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('fee_waivers')
+        .select('*, fee_types(name, name_bn, amount)')
+        .eq('student_id', student.id)
+        .eq('is_active', true);
+      return data || [];
+    },
+  });
+
+  const totalPaid = feePayments.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
+  const totalDue = feePayments.filter((p: any) => p.status === 'unpaid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
+
   const getLibStatusBadge = (status: string) => {
     switch (status) {
       case 'issued': return <Badge className="bg-blue-500/10 text-blue-600">{bn ? 'ইস্যু' : 'Issued'}</Badge>;
       case 'returned': return <Badge className="bg-emerald-500/10 text-emerald-600">{bn ? 'জমা দিয়েছে ✓' : 'Returned ✓'}</Badge>;
       case 'lost': return <Badge variant="destructive">{bn ? 'হারিয়েছে' : 'Lost'}</Badge>;
+      default: return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getFeeStatusBadge = (status: string) => {
+    switch (status) {
+      case 'paid': return <Badge className="bg-emerald-500/10 text-emerald-600">{bn ? 'পরিশোধিত ✓' : 'Paid ✓'}</Badge>;
+      case 'unpaid': return <Badge className="bg-destructive/10 text-destructive">{bn ? 'বকেয়া' : 'Unpaid'}</Badge>;
+      case 'pending': return <Badge className="bg-amber-500/10 text-amber-600">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>;
       default: return <Badge variant="secondary">{status}</Badge>;
     }
   };
@@ -407,6 +443,69 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
         {student.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
       </div>
 
+      {/* Fee Payment Summary */}
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <Banknote className="w-4 h-4 text-primary" />
+          {bn ? 'ফি পরিশোধের ইতিহাস' : 'Fee Payment History'}
+        </h4>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="rounded-lg bg-emerald-500/10 p-2.5 text-center">
+            <p className="text-xs text-muted-foreground">{bn ? 'মোট পরিশোধিত' : 'Total Paid'}</p>
+            <p className="text-lg font-bold text-emerald-600">৳{totalPaid.toLocaleString()}</p>
+          </div>
+          <div className="rounded-lg bg-destructive/10 p-2.5 text-center">
+            <p className="text-xs text-muted-foreground">{bn ? 'মোট বকেয়া' : 'Total Due'}</p>
+            <p className="text-lg font-bold text-destructive">৳{totalDue.toLocaleString()}</p>
+          </div>
+        </div>
+        {feeLoading ? (
+          <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+        ) : feePayments.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো ফি পেমেন্ট রেকর্ড নেই' : 'No fee payment records'}</p>
+        ) : (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {feePayments.map((p: any) => (
+              <div key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{bn ? (p.fee_types?.name_bn || p.fee_types?.name) : p.fee_types?.name || '-'}</p>
+                  <p className="text-xs text-muted-foreground">
+                    ৳{(p.paid_amount || p.amount || 0).toLocaleString()}
+                    {p.receipt_number && <> • {bn ? 'রসিদ: ' : 'Receipt: '}{p.receipt_number}</>}
+                  </p>
+                </div>
+                <div className="ml-2 shrink-0">{getFeeStatusBadge(p.status)}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Fee Waivers / Discounts */}
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <BadgePercent className="w-4 h-4 text-primary" />
+          {bn ? 'ফি ছাড় / ডিসকাউন্ট' : 'Fee Waivers / Discounts'}
+        </h4>
+        {waiverLoading ? (
+          <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+        ) : feeWaivers.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো ছাড় নেই' : 'No waivers'}</p>
+        ) : (
+          <div className="space-y-2 max-h-36 overflow-y-auto">
+            {feeWaivers.map((w: any) => (
+              <div key={w.id} className="flex items-center justify-between p-2 rounded-lg bg-amber-500/5 border border-amber-500/10 text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{bn ? (w.fee_types?.name_bn || w.fee_types?.name) : w.fee_types?.name || '-'}</p>
+                  {w.reason && <p className="text-xs text-muted-foreground truncate">{w.reason}</p>}
+                </div>
+                <Badge className="bg-amber-500/10 text-amber-600 ml-2 shrink-0">{w.waiver_percent}% {bn ? 'ছাড়' : 'off'}</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Library Book History */}
       <div className="border-t pt-4">
         <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
@@ -428,9 +527,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                     {item.returned_date && <> • {bn ? 'জমা: ' : 'Returned: '}{item.returned_date}</>}
                   </p>
                 </div>
-                <div className="ml-2 shrink-0">
-                  {getLibStatusBadge(item.status)}
-                </div>
+                <div className="ml-2 shrink-0">{getLibStatusBadge(item.status)}</div>
               </div>
             ))}
           </div>
