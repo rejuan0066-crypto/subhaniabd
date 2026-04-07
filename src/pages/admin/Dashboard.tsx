@@ -39,7 +39,7 @@ const Dashboard = () => {
   const canViewStats = isAdmin || hasPermission('/admin', 'view');
   const [builderOpen, setBuilderOpen] = useState(false);
   const { sections } = useDashboardLayout();
-  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors'; filters: Record<string, any> }>({
+  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results'; filters: Record<string, any> }>({
     open: false, title: '', table: 'students', filters: {},
   });
 
