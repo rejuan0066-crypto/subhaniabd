@@ -52,6 +52,24 @@ const LibraryInventory = () => {
     },
   });
 
+  // Merge default categories with custom ones from existing books
+  const BOOK_CATEGORIES = useMemo(() => {
+    const defaultKeys = new Set(DEFAULT_BOOK_CATEGORIES.map(c => c.key));
+    const customCats = (books as any[])
+      .map(b => b.book_category)
+      .filter(c => c && !defaultKeys.has(c));
+    const uniqueCustom = [...new Set(customCats)];
+    return [
+      ...DEFAULT_BOOK_CATEGORIES,
+      ...uniqueCustom.map(c => ({ key: c, label: c, label_bn: c })),
+    ];
+  }, [books]);
+
+  const categoryOptions = useMemo(() =>
+    BOOK_CATEGORIES.map(c => ({ value: c.key, label: bn ? c.label_bn : c.label })),
+    [BOOK_CATEGORIES, bn]
+  );
+
   const { data: classes = [] } = useQuery({
     queryKey: ['classes-list'],
     queryFn: async () => { const { data } = await supabase.from('classes').select('id, name, name_bn').eq('is_active', true).order('sort_order'); return data || []; },
