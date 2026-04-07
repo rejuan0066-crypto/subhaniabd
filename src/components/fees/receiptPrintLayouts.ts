@@ -157,8 +157,8 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .page:last-child { page-break-after: auto; }
 
   /* MODE 1: Single - 2 side-by-side copies */
-  .mode-single { flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
-  .mode-single .receipt-card { width: 50%; height: auto; }
+  .mode-single { flex-direction: row; justify-content: center; align-items: stretch; gap: 0; }
+  .mode-single .receipt-card { width: 50%; }
   .mode-single .cut-v { 
     width: 0; border-left: 1.5px dashed #bbb; position: relative; align-self: stretch;
   }
