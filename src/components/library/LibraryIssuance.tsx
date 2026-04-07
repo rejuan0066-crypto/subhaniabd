@@ -34,6 +34,7 @@ const LibraryIssuance = () => {
   const [distributionType, setDistributionType] = useState('free');
   const [sellingPrice, setSellingPrice] = useState(0);
   const [bookCondition, setBookCondition] = useState('new');
+  const [distributorName, setDistributorName] = useState('');
 
   const { data: books = [] } = useQuery({
     queryKey: ['library-books-available'],
