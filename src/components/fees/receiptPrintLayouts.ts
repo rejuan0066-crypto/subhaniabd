@@ -209,14 +209,15 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .inst-detail { color: rgba(255,255,255,0.7); line-height: 1.2; }
 
   /* Title row */
-  .title-row { display: flex; align-items: center; justify-content: space-between; padding: 1.5mm 2.5mm 0.5mm; position: relative; z-index: 1; }
-  .serial-box { display: flex; align-items: center; gap: 1mm; }
+  .title-row { display: flex; align-items: center; padding: 1.5mm 3mm 0.5mm; position: relative; z-index: 1; }
+  .title-left { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-start; }
+  .title-center { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+  .title-right { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-end; }
   .serial-label { font-weight: 600; color: #adb5bd; white-space: nowrap; }
   .serial-capsule { font-weight: 700; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px; padding: 1px 6px; min-width: 40px; min-height: 14px; text-align: center; display: inline-block; color: #e8eaed; }
-  .date-box-row { display: flex; align-items: center; gap: 1mm; }
   .date-label-text { font-weight: 600; color: #adb5bd; white-space: nowrap; }
   .date-capsule { font-weight: 600; background: #2a3040; border: 1px solid #3d4556; border-radius: 8px; padding: 1px 6px; min-width: 55px; min-height: 14px; color: #e8eaed; white-space: nowrap; display: inline-block; }
-  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 12px; border-radius: 8px; white-space: nowrap; }
+  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 1px 14px; border-radius: 8px; white-space: nowrap; }
 
   .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0.5mm 2.5mm; position: relative; z-index: 1; }
   .trx-item { color: #8b95a5; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
