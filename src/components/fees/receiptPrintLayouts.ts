@@ -219,13 +219,13 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .trx-item strong { color: #333; }
 
   /* Form body - compact */
-  .form-body { flex: 1; padding: 1mm 2.5mm; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.5mm; }
+  .form-body { flex: 1; padding: 2.5mm 2.5mm 1mm; position: relative; z-index: 1; display: flex; flex-direction: column; gap: 1.5mm; }
   .form-row { display: flex; align-items: center; gap: 1mm; }
   .form-row-split { display: flex; gap: 1.5mm; }
   .form-row.half { flex: 1; }
   .field-label { width: 62px; flex-shrink: 0; font-weight: 600; color: #444; white-space: nowrap; }
-  .field-input { flex: 1; min-height: 15px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
-    display: flex; align-items: center; padding: 1px 5px; }
+  .field-input { flex: 1; min-height: 18px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px;
+    display: flex; align-items: center; padding: 2px 6px; }
   .field-input.amt { background: #ecfdf5; border-color: ${pc}44; }
   .field-value { color: #111; white-space: nowrap; overflow: visible; }
   .amt-val { font-weight: 700; color: ${pc}; }
