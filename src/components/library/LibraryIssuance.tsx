@@ -184,7 +184,7 @@ const LibraryIssuance = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
     setRecipientSearch(''); setSelectedRecipient(null);
     setDistributionType('free'); setSellingPrice(0); setBookCondition('new');
-    setDistributorName(autoDistributorName);
+    setDistributorName(autoDistributorName); setDistributorSearch(''); setShowDistributorList(false);
   };
 
   const filteredIss = issuances.filter((i: any) => {
@@ -362,11 +362,34 @@ const LibraryIssuance = () => {
               </div>
             )}
 
-            <div>
+            <div className="relative">
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
-              <Input value={distributorName || autoDistributorName} onChange={e => setDistributorName(e.target.value)} placeholder={bn ? 'বিতরণকারীর নাম লিখুন...' : 'Enter distributor name...'} />
-              {autoDistributorName && !distributorName && (
-                <p className="text-xs text-muted-foreground mt-1">{bn ? 'অটো: ' : 'Auto: '}{autoDistributorName}</p>
+              <Input
+                value={distributorName || autoDistributorName}
+                onChange={e => {
+                  const val = e.target.value;
+                  setDistributorName(val);
+                  setDistributorSearch(val);
+                  setShowDistributorList(val.length >= 2);
+                }}
+                onFocus={() => { if ((distributorName || autoDistributorName).length >= 2) setShowDistributorList(true); }}
+                placeholder={bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...'}
+              />
+              {showDistributorList && distributorResults.length > 0 && (
+                <div className="absolute z-50 w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
+                  {distributorResults.map((s: any) => (
+                    <button key={s.id} onClick={() => {
+                      setDistributorName(s.name_bn || s.name_en);
+                      setShowDistributorList(false);
+                      setDistributorSearch('');
+                    }}
+                      className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0">
+                      <span className="font-medium">{s.name_bn || s.name_en}</span>
+                      {s.staff_id && <span className="text-muted-foreground ml-2">({s.staff_id})</span>}
+                      {s.designation && <span className="text-muted-foreground ml-2">— {s.designation}</span>}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 
