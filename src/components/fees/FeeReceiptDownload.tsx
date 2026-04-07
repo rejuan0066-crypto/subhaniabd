@@ -134,30 +134,12 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       }
     }
 
-    // Fallback approver name from staff (principal/head)
-    let fallbackApprover = '';
-    {
-      const { data: headStaff } = await supabase
-        .from('staff')
-        .select('name_bn, name_en, designation')
-        .or('designation.ilike.%মুহতামিম%,designation.ilike.%প্রিন্সিপাল%,designation.ilike.%principal%,designation.ilike.%head%')
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle();
-      if (headStaff) {
-        fallbackApprover = headStaff.name_bn || headStaff.name_en || '';
-      }
-    }
-    if (!fallbackApprover) {
-      fallbackApprover = bn ? 'মুহতামিম' : 'Principal';
-    }
-
     const studentMap = new Map(students.map((s: any) => [s.id, s]));
     const className = selectedClass
       ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
       : '';
 
-    return { payments, studentMap, sessionName, className, approverMap, fallbackApprover };
+    return { payments, studentMap, sessionName, className, approverMap };
   };
 
   const getCollectorFromNotes = (notes: string) => {
