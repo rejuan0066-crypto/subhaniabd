@@ -36,6 +36,20 @@ const LibraryIssuance = () => {
   const [bookCondition, setBookCondition] = useState('new');
   const [distributorName, setDistributorName] = useState('');
 
+  // Auto-fill distributor name from logged-in user's staff/profile record
+  const { data: currentStaff } = useQuery({
+    queryKey: ['current-staff-name', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('staff').select('name_bn, name_en').eq('user_id', user.id).maybeSingle();
+      if (data) return data;
+      // Fallback to profile
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      return profile ? { name_bn: profile.full_name, name_en: profile.full_name } : null;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: books = [] } = useQuery({
     queryKey: ['library-books-available'],
     queryFn: async () => {
@@ -152,11 +166,13 @@ const LibraryIssuance = () => {
     },
   });
 
+  const autoDistributorName = currentStaff?.name_bn || currentStaff?.name_en || '';
+
   const resetForm = () => {
     setOpen(false); setBookId(''); setRecipientType('student');
     setRecipientSearch(''); setSelectedRecipient(null);
     setDistributionType('free'); setSellingPrice(0); setBookCondition('new');
-    setDistributorName('');
+    setDistributorName(autoDistributorName);
   };
 
   const filteredIss = issuances.filter((i: any) => {
@@ -336,7 +352,10 @@ const LibraryIssuance = () => {
 
             <div>
               <Label>{bn ? 'বিতরণকারীর নাম' : 'Distributor Name'}</Label>
-              <Input value={distributorName} onChange={e => setDistributorName(e.target.value)} placeholder={bn ? 'বিতরণকারীর নাম লিখুন...' : 'Enter distributor name...'} />
+              <Input value={distributorName || autoDistributorName} onChange={e => setDistributorName(e.target.value)} placeholder={bn ? 'বিতরণকারীর নাম লিখুন...' : 'Enter distributor name...'} />
+              {autoDistributorName && !distributorName && (
+                <p className="text-xs text-muted-foreground mt-1">{bn ? 'অটো: ' : 'Auto: '}{autoDistributorName}</p>
+              )}
             </div>
 
             <Button onClick={() => issueMut.mutate()} disabled={!bookId || !selectedRecipient || issueMut.isPending} className="btn-primary-gradient">
