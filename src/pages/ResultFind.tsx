@@ -70,11 +70,23 @@ const ResultFind = () => {
       // Find student by roll number in exam session
       const { data: sessionStudents } = await supabase
         .from('exam_session_students')
-        .select('student_id, class_id, students(*)')
+        .select('student_id, class_id')
         .eq('exam_session_id', examSessionId);
 
-      const found = sessionStudents?.find((es: any) => {
-        const st = es.students;
+      if (!sessionStudents?.length) {
+        setError(bn ? 'ছাত্র পাওয়া যায়নি' : 'Student not found');
+        return;
+      }
+
+      // Get student info from public view (non-sensitive fields only)
+      const studentIds = sessionStudents.map((s: any) => s.student_id);
+      const { data: publicStudents } = await supabase
+        .from('students_public' as any)
+        .select('*')
+        .in('id', studentIds);
+
+      const found = sessionStudents.find((es: any) => {
+        const st = (publicStudents || []).find((ps: any) => ps.id === es.student_id);
         return st && (
           String(st.roll_number) === rollNumber.trim() ||
           st.student_id === rollNumber.trim() ||
@@ -82,12 +94,12 @@ const ResultFind = () => {
         );
       });
 
-      if (!found?.students) {
+      const student = found ? (publicStudents || []).find((ps: any) => ps.id === found.student_id) : null;
+      if (!student) {
         setError(bn ? 'ছাত্র পাওয়া যায়নি' : 'Student not found');
         return;
       }
 
-      const student = found.students;
       const classId = found.class_id;
 
       // Get class info to find division
