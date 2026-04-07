@@ -17,6 +17,7 @@ interface FeeSectionProps {
 
 const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionProps) => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
   const [expanded, setExpanded] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [listType, setListType] = useState<'paid' | 'unpaid'>('paid');
@@ -38,7 +39,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   const groups = payments.reduce((acc: any, p: any) => {
     let key = '';
     if (category === 'monthly') key = p.month || 'N/A';
-    else if (category === 'exam') key = p.fee_types?.name_bn || p.fee_types?.name || 'N/A';
+    else if (category === 'exam') key = bn ? (p.fee_types?.name_bn || p.fee_types?.name || 'N/A') : (p.fee_types?.name || 'N/A');
     else key = `${p.year || 'N/A'}`;
 
     if (!acc[key]) acc[key] = { label: key, total: 0, paid: [], unpaid: [] };
