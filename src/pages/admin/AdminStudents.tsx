@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import AdmissionForm from '@/components/admission/AdmissionForm';
 
 const AdminStudents = () => {
@@ -310,59 +311,7 @@ const AdminStudents = () => {
       <Dialog open={!!showDetail} onOpenChange={o => { if (!o) setShowDetail(null); }}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{bn ? 'ছাত্রের বিস্তারিত' : 'Student Details'}</DialogTitle></DialogHeader>
-          {showDetail && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-start gap-4">
-                {showDetail.photo_url ? (
-                  <img src={showDetail.photo_url} className="w-24 h-28 rounded-lg object-cover border" alt="" />
-                ) : (
-                  <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">{showDetail.name_bn?.[0]}</div>
-                )}
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-lg font-bold text-foreground">{showDetail.name_bn}</h3>
-                  {showDetail.name_en && <p className="text-sm text-muted-foreground">{showDetail.name_en}</p>}
-                  <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{showDetail.student_id}</p>
-                  <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{showDetail.roll_number || '-'}</p>
-                  <div className="mt-2">{getApprovalBadge(showDetail.approval_status || 'pending')}</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-muted-foreground">{bn ? 'পিতা: ' : 'Father: '}</span>{showDetail.father_name || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'মাতা: ' : 'Mother: '}</span>{showDetail.mother_name || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{showDetail.date_of_birth || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{showDetail.gender || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{showDetail.phone || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian: '}</span>{showDetail.guardian_phone || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{showDetail.birth_reg_no || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{showDetail.religion || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(showDetail.session_id, showDetail.admission_session)}</div>
-                <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(showDetail.class_id)}</div>
-                 <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{showDetail.residence_type || '-'}</div>
-                 <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{showDetail.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : showDetail.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : showDetail.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
-                 {showDetail.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
-              </div>
-              <div className="flex gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => { setEditStudent(showDetail); setShowDetail(null); setShowAdd(true); }} className="flex-1">
-                  <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
-                </Button>
-                {showDetail.approval_status !== 'approved' && (
-                  <Button onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 bg-success hover:bg-success/90 text-success-foreground">
-                    <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
-                  </Button>
-                )}
-                {showDetail.approval_status !== 'rejected' && (
-                  <Button variant="destructive" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'rejected' }); setShowDetail(null); }} className="flex-1">
-                    <XCircle className="w-4 h-4 mr-2" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
-                  </Button>
-                )}
-                {showDetail.approval_status === 'rejected' && (
-                  <Button variant="outline" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'pending' }); setShowDetail(null); }} className="flex-1">
-                    <Clock className="w-4 h-4 mr-2" /> {bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
+          {showDetail && <StudentDetailContent student={showDetail} bn={bn} getApprovalBadge={getApprovalBadge} getSessionName={getSessionName} getClassName={getClassName} setEditStudent={setEditStudent} setShowDetail={setShowDetail} setShowAdd={setShowAdd} statusMutation={statusMutation} canEditItem={canEditItem} />}
         </DialogContent>
       </Dialog>
     </div>
@@ -400,6 +349,115 @@ const AdminStudents = () => {
         paramKey="tab"
       />
     </AdminLayout>
+  );
+};
+
+// Student detail with library book history
+const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, getClassName, setEditStudent, setShowDetail, setShowAdd, statusMutation, canEditItem }: any) => {
+  const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
+    queryKey: ['student-library-history', student.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('library_issuances')
+        .select('*, library_books(title, title_bn)')
+        .eq('student_id', student.id)
+        .order('issued_date', { ascending: false });
+      return data || [];
+    },
+  });
+
+  const getLibStatusBadge = (status: string) => {
+    switch (status) {
+      case 'issued': return <Badge className="bg-blue-500/10 text-blue-600">{bn ? 'ইস্যু' : 'Issued'}</Badge>;
+      case 'returned': return <Badge className="bg-emerald-500/10 text-emerald-600">{bn ? 'জমা দিয়েছে ✓' : 'Returned ✓'}</Badge>;
+      case 'lost': return <Badge variant="destructive">{bn ? 'হারিয়েছে' : 'Lost'}</Badge>;
+      default: return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-4 py-4">
+      <div className="flex items-start gap-4">
+        {student.photo_url ? (
+          <img src={student.photo_url} className="w-24 h-28 rounded-lg object-cover border" alt="" />
+        ) : (
+          <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">{student.name_bn?.[0]}</div>
+        )}
+        <div className="flex-1 space-y-1">
+          <h3 className="text-lg font-bold text-foreground">{student.name_bn}</h3>
+          {student.name_en && <p className="text-sm text-muted-foreground">{student.name_en}</p>}
+          <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{student.student_id}</p>
+          <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{student.roll_number || '-'}</p>
+          <div className="mt-2">{getApprovalBadge(student.approval_status || 'pending')}</div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div><span className="text-muted-foreground">{bn ? 'পিতা: ' : 'Father: '}</span>{student.father_name || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'মাতা: ' : 'Mother: '}</span>{student.mother_name || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{student.date_of_birth || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{student.phone || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian: '}</span>{student.guardian_phone || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{student.birth_reg_no || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(student.session_id, student.admission_session)}</div>
+        <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(student.class_id)}</div>
+        <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
+        <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
+        {student.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
+      </div>
+
+      {/* Library Book History */}
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <BookOpen className="w-4 h-4 text-primary" />
+          {bn ? 'লাইব্রেরি বই ইতিহাস' : 'Library Book History'}
+        </h4>
+        {libLoading ? (
+          <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+        ) : libraryHistory.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো বই ইস্যু/জমার রেকর্ড নেই' : 'No library records'}</p>
+        ) : (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {libraryHistory.map((item: any) => (
+              <div key={item.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{bn ? (item.library_books?.title_bn || item.library_books?.title) : item.library_books?.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {bn ? 'ইস্যু: ' : 'Issued: '}{item.issued_date}
+                    {item.returned_date && <> • {bn ? 'জমা: ' : 'Returned: '}{item.returned_date}</>}
+                  </p>
+                </div>
+                <div className="ml-2 shrink-0">
+                  {getLibStatusBadge(item.status)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-2 pt-4 border-t">
+        <Button variant="outline" onClick={() => { setEditStudent(student); setShowDetail(null); setShowAdd(true); }} className="flex-1">
+          <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
+        </Button>
+        {student.approval_status !== 'approved' && (
+          <Button onClick={() => { statusMutation.mutate({ id: student.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 bg-success hover:bg-success/90 text-success-foreground">
+            <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
+          </Button>
+        )}
+        {student.approval_status !== 'rejected' && (
+          <Button variant="destructive" onClick={() => { statusMutation.mutate({ id: student.id, status: 'rejected' }); setShowDetail(null); }} className="flex-1">
+            <XCircle className="w-4 h-4 mr-2" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
+          </Button>
+        )}
+        {student.approval_status === 'rejected' && (
+          <Button variant="outline" onClick={() => { statusMutation.mutate({ id: student.id, status: 'pending' }); setShowDetail(null); }} className="flex-1">
+            <Clock className="w-4 h-4 mr-2" /> {bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 };
 
