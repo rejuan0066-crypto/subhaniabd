@@ -62,6 +62,37 @@ const LibraryInventory = () => {
     queryFn: async () => { const { data } = await supabase.from('subjects').select('id, name, name_bn').eq('is_active', true).order('name_bn'); return data || []; },
   });
 
+  const { data: purchaserOptions = [] } = useQuery({
+    queryKey: ['library-purchasers'],
+    queryFn: async () => {
+      const { data: staffData } = await supabase.from('staff').select('id, user_id, name_bn, name_en').order('name_bn').limit(200);
+      const staffRows = (staffData || []).map((s: any) => ({ ...s, source: 'staff' }));
+      const staffUserIds = new Set(staffRows.filter((s: any) => s.user_id).map((s: any) => s.user_id));
+
+      const { data: profilesData } = await supabase.from('profiles').select('id, full_name, status');
+
+      const entries: { value: string; label: string }[] = [];
+      staffRows.forEach((s: any) => {
+        entries.push({ value: s.name_bn || s.name_en || s.id, label: s.name_bn || s.name_en });
+      });
+      (profilesData || []).forEach((p: any) => {
+        if (!staffUserIds.has(p.id) && p.full_name && p.status === 'approved') {
+          entries.push({ value: p.full_name, label: p.full_name });
+        }
+      });
+      return entries.sort((a, b) => a.label.localeCompare(b.label, 'bn'));
+    },
+    enabled: open,
+  });
+
+  // Auto-set purchaser to current user name
+  const autoSetPurchaser = () => {
+    if (!form.purchased_by && user) {
+      const profile = purchaserOptions.find(o => o.value === (user.user_metadata?.full_name || ''));
+      if (profile) setForm(f => ({ ...f, purchased_by: profile.value }));
+    }
+  };
+
   const saveMut = useMutation({
     mutationFn: async () => {
       const payload: any = {
