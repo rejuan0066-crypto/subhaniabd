@@ -134,7 +134,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         .from('staff')
         .select('name_bn, name_en, designation')
         .or('designation.ilike.%মুহতামিম%,designation.ilike.%প্রিন্সিপাল%,designation.ilike.%principal%,designation.ilike.%head%')
-        .eq('is_active', true)
+        .eq('status', 'active')
         .limit(1)
         .maybeSingle();
       if (headStaff) {
