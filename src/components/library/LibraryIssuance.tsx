@@ -51,15 +51,18 @@ const LibraryIssuance = () => {
     enabled: !!user?.id,
   });
 
-  // Distributor search (staff + teachers)
+  // Distributor search (staff + teachers) - load all on empty search for dropdown
   const { data: distributorResults = [] } = useQuery({
     queryKey: ['distributor-search', distributorSearch],
     queryFn: async () => {
-      if (distributorSearch.length < 2) return [];
-      const { data } = await supabase.from('staff').select('id, name_bn, name_en, staff_id, designation').or(`name_bn.ilike.%${distributorSearch}%,name_en.ilike.%${distributorSearch}%,staff_id.ilike.%${distributorSearch}%`).limit(10);
+      let query = supabase.from('staff').select('id, name_bn, name_en, staff_id, designation');
+      if (distributorSearch.length >= 2) {
+        query = query.or(`name_bn.ilike.%${distributorSearch}%,name_en.ilike.%${distributorSearch}%,staff_id.ilike.%${distributorSearch}%`);
+      }
+      const { data } = await query.order('name_bn').limit(15);
       return data || [];
     },
-    enabled: distributorSearch.length >= 2,
+    enabled: showDistributorList,
   });
 
   const { data: books = [] } = useQuery({
@@ -370,15 +373,16 @@ const LibraryIssuance = () => {
                   const val = e.target.value;
                   setDistributorName(val);
                   setDistributorSearch(val);
-                  setShowDistributorList(val.length >= 2);
+                  setShowDistributorList(true);
                 }}
-                onFocus={() => { if ((distributorName || autoDistributorName).length >= 2) setShowDistributorList(true); }}
+                onFocus={() => setShowDistributorList(true)}
+                onBlur={() => setTimeout(() => setShowDistributorList(false), 200)}
                 placeholder={bn ? 'নাম লিখে খুঁজুন বা টাইপ করুন...' : 'Search or type name...'}
               />
               {showDistributorList && distributorResults.length > 0 && (
-                <div className="absolute z-50 w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
+                <div className="absolute z-[100] w-full border border-border rounded-md mt-1 max-h-40 overflow-y-auto bg-background shadow-lg">
                   {distributorResults.map((s: any) => (
-                    <button key={s.id} onClick={() => {
+                    <button key={s.id} type="button" onMouseDown={e => e.preventDefault()} onClick={() => {
                       setDistributorName(s.name_bn || s.name_en);
                       setShowDistributorList(false);
                       setDistributorSearch('');
