@@ -40,7 +40,8 @@ const AdminStudentsFees = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
-  const [feeType, setFeeType] = useState<FeeType | ''>('');
+  const [feeType, setFeeType] = useState('');
+  const [selectedFeeTypeObj, setSelectedFeeTypeObj] = useState<any>(null);
   const [amount, setAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
