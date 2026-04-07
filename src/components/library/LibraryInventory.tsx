@@ -278,7 +278,17 @@ const LibraryInventory = () => {
               <div><Label>{bn ? 'দাম (৳)' : 'Price (৳)'}</Label><Input type="number" value={form.buying_price || ''} onChange={e => setForm({ ...form, buying_price: Number(e.target.value) })} /></div>
               <div><Label>{bn ? 'কপি সংখ্যা' : 'Copies'}</Label><Input type="number" min={1} value={form.total_copies || ''} onChange={e => setForm({ ...form, total_copies: Number(e.target.value) })} /></div>
             </div>
-            <div><Label>{bn ? 'ক্রয়কারী নাম' : 'Purchaser Name'}</Label><Input value={form.purchased_by} onChange={e => setForm({ ...form, purchased_by: e.target.value })} /></div>
+            <div><Label>{bn ? 'ক্রয়কারী নাম' : 'Purchaser Name'}</Label>
+              <SearchableSelect
+                options={purchaserOptions}
+                value={form.purchased_by}
+                onValueChange={v => setForm({ ...form, purchased_by: v })}
+                placeholder={bn ? 'ক্রয়কারী নির্বাচন করুন' : 'Select purchaser'}
+                searchPlaceholder={bn ? 'নাম খুঁজুন...' : 'Search name...'}
+                allowCustom
+                customLabel={bn ? 'যোগ করুন' : 'Add'}
+              />
+            </div>
             <div><Label>{bn ? 'নোট' : 'Notes'}</Label><Input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
             <Button onClick={() => saveMut.mutate()} disabled={!form.title.trim() && !form.title_bn.trim() || saveMut.isPending} className="btn-primary-gradient">
               {saveMut.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
