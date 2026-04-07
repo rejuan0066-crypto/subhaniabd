@@ -202,26 +202,26 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .inst-detail { color: rgba(255,255,255,0.8); line-height: 1.2; }
 
   /* Title row */
-  .title-row { display: flex; align-items: center; padding: 1.5mm 3mm 0.5mm; position: relative; z-index: 1; }
-  .title-left { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-start; }
+  .title-row { display: flex; align-items: center; padding: 1mm 2.5mm 0.5mm; position: relative; z-index: 1; }
+  .title-left { flex: 1; display: flex; align-items: center; gap: 0.8mm; justify-content: flex-start; }
   .title-center { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-  .title-right { flex: 1; display: flex; align-items: center; gap: 1mm; justify-content: flex-end; }
+  .title-right { flex: 1; display: flex; align-items: center; gap: 0.8mm; justify-content: flex-end; }
   .serial-label { font-weight: 600; color: #555; white-space: nowrap; }
-  .serial-capsule { font-weight: 700; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 1px 6px; min-width: 40px; min-height: 14px; text-align: center; display: inline-block; color: #333; }
+  .serial-capsule { font-weight: 700; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 0.5px 5px; min-width: 36px; min-height: 12px; text-align: center; display: inline-block; color: #333; }
   .date-label-text { font-weight: 600; color: #555; white-space: nowrap; }
-  .date-capsule { font-weight: 600; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; padding: 1px 6px; min-width: 55px; min-height: 14px; color: #333; white-space: nowrap; display: inline-block; }
-  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 1px 14px; border-radius: 8px; white-space: nowrap; }
+  .date-capsule { font-weight: 600; background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 0.5px 5px; min-width: 48px; min-height: 12px; color: #333; white-space: nowrap; display: inline-block; }
+  .title-capsule { color: #fff; font-weight: 700; text-align: center; padding: 0.5px 10px; border-radius: 6px; white-space: nowrap; }
 
   .trx-row { display: flex; justify-content: center; gap: 3mm; padding: 0.5mm 2.5mm; position: relative; z-index: 1; }
   .trx-item { color: #777; font-family: monospace, 'Noto Sans Bengali', sans-serif; }
   .trx-item strong { color: #333; }
 
   /* Form body - CSS Grid */
-  .form-body { flex: 1; padding: 2.5mm 3mm 1mm; position: relative; z-index: 1; }
-  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.5mm 2mm; }
-  .field-label { font-weight: 600; color: #555; white-space: nowrap; text-align: left; padding-right: 1mm; }
-  .field-capsule { height: 16px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
-    display: flex; align-items: center; padding: 2px 8px; }
+  .form-body { flex: 1; padding: 1.5mm 2.5mm 1mm; position: relative; z-index: 1; }
+  .form-grid { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.2mm 1.5mm; }
+  .field-label { font-weight: 600; color: #555; white-space: nowrap; text-align: left; padding-right: 0.5mm; }
+  .field-capsule { height: 14px; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 5px;
+    display: flex; align-items: center; padding: 1px 6px; }
   .field-capsule.amt { background: #ecfdf5; border-color: #16a34a; }
   .field-value { color: #1a1a1a; white-space: nowrap; overflow: visible; }
   .amt-val { font-weight: 700; color: #16a34a; }
@@ -238,10 +238,10 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
 
   /* QR in title row */
   .qr-title-box { display: flex; align-items: center; justify-content: center; }
-  .qr-title-img { width: 28px; height: 28px; border-radius: 3px; }
+  .qr-title-img { width: 22px; height: 22px; border-radius: 2px; }
 
   /* Signatures */
-  .sig-footer { display: flex; justify-content: space-between; padding: 0 4mm 2mm; margin-top: auto; padding-top: 10mm; position: relative; z-index: 1; }
+  .sig-footer { display: flex; justify-content: space-between; padding: 0 3mm 1.5mm; margin-top: auto; padding-top: 6mm; position: relative; z-index: 1; }
   .sig-block { text-align: center; width: 35%; }
   .sig-line { border-top: 1px dashed #aaa; margin-bottom: 0.5mm; }
   .sig-title { font-weight: 600; color: #555; }
