@@ -1493,6 +1493,7 @@ export type Database = {
           author: string | null
           author_bn: string | null
           available_copies: number
+          book_category: string
           buying_price: number
           class_id: string | null
           condition: string
@@ -1514,6 +1515,7 @@ export type Database = {
           author?: string | null
           author_bn?: string | null
           available_copies?: number
+          book_category?: string
           buying_price?: number
           class_id?: string | null
           condition?: string
@@ -1535,6 +1537,7 @@ export type Database = {
           author?: string | null
           author_bn?: string | null
           available_copies?: number
+          book_category?: string
           buying_price?: number
           class_id?: string | null
           condition?: string
