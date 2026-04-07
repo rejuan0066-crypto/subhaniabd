@@ -21,7 +21,7 @@ import FeeCategoryManager from '@/components/admin/FeeCategoryManager';
 
 const LazyPaymentDashboard = lazy(() => import('@/pages/admin/AdminPayments'));
 
-// Dynamic fee types from DB will be used instead of hardcoded ones
+type PaymentMethod = 'cash' | 'online';
 
 const generateTransactionId = () => {
   const now = new Date();
