@@ -161,6 +161,7 @@ const App = () => (
                     <Route path="payments" element={<AdminPayments />} />
                     <Route path="receipt-designer" element={<AdminReceiptDesigner />} />
                     <Route path="exam-sessions" element={<ModuleGuard menuPath="/admin/exam-sessions"><AdminExamSessions /></ModuleGuard>} />
+                    <Route path="library" element={<ModuleGuard menuPath="/admin/library"><AdminLibrary /></ModuleGuard>} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
