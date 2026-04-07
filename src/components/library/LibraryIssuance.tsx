@@ -431,16 +431,21 @@ const LibraryIssuance = () => {
                   <TableCell className="text-center">{getStatusBadge(i.status)}</TableCell>
                   <TableCell className="text-right">{i.distribution_type === 'sale' ? `৳${i.selling_price}` : '—'}</TableCell>
                   <TableCell className="text-center">
-                    {i.status === 'issued' && (
-                      <div className="flex justify-center gap-1">
-                        <Button size="sm" variant="outline" onClick={() => returnMut.mutate(i)} title={bn ? 'ফেরত' : 'Return'}>
-                          <Undo2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button size="sm" variant="outline" className="text-destructive" onClick={() => { setLossTarget(i); setFineAmount(0); setLossOpen(true); }} title={bn ? 'হারানো' : 'Lost'}>
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex justify-center gap-1">
+                      <Button size="sm" variant="outline" onClick={() => handlePrintSingleIssuance(i)} title={bn ? 'প্রিন্ট' : 'Print'}>
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+                      {i.status === 'issued' && (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => returnMut.mutate(i)} title={bn ? 'ফেরত' : 'Return'}>
+                            <Undo2 className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-destructive" onClick={() => { setLossTarget(i); setFineAmount(0); setLossOpen(true); }} title={bn ? 'হারানো' : 'Lost'}>
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
