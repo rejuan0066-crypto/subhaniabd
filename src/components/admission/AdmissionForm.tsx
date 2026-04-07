@@ -567,7 +567,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
 
     // Validation manager rules
     const vmErrors = validateAll(form);
+    console.log('[AdmissionForm] vmErrors:', vmErrors);
     Object.assign(errors, vmErrors);
+    console.log('[AdmissionForm] final errors:', errors);
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
