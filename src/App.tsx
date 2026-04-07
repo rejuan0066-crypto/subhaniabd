@@ -71,6 +71,7 @@ import AdminApprovals from "./pages/admin/AdminApprovals";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminReceiptDesigner from "./pages/admin/AdminReceiptDesigner";
 import AdminExamSessions from "./pages/admin/AdminExamSessions";
+import AdminLibrary from "./pages/admin/AdminLibrary";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import RouteLoader from "./components/RouteLoader";
