@@ -311,59 +311,7 @@ const AdminStudents = () => {
       <Dialog open={!!showDetail} onOpenChange={o => { if (!o) setShowDetail(null); }}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{bn ? 'ছাত্রের বিস্তারিত' : 'Student Details'}</DialogTitle></DialogHeader>
-          {showDetail && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-start gap-4">
-                {showDetail.photo_url ? (
-                  <img src={showDetail.photo_url} className="w-24 h-28 rounded-lg object-cover border" alt="" />
-                ) : (
-                  <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">{showDetail.name_bn?.[0]}</div>
-                )}
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-lg font-bold text-foreground">{showDetail.name_bn}</h3>
-                  {showDetail.name_en && <p className="text-sm text-muted-foreground">{showDetail.name_en}</p>}
-                  <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{showDetail.student_id}</p>
-                  <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{showDetail.roll_number || '-'}</p>
-                  <div className="mt-2">{getApprovalBadge(showDetail.approval_status || 'pending')}</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-muted-foreground">{bn ? 'পিতা: ' : 'Father: '}</span>{showDetail.father_name || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'মাতা: ' : 'Mother: '}</span>{showDetail.mother_name || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{showDetail.date_of_birth || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{showDetail.gender || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{showDetail.phone || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian: '}</span>{showDetail.guardian_phone || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{showDetail.birth_reg_no || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{showDetail.religion || '-'}</div>
-                <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(showDetail.session_id, showDetail.admission_session)}</div>
-                <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(showDetail.class_id)}</div>
-                 <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{showDetail.residence_type || '-'}</div>
-                 <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{showDetail.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : showDetail.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : showDetail.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
-                 {showDetail.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
-              </div>
-              <div className="flex gap-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => { setEditStudent(showDetail); setShowDetail(null); setShowAdd(true); }} className="flex-1">
-                  <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
-                </Button>
-                {showDetail.approval_status !== 'approved' && (
-                  <Button onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 bg-success hover:bg-success/90 text-success-foreground">
-                    <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
-                  </Button>
-                )}
-                {showDetail.approval_status !== 'rejected' && (
-                  <Button variant="destructive" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'rejected' }); setShowDetail(null); }} className="flex-1">
-                    <XCircle className="w-4 h-4 mr-2" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
-                  </Button>
-                )}
-                {showDetail.approval_status === 'rejected' && (
-                  <Button variant="outline" onClick={() => { statusMutation.mutate({ id: showDetail.id, status: 'pending' }); setShowDetail(null); }} className="flex-1">
-                    <Clock className="w-4 h-4 mr-2" /> {bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
+          {showDetail && <StudentDetailContent student={showDetail} bn={bn} getApprovalBadge={getApprovalBadge} getSessionName={getSessionName} getClassName={getClassName} setEditStudent={setEditStudent} setShowDetail={setShowDetail} setShowAdd={setShowAdd} statusMutation={statusMutation} canEditItem={canEditItem} />}
         </DialogContent>
       </Dialog>
     </div>
