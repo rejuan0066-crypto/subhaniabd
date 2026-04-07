@@ -39,6 +39,7 @@ const LibraryInventory = () => {
   const [form, setForm] = useState(emptyBook);
   const [search, setSearch] = useState('');
   const [filterClass, setFilterClass] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
 
   const { data: books = [], isLoading } = useQuery({
     queryKey: ['library-books'],
@@ -115,7 +116,8 @@ const LibraryInventory = () => {
     const q = search.toLowerCase();
     const matchSearch = !q || b.title?.toLowerCase().includes(q) || b.title_bn?.includes(q) || b.author?.toLowerCase().includes(q) || b.author_bn?.includes(q);
     const matchClass = filterClass === 'all' || b.class_id === filterClass;
-    return matchSearch && matchClass;
+    const matchCat = filterCategory === 'all' || b.book_category === filterCategory;
+    return matchSearch && matchClass && matchCat;
   });
 
   const getConditionBadge = (book: any) => {
@@ -132,11 +134,18 @@ const LibraryInventory = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder={bn ? 'বই খুঁজুন...' : 'Search books...'} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
-          <Select value={filterClass} onValueChange={setFilterClass}>
-            <SelectTrigger className="w-[180px]"><SelectValue placeholder={bn ? 'ক্লাস ফিল্টার' : 'Filter by class'} /></SelectTrigger>
+           <Select value={filterClass} onValueChange={setFilterClass}>
+            <SelectTrigger className="w-[160px]"><SelectValue placeholder={bn ? 'ক্লাস ফিল্টার' : 'Filter by class'} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{bn ? 'সকল ক্লাস' : 'All Classes'}</SelectItem>
               {classes.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[160px]"><SelectValue placeholder={bn ? 'ক্যাটাগরি' : 'Category'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সকল ক্যাটাগরি' : 'All Categories'}</SelectItem>
+              {BOOK_CATEGORIES.map(c => <SelectItem key={c.key} value={c.key}>{bn ? c.label_bn : c.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -158,9 +167,9 @@ const LibraryInventory = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>{bn ? 'বইয়ের নাম' : 'Title'}</TableHead>
+                <TableHead>{bn ? 'ক্যাটাগরি' : 'Category'}</TableHead>
                 <TableHead>{bn ? 'লেখক' : 'Author'}</TableHead>
                 <TableHead>{bn ? 'ক্লাস' : 'Class'}</TableHead>
-                <TableHead>{bn ? 'বিষয়' : 'Subject'}</TableHead>
                 <TableHead className="text-center">{bn ? 'অবস্থা' : 'Condition'}</TableHead>
                 <TableHead className="text-center">{bn ? 'মোট' : 'Total'}</TableHead>
                 <TableHead className="text-center">{bn ? 'উপলব্ধ' : 'Avail.'}</TableHead>
@@ -172,9 +181,9 @@ const LibraryInventory = () => {
               {filtered.map((b: any) => (
                 <TableRow key={b.id}>
                   <TableCell className="font-medium">{bn ? (b.title_bn || b.title) : b.title}</TableCell>
+                  <TableCell><Badge variant="outline">{BOOK_CATEGORIES.find(c => c.key === b.book_category)?.[bn ? 'label_bn' : 'label'] || (bn ? 'পাঠ্যবই' : 'Textbook')}</Badge></TableCell>
                   <TableCell>{bn ? (b.author_bn || b.author) : b.author}</TableCell>
                   <TableCell>{b.classes ? (bn ? b.classes.name_bn : b.classes.name) : '—'}</TableCell>
-                  <TableCell>{b.subjects ? (bn ? b.subjects.name_bn : b.subjects.name) : '—'}</TableCell>
                   <TableCell className="text-center">{getConditionBadge(b)}</TableCell>
                   <TableCell className="text-center">{b.total_copies}</TableCell>
                   <TableCell className="text-center">{b.available_copies}</TableCell>
@@ -206,6 +215,13 @@ const LibraryInventory = () => {
             <div className="grid grid-cols-2 gap-3">
               <div><Label>{bn ? 'লেখক (ইংরেজি)' : 'Author (English)'}</Label><Input value={form.author} onChange={e => setForm({ ...form, author: e.target.value })} /></div>
               <div><Label>{bn ? 'লেখক (বাংলা)' : 'Author (Bangla)'}</Label><Input value={form.author_bn} onChange={e => setForm({ ...form, author_bn: e.target.value })} /></div>
+            </div>
+            <div>
+              <Label>{bn ? 'ক্যাটাগরি' : 'Category'}</Label>
+              <Select value={form.book_category} onValueChange={v => setForm({ ...form, book_category: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{BOOK_CATEGORIES.map(c => <SelectItem key={c.key} value={c.key}>{bn ? c.label_bn : c.label}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
