@@ -1,0 +1,1 @@
+ALTER TABLE public.payments DROP CONSTRAINT payments_fee_type_check;
