@@ -219,6 +219,21 @@ const LibraryIssuance = () => {
       if (distributionType === 'sale' && recipientType === 'student') {
         toast.info(bn ? `৳${sellingPrice} ছাত্রের লেজারে বকেয়া যোগ হয়েছে` : `৳${sellingPrice} added as due to student ledger`);
       }
+
+      // Print receipt
+      const selectedBook = books.find((b: any) => b.id === bookId);
+      printIssuanceReceipt({
+        bookTitle: bn ? (selectedBook?.title_bn || selectedBook?.title || '') : (selectedBook?.title || ''),
+        recipientName: selectedRecipient?.name_bn || selectedRecipient?.name_en || '',
+        recipientType,
+        distributionType,
+        bookCondition,
+        sellingPrice: Number(sellingPrice),
+        distributorName: distributorName || autoDistributorName || '',
+        issuedDate: format(new Date(), 'dd/MM/yyyy'),
+        recipientId: selectedRecipient?.student_id || selectedRecipient?.staff_id || '',
+      }, institutionInfo);
+
       resetForm();
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
