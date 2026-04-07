@@ -66,19 +66,17 @@ function buildReceipt(data: ReceiptData, copyLabel: string, style: ReceiptStyleC
         ? `<div class="watermark"><img src="${data.logoUrl}" /></div>`
         : `<div class="watermark-text">${data.institutionName}</div>`) : ''}
 
-      <!-- Copy Label -->
-      <div class="copy-label">${copyLabel}</div>
-
       <!-- Header -->
       <div class="receipt-header" style="background:linear-gradient(135deg, ${pc} 0%, ${pc}dd 100%);">
         ${data.logoUrl ? `<img src="${data.logoUrl}" class="header-logo" />` : '<div class="header-logo-placeholder"></div>'}
         <div class="header-center">
           <div class="inst-name-bn" style="font-size:${10 * fs}px">${data.institutionName}</div>
           ${data.institutionNameEn ? `<div class="inst-name-en" style="font-size:${6.5 * fs}px">${data.institutionNameEn}</div>` : ''}
-          <div class="inst-detail" style="font-size:${5.5 * fs}px">${data.institutionAddress}</div>
-          ${data.institutionPhone ? `<div class="inst-detail" style="font-size:${5.5 * fs}px">যোগাযোগ: ${data.institutionPhone}</div>` : ''}
+          <div class="inst-detail" style="font-size:${5.5 * fs}px">${data.institutionAddress}${data.institutionPhone ? ` | যোগাযোগ: ${data.institutionPhone}` : ''}</div>
         </div>
-        ${data.logoUrl ? `<img src="${data.logoUrl}" class="header-logo" />` : '<div class="header-logo-placeholder"></div>'}
+        <div class="copy-badge" style="border-color:${pc}">
+          <span class="copy-badge-text" style="color:${pc}">${copyLabel}</span>
+        </div>
       </div>
 
       <!-- Title Row -->
@@ -195,9 +193,10 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   .watermark-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg);
     font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.04); white-space: nowrap; pointer-events: none; z-index: 0; }
 
-  /* Copy label */
-  .copy-label { position: absolute; top: 1.5mm; right: 1.5mm; font-size: 5.5px; font-weight: 700;
-    padding: 0.5px 6px; border-radius: 6px; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); z-index: 3; letter-spacing: 0.3px; }
+  /* Copy badge - vertical */
+  .copy-badge { display: flex; align-items: center; justify-content: center; background: #fff; border: 2px solid; border-radius: 4px;
+    padding: 3px 2px; writing-mode: vertical-rl; text-orientation: mixed; flex-shrink: 0; min-height: 36px; z-index: 3; }
+  .copy-badge-text { font-size: 7px; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
 
   /* Header */
   .receipt-header { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 2.5mm; position: relative; z-index: 1; }
