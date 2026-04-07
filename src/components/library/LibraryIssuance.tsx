@@ -23,12 +23,22 @@ const LibraryIssuance = () => {
   const bn = language === 'bn';
   const qc = useQueryClient();
   const { user, role } = useAuth();
+  const { settings } = useWebsiteSettings();
 
   const [open, setOpen] = useState(false);
   const [lossOpen, setLossOpen] = useState(false);
   const [lossTarget, setLossTarget] = useState<any>(null);
   const [fineAmount, setFineAmount] = useState(0);
   const [search, setSearch] = useState('');
+  const [yearFilter, setYearFilter] = useState(new Date().getFullYear().toString());
+
+  const institutionInfo = useMemo(() => ({
+    name: settings.institution_name,
+    nameEn: settings.institution_name_en,
+    address: settings.address,
+    phone: settings.phone,
+    logoUrl: settings.logo_url,
+  }), [settings]);
 
   // Issue form state
   const [bookId, setBookId] = useState('');
