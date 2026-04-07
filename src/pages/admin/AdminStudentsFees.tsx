@@ -63,7 +63,25 @@ const AdminStudentsFees = () => {
     },
   });
 
-  // Check if payment gateway is configured
+  // Fetch dynamic fee types from fee_types table
+  const { data: dbFeeTypes = [] } = useQuery({
+    queryKey: ['fee_types_for_collection'],
+    queryFn: async () => {
+      const { data } = await supabase.from('fee_types').select('*, divisions(name_bn), classes(name_bn)').eq('is_active', true).order('fee_category').order('name_bn');
+      return data || [];
+    },
+  });
+
+  // Filter fee types based on found student's division/class
+  const applicableFeeTypes = foundStudent
+    ? dbFeeTypes.filter((ft: any) => {
+        if (ft.division_id && ft.division_id !== foundStudent.division_id) return false;
+        if (ft.class_id && ft.class_id !== foundStudent.class_id) return false;
+        return true;
+      })
+    : dbFeeTypes;
+
+
   const { data: gatewayConfig } = useQuery({
     queryKey: ['payment_gateway_config_check'],
     queryFn: async () => {
