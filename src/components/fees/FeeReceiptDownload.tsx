@@ -367,13 +367,26 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
             </Button>
           </div>
 
-          {/* Receipt summary list */}
-          <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2 bg-background">
+          {/* Receipt detail list */}
+          <div className="max-h-64 overflow-y-auto space-y-2 border border-border rounded-lg p-2 bg-background">
             {searchResults.map((r, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs py-1.5 px-2 rounded hover:bg-accent/30">
-                <span className="font-medium text-foreground">{r.studentName}</span>
-                <span className="text-muted-foreground">{r.feeType}</span>
-                <span className={`font-bold ${r.statusColor === '#22c55e' ? 'text-green-600' : 'text-amber-500'}`}>৳ {r.amount}</span>
+              <div key={idx} className="text-xs p-3 rounded-lg border border-border hover:bg-accent/30 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-foreground">{r.studentName}</span>
+                  <span className={`font-bold text-sm ${r.statusColor === '#22c55e' ? 'text-green-600' : 'text-amber-500'}`}>৳ {r.amount}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
+                  <span>{bn ? 'ক্লাস' : 'Class'}: <span className="text-foreground">{r.className}</span></span>
+                  <span>{bn ? 'রোল' : 'Roll'}: <span className="text-foreground">{r.rollNumber}</span></span>
+                  <span>{bn ? 'রেজি. নং' : 'Reg. No'}: <span className="text-foreground">{r.studentId}</span></span>
+                  <span>{bn ? 'ফি ধরন' : 'Fee Type'}: <span className="text-foreground">{r.feeType}</span></span>
+                  <span>{bn ? 'তারিখ' : 'Date'}: <span className="text-foreground">{r.date}</span></span>
+                  <span>{bn ? 'পদ্ধতি' : 'Method'}: <span className="text-foreground">{r.paymentMethod}</span></span>
+                  {r.receiptSerial && <span>{bn ? 'সিরিয়াল' : 'Serial'}: <span className="text-foreground">{r.receiptSerial}</span></span>}
+                  <span>{bn ? 'স্ট্যাটাস' : 'Status'}: <span className="text-foreground">{r.status}</span></span>
+                  {r.collectorName && <span>{bn ? 'আদায়কারী' : 'Collector'}: <span className="text-foreground">{r.collectorName}</span></span>}
+                  {r.approverName && <span>{bn ? 'অনুমোদনকারী' : 'Approver'}: <span className="text-foreground">{r.approverName}</span></span>}
+                </div>
               </div>
             ))}
           </div>
