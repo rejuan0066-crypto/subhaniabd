@@ -121,12 +121,15 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       }
 
       const studentIds = students.map((s: any) => s.id);
-      const { data: payments, error: payErr } = await supabase
+      let paymentQuery = supabase
         .from('payments')
         .select('*')
         .in('student_id', studentIds)
-        .eq('status', statusFilter)
-        .order('created_at', { ascending: false });
+        .eq('status', statusFilter);
+      if (selectedFeeType) {
+        paymentQuery = paymentQuery.eq('fee_type', selectedFeeType);
+      }
+      const { data: payments, error: payErr } = await paymentQuery.order('created_at', { ascending: false });
       if (payErr) throw payErr;
 
       if (!payments || payments.length === 0) {
