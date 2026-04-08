@@ -270,6 +270,7 @@ const AdminStudents = () => {
                 <tbody className="divide-y divide-border">
                   {filtered.map((s: any) => (
                     <tr key={s.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-4 py-3 text-sm font-mono font-semibold text-primary">{getClassSerial(s)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {s.photo_url ? (
