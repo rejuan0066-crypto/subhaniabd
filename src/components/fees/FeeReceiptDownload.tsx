@@ -206,7 +206,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
             gatewayTrxId: p.payment_method && p.payment_method !== 'Cash' ? (p.transaction_id || '') : '',
             paymentTimestamp: p.status === 'success' ? createdAt.toLocaleString('bn-BD', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '',
             date: createdAt.toLocaleDateString('bn-BD'),
-            status: statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পরিশোধ' : 'Paid'),
+            status: statusFilter === 'pending' ? (bn ? 'অপরিশোধ' : 'Pending') : (bn ? 'পরিশোধ' : 'Paid'),
             statusColor: statusFilter === 'pending' ? '#f59e0b' : '#22c55e',
             paymentMethod: bn ? (p.payment_method === 'Cash' || !p.payment_method ? 'নগদ' : p.payment_method) : (p.payment_method || 'Cash'),
             collectorName: getCollectorFromNotes(p.notes || ''),
