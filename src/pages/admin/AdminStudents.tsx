@@ -678,8 +678,14 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">{bn ? 'ছাড়ের হার (%)' : 'Discount %'} *</label>
-              <Input type="number" min="1" max="100" value={waiverForm.waiver_percent} onChange={e => setWaiverForm(p => ({ ...p, waiver_percent: e.target.value }))} className="mt-1" />
+              <label className="text-sm font-medium">{bn ? 'ছাড়ের পরিমাণ (৳)' : 'Discount Amount (৳)'} *</label>
+              <Input type="number" min="1" value={waiverForm.waiver_amount} onChange={e => setWaiverForm(p => ({ ...p, waiver_amount: e.target.value }))} className="mt-1" placeholder={bn ? 'টাকার পরিমাণ' : 'Amount in Taka'} />
+              {waiverForm.fee_type_id && waiverForm.waiver_amount && (() => {
+                const ft = applicableFeeTypes.find((f: any) => f.id === waiverForm.fee_type_id);
+                if (!ft) return null;
+                const pct = Math.min(100, Math.round((parseFloat(waiverForm.waiver_amount) / ft.amount) * 100));
+                return <p className="text-xs text-muted-foreground mt-1">{bn ? `ফি ৳${ft.amount} এর ${pct}%` : `${pct}% of ৳${ft.amount}`}</p>;
+              })()}
             </div>
             <div>
               <label className="text-sm font-medium">{bn ? 'কারণ' : 'Reason'}</label>
