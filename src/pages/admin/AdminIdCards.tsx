@@ -124,6 +124,7 @@ const AdminIdCards = () => {
           institution={institution || undefined}
           validUntil={validUntil}
           principalName={principalName}
+          lang={language}
           ref={(el) => {
             if (el) {
               setTimeout(() => {
@@ -164,6 +165,7 @@ const AdminIdCards = () => {
               institution={institution || undefined}
               validUntil={validUntil}
               principalName={principalName}
+              lang={language}
               ref={(el) => {
                 if (el) {
                   cards.push(el.outerHTML);
@@ -341,6 +343,7 @@ const AdminIdCards = () => {
                   institution={institution || undefined}
                   validUntil={validUntil}
                   principalName={principalName}
+                  lang={language}
                 />
               </div>
             )}
