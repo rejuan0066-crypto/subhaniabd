@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, BookOpen, Banknote, BadgePercent, CalendarCheck } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, BookOpen, Banknote, BadgePercent, CalendarCheck, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -390,8 +390,29 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     },
   });
 
+  // Applicable fee types for this student based on division/class
+  const { data: applicableFeeTypes = [], isLoading: feeTypesLoading } = useQuery({
+    queryKey: ['student-applicable-fee-types', student.division_id, student.class_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('fee_types')
+        .select('*, divisions(name_bn), classes(name_bn)')
+        .eq('is_active', true)
+        .order('fee_category')
+        .order('name_bn');
+      if (!data) return [];
+      // Filter: fee type applies if no division/class restriction, or matches student's
+      return data.filter((ft: any) => {
+        if (ft.division_id && ft.division_id !== student.division_id) return false;
+        if (ft.class_id && ft.class_id !== student.class_id) return false;
+        return true;
+      });
+    },
+  });
+
   const totalPaid = feePayments.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
   const totalDue = feePayments.filter((p: any) => p.status === 'unpaid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
+
 
   const getLibStatusBadge = (status: string) => {
     switch (status) {
@@ -441,6 +462,67 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
         <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
         <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
         {student.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
+      </div>
+
+      {/* Applicable Fee Types for this student */}
+      <div className="border-t pt-4">
+        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+          <FileText className="w-4 h-4 text-primary" />
+          {bn ? 'প্রযোজ্য ফি ধরন' : 'Applicable Fee Types'}
+        </h4>
+        {feeTypesLoading ? (
+          <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+        ) : applicableFeeTypes.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো প্রযোজ্য ফি ধরন নেই' : 'No applicable fee types'}</p>
+        ) : (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {applicableFeeTypes.map((ft: any) => {
+              const waiver = feeWaivers.find((w: any) => w.fee_type_id === ft.id);
+              const isFreeMonthly = student.is_free && ft.fee_category === 'monthly';
+              const waiverPercent = isFreeMonthly ? 100 : (waiver ? waiver.waiver_percent : 0);
+              const discountAmount = Math.round(ft.amount * waiverPercent / 100);
+              const netAmount = ft.amount - discountAmount;
+              // Check if already paid
+              const payment = feePayments.find((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending'));
+              const categoryLabel = ft.fee_category === 'monthly' ? (bn ? 'মাসিক' : 'Monthly') : ft.fee_category === 'admission' ? (bn ? 'ভর্তি' : 'Admission') : ft.fee_category === 'exam' ? (bn ? 'পরীক্ষা' : 'Exam') : ft.fee_category;
+
+              return (
+                <div key={ft.id} className="p-2.5 rounded-lg bg-muted/50 border border-border text-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{bn ? ft.name_bn : ft.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {categoryLabel}
+                        {ft.classes?.name_bn && ` • ${ft.classes.name_bn}`}
+                        {ft.divisions?.name_bn && ` • ${ft.divisions.name_bn}`}
+                      </p>
+                    </div>
+                    <div className="text-right ml-2 shrink-0">
+                      {waiverPercent > 0 ? (
+                        <div>
+                          <p className="text-xs line-through text-muted-foreground">৳{ft.amount}</p>
+                          <p className="font-bold text-primary">৳{netAmount}</p>
+                          <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{waiverPercent}% {bn ? 'ছাড়' : 'off'}</Badge>
+                        </div>
+                      ) : (
+                        <p className="font-bold text-foreground">৳{ft.amount}</p>
+                      )}
+                    </div>
+                  </div>
+                  {payment && (
+                    <div className="mt-1.5">
+                      {payment.status === 'paid' ? (
+                        <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge>
+                      ) : (
+                        <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Fee Payment Summary */}
