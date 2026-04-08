@@ -248,11 +248,11 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       </h3>
 
       <div className="flex gap-2">
-        <button onClick={() => setStatusFilter('pending')}
+        <button onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'pending' ? 'bg-amber-500 text-white' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেন্ডিং' : 'Pending'}
         </button>
-        <button onClick={() => setStatusFilter('success')}
+        <button onClick={() => setStatusFilter(statusFilter === 'success' ? '' : 'success')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'success' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেইড (অনুমোদিত)' : 'Paid (Approved)'}
         </button>
