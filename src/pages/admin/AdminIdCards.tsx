@@ -343,6 +343,12 @@ const AdminIdCards = () => {
               </div>
             )}
           </div>
+          <div className="flex items-end">
+            <Button onClick={saveSettings} disabled={savingSettings} variant="outline" size="sm" className="gap-1.5">
+              {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {bn ? 'সংরক্ষণ' : 'Save'}
+            </Button>
+          </div>
         </div>
       </div>
 
