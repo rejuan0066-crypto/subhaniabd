@@ -24,7 +24,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [regNumber, setRegNumber] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'pending' | 'success'>('pending');
+  const [statusFilter, setStatusFilter] = useState<'pending' | 'success' | ''>('');
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
 
@@ -55,7 +55,8 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const filledCount = [selectedSession, selectedClass, rollNumber.trim(), regNumber.trim()].filter(Boolean).length;
   const hasSession = !!selectedSession;
   const hasSecondField = !!(selectedClass || rollNumber.trim() || regNumber.trim());
-  const canDownload = hasSession && hasSecondField;
+  const hasStatus = !!statusFilter;
+  const canDownload = hasSession && hasSecondField && hasStatus;
 
   const fetchReceiptData = async () => {
     if (!selectedSession) {
@@ -64,6 +65,10 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     }
     if (!hasSecondField) {
       toast.error(bn ? 'ক্লাস / রোল / রেজিস্ট্রেশন এর যেকোনো একটি দিন' : 'Provide class, roll, or registration');
+      return null;
+    }
+    if (!statusFilter) {
+      toast.error(bn ? 'পেন্ডিং বা পেইড নির্বাচন করুন' : 'Select Pending or Paid status');
       return null;
     }
 
@@ -247,11 +252,11 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       </h3>
 
       <div className="flex gap-2">
-        <button onClick={() => setStatusFilter('pending')}
+        <button onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'pending' ? 'bg-amber-500 text-white' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেন্ডিং' : 'Pending'}
         </button>
-        <button onClick={() => setStatusFilter('success')}
+        <button onClick={() => setStatusFilter(statusFilter === 'success' ? '' : 'success')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'success' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেইড (অনুমোদিত)' : 'Paid (Approved)'}
         </button>
