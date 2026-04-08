@@ -150,6 +150,25 @@ const AdminStudents = () => {
     return cls ? (bn ? cls.name_bn : cls.name) : '-';
   };
 
+  // Generate class-based serial like 101, 102... for class 1, 201, 202... for class 2
+  const getClassSerial = (student: any) => {
+    if (!student.class_id) return '-';
+    const classIndex = classes.findIndex((c: any) => c.id === student.class_id);
+    if (classIndex === -1) return '-';
+    const classPrefix = (classIndex + 1) * 100;
+    // Find students in the same class, sorted by roll_number or created_at
+    const sameClassStudents = students
+      .filter((s: any) => s.class_id === student.class_id)
+      .sort((a: any, b: any) => {
+        const rollA = parseInt(a.roll_number) || 9999;
+        const rollB = parseInt(b.roll_number) || 9999;
+        if (rollA !== rollB) return rollA - rollB;
+        return (a.created_at || '').localeCompare(b.created_at || '');
+      });
+    const idx = sameClassStudents.findIndex((s: any) => s.id === student.id);
+    return classPrefix + idx + 1;
+  };
+
   const getSessionName = (sessionId: string | null, fallback: string | null) => {
     if (sessionId) {
       const session = academicSessions.find((s: any) => s.id === sessionId);
