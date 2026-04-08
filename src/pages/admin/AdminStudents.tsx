@@ -11,7 +11,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import AdmissionForm from '@/components/admission/AdmissionForm';
 
@@ -354,6 +355,10 @@ const AdminStudents = () => {
 
 // Student detail with library book history
 const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, getClassName, setEditStudent, setShowDetail, setShowAdd, statusMutation, canEditItem }: any) => {
+  const queryClient = useQueryClient();
+  const [showWaiverDialog, setShowWaiverDialog] = useState(false);
+  const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_percent: '100', reason: '' });
+
   const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
     queryKey: ['student-library-history', student.id],
     queryFn: async () => {
@@ -421,6 +426,42 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     return sum + netAmount;
   }, 0);
   const totalDue = Math.max(0, totalApplicable - totalPaid);
+
+  const addWaiverMutation = useMutation({
+    mutationFn: async () => {
+      if (!waiverForm.fee_type_id) throw new Error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type');
+      const { error } = await supabase.from('fee_waivers').insert({
+        student_id: student.id,
+        fee_type_id: waiverForm.fee_type_id,
+        waiver_percent: parseFloat(waiverForm.waiver_percent) || 100,
+        reason: waiverForm.reason || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
+      setShowWaiverDialog(false);
+      setWaiverForm({ fee_type_id: '', waiver_percent: '100', reason: '' });
+      toast.success(bn ? 'ডিসকাউন্ট যোগ হয়েছে' : 'Discount added');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteWaiverMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('fee_waivers').update({ is_active: false }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
+      toast.success(bn ? 'ডিসকাউন্ট সরানো হয়েছে' : 'Discount removed');
+    },
+  });
+
+  // Fee types not yet having a waiver for this student
+  const availableFeeTypesForWaiver = applicableFeeTypes.filter(
+    (ft: any) => !feeWaivers.some((w: any) => w.fee_type_id === ft.id)
+  );
 
 
   const getLibStatusBadge = (status: string) => {
@@ -574,10 +615,15 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
 
       {/* Fee Waivers / Discounts */}
       <div className="border-t pt-4">
-        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-          <BadgePercent className="w-4 h-4 text-primary" />
-          {bn ? 'ফি ছাড় / ডিসকাউন্ট' : 'Fee Waivers / Discounts'}
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <BadgePercent className="w-4 h-4 text-primary" />
+            {bn ? 'ফি ছাড় / ডিসকাউন্ট' : 'Fee Waivers / Discounts'}
+          </h4>
+          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setShowWaiverDialog(true)} disabled={availableFeeTypesForWaiver.length === 0}>
+            <Plus className="w-3 h-3 mr-1" /> {bn ? 'ছাড় দিন' : 'Add Discount'}
+          </Button>
+        </div>
         {waiverLoading ? (
           <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
         ) : feeWaivers.length === 0 ? (
@@ -590,12 +636,52 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                   <p className="font-medium truncate">{bn ? (w.fee_types?.name_bn || w.fee_types?.name) : w.fee_types?.name || '-'}</p>
                   {w.reason && <p className="text-xs text-muted-foreground truncate">{w.reason}</p>}
                 </div>
-                <Badge className="bg-amber-500/10 text-amber-600 ml-2 shrink-0">{w.waiver_percent}% {bn ? 'ছাড়' : 'off'}</Badge>
+                <div className="flex items-center gap-1 ml-2 shrink-0">
+                  <Badge className="bg-amber-500/10 text-amber-600">{w.waiver_percent}% {bn ? 'ছাড়' : 'off'}</Badge>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => deleteWaiverMutation.mutate(w.id)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Add Waiver Dialog */}
+      <Dialog open={showWaiverDialog} onOpenChange={setShowWaiverDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>{bn ? 'ফি ছাড় / ডিসকাউন্ট দিন' : 'Add Fee Discount'}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium">{bn ? 'ফি ধরন' : 'Fee Type'} *</label>
+              <Select value={waiverForm.fee_type_id} onValueChange={v => setWaiverForm(p => ({ ...p, fee_type_id: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                <SelectContent>
+                  {availableFeeTypesForWaiver.map((ft: any) => (
+                    <SelectItem key={ft.id} value={ft.id}>{bn ? ft.name_bn : ft.name} (৳{ft.amount})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">{bn ? 'ছাড়ের হার (%)' : 'Discount %'} *</label>
+              <Input type="number" min="1" max="100" value={waiverForm.waiver_percent} onChange={e => setWaiverForm(p => ({ ...p, waiver_percent: e.target.value }))} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium">{bn ? 'কারণ' : 'Reason'}</label>
+              <Textarea value={waiverForm.reason} onChange={e => setWaiverForm(p => ({ ...p, reason: e.target.value }))} className="mt-1" rows={2} placeholder={bn ? 'ঐচ্ছিক...' : 'Optional...'} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWaiverDialog(false)}>{bn ? 'বাতিল' : 'Cancel'}</Button>
+            <Button onClick={() => addWaiverMutation.mutate()} disabled={addWaiverMutation.isPending || !waiverForm.fee_type_id} className="btn-primary-gradient">
+              {addWaiverMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-1" />}
+              {bn ? 'সেভ' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Library Book History */}
       <div className="border-t pt-4">
