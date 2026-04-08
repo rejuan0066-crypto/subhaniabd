@@ -367,7 +367,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         ...prev,
         first_name: s.name_bn || '', last_name: s.name_en || '', roll_number: s.roll_number || '',
         gender: s.gender || 'male', date_of_birth: s.date_of_birth || '', birth_reg_no: s.birth_reg_no || '',
-        father_name: s.father_name || '', mother_name: s.mother_name || '',
+        father_name: s.father_name || '', father_name_en: s.father_name_en || '', mother_name: s.mother_name || '', mother_name_en: s.mother_name_en || '',
         father_nid: s.father_nid || '', mother_nid: s.mother_nid || '',
         photo_url: s.photo_url || '', religion: s.religion || 'islam',
         admission_session: s.admission_session || '', registration_no: s.registration_no || '',
