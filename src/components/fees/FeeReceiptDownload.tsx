@@ -67,6 +67,10 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       toast.error(bn ? 'ক্লাস / রোল / রেজিস্ট্রেশন এর যেকোনো একটি দিন' : 'Provide class, roll, or registration');
       return null;
     }
+    if (!statusFilter) {
+      toast.error(bn ? 'পেন্ডিং বা পেইড নির্বাচন করুন' : 'Select Pending or Paid status');
+      return null;
+    }
 
     const session = sessions.find((s: any) => s.id === selectedSession);
     const sessionName = session?.name || '';
