@@ -24,7 +24,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const [selectedClass, setSelectedClass] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [regNumber, setRegNumber] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'pending' | 'success'>('pending');
+  const [statusFilter, setStatusFilter] = useState<'pending' | 'success' | ''>('');
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
 
