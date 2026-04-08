@@ -223,7 +223,8 @@ const AdminIdCards = () => {
         <StudentIdCard
           student={buildStudentData(student)}
           institution={institution || undefined}
-          validUntil={validUntil}
+           validUntil={validUntil}
+           validUntilBn={validUntilBn}
            principalName={principalName}
            principalNameEn={principalNameEn}
            principalSignatureUrl={signatureUrl}
@@ -266,7 +267,8 @@ const AdminIdCards = () => {
               key={s.id}
               student={buildStudentData(s)}
               institution={institution || undefined}
-              validUntil={validUntil}
+               validUntil={validUntil}
+               validUntilBn={validUntilBn}
                principalName={principalName}
                principalNameEn={principalNameEn}
                principalSignatureUrl={signatureUrl}
@@ -486,7 +488,8 @@ const AdminIdCards = () => {
                   ref={cardRef}
                   student={buildStudentData(previewStudent)}
                   institution={institution || undefined}
-                  validUntil={validUntil}
+                   validUntil={validUntil}
+                   validUntilBn={validUntilBn}
                    principalName={principalName}
                    principalNameEn={principalNameEn}
                    principalSignatureUrl={signatureUrl}
