@@ -174,8 +174,10 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               <div style={{ fontWeight: 700, fontSize: '7.5px', color: '#0f172a', lineHeight: 1.2 }}>
                 {lang === 'bn' ? (student.name_bn || student.name_en || '—') : (student.name_en || student.name_bn || '—')}
               </div>
-              {lang === 'en' && student.name_bn && (
-                <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>{student.name_bn}</div>
+              {student.name_bn && student.name_en && (
+                <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>
+                  {lang === 'bn' ? student.name_en : student.name_bn}
+                </div>
               )}
               <div style={{ fontSize: '5.5px', color: '#2563eb', fontWeight: 600, marginTop: '2px' }}>
                 {l.id}: {student.student_id || '—'}
