@@ -2,18 +2,20 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Users } from 'lucide-react';
+import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentIdCard from '@/components/idcard/StudentIdCard';
 import { printIdCard, printMultipleIdCards } from '@/lib/idCardPrint';
 import { toast } from 'sonner';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 
 const AdminIdCards = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const { settings } = useWebsiteSettings();
   const [search, setSearch] = useState('');
   const [filterDivisionId, setFilterDivisionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
@@ -21,7 +23,68 @@ const AdminIdCards = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [validUntil, setValidUntil] = useState('December 2026');
   const [principalName, setPrincipalName] = useState('');
+  const [signatureUrl, setSignatureUrl] = useState('');
+  const [uploadingSignature, setUploadingSignature] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const sigInputRef = useRef<HTMLInputElement>(null);
+
+  // Load principal name from settings
+  useEffect(() => {
+    if (settings.principal_name && !principalName) {
+      setPrincipalName(settings.principal_name);
+    }
+  }, [settings.principal_name]);
+
+  // Load saved signature
+  const { data: savedSignature } = useQuery({
+    queryKey: ['idcard-principal-signature'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'idcard_principal_signature_url').maybeSingle();
+      return data?.value || '';
+    },
+  });
+
+  useEffect(() => {
+    if (savedSignature && !signatureUrl) setSignatureUrl(savedSignature);
+  }, [savedSignature]);
+
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 300 * 1024) {
+      toast.error(bn ? 'ফাইল সাইজ ৩০০KB এর বেশি' : 'File size exceeds 300KB');
+      return;
+    }
+    setUploadingSignature(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `principal-signature-${Date.now()}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('institution-logos').upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from('institution-logos').getPublicUrl(path);
+      const url = urlData.publicUrl;
+      setSignatureUrl(url);
+      // Save to settings
+      const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'idcard_principal_signature_url').maybeSingle();
+      if (existing) {
+        await supabase.from('website_settings').update({ value: url }).eq('key', 'idcard_principal_signature_url');
+      } else {
+        await supabase.from('website_settings').insert({ key: 'idcard_principal_signature_url', value: url });
+      }
+      toast.success(bn ? 'স্বাক্ষর আপলোড হয়েছে' : 'Signature uploaded');
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setUploadingSignature(false);
+      if (sigInputRef.current) sigInputRef.current.value = '';
+    }
+  };
+
+  const removeSignature = async () => {
+    setSignatureUrl('');
+    await supabase.from('website_settings').update({ value: '' }).eq('key', 'idcard_principal_signature_url');
+    toast.success(bn ? 'স্বাক্ষর সরানো হয়েছে' : 'Signature removed');
+  };
 
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
@@ -118,13 +181,13 @@ const AdminIdCards = () => {
     
     import('react-dom/client').then(({ createRoot }) => {
       const root = createRoot(tempDiv);
-      const cardElement = document.createElement('div');
       root.render(
         <StudentIdCard
           student={buildStudentData(student)}
           institution={institution || undefined}
           validUntil={validUntil}
           principalName={principalName}
+          principalSignatureUrl={signatureUrl}
           lang={language}
           ref={(el) => {
             if (el) {
@@ -138,7 +201,7 @@ const AdminIdCards = () => {
         />
       );
     });
-  }, [institution, validUntil, principalName, bn, classes]);
+  }, [institution, validUntil, principalName, signatureUrl, bn, classes]);
 
   const handlePrintSelected = useCallback(() => {
     if (selectedIds.size === 0) {
@@ -166,6 +229,7 @@ const AdminIdCards = () => {
               institution={institution || undefined}
               validUntil={validUntil}
               principalName={principalName}
+              principalSignatureUrl={signatureUrl}
               lang={language}
               ref={(el) => {
                 if (el) {
@@ -187,7 +251,7 @@ const AdminIdCards = () => {
 
       root.render(<Cards />);
     });
-  }, [selectedIds, filtered, institution, validUntil, principalName, bn, classes]);
+  }, [selectedIds, filtered, institution, validUntil, principalName, signatureUrl, bn, classes]);
 
   return (
     <div className="space-y-6">
@@ -221,6 +285,32 @@ const AdminIdCards = () => {
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম' : 'Principal Name'}</label>
             <Input value={principalName} onChange={(e) => setPrincipalName(e.target.value)} className="bg-background" placeholder={bn ? 'নাম লিখুন' : 'Enter name'} />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের স্বাক্ষর' : 'Principal Signature'}</label>
+            {signatureUrl ? (
+              <div className="flex items-center gap-2 p-2 border rounded-md bg-background">
+                <img src={signatureUrl} alt="Signature" className="h-8 max-w-[100px] object-contain" />
+                <button onClick={removeSignature} className="p-1 rounded hover:bg-destructive/10 text-destructive" title={bn ? 'সরান' : 'Remove'}>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div>
+                <input ref={sigInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleSignatureUpload} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => sigInputRef.current?.click()}
+                  disabled={uploadingSignature}
+                >
+                  {uploadingSignature ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />}
+                  {bn ? 'আপলোড করুন' : 'Upload'}
+                </Button>
+                <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'PNG/JPG, সর্বোচ্চ ৩০০KB' : 'PNG/JPG, max 300KB'}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -344,6 +434,7 @@ const AdminIdCards = () => {
                   institution={institution || undefined}
                   validUntil={validUntil}
                   principalName={principalName}
+                  principalSignatureUrl={signatureUrl}
                   lang={language}
                 />
               </div>
