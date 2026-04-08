@@ -198,24 +198,35 @@ const FeeTypeManager = () => {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium">{bn ? 'বিভাগ (ঐচ্ছিক)' : 'Division (Optional)'}</label>
-                <Select value={form.division_id} onValueChange={handleDivisionChange}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'সব বিভাগ' : 'All Divisions'} /></SelectTrigger>
+                <label className="text-sm font-medium">{bn ? 'বিভাগ' : 'Division'}</label>
+                <Select value={form.division_id || 'all'} onValueChange={v => handleDivisionChange(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">
+                      <span className="font-semibold text-primary">{bn ? '✦ সব বিভাগ' : '✦ All Divisions'}</span>
+                    </SelectItem>
                     {divisions.map((d: any) => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium">{bn ? 'শ্রেণী (ঐচ্ছিক)' : 'Class (Optional)'}</label>
-                <Select value={form.class_id} onValueChange={v => setForm(p => ({ ...p, class_id: v }))} disabled={!form.division_id}>
-                  <SelectTrigger className="mt-1"><SelectValue placeholder={form.division_id ? (bn ? 'সব শ্রেণী' : 'All Classes') : (bn ? 'আগে বিভাগ নির্বাচন করুন' : 'Select division first')} /></SelectTrigger>
+                <label className="text-sm font-medium">{bn ? 'শ্রেণী' : 'Class'}</label>
+                <Select value={form.class_id || 'all'} onValueChange={v => setForm(p => ({ ...p, class_id: v === 'all' ? '' : v }))} disabled={!!form.division_id && filteredClasses.length === 0}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {filteredClasses.map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
+                    <SelectItem value="all">
+                      <span className="font-semibold text-primary">{bn ? '✦ সব শ্রেণী' : '✦ All Classes'}</span>
+                    </SelectItem>
+                    {(form.division_id ? filteredClasses : allClasses).map((c: any) => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </div>
+            {!form.division_id && !form.class_id && (
+              <p className="text-xs text-primary/80 bg-primary/5 rounded-lg px-3 py-2">
+                {bn ? '✦ "সব বিভাগ" ও "সব শ্রেণী" নির্বাচিত — এই ফি সব বিভাগ ও শ্রেণীতে সমানভাবে প্রযোজ্য হবে।' : '✦ "All Divisions" & "All Classes" selected — this fee will apply equally to all divisions and classes.'}
+              </p>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>{bn ? 'বাতিল' : 'Cancel'}</Button>
