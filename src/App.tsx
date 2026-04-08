@@ -163,6 +163,7 @@ const App = () => (
                     <Route path="receipt-designer" element={<AdminReceiptDesigner />} />
                     <Route path="exam-sessions" element={<ModuleGuard menuPath="/admin/exam-sessions"><AdminExamSessions /></ModuleGuard>} />
                     <Route path="library" element={<ModuleGuard menuPath="/admin/library"><AdminLibrary /></ModuleGuard>} />
+                    <Route path="id-cards" element={<AdminIdCards />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
