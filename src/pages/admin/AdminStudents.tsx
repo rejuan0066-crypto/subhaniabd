@@ -150,21 +150,9 @@ const AdminStudents = () => {
     return cls ? (bn ? cls.name_bn : cls.name) : '-';
   };
 
-  // Sort classes globally: by division sort_order, then class sort_order within division
-  const globalSortedClasses = [...classes].sort((a: any, b: any) => {
-    const divA = divisions.findIndex((d: any) => d.id === a.division_id);
-    const divB = divisions.findIndex((d: any) => d.id === b.division_id);
-    if (divA !== divB) return divA - divB;
-    return (a.sort_order ?? 0) - (b.sort_order ?? 0);
-  });
-
-  // Generate class-based serial like 101, 102... for class 1, 201, 202... for class 2
+  // Generate class-wise serial: 1, 2, 3... within each class
   const getClassSerial = (student: any) => {
     if (!student.class_id) return '-';
-    const classIndex = globalSortedClasses.findIndex((c: any) => c.id === student.class_id);
-    if (classIndex === -1) return '-';
-    const classPrefix = (classIndex + 1) * 100;
-    // Find students in the same class, sorted by roll_number or created_at
     const sameClassStudents = students
       .filter((s: any) => s.class_id === student.class_id)
       .sort((a: any, b: any) => {
@@ -174,7 +162,7 @@ const AdminStudents = () => {
         return (a.created_at || '').localeCompare(b.created_at || '');
       });
     const idx = sameClassStudents.findIndex((s: any) => s.id === student.id);
-    return classPrefix + idx + 1;
+    return idx + 1;
   };
 
   const getSessionName = (sessionId: string | null, fallback: string | null) => {
