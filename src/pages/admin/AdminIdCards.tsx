@@ -341,6 +341,7 @@ const AdminIdCards = () => {
                   institution={institution || undefined}
                   validUntil={validUntil}
                   principalName={principalName}
+                  lang={language}
                 />
               </div>
             )}
