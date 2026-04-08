@@ -136,6 +136,17 @@ const AdminStudents = () => {
     return true;
   });
 
+  const parseRollNumber = (roll: string | null | undefined) => {
+    const parsed = Number.parseInt(roll || '', 10);
+    return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
+  };
+
+  const sortedFiltered = [...filtered].sort((a: any, b: any) => {
+    const rollDiff = parseRollNumber(a.roll_number) - parseRollNumber(b.roll_number);
+    if (rollDiff !== 0) return rollDiff;
+    return (a.created_at || '').localeCompare(b.created_at || '');
+  });
+
   const getApprovalBadge = (status: string) => {
     switch (status) {
       case 'approved': return <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-success/10 text-success"><CheckCircle className="w-3 h-3" />{bn ? 'অনুমোদিত' : 'Approved'}</span>;
@@ -156,8 +167,8 @@ const AdminStudents = () => {
     const sameClassStudents = students
       .filter((s: any) => s.class_id === student.class_id)
       .sort((a: any, b: any) => {
-        const rollA = parseInt(a.roll_number) || 9999;
-        const rollB = parseInt(b.roll_number) || 9999;
+        const rollA = parseRollNumber(a.roll_number);
+        const rollB = parseRollNumber(b.roll_number);
         if (rollA !== rollB) return rollA - rollB;
         return (a.created_at || '').localeCompare(b.created_at || '');
       });
@@ -264,7 +275,7 @@ const AdminStudents = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filtered.map((s: any) => (
+                  {sortedFiltered.map((s: any) => (
                     <tr key={s.id} className="hover:bg-secondary/30 transition-colors">
                       <td className="px-4 py-3 text-sm font-mono font-semibold text-primary">{getClassSerial(s)}</td>
                       <td className="px-4 py-3">
@@ -313,7 +324,7 @@ const AdminStudents = () => {
                       </td>
                     </tr>
                   ))}
-                  {filtered.length === 0 && (
+                  {sortedFiltered.length === 0 && (
                     <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
                   )}
                 </tbody>
