@@ -594,9 +594,11 @@ const AdminStudentsFees = () => {
               </div>
             </div>
 
-            <Button onClick={handleProceed} className="btn-primary-gradient w-full mt-2">
+            <Button onClick={handleProceed} className="btn-primary-gradient w-full mt-2" disabled={isPaymentBlocked || checkingExisting}>
               <ArrowRight className="w-4 h-4 mr-2" />
-              {bn ? 'পরিশোধে এগিয়ে যান' : 'Proceed to Pay'}
+              {isPaymentBlocked
+                ? (bn ? '🚫 পেমেন্ট ব্লকড — পূর্ববর্তী পেমেন্ট বাতিল করুন' : '🚫 Blocked — Cancel previous payment first')
+                : (bn ? 'পরিশোধে এগিয়ে যান' : 'Proceed to Pay')}
             </Button>
           </div>
         )}
