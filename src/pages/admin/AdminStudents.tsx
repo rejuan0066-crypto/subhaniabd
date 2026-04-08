@@ -509,15 +509,15 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                       )}
                     </div>
                   </div>
-                  {payment && (
-                    <div className="mt-1.5">
-                      {payment.status === 'paid' ? (
-                        <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge>
-                      ) : (
-                        <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
-                      )}
-                    </div>
-                  )}
+                  <div className="mt-1.5">
+                    {payment?.status === 'paid' ? (
+                      <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge>
+                    ) : payment?.status === 'pending' ? (
+                      <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
+                    ) : (
+                      <Badge className="bg-destructive/10 text-destructive text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
+                    )}
+                  </div>
                 </div>
               );
             })}
