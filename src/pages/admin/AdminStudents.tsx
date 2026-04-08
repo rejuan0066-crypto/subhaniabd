@@ -650,7 +650,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                   {w.reason && <p className="text-xs text-muted-foreground truncate">{w.reason}</p>}
                 </div>
                 <div className="flex items-center gap-1 ml-2 shrink-0">
-                  <Badge className="bg-amber-500/10 text-amber-600">{w.waiver_percent}% {bn ? 'ছাড়' : 'off'}</Badge>
+                  <Badge className="bg-amber-500/10 text-amber-600">৳{Math.round((w.fee_types?.amount || 0) * w.waiver_percent / 100)} {bn ? 'ছাড়' : 'off'}</Badge>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => deleteWaiverMutation.mutate(w.id)}>
                     <Trash2 className="w-3 h-3" />
                   </Button>
