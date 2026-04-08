@@ -430,10 +430,13 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
   const addWaiverMutation = useMutation({
     mutationFn: async () => {
       if (!waiverForm.fee_type_id) throw new Error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type');
+      const selectedFt = applicableFeeTypes.find((ft: any) => ft.id === waiverForm.fee_type_id);
+      const amount = parseFloat(waiverForm.waiver_amount) || 0;
+      const percent = selectedFt && selectedFt.amount > 0 ? Math.min(100, Math.round((amount / selectedFt.amount) * 100)) : 100;
       const { error } = await supabase.from('fee_waivers').insert({
         student_id: student.id,
         fee_type_id: waiverForm.fee_type_id,
-        waiver_percent: parseFloat(waiverForm.waiver_percent) || 100,
+        waiver_percent: percent,
         reason: waiverForm.reason || null,
       });
       if (error) throw error;
@@ -441,7 +444,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
       setShowWaiverDialog(false);
-      setWaiverForm({ fee_type_id: '', waiver_percent: '100', reason: '' });
+      setWaiverForm({ fee_type_id: '', waiver_amount: '', reason: '' });
       toast.success(bn ? 'ডিসকাউন্ট যোগ হয়েছে' : 'Discount added');
     },
     onError: (e: any) => toast.error(e.message),
