@@ -55,7 +55,8 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const filledCount = [selectedSession, selectedClass, rollNumber.trim(), regNumber.trim()].filter(Boolean).length;
   const hasSession = !!selectedSession;
   const hasSecondField = !!(selectedClass || rollNumber.trim() || regNumber.trim());
-  const canDownload = hasSession && hasSecondField;
+  const hasStatus = !!statusFilter;
+  const canDownload = hasSession && hasSecondField && hasStatus;
 
   const fetchReceiptData = async () => {
     if (!selectedSession) {
