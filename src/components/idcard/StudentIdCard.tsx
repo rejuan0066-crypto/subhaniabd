@@ -14,6 +14,7 @@ interface StudentIdCardProps {
     mother_name?: string;
     phone?: string;
     guardian_phone?: string;
+    address?: string;
   };
   institution?: {
     name?: string;
@@ -37,6 +38,7 @@ const labels = {
     blood: 'রক্তের গ্রুপ',
     father: 'পিতা',
     phone: 'ফোন',
+    address: 'ঠিকানা',
     principal: 'প্রিন্সিপাল',
     validUntil: 'মেয়াদ',
   },
@@ -49,14 +51,26 @@ const labels = {
     blood: 'Blood Group',
     father: 'Father',
     phone: 'Phone',
+    address: 'Address',
     principal: 'Principal',
     validUntil: 'Valid Until',
   },
 };
 
+const generateQrUrl = (data: string, size = 60) =>
+  `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=1`;
+
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
   ({ student, institution, validUntil = 'December 2026', principalName = '', lang = 'bn' }, ref) => {
     const l = labels[lang];
+
+    const qrData = JSON.stringify({
+      name: student.name_bn || student.name_en,
+      id: student.student_id,
+      roll: student.roll_number,
+      class: student.class_name,
+      institution: institution?.name,
+    });
 
     return (
       <div
@@ -82,7 +96,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         <div
           style={{
             background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
-            padding: '6px 8px 5px',
+            padding: '5px 8px 4px',
             textAlign: 'center',
             position: 'relative',
           }}
@@ -92,22 +106,17 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               <img
                 src={institution.logo_url}
                 alt="Logo"
-                style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.4)' }}
+                style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.4)' }}
               />
             )}
             <div>
-              <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '8px', lineHeight: 1.2, letterSpacing: '0.3px' }}>
+              <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2 }}>
                 {lang === 'bn' ? (institution?.name || 'প্রতিষ্ঠানের নাম') : (institution?.name_en || institution?.name || 'Institution Name')}
               </div>
-              {lang === 'en' && institution?.name && (
-                <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '5.5px', fontWeight: 500, marginTop: '1px' }}>
-                  {institution.name}
-                </div>
-              )}
             </div>
           </div>
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '5px', marginTop: '2px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '4.5px', marginTop: '1px' }}>
               {institution.address}
             </div>
           )}
@@ -115,11 +124,11 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             style={{
               background: '#ef4444',
               color: '#fff',
-              fontSize: '5.5px',
+              fontSize: '5px',
               fontWeight: 700,
-              padding: '1.5px 10px',
+              padding: '1px 8px',
               borderRadius: '2px',
-              marginTop: '3px',
+              marginTop: '2px',
               display: 'inline-block',
               letterSpacing: lang === 'en' ? '1px' : '0.5px',
               textTransform: lang === 'en' ? 'uppercase' : 'none',
@@ -129,44 +138,59 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           </div>
         </div>
 
-        {/* Photo Section */}
-        <div style={{ flex: 1, padding: '6px 8px 4px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '52px',
-              height: '60px',
-              borderRadius: '4px',
-              overflow: 'hidden',
-              border: '2px solid #2563eb',
-              background: '#f1f5f9',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '5px',
-            }}
-          >
-            {student.photo_url ? (
-              <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <div style={{ fontSize: '20px', color: '#94a3b8', fontWeight: 700 }}>
-                {student.name_bn?.[0] || student.name_en?.[0] || '?'}
-              </div>
-            )}
-          </div>
-
-          {/* Name */}
-          <div style={{ textAlign: 'center', marginBottom: '5px' }}>
-            <div style={{ fontWeight: 700, fontSize: '8.5px', color: '#0f172a', lineHeight: 1.3 }}>
-              {lang === 'bn' ? (student.name_bn || student.name_en || '—') : (student.name_en || student.name_bn || '—')}
+        {/* Body */}
+        <div style={{ flex: 1, padding: '4px 8px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Photo + QR row */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', width: '100%', marginBottom: '3px' }}>
+            {/* Photo */}
+            <div
+              style={{
+                width: '46px',
+                height: '54px',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                border: '1.5px solid #2563eb',
+                background: '#f1f5f9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {student.photo_url ? (
+                <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ fontSize: '18px', color: '#94a3b8', fontWeight: 700 }}>
+                  {student.name_bn?.[0] || student.name_en?.[0] || '?'}
+                </div>
+              )}
             </div>
-            {lang === 'en' && student.name_bn && (
-              <div style={{ fontSize: '6px', color: '#64748b', marginTop: '1px' }}>{student.name_bn}</div>
-            )}
+
+            {/* Name + basic info */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: '7.5px', color: '#0f172a', lineHeight: 1.2 }}>
+                {lang === 'bn' ? (student.name_bn || student.name_en || '—') : (student.name_en || student.name_bn || '—')}
+              </div>
+              {lang === 'en' && student.name_bn && (
+                <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>{student.name_bn}</div>
+              )}
+              <div style={{ fontSize: '5.5px', color: '#2563eb', fontWeight: 600, marginTop: '2px' }}>
+                {l.id}: {student.student_id || '—'}
+              </div>
+            </div>
+
+            {/* QR Code */}
+            <div style={{ flexShrink: 0, textAlign: 'center' }}>
+              <img
+                src={generateQrUrl(qrData, 80)}
+                alt="QR"
+                style={{ width: '38px', height: '38px', borderRadius: '2px' }}
+              />
+            </div>
           </div>
 
           {/* Info Grid */}
-          <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '4px' }}>
-            <InfoRow label={l.id} value={student.student_id || '—'} />
+          <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '2px' }}>
             <InfoRow label={l.className} value={student.class_name || '—'} />
             <InfoRow label={l.roll} value={student.roll_number || '—'} />
             <InfoRow label={l.division} value={student.division_name || '—'} />
@@ -175,6 +199,14 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             {(student.guardian_phone || student.phone) && (
               <InfoRow label={l.phone} value={student.guardian_phone || student.phone || ''} />
             )}
+            {student.address && (
+              <div style={{ display: 'flex', padding: '1.5px 0', borderBottom: '1px dotted #f1f5f9' }}>
+                <span style={{ fontSize: '5.5px', color: '#64748b', whiteSpace: 'nowrap', marginRight: '4px' }}>{l.address}</span>
+                <span style={{ fontSize: '5.5px', fontWeight: 500, color: '#0f172a', lineHeight: 1.3, textAlign: 'right', flex: 1, wordBreak: 'break-word' }}>
+                  {student.address}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -182,7 +214,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         <div
           style={{
             borderTop: '1px solid #e2e8f0',
-            padding: '4px 8px 5px',
+            padding: '3px 8px 4px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
@@ -219,7 +251,7 @@ const InfoRow = ({ label, value, highlight }: { label: string; value: string; hi
     <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
     <span
       style={{
-        fontSize: '6.5px',
+        fontSize: '6px',
         fontWeight: 600,
         color: highlight ? '#dc2626' : '#0f172a',
         background: highlight ? '#fef2f2' : 'transparent',
