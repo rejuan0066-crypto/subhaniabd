@@ -120,6 +120,30 @@ const AdminStudentsFees = () => {
       })
     : dbFeeTypes;
 
+  // Check for existing pending/approved payment for selected student + fee type
+  const { data: existingPayment, isLoading: checkingExisting } = useQuery({
+    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn],
+    queryFn: async () => {
+      if (!foundStudent?.id || !selectedFeeTypeObj) return null;
+      const feeTypeName = selectedFeeTypeObj.name_bn || selectedFeeTypeObj.name;
+      const { data, error } = await supabase
+        .from('payments')
+        .select('id, status, transaction_id, amount, created_at, notes')
+        .eq('student_id', foundStudent.id)
+        .eq('fee_type', feeTypeName)
+        .in('status', ['pending', 'success'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!foundStudent?.id && !!selectedFeeTypeObj,
+  });
+
+  const isPaymentBlocked = !!existingPayment;
+  const blockedStatus = existingPayment?.status; // 'pending' or 'success'
+
 
   const { data: gatewayConfig } = useQuery({
     queryKey: ['payment_gateway_config_check'],
@@ -284,6 +308,10 @@ const AdminStudentsFees = () => {
     if (!feeType) { toast.error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type'); return; }
     if (!foundStudent) { toast.error(bn ? 'প্রথমে ছাত্র খুঁজুন' : 'Search student first'); return; }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid amount'); return; }
+    if (isPaymentBlocked) {
+      toast.error(bn ? 'এই ফি ধরনে ইতিমধ্যে পেমেন্ট আছে। বাতিল না হওয়া পর্যন্ত আবার পরিশোধ করা যাবে না।' : 'Payment already exists. Cannot pay again until cancelled.');
+      return;
+    }
     if (paymentMethod === 'online' && !isGatewayReady) {
       toast.error(bn ? 'প্রথমে পেমেন্ট গেটওয়ে সেটআপ করুন' : 'Please setup payment gateway first');
       return;
@@ -465,9 +493,40 @@ const AdminStudentsFees = () => {
                     {bn ? 'কোনো ফি ধরন পাওয়া যায়নি। প্রথমে "ফি ধরন" ট্যাব থেকে ফি যোগ করুন।' : 'No fee types found. Add fee types from the "Fee Types" tab first.'}
                   </p>
                 )}
+                {/* Existing payment block warning */}
+                {isPaymentBlocked && existingPayment && (
+                  <div className={`mt-2 border rounded-xl p-4 space-y-2 ${blockedStatus === 'pending' ? 'bg-amber-50 border-amber-300 dark:bg-amber-950/30 dark:border-amber-700' : 'bg-emerald-50 border-emerald-300 dark:bg-emerald-950/30 dark:border-emerald-700'}`}>
+                    <div className="flex items-center gap-2">
+                      {blockedStatus === 'pending' ? (
+                        <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      ) : (
+                        <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      )}
+                      <span className={`text-sm font-semibold ${blockedStatus === 'pending' ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+                        {blockedStatus === 'pending'
+                          ? (bn ? '⏳ পেন্ডিং রিসিট — অনুমোদনের অপেক্ষায়' : '⏳ Pending Receipt — Awaiting Approval')
+                          : (bn ? '✅ অনুমোদিত রিসিট — পরিশোধিত' : '✅ Approved Receipt — Paid')}
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-1 text-foreground/80">
+                      <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {existingPayment.transaction_id}</p>
+                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{existingPayment.amount}</p>
+                      <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date(existingPayment.created_at).toLocaleDateString('bn-BD')}</p>
+                    </div>
+                    <p className={`text-xs font-medium ${blockedStatus === 'pending' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {bn ? '🚫 বাতিল না হওয়া পর্যন্ত এই ফি ধরনে আবার পরিশোধ করা যাবে না।' : '🚫 Cannot pay again until this payment is cancelled.'}
+                    </p>
+                  </div>
+                )}
+                {checkingExisting && feeType && foundStudent && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {bn ? 'পূর্ববর্তী পেমেন্ট যাচাই করা হচ্ছে...' : 'Checking existing payments...'}
+                  </div>
+                )}
               </div>
 
-              {/* Payment Method */}
+
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
                   {bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'} <span className="text-destructive">*</span>
@@ -535,9 +594,11 @@ const AdminStudentsFees = () => {
               </div>
             </div>
 
-            <Button onClick={handleProceed} className="btn-primary-gradient w-full mt-2">
+            <Button onClick={handleProceed} className="btn-primary-gradient w-full mt-2" disabled={isPaymentBlocked || checkingExisting}>
               <ArrowRight className="w-4 h-4 mr-2" />
-              {bn ? 'পরিশোধে এগিয়ে যান' : 'Proceed to Pay'}
+              {isPaymentBlocked
+                ? (bn ? '🚫 পেমেন্ট ব্লকড — পূর্ববর্তী পেমেন্ট বাতিল করুন' : '🚫 Blocked — Cancel previous payment first')
+                : (bn ? 'পরিশোধে এগিয়ে যান' : 'Proceed to Pay')}
             </Button>
           </div>
         )}
