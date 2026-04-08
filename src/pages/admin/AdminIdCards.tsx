@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X } from 'lucide-react';
+import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useRef, useCallback, useEffect } from 'react';
@@ -21,32 +21,63 @@ const AdminIdCards = () => {
   const [filterClassId, setFilterClassId] = useState('all');
   const [previewStudent, setPreviewStudent] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [validUntil, setValidUntil] = useState('December 2026');
+  const [validUntil, setValidUntil] = useState('');
   const [principalName, setPrincipalName] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState('');
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const sigInputRef = useRef<HTMLInputElement>(null);
 
-  // Load principal name from settings
-  useEffect(() => {
-    if (settings.principal_name && !principalName) {
-      setPrincipalName(settings.principal_name);
-    }
-  }, [settings.principal_name]);
-
-  // Load saved signature
-  const { data: savedSignature } = useQuery({
-    queryKey: ['idcard-principal-signature'],
+  // Load all ID card settings
+  const { data: idcardSettings, refetch: refetchSettings } = useQuery({
+    queryKey: ['idcard-settings'],
     queryFn: async () => {
-      const { data } = await supabase.from('website_settings').select('value').eq('key', 'idcard_principal_signature_url').maybeSingle();
-      return data?.value || '';
+      const { data } = await supabase.from('website_settings').select('key, value').in('key', [
+        'idcard_principal_name', 'idcard_valid_until', 'idcard_principal_signature_url'
+      ]);
+      const map: Record<string, string> = {};
+      data?.forEach((r: any) => { map[r.key] = String(r.value || ''); });
+      return map;
     },
   });
 
   useEffect(() => {
-    if (savedSignature && !signatureUrl) setSignatureUrl(String(savedSignature));
-  }, [savedSignature]);
+    if (idcardSettings) {
+      if (idcardSettings.idcard_principal_name && !principalName) setPrincipalName(idcardSettings.idcard_principal_name);
+      if (idcardSettings.idcard_valid_until && !validUntil) setValidUntil(idcardSettings.idcard_valid_until);
+      if (idcardSettings.idcard_principal_signature_url && !signatureUrl) setSignatureUrl(idcardSettings.idcard_principal_signature_url);
+    }
+    // Fallback: load principal name from general settings if not saved in idcard settings
+    if (!idcardSettings?.idcard_principal_name && settings.principal_name && !principalName) {
+      setPrincipalName(settings.principal_name);
+    }
+    if (!validUntil) setValidUntil('December 2026');
+  }, [idcardSettings, settings.principal_name]);
+
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const pairs = [
+        { key: 'idcard_principal_name', value: principalName },
+        { key: 'idcard_valid_until', value: validUntil },
+      ];
+      for (const { key, value } of pairs) {
+        const { data: existing } = await supabase.from('website_settings').select('id').eq('key', key).maybeSingle();
+        if (existing) {
+          await supabase.from('website_settings').update({ value }).eq('key', key);
+        } else {
+          await supabase.from('website_settings').insert({ key, value });
+        }
+      }
+      refetchSettings();
+      toast.success(bn ? 'সেটিংস সংরক্ষিত হয়েছে' : 'Settings saved');
+    } catch (err: any) {
+      toast.error(err.message || 'Save failed');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -311,6 +342,12 @@ const AdminIdCards = () => {
                 <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'PNG/JPG, সর্বোচ্চ ৩০০KB' : 'PNG/JPG, max 300KB'}</p>
               </div>
             )}
+          </div>
+          <div className="flex items-end">
+            <Button onClick={saveSettings} disabled={savingSettings} variant="outline" size="sm" className="gap-1.5">
+              {savingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {bn ? 'সংরক্ষণ' : 'Save'}
+            </Button>
           </div>
         </div>
       </div>
