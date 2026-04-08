@@ -355,6 +355,10 @@ const AdminStudents = () => {
 
 // Student detail with library book history
 const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, getClassName, setEditStudent, setShowDetail, setShowAdd, statusMutation, canEditItem }: any) => {
+  const queryClient = useQueryClient();
+  const [showWaiverDialog, setShowWaiverDialog] = useState(false);
+  const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_percent: '100', reason: '' });
+
   const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
     queryKey: ['student-library-history', student.id],
     queryFn: async () => {
