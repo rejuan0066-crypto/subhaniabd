@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { Download, FileText, Loader2, Palette, Printer } from 'lucide-react';
+import { Download, FileText, Loader2, Palette, Printer, Search, X } from 'lucide-react';
 import { downloadReceiptAsPdf } from '@/lib/receiptPdfDownload';
 import { toast } from 'sonner';
 import { useReceiptSettings } from '@/hooks/useReceiptSettings';
@@ -25,8 +25,13 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const [rollNumber, setRollNumber] = useState('');
   const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success' | ''>('');
-  const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
+
+  // Search results state
+  const [searchResults, setSearchResults] = useState<ReceiptData[] | null>(null);
+  const [resultMeta, setResultMeta] = useState<{ count: number; studentName: string; className: string } | null>(null);
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions_receipt'],
@@ -52,100 +57,10 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     },
   });
 
-  const filledCount = [selectedSession, selectedClass, rollNumber.trim(), regNumber.trim()].filter(Boolean).length;
   const hasSession = !!selectedSession;
   const hasSecondField = !!(selectedClass || rollNumber.trim() || regNumber.trim());
   const hasStatus = !!statusFilter;
-  const canDownload = hasSession && hasSecondField && hasStatus;
-
-  const fetchReceiptData = async () => {
-    if (!selectedSession) {
-      toast.error(bn ? 'সেশন নির্বাচন করুন' : 'Select session');
-      return null;
-    }
-    if (!hasSecondField) {
-      toast.error(bn ? 'ক্লাস / রোল / রেজিস্ট্রেশন এর যেকোনো একটি দিন' : 'Provide class, roll, or registration');
-      return null;
-    }
-    if (!statusFilter) {
-      toast.error(bn ? 'পেন্ডিং বা পেইড নির্বাচন করুন' : 'Select Pending or Paid status');
-      return null;
-    }
-
-    const session = sessions.find((s: any) => s.id === selectedSession);
-    const sessionName = session?.name || '';
-
-    let studentQuery = supabase
-      .from('students')
-      .select('*, divisions(name_bn, name), classes(name_bn, name)')
-      .eq('status', 'active');
-
-    if (sessionName) {
-      studentQuery = studentQuery.or(`admission_session.eq.${sessionName},admission_session.is.null`);
-    }
-
-    if (selectedClass) studentQuery = studentQuery.eq('class_id', selectedClass);
-    if (rollNumber.trim()) studentQuery = studentQuery.eq('roll_number', rollNumber.trim());
-    if (regNumber.trim()) studentQuery = studentQuery.eq('student_id', regNumber.trim());
-
-    const { data: students, error: studErr } = await studentQuery.order('roll_number');
-    if (studErr) throw studErr;
-    if (!students || students.length === 0) {
-      toast.error(bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found');
-      return null;
-    }
-
-    const studentIds = students.map((s: any) => s.id);
-    const { data: payments, error: payErr } = await supabase
-      .from('payments')
-      .select('*')
-      .in('student_id', studentIds)
-      .eq('status', statusFilter)
-      .order('created_at', { ascending: false });
-    if (payErr) throw payErr;
-
-    if (!payments || payments.length === 0) {
-      toast.error(bn ? 'কোনো পেমেন্ট রেকর্ড পাওয়া যায়নি' : 'No payment records found');
-      return null;
-    }
-
-    // Build a map of payment_id -> approver name from pending_actions
-    const approverMap = new Map<string, string>();
-    {
-      const { data: approvals } = await supabase
-        .from('pending_actions')
-        .select('target_id, reviewed_by, user_name')
-        .eq('status', 'approved')
-        .eq('target_table', 'payments');
-
-      if (approvals && approvals.length > 0) {
-        const reviewerIds = [...new Set(approvals.map((a: any) => a.reviewed_by).filter(Boolean))];
-        let profileMap = new Map<string, string>();
-        if (reviewerIds.length > 0) {
-          const { data: profiles } = await supabase
-            .from('profiles')
-            .select('id, full_name')
-            .in('id', reviewerIds);
-          if (profiles) {
-            profiles.forEach((p: any) => profileMap.set(p.id, p.full_name || ''));
-          }
-        }
-        approvals.forEach((a: any) => {
-          if (a.target_id) {
-            const name = profileMap.get(a.reviewed_by) || a.user_name || '';
-            if (name) approverMap.set(a.target_id, name);
-          }
-        });
-      }
-    }
-
-    const studentMap = new Map(students.map((s: any) => [s.id, s]));
-    const className = selectedClass
-      ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
-      : '';
-
-    return { payments, studentMap, sessionName, className, approverMap };
-  };
+  const canSearch = hasSession && hasSecondField && hasStatus;
 
   const getCollectorFromNotes = (notes: string) => {
     const match = notes?.match(/আদায়কারী: (.+?)(?:\||$)/);
@@ -153,81 +68,175 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   };
 
   const isSingleStudent = !!(rollNumber.trim() || regNumber.trim());
-  const isBulkClass = !!selectedClass && !rollNumber.trim() && !regNumber.trim();
 
-  const buildReceiptDataList = (data: any): ReceiptData[] => {
-    const { payments, studentMap, sessionName, className, approverMap } = data;
-    
-    // Group payments by student
-    const studentPayments = new Map<string, any[]>();
-    payments.forEach((p: any) => {
-      const list = studentPayments.get(p.student_id) || [];
-      list.push(p);
-      studentPayments.set(p.student_id, list);
-    });
+  const handleSearch = async () => {
+    if (!selectedSession) {
+      toast.error(bn ? 'সেশন নির্বাচন করুন' : 'Select session');
+      return;
+    }
+    if (!hasSecondField) {
+      toast.error(bn ? 'ক্লাস / রোল / রেজিস্ট্রেশন এর যেকোনো একটি দিন' : 'Provide class, roll, or registration');
+      return;
+    }
+    if (!statusFilter) {
+      toast.error(bn ? 'পেন্ডিং বা পেইড নির্বাচন করুন' : 'Select Pending or Paid status');
+      return;
+    }
 
-    const receiptList: ReceiptData[] = [];
-    studentPayments.forEach((payList, studentId) => {
-      const student = studentMap.get(studentId);
-      if (!student) return;
-      payList.forEach((p: any) => {
-        const serialMatch = p.notes?.match(/Serial: (SL-\d{4}-\d{4})/);
-        const createdAt = new Date(p.created_at || Date.now());
-        // Get approver name for this specific payment
-        const paymentApprover = approverMap.get(p.id) || '';
-        receiptList.push({
-          studentName: student?.name_bn || '-',
-          studentId: student?.student_id || '-',
-          rollNumber: student?.roll_number || '-',
-          className: student?.classes?.name_bn || className || '-',
-          sessionName,
-          feeType: bn ? (feeTypeLabels[p.fee_type]?.bn || p.fee_type) : (feeTypeLabels[p.fee_type]?.en || p.fee_type),
-          amount: String(p.amount),
-          transactionId: p.transaction_id,
-          receiptSerial: serialMatch ? serialMatch[1] : (p.transaction_id || ''),
-          gatewayTrxId: p.payment_method && p.payment_method !== 'Cash' ? (p.transaction_id || '') : '',
-          paymentTimestamp: p.status === 'success' ? createdAt.toLocaleString('bn-BD', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '',
-          date: createdAt.toLocaleDateString('bn-BD'),
-          status: statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পেইড' : 'Paid'),
-          statusColor: statusFilter === 'pending' ? '#f59e0b' : '#22c55e',
-          paymentMethod: p.payment_method || 'Cash',
-          collectorName: getCollectorFromNotes(p.notes || ''),
-          approverName: paymentApprover,
-          institutionName: institution?.name || '',
-          institutionNameEn: institution?.name_en || '',
-          institutionAddress: institution?.address || '',
-          institutionPhone: institution?.phone || '',
-          institutionEmail: institution?.email || '',
-          institutionOtherInfo: institution?.other_info || '',
-          logoUrl: institution?.logo_url || '',
-          bn,
+    setSearching(true);
+    setSearchResults(null);
+    setResultMeta(null);
+
+    try {
+      const session = sessions.find((s: any) => s.id === selectedSession);
+      const sessionName = session?.name || '';
+
+      let studentQuery = supabase
+        .from('students')
+        .select('*, divisions(name_bn, name), classes(name_bn, name)')
+        .eq('status', 'active');
+
+      if (sessionName) {
+        studentQuery = studentQuery.or(`admission_session.eq.${sessionName},admission_session.is.null`);
+      }
+
+      if (selectedClass) studentQuery = studentQuery.eq('class_id', selectedClass);
+      if (rollNumber.trim()) studentQuery = studentQuery.eq('roll_number', rollNumber.trim());
+      if (regNumber.trim()) studentQuery = studentQuery.eq('student_id', regNumber.trim());
+
+      const { data: students, error: studErr } = await studentQuery.order('roll_number');
+      if (studErr) throw studErr;
+      if (!students || students.length === 0) {
+        toast.error(bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found');
+        return;
+      }
+
+      const studentIds = students.map((s: any) => s.id);
+      const { data: payments, error: payErr } = await supabase
+        .from('payments')
+        .select('*')
+        .in('student_id', studentIds)
+        .eq('status', statusFilter)
+        .order('created_at', { ascending: false });
+      if (payErr) throw payErr;
+
+      if (!payments || payments.length === 0) {
+        toast.error(bn ? 'কোনো পেমেন্ট রেকর্ড পাওয়া যায়নি' : 'No payment records found');
+        return;
+      }
+
+      // Build approver map
+      const approverMap = new Map<string, string>();
+      {
+        const { data: approvals } = await supabase
+          .from('pending_actions')
+          .select('target_id, reviewed_by, user_name')
+          .eq('status', 'approved')
+          .eq('target_table', 'payments');
+
+        if (approvals && approvals.length > 0) {
+          const reviewerIds = [...new Set(approvals.map((a: any) => a.reviewed_by).filter(Boolean))];
+          let profileMap = new Map<string, string>();
+          if (reviewerIds.length > 0) {
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('id, full_name')
+              .in('id', reviewerIds);
+            if (profiles) {
+              profiles.forEach((p: any) => profileMap.set(p.id, p.full_name || ''));
+            }
+          }
+          approvals.forEach((a: any) => {
+            if (a.target_id) {
+              const name = profileMap.get(a.reviewed_by) || a.user_name || '';
+              if (name) approverMap.set(a.target_id, name);
+            }
+          });
+        }
+      }
+
+      const studentMap = new Map(students.map((s: any) => [s.id, s]));
+      const className = selectedClass
+        ? classes.find((c: any) => c.id === selectedClass)?.name_bn || ''
+        : '';
+
+      // Build receipt data list
+      const studentPayments = new Map<string, any[]>();
+      payments.forEach((p: any) => {
+        const list = studentPayments.get(p.student_id) || [];
+        list.push(p);
+        studentPayments.set(p.student_id, list);
+      });
+
+      const receiptList: ReceiptData[] = [];
+      studentPayments.forEach((payList, studentId) => {
+        const student = studentMap.get(studentId);
+        if (!student) return;
+        payList.forEach((p: any) => {
+          const serialMatch = p.notes?.match(/Serial: (SL-\d{4}-\d{4})/);
+          const createdAt = new Date(p.created_at || Date.now());
+          const paymentApprover = approverMap.get(p.id) || '';
+          receiptList.push({
+            studentName: student?.name_bn || '-',
+            studentId: student?.student_id || '-',
+            rollNumber: student?.roll_number || '-',
+            className: student?.classes?.name_bn || className || '-',
+            sessionName,
+            feeType: bn ? (feeTypeLabels[p.fee_type]?.bn || p.fee_type) : (feeTypeLabels[p.fee_type]?.en || p.fee_type),
+            amount: String(p.amount),
+            transactionId: p.transaction_id,
+            receiptSerial: serialMatch ? serialMatch[1] : (p.transaction_id || ''),
+            gatewayTrxId: p.payment_method && p.payment_method !== 'Cash' ? (p.transaction_id || '') : '',
+            paymentTimestamp: p.status === 'success' ? createdAt.toLocaleString('bn-BD', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '',
+            date: createdAt.toLocaleDateString('bn-BD'),
+            status: statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পেইড' : 'Paid'),
+            statusColor: statusFilter === 'pending' ? '#f59e0b' : '#22c55e',
+            paymentMethod: p.payment_method || 'Cash',
+            collectorName: getCollectorFromNotes(p.notes || ''),
+            approverName: paymentApprover,
+            institutionName: institution?.name || '',
+            institutionNameEn: institution?.name_en || '',
+            institutionAddress: institution?.address || '',
+            institutionPhone: institution?.phone || '',
+            institutionEmail: institution?.email || '',
+            institutionOtherInfo: institution?.other_info || '',
+            logoUrl: institution?.logo_url || '',
+            bn,
+          });
         });
       });
-    });
-    return receiptList;
-  };
 
-  const handleDownload = async (mode: 'print' | 'pdf') => {
-    const setLoad = mode === 'pdf' ? setPdfLoading : setLoading;
-    setLoad(true);
-    try {
-      const data = await fetchReceiptData();
-      if (!data) return;
-
-      const receiptList = buildReceiptDataList(data);
       if (receiptList.length === 0) {
         toast.error(bn ? 'কোনো রিসিট তৈরি হয়নি' : 'No receipts generated');
         return;
       }
 
-      // Load style from saved settings if available
-      const savedStyle: ReceiptStyleConfig | undefined = defaultSetting?.design_config as any;
+      setSearchResults(receiptList);
+      const firstStudent = receiptList[0];
+      setResultMeta({
+        count: receiptList.length,
+        studentName: isSingleStudent ? firstStudent.studentName : '',
+        className: className || firstStudent.className,
+      });
+      toast.success(bn ? `${receiptList.length}টি রিসিট পাওয়া গেছে` : `${receiptList.length} receipt(s) found`);
+    } catch (e: any) {
+      toast.error(e.message || 'Error');
+    } finally {
+      setSearching(false);
+    }
+  };
 
+  const handleAction = async (mode: 'print' | 'pdf') => {
+    if (!searchResults || searchResults.length === 0) return;
+    const setLoad = mode === 'pdf' ? setPdfLoading : setPrintLoading;
+    setLoad(true);
+    try {
+      const savedStyle: ReceiptStyleConfig | undefined = defaultSetting?.design_config as any;
       let html: string;
-      if (receiptList.length === 1 || isSingleStudent) {
-        html = buildSingleStudentPrintHtml(receiptList[0], savedStyle);
+      if (searchResults.length === 1 || isSingleStudent) {
+        html = buildSingleStudentPrintHtml(searchResults[0], savedStyle);
       } else {
-        html = buildBulkClassPrintHtml(receiptList, savedStyle);
+        html = buildBulkClassPrintHtml(searchResults, savedStyle);
       }
 
       if (mode === 'pdf') {
@@ -244,6 +253,11 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     }
   };
 
+  const clearResults = () => {
+    setSearchResults(null);
+    setResultMeta(null);
+  };
+
   return (
     <div className="card-elevated p-5 space-y-4">
       <h3 className="font-display font-bold text-foreground flex items-center gap-2">
@@ -252,11 +266,11 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       </h3>
 
       <div className="flex gap-2">
-        <button onClick={() => setStatusFilter(statusFilter === 'pending' ? '' : 'pending')}
+        <button onClick={() => { setStatusFilter(statusFilter === 'pending' ? '' : 'pending'); clearResults(); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'pending' ? 'bg-amber-500 text-white' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেন্ডিং' : 'Pending'}
         </button>
-        <button onClick={() => setStatusFilter(statusFilter === 'success' ? '' : 'success')}
+        <button onClick={() => { setStatusFilter(statusFilter === 'success' ? '' : 'success'); clearResults(); }}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${statusFilter === 'success' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
           {bn ? 'পেইড (অনুমোদিত)' : 'Paid (Approved)'}
         </button>
@@ -269,7 +283,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'সেশন *' : 'Session *'}</label>
-          <Select value={selectedSession} onValueChange={setSelectedSession}>
+          <Select value={selectedSession} onValueChange={(v) => { setSelectedSession(v); clearResults(); }}>
             <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
             <SelectContent>
               {sessions.map((s: any) => <SelectItem key={s.id} value={s.id}>{bn ? (s.name_bn || s.name) : s.name}</SelectItem>)}
@@ -278,7 +292,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         </div>
         <div>
           <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'ক্লাস' : 'Class'}</label>
-          <Select value={selectedClass} onValueChange={setSelectedClass}>
+          <Select value={selectedClass} onValueChange={(v) => { setSelectedClass(v); clearResults(); }}>
             <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{bn ? 'সব ক্লাস' : 'All Classes'}</SelectItem>
@@ -292,29 +306,70 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         </div>
         <div>
           <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
-          <Input className="bg-background" value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} placeholder={bn ? 'রোল' : 'Roll'} />
+          <Input className="bg-background" value={rollNumber} onChange={(e) => { setRollNumber(e.target.value); clearResults(); }} placeholder={bn ? 'রোল' : 'Roll'} />
         </div>
         <div>
           <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'}</label>
-          <Input className="bg-background" value={regNumber} onChange={(e) => setRegNumber(e.target.value)} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
+          <Input className="bg-background" value={regNumber} onChange={(e) => { setRegNumber(e.target.value); clearResults(); }} placeholder={bn ? 'রেজিস্ট্রেশন নম্বর' : 'Registration No'} />
         </div>
       </div>
 
-      <div className="flex gap-2">
-        <Button onClick={() => handleDownload('print')} disabled={loading || pdfLoading || !canDownload} className="flex-1" variant="outline">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Printer className="w-4 h-4 mr-2" />}
-          {bn ? 'প্রিন্ট করুন' : 'Print Receipt'}
+      {/* Search Button */}
+      {!searchResults && (
+        <Button onClick={handleSearch} disabled={searching || !canSearch} className="w-full btn-primary-gradient">
+          {searching ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Search className="w-4 h-4 mr-2" />}
+          {bn ? 'রিসিট খুঁজুন' : 'Search Receipts'}
         </Button>
-        <Button onClick={() => handleDownload('pdf')} disabled={loading || pdfLoading || !canDownload} className="btn-primary-gradient flex-1">
-          {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
-          {bn ? 'PDF ডাউনলোড' : 'PDF Download'}
-        </Button>
-        <Link to="/admin/receipt-designer">
-          <Button variant="outline" size="icon" title={bn ? 'রিসিট ডিজাইনার' : 'Receipt Designer'}>
-            <Palette className="w-4 h-4" />
-          </Button>
-        </Link>
-      </div>
+      )}
+
+      {/* Search Results & Actions */}
+      {searchResults && resultMeta && (
+        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center justify-between bg-accent/50 rounded-lg p-3 border border-border">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {bn ? `${resultMeta.count}টি রিসিট পাওয়া গেছে` : `${resultMeta.count} receipt(s) found`}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {resultMeta.studentName && `${resultMeta.studentName} | `}
+                {resultMeta.className && `${bn ? 'ক্লাস' : 'Class'}: ${resultMeta.className} | `}
+                {statusFilter === 'pending' ? (bn ? 'পেন্ডিং' : 'Pending') : (bn ? 'পেইড' : 'Paid')}
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={clearResults} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Receipt summary list */}
+          <div className="max-h-40 overflow-y-auto space-y-1 border border-border rounded-lg p-2 bg-background">
+            {searchResults.map((r, idx) => (
+              <div key={idx} className="flex items-center justify-between text-xs py-1.5 px-2 rounded hover:bg-accent/30">
+                <span className="font-medium text-foreground">{r.studentName}</span>
+                <span className="text-muted-foreground">{r.feeType}</span>
+                <span className={`font-bold ${r.statusColor === '#22c55e' ? 'text-green-600' : 'text-amber-500'}`}>৳ {r.amount}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Print & Download buttons */}
+          <div className="flex gap-2">
+            <Button onClick={() => handleAction('print')} disabled={printLoading || pdfLoading} className="flex-1" variant="outline">
+              {printLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Printer className="w-4 h-4 mr-2" />}
+              {bn ? 'প্রিন্ট করুন' : 'Print Receipt'}
+            </Button>
+            <Button onClick={() => handleAction('pdf')} disabled={printLoading || pdfLoading} className="btn-primary-gradient flex-1">
+              {pdfLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download className="w-4 h-4 mr-2" />}
+              {bn ? 'PDF ডাউনলোড' : 'PDF Download'}
+            </Button>
+            <Link to="/admin/receipt-designer">
+              <Button variant="outline" size="icon" title={bn ? 'রিসিট ডিজাইনার' : 'Receipt Designer'}>
+                <Palette className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
