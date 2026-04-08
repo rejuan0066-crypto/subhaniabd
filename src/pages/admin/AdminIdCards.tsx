@@ -29,25 +29,55 @@ const AdminIdCards = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const sigInputRef = useRef<HTMLInputElement>(null);
 
-  // Load principal name from settings
-  useEffect(() => {
-    if (settings.principal_name && !principalName) {
-      setPrincipalName(settings.principal_name);
-    }
-  }, [settings.principal_name]);
-
-  // Load saved signature
-  const { data: savedSignature } = useQuery({
-    queryKey: ['idcard-principal-signature'],
+  // Load all ID card settings
+  const { data: idcardSettings, refetch: refetchSettings } = useQuery({
+    queryKey: ['idcard-settings'],
     queryFn: async () => {
-      const { data } = await supabase.from('website_settings').select('value').eq('key', 'idcard_principal_signature_url').maybeSingle();
-      return data?.value || '';
+      const { data } = await supabase.from('website_settings').select('key, value').in('key', [
+        'idcard_principal_name', 'idcard_valid_until', 'idcard_principal_signature_url'
+      ]);
+      const map: Record<string, string> = {};
+      data?.forEach((r: any) => { map[r.key] = String(r.value || ''); });
+      return map;
     },
   });
 
   useEffect(() => {
-    if (savedSignature && !signatureUrl) setSignatureUrl(String(savedSignature));
-  }, [savedSignature]);
+    if (idcardSettings) {
+      if (idcardSettings.idcard_principal_name && !principalName) setPrincipalName(idcardSettings.idcard_principal_name);
+      if (idcardSettings.idcard_valid_until && !validUntil) setValidUntil(idcardSettings.idcard_valid_until);
+      if (idcardSettings.idcard_principal_signature_url && !signatureUrl) setSignatureUrl(idcardSettings.idcard_principal_signature_url);
+    }
+    // Fallback: load principal name from general settings if not saved in idcard settings
+    if (!idcardSettings?.idcard_principal_name && settings.principal_name && !principalName) {
+      setPrincipalName(settings.principal_name);
+    }
+    if (!validUntil) setValidUntil('December 2026');
+  }, [idcardSettings, settings.principal_name]);
+
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const pairs = [
+        { key: 'idcard_principal_name', value: principalName },
+        { key: 'idcard_valid_until', value: validUntil },
+      ];
+      for (const { key, value } of pairs) {
+        const { data: existing } = await supabase.from('website_settings').select('id').eq('key', key).maybeSingle();
+        if (existing) {
+          await supabase.from('website_settings').update({ value }).eq('key', key);
+        } else {
+          await supabase.from('website_settings').insert({ key, value });
+        }
+      }
+      refetchSettings();
+      toast.success(bn ? 'সেটিংস সংরক্ষিত হয়েছে' : 'Settings saved');
+    } catch (err: any) {
+      toast.error(err.message || 'Save failed');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
