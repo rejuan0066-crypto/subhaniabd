@@ -150,6 +150,25 @@ const AdminStudents = () => {
     return cls ? (bn ? cls.name_bn : cls.name) : '-';
   };
 
+  // Generate class-based serial like 101, 102... for class 1, 201, 202... for class 2
+  const getClassSerial = (student: any) => {
+    if (!student.class_id) return '-';
+    const classIndex = classes.findIndex((c: any) => c.id === student.class_id);
+    if (classIndex === -1) return '-';
+    const classPrefix = (classIndex + 1) * 100;
+    // Find students in the same class, sorted by roll_number or created_at
+    const sameClassStudents = students
+      .filter((s: any) => s.class_id === student.class_id)
+      .sort((a: any, b: any) => {
+        const rollA = parseInt(a.roll_number) || 9999;
+        const rollB = parseInt(b.roll_number) || 9999;
+        if (rollA !== rollB) return rollA - rollB;
+        return (a.created_at || '').localeCompare(b.created_at || '');
+      });
+    const idx = sameClassStudents.findIndex((s: any) => s.id === student.id);
+    return classPrefix + idx + 1;
+  };
+
   const getSessionName = (sessionId: string | null, fallback: string | null) => {
     if (sessionId) {
       const session = academicSessions.find((s: any) => s.id === sessionId);
@@ -237,6 +256,7 @@ const AdminStudents = () => {
               <table className="w-full">
                 <thead className="bg-secondary/50">
                   <tr>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সিরিয়াল' : 'Serial'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'আইডি' : 'ID'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রোল' : 'Roll'}</th>
@@ -250,6 +270,7 @@ const AdminStudents = () => {
                 <tbody className="divide-y divide-border">
                   {filtered.map((s: any) => (
                     <tr key={s.id} className="hover:bg-secondary/30 transition-colors">
+                      <td className="px-4 py-3 text-sm font-mono font-semibold text-primary">{getClassSerial(s)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           {s.photo_url ? (
