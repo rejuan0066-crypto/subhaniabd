@@ -58,6 +58,14 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     },
   });
 
+  const { data: feeTypes = [] } = useQuery({
+    queryKey: ['fee_types_receipt'],
+    queryFn: async () => {
+      const { data } = await supabase.from('fee_types').select('*').eq('is_active', true).order('name_bn');
+      return data || [];
+    },
+  });
+
   const hasSession = !!selectedSession;
   const hasSecondField = !!(selectedClass || rollNumber.trim() || regNumber.trim());
   const hasStatus = !!statusFilter;
