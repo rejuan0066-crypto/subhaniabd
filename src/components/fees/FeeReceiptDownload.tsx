@@ -22,6 +22,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const { defaultSetting } = useReceiptSettings();
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [selectedFeeType, setSelectedFeeType] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success' | ''>('');
@@ -54,6 +55,14 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
     queryFn: async () => {
       const { data } = await supabase.from('institutions').select('*').eq('is_default', true).maybeSingle();
       return data;
+    },
+  });
+
+  const { data: feeTypes = [] } = useQuery({
+    queryKey: ['fee_types_receipt'],
+    queryFn: async () => {
+      const { data } = await supabase.from('fee_types').select('*').eq('is_active', true).order('name_bn');
+      return data || [];
     },
   });
 
@@ -112,12 +121,15 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
       }
 
       const studentIds = students.map((s: any) => s.id);
-      const { data: payments, error: payErr } = await supabase
+      let paymentQuery = supabase
         .from('payments')
         .select('*')
         .in('student_id', studentIds)
-        .eq('status', statusFilter)
-        .order('created_at', { ascending: false });
+        .eq('status', statusFilter);
+      if (selectedFeeType && selectedFeeType !== 'all') {
+        paymentQuery = paymentQuery.eq('fee_type', selectedFeeType);
+      }
+      const { data: payments, error: payErr } = await paymentQuery.order('created_at', { ascending: false });
       if (payErr) throw payErr;
 
       if (!payments || payments.length === 0) {
@@ -299,6 +311,20 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
               {classes.map((c: any) => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.name_bn} ({c.divisions?.name_bn || ''})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'ফি ধরন *' : 'Fee Type *'}</label>
+          <Select value={selectedFeeType} onValueChange={(v) => { setSelectedFeeType(v); clearResults(); }}>
+            <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সব ধরন' : 'All Types'}</SelectItem>
+              {feeTypes.map((ft: any) => (
+                <SelectItem key={ft.id} value={ft.name}>
+                  {bn ? ft.name_bn : ft.name}
                 </SelectItem>
               ))}
             </SelectContent>
