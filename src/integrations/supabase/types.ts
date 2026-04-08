@@ -1190,6 +1190,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_bn: string
+          session_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1202,6 +1203,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_bn: string
+          session_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1214,6 +1216,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_bn?: string
+          session_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1229,6 +1232,13 @@ export type Database = {
             columns: ["division_id"]
             isOneToOne: false
             referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_types_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
             referencedColumns: ["id"]
           },
         ]
