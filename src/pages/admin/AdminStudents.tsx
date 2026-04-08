@@ -427,6 +427,42 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
   }, 0);
   const totalDue = Math.max(0, totalApplicable - totalPaid);
 
+  const addWaiverMutation = useMutation({
+    mutationFn: async () => {
+      if (!waiverForm.fee_type_id) throw new Error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type');
+      const { error } = await supabase.from('fee_waivers').insert({
+        student_id: student.id,
+        fee_type_id: waiverForm.fee_type_id,
+        waiver_percent: parseFloat(waiverForm.waiver_percent) || 100,
+        reason: waiverForm.reason || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
+      setShowWaiverDialog(false);
+      setWaiverForm({ fee_type_id: '', waiver_percent: '100', reason: '' });
+      toast.success(bn ? 'ডিসকাউন্ট যোগ হয়েছে' : 'Discount added');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteWaiverMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('fee_waivers').update({ is_active: false }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
+      toast.success(bn ? 'ডিসকাউন্ট সরানো হয়েছে' : 'Discount removed');
+    },
+  });
+
+  // Fee types not yet having a waiver for this student
+  const availableFeeTypesForWaiver = applicableFeeTypes.filter(
+    (ft: any) => !feeWaivers.some((w: any) => w.fee_type_id === ft.id)
+  );
+
 
   const getLibStatusBadge = (status: string) => {
     switch (status) {
