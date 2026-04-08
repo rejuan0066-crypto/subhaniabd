@@ -391,8 +391,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       gender: 'male', religion: 'islam', date_of_birth: '',
       birth_reg_no: '', previous_class: '', previous_institute: '',
       is_orphan: false, is_poor: false, is_free: false, student_category: '', photo_url: '',
-      father_name: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
-      mother_name: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
+      father_name: '', father_name_en: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
+      mother_name: '', mother_name_en: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
       guardian_type: '', guardian_name: '', guardian_relation: '', guardian_phone: '', guardian_phone_code: '+880', guardian_nid: '',
       approver_name: '', approver_designation: '', approver_date: '', approver_signature: '',
     });
