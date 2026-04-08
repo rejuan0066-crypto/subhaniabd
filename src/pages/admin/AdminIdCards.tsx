@@ -22,6 +22,7 @@ const AdminIdCards = () => {
   const [previewStudent, setPreviewStudent] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [validUntil, setValidUntil] = useState('');
+  const [validUntilBn, setValidUntilBn] = useState('');
   const [principalName, setPrincipalName] = useState('');
   const [principalNameEn, setPrincipalNameEn] = useState('');
   const [savingSettings, setSavingSettings] = useState(false);
@@ -35,7 +36,7 @@ const AdminIdCards = () => {
     queryKey: ['idcard-settings'],
     queryFn: async () => {
       const { data } = await supabase.from('website_settings').select('key, value').in('key', [
-        'idcard_principal_name', 'idcard_principal_name_en', 'idcard_valid_until', 'idcard_principal_signature_url'
+        'idcard_principal_name', 'idcard_principal_name_en', 'idcard_valid_until', 'idcard_valid_until_bn', 'idcard_principal_signature_url'
       ]);
       const map: Record<string, string> = {};
       data?.forEach((r: any) => { map[r.key] = String(r.value || ''); });
@@ -48,6 +49,7 @@ const AdminIdCards = () => {
       if (idcardSettings.idcard_principal_name && !principalName) setPrincipalName(idcardSettings.idcard_principal_name);
       if (idcardSettings.idcard_principal_name_en && !principalNameEn) setPrincipalNameEn(idcardSettings.idcard_principal_name_en);
       if (idcardSettings.idcard_valid_until && !validUntil) setValidUntil(idcardSettings.idcard_valid_until);
+      if (idcardSettings.idcard_valid_until_bn && !validUntilBn) setValidUntilBn(idcardSettings.idcard_valid_until_bn);
       if (idcardSettings.idcard_principal_signature_url && !signatureUrl) setSignatureUrl(idcardSettings.idcard_principal_signature_url);
     }
     // Fallback: load principal name from general settings if not saved in idcard settings
@@ -55,6 +57,7 @@ const AdminIdCards = () => {
       setPrincipalName(settings.principal_name);
     }
     if (!validUntil) setValidUntil('December 2026');
+    if (!validUntilBn) setValidUntilBn('ডিসেম্বর ২০২৬');
   }, [idcardSettings, settings.principal_name]);
 
   const saveSettings = async () => {
@@ -64,6 +67,7 @@ const AdminIdCards = () => {
         { key: 'idcard_principal_name', value: principalName },
         { key: 'idcard_principal_name_en', value: principalNameEn },
         { key: 'idcard_valid_until', value: validUntil },
+        { key: 'idcard_valid_until_bn', value: validUntilBn },
       ];
       for (const { key, value } of pairs) {
         const { data: existing } = await supabase.from('website_settings').select('id').eq('key', key).maybeSingle();
@@ -315,8 +319,12 @@ const AdminIdCards = () => {
       <div className="card-elevated p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'মেয়াদ' : 'Valid Until'}</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'মেয়াদ (ইংরেজি)' : 'Valid Until (English)'}</label>
             <Input value={validUntil} onChange={(e) => setValidUntil(e.target.value)} className="bg-background" placeholder="December 2026" />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'মেয়াদ (বাংলা)' : 'Valid Until (Bangla)'}</label>
+            <Input value={validUntilBn} onChange={(e) => setValidUntilBn(e.target.value)} className="bg-background" placeholder="ডিসেম্বর ২০২৬" />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম (বাংলা)' : 'Principal Name (Bangla)'}</label>
