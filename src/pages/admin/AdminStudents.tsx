@@ -532,8 +532,13 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
               const waiverPercent = isFreeMonthly ? 100 : (waiver ? waiver.waiver_percent : 0);
               const discountAmount = Math.round(ft.amount * waiverPercent / 100);
               const netAmount = ft.amount - discountAmount;
-              // Check if already paid
-              const payment = feePayments.find((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending'));
+              // Check payments for this fee type
+              const paidPayments = feePayments.filter((p: any) => p.fee_type_id === ft.id && p.status === 'paid');
+              const pendingPayment = feePayments.find((p: any) => p.fee_type_id === ft.id && p.status === 'pending');
+              const totalPaidForThis = paidPayments.reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
+              const remaining = Math.max(0, netAmount - totalPaidForThis);
+              const isFullyPaid = remaining === 0 && totalPaidForThis >= netAmount;
+              const isPartialPaid = totalPaidForThis > 0 && remaining > 0;
               const categoryLabel = ft.fee_category === 'monthly' ? (bn ? 'মাসিক' : 'Monthly') : ft.fee_category === 'admission' ? (bn ? 'ভর্তি' : 'Admission') : ft.fee_category === 'exam' ? (bn ? 'পরীক্ষা' : 'Exam') : ft.fee_category;
 
               return (
@@ -559,13 +564,18 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                       )}
                     </div>
                   </div>
-                  <div className="mt-1.5">
-                    {payment?.status === 'paid' ? (
-                      <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge>
-                    ) : payment?.status === 'pending' ? (
+                  <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                    {isFullyPaid ? (
+                      <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{bn ? '✓ সম্পূর্ণ পরিশোধিত' : '✓ Fully Paid'}</Badge>
+                    ) : isPartialPaid ? (
+                      <>
+                        <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{bn ? `আংশিক ৳${totalPaidForThis}` : `Partial ৳${totalPaidForThis}`}</Badge>
+                        <Badge className="bg-destructive/10 text-destructive text-[10px]">{bn ? `বকেয়া ৳${remaining}` : `Due ৳${remaining}`}</Badge>
+                      </>
+                    ) : pendingPayment ? (
                       <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
                     ) : (
-                      <Badge className="bg-destructive/10 text-destructive text-[10px]">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
+                      <Badge className="bg-destructive/10 text-destructive text-[10px]">{bn ? `বকেয়া ৳${netAmount}` : `Due ৳${netAmount}`}</Badge>
                     )}
                   </div>
                 </div>
