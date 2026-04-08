@@ -357,7 +357,7 @@ const AdminStudents = () => {
 const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, getClassName, setEditStudent, setShowDetail, setShowAdd, statusMutation, canEditItem }: any) => {
   const queryClient = useQueryClient();
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
-  const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_percent: '100', reason: '' });
+  const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_amount: '', reason: '' });
 
   const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
     queryKey: ['student-library-history', student.id],
@@ -430,10 +430,13 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
   const addWaiverMutation = useMutation({
     mutationFn: async () => {
       if (!waiverForm.fee_type_id) throw new Error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type');
+      const selectedFt = applicableFeeTypes.find((ft: any) => ft.id === waiverForm.fee_type_id);
+      const amount = parseFloat(waiverForm.waiver_amount) || 0;
+      const percent = selectedFt && selectedFt.amount > 0 ? Math.min(100, Math.round((amount / selectedFt.amount) * 100)) : 100;
       const { error } = await supabase.from('fee_waivers').insert({
         student_id: student.id,
         fee_type_id: waiverForm.fee_type_id,
-        waiver_percent: parseFloat(waiverForm.waiver_percent) || 100,
+        waiver_percent: percent,
         reason: waiverForm.reason || null,
       });
       if (error) throw error;
@@ -441,7 +444,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['student-fee-waivers', student.id] });
       setShowWaiverDialog(false);
-      setWaiverForm({ fee_type_id: '', waiver_percent: '100', reason: '' });
+      setWaiverForm({ fee_type_id: '', waiver_amount: '', reason: '' });
       toast.success(bn ? 'ডিসকাউন্ট যোগ হয়েছে' : 'Discount added');
     },
     onError: (e: any) => toast.error(e.message),
@@ -647,7 +650,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
                   {w.reason && <p className="text-xs text-muted-foreground truncate">{w.reason}</p>}
                 </div>
                 <div className="flex items-center gap-1 ml-2 shrink-0">
-                  <Badge className="bg-amber-500/10 text-amber-600">{w.waiver_percent}% {bn ? 'ছাড়' : 'off'}</Badge>
+                  <Badge className="bg-amber-500/10 text-amber-600">৳{Math.round((w.fee_types?.amount || 0) * w.waiver_percent / 100)} {bn ? 'ছাড়' : 'off'}</Badge>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => deleteWaiverMutation.mutate(w.id)}>
                     <Trash2 className="w-3 h-3" />
                   </Button>
@@ -675,8 +678,14 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
               </Select>
             </div>
             <div>
-              <label className="text-sm font-medium">{bn ? 'ছাড়ের হার (%)' : 'Discount %'} *</label>
-              <Input type="number" min="1" max="100" value={waiverForm.waiver_percent} onChange={e => setWaiverForm(p => ({ ...p, waiver_percent: e.target.value }))} className="mt-1" />
+              <label className="text-sm font-medium">{bn ? 'ছাড়ের পরিমাণ (৳)' : 'Discount Amount (৳)'} *</label>
+              <Input type="number" min="1" value={waiverForm.waiver_amount} onChange={e => setWaiverForm(p => ({ ...p, waiver_amount: e.target.value }))} className="mt-1" placeholder={bn ? 'টাকার পরিমাণ' : 'Amount in Taka'} />
+              {waiverForm.fee_type_id && waiverForm.waiver_amount && (() => {
+                const ft = applicableFeeTypes.find((f: any) => f.id === waiverForm.fee_type_id);
+                if (!ft) return null;
+                const pct = Math.min(100, Math.round((parseFloat(waiverForm.waiver_amount) / ft.amount) * 100));
+                return <p className="text-xs text-muted-foreground mt-1">{bn ? `ফি ৳${ft.amount} এর ${pct}%` : `${pct}% of ৳${ft.amount}`}</p>;
+              })()}
             </div>
             <div>
               <label className="text-sm font-medium">{bn ? 'কারণ' : 'Reason'}</label>
