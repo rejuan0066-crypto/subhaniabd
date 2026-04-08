@@ -55,11 +55,13 @@ const DEFAULT_FIELDS: Array<{
   { label: 'Present Address', label_bn: 'বর্তমান ঠিকানা', field_type: 'address_present', is_required: false, sort_order: 21, default_value: 'address_present', section: 'student_address' },
   // Parents
   { label: 'Father Name', label_bn: 'পিতার নাম', field_type: 'text', is_required: true, sort_order: 22, default_value: 'father_name', section: 'parents' },
-  { label: 'Father Occupation', label_bn: 'পিতার পেশা', field_type: 'text', is_required: false, sort_order: 23, default_value: 'father_occupation', section: 'parents' },
+  { label: 'Father Name (English)', label_bn: 'পিতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 23, default_value: 'father_name_en', section: 'parents' },
+  { label: 'Father Occupation', label_bn: 'পিতার পেশা', field_type: 'text', is_required: false, sort_order: 24, default_value: 'father_occupation', section: 'parents' },
   { label: 'Father NID (10/17 digits)', label_bn: 'পিতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 24, default_value: 'father_nid', section: 'parents' },
   { label: 'Father Mobile', label_bn: 'পিতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 25, default_value: 'father_phone', section: 'parents' },
-  { label: 'Mother Name', label_bn: 'মাতার নাম', field_type: 'text', is_required: true, sort_order: 26, default_value: 'mother_name', section: 'parents' },
-  { label: 'Mother Occupation', label_bn: 'মাতার পেশা', field_type: 'text', is_required: false, sort_order: 27, default_value: 'mother_occupation', section: 'parents' },
+  { label: 'Mother Name', label_bn: 'মাতার নাম', field_type: 'text', is_required: true, sort_order: 27, default_value: 'mother_name', section: 'parents' },
+  { label: 'Mother Name (English)', label_bn: 'মাতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 28, default_value: 'mother_name_en', section: 'parents' },
+  { label: 'Mother Occupation', label_bn: 'মাতার পেশা', field_type: 'text', is_required: false, sort_order: 29, default_value: 'mother_occupation', section: 'parents' },
   { label: 'Mother NID (10/17 digits)', label_bn: 'মাতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 28, default_value: 'mother_nid', section: 'parents' },
   { label: 'Mother Mobile', label_bn: 'মাতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 29, default_value: 'mother_phone', section: 'parents' },
   // Guardian

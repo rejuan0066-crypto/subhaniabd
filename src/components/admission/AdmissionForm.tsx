@@ -49,8 +49,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     gender: 'male', religion: 'islam', date_of_birth: '',
     birth_reg_no: '', previous_class: '', previous_institute: '',
     is_orphan: false, is_poor: false, is_free: false, student_category: '', photo_url: '',
-    father_name: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
-    mother_name: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
+    father_name: '', father_name_en: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
+    mother_name: '', mother_name_en: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
     guardian_type: '', guardian_name: '', guardian_relation: '', guardian_phone: '', guardian_phone_code: '+880', guardian_nid: '',
     approver_name: '', approver_designation: '', approver_date: '', approver_signature: '',
   });
@@ -111,11 +111,13 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         student_category: s.student_category || '',
         photo_url: s.photo_url || '',
         father_name: s.father_name || '',
+        father_name_en: s.father_name_en || '',
         father_occupation: s.father_occupation || '',
         father_nid: s.father_nid || '',
         father_phone: s.father_phone || '',
         father_phone_code: admData.father_phone_code || '+880',
         mother_name: s.mother_name || '',
+        mother_name_en: s.mother_name_en || '',
         mother_occupation: s.mother_occupation || '',
         mother_nid: s.mother_nid || '',
         mother_phone: s.mother_phone || '',
@@ -365,7 +367,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         ...prev,
         first_name: s.name_bn || '', last_name: s.name_en || '', roll_number: s.roll_number || '',
         gender: s.gender || 'male', date_of_birth: s.date_of_birth || '', birth_reg_no: s.birth_reg_no || '',
-        father_name: s.father_name || '', mother_name: s.mother_name || '',
+        father_name: s.father_name || '', father_name_en: s.father_name_en || '', mother_name: s.mother_name || '', mother_name_en: s.mother_name_en || '',
         father_nid: s.father_nid || '', mother_nid: s.mother_nid || '',
         photo_url: s.photo_url || '', religion: s.religion || 'islam',
         admission_session: s.admission_session || '', registration_no: s.registration_no || '',
@@ -389,8 +391,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       gender: 'male', religion: 'islam', date_of_birth: '',
       birth_reg_no: '', previous_class: '', previous_institute: '',
       is_orphan: false, is_poor: false, is_free: false, student_category: '', photo_url: '',
-      father_name: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
-      mother_name: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
+      father_name: '', father_name_en: '', father_occupation: '', father_nid: '', father_phone: '', father_phone_code: '+880',
+      mother_name: '', mother_name_en: '', mother_occupation: '', mother_nid: '', mother_phone: '', mother_phone_code: '+880',
       guardian_type: '', guardian_name: '', guardian_relation: '', guardian_phone: '', guardian_phone_code: '+880', guardian_nid: '',
       approver_name: '', approver_designation: '', approver_date: '', approver_signature: '',
     });
@@ -440,7 +442,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       name_en: form.last_name.trim() || null,
       roll_number: form.roll_number.trim() || null,
       father_name: form.father_name.trim() || null,
+      father_name_en: form.father_name_en?.trim() || null,
       mother_name: form.mother_name.trim() || null,
+      mother_name_en: form.mother_name_en?.trim() || null,
       phone: form.father_phone || null,
       guardian_phone: form.guardian_type === 'other' ? form.guardian_phone : (form.guardian_type === 'mother' ? form.mother_phone : form.father_phone) || null,
       address: formatAddress(permanentAddr) || null,
@@ -925,6 +929,22 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               onChange={e => {
                 const val = e.target.value.replace(/[^\x00-\x7F]/g, '');
                 setForm(prev => ({ ...prev, last_name: val }));
+              }}
+              placeholder={bn ? 'ইংরেজিতে লিখুন' : 'Type in English only'} />
+            <FieldError field={fieldKey} />
+          </div>
+        );
+
+      case 'father_name_en':
+      case 'mother_name_en':
+        return (
+          <div data-field={fieldKey}>
+            <Label className={errorLabel}>{label}</Label>
+            <Input className={`bg-background mt-1 ${errorBorder}`}
+              value={form[fieldKey] || ''}
+              onChange={e => {
+                const val = e.target.value.replace(/[^\x00-\x7F]/g, '');
+                setForm(prev => ({ ...prev, [fieldKey]: val }));
               }}
               placeholder={bn ? 'ইংরেজিতে লিখুন' : 'Type in English only'} />
             <FieldError field={fieldKey} />

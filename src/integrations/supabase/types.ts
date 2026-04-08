@@ -2665,6 +2665,7 @@ export type Database = {
           division_id: string | null
           email: string | null
           father_name: string | null
+          father_name_en: string | null
           father_nid: string | null
           father_occupation: string | null
           father_phone: string | null
@@ -2675,6 +2676,7 @@ export type Database = {
           is_orphan: boolean | null
           is_poor: boolean | null
           mother_name: string | null
+          mother_name_en: string | null
           mother_nid: string | null
           mother_occupation: string | null
           mother_phone: string | null
@@ -2708,6 +2710,7 @@ export type Database = {
           division_id?: string | null
           email?: string | null
           father_name?: string | null
+          father_name_en?: string | null
           father_nid?: string | null
           father_occupation?: string | null
           father_phone?: string | null
@@ -2718,6 +2721,7 @@ export type Database = {
           is_orphan?: boolean | null
           is_poor?: boolean | null
           mother_name?: string | null
+          mother_name_en?: string | null
           mother_nid?: string | null
           mother_occupation?: string | null
           mother_phone?: string | null
@@ -2751,6 +2755,7 @@ export type Database = {
           division_id?: string | null
           email?: string | null
           father_name?: string | null
+          father_name_en?: string | null
           father_nid?: string | null
           father_occupation?: string | null
           father_phone?: string | null
@@ -2761,6 +2766,7 @@ export type Database = {
           is_orphan?: boolean | null
           is_poor?: boolean | null
           mother_name?: string | null
+          mother_name_en?: string | null
           mother_nid?: string | null
           mother_occupation?: string | null
           mother_phone?: string | null
