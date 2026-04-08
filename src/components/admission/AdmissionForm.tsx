@@ -935,6 +935,22 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
         );
 
+      case 'father_name_en':
+      case 'mother_name_en':
+        return (
+          <div data-field={fieldKey}>
+            <Label className={errorLabel}>{label}</Label>
+            <Input className={`bg-background mt-1 ${errorBorder}`}
+              value={form[fieldKey] || ''}
+              onChange={e => {
+                const val = e.target.value.replace(/[^\x00-\x7F]/g, '');
+                setForm(prev => ({ ...prev, [fieldKey]: val }));
+              }}
+              placeholder={bn ? 'ইংরেজিতে লিখুন' : 'Type in English only'} />
+            <FieldError field={fieldKey} />
+          </div>
+        );
+
       default:
         if (!isFormFieldVisible(fieldKey)) return null;
         return (
