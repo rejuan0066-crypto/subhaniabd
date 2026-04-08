@@ -183,6 +183,9 @@ const FeeTypeManager = () => {
               </SelectContent>
             </Select>
           </div>
+          <Button size="sm" variant="outline" onClick={() => exportFeeTypesCSV(displayedFeeTypes, categories, bn)} disabled={displayedFeeTypes.length === 0}>
+            <Download className="w-4 h-4 mr-1" /> {bn ? 'ডাউনলোড' : 'Export'}
+          </Button>
           <Button size="sm" onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
             <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন যোগ' : 'Add New'}
           </Button>
