@@ -390,8 +390,29 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
     },
   });
 
+  // Applicable fee types for this student based on division/class
+  const { data: applicableFeeTypes = [], isLoading: feeTypesLoading } = useQuery({
+    queryKey: ['student-applicable-fee-types', student.division_id, student.class_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('fee_types')
+        .select('*, divisions(name_bn), classes(name_bn)')
+        .eq('is_active', true)
+        .order('fee_category')
+        .order('name_bn');
+      if (!data) return [];
+      // Filter: fee type applies if no division/class restriction, or matches student's
+      return data.filter((ft: any) => {
+        if (ft.division_id && ft.division_id !== student.division_id) return false;
+        if (ft.class_id && ft.class_id !== student.class_id) return false;
+        return true;
+      });
+    },
+  });
+
   const totalPaid = feePayments.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
   const totalDue = feePayments.filter((p: any) => p.status === 'unpaid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
+
 
   const getLibStatusBadge = (status: string) => {
     switch (status) {
