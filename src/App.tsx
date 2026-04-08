@@ -72,6 +72,7 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import AdminReceiptDesigner from "./pages/admin/AdminReceiptDesigner";
 import AdminExamSessions from "./pages/admin/AdminExamSessions";
 import AdminLibrary from "./pages/admin/AdminLibrary";
+import AdminIdCards from "./pages/admin/AdminIdCards";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import RouteLoader from "./components/RouteLoader";
@@ -162,6 +163,7 @@ const App = () => (
                     <Route path="receipt-designer" element={<AdminReceiptDesigner />} />
                     <Route path="exam-sessions" element={<ModuleGuard menuPath="/admin/exam-sessions"><AdminExamSessions /></ModuleGuard>} />
                     <Route path="library" element={<ModuleGuard menuPath="/admin/library"><AdminLibrary /></ModuleGuard>} />
+                    <Route path="id-cards" element={<AdminIdCards />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
