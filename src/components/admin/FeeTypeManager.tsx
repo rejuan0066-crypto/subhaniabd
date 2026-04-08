@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 const FeeTypeManager = () => {
@@ -15,12 +15,22 @@ const FeeTypeManager = () => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '' });
+  const [filterSessionId, setFilterSessionId] = useState<string>('all');
+  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
+
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['academic_sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').eq('is_active', true).order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['all_fee_types'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('fee_types').select('*, divisions(name_bn), classes(name_bn)').order('fee_category').order('name_bn');
+      const { data, error } = await supabase.from('fee_types').select('*, divisions(name_bn), classes(name_bn), academic_sessions(name_bn, name)').order('fee_category').order('name_bn');
       if (error) throw error;
       return data;
     },
@@ -53,10 +63,17 @@ const FeeTypeManager = () => {
     },
   });
 
-  // Filter classes by selected division
   const filteredClasses = form.division_id
     ? allClasses.filter((c: any) => c.division_id === form.division_id)
     : allClasses;
+
+  // Filter fee types by selected session
+  const displayedFeeTypes = feeTypes.filter((f: any) => {
+    if (f.is_active === false) return false;
+    if (filterSessionId === 'all') return true;
+    if (filterSessionId === 'none') return !f.session_id;
+    return f.session_id === filterSessionId;
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -68,6 +85,7 @@ const FeeTypeManager = () => {
         fee_category: form.fee_category,
         division_id: form.division_id || null,
         class_id: form.class_id || null,
+        session_id: form.session_id || null,
       };
       if (editId) {
         const { error } = await supabase.from('fee_types').update(payload).eq('id', editId);
@@ -100,7 +118,7 @@ const FeeTypeManager = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '' });
+    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
     setEditId(null);
   };
 
@@ -112,24 +130,42 @@ const FeeTypeManager = () => {
       fee_category: item.fee_category,
       division_id: item.division_id || '',
       class_id: item.class_id || '',
+      session_id: item.session_id || '',
     });
     setEditId(item.id);
     setOpen(true);
   };
 
   const handleDivisionChange = (v: string) => {
-    setForm(p => ({ ...p, division_id: v, class_id: '' })); // Reset class when division changes
+    setForm(p => ({ ...p, division_id: v, class_id: '' }));
   };
 
   const categories = feeCategories.map((c: any) => ({ key: c.name, bn: c.name_bn, en: c.name }));
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="font-display font-bold text-foreground">{bn ? 'ফি ধরন ব্যবস্থাপনা' : 'Fee Type Management'}</h3>
-        <Button size="sm" onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
-          <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন যোগ' : 'Add New'}
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <Select value={filterSessionId} onValueChange={setFilterSessionId}>
+              <SelectTrigger className="w-[180px] h-9 text-xs">
+                <SelectValue placeholder={bn ? 'সেশন ফিল্টার' : 'Filter by session'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? '📋 সব সেশন' : '📋 All Sessions'}</SelectItem>
+                <SelectItem value="none">{bn ? '🔹 সেশন ছাড়া' : '🔹 No Session'}</SelectItem>
+                {sessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn || s.name : s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button size="sm" onClick={() => { resetForm(); setOpen(true); }} className="btn-primary-gradient">
+            <Plus className="w-4 h-4 mr-1" /> {bn ? 'নতুন যোগ' : 'Add New'}
+          </Button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -137,6 +173,7 @@ const FeeTypeManager = () => {
           <thead className="bg-secondary/50">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'সেশন' : 'Session'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'পরিমাণ' : 'Amount'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'বিভাগ' : 'Division'}</th>
@@ -145,9 +182,14 @@ const FeeTypeManager = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {feeTypes.filter((f: any) => f.is_active !== false).map((f: any) => (
+            {displayedFeeTypes.map((f: any) => (
               <tr key={f.id} className="hover:bg-secondary/30">
                 <td className="px-4 py-3 font-medium text-foreground">{f.name_bn}</td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  <span className="px-2 py-0.5 rounded-full text-xs bg-accent/50 text-accent-foreground">
+                    {f.academic_sessions?.[bn ? 'name_bn' : 'name'] || (bn ? '—' : '—')}
+                  </span>
+                </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
                     {categories.find(c => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category}
@@ -164,8 +206,8 @@ const FeeTypeManager = () => {
                 </td>
               </tr>
             ))}
-            {feeTypes.filter((f: any) => f.is_active !== false).length === 0 && (
-              <tr><td colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
+            {displayedFeeTypes.length === 0 && (
+              <tr><td colSpan={7} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
             )}
           </tbody>
         </table>
@@ -175,6 +217,18 @@ const FeeTypeManager = () => {
         <DialogContent>
           <DialogHeader><DialogTitle>{editId ? (bn ? 'ফি ধরন সম্পাদনা' : 'Edit Fee Type') : (bn ? 'নতুন ফি ধরন' : 'New Fee Type')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">{bn ? 'শিক্ষাবর্ষ' : 'Academic Session'}</label>
+              <Select value={form.session_id || 'none'} onValueChange={v => setForm(p => ({ ...p, session_id: v === 'none' ? '' : v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{bn ? '— সেশন ছাড়া —' : '— No Session —'}</SelectItem>
+                  {sessions.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn || s.name : s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <label className="text-sm font-medium">{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</label>
               <Input value={form.name_bn} onChange={e => setForm(p => ({ ...p, name_bn: e.target.value }))} className="mt-1" />
