@@ -220,8 +220,9 @@ const AdminIdCards = () => {
           student={buildStudentData(student)}
           institution={institution || undefined}
           validUntil={validUntil}
-          principalName={principalName}
-          principalSignatureUrl={signatureUrl}
+           principalName={principalName}
+           principalNameEn={principalNameEn}
+           principalSignatureUrl={signatureUrl}
           lang={language}
           ref={(el) => {
             if (el) {
@@ -262,8 +263,9 @@ const AdminIdCards = () => {
               student={buildStudentData(s)}
               institution={institution || undefined}
               validUntil={validUntil}
-              principalName={principalName}
-              principalSignatureUrl={signatureUrl}
+               principalName={principalName}
+               principalNameEn={principalNameEn}
+               principalSignatureUrl={signatureUrl}
               lang={language}
               ref={(el) => {
                 if (el) {
@@ -477,8 +479,9 @@ const AdminIdCards = () => {
                   student={buildStudentData(previewStudent)}
                   institution={institution || undefined}
                   validUntil={validUntil}
-                  principalName={principalName}
-                  principalSignatureUrl={signatureUrl}
+                   principalName={principalName}
+                   principalNameEn={principalNameEn}
+                   principalSignatureUrl={signatureUrl}
                   lang={language}
                 />
               </div>
