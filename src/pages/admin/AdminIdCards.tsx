@@ -109,6 +109,7 @@ const AdminIdCards = () => {
     father_name: s.father_name_bn || s.father_name,
     phone: s.phone,
     guardian_phone: s.guardian_phone,
+    address: s.address,
   });
 
   const handlePrintSingle = useCallback((student: any) => {
