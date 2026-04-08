@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X } from 'lucide-react';
+import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useRef, useCallback, useEffect } from 'react';
