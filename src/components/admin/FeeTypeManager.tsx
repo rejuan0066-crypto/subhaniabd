@@ -6,8 +6,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Loader2, Filter } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Filter, Download } from 'lucide-react';
 import { toast } from 'sonner';
+
+const exportFeeTypesCSV = (data: any[], categories: any[], bn: boolean) => {
+  const bom = '\uFEFF';
+  const headers = [bn ? 'নাম' : 'Name', bn ? 'সেশন' : 'Session', bn ? 'ক্যাটাগরি' : 'Category', bn ? 'পরিমাণ' : 'Amount', bn ? 'বিভাগ' : 'Division', bn ? 'শ্রেণী' : 'Class'];
+  const rows = data.map((f: any) => [
+    f.name_bn || f.name,
+    f.academic_sessions?.[bn ? 'name_bn' : 'name'] || '—',
+    categories.find((c: any) => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category,
+    f.amount,
+    f.divisions?.name_bn || (bn ? 'সব' : 'All'),
+    f.classes?.name_bn || (bn ? 'সব' : 'All'),
+  ]);
+  const csv = bom + [headers, ...rows].map(r => r.map((c: any) => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fee-types-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
 
 const FeeTypeManager = () => {
   const { language } = useLanguage();
