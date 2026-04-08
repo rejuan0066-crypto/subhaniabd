@@ -411,7 +411,16 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
   });
 
   const totalPaid = feePayments.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
-  const totalDue = feePayments.filter((p: any) => p.status === 'unpaid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
+
+  // Calculate total due from applicable fee types minus paid amounts
+  const totalApplicable = applicableFeeTypes.reduce((sum: number, ft: any) => {
+    const waiver = feeWaivers.find((w: any) => w.fee_type_id === ft.id);
+    const isFreeMonthly = student.is_free && ft.fee_category === 'monthly';
+    const waiverPercent = isFreeMonthly ? 100 : (waiver ? waiver.waiver_percent : 0);
+    const netAmount = ft.amount - Math.round(ft.amount * waiverPercent / 100);
+    return sum + netAmount;
+  }, 0);
+  const totalDue = Math.max(0, totalApplicable - totalPaid);
 
 
   const getLibStatusBadge = (status: string) => {
