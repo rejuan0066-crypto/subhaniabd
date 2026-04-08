@@ -25,6 +25,7 @@ interface StudentIdCardProps {
   };
   validUntil?: string;
   principalName?: string;
+  principalNameEn?: string;
   principalSignatureUrl?: string;
   lang?: 'bn' | 'en';
 }
@@ -231,7 +232,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             )}
             <div style={{ borderTop: '1px dashed #94a3b8', width: '55px', marginBottom: '1px' }} />
             <div style={{ fontSize: '5px', color: '#64748b' }}>
-              {principalName || l.principal}
+              {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
