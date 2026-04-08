@@ -317,6 +317,20 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
           </Select>
         </div>
         <div>
+          <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'ফি ধরন *' : 'Fee Type *'}</label>
+          <Select value={selectedFeeType} onValueChange={(v) => { setSelectedFeeType(v); clearResults(); }}>
+            <SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সব ধরন' : 'All Types'}</SelectItem>
+              {feeTypes.map((ft: any) => (
+                <SelectItem key={ft.id} value={ft.name}>
+                  {bn ? ft.name_bn : ft.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
           <label className="text-sm font-medium text-foreground mb-1 block">{bn ? 'রোল নম্বর' : 'Roll Number'}</label>
           <Input className="bg-background" value={rollNumber} onChange={(e) => { setRollNumber(e.target.value); clearResults(); }} placeholder={bn ? 'রোল' : 'Roll'} />
         </div>
