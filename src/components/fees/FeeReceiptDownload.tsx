@@ -126,7 +126,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
         .select('*')
         .in('student_id', studentIds)
         .eq('status', statusFilter);
-      if (selectedFeeType) {
+      if (selectedFeeType && selectedFeeType !== 'all') {
         paymentQuery = paymentQuery.eq('fee_type', selectedFeeType);
       }
       const { data: payments, error: payErr } = await paymentQuery.order('created_at', { ascending: false });
