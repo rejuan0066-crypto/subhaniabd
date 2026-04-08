@@ -21,8 +21,9 @@ const AdminIdCards = () => {
   const [filterClassId, setFilterClassId] = useState('all');
   const [previewStudent, setPreviewStudent] = useState<any>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [validUntil, setValidUntil] = useState('December 2026');
+  const [validUntil, setValidUntil] = useState('');
   const [principalName, setPrincipalName] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState('');
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
