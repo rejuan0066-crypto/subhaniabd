@@ -71,9 +71,14 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const hasStatus = !!statusFilter;
   const canSearch = hasSession && hasSecondField && hasStatus;
 
+  const cleanRolePrefix = (name: string) => {
+    return name.replace(/\s*\((?:Admin|Staff|Teacher|Super Admin|admin|staff|teacher|super_admin|অ্যাডমিন|স্টাফ|শিক্ষক)\)\s*/gi, '').trim();
+  };
+
   const getCollectorFromNotes = (notes: string) => {
     const match = notes?.match(/আদায়কারী: (.+?)(?:\||$)/);
-    return match ? match[1].trim() : collectorName;
+    const raw = match ? match[1].trim() : collectorName;
+    return cleanRolePrefix(raw);
   };
 
   const isSingleStudent = !!(rollNumber.trim() || regNumber.trim());
