@@ -45,7 +45,7 @@ const AdminIdCards = () => {
   });
 
   useEffect(() => {
-    if (savedSignature && !signatureUrl) setSignatureUrl(savedSignature);
+    if (savedSignature && !signatureUrl) setSignatureUrl(String(savedSignature));
   }, [savedSignature]);
 
   const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
