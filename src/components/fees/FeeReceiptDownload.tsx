@@ -22,6 +22,7 @@ const FeeReceiptDownload = ({ collectorName }: Props) => {
   const { defaultSetting } = useReceiptSettings();
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [selectedFeeType, setSelectedFeeType] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [regNumber, setRegNumber] = useState('');
   const [statusFilter, setStatusFilter] = useState<'pending' | 'success' | ''>('');
