@@ -25,6 +25,7 @@ interface StudentIdCardProps {
   };
   validUntil?: string;
   principalName?: string;
+  principalNameEn?: string;
   principalSignatureUrl?: string;
   lang?: 'bn' | 'en';
 }
@@ -62,7 +63,7 @@ const generateQrUrl = (data: string, size = 60) =>
   `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=1`;
 
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
-  ({ student, institution, validUntil = 'December 2026', principalName = '', principalSignatureUrl, lang = 'bn' }, ref) => {
+  ({ student, institution, validUntil = 'December 2026', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
     const l = labels[lang];
 
     const qrData = JSON.stringify({
@@ -231,7 +232,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             )}
             <div style={{ borderTop: '1px dashed #94a3b8', width: '55px', marginBottom: '1px' }} />
             <div style={{ fontSize: '5px', color: '#64748b' }}>
-              {principalName || l.principal}
+              {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>

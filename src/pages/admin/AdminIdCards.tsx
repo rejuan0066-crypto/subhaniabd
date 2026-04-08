@@ -23,6 +23,7 @@ const AdminIdCards = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [validUntil, setValidUntil] = useState('');
   const [principalName, setPrincipalName] = useState('');
+  const [principalNameEn, setPrincipalNameEn] = useState('');
   const [savingSettings, setSavingSettings] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState('');
   const [uploadingSignature, setUploadingSignature] = useState(false);
@@ -34,7 +35,7 @@ const AdminIdCards = () => {
     queryKey: ['idcard-settings'],
     queryFn: async () => {
       const { data } = await supabase.from('website_settings').select('key, value').in('key', [
-        'idcard_principal_name', 'idcard_valid_until', 'idcard_principal_signature_url'
+        'idcard_principal_name', 'idcard_principal_name_en', 'idcard_valid_until', 'idcard_principal_signature_url'
       ]);
       const map: Record<string, string> = {};
       data?.forEach((r: any) => { map[r.key] = String(r.value || ''); });
@@ -45,6 +46,7 @@ const AdminIdCards = () => {
   useEffect(() => {
     if (idcardSettings) {
       if (idcardSettings.idcard_principal_name && !principalName) setPrincipalName(idcardSettings.idcard_principal_name);
+      if (idcardSettings.idcard_principal_name_en && !principalNameEn) setPrincipalNameEn(idcardSettings.idcard_principal_name_en);
       if (idcardSettings.idcard_valid_until && !validUntil) setValidUntil(idcardSettings.idcard_valid_until);
       if (idcardSettings.idcard_principal_signature_url && !signatureUrl) setSignatureUrl(idcardSettings.idcard_principal_signature_url);
     }
@@ -60,6 +62,7 @@ const AdminIdCards = () => {
     try {
       const pairs = [
         { key: 'idcard_principal_name', value: principalName },
+        { key: 'idcard_principal_name_en', value: principalNameEn },
         { key: 'idcard_valid_until', value: validUntil },
       ];
       for (const { key, value } of pairs) {
@@ -217,8 +220,9 @@ const AdminIdCards = () => {
           student={buildStudentData(student)}
           institution={institution || undefined}
           validUntil={validUntil}
-          principalName={principalName}
-          principalSignatureUrl={signatureUrl}
+           principalName={principalName}
+           principalNameEn={principalNameEn}
+           principalSignatureUrl={signatureUrl}
           lang={language}
           ref={(el) => {
             if (el) {
@@ -259,8 +263,9 @@ const AdminIdCards = () => {
               student={buildStudentData(s)}
               institution={institution || undefined}
               validUntil={validUntil}
-              principalName={principalName}
-              principalSignatureUrl={signatureUrl}
+               principalName={principalName}
+               principalNameEn={principalNameEn}
+               principalSignatureUrl={signatureUrl}
               lang={language}
               ref={(el) => {
                 if (el) {
@@ -314,8 +319,12 @@ const AdminIdCards = () => {
             <Input value={validUntil} onChange={(e) => setValidUntil(e.target.value)} className="bg-background" placeholder="December 2026" />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম' : 'Principal Name'}</label>
-            <Input value={principalName} onChange={(e) => setPrincipalName(e.target.value)} className="bg-background" placeholder={bn ? 'নাম লিখুন' : 'Enter name'} />
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম (বাংলা)' : 'Principal Name (Bangla)'}</label>
+            <Input value={principalName} onChange={(e) => setPrincipalName(e.target.value)} className="bg-background" placeholder={bn ? 'বাংলায় নাম লিখুন' : 'Enter name in Bangla'} />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম (ইংরেজি)' : 'Principal Name (English)'}</label>
+            <Input value={principalNameEn} onChange={(e) => setPrincipalNameEn(e.target.value)} className="bg-background" placeholder={bn ? 'ইংরেজিতে নাম লিখুন' : 'Enter name in English'} />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের স্বাক্ষর' : 'Principal Signature'}</label>
@@ -470,8 +479,9 @@ const AdminIdCards = () => {
                   student={buildStudentData(previewStudent)}
                   institution={institution || undefined}
                   validUntil={validUntil}
-                  principalName={principalName}
-                  principalSignatureUrl={signatureUrl}
+                   principalName={principalName}
+                   principalNameEn={principalNameEn}
+                   principalSignatureUrl={signatureUrl}
                   lang={language}
                 />
               </div>
