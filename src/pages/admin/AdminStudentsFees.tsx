@@ -493,9 +493,40 @@ const AdminStudentsFees = () => {
                     {bn ? 'কোনো ফি ধরন পাওয়া যায়নি। প্রথমে "ফি ধরন" ট্যাব থেকে ফি যোগ করুন।' : 'No fee types found. Add fee types from the "Fee Types" tab first.'}
                   </p>
                 )}
+                {/* Existing payment block warning */}
+                {isPaymentBlocked && existingPayment && (
+                  <div className={`mt-2 border rounded-xl p-4 space-y-2 ${blockedStatus === 'pending' ? 'bg-amber-50 border-amber-300 dark:bg-amber-950/30 dark:border-amber-700' : 'bg-emerald-50 border-emerald-300 dark:bg-emerald-950/30 dark:border-emerald-700'}`}>
+                    <div className="flex items-center gap-2">
+                      {blockedStatus === 'pending' ? (
+                        <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      ) : (
+                        <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      )}
+                      <span className={`text-sm font-semibold ${blockedStatus === 'pending' ? 'text-amber-700 dark:text-amber-300' : 'text-emerald-700 dark:text-emerald-300'}`}>
+                        {blockedStatus === 'pending'
+                          ? (bn ? '⏳ পেন্ডিং রিসিট — অনুমোদনের অপেক্ষায়' : '⏳ Pending Receipt — Awaiting Approval')
+                          : (bn ? '✅ অনুমোদিত রিসিট — পরিশোধিত' : '✅ Approved Receipt — Paid')}
+                      </span>
+                    </div>
+                    <div className="text-xs space-y-1 text-foreground/80">
+                      <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {existingPayment.transaction_id}</p>
+                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{existingPayment.amount}</p>
+                      <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date(existingPayment.created_at).toLocaleDateString('bn-BD')}</p>
+                    </div>
+                    <p className={`text-xs font-medium ${blockedStatus === 'pending' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {bn ? '🚫 বাতিল না হওয়া পর্যন্ত এই ফি ধরনে আবার পরিশোধ করা যাবে না।' : '🚫 Cannot pay again until this payment is cancelled.'}
+                    </p>
+                  </div>
+                )}
+                {checkingExisting && feeType && foundStudent && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    {bn ? 'পূর্ববর্তী পেমেন্ট যাচাই করা হচ্ছে...' : 'Checking existing payments...'}
+                  </div>
+                )}
               </div>
 
-              {/* Payment Method */}
+
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
                   {bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'} <span className="text-destructive">*</span>
