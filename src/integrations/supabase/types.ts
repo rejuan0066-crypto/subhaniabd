@@ -17,26 +17,32 @@ export type Database = {
       academic_sessions: {
         Row: {
           created_at: string | null
+          end_date: string | null
           id: string
           is_active: boolean | null
           name: string
           name_bn: string | null
+          start_date: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean | null
           name: string
           name_bn?: string | null
+          start_date?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
           name_bn?: string | null
+          start_date?: string | null
           updated_at?: string | null
         }
         Relationships: []
