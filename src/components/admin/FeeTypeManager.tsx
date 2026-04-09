@@ -107,6 +107,7 @@ const FeeTypeManager = () => {
         division_id: form.division_id || null,
         class_id: form.class_id || null,
         session_id: form.session_id || null,
+        payment_frequency: form.payment_frequency || 'one-time',
       };
       if (editId) {
         const { error } = await supabase.from('fee_types').update(payload).eq('id', editId);
@@ -139,7 +140,7 @@ const FeeTypeManager = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
+    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
     setEditId(null);
   };
 
@@ -152,6 +153,7 @@ const FeeTypeManager = () => {
       division_id: item.division_id || '',
       class_id: item.class_id || '',
       session_id: item.session_id || '',
+      payment_frequency: item.payment_frequency || 'one-time',
     });
     setEditId(item.id);
     setOpen(true);
