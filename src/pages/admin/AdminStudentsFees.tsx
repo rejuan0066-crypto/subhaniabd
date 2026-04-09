@@ -503,6 +503,55 @@ const AdminStudentsFees = () => {
               </div>
             )}
 
+            {/* Monthly Fee Breakdown for monthly fee types */}
+            {foundStudent && applicableFeeTypes.filter((ft: any) => ft.payment_frequency === 'monthly').length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-display font-semibold text-foreground text-sm flex items-center gap-2">
+                  🔄 {bn ? 'মাসিক ফি স্ট্যাটাস' : 'Monthly Fee Status'}
+                </h4>
+                {applicableFeeTypes.filter((ft: any) => ft.payment_frequency === 'monthly').map((ft: any) => {
+                  const statuses = getMonthlyStatuses(ft.id);
+                  const dueCount = statuses.filter(s => s.status === 'due').length;
+                  return (
+                    <div key={ft.id} className="border border-border rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-foreground text-sm">{bn ? ft.name_bn : ft.name} — ৳{ft.amount}/{bn ? 'মাস' : 'mo'}</span>
+                        {dueCount > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-destructive/10 text-destructive">
+                            {dueCount} {bn ? 'বকেয়া' : 'Due'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        {statuses.map(s => (
+                          <div key={s.month} className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
+                            s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400' :
+                            s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400' :
+                            s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400' :
+                            'bg-muted/30 border-border text-muted-foreground opacity-60'
+                          }`}>
+                            <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                            <div className="text-[10px] mt-0.5">
+                              {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {dueCount > 0 && (
+                        <Button size="sm" className="btn-primary-gradient w-full" onClick={() => {
+                          setFeeType(ft.id);
+                          setSelectedFeeTypeObj(ft);
+                          setAmount(String(ft.amount * dueCount));
+                        }}>
+                          {bn ? `৳${ft.amount * dueCount} বকেয়া পরিশোধ করুন` : `Pay ৳${ft.amount * dueCount} Due`}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="border-t border-border pt-4 space-y-4">
               <div>
                 <label className="text-sm font-medium text-foreground mb-1 block">
