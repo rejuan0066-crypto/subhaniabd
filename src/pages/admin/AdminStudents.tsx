@@ -580,7 +580,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
       <div className="space-y-3">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</h4>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type === 'residential' ? (bn ? 'আবাসিক' : 'Residential') : student.residence_type === 'non_residential' ? (bn ? 'অনাবাসিক' : 'Non-Residential') : student.residence_type === 'day_scholar' ? (bn ? 'ডে স্কলার' : 'Day Scholar') : student.residence_type || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
           <div className="col-span-2"><span className="text-muted-foreground">{bn ? 'ঠিকানা: ' : 'Address: '}</span>{student.address || '-'}</div>
           <div className="flex flex-wrap gap-2 col-span-2">
