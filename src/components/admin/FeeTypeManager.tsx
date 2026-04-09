@@ -11,11 +11,12 @@ import { toast } from 'sonner';
 
 const exportFeeTypesCSV = (data: any[], categories: any[], bn: boolean) => {
   const bom = '\uFEFF';
-  const headers = [bn ? 'নাম' : 'Name', bn ? 'সেশন' : 'Session', bn ? 'ক্যাটাগরি' : 'Category', bn ? 'পরিমাণ' : 'Amount', bn ? 'বিভাগ' : 'Division', bn ? 'শ্রেণী' : 'Class'];
+  const headers = [bn ? 'নাম' : 'Name', bn ? 'সেশন' : 'Session', bn ? 'ক্যাটাগরি' : 'Category', bn ? 'ফ্রিকোয়েন্সি' : 'Frequency', bn ? 'পরিমাণ' : 'Amount', bn ? 'বিভাগ' : 'Division', bn ? 'শ্রেণী' : 'Class'];
   const rows = data.map((f: any) => [
     f.name_bn || f.name,
     f.academic_sessions?.[bn ? 'name_bn' : 'name'] || '—',
     categories.find((c: any) => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category,
+    f.payment_frequency === 'monthly' ? (bn ? 'মাসিক' : 'Monthly') : (bn ? 'একবার' : 'One-time'),
     f.amount,
     f.divisions?.name_bn || (bn ? 'সব' : 'All'),
     f.classes?.name_bn || (bn ? 'সব' : 'All'),
