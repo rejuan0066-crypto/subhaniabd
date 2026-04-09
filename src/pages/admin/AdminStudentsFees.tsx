@@ -926,8 +926,7 @@ const AdminStudentsFees = () => {
           </div>
         )}
 
-        {/* Receipt Download Section */}
-        <FeeReceiptDownload collectorName={collectorName} />
+
       </div>
   );
 
