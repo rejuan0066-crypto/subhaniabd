@@ -282,6 +282,20 @@ const FeeTypeManager = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <label className="text-sm font-medium">{bn ? 'পেমেন্ট ফ্রিকোয়েন্সি' : 'Payment Frequency'}</label>
+              <Select value={form.payment_frequency} onValueChange={v => setForm(p => ({ ...p, payment_frequency: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one-time">{bn ? '1️⃣ একবার (One-time)' : '1️⃣ One-time'}</SelectItem>
+                  <SelectItem value="monthly">{bn ? '🔄 মাসিক (Monthly)' : '🔄 Monthly'}</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.payment_frequency === 'monthly' && (
+                <p className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 rounded-lg px-3 py-2 mt-2">
+                  {bn ? '🔄 মাসিক ফি — প্রতিটি ছাত্রের জন্য প্রতি মাসে আলাদা পেমেন্ট রেকর্ড তৈরি হবে।' : '🔄 Monthly fee — separate payment records will be generated for each month per student.'}
+                </p>
+              )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">{bn ? 'বিভাগ' : 'Division'}</label>
