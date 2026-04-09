@@ -11,11 +11,12 @@ import { toast } from 'sonner';
 
 const exportFeeTypesCSV = (data: any[], categories: any[], bn: boolean) => {
   const bom = '\uFEFF';
-  const headers = [bn ? 'নাম' : 'Name', bn ? 'সেশন' : 'Session', bn ? 'ক্যাটাগরি' : 'Category', bn ? 'পরিমাণ' : 'Amount', bn ? 'বিভাগ' : 'Division', bn ? 'শ্রেণী' : 'Class'];
+  const headers = [bn ? 'নাম' : 'Name', bn ? 'সেশন' : 'Session', bn ? 'ক্যাটাগরি' : 'Category', bn ? 'ফ্রিকোয়েন্সি' : 'Frequency', bn ? 'পরিমাণ' : 'Amount', bn ? 'বিভাগ' : 'Division', bn ? 'শ্রেণী' : 'Class'];
   const rows = data.map((f: any) => [
     f.name_bn || f.name,
     f.academic_sessions?.[bn ? 'name_bn' : 'name'] || '—',
     categories.find((c: any) => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category,
+    f.payment_frequency === 'monthly' ? (bn ? 'মাসিক' : 'Monthly') : (bn ? 'একবার' : 'One-time'),
     f.amount,
     f.divisions?.name_bn || (bn ? 'সব' : 'All'),
     f.classes?.name_bn || (bn ? 'সব' : 'All'),
@@ -37,7 +38,7 @@ const FeeTypeManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [filterSessionId, setFilterSessionId] = useState<string>('all');
-  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
+  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['academic_sessions'],
@@ -107,6 +108,7 @@ const FeeTypeManager = () => {
         division_id: form.division_id || null,
         class_id: form.class_id || null,
         session_id: form.session_id || null,
+        payment_frequency: form.payment_frequency || 'one-time',
       };
       if (editId) {
         const { error } = await supabase.from('fee_types').update(payload).eq('id', editId);
@@ -139,7 +141,7 @@ const FeeTypeManager = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
+    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
     setEditId(null);
   };
 
@@ -152,6 +154,7 @@ const FeeTypeManager = () => {
       division_id: item.division_id || '',
       class_id: item.class_id || '',
       session_id: item.session_id || '',
+      payment_frequency: item.payment_frequency || 'one-time',
     });
     setEditId(item.id);
     setOpen(true);
@@ -199,6 +202,7 @@ const FeeTypeManager = () => {
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'সেশন' : 'Session'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ফ্রিকোয়েন্সি' : 'Frequency'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'পরিমাণ' : 'Amount'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'বিভাগ' : 'Division'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'শ্রেণী' : 'Class'}</th>
@@ -219,6 +223,11 @@ const FeeTypeManager = () => {
                     {categories.find(c => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${f.payment_frequency === 'monthly' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                    {f.payment_frequency === 'monthly' ? (bn ? '🔄 মাসিক' : '🔄 Monthly') : (bn ? '1️⃣ একবার' : '1️⃣ One-time')}
+                  </span>
+                </td>
                 <td className="px-4 py-3 font-bold text-foreground">৳{f.amount}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.divisions?.name_bn || (bn ? 'সব' : 'All')}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.classes?.name_bn || (bn ? 'সব' : 'All')}</td>
@@ -231,7 +240,7 @@ const FeeTypeManager = () => {
               </tr>
             ))}
             {displayedFeeTypes.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
             )}
           </tbody>
         </table>
@@ -273,6 +282,21 @@ const FeeTypeManager = () => {
                   {categories.map(c => <SelectItem key={c.key} value={c.key}>{bn ? c.bn : c.en}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">{bn ? 'পেমেন্ট ফ্রিকোয়েন্সি' : 'Payment Frequency'}</label>
+              <Select value={form.payment_frequency} onValueChange={v => setForm(p => ({ ...p, payment_frequency: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="one-time">{bn ? '1️⃣ একবার (One-time)' : '1️⃣ One-time'}</SelectItem>
+                  <SelectItem value="monthly">{bn ? '🔄 মাসিক (Monthly)' : '🔄 Monthly'}</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.payment_frequency === 'monthly' && (
+                <p className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 rounded-lg px-3 py-2 mt-2">
+                  {bn ? '🔄 মাসিক ফি — প্রতিটি ছাত্রের জন্য প্রতি মাসে আলাদা পেমেন্ট রেকর্ড তৈরি হবে।' : '🔄 Monthly fee — separate payment records will be generated for each month per student.'}
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
