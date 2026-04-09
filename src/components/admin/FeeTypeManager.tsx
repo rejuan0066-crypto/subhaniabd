@@ -37,7 +37,7 @@ const FeeTypeManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [filterSessionId, setFilterSessionId] = useState<string>('all');
-  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '' });
+  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['academic_sessions'],
