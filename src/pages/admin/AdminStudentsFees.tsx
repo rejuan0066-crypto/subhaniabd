@@ -142,11 +142,17 @@ const AdminStudentsFees = () => {
   const getMonthlyStatuses = (feeTypeId: string) => {
     const now = new Date();
     const currentMonthIndex = now.getMonth();
+    const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
+    const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? ftObj.applicable_months : null;
     return MONTHS_EN.map((monthEn, i) => {
+      // If applicable_months is set, months not in the list are 'n/a'
+      if (applicableMonths && !applicableMonths.includes(monthEn)) {
+        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as const };
+      }
       const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
       if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as const };
       if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as const };
-      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: existingStatus === 'unpaid' ? 'unpaid' as const : 'unpaid' as const };
+      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as const };
       return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as const };
     });
   };
