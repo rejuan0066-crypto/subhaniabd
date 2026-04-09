@@ -139,15 +139,21 @@ const AdminStudentsFees = () => {
   });
 
   // Get monthly fee status for a given fee type
-  const getMonthlyStatuses = (feeTypeId: string) => {
+  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
+  const getMonthlyStatuses = (feeTypeId: string): { month: string; monthBn: string; status: MonthStatus }[] => {
     const now = new Date();
     const currentMonthIndex = now.getMonth();
+    const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
+    const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
     return MONTHS_EN.map((monthEn, i) => {
+      if (applicableMonths && !applicableMonths.includes(monthEn)) {
+        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+      }
       const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
-      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as const };
-      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as const };
-      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: existingStatus === 'unpaid' ? 'unpaid' as const : 'unpaid' as const };
-      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as const };
+      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as MonthStatus };
+      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as MonthStatus };
+      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as MonthStatus };
+      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as MonthStatus };
     });
   };
 
@@ -528,6 +534,12 @@ const AdminStudentsFees = () => {
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                         {statuses.map(s => {
                           const canPay = s.status === 'due' || s.status === 'unpaid';
+                          if (s.status === 'na') return (
+                            <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                              <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                              <div className="text-[10px] mt-0.5">—</div>
+                            </div>
+                          );
                           return (
                             <button
                               key={s.month}
@@ -616,6 +628,12 @@ const AdminStudentsFees = () => {
                     </label>
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {getMonthlyStatuses(feeType).map(s => {
+                        if (s.status === 'na') return (
+                          <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                            <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                            <div className="text-[10px] mt-0.5">—</div>
+                          </div>
+                        );
                         const canPay = s.status === 'due' || s.status === 'unpaid';
                         return (
                           <button

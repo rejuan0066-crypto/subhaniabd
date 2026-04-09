@@ -1182,6 +1182,7 @@ export type Database = {
       fee_types: {
         Row: {
           amount: number
+          applicable_months: Json | null
           class_id: string | null
           created_at: string | null
           division_id: string | null
@@ -1196,6 +1197,7 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          applicable_months?: Json | null
           class_id?: string | null
           created_at?: string | null
           division_id?: string | null
@@ -1210,6 +1212,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          applicable_months?: Json | null
           class_id?: string | null
           created_at?: string | null
           division_id?: string | null

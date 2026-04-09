@@ -38,7 +38,10 @@ const FeeTypeManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [filterSessionId, setFilterSessionId] = useState<string>('all');
-  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
+  const [form, setForm] = useState<{ name: string; name_bn: string; amount: string; fee_category: string; division_id: string; class_id: string; session_id: string; payment_frequency: string; applicable_months: string[] }>({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time', applicable_months: [] });
+
+  const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONTHS_BN = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['academic_sessions'],
@@ -109,6 +112,7 @@ const FeeTypeManager = () => {
         class_id: form.class_id || null,
         session_id: form.session_id || null,
         payment_frequency: form.payment_frequency || 'one-time',
+        applicable_months: form.payment_frequency === 'monthly' && form.applicable_months.length > 0 ? form.applicable_months : null,
       };
       if (editId) {
         const { error } = await supabase.from('fee_types').update(payload).eq('id', editId);
@@ -141,11 +145,12 @@ const FeeTypeManager = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
+    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time', applicable_months: [] });
     setEditId(null);
   };
 
   const openEdit = (item: any) => {
+    const months = Array.isArray(item.applicable_months) ? item.applicable_months : [];
     setForm({
       name: item.name,
       name_bn: item.name_bn,
@@ -155,6 +160,7 @@ const FeeTypeManager = () => {
       class_id: item.class_id || '',
       session_id: item.session_id || '',
       payment_frequency: item.payment_frequency || 'one-time',
+      applicable_months: months,
     });
     setEditId(item.id);
     setOpen(true);
@@ -285,7 +291,7 @@ const FeeTypeManager = () => {
             </div>
             <div>
               <label className="text-sm font-medium">{bn ? 'পেমেন্ট ফ্রিকোয়েন্সি' : 'Payment Frequency'}</label>
-              <Select value={form.payment_frequency} onValueChange={v => { console.log('freq changed:', v); setForm(p => ({ ...p, payment_frequency: v })); }}>
+              <Select value={form.payment_frequency} onValueChange={v => setForm(p => ({ ...p, payment_frequency: v, applicable_months: v === 'one-time' ? [] : p.applicable_months }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="one-time">{bn ? 'একবার (One-time)' : 'One-time'}</SelectItem>
@@ -293,9 +299,55 @@ const FeeTypeManager = () => {
                 </SelectContent>
               </Select>
               {form.payment_frequency === 'monthly' && (
-                <p className="text-xs text-primary bg-primary/5 rounded-lg px-3 py-2 mt-2">
-                  {bn ? '🔄 মাসিক ফি — প্রতিটি ছাত্রের জন্য প্রতি মাসে আলাদা পেমেন্ট রেকর্ড তৈরি হবে।' : '🔄 Monthly fee — separate payment records will be generated for each month per student.'}
-                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">{bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}</label>
+                    <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
+                      setForm(p => ({
+                        ...p,
+                        applicable_months: p.applicable_months.length === 12 ? [] : [...MONTHS_EN]
+                      }));
+                    }}>
+                      {form.applicable_months.length === 12 ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {MONTHS_EN.map((month, i) => {
+                      const isSelected = form.applicable_months.includes(month);
+                      return (
+                        <button
+                          key={month}
+                          type="button"
+                          onClick={() => {
+                            setForm(p => ({
+                              ...p,
+                              applicable_months: isSelected
+                                ? p.applicable_months.filter(m => m !== month)
+                                : [...p.applicable_months, month]
+                            }));
+                          }}
+                          className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary'
+                              : 'bg-muted/30 border-border text-muted-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {bn ? MONTHS_BN[i] : month.slice(0, 3)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {form.applicable_months.length === 0 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      {bn ? '⚠ কোনো মাস নির্বাচিত নয় — সব মাসে প্রযোজ্য হবে' : '⚠ No months selected — will apply to all months'}
+                    </p>
+                  )}
+                  {form.applicable_months.length > 0 && (
+                    <p className="text-xs text-primary bg-primary/5 rounded-lg px-3 py-1.5">
+                      ✓ {form.applicable_months.length} {bn ? 'টি মাসে প্রযোজ্য' : 'months selected'}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3">
