@@ -347,6 +347,7 @@ const AdminStudentsFees = () => {
   const handleProceed = () => {
     if (!feeType) { toast.error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type'); return; }
     if (!foundStudent) { toast.error(bn ? 'প্রথমে ছাত্র খুঁজুন' : 'Search student first'); return; }
+    if (selectedFeeTypeObj?.payment_frequency === 'monthly' && !paymentMonth) { toast.error(bn ? 'মাস নির্বাচন করুন' : 'Select a month'); return; }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid amount'); return; }
     if (isPaymentBlocked) {
       toast.error(bn ? 'এই ফি ধরনে ইতিমধ্যে পেমেন্ট আছে। বাতিল না হওয়া পর্যন্ত আবার পরিশোধ করা যাবে না।' : 'Payment already exists. Cannot pay again until cancelled.');
