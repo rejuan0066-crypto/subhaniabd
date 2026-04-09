@@ -143,7 +143,7 @@ const AdminStudentsFees = () => {
     const now = new Date();
     const currentMonthIndex = now.getMonth();
     const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
-    const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? ftObj.applicable_months : null;
+    const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
     return MONTHS_EN.map((monthEn, i) => {
       // If applicable_months is set, months not in the list are 'n/a'
       if (applicableMonths && !applicableMonths.includes(monthEn)) {
