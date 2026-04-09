@@ -573,6 +573,7 @@ const AdminStudentsFees = () => {
                         <SelectItem key={ft.id} value={ft.id} disabled={isPaid}>
                           <span className="flex items-center gap-2">
                             {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
+                            {ft.payment_frequency === 'monthly' && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">🔄</span>}
                             {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
                             {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
                             {isPaid && (
