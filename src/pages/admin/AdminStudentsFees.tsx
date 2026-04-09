@@ -307,7 +307,7 @@ const AdminStudentsFees = () => {
         status: isCash ? 'paid' : 'pending',
         receipt_number: serialNumber || txnId,
         paid_at: isCash ? new Date().toISOString() : null,
-        month: new Date().toLocaleString('default', { month: 'long' }),
+        month: paymentMonth || new Date().toLocaleString('default', { month: 'long' }),
         year: new Date().getFullYear(),
       };
       await supabase.from('fee_payments').insert(feePaymentPayload);
