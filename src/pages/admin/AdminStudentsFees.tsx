@@ -525,19 +525,60 @@ const AdminStudentsFees = () => {
               </div>
             )}
 
-            {/* Monthly Fee Breakdown for monthly fee types */}
-            {foundStudent && applicableFeeTypes.filter((ft: any) => ft.payment_frequency === 'monthly').length > 0 && (
+            {/* All Applicable Fee Types Summary */}
+            {foundStudent && applicableFeeTypes.length > 0 && (
               <div className="space-y-3">
                 <h4 className="font-display font-semibold text-foreground text-sm flex items-center gap-2">
-                  🔄 {bn ? 'মাসিক ফি স্ট্যাটাস' : 'Monthly Fee Status'}
+                  📋 {bn ? 'প্রযোজ্য ফি তালিকা' : 'Applicable Fee Types'}
                 </h4>
+
+                {/* One-time fees */}
+                {applicableFeeTypes.filter((ft: any) => ft.payment_frequency !== 'monthly').length > 0 && (
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <div className="bg-secondary/50 px-4 py-2">
+                      <span className="text-xs font-semibold text-muted-foreground">{bn ? '1️⃣ একবারের ফি' : '1️⃣ One-time Fees'}</span>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {applicableFeeTypes.filter((ft: any) => ft.payment_frequency !== 'monthly').map((ft: any) => {
+                        const isPaid = paidFeeTypeIds.has(ft.id);
+                        return (
+                          <div key={ft.id} className="flex items-center justify-between px-4 py-3 hover:bg-accent/30 transition-colors">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{bn ? ft.name_bn : ft.name}</p>
+                              <p className="text-xs text-muted-foreground">{ft.divisions?.name_bn || (bn ? 'সব বিভাগ' : 'All')} {ft.classes?.name_bn ? `• ${ft.classes.name_bn}` : ''}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-foreground text-sm">৳{ft.amount}</span>
+                              {isPaid ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                  {bn ? '✓ পরিশোধিত' : '✓ Paid'}
+                                </span>
+                              ) : (
+                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => {
+                                  setFeeType(ft.id);
+                                  setSelectedFeeTypeObj(ft);
+                                  setAmount(String(ft.amount));
+                                  setPaymentMonth('');
+                                }}>
+                                  {bn ? 'পরিশোধ' : 'Pay'}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Monthly fees with month grid */}
                 {applicableFeeTypes.filter((ft: any) => ft.payment_frequency === 'monthly').map((ft: any) => {
                   const statuses = getMonthlyStatuses(ft.id);
                   const dueCount = statuses.filter(s => s.status === 'due').length;
                   return (
                     <div key={ft.id} className="border border-border rounded-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-foreground text-sm">{bn ? ft.name_bn : ft.name} — ৳{ft.amount}/{bn ? 'মাস' : 'mo'}</span>
+                        <span className="font-semibold text-foreground text-sm">🔄 {bn ? ft.name_bn : ft.name} — ৳{ft.amount}/{bn ? 'মাস' : 'mo'}</span>
                         {dueCount > 0 && (
                           <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-destructive/10 text-destructive">
                             {dueCount} {bn ? 'বকেয়া' : 'Due'}
