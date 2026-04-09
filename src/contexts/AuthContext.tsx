@@ -6,6 +6,7 @@ export interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  ready: boolean;
   role: string | null;
   userStatus: string | null;
   signIn: (email: string, password: string) => Promise<{ error: unknown }>;
@@ -24,106 +25,69 @@ const resolvePrimaryRole = (roles: Array<string | null | undefined>): string | n
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const fetchedForUser = useRef<string | null>(null);
-  const initialSessionResolved = useRef(false);
+
+  const clearResolvedUserState = () => {
+    fetchedForUser.current = null;
+    setProfileLoading(false);
+    setRole(null);
+    setUserStatus(null);
+  };
 
   const clearAuthState = () => {
     setUser(null);
     setSession(null);
-    setRole(null);
-    setUserStatus(null);
-    fetchedForUser.current = null;
-    setLoading(false);
-  };
-
-  const fetchRoleAndStatus = async (userId: string) => {
-    // Prevent duplicate fetches for the same user
-    if (fetchedForUser.current === userId) {
-      setLoading(false);
-      return;
-    }
-    fetchedForUser.current = userId;
-    setLoading(true);
-
-    try {
-      const rolesResult = await supabase.from('user_roles').select('role').eq('user_id', userId);
-      if (rolesResult.error) {
-        console.error('Failed to fetch user roles:', rolesResult.error);
-      }
-
-      const profileResult = await supabase.from('profiles').select('status').eq('id', userId).maybeSingle();
-      if (profileResult.error) {
-        console.error('Failed to fetch user status:', profileResult.error);
-      }
-
-      const resolvedRole = resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role));
-      setRole(resolvedRole);
-      setUserStatus(profileResult.data?.status ?? 'pending');
-    } catch (error) {
-      console.error('Failed to resolve auth state:', error);
-      setRole(null);
-      setUserStatus('pending');
-    } finally {
-      setLoading(false);
-    }
+    clearResolvedUserState();
+    setAuthReady(true);
   };
 
   useEffect(() => {
     let mounted = true;
 
-    const processSession = (nextSession: Session | null, options?: { forceRefetch?: boolean }) => {
+    const syncSessionState = (nextSession: Session | null, options?: { resetResolvedUser?: boolean }) => {
       if (!mounted) return;
+
+      if (options?.resetResolvedUser) {
+        fetchedForUser.current = null;
+      }
 
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
       if (!nextSession?.user) {
-        clearAuthState();
-        return;
+        clearResolvedUserState();
       }
-
-      if (options?.forceRefetch) {
-        fetchedForUser.current = null;
-      }
-
-      void fetchRoleAndStatus(nextSession.user.id);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
 
-      if (!initialSessionResolved.current && event === 'INITIAL_SESSION') {
+      if (event === 'SIGNED_OUT') {
+        clearAuthState();
         return;
       }
 
-      window.setTimeout(() => {
+      syncSessionState(nextSession, {
+        resetResolvedUser: event === 'SIGNED_IN' || event === 'USER_UPDATED',
+      });
+      setAuthReady(true);
+    });
+
+    supabase.auth.getSession()
+      .then(({ data: { session: currentSession } }) => {
         if (!mounted) return;
-
-        if (event === 'SIGNED_OUT') {
-          clearAuthState();
-          return;
-        }
-
-        if (event === 'TOKEN_REFRESHED') {
-          setSession(nextSession);
-          setUser(nextSession?.user ?? null);
-          return;
-        }
-
-        processSession(nextSession, {
-          forceRefetch: event === 'SIGNED_IN' || event === 'USER_UPDATED',
-        });
-      }, 0);
-    });
-
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      if (!mounted) return;
-      initialSessionResolved.current = true;
-      processSession(currentSession);
-    });
+        syncSessionState(currentSession);
+        setAuthReady(true);
+      })
+      .catch((error) => {
+        console.error('Failed to restore auth session:', error);
+        if (!mounted) return;
+        clearAuthState();
+      });
 
     return () => {
       mounted = false;
@@ -131,11 +95,67 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!authReady) return;
+
+    if (!user?.id) {
+      setProfileLoading(false);
+      return;
+    }
+
+    if (fetchedForUser.current === user.id) {
+      setProfileLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    fetchedForUser.current = user.id;
+    setProfileLoading(true);
+
+    void (async () => {
+      try {
+        const rolesResult = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        if (rolesResult.error) {
+          console.error('Failed to fetch user roles:', rolesResult.error);
+        }
+
+        const profileResult = await supabase.from('profiles').select('status').eq('id', user.id).maybeSingle();
+        if (profileResult.error) {
+          console.error('Failed to fetch user status:', profileResult.error);
+        }
+
+        if (cancelled) return;
+
+        const resolvedRole = resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role));
+        setRole(resolvedRole);
+        setUserStatus(profileResult.data?.status ?? 'pending');
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error('Failed to resolve auth state:', error);
+        setRole(null);
+        setUserStatus('pending');
+      } finally {
+        if (!cancelled) {
+          setProfileLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authReady, user?.id]);
+
+  const loading = !authReady || profileLoading;
+
   const value = useMemo<AuthContextType>(
     () => ({
       user,
       session,
       loading,
+      ready: authReady,
       role,
       userStatus,
       signIn: async (email: string, password: string) => {
@@ -147,7 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearAuthState();
       },
     }),
-    [user, session, loading, role, userStatus]
+    [authReady, user, session, loading, role, userStatus]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
