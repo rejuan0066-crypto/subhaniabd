@@ -522,8 +522,8 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
           <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">{student.name_bn?.[0]}</div>
         )}
         <div className="flex-1 space-y-1">
-          <h3 className="text-lg font-bold text-foreground">{student.name_bn}</h3>
-          {student.name_en && <p className="text-sm text-muted-foreground">{student.name_en}</p>}
+          <h3 className="text-lg font-bold text-foreground">{bn ? (student.name_bn || student.name_en) : (student.name_en || student.name_bn)}</h3>
+          {student.name_bn && student.name_en && <p className="text-sm text-muted-foreground">{bn ? student.name_en : student.name_bn}</p>}
           <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{student.student_id}</p>
           <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{student.roll_number || '-'}</p>
           <div className="mt-2">{getApprovalBadge(student.approval_status || 'pending')}</div>
