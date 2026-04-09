@@ -834,6 +834,7 @@ const AdminStudentsFees = () => {
                 ? (bn ? '🚫 পেমেন্ট ব্লকড — পূর্ববর্তী পেমেন্ট বাতিল করুন' : '🚫 Blocked — Cancel previous payment first')
                 : (bn ? 'পরিশোধে এগিয়ে যান' : 'Proceed to Pay')}
             </Button>
+            </>)}
           </div>
         )}
 
