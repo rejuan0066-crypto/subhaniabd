@@ -33,14 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
 
     try {
-      const [rolesResult, profileResult] = await Promise.all([
-        supabase.from('user_roles').select('role').eq('user_id', userId),
-        supabase.from('profiles').select('status').eq('id', userId).maybeSingle(),
-      ]);
+      const rolesResult = await supabase.from('user_roles').select('role').eq('user_id', userId);
 
       if (rolesResult.error) {
         console.error('Failed to fetch user roles:', rolesResult.error);
       }
+
+      const profileResult = await supabase.from('profiles').select('status').eq('id', userId).maybeSingle();
 
       if (profileResult.error) {
         console.error('Failed to fetch user status:', profileResult.error);
@@ -49,6 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const resolvedRole = resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role));
       setRole(resolvedRole);
       setUserStatus(profileResult.data?.status ?? 'pending');
+    } catch (error) {
+      console.error('Failed to resolve auth state:', error);
+      setRole(null);
+      setUserStatus('pending');
     } finally {
       setLoading(false);
     }
@@ -60,21 +63,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
-      // Skip the initial INITIAL_SESSION event — we handle it via getSession below
-      if (!initialDone) return;
+      if (!initialDone && event === 'INITIAL_SESSION') return;
 
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
-      if (nextSession?.user) {
-        void fetchRoleAndStatus(nextSession.user.id);
-      } else {
+      if (!nextSession?.user) {
         setRole(null);
         setUserStatus(null);
         setLoading(false);
+        return;
       }
+
+      if (event === 'TOKEN_REFRESHED') {
+        setLoading(false);
+        return;
+      }
+
+      void fetchRoleAndStatus(nextSession.user.id);
     });
 
     void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {

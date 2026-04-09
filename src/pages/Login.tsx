@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
-import { usePermissions } from '@/hooks/usePermissions';
 import { isAdminRole } from '@/lib/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,14 +15,13 @@ import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 const Login = () => {
   const { t, language } = useLanguage();
   const { signIn, user, loading: authLoading, role, userStatus } = useAuth();
-  const { hasUserPermission, isLoading: permLoading } = usePermissions();
   const { settings } = useWebsiteSettings();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
-  if (authLoading || permLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -37,9 +35,6 @@ const Login = () => {
     }
     if (userStatus === 'pending') {
       return <Navigate to="/waiting-approval" replace />;
-    }
-    if (hasUserPermission('/admin', 'view')) {
-      return <Navigate to="/admin" replace />;
     }
     return <Navigate to="/staff-dashboard" replace />;
   }
