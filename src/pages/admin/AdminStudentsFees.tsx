@@ -492,13 +492,23 @@ const AdminStudentsFees = () => {
                     <SelectValue placeholder={bn ? 'ফি ধরন নির্বাচন করুন' : 'Select Fee Type'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {applicableFeeTypes.map((ft: any) => (
-                      <SelectItem key={ft.id} value={ft.id}>
-                        {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
-                        {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
-                        {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
-                      </SelectItem>
-                    ))}
+                    {applicableFeeTypes.map((ft: any) => {
+                      const isPaid = paidFeeTypeIds.has(ft.id);
+                      return (
+                        <SelectItem key={ft.id} value={ft.id} disabled={isPaid}>
+                          <span className="flex items-center gap-2">
+                            {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
+                            {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
+                            {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
+                            {isPaid && (
+                              <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-success/15 text-success">
+                                {bn ? '✓ পরিশোধিত' : '✓ Paid'}
+                              </span>
+                            )}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 {applicableFeeTypes.length === 0 && (
