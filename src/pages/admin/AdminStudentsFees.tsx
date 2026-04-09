@@ -111,6 +111,19 @@ const AdminStudentsFees = () => {
     },
   });
 
+  // Fetch existing fee_payments for found student to show paid status
+  const { data: studentFeePayments = [] } = useQuery({
+    queryKey: ['student_fee_payments_status', foundStudent?.id],
+    queryFn: async () => {
+      if (!foundStudent?.id) return [];
+      const { data } = await supabase.from('fee_payments').select('fee_type_id, status, paid_amount').eq('student_id', foundStudent.id).in('status', ['paid', 'unpaid']);
+      return data || [];
+    },
+    enabled: !!foundStudent?.id,
+  });
+
+  const paidFeeTypeIds = new Set(studentFeePayments.filter((p: any) => p.status === 'paid').map((p: any) => p.fee_type_id));
+
   // Filter fee types based on found student's division/class
   const applicableFeeTypes = foundStudent
     ? dbFeeTypes.filter((ft: any) => {
