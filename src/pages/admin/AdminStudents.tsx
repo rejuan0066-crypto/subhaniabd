@@ -529,20 +529,66 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
           <div className="mt-2">{getApprovalBadge(student.approval_status || 'pending')}</div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div><span className="text-muted-foreground">{bn ? 'পিতা: ' : 'Father: '}</span>{student.father_name || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'মাতা: ' : 'Mother: '}</span>{student.mother_name || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{student.date_of_birth || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{student.phone || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian: '}</span>{student.guardian_phone || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{student.birth_reg_no || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(student.session_id, student.admission_session)}</div>
-        <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(student.class_id)}</div>
-        <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
-        <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
-        {student.is_free && <div><span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span></div>}
+      {/* Basic Info */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'মৌলিক তথ্য' : 'Basic Info'}</h4>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">{bn ? 'রেজিস্ট্রেশন নং: ' : 'Reg No: '}</span>{student.registration_no || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{student.date_of_birth || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{student.birth_reg_no || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ইমেইল: ' : 'Email: '}</span>{student.email || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{student.phone || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'অভিভাবক ফোন: ' : 'Guardian Phone: '}</span>{student.guardian_phone || '-'}</div>
+        </div>
+      </div>
+
+      {/* Parents Info */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অভিভাবক তথ্য' : 'Parents Info'}</h4>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">{bn ? 'পিতা (বাংলা): ' : 'Father (BN): '}</span>{student.father_name || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'পিতা (ইংরেজি): ' : 'Father (EN): '}</span>{student.father_name_en || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'পিতার পেশা: ' : 'Father Occupation: '}</span>{student.father_occupation || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'পিতার NID: ' : 'Father NID: '}</span>{student.father_nid || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'পিতার ফোন: ' : 'Father Phone: '}</span>{student.father_phone || '-'}</div>
+          <div className="col-span-2 border-t pt-2 mt-1" />
+          <div><span className="text-muted-foreground">{bn ? 'মাতা (বাংলা): ' : 'Mother (BN): '}</span>{student.mother_name || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'মাতা (ইংরেজি): ' : 'Mother (EN): '}</span>{student.mother_name_en || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'মাতার পেশা: ' : 'Mother Occupation: '}</span>{student.mother_occupation || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'মাতার NID: ' : 'Mother NID: '}</span>{student.mother_nid || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'মাতার ফোন: ' : 'Mother Phone: '}</span>{student.mother_phone || '-'}</div>
+        </div>
+      </div>
+
+      {/* Academic Info */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'একাডেমিক তথ্য' : 'Academic Info'}</h4>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">{bn ? 'বিভাগ: ' : 'Division: '}</span>{bn ? student.divisions?.name_bn : student.divisions?.name || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'শ্রেণী: ' : 'Class: '}</span>{getClassName(student.class_id)}</div>
+          <div><span className="text-muted-foreground">{bn ? 'সেশন: ' : 'Session: '}</span>{getSessionName(student.session_id, student.admission_session)}</div>
+          <div><span className="text-muted-foreground">{bn ? 'সেশন বছর: ' : 'Session Year: '}</span>{student.session_year || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ভর্তির তারিখ: ' : 'Admission Date: '}</span>{student.admission_date || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'পূর্বের শ্রেণী: ' : 'Previous Class: '}</span>{student.previous_class || '-'}</div>
+          <div className="col-span-2"><span className="text-muted-foreground">{bn ? 'পূর্বের প্রতিষ্ঠান: ' : 'Previous Institute: '}</span>{student.previous_institute || '-'}</div>
+        </div>
+      </div>
+
+      {/* Other Info */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</h4>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
+          <div className="col-span-2"><span className="text-muted-foreground">{bn ? 'ঠিকানা: ' : 'Address: '}</span>{student.address || '-'}</div>
+          <div className="flex flex-wrap gap-2 col-span-2">
+            {student.is_free && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-success/15 text-success border border-success/20">{bn ? '✓ বিনা বেতন' : '✓ Free Student'}</span>}
+            {student.is_orphan && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 border border-amber-500/20">{bn ? 'এতিম' : 'Orphan'}</span>}
+            {student.is_poor && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-600 border border-blue-500/20">{bn ? 'গরীব' : 'Poor'}</span>}
+          </div>
+        </div>
       </div>
 
       {/* Applicable Fee Types for this student */}
