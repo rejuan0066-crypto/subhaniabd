@@ -1,5 +1,6 @@
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useMemo, useState } from 'react';
 import { CreditCard, Search, RefreshCw, CheckCircle, XCircle, Clock, Filter } from 'lucide-react';
+import FeeTypeSummary from '@/components/fees/FeeTypeSummary';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -39,17 +41,6 @@ const AdminPayments = () => {
     },
   });
 
-  // Fetch fee_payments with fee_types for category-wise breakdown
-  const { data: feePayments = [] } = useQuery({
-    queryKey: ['fee_payments_dashboard'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('fee_payments')
-        .select('*, fee_types(name, name_bn, fee_category)')
-        .order('created_at', { ascending: false });
-      return data || [];
-    },
-  });
 
   // Dynamically extract unique fee_type values from payments
   const feeTypeOptions = useMemo(() => {
@@ -95,22 +86,6 @@ const AdminPayments = () => {
     amount: filtered.filter((p: any) => p.status === 'success').reduce((s: number, p: any) => s + Number(p.amount || 0), 0),
   };
 
-  // Group by fee_types (from fee_payments table) for accurate category stats
-  const categoryStats = useMemo(() => {
-    const map: Record<string, { name: string; count: number; total: number; paid: number; pending: number; unpaid: number }> = {};
-    feePayments.forEach((fp: any) => {
-      const ftName = bn ? (fp.fee_types?.name_bn || fp.fee_types?.name || 'অজানা') : (fp.fee_types?.name || 'Unknown');
-      const key = fp.fee_type_id || 'unknown';
-      if (!map[key]) map[key] = { name: ftName, count: 0, total: 0, paid: 0, pending: 0, unpaid: 0 };
-      map[key].count++;
-      map[key].total += Number(fp.amount || 0);
-      if (fp.status === 'paid') map[key].paid += Number(fp.paid_amount || fp.amount || 0);
-      if (fp.status === 'pending') map[key].pending += Number(fp.amount || 0);
-      if (fp.status === 'unpaid') map[key].unpaid += Number(fp.amount || 0);
-    });
-    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
-  }, [feePayments, bn]);
-
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -144,36 +119,8 @@ const AdminPayments = () => {
           </div>
         </div>
 
-        {/* Category-wise Stats */}
-        {categoryStats.length > 0 && (
-          <div className="card-elevated p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">{bn ? 'ফি ধরন অনুযায়ী সারাংশ' : 'Fee Type-wise Summary'}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {categoryStats.map(([key, stats]) => (
-                <div key={key} className="rounded-lg border border-border p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs font-medium">{stats.name}</Badge>
-                    <span className="text-xs text-muted-foreground">{stats.count} {bn ? 'টি' : ''}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div>
-                      <p className="font-bold text-foreground">৳{stats.total.toLocaleString()}</p>
-                      <p className="text-muted-foreground">{bn ? 'মোট' : 'Total'}</p>
-                    </div>
-                    <div>
-                      <p className="font-bold text-success">৳{stats.paid.toLocaleString()}</p>
-                      <p className="text-muted-foreground">{bn ? 'আদায়' : 'Paid'}</p>
-                    </div>
-                    <div>
-                      <p className="font-bold text-destructive">৳{(stats.pending + stats.unpaid).toLocaleString()}</p>
-                      <p className="text-muted-foreground">{bn ? 'বকেয়া' : 'Due'}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Fee Type-wise Summary */}
+        <FeeTypeSummary />
 
         {/* Filters */}
         <div className="card-elevated p-4">
