@@ -32,6 +32,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchedForUser = useRef<string | null>(null);
   const lastHandledAccessToken = useRef<string | null>(null);
+  const sessionRef = useRef<Session | null>(null);
+  const userRef = useRef<User | null>(null);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,44 +53,81 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserStatus(null);
     };
 
+    const clearSessionState = () => {
+      if (cancelled) return;
+      lastHandledAccessToken.current = null;
+      sessionRef.current = null;
+      userRef.current = null;
+      setSession(null);
+      setUser(null);
+      resetResolvedState();
+      setAuthReady(true);
+    };
+
     const applySession = (nextSession: Session | null) => {
       if (cancelled) return;
 
-      const nextAccessToken = nextSession?.access_token ?? null;
-      const nextUser = nextSession?.user ?? null;
+      if (!nextSession?.user) {
+        clearSessionState();
+        return;
+      }
 
-      if (lastHandledAccessToken.current === nextAccessToken) {
+      const nextAccessToken = nextSession.access_token ?? null;
+      const nextUser = nextSession.user;
+
+      if (
+        lastHandledAccessToken.current === nextAccessToken &&
+        sessionRef.current?.user?.id === nextUser.id
+      ) {
         setAuthReady(true);
         return;
       }
 
       lastHandledAccessToken.current = nextAccessToken;
+      sessionRef.current = nextSession;
+      userRef.current = nextUser;
       setSession(nextSession);
       setUser(nextUser);
-
-      if (!nextUser) {
-        resetResolvedState();
-      }
-
       setAuthReady(true);
+    };
+
+    const restoreSessionSafely = () => {
+      void supabase.auth.getSession().then(({ data: { session: restoredSession } }) => {
+        if (cancelled) return;
+        if (restoredSession?.user) {
+          applySession(restoredSession);
+          return;
+        }
+        clearSessionState();
+      }).catch((error) => {
+        if (cancelled) return;
+        console.error('Failed to restore auth session:', error);
+        clearSessionState();
+      });
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (cancelled) return;
 
       if (event === 'SIGNED_OUT') {
-        lastHandledAccessToken.current = null;
-        setSession(null);
-        setUser(null);
-        resetResolvedState();
-        setAuthReady(true);
+        clearSessionState();
         return;
       }
 
-      // Supabase can emit INITIAL_SESSION / SIGNED_IN multiple times for the same session.
-      // We only react when the access token actually changes.
+      if (!nextSession?.user) {
+        if (sessionRef.current?.user || userRef.current || lastHandledAccessToken.current) {
+          restoreSessionSafely();
+          return;
+        }
+
+        clearSessionState();
+        return;
+      }
+
       applySession(nextSession);
     });
+
+    restoreSessionSafely();
 
     return () => {
       cancelled = true;
