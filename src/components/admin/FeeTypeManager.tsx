@@ -38,7 +38,10 @@ const FeeTypeManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [filterSessionId, setFilterSessionId] = useState<string>('all');
-  const [form, setForm] = useState({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
+  const [form, setForm] = useState<{ name: string; name_bn: string; amount: string; fee_category: string; division_id: string; class_id: string; session_id: string; payment_frequency: string; applicable_months: string[] }>({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time', applicable_months: [] });
+
+  const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONTHS_BN = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
 
   const { data: sessions = [] } = useQuery({
     queryKey: ['academic_sessions'],
