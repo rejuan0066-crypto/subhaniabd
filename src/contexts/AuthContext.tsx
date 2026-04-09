@@ -33,14 +33,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
 
     try {
-      const [rolesResult, profileResult] = await Promise.all([
-        supabase.from('user_roles').select('role').eq('user_id', userId),
-        supabase.from('profiles').select('status').eq('id', userId).maybeSingle(),
-      ]);
+      const rolesResult = await supabase.from('user_roles').select('role').eq('user_id', userId);
 
       if (rolesResult.error) {
         console.error('Failed to fetch user roles:', rolesResult.error);
       }
+
+      const profileResult = await supabase.from('profiles').select('status').eq('id', userId).maybeSingle();
 
       if (profileResult.error) {
         console.error('Failed to fetch user status:', profileResult.error);
@@ -49,6 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const resolvedRole = resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role));
       setRole(resolvedRole);
       setUserStatus(profileResult.data?.status ?? 'pending');
+    } catch (error) {
+      console.error('Failed to resolve auth state:', error);
+      setRole(null);
+      setUserStatus('pending');
     } finally {
       setLoading(false);
     }
