@@ -1190,6 +1190,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_bn: string
+          payment_frequency: string
           session_id: string | null
           updated_at: string | null
         }
@@ -1203,6 +1204,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_bn: string
+          payment_frequency?: string
           session_id?: string | null
           updated_at?: string | null
         }
@@ -1216,6 +1218,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_bn?: string
+          payment_frequency?: string
           session_id?: string | null
           updated_at?: string | null
         }
