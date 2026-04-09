@@ -111,6 +111,19 @@ const AdminStudentsFees = () => {
     },
   });
 
+  // Fetch existing fee_payments for found student to show paid status
+  const { data: studentFeePayments = [] } = useQuery({
+    queryKey: ['student_fee_payments_status', foundStudent?.id],
+    queryFn: async () => {
+      if (!foundStudent?.id) return [];
+      const { data } = await supabase.from('fee_payments').select('fee_type_id, status, paid_amount').eq('student_id', foundStudent.id).in('status', ['paid', 'unpaid']);
+      return data || [];
+    },
+    enabled: !!foundStudent?.id,
+  });
+
+  const paidFeeTypeIds = new Set(studentFeePayments.filter((p: any) => p.status === 'paid').map((p: any) => p.fee_type_id));
+
   // Filter fee types based on found student's division/class
   const applicableFeeTypes = foundStudent
     ? dbFeeTypes.filter((ft: any) => {
@@ -479,13 +492,23 @@ const AdminStudentsFees = () => {
                     <SelectValue placeholder={bn ? 'ফি ধরন নির্বাচন করুন' : 'Select Fee Type'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {applicableFeeTypes.map((ft: any) => (
-                      <SelectItem key={ft.id} value={ft.id}>
-                        {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
-                        {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
-                        {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
-                      </SelectItem>
-                    ))}
+                    {applicableFeeTypes.map((ft: any) => {
+                      const isPaid = paidFeeTypeIds.has(ft.id);
+                      return (
+                        <SelectItem key={ft.id} value={ft.id} disabled={isPaid}>
+                          <span className="flex items-center gap-2">
+                            {bn ? ft.name_bn : ft.name} — ৳{ft.amount}
+                            {ft.divisions?.name_bn ? ` (${ft.divisions.name_bn})` : ''}
+                            {ft.classes?.name_bn ? ` - ${ft.classes.name_bn}` : ''}
+                            {isPaid && (
+                              <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-success/15 text-success">
+                                {bn ? '✓ পরিশোধিত' : '✓ Paid'}
+                              </span>
+                            )}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 {applicableFeeTypes.length === 0 && (
