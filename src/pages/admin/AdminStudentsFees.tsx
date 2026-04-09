@@ -347,6 +347,7 @@ const AdminStudentsFees = () => {
   const handleProceed = () => {
     if (!feeType) { toast.error(bn ? 'ফি ধরন নির্বাচন করুন' : 'Select fee type'); return; }
     if (!foundStudent) { toast.error(bn ? 'প্রথমে ছাত্র খুঁজুন' : 'Search student first'); return; }
+    if (selectedFeeTypeObj?.payment_frequency === 'monthly' && !paymentMonth) { toast.error(bn ? 'মাস নির্বাচন করুন' : 'Select a month'); return; }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid amount'); return; }
     if (isPaymentBlocked) {
       toast.error(bn ? 'এই ফি ধরনে ইতিমধ্যে পেমেন্ট আছে। বাতিল না হওয়া পর্যন্ত আবার পরিশোধ করা যাবে না।' : 'Payment already exists. Cannot pay again until cancelled.');
@@ -580,6 +581,7 @@ const AdminStudentsFees = () => {
                   const ftObj = applicableFeeTypes.find((ft: any) => ft.id === v);
                   setSelectedFeeTypeObj(ftObj || null);
                   if (ftObj) setAmount(String(ftObj.amount || ''));
+                  setPaymentMonth(''); // reset month on fee type change
                 }}>
                   <SelectTrigger className="bg-background">
                     <SelectValue placeholder={bn ? 'ফি ধরন নির্বাচন করুন' : 'Select Fee Type'} />
@@ -605,6 +607,49 @@ const AdminStudentsFees = () => {
                     })}
                   </SelectContent>
                 </Select>
+
+                {/* Month selector for monthly fee types */}
+                {selectedFeeTypeObj?.payment_frequency === 'monthly' && foundStudent && (
+                  <div className="mt-3">
+                    <label className="text-sm font-medium text-foreground mb-1 block">
+                      {bn ? 'মাস নির্বাচন করুন' : 'Select Month'} <span className="text-destructive">*</span>
+                    </label>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                      {getMonthlyStatuses(feeType).map(s => {
+                        const canPay = s.status === 'due' || s.status === 'unpaid';
+                        return (
+                          <button
+                            key={s.month}
+                            type="button"
+                            disabled={!canPay}
+                            onClick={() => {
+                              if (!canPay) return;
+                              setPaymentMonth(s.month);
+                              setAmount(String(selectedFeeTypeObj.amount));
+                            }}
+                            className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
+                              s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 cursor-default' :
+                              s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
+                              s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
+                              'bg-muted/30 border-border text-muted-foreground opacity-60 cursor-default'
+                            } ${paymentMonth === s.month ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
+                          >
+                            <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                            <div className="text-[10px] mt-0.5">
+                              {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {paymentMonth && (
+                      <p className="text-xs mt-2 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
+                        ✓ {bn ? `${MONTHS_BN[MONTHS_EN.indexOf(paymentMonth)]} মাসের ফি পরিশোধ হবে` : `Paying for ${paymentMonth}`}
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {applicableFeeTypes.length === 0 && (
                   <p className="text-xs text-destructive mt-1">
                     {bn ? 'কোনো ফি ধরন পাওয়া যায়নি। প্রথমে "ফি ধরন" ট্যাব থেকে ফি যোগ করুন।' : 'No fee types found. Add fee types from the "Fee Types" tab first.'}
