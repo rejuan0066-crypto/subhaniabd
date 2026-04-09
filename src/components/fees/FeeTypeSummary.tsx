@@ -114,19 +114,28 @@ const FeeTypeSummary = () => {
       const studentCount = applicableStudents.length;
       const feeAmount = Number(ft.amount || 0);
 
-      // Calculate total expected (minus waivers)
+      // Calculate total expected (minus waivers) — running monthly basis
       let totalExpected = 0;
       let totalWaiverAmount = 0;
+      const currentMonthIndex = new Date().getMonth(); // 0-based
+      const MONTHS_EN_LIST = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
       applicableStudents.forEach((s: any) => {
         const waiverKey = `${s.id}_${ft.id}`;
         const waiverPercent = waiverMap[waiverKey] || 0;
         const discount = (feeAmount * waiverPercent) / 100;
         totalWaiverAmount += discount;
 
-        // For monthly fees, multiply by applicable months count
+        // For monthly fees, only count months up to and including current month
         if (ft.payment_frequency === 'monthly') {
-          const monthsCount = ft.applicable_months && Array.isArray(ft.applicable_months) ? ft.applicable_months.length : 12;
-          totalExpected += (feeAmount - discount) * monthsCount;
+          const applicableMonths: string[] | null = ft.applicable_months && Array.isArray(ft.applicable_months) ? (ft.applicable_months as any[]).map(String) : null;
+          let runningMonthsCount = 0;
+          for (let i = 0; i <= currentMonthIndex; i++) {
+            if (!applicableMonths || applicableMonths.includes(MONTHS_EN_LIST[i])) {
+              runningMonthsCount++;
+            }
+          }
+          totalExpected += (feeAmount - discount) * runningMonthsCount;
         } else {
           totalExpected += feeAmount - discount;
         }
