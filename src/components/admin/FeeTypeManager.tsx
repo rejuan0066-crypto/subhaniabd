@@ -112,6 +112,7 @@ const FeeTypeManager = () => {
         class_id: form.class_id || null,
         session_id: form.session_id || null,
         payment_frequency: form.payment_frequency || 'one-time',
+        applicable_months: form.payment_frequency === 'monthly' && form.applicable_months.length > 0 ? form.applicable_months : null,
       };
       if (editId) {
         const { error } = await supabase.from('fee_types').update(payload).eq('id', editId);
