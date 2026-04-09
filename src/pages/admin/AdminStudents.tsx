@@ -522,8 +522,8 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
           <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">{student.name_bn?.[0]}</div>
         )}
         <div className="flex-1 space-y-1">
-          <h3 className="text-lg font-bold text-foreground">{student.name_bn}</h3>
-          {student.name_en && <p className="text-sm text-muted-foreground">{student.name_en}</p>}
+          <h3 className="text-lg font-bold text-foreground">{bn ? (student.name_bn || student.name_en) : (student.name_en || student.name_bn)}</h3>
+          {student.name_bn && student.name_en && <p className="text-sm text-muted-foreground">{bn ? student.name_en : student.name_bn}</p>}
           <p className="text-sm">{bn ? 'আইডি: ' : 'ID: '}{student.student_id}</p>
           <p className="text-sm">{bn ? 'রোল: ' : 'Roll: '}{student.roll_number || '-'}</p>
           <div className="mt-2">{getApprovalBadge(student.approval_status || 'pending')}</div>
@@ -535,8 +535,8 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div><span className="text-muted-foreground">{bn ? 'রেজিস্ট্রেশন নং: ' : 'Reg No: '}</span>{student.registration_no || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{student.date_of_birth || '-'}</div>
-          <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender || '-'}</div>
-          <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender === 'male' ? (bn ? 'পুরুষ' : 'Male') : student.gender === 'female' ? (bn ? 'মহিলা' : 'Female') : student.gender || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion === 'islam' ? (bn ? 'ইসলাম' : 'Islam') : student.religion === 'hinduism' ? (bn ? 'হিন্দু' : 'Hinduism') : student.religion === 'christianity' ? (bn ? 'খ্রিস্টান' : 'Christianity') : student.religion === 'buddhism' ? (bn ? 'বৌদ্ধ' : 'Buddhism') : student.religion || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{student.birth_reg_no || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ইমেইল: ' : 'Email: '}</span>{student.email || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{student.phone || '-'}</div>
@@ -580,7 +580,7 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
       <div className="space-y-3">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অন্যান্য তথ্য' : 'Other Info'}</h4>
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'আবাসিক: ' : 'Residence: '}</span>{student.residence_type === 'residential' ? (bn ? 'আবাসিক' : 'Residential') : student.residence_type === 'non_residential' ? (bn ? 'অনাবাসিক' : 'Non-Residential') : student.residence_type === 'day_scholar' ? (bn ? 'ডে স্কলার' : 'Day Scholar') : student.residence_type || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ক্যাটাগরি: ' : 'Category: '}</span>{student.student_category === 'orphan' ? (bn ? 'এতিম' : 'Orphan') : student.student_category === 'poor' ? (bn ? 'গরীব' : 'Poor') : student.student_category === 'teacher_child' ? (bn ? 'শিক্ষক সন্তান' : "Teacher's Child") : (bn ? 'সাধারণ' : 'General')}</div>
           <div className="col-span-2"><span className="text-muted-foreground">{bn ? 'ঠিকানা: ' : 'Address: '}</span>{student.address || '-'}</div>
           <div className="flex flex-wrap gap-2 col-span-2">
