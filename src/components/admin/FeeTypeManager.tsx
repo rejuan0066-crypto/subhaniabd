@@ -201,6 +201,7 @@ const FeeTypeManager = () => {
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'সেশন' : 'Session'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'ফ্রিকোয়েন্সি' : 'Frequency'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'পরিমাণ' : 'Amount'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'বিভাগ' : 'Division'}</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{bn ? 'শ্রেণী' : 'Class'}</th>
