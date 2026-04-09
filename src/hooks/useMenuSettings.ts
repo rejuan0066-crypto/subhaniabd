@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface MenuItemConfig {
   id: string;
@@ -147,6 +148,7 @@ const mergeWithDefaults = (saved: MenuItemConfig[], defaults: MenuItemConfig[]):
 
 export const useMenuSettings = () => {
   const queryClient = useQueryClient();
+  const { loading: authLoading } = useAuth();
 
   const { data: menuConfig, isLoading } = useQuery({
     queryKey: ['menu-settings'],
@@ -169,6 +171,7 @@ export const useMenuSettings = () => {
       });
       return result;
     },
+    enabled: !authLoading,
   });
 
   const saveMenuConfig = useMutation({
