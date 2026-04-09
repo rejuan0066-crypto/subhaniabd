@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Notification {
   id: string;
@@ -17,6 +18,7 @@ export interface Notification {
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();
+  const { user, loading: authLoading } = useAuth();
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['notifications'],
@@ -29,10 +31,13 @@ export const useNotifications = () => {
       if (error) throw error;
       return (data || []) as Notification[];
     },
+    enabled: !authLoading && !!user,
   });
 
   // Realtime subscription
   useEffect(() => {
+    if (authLoading || !user) return;
+
     const channel = supabase
       .channel('notifications-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
@@ -40,7 +45,7 @@ export const useNotifications = () => {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [queryClient]);
+  }, [authLoading, queryClient, user]);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 

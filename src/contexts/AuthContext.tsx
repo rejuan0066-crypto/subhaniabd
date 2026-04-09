@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const fetchedForUser = useRef<string | null>(null);
+  const initialSessionResolved = useRef(false);
 
   const clearAuthState = () => {
     setUser(null);
@@ -94,6 +95,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
 
+      if (!initialSessionResolved.current && event === 'INITIAL_SESSION') {
+        return;
+      }
+
       window.setTimeout(() => {
         if (!mounted) return;
 
@@ -116,6 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       if (!mounted) return;
+      initialSessionResolved.current = true;
       processSession(currentSession);
     });
 

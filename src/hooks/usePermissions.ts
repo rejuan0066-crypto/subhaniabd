@@ -12,7 +12,7 @@ export interface Permission {
 }
 
 export const usePermissions = () => {
-  const { role, user } = useAuth();
+  const { role, user, loading: authLoading } = useAuth();
 
   // Role-based permissions
   const { data: rolePermissions = [], isLoading: roleLoading } = useQuery({
@@ -26,7 +26,7 @@ export const usePermissions = () => {
       if (error) throw error;
       return data as Permission[];
     },
-    enabled: !!role,
+    enabled: !authLoading && !!role,
   });
 
   // User-specific permissions (override role permissions)
@@ -41,7 +41,7 @@ export const usePermissions = () => {
       if (error) throw error;
       return (data || []) as (Permission & { requires_approval?: boolean })[];
     },
-    enabled: !!user?.id,
+    enabled: !authLoading && !!user?.id,
   });
 
   const isLoading = roleLoading || userLoading;

@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export const useModuleAccess = (menuPath?: string) => {
+  const { user, loading: authLoading } = useAuth();
+
   const { data: modules = [] } = useQuery({
     queryKey: ['system-modules-access'],
     queryFn: async () => {
@@ -11,6 +14,7 @@ export const useModuleAccess = (menuPath?: string) => {
       if (error) throw error;
       return data;
     },
+    enabled: !authLoading && !!user,
     staleTime: 30000,
   });
 
