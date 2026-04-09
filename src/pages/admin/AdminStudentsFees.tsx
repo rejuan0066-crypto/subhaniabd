@@ -523,19 +523,35 @@ const AdminStudentsFees = () => {
                         )}
                       </div>
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                        {statuses.map(s => (
-                          <div key={s.month} className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
-                            s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400' :
-                            s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400' :
-                            s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400' :
-                            'bg-muted/30 border-border text-muted-foreground opacity-60'
-                          }`}>
-                            <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
-                            <div className="text-[10px] mt-0.5">
-                              {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
-                            </div>
-                          </div>
-                        ))}
+                        {statuses.map(s => {
+                          const canPay = s.status === 'due' || s.status === 'unpaid';
+                          return (
+                            <button
+                              key={s.month}
+                              type="button"
+                              disabled={!canPay}
+                              onClick={() => {
+                                if (!canPay) return;
+                                setFeeType(ft.id);
+                                setSelectedFeeTypeObj(ft);
+                                setAmount(String(ft.amount));
+                                setPaymentMonth(s.month);
+                                toast.info(bn ? `${s.monthBn} মাস সিলেক্ট করা হয়েছে` : `${s.month} selected`);
+                              }}
+                              className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
+                                s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 cursor-default' :
+                                s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
+                                s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
+                                'bg-muted/30 border-border text-muted-foreground opacity-60 cursor-default'
+                              } ${paymentMonth === s.month && feeType === ft.id ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
+                            >
+                              <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                              <div className="text-[10px] mt-0.5">
+                                {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                       {dueCount > 0 && (
                         <Button size="sm" className="btn-primary-gradient w-full" onClick={() => {
