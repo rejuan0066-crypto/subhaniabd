@@ -973,6 +973,12 @@ const AdminStudentsFees = () => {
             icon: Users,
             content: <StudentCategoryManager />,
           },
+          {
+            id: 'receipts',
+            label: bn ? 'রিসিট ডাউনলোড' : 'Receipt Download',
+            icon: Receipt,
+            content: <FeeReceiptDownload />,
+          },
         ]}
         paramKey="tab"
       />
