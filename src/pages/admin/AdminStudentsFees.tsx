@@ -139,21 +139,21 @@ const AdminStudentsFees = () => {
   });
 
   // Get monthly fee status for a given fee type
-  const getMonthlyStatuses = (feeTypeId: string) => {
+  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
+  const getMonthlyStatuses = (feeTypeId: string): { month: string; monthBn: string; status: MonthStatus }[] => {
     const now = new Date();
     const currentMonthIndex = now.getMonth();
     const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
     const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
     return MONTHS_EN.map((monthEn, i) => {
-      // If applicable_months is set, months not in the list are 'n/a'
       if (applicableMonths && !applicableMonths.includes(monthEn)) {
-        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as const };
+        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
       }
       const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
-      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as const };
-      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as const };
-      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as const };
-      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as const };
+      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as MonthStatus };
+      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as MonthStatus };
+      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as MonthStatus };
+      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as MonthStatus };
     });
   };
 
