@@ -535,8 +535,8 @@ const StudentDetailContent = ({ student, bn, getApprovalBadge, getSessionName, g
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div><span className="text-muted-foreground">{bn ? 'রেজিস্ট্রেশন নং: ' : 'Reg No: '}</span>{student.registration_no || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'জন্ম তারিখ: ' : 'DOB: '}</span>{student.date_of_birth || '-'}</div>
-          <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender || '-'}</div>
-          <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'লিঙ্গ: ' : 'Gender: '}</span>{student.gender === 'male' ? (bn ? 'পুরুষ' : 'Male') : student.gender === 'female' ? (bn ? 'মহিলা' : 'Female') : student.gender || '-'}</div>
+          <div><span className="text-muted-foreground">{bn ? 'ধর্ম: ' : 'Religion: '}</span>{student.religion === 'islam' ? (bn ? 'ইসলাম' : 'Islam') : student.religion === 'hinduism' ? (bn ? 'হিন্দু' : 'Hinduism') : student.religion === 'christianity' ? (bn ? 'খ্রিস্টান' : 'Christianity') : student.religion === 'buddhism' ? (bn ? 'বৌদ্ধ' : 'Buddhism') : student.religion || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'জন্ম নিবন্ধন: ' : 'Birth Reg: '}</span>{student.birth_reg_no || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ইমেইল: ' : 'Email: '}</span>{student.email || '-'}</div>
           <div><span className="text-muted-foreground">{bn ? 'ফোন: ' : 'Phone: '}</span>{student.phone || '-'}</div>
