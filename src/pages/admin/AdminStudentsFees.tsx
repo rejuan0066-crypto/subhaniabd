@@ -111,6 +111,10 @@ const AdminStudentsFees = () => {
     },
   });
 
+  // Bengali month names
+  const MONTHS_BN = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
   // Fetch existing fee_payments for found student to show paid status
   const { data: studentFeePayments = [] } = useQuery({
     queryKey: ['student_fee_payments_status', foundStudent?.id],
