@@ -61,6 +61,9 @@ const AdminFees = () => {
     enabled: mainTab === 'payment',
   });
 
+  const selectedStudentData = students.find((s: any) => s.id === selectedStudent);
+  const isFreeStudent = selectedStudentData?.is_free === true;
+
   const { data: studentWaivers = [] } = useQuery({
     queryKey: ['fee_waivers', selectedStudent],
     queryFn: async () => {
@@ -73,11 +76,18 @@ const AdminFees = () => {
   });
 
   const { data: feeTypes = [] } = useQuery({
-    queryKey: ['fee_types', tab],
+    queryKey: ['fee_types', tab, selectedStudent, selectedStudentData?.division_id, selectedStudentData?.class_id],
     queryFn: async () => {
       const { data, error } = await supabase.from('fee_types').select('*').eq('fee_category', tab).eq('is_active', true);
       if (error) throw error;
-      return data;
+      if (!selectedStudentData) return data;
+      const sDivision = selectedStudentData.division_id;
+      const sClass = selectedStudentData.class_id;
+      return data.filter((f: any) => {
+        const divMatch = !f.division_id || f.division_id === sDivision;
+        const clsMatch = !f.class_id || f.class_id === sClass;
+        return divMatch && clsMatch;
+      });
     },
     enabled: mainTab === 'payment',
   });
@@ -93,9 +103,6 @@ const AdminFees = () => {
     },
     enabled: mainTab === 'payment',
   });
-
-  const selectedStudentData = students.find((s: any) => s.id === selectedStudent);
-  const isFreeStudent = selectedStudentData?.is_free === true;
   const selectedFeeTypeData = feeTypes.find((f: any) => f.id === selectedFeeType);
 
   const getWaiverPercent = () => {
