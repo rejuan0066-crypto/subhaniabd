@@ -28,6 +28,7 @@ const AdminStaff = () => {
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewStaff, setViewStaff] = useState<any>(null);
 
   // Account creation dialog state
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
