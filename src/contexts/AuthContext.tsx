@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState, useRef, type ReactNode } from 'react';
+import { createContext, useEffect, useMemo, useState, useRef, useCallback, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -30,37 +30,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const fetchedForUser = useRef<string | null>(null);
+  const processingEvent = useRef(false);
+  const lastEventTime = useRef(0);
 
-  const clearResolvedUserState = () => {
+  const clearResolvedUserState = useCallback(() => {
     fetchedForUser.current = null;
     setProfileLoading(false);
     setRole(null);
     setUserStatus(null);
-  };
+  }, []);
 
-  const clearAuthState = () => {
+  const clearAuthState = useCallback(() => {
     setUser(null);
     setSession(null);
-    clearResolvedUserState();
+    fetchedForUser.current = null;
+    setProfileLoading(false);
+    setRole(null);
+    setUserStatus(null);
     setAuthReady(true);
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
+    let initialSessionHandled = false;
 
-    const syncSessionState = (nextSession: Session | null, options?: { resetResolvedUser?: boolean }) => {
+    const applySession = (nextSession: Session | null, isNewLogin: boolean) => {
       if (!mounted) return;
 
-      if (options?.resetResolvedUser) {
-        fetchedForUser.current = null;
+      // Debounce: ignore events that come within 100ms of each other
+      const now = Date.now();
+      if (now - lastEventTime.current < 100 && !isNewLogin) {
+        return;
       }
+      lastEventTime.current = now;
+
+      // Prevent re-entrant processing
+      if (processingEvent.current && !isNewLogin) return;
+      processingEvent.current = true;
 
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
       if (!nextSession?.user) {
         clearResolvedUserState();
+      } else if (isNewLogin) {
+        // Only reset profile fetch for genuinely new logins
+        fetchedForUser.current = null;
       }
+
+      setAuthReady(true);
+      processingEvent.current = false;
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
@@ -71,17 +90,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      syncSessionState(nextSession, {
-        resetResolvedUser: event === 'SIGNED_IN' || event === 'USER_UPDATED',
-      });
-      setAuthReady(true);
+      // Only treat SIGNED_IN as a new login if we don't already have a user,
+      // or if it's a different user. TOKEN_REFRESHED should never reset profile.
+      const isNewLogin =
+        (event === 'SIGNED_IN' && (!user || user.id !== nextSession?.user?.id)) ||
+        event === 'USER_UPDATED';
+
+      // If initial session was already handled and this is just a token refresh, skip heavy processing
+      if (initialSessionHandled && event === 'SIGNED_IN' && user?.id === nextSession?.user?.id) {
+        // Just update session/token silently without triggering profile refetch
+        setSession(nextSession);
+        return;
+      }
+
+      applySession(nextSession, isNewLogin);
     });
 
     supabase.auth.getSession()
       .then(({ data: { session: currentSession } }) => {
         if (!mounted) return;
-        syncSessionState(currentSession);
-        setAuthReady(true);
+        initialSessionHandled = true;
+        applySession(currentSession, true);
       })
       .catch((error) => {
         console.error('Failed to restore auth session:', error);
@@ -93,6 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -115,12 +145,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     void (async () => {
       try {
-        const rolesResult = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        const [rolesResult, profileResult] = await Promise.all([
+          supabase.from('user_roles').select('role').eq('user_id', user.id),
+          supabase.from('profiles').select('status').eq('id', user.id).maybeSingle(),
+        ]);
+
         if (rolesResult.error) {
           console.error('Failed to fetch user roles:', rolesResult.error);
         }
-
-        const profileResult = await supabase.from('profiles').select('status').eq('id', user.id).maybeSingle();
         if (profileResult.error) {
           console.error('Failed to fetch user status:', profileResult.error);
         }
@@ -167,7 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearAuthState();
       },
     }),
-    [authReady, user, session, loading, role, userStatus]
+    [authReady, user, session, loading, role, userStatus, clearAuthState]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
