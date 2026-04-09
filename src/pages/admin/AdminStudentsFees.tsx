@@ -637,7 +637,7 @@ const AdminStudentsFees = () => {
               </div>
             )}
 
-            <div className="border-t border-border pt-4 space-y-4">
+            {foundStudent && <div className="border-t border-border pt-4 space-y-4">
               <div>
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'ফি ধরন' : 'Fee Type'} <span className="text-destructive">*</span>
