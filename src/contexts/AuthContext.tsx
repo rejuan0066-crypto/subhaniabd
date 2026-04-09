@@ -63,21 +63,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!mounted) return;
-      // Skip the initial INITIAL_SESSION event — we handle it via getSession below
-      if (!initialDone) return;
+      if (!initialDone && event === 'INITIAL_SESSION') return;
 
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
-      if (nextSession?.user) {
-        void fetchRoleAndStatus(nextSession.user.id);
-      } else {
+      if (!nextSession?.user) {
         setRole(null);
         setUserStatus(null);
         setLoading(false);
+        return;
       }
+
+      if (event === 'TOKEN_REFRESHED') {
+        setLoading(false);
+        return;
+      }
+
+      void fetchRoleAndStatus(nextSession.user.id);
     });
 
     void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
