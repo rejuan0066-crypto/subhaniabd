@@ -222,6 +222,11 @@ const FeeTypeManager = () => {
                     {categories.find(c => c.key === f.fee_category)?.[bn ? 'bn' : 'en'] || f.fee_category}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${f.payment_frequency === 'monthly' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                    {f.payment_frequency === 'monthly' ? (bn ? '🔄 মাসিক' : '🔄 Monthly') : (bn ? '1️⃣ একবার' : '1️⃣ One-time')}
+                  </span>
+                </td>
                 <td className="px-4 py-3 font-bold text-foreground">৳{f.amount}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.divisions?.name_bn || (bn ? 'সব' : 'All')}</td>
                 <td className="px-4 py-3 text-muted-foreground">{f.classes?.name_bn || (bn ? 'সব' : 'All')}</td>
@@ -234,7 +239,7 @@ const FeeTypeManager = () => {
               </tr>
             ))}
             {displayedFeeTypes.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
+              <tr><td colSpan={8} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো ফি ধরন নেই' : 'No fee types'}</td></tr>
             )}
           </tbody>
         </table>
