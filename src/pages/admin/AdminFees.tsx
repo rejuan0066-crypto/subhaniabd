@@ -61,6 +61,9 @@ const AdminFees = () => {
     enabled: mainTab === 'payment',
   });
 
+  const selectedStudentData = students.find((s: any) => s.id === selectedStudent);
+  const isFreeStudent = selectedStudentData?.is_free === true;
+
   const { data: studentWaivers = [] } = useQuery({
     queryKey: ['fee_waivers', selectedStudent],
     queryFn: async () => {
@@ -100,9 +103,6 @@ const AdminFees = () => {
     },
     enabled: mainTab === 'payment',
   });
-
-  const selectedStudentData = students.find((s: any) => s.id === selectedStudent);
-  const isFreeStudent = selectedStudentData?.is_free === true;
   const selectedFeeTypeData = feeTypes.find((f: any) => f.id === selectedFeeType);
 
   const getWaiverPercent = () => {
