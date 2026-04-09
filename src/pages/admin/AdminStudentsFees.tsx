@@ -120,13 +120,35 @@ const AdminStudentsFees = () => {
     queryKey: ['student_fee_payments_status', foundStudent?.id],
     queryFn: async () => {
       if (!foundStudent?.id) return [];
-      const { data } = await supabase.from('fee_payments').select('fee_type_id, status, paid_amount').eq('student_id', foundStudent.id).in('status', ['paid', 'unpaid']);
+      const { data } = await supabase.from('fee_payments').select('fee_type_id, status, paid_amount, month, year').eq('student_id', foundStudent.id).in('status', ['paid', 'unpaid']);
       return data || [];
     },
     enabled: !!foundStudent?.id,
   });
 
   const paidFeeTypeIds = new Set(studentFeePayments.filter((p: any) => p.status === 'paid').map((p: any) => p.fee_type_id));
+
+  // Build monthly payment status map: { feeTypeId: { monthName: status } }
+  const monthlyPaymentMap: Record<string, Record<string, string>> = {};
+  studentFeePayments.forEach((p: any) => {
+    if (p.month) {
+      if (!monthlyPaymentMap[p.fee_type_id]) monthlyPaymentMap[p.fee_type_id] = {};
+      monthlyPaymentMap[p.fee_type_id][p.month] = p.status;
+    }
+  });
+
+  // Get monthly fee status for a given fee type
+  const getMonthlyStatuses = (feeTypeId: string) => {
+    const now = new Date();
+    const currentMonthIndex = now.getMonth();
+    return MONTHS_EN.map((monthEn, i) => {
+      const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
+      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as const };
+      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as const };
+      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: existingStatus === 'unpaid' ? 'unpaid' as const : 'unpaid' as const };
+      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as const };
+    });
+  };
 
   // Filter fee types based on found student's division/class
   const applicableFeeTypes = foundStudent
