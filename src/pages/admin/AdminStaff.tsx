@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -249,8 +249,19 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
 );
 
 const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
-  const staffData = staff.staff_data || {};
-  
+  const sd = staff.staff_data || {};
+  const parents = sd.parents || {};
+  const father = parents.father || {};
+  const mother = parents.mother || {};
+  const guardian = sd.guardian || {};
+  const identifier = sd.identifier || {};
+  const approver = sd.approver || {};
+  const presentAddr = sd.present_address || {};
+  const permanentAddr = sd.permanent_address || {};
+  const docs = sd.documents || [];
+
+  const formatAddr = (a: any) => [a?.village, a?.postOffice, a?.union, a?.upazila, a?.district, a?.division].filter(Boolean).join(', ');
+
   return (
     <div className="space-y-5 py-4">
       {/* Header with photo */}
@@ -278,14 +289,20 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</h4>
         <div className="grid grid-cols-2 gap-3">
           <InfoRow label={bn ? 'জন্ম তারিখ: ' : 'DOB: '} value={staff.date_of_birth || '-'} />
-          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={staff.religion || '-'} />
+          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={staff.religion || sd.religion || '-'} />
           <InfoRow label={bn ? 'NID: ' : 'NID: '} value={staff.nid || '-'} />
-          <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staff.phone || '-'} />
+          <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staff.phone ? `${sd.mobile_code || ''}${staff.phone}` : '-'} />
           <InfoRow label={bn ? 'ইমেইল: ' : 'Email: '} value={staff.email || '-'} />
-          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={staff.residence_type || '-'} />
-          <div className="col-span-2">
-            <InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staff.address || '-'} />
-          </div>
+          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={staff.residence_type || sd.residence_type || '-'} />
+        </div>
+      </div>
+
+      {/* Address */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ঠিকানা' : 'Address'}</h4>
+        <div className="grid grid-cols-1 gap-3">
+          <InfoRow label={bn ? 'বর্তমান ঠিকানা: ' : 'Present Address: '} value={formatAddr(presentAddr) || staff.address || '-'} />
+          <InfoRow label={bn ? 'স্থায়ী ঠিকানা: ' : 'Permanent Address: '} value={formatAddr(permanentAddr) || '-'} />
         </div>
       </div>
 
@@ -293,66 +310,92 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
       <div className="space-y-2">
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'কর্মসংস্থান তথ্য' : 'Employment Info'}</h4>
         <div className="grid grid-cols-2 gap-3">
-          <InfoRow label={bn ? 'কর্মের ধরন: ' : 'Employment Type: '} value={staff.employment_type || '-'} />
+          <InfoRow label={bn ? 'কর্মের ধরন: ' : 'Employment Type: '} value={staff.employment_type || sd.employment_type || '-'} />
           <InfoRow label={bn ? 'যোগদানের তারিখ: ' : 'Joining Date: '} value={staff.joining_date || '-'} />
-          <InfoRow label={bn ? 'শিক্ষাগত যোগ্যতা: ' : 'Education: '} value={staff.education || '-'} />
-          <InfoRow label={bn ? 'অভিজ্ঞতা: ' : 'Experience: '} value={staff.experience || '-'} />
+          <InfoRow label={bn ? 'শিক্ষাগত যোগ্যতা: ' : 'Education: '} value={staff.education || sd.education || '-'} />
+          <InfoRow label={bn ? 'অভিজ্ঞতা: ' : 'Experience: '} value={staff.experience || sd.experience || '-'} />
           <InfoRow label={bn ? 'বেতন: ' : 'Salary: '} value={staff.salary ? `৳${staff.salary}` : '-'} />
-          <InfoRow label={bn ? 'পূর্বের প্রতিষ্ঠান: ' : 'Previous Institute: '} value={staff.previous_institute || '-'} />
+          <InfoRow label={bn ? 'পূর্বের প্রতিষ্ঠান: ' : 'Previous Institute: '} value={staff.previous_institute || sd.previous_institute || '-'} />
           <InfoRow label={bn ? 'ডিউটি শুরু: ' : 'Duty Start: '} value={staff.duty_start_time || '-'} />
           <InfoRow label={bn ? 'ডিউটি শেষ: ' : 'Duty End: '} value={staff.duty_end_time || '-'} />
         </div>
       </div>
 
-      {/* Father/Mother from staff_data */}
-      {(staffData.father_name || staffData.mother_name || staffData.guardian_name) && (
+      {/* Father/Mother */}
+      {(father.name || mother.name) && (
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পারিবারিক তথ্য' : 'Family Info'}</h4>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পিতা-মাতার তথ্য' : 'Parents Info'}</h4>
           <div className="grid grid-cols-2 gap-3">
-            {staffData.father_name && <InfoRow label={bn ? 'পিতা: ' : 'Father: '} value={staffData.father_name} />}
-            {staffData.father_occupation && <InfoRow label={bn ? 'পিতার পেশা: ' : "Father's Occupation: "} value={staffData.father_occupation} />}
-            {staffData.father_phone && <InfoRow label={bn ? 'পিতার ফোন: ' : "Father's Phone: "} value={staffData.father_phone} />}
-            {staffData.mother_name && <InfoRow label={bn ? 'মাতা: ' : 'Mother: '} value={staffData.mother_name} />}
-            {staffData.mother_occupation && <InfoRow label={bn ? 'মাতার পেশা: ' : "Mother's Occupation: "} value={staffData.mother_occupation} />}
-            {staffData.mother_phone && <InfoRow label={bn ? 'মাতার ফোন: ' : "Mother's Phone: "} value={staffData.mother_phone} />}
+            {father.name && <InfoRow label={bn ? 'পিতার নাম: ' : 'Father: '} value={father.name} />}
+            {father.occupation && <InfoRow label={bn ? 'পিতার পেশা: ' : "Father's Occupation: "} value={father.occupation} />}
+            {father.nid && <InfoRow label={bn ? 'পিতার NID: ' : "Father's NID: "} value={father.nid} />}
+            {father.mobile && <InfoRow label={bn ? 'পিতার ফোন: ' : "Father's Phone: "} value={`${father.mobile_code || ''}${father.mobile}`} />}
+            <div className="col-span-2 border-t my-1" />
+            {mother.name && <InfoRow label={bn ? 'মাতার নাম: ' : 'Mother: '} value={mother.name} />}
+            {mother.occupation && <InfoRow label={bn ? 'মাতার পেশা: ' : "Mother's Occupation: "} value={mother.occupation} />}
+            {mother.nid && <InfoRow label={bn ? 'মাতার NID: ' : "Mother's NID: "} value={mother.nid} />}
+            {mother.mobile && <InfoRow label={bn ? 'মাতার ফোন: ' : "Mother's Phone: "} value={`${mother.mobile_code || ''}${mother.mobile}`} />}
           </div>
         </div>
       )}
 
-      {/* Guardian from staff_data */}
-      {(staffData.guardian_name || staffData.guardian_relation) && (
+      {/* Guardian */}
+      {(guardian.name || guardian.relation) && (
         <div className="space-y-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অভিভাবক তথ্য' : 'Guardian Info'}</h4>
           <div className="grid grid-cols-2 gap-3">
-            {staffData.guardian_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.guardian_name} />}
-            {staffData.guardian_relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={staffData.guardian_relation} />}
-            {staffData.guardian_phone && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staffData.guardian_phone} />}
-            {staffData.guardian_address && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staffData.guardian_address} /></div>}
+            {guardian.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={guardian.name} />}
+            {guardian.relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={guardian.relation} />}
+            {guardian.nid && <InfoRow label={bn ? 'NID: ' : 'NID: '} value={guardian.nid} />}
+            {guardian.mobile && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={`${guardian.mobile_code || ''}${guardian.mobile}`} />}
+            {formatAddr(guardian.present_address) && <div className="col-span-2"><InfoRow label={bn ? 'বর্তমান ঠিকানা: ' : 'Present Address: '} value={formatAddr(guardian.present_address)} /></div>}
+            {formatAddr(guardian.permanent_address) && <div className="col-span-2"><InfoRow label={bn ? 'স্থায়ী ঠিকানা: ' : 'Permanent Address: '} value={formatAddr(guardian.permanent_address)} /></div>}
           </div>
         </div>
       )}
 
-      {/* Referee from staff_data */}
-      {(staffData.referee_name || staffData.referee_designation) && (
+      {/* Identifier/Referee */}
+      {(identifier.name || identifier.relation) && (
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পরিচয়দাতা' : 'Referee'}</h4>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পরিচয়দাতা' : 'Referee / Identifier'}</h4>
           <div className="grid grid-cols-2 gap-3">
-            {staffData.referee_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.referee_name} />}
-            {staffData.referee_designation && <InfoRow label={bn ? 'পদবী: ' : 'Designation: '} value={staffData.referee_designation} />}
-            {staffData.referee_phone && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staffData.referee_phone} />}
-            {staffData.referee_address && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staffData.referee_address} /></div>}
+            {identifier.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={identifier.name} />}
+            {identifier.relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={identifier.relation} />}
+            {identifier.nid && <InfoRow label={bn ? 'NID: ' : 'NID: '} value={identifier.nid} />}
+            {identifier.mobile && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={`${identifier.mobile_code || ''}${identifier.mobile}`} />}
+            {formatAddr(identifier.address) && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={formatAddr(identifier.address)} /></div>}
           </div>
         </div>
       )}
 
-      {/* Approver from staff_data */}
-      {(staffData.approver_name || staffData.approver_designation) && (
+      {/* Approver */}
+      {(approver.name || approver.position) && (
         <div className="space-y-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অনুমোদনকারী' : 'Approver'}</h4>
           <div className="grid grid-cols-2 gap-3">
-            {staffData.approver_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.approver_name} />}
-            {staffData.approver_designation && <InfoRow label={bn ? 'পদবী: ' : 'Designation: '} value={staffData.approver_designation} />}
-            {staffData.approver_date && <InfoRow label={bn ? 'তারিখ: ' : 'Date: '} value={staffData.approver_date} />}
+            {approver.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={approver.name} />}
+            {approver.position && <InfoRow label={bn ? 'পদবী: ' : 'Position: '} value={approver.position} />}
+            {approver.date && <InfoRow label={bn ? 'তারিখ: ' : 'Date: '} value={approver.date} />}
+          </div>
+        </div>
+      )}
+
+      {/* Documents */}
+      {docs.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ডকুমেন্টস' : 'Documents'}</h4>
+          <div className="space-y-2">
+            {docs.map((doc: any, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-sm p-2 rounded-lg bg-secondary/50">
+                <FileText className="w-4 h-4 text-primary shrink-0" />
+                <span className="flex-1 truncate">{doc.name || doc.type || `Document ${i + 1}`}</span>
+                {doc.url && (
+                  <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline shrink-0">
+                    {bn ? 'দেখুন' : 'View'}
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
