@@ -296,6 +296,7 @@ const FeeTypeManager = () => {
                   {bn ? '🔄 মাসিক ফি — প্রতিটি ছাত্রের জন্য প্রতি মাসে আলাদা পেমেন্ট রেকর্ড তৈরি হবে।' : '🔄 Monthly fee — separate payment records will be generated for each month per student.'}
                 </p>
               )}
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">{bn ? 'বিভাগ' : 'Division'}</label>
