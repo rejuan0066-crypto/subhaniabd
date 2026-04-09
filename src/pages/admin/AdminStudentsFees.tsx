@@ -548,6 +548,7 @@ const AdminStudentsFees = () => {
                                 toast.info(bn ? `${s.monthBn} মাস সিলেক্ট করা হয়েছে` : `${s.month} selected`);
                               }}
                               className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
+                                s.status === 'na' ? 'bg-muted/10 border-border/50 text-muted-foreground/30 cursor-default line-through' :
                                 s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 cursor-default' :
                                 s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
                                 s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
@@ -556,7 +557,7 @@ const AdminStudentsFees = () => {
                             >
                               <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                               <div className="text-[10px] mt-0.5">
-                                {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
+                                {s.status === 'na' ? '—' : s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
                               </div>
                             </button>
                           );
