@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 import { buildSingleStudentPrintHtml, buildBulkClassPrintHtml, ReceiptData, ReceiptStyleConfig } from './receiptPrintLayouts';
 
 interface Props {
-  collectorName: string;
+  collectorName?: string;
 }
 
 const FeeReceiptDownload = ({ collectorName }: Props) => {
