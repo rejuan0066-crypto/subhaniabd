@@ -40,17 +40,6 @@ const AdminPayments = () => {
     },
   });
 
-  // Fetch fee_payments with fee_types for category-wise breakdown
-  const { data: feePayments = [] } = useQuery({
-    queryKey: ['fee_payments_dashboard'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('fee_payments')
-        .select('*, fee_types(name, name_bn, fee_category)')
-        .order('created_at', { ascending: false });
-      return data || [];
-    },
-  });
 
   // Dynamically extract unique fee_type values from payments
   const feeTypeOptions = useMemo(() => {
