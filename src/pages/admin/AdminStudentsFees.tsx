@@ -145,7 +145,20 @@ const AdminStudentsFees = () => {
     const currentMonthIndex = now.getMonth();
     const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
     const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
+    // Determine admission month index (0-based) from student's admission_date
+    let admissionMonthIndex = 0; // default: January
+    if (foundStudent?.admission_date) {
+      const admDate = new Date(foundStudent.admission_date);
+      if (!isNaN(admDate.getTime())) {
+        admissionMonthIndex = admDate.getMonth();
+      }
+    }
+
     return MONTHS_EN.map((monthEn, i) => {
+      // Month before admission → not applicable
+      if (i < admissionMonthIndex) {
+        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+      }
       if (applicableMonths && !applicableMonths.includes(monthEn)) {
         return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
       }
