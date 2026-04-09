@@ -55,18 +55,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    let initialSessionHandled = false;
+    let mounted = true;
+    let initialDone = false;
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!mounted) return;
+      // Skip the initial INITIAL_SESSION event — we handle it via getSession below
+      if (!initialDone) return;
+
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
       if (nextSession?.user) {
-        queueMicrotask(() => {
-          void fetchRoleAndStatus(nextSession.user.id);
-        });
+        void fetchRoleAndStatus(nextSession.user.id);
       } else {
         setRole(null);
         setUserStatus(null);
@@ -75,8 +78,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      if (initialSessionHandled) return;
-      initialSessionHandled = true;
+      if (!mounted) return;
+      initialDone = true;
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
@@ -89,7 +92,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const value = useMemo<AuthContextType>(
