@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -28,6 +28,7 @@ const AdminStaff = () => {
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewStaff, setViewStaff] = useState<any>(null);
 
   // Account creation dialog state
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
@@ -187,6 +188,7 @@ const AdminStaff = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
+                        <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
                           <button onClick={() => navigate(`/admin/staff/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                         )}
@@ -226,58 +228,135 @@ const AdminStaff = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Create Account Dialog */}
-        <Dialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-primary" />
-                {bn ? 'লগইন অ্যাকাউন্ট তৈরি করুন' : 'Create Login Account'}
-              </DialogTitle>
-            </DialogHeader>
-            {selectedStaff && (
-              <div className="space-y-4 pt-2">
-                <div className="rounded-lg border bg-muted/50 p-3">
-                  <p className="text-sm font-medium text-foreground">{selectedStaff.name_bn}</p>
-                  {selectedStaff.name_en && <p className="text-xs text-muted-foreground">{selectedStaff.name_en}</p>}
-                  <p className="text-xs text-muted-foreground mt-1">{selectedStaff.designation || ''} {selectedStaff.department ? `• ${selectedStaff.department}` : ''}</p>
-                </div>
-                <div>
-                  <Label>{bn ? 'ইমেইল' : 'Email'} *</Label>
-                  <Input className="mt-1" type="email" value={accEmail} onChange={e => setAccEmail(e.target.value)} placeholder={bn ? 'ইমেইল অ্যাড্রেস' : 'Email address'} />
-                </div>
-                <div>
-                  <Label>{bn ? 'পাসওয়ার্ড' : 'Password'} *</Label>
-                  <div className="relative mt-1">
-                    <Input className="pr-10" type={showPassword ? 'text' : 'password'} value={accPassword} onChange={e => setAccPassword(e.target.value)} placeholder={bn ? 'কমপক্ষে ৬ অক্ষর' : 'Min 6 characters'} />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <Label>{bn ? 'রোল' : 'Role'} *</Label>
-                  <Select value={accRole} onValueChange={setAccRole}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">{bn ? '🚫 রোল ছাড়া (ঐচ্ছিক)' : '🚫 No Role (Optional)'}</SelectItem>
-                      <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
-                      <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={handleCreateAccount} disabled={accCreating} className="w-full btn-primary-gradient">
-                  {accCreating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
-                  {bn ? 'অ্যাকাউন্ট তৈরি করুন' : 'Create Account'}
-                </Button>
-              </div>
-            )}
+
+        {/* Staff Profile Detail Dialog */}
+        <Dialog open={!!viewStaff} onOpenChange={o => { if (!o) setViewStaff(null); }}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{bn ? 'স্টাফ/শিক্ষক প্রোফাইল' : 'Staff/Teacher Profile'}</DialogTitle></DialogHeader>
+            {viewStaff && <StaffProfileView staff={viewStaff} bn={bn} />}
           </DialogContent>
         </Dialog>
       </div>
     </AdminLayout>
+  );
+};
+
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div className="text-sm">
+    <span className="text-muted-foreground">{label}</span>
+    <span className="text-foreground">{value || '-'}</span>
+  </div>
+);
+
+const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
+  const staffData = staff.staff_data || {};
+  
+  return (
+    <div className="space-y-5 py-4">
+      {/* Header with photo */}
+      <div className="flex items-start gap-4">
+        {staff.photo_url ? (
+          <img src={staff.photo_url} className="w-24 h-28 rounded-lg object-cover border" alt="" />
+        ) : (
+          <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">
+            <User className="w-10 h-10" />
+          </div>
+        )}
+        <div className="flex-1 space-y-1">
+          <h3 className="text-lg font-bold text-foreground">{staff.name_bn || '-'}</h3>
+          {staff.name_en && <p className="text-sm text-muted-foreground">{staff.name_en}</p>}
+          <p className="text-sm text-primary font-medium">{staff.designation || '-'}</p>
+          <p className="text-xs text-muted-foreground">{staff.department || ''}</p>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${staff.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+          </span>
+        </div>
+      </div>
+
+      {/* Personal Info */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow label={bn ? 'জন্ম তারিখ: ' : 'DOB: '} value={staff.date_of_birth || '-'} />
+          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={staff.religion || '-'} />
+          <InfoRow label={bn ? 'NID: ' : 'NID: '} value={staff.nid || '-'} />
+          <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staff.phone || '-'} />
+          <InfoRow label={bn ? 'ইমেইল: ' : 'Email: '} value={staff.email || '-'} />
+          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={staff.residence_type || '-'} />
+          <div className="col-span-2">
+            <InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staff.address || '-'} />
+          </div>
+        </div>
+      </div>
+
+      {/* Employment Info */}
+      <div className="space-y-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'কর্মসংস্থান তথ্য' : 'Employment Info'}</h4>
+        <div className="grid grid-cols-2 gap-3">
+          <InfoRow label={bn ? 'কর্মের ধরন: ' : 'Employment Type: '} value={staff.employment_type || '-'} />
+          <InfoRow label={bn ? 'যোগদানের তারিখ: ' : 'Joining Date: '} value={staff.joining_date || '-'} />
+          <InfoRow label={bn ? 'শিক্ষাগত যোগ্যতা: ' : 'Education: '} value={staff.education || '-'} />
+          <InfoRow label={bn ? 'অভিজ্ঞতা: ' : 'Experience: '} value={staff.experience || '-'} />
+          <InfoRow label={bn ? 'বেতন: ' : 'Salary: '} value={staff.salary ? `৳${staff.salary}` : '-'} />
+          <InfoRow label={bn ? 'পূর্বের প্রতিষ্ঠান: ' : 'Previous Institute: '} value={staff.previous_institute || '-'} />
+          <InfoRow label={bn ? 'ডিউটি শুরু: ' : 'Duty Start: '} value={staff.duty_start_time || '-'} />
+          <InfoRow label={bn ? 'ডিউটি শেষ: ' : 'Duty End: '} value={staff.duty_end_time || '-'} />
+        </div>
+      </div>
+
+      {/* Father/Mother from staff_data */}
+      {(staffData.father_name || staffData.mother_name || staffData.guardian_name) && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পারিবারিক তথ্য' : 'Family Info'}</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {staffData.father_name && <InfoRow label={bn ? 'পিতা: ' : 'Father: '} value={staffData.father_name} />}
+            {staffData.father_occupation && <InfoRow label={bn ? 'পিতার পেশা: ' : "Father's Occupation: "} value={staffData.father_occupation} />}
+            {staffData.father_phone && <InfoRow label={bn ? 'পিতার ফোন: ' : "Father's Phone: "} value={staffData.father_phone} />}
+            {staffData.mother_name && <InfoRow label={bn ? 'মাতা: ' : 'Mother: '} value={staffData.mother_name} />}
+            {staffData.mother_occupation && <InfoRow label={bn ? 'মাতার পেশা: ' : "Mother's Occupation: "} value={staffData.mother_occupation} />}
+            {staffData.mother_phone && <InfoRow label={bn ? 'মাতার ফোন: ' : "Mother's Phone: "} value={staffData.mother_phone} />}
+          </div>
+        </div>
+      )}
+
+      {/* Guardian from staff_data */}
+      {(staffData.guardian_name || staffData.guardian_relation) && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অভিভাবক তথ্য' : 'Guardian Info'}</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {staffData.guardian_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.guardian_name} />}
+            {staffData.guardian_relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={staffData.guardian_relation} />}
+            {staffData.guardian_phone && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staffData.guardian_phone} />}
+            {staffData.guardian_address && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staffData.guardian_address} /></div>}
+          </div>
+        </div>
+      )}
+
+      {/* Referee from staff_data */}
+      {(staffData.referee_name || staffData.referee_designation) && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পরিচয়দাতা' : 'Referee'}</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {staffData.referee_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.referee_name} />}
+            {staffData.referee_designation && <InfoRow label={bn ? 'পদবী: ' : 'Designation: '} value={staffData.referee_designation} />}
+            {staffData.referee_phone && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staffData.referee_phone} />}
+            {staffData.referee_address && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={staffData.referee_address} /></div>}
+          </div>
+        </div>
+      )}
+
+      {/* Approver from staff_data */}
+      {(staffData.approver_name || staffData.approver_designation) && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অনুমোদনকারী' : 'Approver'}</h4>
+          <div className="grid grid-cols-2 gap-3">
+            {staffData.approver_name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={staffData.approver_name} />}
+            {staffData.approver_designation && <InfoRow label={bn ? 'পদবী: ' : 'Designation: '} value={staffData.approver_designation} />}
+            {staffData.approver_date && <InfoRow label={bn ? 'তারিখ: ' : 'Date: '} value={staffData.approver_date} />}
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
