@@ -29,6 +29,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const fetchedForUser = useRef<string | null>(null);
 
+  const clearAuthState = () => {
+    setUser(null);
+    setSession(null);
+    setRole(null);
+    setUserStatus(null);
+    fetchedForUser.current = null;
+    setLoading(false);
+  };
+
   const fetchRoleAndStatus = async (userId: string) => {
     // Prevent duplicate fetches for the same user
     if (fetchedForUser.current === userId) {
@@ -64,47 +73,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
 
-    // 1. Restore session first
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    const processSession = (nextSession: Session | null, options?: { forceRefetch?: boolean }) => {
       if (!mounted) return;
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-
-      if (currentSession?.user) {
-        fetchRoleAndStatus(currentSession.user.id);
-      } else {
-        setRole(null);
-        setUserStatus(null);
-        setLoading(false);
-      }
-    });
-
-    // 2. Listen for subsequent auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (!mounted) return;
-
-      // Only act on meaningful events, skip noisy ones
-      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-        return;
-      }
 
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
-      if (event === 'SIGNED_OUT' || !nextSession?.user) {
-        setRole(null);
-        setUserStatus(null);
-        fetchedForUser.current = null;
-        setLoading(false);
+      if (!nextSession?.user) {
+        clearAuthState();
         return;
       }
 
-      // SIGNED_IN or USER_UPDATED — fetch role (dedup handled inside)
-      if (event === 'SIGNED_IN') {
-        // Reset so we re-fetch for fresh login
+      if (options?.forceRefetch) {
         fetchedForUser.current = null;
       }
-      fetchRoleAndStatus(nextSession.user.id);
+
+      void fetchRoleAndStatus(nextSession.user.id);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!mounted) return;
+
+      window.setTimeout(() => {
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT') {
+          clearAuthState();
+          return;
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          setSession(nextSession);
+          setUser(nextSession?.user ?? null);
+          return;
+        }
+
+        processSession(nextSession, {
+          forceRefetch: event === 'SIGNED_IN' || event === 'USER_UPDATED',
+        });
+      }, 0);
+    });
+
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (!mounted) return;
+      processSession(currentSession);
     });
 
     return () => {
@@ -126,11 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
       signOut: async () => {
         await supabase.auth.signOut();
-        setUser(null);
-        setSession(null);
-        setRole(null);
-        setUserStatus(null);
-        fetchedForUser.current = null;
+        clearAuthState();
       },
     }),
     [user, session, loading, role, userStatus]
