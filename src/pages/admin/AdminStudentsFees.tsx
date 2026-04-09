@@ -534,6 +534,12 @@ const AdminStudentsFees = () => {
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                         {statuses.map(s => {
                           const canPay = s.status === 'due' || s.status === 'unpaid';
+                          if (s.status === 'na') return (
+                            <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                              <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
+                              <div className="text-[10px] mt-0.5">—</div>
+                            </div>
+                          );
                           return (
                             <button
                               key={s.month}
