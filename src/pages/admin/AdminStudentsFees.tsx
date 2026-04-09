@@ -365,6 +365,7 @@ const AdminStudentsFees = () => {
     setSelectedFeeTypeObj(null);
     setAmount('');
     setPaymentMethod('cash');
+    setPaymentMonth('');
     setTransactionId('');
     setFoundStudent(null);
     setRegNo('');
