@@ -291,7 +291,7 @@ const FeeTypeManager = () => {
             </div>
             <div>
               <label className="text-sm font-medium">{bn ? 'পেমেন্ট ফ্রিকোয়েন্সি' : 'Payment Frequency'}</label>
-              <Select value={form.payment_frequency} onValueChange={v => { console.log('freq changed:', v); setForm(p => ({ ...p, payment_frequency: v })); }}>
+              <Select value={form.payment_frequency} onValueChange={v => setForm(p => ({ ...p, payment_frequency: v, applicable_months: v === 'one-time' ? [] : p.applicable_months }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="one-time">{bn ? 'একবার (One-time)' : 'One-time'}</SelectItem>
@@ -299,9 +299,55 @@ const FeeTypeManager = () => {
                 </SelectContent>
               </Select>
               {form.payment_frequency === 'monthly' && (
-                <p className="text-xs text-primary bg-primary/5 rounded-lg px-3 py-2 mt-2">
-                  {bn ? '🔄 মাসিক ফি — প্রতিটি ছাত্রের জন্য প্রতি মাসে আলাদা পেমেন্ট রেকর্ড তৈরি হবে।' : '🔄 Monthly fee — separate payment records will be generated for each month per student.'}
-                </p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">{bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}</label>
+                    <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
+                      setForm(p => ({
+                        ...p,
+                        applicable_months: p.applicable_months.length === 12 ? [] : [...MONTHS_EN]
+                      }));
+                    }}>
+                      {form.applicable_months.length === 12 ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {MONTHS_EN.map((month, i) => {
+                      const isSelected = form.applicable_months.includes(month);
+                      return (
+                        <button
+                          key={month}
+                          type="button"
+                          onClick={() => {
+                            setForm(p => ({
+                              ...p,
+                              applicable_months: isSelected
+                                ? p.applicable_months.filter(m => m !== month)
+                                : [...p.applicable_months, month]
+                            }));
+                          }}
+                          className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-primary/10 border-primary text-primary ring-1 ring-primary'
+                              : 'bg-muted/30 border-border text-muted-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {bn ? MONTHS_BN[i] : month.slice(0, 3)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {form.applicable_months.length === 0 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      {bn ? '⚠ কোনো মাস নির্বাচিত নয় — সব মাসে প্রযোজ্য হবে' : '⚠ No months selected — will apply to all months'}
+                    </p>
+                  )}
+                  {form.applicable_months.length > 0 && (
+                    <p className="text-xs text-primary bg-primary/5 rounded-lg px-3 py-1.5">
+                      ✓ {form.applicable_months.length} {bn ? 'টি মাসে প্রযোজ্য' : 'months selected'}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3">
