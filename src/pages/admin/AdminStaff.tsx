@@ -154,11 +154,11 @@ const AdminStaff = () => {
                           {s.photo_url ? (
                             <img src={s.photo_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent-foreground font-bold text-sm">{s.name_bn?.[0] || '?'}</div>
+                            <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent-foreground font-bold text-sm">{(bn ? s.name_bn : s.name_en)?.[0] || '?'}</div>
                           )}
                           <div>
-                            <span className="font-medium text-foreground text-sm block">{s.name_bn}</span>
-                            {s.name_en && <span className="text-xs text-muted-foreground">{s.name_en}</span>}
+                            <span className="font-medium text-foreground text-sm block">{bn ? (s.name_bn || s.name_en) : (s.name_en || s.name_bn)}</span>
+                            {s.name_bn && s.name_en && <span className="text-xs text-muted-foreground">{bn ? s.name_en : s.name_bn}</span>}
                           </div>
                         </div>
                       </td>
@@ -248,6 +248,29 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const translateReligion = (val: string | undefined, bn: boolean): string => {
+  if (!val) return '-';
+  const map: Record<string, [string, string]> = {
+    islam: ['ইসলাম', 'Islam'], hinduism: ['হিন্দু', 'Hinduism'], christianity: ['খ্রিস্টান', 'Christianity'], buddhism: ['বৌদ্ধ', 'Buddhism'], other: ['অন্যান্য', 'Other'],
+  };
+  const m = map[val.toLowerCase()];
+  return m ? m[bn ? 0 : 1] : val;
+};
+
+const translateGender = (val: string | undefined, bn: boolean): string => {
+  if (!val) return '-';
+  const map: Record<string, [string, string]> = { male: ['পুরুষ', 'Male'], female: ['মহিলা', 'Female'], other: ['অন্যান্য', 'Other'] };
+  const m = map[val.toLowerCase()];
+  return m ? m[bn ? 0 : 1] : val;
+};
+
+const translateResidence = (val: string | undefined, bn: boolean): string => {
+  if (!val) return '-';
+  const map: Record<string, [string, string]> = { residential: ['আবাসিক', 'Residential'], non_residential: ['অনাবাসিক', 'Non-Residential'], day_scholar: ['ডে স্কলার', 'Day Scholar'] };
+  const m = map[val.toLowerCase()];
+  return m ? m[bn ? 0 : 1] : val;
+};
+
 const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
   const sd = staff.staff_data || {};
   const parents = sd.parents || {};
@@ -274,8 +297,8 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
           </div>
         )}
         <div className="flex-1 space-y-1">
-          <h3 className="text-lg font-bold text-foreground">{staff.name_bn || '-'}</h3>
-          {staff.name_en && <p className="text-sm text-muted-foreground">{staff.name_en}</p>}
+          <h3 className="text-lg font-bold text-foreground">{bn ? (staff.name_bn || staff.name_en) : (staff.name_en || staff.name_bn) || '-'}</h3>
+          {staff.name_bn && staff.name_en && <p className="text-sm text-muted-foreground">{bn ? staff.name_en : staff.name_bn}</p>}
           <p className="text-sm text-primary font-medium">{staff.designation || '-'}</p>
           <p className="text-xs text-muted-foreground">{staff.department || ''}</p>
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${staff.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
@@ -289,11 +312,12 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</h4>
         <div className="grid grid-cols-2 gap-3">
           <InfoRow label={bn ? 'জন্ম তারিখ: ' : 'DOB: '} value={staff.date_of_birth || '-'} />
-          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={staff.religion || sd.religion || '-'} />
+          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={translateReligion(staff.religion || sd.religion, bn)} />
+          <InfoRow label={bn ? 'লিঙ্গ: ' : 'Gender: '} value={translateGender(staff.gender || sd.gender, bn)} />
           <InfoRow label={bn ? 'NID: ' : 'NID: '} value={staff.nid || '-'} />
           <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staff.phone ? `${sd.mobile_code || ''}${staff.phone}` : '-'} />
           <InfoRow label={bn ? 'ইমেইল: ' : 'Email: '} value={staff.email || '-'} />
-          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={staff.residence_type || sd.residence_type || '-'} />
+          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={translateResidence(staff.residence_type || sd.residence_type, bn)} />
         </div>
       </div>
 
