@@ -144,11 +144,12 @@ const FeeTypeManager = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time' });
+    setForm({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time', applicable_months: [] });
     setEditId(null);
   };
 
   const openEdit = (item: any) => {
+    const months = Array.isArray(item.applicable_months) ? item.applicable_months : [];
     setForm({
       name: item.name,
       name_bn: item.name_bn,
@@ -158,6 +159,7 @@ const FeeTypeManager = () => {
       class_id: item.class_id || '',
       session_id: item.session_id || '',
       payment_frequency: item.payment_frequency || 'one-time',
+      applicable_months: months,
     });
     setEditId(item.id);
     setOpen(true);
