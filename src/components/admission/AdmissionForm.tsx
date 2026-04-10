@@ -1159,25 +1159,9 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             <AlertCircle className="w-3 h-3" />
             {bn ? 'কমপক্ষে একটি NID এবং একটি মোবাইল নম্বর প্রয়োজন' : 'At least one NID and one mobile number required'}
           </p>
-        </div>
-      );
-    }
-
-    // Parent address section (after mother info)
-    if (sectionKey === 'student_address') {
-      return (
-        <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-md">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {sectionFields.map(f => {
-              const key = f.default_value;
-              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
-              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
-              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
-            })}
-          </div>
           {/* Parent address */}
-          <div className="flex items-center gap-2 mt-4">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary mt-4">{bn ? 'পিতা/মাতার ঠিকানা' : 'Parent Address'}</h3>
+          <div className="flex items-center gap-2 mt-2">
             <Checkbox id="parentAddrSame" checked={parentAddrSameAsStudent} onCheckedChange={v => {
               setParentAddrSameAsStudent(!!v);
               if (v) { setParentPermanentAddr({ ...permanentAddr }); setParentPresentAddr(sameAddress ? { ...permanentAddr } : { ...presentAddr }); }
@@ -1191,6 +1175,26 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                 <Checkbox id="parentSamePres" checked={parentSamePresAddr} onCheckedChange={v => { setParentSamePresAddr(!!v); if (v) setParentPresentAddr({ ...parentPermanentAddr }); }} />
                 <Label htmlFor="parentSamePres">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতো' : 'Present same as permanent'}</Label>
               </div>
+              {!parentSamePresAddr && <AddressFields label={bn ? 'পিতা/মাতার বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // Student address section
+    if (sectionKey === 'student_address') {
+      return (
+        <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-md">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sectionFields.map(f => {
+              const key = f.default_value;
+              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
+            })}
+          </div>
               {!parentSamePresAddr && <AddressFields label={bn ? 'পিতা/মাতার বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
             </>
           )}
