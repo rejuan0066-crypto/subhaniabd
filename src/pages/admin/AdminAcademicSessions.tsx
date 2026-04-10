@@ -217,6 +217,7 @@ const AdminAcademicSessions = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </div>
 
