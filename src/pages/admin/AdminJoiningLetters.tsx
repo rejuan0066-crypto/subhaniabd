@@ -454,7 +454,7 @@ const AdminJoiningLetters = () => {
                           <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="text-left" />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base text-left" style={{ color: 'hsl(var(--primary))' }} />
-                            <p>
+                            <p className="text-center">
                               {viewLetter.letter_type === 'reinstatement'
                                 ? (bn
                                     ? <>এতদ্বারা জানানো যাচ্ছে যে, জনাব <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), পূর্বে পদত্যাগের পর অদ্য <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে পুনরায় কর্মে বহাল করা হয়েছে। আমরা আশা করি, তিনি পূর্বের ন্যায় তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।</>
