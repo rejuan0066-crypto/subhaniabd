@@ -696,6 +696,33 @@ const AdminResignLetters = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Rejoin Confirm */}
+        <AlertDialog open={!!rejoinId} onOpenChange={(o) => { if (!o) setRejoinId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{bn ? 'পুনর্বহাল করতে চান?' : 'Rejoin this staff?'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {bn
+                  ? 'এই স্টাফকে আবার সক্রিয় করা হবে এবং একটি নতুন যোগদান পত্র স্বয়ংক্রিয়ভাবে তৈরি হবে।'
+                  : 'This staff will be reactivated and a new joining letter will be automatically created.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{bn ? 'না' : 'Cancel'}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  const letter = letters.find((l: any) => l.id === rejoinId);
+                  if (letter) rejoinMutation.mutate(letter);
+                }}
+                className="bg-primary text-primary-foreground"
+              >
+                {rejoinMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {bn ? 'হ্যাঁ, পুনর্বহাল করুন' : 'Yes, Rejoin'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );
