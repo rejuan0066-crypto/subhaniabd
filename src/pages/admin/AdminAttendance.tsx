@@ -784,6 +784,22 @@ const AdminAttendance = () => {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            {entityType === 'student' && (
+              <Button variant="outline" size="sm" onClick={() => setQrPosterOpen(true)}>
+                <QrCode className="h-4 w-4 mr-1" /> {bn ? 'QR পোস্টার' : 'QR Poster'}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={async () => {
+              toast.loading(bn ? 'দৈনিক সারসংক্ষেপ তৈরি হচ্ছে...' : 'Generating daily summary...');
+              try {
+                const res = await supabase.functions.invoke('daily-attendance-summary', { body: { date: selectedDate } });
+                toast.dismiss();
+                if (res.error) throw res.error;
+                toast.success(bn ? `সারসংক্ষেপ তৈরি হয়েছে! ${res.data?.notifications_created || 0}টি বিজ্ঞপ্তি পাঠানো হয়েছে` : `Summary created! ${res.data?.notifications_created || 0} notifications sent`);
+              } catch (e: any) { toast.dismiss(); toast.error(e.message || 'Failed'); }
+            }}>
+              <Send className="h-4 w-4 mr-1" /> {bn ? 'দৈনিক সারসংক্ষেপ' : 'Daily Summary'}
+            </Button>
             <Button variant="outline" size="sm" onClick={handleDownloadCSV}>
               <Download className="h-4 w-4 mr-1" /> {bn ? 'ডাউনলোড' : 'Download'}
             </Button>
