@@ -77,29 +77,37 @@ const AdminJoiningLetters = () => {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  @page { size: A4; margin: 20mm; }
-  body {
+  @page { size: A4; margin: 0; }
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
     font-family: 'Noto Serif Bengali', 'Georgia', serif;
     color: #1a1a1a;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background: #fff;
+    overflow: hidden;
   }
   .page {
-    width: 100%;
-    max-width: 210mm;
-    margin: 0 auto;
-    padding: 10mm;
+    width: 210mm;
+    height: 297mm;
+    padding: 12mm;
+    box-sizing: border-box;
     border: 3px double #444;
     position: relative;
-    min-height: calc(297mm - 40mm);
+    break-inside: avoid;
+    page-break-inside: avoid;
+    overflow: hidden;
   }
   .inner-border {
     border: 1px solid #ccc;
     padding: 8mm;
     position: relative;
     overflow: hidden;
-    min-height: calc(297mm - 60mm);
+    height: calc(297mm - 24mm - 6px);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
   }
