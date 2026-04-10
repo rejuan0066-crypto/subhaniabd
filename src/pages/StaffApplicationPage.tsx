@@ -44,6 +44,14 @@ const DESIGNATIONS = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
+const DOC_TYPES = [
+  { value: 'nid', bn: 'জাতীয় পরিচয়পত্র', en: 'NID' },
+  { value: 'birth_certificate', bn: 'জন্ম সনদ', en: 'Birth Certificate' },
+  { value: 'education_certificate', bn: 'শিক্ষা সনদ', en: 'Education Certificate' },
+  { value: 'citizenship_certificate', bn: 'নাগরিকত্ব সনদ', en: 'Citizenship Certificate' },
+  { value: 'other', bn: 'অন্যান্য', en: 'Other' },
+];
+
 const StaffApplicationPage = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
