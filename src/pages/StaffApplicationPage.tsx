@@ -502,6 +502,7 @@ const StaffApplicationPage = () => {
           )
 
           {/* Section 4: Relatives Identifier */}
+          {isVisible('section_relatives') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'আত্মীয় শনাক্তকারীর তথ্য (Relatives Identifier Information)' : 'Relatives Identifier Information'}
@@ -526,6 +527,7 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Submit */}
           <Button type="submit" className="btn-primary-gradient w-full text-lg py-6" disabled={saveMutation.isPending}>
