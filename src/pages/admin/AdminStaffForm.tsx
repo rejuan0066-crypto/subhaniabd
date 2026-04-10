@@ -428,39 +428,46 @@ const AdminStaffForm = () => {
     e.preventDefault();
     const errors: Record<string, string> = {};
 
-    if (!firstName.trim()) errors['first_name'] = bn ? 'প্রথম নাম আবশ্যক' : 'First name required';
-    if (!lastName.trim()) errors['last_name'] = bn ? 'শেষ নাম আবশ্যক' : 'Last name required';
-    if (!mobile.trim()) errors['mobile'] = bn ? 'মোবাইল নম্বর আবশ্যক' : 'Mobile required';
-    if (!employmentType) errors['employment_type'] = bn ? 'চাকরির ধরন নির্বাচন করুন' : 'Select employment type';
-    if (!designation) errors['designation'] = bn ? 'পদবী নির্বাচন করুন' : 'Select designation';
-    if (!residenceType) errors['residence_type'] = bn ? 'আবাসিক ধরন নির্বাচন করুন' : 'Select residence type';
-    if (!dob) errors['dob'] = bn ? 'জন্ম তারিখ আবশ্যক' : 'Date of birth required';
-    if (!religion) errors['religion'] = bn ? 'ধর্ম নির্বাচন করুন' : 'Select religion';
-    if (!nid || (nid.length !== 10 && nid.length !== 17)) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
-    if (!education.trim()) errors['education'] = bn ? 'শিক্ষাগত যোগ্যতা আবশ্যক' : 'Education required';
-    if (experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
-    if (!salary) errors['salary'] = bn ? 'বেতন আবশ্যক' : 'Salary required';
+    // Helper: only validate if field is active AND required (from custom builder config)
+    const reqCheck = (key: string, value: string, msgBn: string, msgEn: string) => {
+      if (isFieldActive(key) && isFieldRequired(key) && !value.trim()) {
+        errors[key] = bn ? msgBn : msgEn;
+      }
+    };
+
+    reqCheck('first_name', firstName, 'প্রথম নাম আবশ্যক', 'First name required');
+    reqCheck('last_name', lastName, 'শেষ নাম আবশ্যক', 'Last name required');
+    reqCheck('mobile', mobile, 'মোবাইল নম্বর আবশ্যক', 'Mobile required');
+    if (isFieldActive('employment_type') && isFieldRequired('employment_type') && !employmentType) errors['employment_type'] = bn ? 'চাকরির ধরন নির্বাচন করুন' : 'Select employment type';
+    if (isFieldActive('designation') && isFieldRequired('designation') && !designation) errors['designation'] = bn ? 'পদবী নির্বাচন করুন' : 'Select designation';
+    if (isFieldActive('residence_type') && isFieldRequired('residence_type') && !residenceType) errors['residence_type'] = bn ? 'আবাসিক ধরন নির্বাচন করুন' : 'Select residence type';
+    if (isFieldActive('dob') && isFieldRequired('dob') && !dob) errors['dob'] = bn ? 'জন্ম তারিখ আবশ্যক' : 'Date of birth required';
+    if (isFieldActive('religion') && isFieldRequired('religion') && !religion) errors['religion'] = bn ? 'ধর্ম নির্বাচন করুন' : 'Select religion';
+    if (isFieldActive('nid') && isFieldRequired('nid') && (!nid || (nid.length !== 10 && nid.length !== 17))) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
+    reqCheck('education', education, 'শিক্ষাগত যোগ্যতা আবশ্যক', 'Education required');
+    if (isFieldActive('prev_institute') && experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
+    reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
 
     // Parents validation
-    if (!fatherName.trim()) errors['father_name'] = bn ? 'পিতার নাম আবশ্যক' : 'Father name required';
-    if (!fatherNid && !motherNid) errors['parent_nid'] = bn ? 'অন্তত একটি NID আবশ্যক' : 'At least one parent NID required';
-    if (!fatherMobile && !motherMobile) errors['parent_mobile'] = bn ? 'অন্তত একটি মোবাইল নম্বর আবশ্যক' : 'At least one parent mobile required';
-    if (!fatherOccupation.trim()) errors['father_occupation'] = bn ? 'পিতার পেশা আবশ্যক' : 'Father occupation required';
+    reqCheck('father_name', fatherName, 'পিতার নাম আবশ্যক', 'Father name required');
+    if (isFieldActive('father_nid') && isFieldActive('mother_nid') && !fatherNid && !motherNid) errors['parent_nid'] = bn ? 'অন্তত একটি NID আবশ্যক' : 'At least one parent NID required';
+    if (isFieldActive('father_mobile') && isFieldActive('mother_mobile') && !fatherMobile && !motherMobile) errors['parent_mobile'] = bn ? 'অন্তত একটি মোবাইল নম্বর আবশ্যক' : 'At least one parent mobile required';
+    reqCheck('father_occupation', fatherOccupation, 'পিতার পেশা আবশ্যক', 'Father occupation required');
 
     // Guardian validation
-    if (!guardianType) errors['guardian_type'] = bn ? 'অভিভাবক নির্বাচন করুন' : 'Select guardian';
+    if (isFieldActive('guardian_type') && isFieldRequired('guardian_type') && !guardianType) errors['guardian_type'] = bn ? 'অভিভাবক নির্বাচন করুন' : 'Select guardian';
     if (guardianType === 'other') {
-      if (!guardianName.trim()) errors['guardian_name'] = bn ? 'অভিভাবকের নাম আবশ্যক' : 'Guardian name required';
-      if (!guardianRelation.trim()) errors['guardian_relation'] = bn ? 'সম্পর্ক আবশ্যক' : 'Relation required';
-      if (!guardianMobile.trim()) errors['guardian_mobile'] = bn ? 'মোবাইল আবশ্যক' : 'Mobile required';
-      if (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17)) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+      reqCheck('guardian_name', guardianName, 'অভিভাবকের নাম আবশ্যক', 'Guardian name required');
+      reqCheck('guardian_relation', guardianRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+      reqCheck('guardian_mobile', guardianMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+      if (isFieldActive('guardian_nid') && isFieldRequired('guardian_nid') && (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17))) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
     }
 
     // Identifier validation
-    if (!identifierName.trim()) errors['identifier_name'] = bn ? 'পরিচয়দাতার নাম আবশ্যক' : 'Identifier name required';
-    if (!identifierRelation.trim()) errors['identifier_relation'] = bn ? 'সম্পর্ক আবশ্যক' : 'Relation required';
-    if (!identifierMobile.trim()) errors['identifier_mobile'] = bn ? 'মোবাইল আবশ্যক' : 'Mobile required';
-    if (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17)) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
+    reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+    reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+    if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
