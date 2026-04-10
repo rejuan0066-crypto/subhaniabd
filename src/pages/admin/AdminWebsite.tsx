@@ -1895,6 +1895,7 @@ const FormSettingsTab = ({ language }: { language: string }) => {
 const StaffFormFieldsControl = ({ language }: { language: string }) => {
   const queryClient = useQueryClient();
   const [fields, setFields] = useState<Record<string, boolean>>({});
+  const [footerText, setFooterText] = useState('');
   const [saving, setSaving] = useState(false);
 
   const { data: savedFields, isLoading } = useQuery({
@@ -1905,19 +1906,26 @@ const StaffFormFieldsControl = ({ language }: { language: string }) => {
     },
   });
 
+  const { data: savedFooter } = useQuery({
+    queryKey: ['staff-form-footer-text'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_footer_text').maybeSingle();
+      return (data?.value as string) || '';
+    },
+  });
+
   useEffect(() => {
     const defaults: Record<string, boolean> = {};
     Object.keys(STAFF_FORM_FIELD_LABELS).forEach(k => { defaults[k] = true; });
-    if (savedFields) {
-      setFields({ ...defaults, ...savedFields });
-    } else {
-      setFields(defaults);
-    }
+    if (savedFields) setFields({ ...defaults, ...savedFields });
+    else setFields(defaults);
   }, [savedFields]);
 
-  const toggle = (key: string) => {
-    setFields(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+  useEffect(() => {
+    if (savedFooter !== undefined) setFooterText(savedFooter);
+  }, [savedFooter]);
+
+  const toggle = (key: string) => setFields(prev => ({ ...prev, [key]: !prev[key] }));
 
   const saveStaffFields = async () => {
     setSaving(true);
@@ -1928,9 +1936,18 @@ const StaffFormFieldsControl = ({ language }: { language: string }) => {
       } else {
         await supabase.from('website_settings').insert({ key: 'staff_form_fields', value: fields as any });
       }
+
+      const { data: existingFooter } = await supabase.from('website_settings').select('id').eq('key', 'staff_form_footer_text').maybeSingle();
+      if (existingFooter) {
+        await supabase.from('website_settings').update({ value: footerText as any, updated_at: new Date().toISOString() }).eq('key', 'staff_form_footer_text');
+      } else {
+        await supabase.from('website_settings').insert({ key: 'staff_form_footer_text', value: footerText as any });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['staff-form-fields-config'] });
-      toast.success(language === 'bn' ? 'স্টাফ ফর্ম ফিল্ড সেটিংস সংরক্ষিত!' : 'Staff form field settings saved!');
-    } catch {
+      queryClient.invalidateQueries({ queryKey: ['staff-form-footer-text'] });
+      toast.success(language === 'bn' ? 'সংরক্ষিত হয়েছে' : 'Saved successfully');
+    } catch (err) {
       toast.error(language === 'bn' ? 'সংরক্ষণে ত্রুটি' : 'Error saving');
     }
     setSaving(false);
@@ -1984,6 +2001,15 @@ const StaffFormFieldsControl = ({ language }: { language: string }) => {
           );
         })}
       </div>
+
+      {/* Footer Paragraph */}
+      <h4 className="text-sm font-semibold text-foreground mb-2">{language === 'bn' ? 'ফর্মের নিচে প্যারাগ্রাফ / নির্দেশনা' : 'Footer Paragraph / Instructions'}</h4>
+      <textarea
+        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mb-4"
+        placeholder={language === 'bn' ? 'ফর্মের নিচে যে টেক্সট/নির্দেশনা দেখাতে চান তা লিখুন...' : 'Enter text/instructions to show at the bottom of the form...'}
+        value={footerText}
+        onChange={e => setFooterText(e.target.value)}
+      />
 
       <Button className="btn-primary-gradient w-full" onClick={saveStaffFields} disabled={saving}>
         <Save className="w-4 h-4 mr-2" />

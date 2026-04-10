@@ -66,6 +66,15 @@ const StaffApplicationPage = () => {
     },
   });
 
+  // Load footer text
+  const { data: footerText } = useQuery({
+    queryKey: ['staff-form-footer-text-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_footer_text').maybeSingle();
+      return (data?.value as string) || '';
+    },
+  });
+
   const isVisible = (key: string) => fieldConfig?.[key] !== false;
 
   // Form state
@@ -527,6 +536,13 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
+          )}
+
+          {/* Footer Text */}
+          {footerText && (
+            <div className="p-4 rounded-lg bg-secondary/50 border border-border text-sm text-foreground whitespace-pre-wrap">
+              {footerText}
+            </div>
           )}
 
           {/* Submit */}
