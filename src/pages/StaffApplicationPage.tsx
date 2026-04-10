@@ -66,6 +66,15 @@ const StaffApplicationPage = () => {
     },
   });
 
+  // Load footer text
+  const { data: footerText } = useQuery({
+    queryKey: ['staff-form-footer-text-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_footer_text').maybeSingle();
+      return (data?.value as string) || '';
+    },
+  });
+
   const isVisible = (key: string) => fieldConfig?.[key] !== false;
 
   // Form state
