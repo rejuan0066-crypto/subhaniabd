@@ -54,15 +54,10 @@ const ResultFind = () => {
       const examSession = examSessions.find((es: any) => es.id === examSessionId);
       if (!examSession) throw new Error('Session not found');
 
-      // Find published exams for this session
-      const { data: exams } = await supabase
-        .from('exams')
-        .select('id, division_id')
-        .eq('exam_session', examSession.name)
-        .eq('exam_type', examSession.exam_type)
-        .eq('is_published', true);
+      // Check if this exam session is published
+      const isPublished = (examSession as any).is_published;
 
-      if (!exams?.length) {
+      if (!isPublished) {
         setError(bn ? 'এই সেশনে কোনো প্রকাশিত ফলাফল নেই' : 'No published results for this session');
         return;
       }
@@ -106,15 +101,8 @@ const ResultFind = () => {
       const { data: classInfo } = await supabase.from('classes').select('*').eq('id', classId).single();
       const divisionId = classInfo?.division_id;
 
-      // Find the published exam for this division
-      const exam = exams.find(e => e.division_id === divisionId);
-      if (!exam) {
-        setError(bn ? 'এই ক্লাসের ফলাফল এখনো প্রকাশিত হয়নি' : 'Results not published for this class yet');
-        return;
-      }
-
       // Load results
-      const { data: results } = await supabase.from('results').select('*').eq('exam_id', exam.id);
+      const { data: results } = await supabase.from('results').select('*').eq('exam_id', examSessionId);
       const marksMap: Record<string, number> = {};
       results?.forEach((r: any) => {
         marksMap[`${r.student_id}_${r.subject_id}`] = r.marks ?? 0;
