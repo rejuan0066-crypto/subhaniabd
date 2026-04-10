@@ -311,6 +311,7 @@ const AdminJoiningLetters = () => {
                 <TableRow>
                   <TableHead>{bn ? 'পত্র নং' : 'Letter No'}</TableHead>
                   <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
+                  <TableHead>{bn ? 'ধরন' : 'Type'}</TableHead>
                   <TableHead>{bn ? 'পদবী' : 'Designation'}</TableHead>
                   <TableHead>{bn ? 'যোগদানের তারিখ' : 'Joining Date'}</TableHead>
                   <TableHead>{bn ? 'পত্রের তারিখ' : 'Letter Date'}</TableHead>
@@ -324,6 +325,11 @@ const AdminJoiningLetters = () => {
                     <TableCell>
                       <p className="font-medium">{l.staff_name_bn || l.staff_name}</p>
                       {l.staff_name && l.staff_name_bn && <p className="text-xs text-muted-foreground">{l.staff_name}</p>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={l.letter_type === 'reinstatement' ? 'secondary' : 'default'} className="text-xs">
+                        {l.letter_type === 'reinstatement' ? (bn ? 'পুনর্বহাল' : 'Reinstatement') : (bn ? 'যোগদান' : 'Joining')}
+                      </Badge>
                     </TableCell>
                     <TableCell>{l.designation}</TableCell>
                     <TableCell>{l.joining_date ? new Date(l.joining_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
