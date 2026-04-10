@@ -82,77 +82,41 @@ const AdminResults = () => {
     enabled: !!examSessionId,
   });
 
-  // Fetch result status for each class (check if exams+results exist)
+  // Fetch result status for each class (check if results exist for this exam session)
   const { data: classResultStatus = {} } = useQuery({
     queryKey: ['class-result-status', examSessionId, examClasses.map((c: any) => c.id)],
     queryFn: async () => {
       const examSession = examSessions.find((es: any) => es.id === examSessionId);
       if (!examSession) return {};
 
-      const { data: exams, error: examsError } = await supabase
-        .from('exams')
-        .select('id, division_id')
-        .eq('exam_session', examSession.name)
-        .eq('exam_type', examSession.exam_type);
-      if (examsError) throw examsError;
-
-      if (!exams?.length) {
-        const map: Record<string, boolean> = {};
-        examClasses.forEach((c: any) => { map[c.id] = false; });
-        return map;
-      }
-
-      const examIds = exams.map(e => e.id);
       const { data: results, error: resultsError } = await supabase
         .from('results')
-        .select('exam_id')
-        .in('exam_id', examIds);
+        .select('id')
+        .eq('exam_id', examSessionId)
+        .limit(1);
       if (resultsError) throw resultsError;
 
-      const examHasResults = new Set<string>();
-      results?.forEach(r => examHasResults.add(r.exam_id));
-
-      const divisionExamMap: Record<string, boolean> = {};
-      exams.forEach(e => {
-        if (e.division_id) {
-          divisionExamMap[e.division_id] = examHasResults.has(e.id);
-        }
-      });
-
+      const hasResults = (results?.length || 0) > 0;
       const map: Record<string, boolean> = {};
       examClasses.forEach((c: any) => {
-        map[c.id] = divisionExamMap[c.division_id] || false;
+        map[c.id] = hasResults;
       });
       return map;
     },
     enabled: showClassList && examClasses.length > 0 && examSessions.length > 0,
   });
 
-  // Fetch publish status for each class
+  // Fetch publish status (now on exam_sessions directly)
   const { data: classPublishStatus = {} } = useQuery({
     queryKey: ['class-publish-status', examSessionId, examClasses.map((c: any) => c.id)],
     queryFn: async () => {
       const examSession = examSessions.find((es: any) => es.id === examSessionId);
       if (!examSession) return {};
 
-      const { data: exams } = await supabase
-        .from('exams')
-        .select('id, division_id, is_published')
-        .eq('exam_session', examSession.name)
-        .eq('exam_type', examSession.exam_type);
-
-      if (!exams?.length) return {};
-
-      const divisionPublishMap: Record<string, boolean> = {};
-      exams.forEach(e => {
-        if (e.division_id) {
-          divisionPublishMap[e.division_id] = e.is_published || false;
-        }
-      });
-
+      const isPublished = (examSession as any).is_published || false;
       const map: Record<string, boolean> = {};
       examClasses.forEach((c: any) => {
-        map[c.id] = divisionPublishMap[c.division_id] || false;
+        map[c.id] = isPublished;
       });
       return map;
     },
@@ -163,29 +127,14 @@ const AdminResults = () => {
     const examSession = examSessions.find((es: any) => es.id === examSessionId);
     if (!examSession) return;
 
-    const cls = examClasses.find((c: any) => c.id === classId);
-    const divisionId = cls?.division_id;
-
-    const { data: exam } = await supabase
-      .from('exams')
-      .select('id')
-      .eq('exam_session', examSession.name)
-      .eq('exam_type', examSession.exam_type)
-      .eq('division_id', divisionId)
-      .maybeSingle();
-
-    if (!exam?.id) {
-      toast.error(bn ? 'পরীক্ষা পাওয়া যায়নি' : 'Exam not found');
-      return;
-    }
-
-    const { error } = await supabase.from('exams').update({ is_published: publish }).eq('id', exam.id);
+    const { error } = await supabase.from('exam_sessions').update({ is_published: publish } as any).eq('id', examSessionId);
     if (error) {
       toast.error(error.message);
       return;
     }
 
     queryClient.invalidateQueries({ queryKey: ['class-publish-status'] });
+    queryClient.invalidateQueries({ queryKey: ['exam-sessions'] });
     toast.success(publish
       ? (bn ? 'ফলাফল পাবলিশ করা হয়েছে' : 'Result published')
       : (bn ? 'ফলাফল আনপাবলিশ করা হয়েছে' : 'Result unpublished')
@@ -236,41 +185,8 @@ const AdminResults = () => {
 
     // Trigger search after state updates via effect
     setTimeout(async () => {
-      const examSession = examSessions.find((es: any) => es.id === examSessionId);
-      if (!examSession) return;
-
-      const cls = examClasses.find((c: any) => c.id === classId);
-      const classDivisionId = cls?.division_id;
-
-      const { data: existing } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('exam_session', examSession.name)
-        .eq('exam_type', examSession.exam_type)
-        .eq('division_id', classDivisionId)
-        .maybeSingle();
-
-      let examId = existing?.id;
-
-      if (!examId) {
-        const academicSession = academicSessions.find((s: any) => s.id === examYear);
-        const yearStr = academicSession?.name || '';
-        const { data: newExam, error } = await supabase.from('exams').insert({
-          name: `${examSession.name} ${yearStr}`,
-          name_bn: `${examSession.name_bn} ${yearStr}`,
-          exam_year: parseInt(yearStr) || new Date().getFullYear(),
-          exam_session: examSession.name,
-          exam_type: examSession.exam_type,
-          division_id: classDivisionId,
-        }).select().single();
-
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-        examId = newExam.id;
-      }
-
+      // exam_id is now the exam_session id directly
+      const examId = examSessionId;
       try {
         setSelectedExamId(examId);
         await loadResultsForExam(examId);
@@ -291,37 +207,8 @@ const AdminResults = () => {
       return;
     }
 
-    const examSession = examSessions.find((es: any) => es.id === examSessionId);
-    if (!examSession) return;
-
-    const selectedClassObj = examClasses.find((c: any) => c.id === selectedClass);
-    const classDivisionId = selectedClassObj?.division_id;
-
-    const { data: existing, error: existingError } = await supabase
-      .from('exams')
-      .select('*')
-      .eq('exam_session', examSession.name)
-      .eq('exam_type', examSession.exam_type)
-      .eq('division_id', classDivisionId)
-      .maybeSingle();
-
-    if (existingError) { toast.error(existingError.message); return; }
-
-    let examId = existing?.id;
-    if (!examId) {
-      const academicSession = academicSessions.find((s: any) => s.id === examYear);
-      const yearStr = academicSession?.name || '';
-      const { data: newExam, error } = await supabase.from('exams').insert({
-        name: `${examSession.name} ${yearStr}`,
-        name_bn: `${examSession.name_bn} ${yearStr}`,
-        exam_year: parseInt(yearStr) || new Date().getFullYear(),
-        exam_session: examSession.name,
-        exam_type: examSession.exam_type,
-        division_id: classDivisionId,
-      }).select().single();
-      if (error) { toast.error(error.message); return; }
-      examId = newExam.id;
-    }
+    // exam_id is now the exam_session id directly
+    const examId = examSessionId;
 
     try {
       setSelectedExamId(examId);
@@ -404,18 +291,10 @@ const AdminResults = () => {
       const classDivisionId = cls?.division_id;
 
       // Get exam
-      const { data: existing } = await supabase
-        .from('exams')
-        .select('id')
-        .eq('exam_session', examSession.name)
-        .eq('exam_type', examSession.exam_type)
-        .eq('division_id', classDivisionId)
-        .maybeSingle();
-
-      if (!existing?.id) { toast.error(bn ? 'পরীক্ষা পাওয়া যায়নি' : 'Exam not found'); return; }
+      const examId = examSessionId;
 
       // Load results
-      const { data: results } = await supabase.from('results').select('*').eq('exam_id', existing.id);
+      const { data: results } = await supabase.from('results').select('*').eq('exam_id', examId);
       const exportMarksMap: Record<string, number> = {};
       results?.forEach((r: any) => { exportMarksMap[`${r.student_id}_${r.subject_id}`] = r.marks ?? 0; });
 
