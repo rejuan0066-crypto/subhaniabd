@@ -419,7 +419,7 @@ const AdminResignLetters = () => {
                   <SelectContent>
                     {staffList.map((s: any) => (
                       <SelectItem key={s.id} value={s.id}>
-                        {s.name_bn || s.name} {s.designation ? `(${s.designation})` : ''}
+                        {s.name_bn || s.name_en} {s.designation ? `(${s.designation})` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
