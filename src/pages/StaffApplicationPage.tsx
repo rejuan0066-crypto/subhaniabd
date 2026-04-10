@@ -243,7 +243,7 @@ const StaffApplicationPage = () => {
         experience: experience || null,
         previous_institute: prevInstitute || null,
         joining_date: joiningDate || new Date().toISOString().split('T')[0],
-        staff_data: staffData as any,
+        staff_data: { ...staffData, documents } as any,
         status: 'pending',
       };
 
