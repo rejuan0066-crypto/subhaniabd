@@ -20,6 +20,7 @@ import { useValidationRules } from '@/hooks/useValidationRules';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import OtpVerificationDialog from '@/components/OtpVerificationDialog';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { useStaffFormConfig } from '@/hooks/useStaffFormConfig';
 
 const emptyAddress: AddressData = { division: '', district: '', upazila: '', union: '', postOffice: '', village: '' };
 
