@@ -2297,6 +2297,62 @@ export type Database = {
         }
         Relationships: []
       }
+      resign_letters: {
+        Row: {
+          created_at: string | null
+          designation: string | null
+          id: string
+          letter_data: Json | null
+          letter_date: string | null
+          letter_number: string | null
+          reason: string | null
+          resign_date: string | null
+          staff_id: string | null
+          staff_name: string
+          staff_name_bn: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          letter_data?: Json | null
+          letter_date?: string | null
+          letter_number?: string | null
+          reason?: string | null
+          resign_date?: string | null
+          staff_id?: string | null
+          staff_name?: string
+          staff_name_bn?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          letter_data?: Json | null
+          letter_date?: string | null
+          letter_number?: string | null
+          reason?: string | null
+          resign_date?: string | null
+          staff_id?: string | null
+          staff_name?: string
+          staff_name_bn?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resign_letters_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       results: {
         Row: {
           created_at: string | null
