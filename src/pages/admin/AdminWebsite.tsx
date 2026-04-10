@@ -1925,7 +1925,23 @@ const StaffFormFieldsControl = ({ language }: { language: string }) => {
     if (savedFooter !== undefined) setFooterText(savedFooter);
   }, [savedFooter]);
 
-  const toggle = (key: string) => setFields(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggle = async (key: string) => {
+    const updated = { ...fields, [key]: !fields[key] };
+    setFields(updated);
+    // Auto-save on toggle
+    try {
+      const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'staff_form_fields').maybeSingle();
+      if (existing) {
+        await supabase.from('website_settings').update({ value: updated as any, updated_at: new Date().toISOString() }).eq('key', 'staff_form_fields');
+      } else {
+        await supabase.from('website_settings').insert({ key: 'staff_form_fields', value: updated as any });
+      }
+      queryClient.invalidateQueries({ queryKey: ['staff-form-fields-config'] });
+      toast.success(language === 'bn' ? 'আপডেট হয়েছে' : 'Updated');
+    } catch {
+      toast.error(language === 'bn' ? 'ত্রুটি' : 'Error');
+    }
+  };
 
   const saveStaffFields = async () => {
     setSaving(true);
