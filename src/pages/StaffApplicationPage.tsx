@@ -57,6 +57,17 @@ const StaffApplicationPage = () => {
     },
   });
 
+  // Load field visibility settings
+  const { data: fieldConfig } = useQuery({
+    queryKey: ['staff-form-fields-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_fields').maybeSingle();
+      return (data?.value as Record<string, boolean>) || {};
+    },
+  });
+
+  const isVisible = (key: string) => fieldConfig?.[key] !== false;
+
   // Form state
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
@@ -284,12 +295,13 @@ const StaffApplicationPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: Personal Details */}
+          {isVisible('section_personal') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'ব্যক্তিগত তথ্য (Employee Details)' : 'Employee Details'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />
+              {isVisible('staff_photo') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>{bn ? 'সম্পুর্ণ নাম (বাংলা)' : 'Full Name (Bangla)'} <span className="text-destructive">*</span></Label>
@@ -302,10 +314,13 @@ const StaffApplicationPage = () => {
                   <FieldError field="last_name" />
                 </div>
                 <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />
+                {isVisible('staff_email') && (
                 <div>
                   <Label>{bn ? 'ইমেইল' : 'Email'}</Label>
                   <Input type="email" className="bg-background mt-1" value={staffEmail} onChange={e => setStaffEmail(e.target.value)} placeholder={bn ? 'ইমেইল (ঐচ্ছিক)' : 'Email (optional)'} />
                 </div>
+                )}
+                {isVisible('staff_employment_type') && (
                 <div>
                   <Label>{bn ? 'চাকরির ধরন' : 'Employment Type'} <span className="text-destructive">*</span></Label>
                   <Select value={employmentType} onValueChange={setEmploymentType}>
@@ -317,6 +332,8 @@ const StaffApplicationPage = () => {
                   </Select>
                   <FieldError field="employment_type" />
                 </div>
+                )}
+                {isVisible('staff_designation') && (
                 <div>
                   <Label>{bn ? 'পদবী' : 'Designation'} <span className="text-destructive">*</span></Label>
                   <Select value={designation} onValueChange={setDesignation}>
@@ -327,6 +344,8 @@ const StaffApplicationPage = () => {
                   </Select>
                   <FieldError field="designation" />
                 </div>
+                )}
+                {isVisible('staff_residence_type') && (
                 <div>
                   <Label>{bn ? 'আবাসিক ধরন' : 'Residential Status'}</Label>
                   <Select value={residenceType} onValueChange={setResidenceType}>
@@ -337,15 +356,21 @@ const StaffApplicationPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                )}
+                {isVisible('staff_dob') && (
                 <div>
                   <Label>{bn ? 'জন্ম তারিখ' : 'Date of Birth'} <span className="text-destructive">*</span></Label>
                   <Input type="date" className={`bg-background mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={e => handleFieldChange('dob', e.target.value, setDob)} />
                   <FieldError field="dob" />
                 </div>
+                )}
+                {isVisible('staff_joining_date') && (
                 <div>
                   <Label>{bn ? 'যোগদান তারিখ' : 'Joining Date'}</Label>
                   <Input type="date" className="bg-background mt-1" value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
                 </div>
+                )}
+                {isVisible('staff_religion') && (
                 <div>
                   <Label>{bn ? 'ধর্ম' : 'Religion'}</Label>
                   <Select value={religion} onValueChange={setReligion}>
@@ -356,37 +381,52 @@ const StaffApplicationPage = () => {
                   </Select>
                   {religion === 'other' && <Input className="bg-background mt-2" placeholder={bn ? 'ধর্মের নাম' : 'Religion name'} value={customReligion} onChange={e => setCustomReligion(e.target.value)} />}
                 </div>
+                )}
+                {isVisible('staff_nid') && (
                 <div>
                   <Label>{bn ? 'NID (১০/১৭ ডিজিট)' : 'NID (10/17 digits)'}</Label>
                   <Input className={`bg-background mt-1 ${nidError ? 'border-destructive' : ''}`} maxLength={17} value={nid} onChange={e => validateNid(e.target.value, setNid, setNidError)} />
                   {nidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{nidError}</p>}
                 </div>
+                )}
+                {isVisible('staff_education') && (
                 <div>
                   <Label>{bn ? 'শিক্ষাগত যোগ্যতা' : 'Education'}</Label>
                   <Input className="bg-background mt-1" value={education} onChange={e => setEducation(e.target.value)} />
                 </div>
+                )}
+                {isVisible('staff_experience') && (
                 <div>
                   <Label>{bn ? 'অভিজ্ঞতা' : 'Experience'}</Label>
                   <Input className="bg-background mt-1" value={experience} onChange={e => setExperience(e.target.value)} />
                 </div>
+                )}
+                {isVisible('staff_prev_institute') && (
                 <div>
                   <Label>{bn ? 'পূর্ববর্তী কর্মস্থল' : 'Previous Institute'}</Label>
                   <Input className="bg-background mt-1" value={prevInstitute} onChange={e => setPrevInstitute(e.target.value)} />
                 </div>
+                )}
               </div>
             </div>
             {/* Address */}
             <div className="space-y-4">
-              <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />
-              <div className="flex items-center gap-2">
-                <Checkbox checked={sameAddress} onCheckedChange={(v) => setSameAddress(!!v)} />
-                <Label className="text-sm">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতই' : 'Present address same as permanent'}</Label>
-              </div>
-              {!sameAddress && <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={presentAddr} onChange={setPresentAddr} />}
+              {isVisible('staff_permanent_addr') && <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />}
+              {isVisible('staff_present_addr') && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Checkbox checked={sameAddress} onCheckedChange={(v) => setSameAddress(!!v)} />
+                  <Label className="text-sm">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতই' : 'Present address same as permanent'}</Label>
+                </div>
+                {!sameAddress && <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={presentAddr} onChange={setPresentAddr} />}
+              </>
+              )}
             </div>
           </div>
+          )}
 
           {/* Section 2: Parents */}
+          {isVisible('section_parents') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'পিতা-মাতার তথ্য (Parents Details)' : 'Parents Details'}
@@ -397,32 +437,44 @@ const StaffApplicationPage = () => {
                 <Input className={`bg-background mt-1 ${fieldErrors['father_name'] ? 'border-destructive' : ''}`} value={fatherName} onChange={e => handleFieldChange('father_name', e.target.value, setFatherName)} />
                 <FieldError field="father_name" />
               </div>
-              <PhoneInput label={bn ? 'পিতার মোবাইল' : "Father's Mobile"} value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />
+              {isVisible('staff_father_mobile') && <PhoneInput label={bn ? 'পিতার মোবাইল' : "Father's Mobile"} value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />}
+              {isVisible('staff_father_nid') && (
               <div>
                 <Label>{bn ? 'পিতার NID' : "Father's NID"}</Label>
                 <Input className="bg-background mt-1" maxLength={17} value={fatherNid} onChange={e => setFatherNid(e.target.value.replace(/\D/g, ''))} />
               </div>
+              )}
+              {isVisible('staff_father_occupation') && (
               <div>
                 <Label>{bn ? 'পিতার পেশা' : "Father's Occupation"}</Label>
                 <Input className="bg-background mt-1" value={fatherOccupation} onChange={e => setFatherOccupation(e.target.value)} />
               </div>
+              )}
+              {isVisible('staff_mother_name') && (
               <div>
                 <Label>{bn ? 'মাতার নাম' : "Mother's Name"}</Label>
                 <Input className="bg-background mt-1" value={motherName} onChange={e => setMotherName(e.target.value)} />
               </div>
-              <PhoneInput label={bn ? 'মাতার মোবাইল' : "Mother's Mobile"} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />
+              )}
+              {isVisible('staff_mother_mobile') && <PhoneInput label={bn ? 'মাতার মোবাইল' : "Mother's Mobile"} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />}
+              {isVisible('staff_mother_nid') && (
               <div>
                 <Label>{bn ? 'মাতার NID' : "Mother's NID"}</Label>
                 <Input className="bg-background mt-1" maxLength={17} value={motherNid} onChange={e => setMotherNid(e.target.value.replace(/\D/g, ''))} />
               </div>
+              )}
+              {isVisible('staff_mother_occupation') && (
               <div>
                 <Label>{bn ? 'মাতার পেশা' : "Mother's Occupation"}</Label>
                 <Input className="bg-background mt-1" value={motherOccupation} onChange={e => setMotherOccupation(e.target.value)} />
               </div>
+              )}
             </div>
           </div>
+          )}
 
           {/* Section 3: Identifier */}
+          {isVisible('section_identifier') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'পরিচয সনাক্তকারী তথ্য (Identifier Details)' : 'Identifier Details'}
@@ -447,8 +499,10 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Section 4: Relatives Identifier */}
+          {isVisible('section_relatives') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'আত্মীয় শনাক্তকারীর তথ্য (Relatives Identifier Information)' : 'Relatives Identifier Information'}
@@ -473,6 +527,7 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
+          )}
 
           {/* Submit */}
           <Button type="submit" className="btn-primary-gradient w-full text-lg py-6" disabled={saveMutation.isPending}>

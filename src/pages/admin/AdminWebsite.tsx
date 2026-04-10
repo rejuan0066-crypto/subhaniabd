@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
-import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff, Link2, List, SlidersHorizontal, LogIn } from 'lucide-react';
+import { Globe, Save, Image, Type, Layout, BarChart3, Plus, Trash2, Eye, ImageIcon, Share2, PanelTop, PanelBottom, Navigation, Menu, RefreshCw, CheckCircle, AlertCircle, Database, FileText, ChevronUp, ChevronDown, EyeOff, Link2, List, SlidersHorizontal, LogIn, Loader2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import WebsitePageBuilder from '@/components/admin/WebsitePageBuilder';
@@ -1612,6 +1612,38 @@ const FORM_FIELD_LABELS: Record<string, { bn: string; en: string }> = {
   footer_paragraph: { bn: 'ফুটার প্যারাগ্রাফ', en: 'Footer Paragraph' },
 };
 
+// Staff form field/section labels for visibility control
+const STAFF_FORM_FIELD_LABELS: Record<string, { bn: string; en: string }> = {
+  // Sections
+  section_personal: { bn: '📋 ব্যক্তিগত তথ্য (সেকশন)', en: '📋 Personal Details (Section)' },
+  section_parents: { bn: '📋 পিতা-মাতার তথ্য (সেকশন)', en: '📋 Parents Details (Section)' },
+  section_identifier: { bn: '📋 পরিচয সনাক্তকারী তথ্য (সেকশন)', en: '📋 Identifier Details (Section)' },
+  section_relatives: { bn: '📋 আত্মীয় শনাক্তকারীর তথ্য (সেকশন)', en: '📋 Relatives Identifier (Section)' },
+  // Personal fields
+  staff_photo: { bn: 'ছবি আপলোড', en: 'Photo Upload' },
+  staff_email: { bn: 'ইমেইল', en: 'Email' },
+  staff_employment_type: { bn: 'চাকরির ধরন', en: 'Employment Type' },
+  staff_designation: { bn: 'পদবী', en: 'Designation' },
+  staff_residence_type: { bn: 'আবাসিক ধরন', en: 'Residential Status' },
+  staff_dob: { bn: 'জন্ম তারিখ', en: 'Date of Birth' },
+  staff_joining_date: { bn: 'যোগদান তারিখ', en: 'Joining Date' },
+  staff_religion: { bn: 'ধর্ম', en: 'Religion' },
+  staff_nid: { bn: 'NID', en: 'NID' },
+  staff_education: { bn: 'শিক্ষাগত যোগ্যতা', en: 'Education' },
+  staff_experience: { bn: 'অভিজ্ঞতা', en: 'Experience' },
+  staff_prev_institute: { bn: 'পূর্ববর্তী কর্মস্থল', en: 'Previous Institute' },
+  staff_permanent_addr: { bn: 'স্থায়ী ঠিকানা', en: 'Permanent Address' },
+  staff_present_addr: { bn: 'বর্তমান ঠিকানা', en: 'Present Address' },
+  // Parent fields
+  staff_father_mobile: { bn: 'পিতার মোবাইল', en: "Father's Mobile" },
+  staff_father_nid: { bn: 'পিতার NID', en: "Father's NID" },
+  staff_father_occupation: { bn: 'পিতার পেশা', en: "Father's Occupation" },
+  staff_mother_name: { bn: 'মাতার নাম', en: "Mother's Name" },
+  staff_mother_mobile: { bn: 'মাতার মোবাইল', en: "Mother's Mobile" },
+  staff_mother_nid: { bn: 'মাতার NID', en: "Mother's NID" },
+  staff_mother_occupation: { bn: 'মাতার পেশা', en: "Mother's Occupation" },
+};
+
 type FormSettingRow = {
   id: string;
   field_name: string;
@@ -1791,6 +1823,9 @@ const FormSettingsTab = ({ language }: { language: string }) => {
         </div>
       </div>
 
+      {/* Staff Form Field Visibility */}
+      <StaffFormFieldsControl language={language} />
+
       {/* Field Visibility Toggles */}
       <div className="card-elevated p-5">
         <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
@@ -1851,6 +1886,109 @@ const FormSettingsTab = ({ language }: { language: string }) => {
       <Button className="btn-primary-gradient w-full" onClick={saveFormSettings} disabled={saving}>
         <Save className="w-4 h-4 mr-2" />
         {language === 'bn' ? 'ফর্ম সেটিংস সংরক্ষণ করুন' : 'Save Form Settings'}
+      </Button>
+    </div>
+  );
+};
+
+// ─── Staff Form Fields Control Component ───
+const StaffFormFieldsControl = ({ language }: { language: string }) => {
+  const queryClient = useQueryClient();
+  const [fields, setFields] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState(false);
+
+  const { data: savedFields, isLoading } = useQuery({
+    queryKey: ['staff-form-fields-config'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_fields').maybeSingle();
+      return (data?.value as Record<string, boolean>) || {};
+    },
+  });
+
+  useEffect(() => {
+    const defaults: Record<string, boolean> = {};
+    Object.keys(STAFF_FORM_FIELD_LABELS).forEach(k => { defaults[k] = true; });
+    if (savedFields) {
+      setFields({ ...defaults, ...savedFields });
+    } else {
+      setFields(defaults);
+    }
+  }, [savedFields]);
+
+  const toggle = (key: string) => {
+    setFields(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const saveStaffFields = async () => {
+    setSaving(true);
+    try {
+      const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'staff_form_fields').maybeSingle();
+      if (existing) {
+        await supabase.from('website_settings').update({ value: fields as any, updated_at: new Date().toISOString() }).eq('key', 'staff_form_fields');
+      } else {
+        await supabase.from('website_settings').insert({ key: 'staff_form_fields', value: fields as any });
+      }
+      queryClient.invalidateQueries({ queryKey: ['staff-form-fields-config'] });
+      toast.success(language === 'bn' ? 'স্টাফ ফর্ম ফিল্ড সেটিংস সংরক্ষিত!' : 'Staff form field settings saved!');
+    } catch {
+      toast.error(language === 'bn' ? 'সংরক্ষণে ত্রুটি' : 'Error saving');
+    }
+    setSaving(false);
+  };
+
+  if (isLoading) return <Skeleton className="h-[200px] w-full" />;
+
+  const sectionKeys = Object.keys(STAFF_FORM_FIELD_LABELS).filter(k => k.startsWith('section_'));
+  const fieldKeys = Object.keys(STAFF_FORM_FIELD_LABELS).filter(k => !k.startsWith('section_'));
+
+  return (
+    <div className="card-elevated p-5">
+      <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+        <SlidersHorizontal className="w-5 h-5 text-primary" />
+        {language === 'bn' ? 'স্টাফ আবেদন ফর্ম ফিল্ড নিয়ন্ত্রণ' : 'Staff Application Form Field Control'}
+      </h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        {language === 'bn' ? 'কোন সেকশন ও ফিল্ড পাবলিক স্টাফ আবেদন ফর্মে দেখাবে তা নিয়ন্ত্রণ করুন।' : 'Control which sections and fields appear on the public staff application form.'}
+      </p>
+
+      {/* Sections */}
+      <h4 className="text-sm font-semibold text-foreground mb-2">{language === 'bn' ? 'সেকশনসমূহ' : 'Sections'}</h4>
+      <div className="space-y-2 mb-4">
+        {sectionKeys.map(key => {
+          const label = STAFF_FORM_FIELD_LABELS[key];
+          return (
+            <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-2">
+                {fields[key] ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                <span className="text-sm font-medium text-foreground">{language === 'bn' ? label.bn : label.en}</span>
+              </div>
+              <Switch checked={fields[key] ?? true} onCheckedChange={() => toggle(key)} />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Individual Fields */}
+      <h4 className="text-sm font-semibold text-foreground mb-2">{language === 'bn' ? 'পৃথক ফিল্ডসমূহ' : 'Individual Fields'}</h4>
+      <div className="space-y-2 mb-4">
+        {fieldKeys.map(key => {
+          const label = STAFF_FORM_FIELD_LABELS[key];
+          return (
+            <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-2">
+                {fields[key] ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                <span className="text-sm font-medium text-foreground">{language === 'bn' ? label.bn : label.en}</span>
+              </div>
+              <Switch checked={fields[key] ?? true} onCheckedChange={() => toggle(key)} />
+            </div>
+          );
+        })}
+      </div>
+
+      <Button className="btn-primary-gradient w-full" onClick={saveStaffFields} disabled={saving}>
+        <Save className="w-4 h-4 mr-2" />
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+        {language === 'bn' ? 'স্টাফ ফর্ম ফিল্ড সংরক্ষণ করুন' : 'Save Staff Form Fields'}
       </Button>
     </div>
   );
