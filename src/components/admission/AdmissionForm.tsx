@@ -1190,12 +1190,12 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
             </div>
             {!parentAddrSameAsStudent && (
               <>
-                <AddressFields label={bn ? 'পিতা/মাতার স্থায়ী ঠিকানা' : 'Parent Permanent Address'} value={parentPermanentAddr} onChange={setParentPermanentAddr} />
+                <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={parentPermanentAddr} onChange={setParentPermanentAddr} />
                 <div className="flex items-center gap-2 mt-2">
                   <Checkbox id="parentSamePres" checked={parentSamePresAddr} onCheckedChange={v => { setParentSamePresAddr(!!v); if (v) setParentPresentAddr({ ...parentPermanentAddr }); }} />
                   <Label htmlFor="parentSamePres">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতো' : 'Present same as permanent'}</Label>
                 </div>
-                {!parentSamePresAddr && <AddressFields label={bn ? 'পিতা/মাতার বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
+                {!parentSamePresAddr && <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
               </>
             )}
           </div>
