@@ -544,21 +544,12 @@ const AdminResignLetters = () => {
                           <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--destructive))' }} />
-                            <p>
-                              {bn
-                                ? <>এই পত্র দ্বারা জানানো যাচ্ছে যে, <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (পত্র নং: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong> পদে কর্মরত, <strong>{r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।</>
-                                : <>This is to inform that <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (Ref: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), serving as <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong>, has resigned from <strong>{r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('en-US') : ''}</strong>.</>
-                              }
-                            </p>
+                            <Editable tag="p" value={r.bodyText} onChange={v => set('bodyText', v)} editing={editMode} />
                             <p>
                               <strong>{bn ? 'কারণ:' : 'Reason:'}</strong>{' '}
                               <Editable value={r.reason} onChange={v => set('reason', v)} editing={editMode} />
                             </p>
-                            <p>
-                              {bn
-                                ? 'তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।'
-                                : 'We express our gratitude for their service and wish them success in future endeavors.'}
-                            </p>
+                            <Editable tag="p" value={r.closingText} onChange={v => set('closingText', v)} editing={editMode} />
                           </div>
 
                           {/* Photo */}
