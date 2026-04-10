@@ -63,7 +63,10 @@ const AdminStaff = () => {
     onError: () => toast.error('Error'),
   });
 
+  const pendingCount = staffList.filter((s: any) => s.status === 'pending').length;
+
   const filtered = staffList.filter((s: any) => {
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return s.name_bn?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q) || s.designation?.toLowerCase().includes(q);
