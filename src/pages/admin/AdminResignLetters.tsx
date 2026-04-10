@@ -220,7 +220,7 @@ const AdminResignLetters = () => {
       const jlNumber = `JL-${new Date().getFullYear()}-${jlSerial}`;
       const today = new Date().toISOString().split('T')[0];
 
-      // 3. Create joining letter
+      // 3. Create reinstatement letter (পুনর্বহাল পত্র)
       const { error: jlErr } = await supabase.from('joining_letters').insert({
         letter_number: jlNumber,
         staff_name: letter.staff_name,
@@ -231,6 +231,7 @@ const AdminResignLetters = () => {
         joining_date: today,
         letter_data: letter.letter_data || {},
         status: 'issued',
+        letter_type: 'reinstatement',
       });
       if (jlErr) throw jlErr;
 

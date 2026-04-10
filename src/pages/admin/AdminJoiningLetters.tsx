@@ -152,14 +152,19 @@ const AdminJoiningLetters = () => {
     const r = resolved(letter);
     const qrValue = `JL:${letter.letter_number}|${letter.staff_name}|${letter.joining_date}`;
 
-    const bodyText = bn
-      ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
-      : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`;
+    const isReinstatement = letter.letter_type === 'reinstatement';
+    const bodyText = isReinstatement
+      ? (bn
+          ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ পূর্বে পদত্যাগের পর পুনরায় কর্মে বহাল করা হয়েছে। তাঁর পুনর্বহালের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা আশা করি তিনি পূর্বের ন্যায় আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has been reinstated to the position of <span class="highlight">"${r.designation}"</span> at <strong>${r.instNameEn || r.instName || 'the institution'}</strong> after a prior resignation. The date of reinstatement is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We wish them continued success in their role.`)
+      : (bn
+          ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`);
 
     const html = `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
-<title>${bn ? 'নিয়োগপত্র' : 'Joining Letter'}</title>
+<title>${isReinstatement ? (bn ? 'পুনর্বহাল পত্র' : 'Reinstatement Letter') : (bn ? 'নিয়োগপত্র' : 'Joining Letter')}</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -220,8 +225,8 @@ const AdminJoiningLetters = () => {
       <div class="header-spacer"></div>
     </div>
     <div class="formal-title">
-      <h2>${bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}</h2>
-      <p class="sub">${bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+      <h2>${isReinstatement ? (bn ? 'পুনর্বহাল পত্র' : 'OFFICIAL REINSTATEMENT LETTER') : (bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER')}</h2>
+      <p class="sub">${isReinstatement ? (bn ? 'OFFICIAL REINSTATEMENT LETTER' : 'পুনর্বহাল পত্র') : (bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র')}</p>
       <div class="underline"></div>
     </div>
     <div class="meta">
@@ -311,6 +316,7 @@ const AdminJoiningLetters = () => {
                 <TableRow>
                   <TableHead>{bn ? 'পত্র নং' : 'Letter No'}</TableHead>
                   <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
+                  <TableHead>{bn ? 'ধরন' : 'Type'}</TableHead>
                   <TableHead>{bn ? 'পদবী' : 'Designation'}</TableHead>
                   <TableHead>{bn ? 'যোগদানের তারিখ' : 'Joining Date'}</TableHead>
                   <TableHead>{bn ? 'পত্রের তারিখ' : 'Letter Date'}</TableHead>
@@ -324,6 +330,11 @@ const AdminJoiningLetters = () => {
                     <TableCell>
                       <p className="font-medium">{l.staff_name_bn || l.staff_name}</p>
                       {l.staff_name && l.staff_name_bn && <p className="text-xs text-muted-foreground">{l.staff_name}</p>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={l.letter_type === 'reinstatement' ? 'secondary' : 'default'} className="text-xs">
+                        {l.letter_type === 'reinstatement' ? (bn ? 'পুনর্বহাল' : 'Reinstatement') : (bn ? 'যোগদান' : 'Joining')}
+                      </Badge>
                     </TableCell>
                     <TableCell>{l.designation}</TableCell>
                     <TableCell>{l.joining_date ? new Date(l.joining_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
@@ -426,9 +437,9 @@ const AdminJoiningLetters = () => {
                         {/* Title */}
                         <div className="text-center mb-5">
                           <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
-                            {bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}
+                            {viewLetter.letter_type === 'reinstatement' ? (bn ? 'পুনর্বহাল পত্র' : 'OFFICIAL REINSTATEMENT LETTER') : (bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER')}
                           </h3>
-                          <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+                          <p className="text-xs text-muted-foreground tracking-wide">{viewLetter.letter_type === 'reinstatement' ? (bn ? 'OFFICIAL REINSTATEMENT LETTER' : 'পুনর্বহাল পত্র') : (bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র')}</p>
                           <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
                         </div>
 
@@ -444,9 +455,15 @@ const AdminJoiningLetters = () => {
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }} />
                             <p>
-                              {bn
-                                ? <>এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
-                                : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{r.instNameEn || r.instName || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
+                              {viewLetter.letter_type === 'reinstatement'
+                                ? (bn
+                                    ? <>এই পত্র দ্বারা জানানো যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ পূর্বে পদত্যাগের পর পুনরায় কর্মে বহাল করা হয়েছে। তাঁর পুনর্বহালের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা আশা করি তিনি পূর্বের ন্যায় আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
+                                    : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has been reinstated to the position of <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> at <strong>{r.instNameEn || r.instName || 'the institution'}</strong> after a prior resignation. The date of reinstatement is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We wish them continued success in their role.</>
+                                  )
+                                : (bn
+                                    ? <>এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
+                                    : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{r.instNameEn || r.instName || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
+                                  )
                               }
                             </p>
                           </div>
