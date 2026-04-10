@@ -1195,9 +1195,6 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
           </div>
-              {!parentSamePresAddr && <AddressFields label={bn ? 'পিতা/মাতার বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
-            </>
-          )}
         </div>
       );
     }
