@@ -10,6 +10,7 @@ import { FileText, Printer, Trash2, Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { QRCodeSVG } from 'qrcode.react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const AdminJoiningLetters = () => {
