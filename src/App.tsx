@@ -116,6 +116,7 @@ const App = () => (
                   <Route path="/photo-tools" element={<PhotoToolsPage />} />
                   <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
                   <Route path="/waiting-approval" element={<WaitingApproval />} />
+                  <Route path="/attendance-checkin" element={<AttendanceCheckin />} />
                   <Route path="/login" element={<Login />} />
 
                   <Route path="/admin" element={<AdminShell />}>
