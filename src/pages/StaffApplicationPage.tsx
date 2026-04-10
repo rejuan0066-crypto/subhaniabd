@@ -8,8 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import PhoneInput from '@/components/PhoneInput';
 import PhotoUpload from '@/components/PhotoUpload';
-import { useState } from 'react';
-import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { AlertCircle, CheckCircle, Loader2, Upload, Trash2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -40,6 +40,14 @@ const DESIGNATIONS = [
   { value: 'peon', bn: 'পিয়ন', en: 'Peon' },
   { value: 'cook', bn: 'রান্না বিভাগ', en: 'Cook' },
   { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
+  { value: 'other', bn: 'অন্যান্য', en: 'Other' },
+];
+
+const DOC_TYPES = [
+  { value: 'nid', bn: 'জাতীয় পরিচয়পত্র', en: 'NID' },
+  { value: 'birth_certificate', bn: 'জন্ম সনদ', en: 'Birth Certificate' },
+  { value: 'education_certificate', bn: 'শিক্ষা সনদ', en: 'Education Certificate' },
+  { value: 'citizenship_certificate', bn: 'নাগরিকত্ব সনদ', en: 'Citizenship Certificate' },
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
@@ -132,6 +140,36 @@ const StaffApplicationPage = () => {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Document upload state
+  const [documents, setDocuments] = useState<{ id: string; type: string; name: string; url: string }[]>([]);
+  const [docType, setDocType] = useState('');
+  const [customDocType, setCustomDocType] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(bn ? 'ফাইল সাইজ ৫MB এর বেশি হতে পারবে না' : 'File size must be under 5MB');
+      return;
+    }
+    const selectedType = docType === 'other' ? customDocType : (DOC_TYPES.find(d => d.value === docType)?.[bn ? 'bn' : 'en'] || docType);
+    if (!selectedType) {
+      toast.error(bn ? 'ডকুমেন্টের ধরন নির্বাচন করুন' : 'Select document type');
+      return;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `staff-docs/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('photos').upload(path, file);
+    if (error) { toast.error(error.message); return; }
+    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+    setDocuments(prev => [...prev, { id: crypto.randomUUID(), type: selectedType, name: file.name, url: urlData.publicUrl }]);
+    setDocType('');
+    setCustomDocType('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    toast.success(bn ? 'ডকুমেন্ট আপলোড হয়েছে' : 'Document uploaded');
+  };
+
   const validateNid = (val: string, setter: (v: string) => void, errorSetter?: (v: string) => void) => {
     const cleaned = val.replace(/\D/g, '');
     setter(cleaned);
@@ -204,7 +242,7 @@ const StaffApplicationPage = () => {
         experience: experience || null,
         previous_institute: prevInstitute || null,
         joining_date: joiningDate || new Date().toISOString().split('T')[0],
-        staff_data: staffData as any,
+        staff_data: { ...staffData, documents } as any,
         status: 'pending',
       };
 
@@ -535,6 +573,63 @@ const StaffApplicationPage = () => {
                 <AddressFields label={bn ? 'পূর্ণ ঠিকানা' : 'Full Address'} value={relIdAddr} onChange={setRelIdAddr} />
               </div>
             </div>
+          </div>
+          )}
+
+          {/* Section 5: Document Upload */}
+          {isVisible('section_documents') && (
+          <div className="card-elevated p-6">
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? 'ডকুমেন্ট আপলোড (Document Upload)' : 'Document Upload'}
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <Select value={docType} onValueChange={setDocType}>
+                <SelectTrigger className="bg-background w-full sm:w-48"><SelectValue placeholder={bn ? 'ধরন নির্বাচন' : 'Select type'} /></SelectTrigger>
+                <SelectContent>
+                  {DOC_TYPES.map(d => <SelectItem key={d.value} value={d.value}>{bn ? d.bn : d.en}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {docType === 'other' && (
+                <Input className="bg-background sm:w-48" placeholder={bn ? 'ধরনের নাম লিখুন' : 'Type name'} value={customDocType} onChange={e => setCustomDocType(e.target.value)} />
+              )}
+              <input ref={fileInputRef} type="file" className="hidden" accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={handleDocUpload} />
+              <Button type="button" variant="outline" onClick={() => { if (!docType) { toast.error(bn ? 'ধরন নির্বাচন করুন' : 'Select type first'); return; } fileInputRef.current?.click(); }} className="gap-2">
+                <Upload className="w-4 h-4" /> {bn ? 'আপলোড' : 'Upload'}
+              </Button>
+            </div>
+
+            {documents.length > 0 && (
+              <div className="border border-border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-secondary/50">
+                    <tr>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">#</th>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'ধরন' : 'Type'}</th>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'ফাইল নাম' : 'File Name'}</th>
+                      <th className="text-right px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {documents.map((doc, i) => (
+                      <tr key={doc.id} className="hover:bg-secondary/20">
+                        <td className="px-4 py-2 text-sm">{i + 1}</td>
+                        <td className="px-4 py-2 text-sm font-medium">{doc.type}</td>
+                        <td className="px-4 py-2 text-sm text-muted-foreground">{doc.name}</td>
+                        <td className="px-4 py-2 text-right">
+                          <div className="flex gap-1 justify-end">
+                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"><Eye className="w-4 h-4" /></a>
+                            <button type="button" onClick={() => setDocuments(prev => prev.filter(d => d.id !== doc.id))} className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {documents.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো ডকুমেন্ট আপলোড করা হয়নি' : 'No documents uploaded'}</p>
+            )}
           </div>
           )}
 
