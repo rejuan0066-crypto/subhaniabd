@@ -141,6 +141,36 @@ const StaffApplicationPage = () => {
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // Document upload state
+  const [documents, setDocuments] = useState<{ id: string; type: string; name: string; url: string }[]>([]);
+  const [docType, setDocType] = useState('');
+  const [customDocType, setCustomDocType] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(bn ? 'ফাইল সাইজ ৫MB এর বেশি হতে পারবে না' : 'File size must be under 5MB');
+      return;
+    }
+    const selectedType = docType === 'other' ? customDocType : (DOC_TYPES.find(d => d.value === docType)?.[bn ? 'bn' : 'en'] || docType);
+    if (!selectedType) {
+      toast.error(bn ? 'ডকুমেন্টের ধরন নির্বাচন করুন' : 'Select document type');
+      return;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `staff-docs/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('photos').upload(path, file);
+    if (error) { toast.error(error.message); return; }
+    const { data: urlData } = supabase.storage.from('photos').getPublicUrl(path);
+    setDocuments(prev => [...prev, { id: crypto.randomUUID(), type: selectedType, name: file.name, url: urlData.publicUrl }]);
+    setDocType('');
+    setCustomDocType('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    toast.success(bn ? 'ডকুমেন্ট আপলোড হয়েছে' : 'Document uploaded');
+  };
+
   const validateNid = (val: string, setter: (v: string) => void, errorSetter?: (v: string) => void) => {
     const cleaned = val.replace(/\D/g, '');
     setter(cleaned);
