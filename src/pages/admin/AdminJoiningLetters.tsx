@@ -39,8 +39,21 @@ const AdminJoiningLetters = () => {
       return data;
     },
   });
+  const { data: principal } = useQuery({
+    queryKey: ['principal-staff'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('staff')
+        .select('name_bn, name_en, designation')
+        .in('designation', ['প্রধান শিক্ষক', 'অধ্যক্ষ', 'মুহতামিম', 'Principal'])
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
 
-  const deleteMutation = useMutation({
+
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('joining_letters').delete().eq('id', id);
       if (error) throw error;
