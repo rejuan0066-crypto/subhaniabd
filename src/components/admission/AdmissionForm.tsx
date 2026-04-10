@@ -1050,8 +1050,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       );
 
       return (
-        <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+        <div key={sectionKey} className="rounded-lg p-4 space-y-4 border-2 opacity-100 border-secondary shadow-xl">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{title}</h3>
 
           {/* Photo + type selectors */}
           <div className="flex flex-col sm:flex-row gap-6">
@@ -1128,8 +1128,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     // Father info section
     if (sectionKey === 'father_info') {
       return (
-        <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+        <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-xl">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{title}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
@@ -1145,8 +1145,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     // Mother info section
     if (sectionKey === 'mother_info') {
       return (
-        <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+        <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-xl">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{title}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
@@ -1169,12 +1169,12 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
           </div>
           {!parentAddrSameAsStudent && (
             <>
-              <AddressFields label={bn ? 'অভিভাবক স্থায়ী ঠিকানা' : 'Parent Permanent Address'} value={parentPermanentAddr} onChange={setParentPermanentAddr} />
+              <AddressFields label={bn ? 'পিতা/মাতার স্থায়ী ঠিকানা' : 'Parent Permanent Address'} value={parentPermanentAddr} onChange={setParentPermanentAddr} />
               <div className="flex items-center gap-2 mt-2">
                 <Checkbox id="parentSamePres" checked={parentSamePresAddr} onCheckedChange={v => { setParentSamePresAddr(!!v); if (v) setParentPresentAddr({ ...parentPermanentAddr }); }} />
                 <Label htmlFor="parentSamePres">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতো' : 'Present same as permanent'}</Label>
               </div>
-              {!parentSamePresAddr && <AddressFields label={bn ? 'অভিভাবক বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
+              {!parentSamePresAddr && <AddressFields label={bn ? 'পিতা/মাতার বর্তমান ঠিকানা' : 'Parent Present Address'} value={parentPresentAddr} onChange={setParentPresentAddr} />}
             </>
           )}
         </div>
@@ -1187,8 +1187,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       const otherGuardianFields = sectionFields.filter(f => f.default_value !== 'guardian_type');
 
       return (
-        <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+        <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-xl">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center border-secondary bg-secondary">{title}</h3>
           {guardianTypeField && renderSystemField('guardian_type', guardianTypeField)}
 
           {(form.guardian_type === 'father' || form.guardian_type === 'mother') && (
@@ -1224,8 +1224,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
 
     // Generic section (address etc.)
     return (
-      <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
-        <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+      <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-xl">
+        <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
         {sectionFields.map(f => {
           const key = f.default_value;
           if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
@@ -1247,7 +1247,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         {!isLoaded ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
         ) : (
-          <div className="space-y-6 py-4">
+          <div className="space-y-6 py-4 rounded-md shadow-xl">
             {/* Error summary banner */}
             {Object.keys(fieldErrors).length > 0 && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 space-y-2">
