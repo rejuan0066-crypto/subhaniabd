@@ -1022,8 +1022,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     'first_name', 'last_name', 'gender', 'religion', 'date_of_birth', 'birth_reg_no',
     'previous_class', 'previous_institute', 'is_orphan', 'is_poor',
     'address_permanent', 'address_present',
-    'father_name', 'father_occupation', 'father_nid', 'father_phone',
-    'mother_name', 'mother_occupation', 'mother_nid', 'mother_phone',
+    'father_name', 'father_name_en', 'father_occupation', 'father_nid', 'father_phone',
+    'mother_name', 'mother_name_en', 'mother_occupation', 'mother_nid', 'mother_phone',
     'guardian_type', 'guardian_name', 'guardian_relation', 'guardian_phone', 'guardian_nid',
   ];
 
