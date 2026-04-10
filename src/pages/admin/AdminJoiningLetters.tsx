@@ -6,12 +6,43 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Trash2, Loader2, Eye } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { QRCodeSVG } from 'qrcode.react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+/* ── Editable span helper ────────────────────────────────── */
+interface EditableProps {
+  value: string;
+  onChange: (v: string) => void;
+  editing: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  tag?: 'span' | 'p' | 'h2' | 'h3';
+}
+
+const Editable = ({ value, onChange, editing, className = '', style, tag: Tag = 'span' }: EditableProps) => {
+  const ref = useRef<HTMLElement>(null);
+
+  const handleBlur = () => {
+    if (ref.current) onChange(ref.current.innerText.trim());
+  };
+
+  return (
+    <Tag
+      ref={ref as any}
+      contentEditable={editing}
+      suppressContentEditableWarning
+      onBlur={handleBlur}
+      className={`${className} ${editing ? 'outline-none ring-1 ring-primary/30 rounded px-0.5 hover:ring-primary/60 focus:ring-primary/80 transition-shadow' : ''}`}
+      style={{ ...style, cursor: editing ? 'text' : 'default' }}
+    >
+      {value}
+    </Tag>
+  );
+};
 
 const AdminJoiningLetters = () => {
   const { language } = useLanguage();
@@ -19,6 +50,34 @@ const AdminJoiningLetters = () => {
   const queryClient = useQueryClient();
   const [viewLetter, setViewLetter] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+
+  /* ── Editable overrides ─────────────────── */
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const set = (key: string, val: string) => setOverrides(p => ({ ...p, [key]: val }));
+  const get = (key: string, fallback: string) => overrides[key] ?? fallback;
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogo, setLocalLogo] = useState<string | null>(null);
+  const [localPhoto, setLocalPhoto] = useState<string | null>(null);
+
+  const resetOverrides = () => {
+    setOverrides({});
+    setEditMode(false);
+    setLocalLogo(null);
+    setLocalPhoto(null);
+  };
+
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('Max 5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const { data: letters = [], isLoading } = useQuery({
     queryKey: ['joining-letters'],
@@ -39,6 +98,7 @@ const AdminJoiningLetters = () => {
       return data;
     },
   });
+
   const { data: principalInfo } = useQuery({
     queryKey: ['principal-settings'],
     queryFn: async () => {
@@ -64,178 +124,153 @@ const AdminJoiningLetters = () => {
     },
   });
 
-  const handlePrint = (letter: any) => {
-    const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' };
+  /* ── Build resolved values (uses overrides or defaults) ─── */
+  const resolved = useCallback((letter: any) => {
+    const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' } as any;
     const pName = principalInfo?.principal_name || '';
     const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
+
+    return {
+      instName: get('instName', inst.name || ''),
+      instNameEn: get('instNameEn', inst.name_en || ''),
+      instAddress: get('instAddress', inst.address || ''),
+      instPhone: get('instPhone', inst.phone || ''),
+      salutation: get('salutation', bn ? 'জনাব,' : 'Dear,'),
+      staffName: get('staffName', letter.staff_name_bn || letter.staff_name || ''),
+      designation: get('designation', letter.designation || ''),
+      pName: get('pName', pName),
+      pTitle: get('pTitle', pTitle),
+      candidateSigLabel: get('candidateSigLabel', bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"),
+      authoritySigLabel: get('authoritySigLabel', bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"),
+      logoUrl: localLogo || inst.logo_url || '',
+      photoUrl: localPhoto || (letter.letter_data as any)?.photo_url || '',
+    };
+  }, [institution, principalInfo, bn, overrides, localLogo, localPhoto]);
+
+  /* ── Print handler (uses overrides) ────────────────────── */
+  const handlePrint = (letter: any) => {
+    const r = resolved(letter);
     const qrValue = `JL:${letter.letter_number}|${letter.staff_name}|${letter.joining_date}`;
-    const html = `
-<!DOCTYPE html>
+
+    const bodyText = bn
+      ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+      : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`;
+
+    const html = `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
 <title>${bn ? 'নিয়োগপত্র' : 'Joining Letter'}</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  @page { size: A4; margin: 0; }
-  html, body {
-    width: 210mm;
-    height: 297mm;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-family: 'Noto Serif Bengali', 'Georgia', serif;
-    color: #1a1a1a;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background: #fff;
-    overflow: hidden;
-  }
-  .page {
-    width: 210mm;
-    height: 297mm;
-    padding: 12mm;
-    box-sizing: border-box;
-    border: 3px double #444;
-    position: relative;
-    break-inside: avoid;
-    page-break-inside: avoid;
-    overflow: hidden;
-  }
-  .inner-border {
-    border: 1px solid #ccc;
-    padding: 8mm;
-    position: relative;
-    overflow: hidden;
-    height: calc(297mm - 24mm - 6px);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-  /* Watermark */
-  .watermark {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.06;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .watermark img { width: 200px; height: 200px; object-fit: contain; }
-  .content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
-  .header { text-align: center; border-bottom: 3px double #333; padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-  .header-logo { width: 52px; height: 52px; object-fit: contain; border-radius: 4px; }
-  .header-text { flex: 1; text-align: center; }
-  .header-text h1 { font-size: 20px; font-weight: 700; }
-  .header-text p { font-size: 12px; color: #555; }
-  .header-spacer { width: 52px; }
-  .formal-title { text-align: center; margin-bottom: 18px; }
-  .formal-title h2 { font-size: 18px; font-weight: 700; letter-spacing: 2px; }
-  .formal-title .sub { font-size: 11px; color: #666; letter-spacing: 1px; }
-  .formal-title .underline { width: 80px; border-bottom: 2px solid #444; margin: 6px auto 0; }
-  .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; color: #555; }
-  .meta strong { color: #1a1a1a; }
-  .letter-body { font-size: 14px; line-height: 2.2; margin-bottom: 20px; flex: 1; }
-  .letter-body p { margin-bottom: 10px; }
-  .letter-body .highlight { color: hsl(142, 50%, 30%); font-weight: 700; }
-  .body-flex { display: flex; gap: 20px; }
-  .body-text { flex: 1; }
-  .photo-box { flex-shrink: 0; text-align: center; }
-  .photo-box .avatar { width: 80px; height: 80px; border: 2px solid #ccc; border-radius: 6px; object-fit: cover; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #999; }
-  .photo-label { font-size: 9px; color: #888; margin-top: 4px; }
-  .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 30px; }
-  .qr-block { text-align: center; }
-  .qr-block canvas, .qr-block svg, .qr-block img { width: 60px; height: 60px; }
-  .qr-label { font-size: 8px; color: #888; margin-top: 3px; }
-  .sig { text-align: center; }
-  .sig .line { width: 160px; border-top: 1px solid #444; margin-bottom: 3px; }
-  .sig .name { font-size: 12px; font-weight: 600; margin-bottom: 1px; }
-  .sig .label { font-size: 11px; color: #555; }
-  .sig .date { font-size: 10px; color: #666; margin-top: 4px; }
-  .sig-right { display: flex; align-items: flex-end; gap: 12px; }
-  .seal { width: 50px; height: 50px; border-radius: 50%; border: 2px dashed #bbb; display: flex; align-items: center; justify-content: center; }
-  .seal span { font-size: 7px; color: #999; text-align: center; line-height: 1.2; }
-  @media print {
-    html, body { margin: 0 !important; padding: 0 !important; overflow: hidden; }
-    .page { box-shadow: none; border: 3px double #444; }
-  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4;margin:0}
+  html,body{width:210mm;height:297mm;margin:0!important;padding:0!important;font-family:'Noto Serif Bengali','Georgia',serif;color:#1a1a1a;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;background:#fff;overflow:hidden}
+  .page{width:210mm;height:297mm;padding:12mm;box-sizing:border-box;border:3px double #444;position:relative;break-inside:avoid;page-break-inside:avoid;overflow:hidden}
+  .inner-border{border:1px solid #ccc;padding:8mm;position:relative;overflow:hidden;height:calc(297mm - 24mm - 6px);box-sizing:border-box;display:flex;flex-direction:column}
+  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;pointer-events:none;z-index:0}
+  .watermark img{width:200px;height:200px;object-fit:contain}
+  .content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column}
+  .header{text-align:center;border-bottom:3px double #333;padding-bottom:14px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+  .header-logo{width:52px;height:52px;object-fit:contain;border-radius:4px}
+  .header-text{flex:1;text-align:center}
+  .header-text h1{font-size:20px;font-weight:700}
+  .header-text p{font-size:12px;color:#555}
+  .header-spacer{width:52px}
+  .formal-title{text-align:center;margin-bottom:18px}
+  .formal-title h2{font-size:18px;font-weight:700;letter-spacing:2px}
+  .formal-title .sub{font-size:11px;color:#666;letter-spacing:1px}
+  .formal-title .underline{width:80px;border-bottom:2px solid #444;margin:6px auto 0}
+  .meta{display:flex;justify-content:space-between;margin-bottom:20px;font-size:13px;color:#555}
+  .meta strong{color:#1a1a1a}
+  .letter-body{font-size:14px;line-height:2.2;margin-bottom:20px;flex:1}
+  .letter-body p{margin-bottom:10px}
+  .letter-body .highlight{color:hsl(142,50%,30%);font-weight:700}
+  .body-flex{display:flex;gap:20px}
+  .body-text{flex:1}
+  .photo-box{flex-shrink:0;text-align:center}
+  .photo-box .avatar{width:80px;height:80px;border:2px solid #ccc;border-radius:6px;object-fit:cover;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:28px;color:#999}
+  .photo-label{font-size:9px;color:#888;margin-top:4px}
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:30px}
+  .qr-block{text-align:center}
+  .qr-block canvas,.qr-block svg,.qr-block img{width:60px;height:60px}
+  .qr-label{font-size:8px;color:#888;margin-top:3px}
+  .sig{text-align:center}
+  .sig .line{width:160px;border-top:1px solid #444;margin-bottom:3px}
+  .sig .name{font-size:12px;font-weight:600;margin-bottom:1px}
+  .sig .label{font-size:11px;color:#555}
+  .sig .date{font-size:10px;color:#666;margin-top:4px}
+  .sig-right{display:flex;align-items:flex-end;gap:12px}
+  .seal{width:50px;height:50px;border-radius:50%;border:2px dashed #bbb;display:flex;align-items:center;justify-content:center}
+  .seal span{font-size:7px;color:#999;text-align:center;line-height:1.2}
+  @media print{html,body{margin:0!important;padding:0!important;overflow:hidden}.page{box-shadow:none;border:3px double #444}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
 </head><body>
-<div class="page">
-  <div class="inner-border">
-    ${(inst as any).logo_url ? `<div class="watermark"><img src="${(inst as any).logo_url}" alt="" /></div>` : ''}
-    <div class="content">
-      <div class="header">
-        ${(inst as any).logo_url ? `<img src="${(inst as any).logo_url}" class="header-logo" alt="Logo" />` : ''}
-        <div class="header-text">
-          <h1>${inst.name || ''}</h1>
-          ${inst.name_en ? `<p>${inst.name_en}</p>` : ''}
-          ${inst.address ? `<p>${inst.address}</p>` : ''}
-          ${inst.phone ? `<p>${bn ? 'ফোন' : 'Phone'}: ${inst.phone}</p>` : ''}
+<div class="page"><div class="inner-border">
+  ${r.logoUrl ? `<div class="watermark"><img src="${r.logoUrl}" alt="" /></div>` : ''}
+  <div class="content">
+    <div class="header">
+      ${r.logoUrl ? `<img src="${r.logoUrl}" class="header-logo" alt="Logo" />` : ''}
+      <div class="header-text">
+        <h1>${r.instName}</h1>
+        ${r.instNameEn ? `<p>${r.instNameEn}</p>` : ''}
+        ${r.instAddress ? `<p>${r.instAddress}</p>` : ''}
+        ${r.instPhone ? `<p>${bn ? 'ফোন' : 'Phone'}: ${r.instPhone}</p>` : ''}
+      </div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="formal-title">
+      <h2>${bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}</h2>
+      <p class="sub">${bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+      <div class="underline"></div>
+    </div>
+    <div class="meta">
+      <span>${bn ? 'পত্র নং' : 'Ref'}: <strong>${letter.letter_number || ''}</strong></span>
+      <span>${bn ? 'তারিখ' : 'Date'}: <strong>${letter.letter_date ? new Date(letter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : ''}</strong></span>
+    </div>
+    <div class="letter-body">
+      <div class="body-flex">
+        <div class="body-text">
+          <p>${r.salutation}</p>
+          <p class="highlight" style="font-size:15px;">${r.staffName}</p>
+          <p>${bodyText}</p>
         </div>
-        <div class="header-spacer"></div>
-      </div>
-      <div class="formal-title">
-        <h2>${bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}</h2>
-        <p class="sub">${bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
-        <div class="underline"></div>
-      </div>
-      <div class="meta">
-        <span>${bn ? 'পত্র নং' : 'Ref'}: <strong>${letter.letter_number || ''}</strong></span>
-        <span>${bn ? 'তারিখ' : 'Date'}: <strong>${letter.letter_date ? new Date(letter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : ''}</strong></span>
-      </div>
-      <div class="letter-body">
-        <div class="body-flex">
-          <div class="body-text">
-            <p>${bn ? 'জনাব,' : 'Dear,'}</p>
-            <p class="highlight" style="font-size:15px;">${letter.staff_name_bn || letter.staff_name || ''}</p>
-            <p>${bn
-              ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${letter.staff_name_bn || letter.staff_name || ''}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${letter.designation || ''}"</span> পদে <strong>${inst.name || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
-              : `This is to certify that <span class="highlight">${letter.staff_name || letter.staff_name_bn || ''}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${inst.name_en || inst.name || 'the institution'}</strong> as <span class="highlight">"${letter.designation || ''}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`
-            }</p>
-          </div>
-          <div class="photo-box">
-            <div class="avatar">${(letter.letter_data as any)?.photo_url ? `<img src="${(letter.letter_data as any).photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : (letter.staff_name_bn || letter.staff_name || '?').charAt(0)}</div>
-            <p class="photo-label">${bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
-          </div>
+        <div class="photo-box">
+          <div class="avatar">${r.photoUrl ? `<img src="${r.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : (r.staffName || '?').charAt(0)}</div>
+          <p class="photo-label">${bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
         </div>
       </div>
-      <div class="footer">
-        <div class="qr-block">
-          <canvas id="qr"></canvas>
-          <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
-        </div>
+    </div>
+    <div class="footer">
+      <div class="qr-block">
+        <canvas id="qr"></canvas>
+        <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+      </div>
+      <div class="sig">
+        <div class="line"></div>
+        <p class="label">${r.candidateSigLabel}</p>
+        <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+      </div>
+      <div class="sig-right">
+        <div class="seal"><span>${bn ? 'সিল' : 'Official<br/>Seal'}</span></div>
         <div class="sig">
           <div class="line"></div>
-          <p class="label">${bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
+          ${r.pName ? `<p class="name">${r.pName}</p>` : ''}
+          <p class="label">${r.authoritySigLabel}</p>
+          <p class="label">${r.pTitle}</p>
           <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-        </div>
-        <div class="sig-right">
-          <div class="seal"><span>${bn ? 'সিল' : 'Official<br/>Seal'}</span></div>
-          <div class="sig">
-            <div class="line"></div>
-            ${pName ? `<p class="name">${pName}</p>` : ''}
-            <p class="label">${bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-            <p class="label">${pTitle}</p>
-            <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</div></div>
 <script>
-  try {
-    QRCode.toCanvas(document.getElementById('qr'), '${qrValue.replace(/'/g, "\\'")}', { width: 60, margin: 0 });
-  } catch(e) {}
-  setTimeout(function(){ window.print(); }, 800);
+  try{QRCode.toCanvas(document.getElementById('qr'),'${qrValue.replace(/'/g, "\\'")}',{width:60,margin:0})}catch(e){}
+  setTimeout(function(){window.print()},800);
 <\/script>
 </body></html>`;
     const w = window.open('', '_blank');
-    if (w) {
-      w.document.write(html);
-      w.document.close();
-    }
+    if (w) { w.document.write(html); w.document.close(); }
   };
 
   return (
@@ -281,7 +316,7 @@ const AdminJoiningLetters = () => {
                     <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => setViewLetter(l)} title={bn ? 'দেখুন' : 'View'}>
+                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
@@ -299,129 +334,178 @@ const AdminJoiningLetters = () => {
           )}
         </div>
 
-        {/* View Dialog */}
-        <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) setViewLetter(null); }}>
+        {/* ── View / Edit Dialog ────────────────────────────── */}
+        <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) { setViewLetter(null); resetOverrides(); } }}>
           <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
             <DialogHeader className="sr-only">
               <DialogTitle>{bn ? 'নিয়োগপত্র' : 'Official Joining Letter'}</DialogTitle>
             </DialogHeader>
-            {viewLetter && (
-              <div className="flex flex-col">
-                {/* Document with double border */}
-                <div className="m-4 border-[3px] border-double border-foreground/30 p-1">
-                  <div className="border border-foreground/15 p-7 relative overflow-hidden" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
+            {viewLetter && (() => {
+              const r = resolved(viewLetter);
+              return (
+                <div className="flex flex-col">
+                  {/* Edit mode toggle */}
+                  <div className="flex items-center justify-end gap-2 px-4 pt-3">
+                    <Button
+                      size="sm"
+                      variant={editMode ? 'default' : 'outline'}
+                      onClick={() => setEditMode(!editMode)}
+                      className="gap-1.5"
+                    >
+                      {editMode ? <PencilOff className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+                      {editMode ? (bn ? 'এডিট বন্ধ' : 'Exit Edit') : (bn ? 'এডিট মোড' : 'Edit Mode')}
+                    </Button>
+                  </div>
 
-                    {/* Watermark */}
-                    {institution?.logo_url && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-                        <img src={institution.logo_url} alt="" className="w-56 h-56 object-contain opacity-[0.06]" />
-                      </div>
-                    )}
+                  {/* Hidden file inputs */}
+                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalLogo)} />
+                  <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalPhoto)} />
 
-                    <div className="relative z-10">
-                      {/* Header with logo + institution */}
-                      <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
-                        {institution?.logo_url && (
-                          <img src={institution.logo_url} alt="Logo" className="w-14 h-14 object-contain rounded" />
-                        )}
-                        <div className="flex-1 text-center">
-                          <h2 className="text-xl font-bold text-foreground">{institution?.name || ''}</h2>
-                          {institution?.name_en && <p className="text-sm text-muted-foreground">{institution.name_en}</p>}
-                          {institution?.address && <p className="text-xs text-muted-foreground mt-0.5">{institution.address}</p>}
-                          {institution?.phone && <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>}
+                  {/* Document */}
+                  <div className="m-4 mt-2 border-[3px] border-double border-foreground/30 p-1">
+                    <div className="border border-foreground/15 p-7 relative overflow-hidden" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
+
+                      {/* Watermark */}
+                      {r.logoUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                          <img src={r.logoUrl} alt="" className="w-56 h-56 object-contain opacity-[0.06]" />
                         </div>
-                        <div className="w-14" />
-                      </div>
+                      )}
 
-                      {/* Formal title */}
-                      <div className="text-center mb-5">
-                        <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
-                          {bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}
-                        </h3>
-                        <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
-                        <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
-                      </div>
-
-                      {/* Meta row */}
-                      <div className="flex justify-between text-sm text-muted-foreground mb-5">
-                        <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold text-foreground">{viewLetter.letter_number}</span></span>
-                        <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
-                      </div>
-
-                      {/* Profile + Letter body */}
-                      <div className="flex gap-5 mb-6">
-                        <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
-                          <p>{bn ? 'জনাব,' : 'Dear,'}</p>
-                          <p className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }}>
-                            {viewLetter.staff_name_bn || viewLetter.staff_name || '—'}
-                          </p>
-                          <p>
-                            {bn
-                              ? <>এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{viewLetter.staff_name_bn || viewLetter.staff_name || ''}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{viewLetter.designation || ''}"</strong> পদে <strong>{institution?.name || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
-                              : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{viewLetter.staff_name || viewLetter.staff_name_bn || ''}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{institution?.name_en || institution?.name || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{viewLetter.designation || ''}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
-                            }
-                          </p>
-                        </div>
-                        {/* Profile photo */}
-                        <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
-                          <Avatar className="w-[88px] h-[88px] border-2 border-foreground/20 rounded-md">
-                            <AvatarImage src={(viewLetter.letter_data as any)?.photo_url} className="object-cover" />
-                            <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl">
-                              {(viewLetter.staff_name_bn || viewLetter.staff_name || '?').charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <p className="text-[10px] text-muted-foreground">{bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
-                        </div>
-                      </div>
-
-                      {/* Signature area with QR + Seal */}
-                      <div className="flex justify-between items-end mt-12 pt-4">
-                        {/* QR placeholder */}
-                        <div className="flex flex-col items-center gap-1">
-                          <QRCodeSVG
-                            value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
-                            size={64}
-                            level="M"
-                            className="opacity-80"
-                          />
-                          <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
-                        </div>
-
-                        {/* Employee signature */}
-                        <div className="text-center">
-                          <div className="w-36 border-t border-foreground/40 mb-1" />
-                          <p className="text-[11px] text-muted-foreground">{bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-                        </div>
-
-                        {/* Authority signature + Seal */}
-                        <div className="flex items-end gap-3">
-                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
-                            <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
+                      <div className="relative z-10">
+                        {/* Header */}
+                        <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
+                          {/* Logo – clickable in edit mode */}
+                          <div
+                            className={`relative w-14 h-14 flex-shrink-0 ${editMode ? 'cursor-pointer group' : ''}`}
+                            onClick={() => editMode && logoInputRef.current?.click()}
+                          >
+                            {r.logoUrl ? (
+                              <img src={r.logoUrl} alt="Logo" className="w-14 h-14 object-contain rounded" />
+                            ) : (
+                              <div className="w-14 h-14 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">Logo</div>
+                            )}
+                            {editMode && (
+                              <div className="absolute inset-0 bg-black/40 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Upload className="w-4 h-4 text-white" />
+                              </div>
+                            )}
                           </div>
+
+                          <div className="flex-1 text-center">
+                            <Editable tag="h2" value={r.instName} onChange={v => set('instName', v)} editing={editMode} className="text-xl font-bold text-foreground" />
+                            {(r.instNameEn || editMode) && (
+                              <Editable tag="p" value={r.instNameEn} onChange={v => set('instNameEn', v)} editing={editMode} className="text-sm text-muted-foreground" />
+                            )}
+                            {(r.instAddress || editMode) && (
+                              <Editable tag="p" value={r.instAddress} onChange={v => set('instAddress', v)} editing={editMode} className="text-xs text-muted-foreground mt-0.5" />
+                            )}
+                            {(r.instPhone || editMode) && (
+                              <p className="text-xs text-muted-foreground">
+                                {bn ? 'ফোন' : 'Phone'}: <Editable value={r.instPhone} onChange={v => set('instPhone', v)} editing={editMode} />
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-14" />
+                        </div>
+
+                        {/* Title */}
+                        <div className="text-center mb-5">
+                          <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
+                            {bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}
+                          </h3>
+                          <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+                          <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
+                        </div>
+
+                        {/* Meta */}
+                        <div className="flex justify-between text-sm text-muted-foreground mb-5">
+                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold text-foreground">{viewLetter.letter_number}</span></span>
+                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                        </div>
+
+                        {/* Body + Photo */}
+                        <div className="flex gap-5 mb-6">
+                          <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
+                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
+                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }} />
+                            <p>
+                              {bn
+                                ? <>এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
+                                : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{r.instNameEn || r.instName || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
+                              }
+                            </p>
+                          </div>
+
+                          {/* Photo – clickable in edit mode */}
+                          <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                            <div
+                              className={`relative ${editMode ? 'cursor-pointer group' : ''}`}
+                              onClick={() => editMode && photoInputRef.current?.click()}
+                            >
+                              <Avatar className="w-[88px] h-[88px] border-2 border-foreground/20 rounded-md">
+                                <AvatarImage src={r.photoUrl} className="object-cover" />
+                                <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl">
+                                  {(r.staffName || '?').charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              {editMode && (
+                                <div className="absolute inset-0 bg-black/40 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Upload className="w-5 h-5 text-white" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">{bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
+                          </div>
+                        </div>
+
+                        {/* Signature area */}
+                        <div className="flex justify-between items-end mt-12 pt-4">
+                          {/* QR */}
+                          <div className="flex flex-col items-center gap-1">
+                            <QRCodeSVG
+                              value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
+                              size={64}
+                              level="M"
+                              className="opacity-80"
+                            />
+                            <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+                          </div>
+
+                          {/* Candidate sig */}
                           <div className="text-center">
                             <div className="w-36 border-t border-foreground/40 mb-1" />
-                            {principalInfo?.principal_name && (
-                              <p className="text-[11px] font-semibold text-foreground">{principalInfo.principal_name}</p>
-                            )}
-                            <p className="text-[11px] text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-                            <p className="text-[10px] text-muted-foreground">{principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head')}</p>
+                            <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
                             <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                          </div>
+
+                          {/* Authority sig + Seal */}
+                          <div className="flex items-end gap-3">
+                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
+                              <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
+                            </div>
+                            <div className="text-center">
+                              <div className="w-36 border-t border-foreground/40 mb-1" />
+                              <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
+                              <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
+                              <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
+                              <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Print button outside document border */}
-                <div className="px-4 pb-4">
-                  <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
-                    <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
-                  </Button>
+                  {/* Actions */}
+                  <div className="px-4 pb-4">
+                    <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
+                      <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
