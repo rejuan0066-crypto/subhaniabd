@@ -695,9 +695,7 @@ const AdminExamSessions = () => {
                           </div>
                         </div>
                         {esClasses.map((ec: any, idx: number) => {
-                          const divisionId = ec.classes?.division_id;
-                          const resultKey = `${es.name}_${es.exam_type}_${divisionId}`;
-                          const resultInfo = (examResultCounts as Record<string, any>)[resultKey];
+                          const resultInfo = (examResultCounts as Record<string, any>)[es.id];
                           const hasResults = resultInfo && resultInfo.resultCount > 0;
 
                           return (
