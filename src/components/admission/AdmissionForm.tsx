@@ -1125,8 +1125,25 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       );
     }
 
-    // Parents section: special NID/phone note
-    if (sectionKey === 'parents') {
+    // Father info section
+    if (sectionKey === 'father_info') {
+      return (
+        <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sectionFields.map(f => {
+              const key = f.default_value;
+              if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id} data-field={key}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // Mother info section
+    if (sectionKey === 'mother_info') {
       return (
         <div key={sectionKey} className="border rounded-lg p-4 space-y-4">
           <h3 className="text-md font-display font-semibold text-foreground border-b pb-2">{title}</h3>
@@ -1165,7 +1182,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
     }
 
     // Guardian section: auto-fill logic + conditional fields
-    if (sectionKey === 'guardian') {
+    if (sectionKey === 'guardian_info') {
       const guardianTypeField = sectionFields.find(f => f.default_value === 'guardian_type');
       const otherGuardianFields = sectionFields.filter(f => f.default_value !== 'guardian_type');
 

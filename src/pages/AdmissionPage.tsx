@@ -869,7 +869,23 @@ const AdmissionPage = () => {
       );
     }
 
-    if (sectionKey === 'parents') {
+    if (sectionKey === 'father_info') {
+      return (
+        <div key={sectionKey} className="card-elevated p-6 space-y-4">
+          <h2 className="text-lg font-display font-bold text-foreground border-b pb-2">{title}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {sectionFields.map(f => {
+              const key = f.default_value;
+              if (!key) return <div key={f.id}>{renderCustomField(f)}</div>;
+              if (SYSTEM_KEYS.includes(key)) return <div key={f.id}>{renderSystemField(key, f)}</div>;
+              return <div key={f.id}>{renderCustomField(f)}</div>;
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    if (sectionKey === 'mother_info') {
       return (
         <div key={sectionKey} className="card-elevated p-6 space-y-4">
           <h2 className="text-lg font-display font-bold text-foreground border-b pb-2">{title}</h2>
@@ -906,7 +922,7 @@ const AdmissionPage = () => {
       );
     }
 
-    if (sectionKey === 'guardian') {
+    if (sectionKey === 'guardian_info') {
       const guardianTypeField = sectionFields.find(f => f.default_value === 'guardian_type');
       const otherGuardianFields = sectionFields.filter(f => f.default_value !== 'guardian_type');
 
