@@ -1,6 +1,7 @@
 import { createContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchResolvedAuthState } from '@/contexts/auth/resolveAuthState';
 
 export interface AuthContextType {
   user: User | null;
@@ -14,13 +15,6 @@ export interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const resolvePrimaryRole = (roles: Array<string | null | undefined>): string | null => {
-  const normalizedRoles = roles.filter((value): value is string => Boolean(value));
-  if (normalizedRoles.includes('super_admin')) return 'super_admin';
-  if (normalizedRoles.includes('admin')) return 'admin';
-  return normalizedRoles[0] ?? null;
-};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -178,23 +172,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     void (async () => {
       try {
-        const [rolesResult, profileResult] = await Promise.all([
-          supabase.from('user_roles').select('role').eq('user_id', user.id),
-          supabase.from('profiles').select('status').eq('id', user.id).maybeSingle(),
-        ]);
+        if (cancelled) return;
 
-        if (rolesResult.error) {
-          console.error('Failed to fetch user roles:', rolesResult.error);
-        }
-
-        if (profileResult.error) {
-          console.error('Failed to fetch user status:', profileResult.error);
-        }
+        const resolvedState = await fetchResolvedAuthState(user.id);
 
         if (cancelled) return;
 
-        setRole(resolvePrimaryRole((rolesResult.data ?? []).map(({ role }) => role)));
-        setUserStatus(profileResult.data?.status ?? 'pending');
+        setRole(resolvedState.role);
+        setUserStatus(resolvedState.userStatus);
       } catch (error) {
         if (cancelled) return;
 
