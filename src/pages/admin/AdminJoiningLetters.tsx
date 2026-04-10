@@ -152,9 +152,14 @@ const AdminJoiningLetters = () => {
     const r = resolved(letter);
     const qrValue = `JL:${letter.letter_number}|${letter.staff_name}|${letter.joining_date}`;
 
-    const bodyText = bn
-      ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
-      : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`;
+    const isReinstatement = letter.letter_type === 'reinstatement';
+    const bodyText = isReinstatement
+      ? (bn
+          ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ পূর্বে পদত্যাগের পর পুনরায় কর্মে বহাল করা হয়েছে। তাঁর পুনর্বহালের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা আশা করি তিনি পূর্বের ন্যায় আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has been reinstated to the position of <span class="highlight">"${r.designation}"</span> at <strong>${r.instNameEn || r.instName || 'the institution'}</strong> after a prior resignation. The date of reinstatement is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We wish them continued success in their role.`)
+      : (bn
+          ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${r.designation}"</span> পদে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`);
 
     const html = `<!DOCTYPE html>
 <html><head>
