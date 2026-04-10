@@ -1626,6 +1626,8 @@ const FormSettingsTab = ({ language }: { language: string }) => {
   const [saving, setSaving] = useState(false);
   const [admissionPublic, setAdmissionPublic] = useState(false);
   const [admissionPublicLoading, setAdmissionPublicLoading] = useState(true);
+  const [staffFormPublic, setStaffFormPublic] = useState(false);
+  const [staffFormPublicLoading, setStaffFormPublicLoading] = useState(true);
 
   const { data: formSettings, isLoading } = useQuery({
     queryKey: ['form-settings'],
@@ -1639,30 +1641,32 @@ const FormSettingsTab = ({ language }: { language: string }) => {
     },
   });
 
-  // Load admission public setting
+  // Load public toggle settings
   useQuery({
-    queryKey: ['website-setting-admission-public'],
+    queryKey: ['website-setting-form-public-toggles'],
     queryFn: async () => {
-      const { data } = await supabase.from('website_settings').select('*').eq('key', 'admission_form_public').maybeSingle();
-      setAdmissionPublic(data?.value === true || data?.value === 'true');
+      const { data } = await supabase.from('website_settings').select('*').in('key', ['admission_form_public', 'staff_form_public']);
+      data?.forEach(row => {
+        if (row.key === 'admission_form_public') setAdmissionPublic(row.value === true || row.value === 'true');
+        if (row.key === 'staff_form_public') setStaffFormPublic(row.value === true || row.value === 'true');
+      });
       setAdmissionPublicLoading(false);
+      setStaffFormPublicLoading(false);
       return data;
     },
   });
 
-  const toggleAdmissionPublic = async () => {
-    const newVal = !admissionPublic;
-    setAdmissionPublic(newVal);
-    const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'admission_form_public').maybeSingle();
+  const togglePublicSetting = async (key: string, currentVal: boolean, setter: (v: boolean) => void, labels: { onBn: string; offBn: string; onEn: string; offEn: string }) => {
+    const newVal = !currentVal;
+    setter(newVal);
+    const { data: existing } = await supabase.from('website_settings').select('id').eq('key', key).maybeSingle();
     if (existing) {
-      await supabase.from('website_settings').update({ value: newVal, updated_at: new Date().toISOString() }).eq('key', 'admission_form_public');
+      await supabase.from('website_settings').update({ value: newVal, updated_at: new Date().toISOString() }).eq('key', key);
     } else {
-      await supabase.from('website_settings').insert({ key: 'admission_form_public', value: newVal });
+      await supabase.from('website_settings').insert({ key, value: newVal });
     }
-    queryClient.invalidateQueries({ queryKey: ['website-setting-admission-public'] });
-    toast.success(language === 'bn'
-      ? (newVal ? 'অনলাইন ভর্তি ফর্ম পাবলিশ করা হয়েছে' : 'অনলাইন ভর্তি ফর্ম হাইড করা হয়েছে')
-      : (newVal ? 'Online admission form published' : 'Online admission form hidden'));
+    queryClient.invalidateQueries({ queryKey: ['website-setting-form-public-toggles'] });
+    toast.success(language === 'bn' ? (newVal ? labels.onBn : labels.offBn) : (newVal ? labels.onEn : labels.offEn));
   };
 
   useEffect(() => {
