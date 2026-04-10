@@ -113,13 +113,15 @@ const AdmissionPage = () => {
       const { data, error } = await supabase
         .from('website_settings')
         .select('key, value')
-        .in('key', ['show_roll_no', 'show_session', 'admission_footer_text']);
+        .in('key', ['show_roll_no', 'show_session', 'admission_footer_text', 'admission_form_public']);
       if (error) throw error;
       const result: Record<string, any> = {};
       data?.forEach(row => { result[row.key] = row.value; });
       return result;
     },
   });
+
+  const isAdmissionOpen = websiteAdmissionSettings?.admission_form_public === true || websiteAdmissionSettings?.admission_form_public === 'true';
 
   const isFormFieldVisible = (fieldName: string) => {
     const setting = formSettings.find(s => s.field_name === fieldName);
