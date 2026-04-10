@@ -404,6 +404,7 @@ const AdminStaffForm = () => {
         residence_type: residenceType || null,
         experience: experience || null,
         previous_institute: prevInstitute || null,
+        joining_date: joiningDate || null,
         staff_data: staffData as any,
       };
 
