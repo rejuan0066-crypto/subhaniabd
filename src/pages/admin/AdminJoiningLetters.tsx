@@ -70,6 +70,9 @@ const AdminJoiningLetters = () => {
     setEditMode(false);
     setLocalLogo(null);
     setLocalPhoto(null);
+    setBodyAlign('center');
+    setSalutationAlign('left');
+    setNameAlign('left');
   };
 
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
