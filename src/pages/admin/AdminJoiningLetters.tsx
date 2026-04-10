@@ -186,76 +186,112 @@ const AdminJoiningLetters = () => {
               <DialogTitle>{bn ? 'নিয়োগপত্র' : 'Official Joining Letter'}</DialogTitle>
             </DialogHeader>
             {viewLetter && (
-              <div className="border-2 border-foreground/20 m-4 p-8" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
-                {/* Header with logo + institution */}
-                <div className="flex items-center gap-4 border-b-2 border-double border-foreground/40 pb-4 mb-6">
-                  {institution?.logo_url && (
-                    <img src={institution.logo_url} alt="Logo" className="w-16 h-16 object-contain rounded" />
-                  )}
-                  <div className="flex-1 text-center">
-                    <h2 className="text-xl font-bold text-foreground">{institution?.name || ''}</h2>
-                    {institution?.name_en && <p className="text-sm text-muted-foreground">{institution.name_en}</p>}
-                    {institution?.address && <p className="text-xs text-muted-foreground mt-0.5">{institution.address}</p>}
-                    {institution?.phone && <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>}
+              <div className="flex flex-col">
+                {/* Document with double border */}
+                <div className="m-4 border-[3px] border-double border-foreground/30 p-1">
+                  <div className="border border-foreground/15 p-7 relative overflow-hidden" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
+
+                    {/* Watermark */}
+                    {institution?.logo_url && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <img src={institution.logo_url} alt="" className="w-56 h-56 object-contain opacity-[0.06]" />
+                      </div>
+                    )}
+
+                    <div className="relative z-10">
+                      {/* Header with logo + institution */}
+                      <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
+                        {institution?.logo_url && (
+                          <img src={institution.logo_url} alt="Logo" className="w-14 h-14 object-contain rounded" />
+                        )}
+                        <div className="flex-1 text-center">
+                          <h2 className="text-xl font-bold text-foreground">{institution?.name || ''}</h2>
+                          {institution?.name_en && <p className="text-sm text-muted-foreground">{institution.name_en}</p>}
+                          {institution?.address && <p className="text-xs text-muted-foreground mt-0.5">{institution.address}</p>}
+                          {institution?.phone && <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>}
+                        </div>
+                        <div className="w-14" />
+                      </div>
+
+                      {/* Formal title */}
+                      <div className="text-center mb-5">
+                        <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
+                          {bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}
+                        </h3>
+                        <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+                        <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
+                      </div>
+
+                      {/* Meta row */}
+                      <div className="flex justify-between text-sm text-muted-foreground mb-5">
+                        <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold text-foreground">{viewLetter.letter_number}</span></span>
+                        <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                      </div>
+
+                      {/* Profile + Letter body */}
+                      <div className="flex gap-5 mb-6">
+                        <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
+                          <p>{bn ? 'প্রিয়,' : 'Dear,'}</p>
+                          <p className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }}>
+                            {viewLetter.staff_name_bn || viewLetter.staff_name || '—'}
+                          </p>
+                          <p>
+                            {bn
+                              ? <>এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <strong style={{ color: 'hsl(var(--primary))' }}>{viewLetter.staff_name_bn || viewLetter.staff_name || ''}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) <strong style={{ color: 'hsl(var(--primary))' }}>"{viewLetter.designation || ''}"</strong> পদে <strong>{institution?.name || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।</>
+                              : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{viewLetter.staff_name || viewLetter.staff_name_bn || ''}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{institution?.name_en || institution?.name || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{viewLetter.designation || ''}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
+                            }
+                          </p>
+                        </div>
+                        {/* Profile photo */}
+                        <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                          <Avatar className="w-[88px] h-[88px] border-2 border-foreground/20 rounded-md">
+                            <AvatarImage src={(viewLetter.letter_data as any)?.photo_url} className="object-cover" />
+                            <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl">
+                              {(viewLetter.staff_name_bn || viewLetter.staff_name || '?').charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <p className="text-[10px] text-muted-foreground">{bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
+                        </div>
+                      </div>
+
+                      {/* Signature area with QR + Seal */}
+                      <div className="flex justify-between items-end mt-12 pt-4">
+                        {/* QR placeholder */}
+                        <div className="flex flex-col items-center gap-1">
+                          <div className="w-16 h-16 border border-dashed border-foreground/25 rounded flex items-center justify-center">
+                            <span className="text-[8px] text-muted-foreground text-center leading-tight">QR Code<br/>{bn ? 'যাচাই' : 'Verify'}</span>
+                          </div>
+                          <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+                        </div>
+
+                        {/* Employee signature */}
+                        <div className="text-center">
+                          <div className="w-36 border-t border-foreground/40 mb-1" />
+                          <p className="text-[11px] text-muted-foreground">{bn ? 'কর্মচারীর স্বাক্ষর' : "Employee's Signature"}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                        </div>
+
+                        {/* Authority signature + Seal */}
+                        <div className="flex items-end gap-3">
+                          {/* Official seal placeholder */}
+                          <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
+                            <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="w-36 border-t border-foreground/40 mb-1" />
+                            <p className="text-[11px] text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
+                            <p className="text-[10px] text-muted-foreground">{bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head'}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-16" /> {/* spacer for symmetry */}
                 </div>
 
-                {/* Formal title */}
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-bold tracking-wide text-foreground border-b border-foreground/30 inline-block pb-1">
-                    {bn ? 'নিয়োগপত্র / OFFICIAL JOINING LETTER' : 'OFFICIAL JOINING LETTER / নিয়োগপত্র'}
-                  </h3>
-                </div>
-
-                {/* Meta row */}
-                <div className="flex justify-between text-sm text-muted-foreground mb-6">
-                  <span>{bn ? 'পত্র নং' : 'Letter No'}: <span className="font-mono font-medium text-foreground">{viewLetter.letter_number}</span></span>
-                  <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
-                </div>
-
-                {/* Profile + Letter body */}
-                <div className="flex gap-6 mb-8">
-                  <div className="flex-1 text-sm leading-relaxed text-foreground space-y-3" style={{ lineHeight: '2' }}>
-                    <p>{bn ? 'প্রিয়,' : 'Dear,'}</p>
-                    <p className="font-semibold text-base">{viewLetter.staff_name_bn || viewLetter.staff_name || '—'}</p>
-                    <p>
-                      {bn
-                        ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, ${viewLetter.staff_name_bn || viewLetter.staff_name || ''} (আইডি: ${viewLetter.letter_number}) "${viewLetter.designation || ''}" পদে ${institution?.name || 'প্রতিষ্ঠান'}-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: ${viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
-                        : `This is to certify that ${viewLetter.staff_name || viewLetter.staff_name_bn || ''} (ID: ${viewLetter.letter_number}) has officially joined ${institution?.name_en || institution?.name || 'the institution'} as "${viewLetter.designation || ''}". The date of joining is: ${viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}. We welcome them to our institution and wish them a successful career.`
-                      }
-                    </p>
-                  </div>
-                  {/* Profile photo */}
-                  <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                    <Avatar className="w-24 h-24 border-2 border-foreground/20 rounded-md">
-                      <AvatarImage src={(viewLetter.letter_data as any)?.photo_url} className="object-cover" />
-                      <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl font-serif">
-                        {(viewLetter.staff_name_bn || viewLetter.staff_name || '?').charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="text-xs text-muted-foreground">{bn ? 'প্রার্থীর ছবি' : 'Candidate Photo'}</p>
-                  </div>
-                </div>
-
-                {/* Signature area */}
-                <div className="flex justify-between items-end mt-16 pt-4">
-                  <div className="text-center">
-                    <div className="w-44 border-t border-foreground/40 mb-1" />
-                    <p className="text-xs text-muted-foreground">{bn ? 'কর্মচারীর স্বাক্ষর' : "Employee's Signature"}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{bn ? 'তারিখ: _______________' : 'Date: _______________'}</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-44 border-t border-foreground/40 mb-1" />
-                    <p className="text-xs text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-                    <p className="text-xs text-muted-foreground">{bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head'}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{bn ? 'তারিখ: _______________' : 'Date: _______________'}</p>
-                  </div>
-                </div>
-
-                {/* Print button */}
-                <div className="flex gap-2 pt-6 mt-6 border-t border-foreground/10">
-                  <Button className="flex-1" onClick={() => handlePrint(viewLetter)}>
+                {/* Print button outside document border */}
+                <div className="px-4 pb-4">
+                  <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
                     <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
                   </Button>
                 </div>
