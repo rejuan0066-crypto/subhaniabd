@@ -426,7 +426,7 @@ const AdminJoiningLetters = () => {
 
                         {/* Body + Photo */}
                         <div className="flex gap-5 mb-6 flex-1">
-                          <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
+                          <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: 'hsl(220, 20%, 10%)' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }} />
                             <p>
