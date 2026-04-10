@@ -154,10 +154,18 @@ const AdminResignLetters = () => {
         status: 'issued',
       });
       if (error) throw error;
+
+      // Set staff status to inactive
+      const { error: staffErr } = await supabase
+        .from('staff')
+        .update({ status: 'inactive' })
+        .eq('id', staff.id);
+      if (staffErr) console.error('Failed to deactivate staff:', staffErr);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
-      toast.success(bn ? 'পদত্যাগ পত্র তৈরি হয়েছে' : 'Resign letter created');
+      queryClient.invalidateQueries({ queryKey: ['staff-for-resign'] });
+      toast.success(bn ? 'পদত্যাগ পত্র তৈরি হয়েছে ও স্টাফ নিষ্ক্রিয় হয়েছে' : 'Resign letter created & staff deactivated');
       setShowCreate(false);
       setSelectedStaffId('');
       setResignDate('');
