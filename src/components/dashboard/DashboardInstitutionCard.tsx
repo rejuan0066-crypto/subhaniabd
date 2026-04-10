@@ -128,7 +128,7 @@ const DashboardInstitutionCard = () => {
   }
 
   return (
-    <div className="card-elevated p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 overflow-hidden">
+    <div className="card-elevated p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
       <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center shrink-0 overflow-hidden">
         {institution?.logo_url ? (
           <img src={institution.logo_url} alt="Logo" className="w-full h-full object-cover" />
@@ -136,14 +136,14 @@ const DashboardInstitutionCard = () => {
           <GraduationCap className="w-9 h-9 text-primary-foreground" />
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <h2 className="text-xl font-display font-bold text-foreground">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
-        <p className="text-sm text-muted-foreground truncate">
+      <div className="flex-1 min-w-0 w-full">
+        <h2 className="text-xl font-display font-bold text-foreground break-words">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
+        <p className="text-sm text-muted-foreground break-all sm:break-normal sm:truncate">
           {[institution?.address, institution?.phone, institution?.email].filter(Boolean).join(' | ') || (language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email')}
         </p>
-        {institution?.other_info && <p className="text-xs text-muted-foreground mt-0.5">{institution.other_info}</p>}
+        {institution?.other_info && <p className="text-xs text-muted-foreground mt-0.5 break-words">{institution.other_info}</p>}
       </div>
-      <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4 mr-1" />{language === 'bn' ? 'সম্পাদনা' : 'Edit'}</Button>
+      <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto"><Edit2 className="w-4 h-4 mr-1" />{language === 'bn' ? 'সম্পাদনা' : 'Edit'}</Button>
     </div>
   );
 };
