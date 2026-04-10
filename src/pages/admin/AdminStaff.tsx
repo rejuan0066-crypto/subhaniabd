@@ -206,8 +206,14 @@ const AdminStaff = () => {
                       </td>
                       )}
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${s.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                          {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                          s.status === 'active' ? 'bg-success/10 text-success' : 
+                          s.status === 'pending' ? 'bg-warning/10 text-warning' : 
+                          'bg-destructive/10 text-destructive'
+                        }`}>
+                          {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : 
+                           s.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') : 
+                           (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
