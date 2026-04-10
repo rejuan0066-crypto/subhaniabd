@@ -118,6 +118,14 @@ async function seedAdmissionForm() {
   await supabase.from('custom_form_fields').insert(fieldsToInsert);
 }
 
+const pickPreferredAdmissionForm = (forms: Array<any>) => {
+  return forms.find(form => form.menu_slug === 'admission-form')
+    || forms.find(form => form.parent_menu === '/admin/students')
+    || forms.find(form => form.is_active)
+    || forms[0]
+    || null;
+};
+
 export const useAdmissionFormConfig = () => {
   const seeded = useRef(false);
 
@@ -128,11 +136,13 @@ export const useAdmissionFormConfig = () => {
         .from('custom_forms')
         .select('*')
         .eq('form_type', 'admission')
-        .limit(1);
+        .order('created_at', { ascending: true });
 
       if (!forms || forms.length === 0) return null;
 
-      const form = forms[0];
+      const form = pickPreferredAdmissionForm(forms);
+      if (!form) return null;
+
       const { data: fields } = await supabase
         .from('custom_form_fields')
         .select('*')

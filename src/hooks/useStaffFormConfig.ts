@@ -127,6 +127,14 @@ async function seedStaffForm() {
   await supabase.from('custom_form_fields').insert(fieldsToInsert);
 }
 
+const pickPreferredStaffForm = (forms: Array<any>) => {
+  return forms.find(form => form.menu_slug === 'staff-form')
+    || forms.find(form => form.parent_menu === '/admin/staff')
+    || forms.find(form => form.is_active)
+    || forms[0]
+    || null;
+};
+
 export const useStaffFormConfig = () => {
   const seeded = useRef(false);
 
@@ -137,11 +145,13 @@ export const useStaffFormConfig = () => {
         .from('custom_forms')
         .select('*')
         .eq('form_type', 'staff')
-        .limit(1);
+        .order('created_at', { ascending: true });
 
       if (!forms || forms.length === 0) return null;
 
-      const form = forms[0];
+      const form = pickPreferredStaffForm(forms);
+      if (!form) return null;
+
       const { data: fields } = await supabase
         .from('custom_form_fields')
         .select('*')
