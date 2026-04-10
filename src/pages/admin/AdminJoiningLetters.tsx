@@ -263,9 +263,24 @@ const AdminJoiningLetters = () => {
     </div>
   </div>
 </div></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
 <script>
-  try{QRCode.toCanvas(document.getElementById('qr'),'${qrValue.replace(/'/g, "\\'")}',{width:60,margin:0})}catch(e){}
-  setTimeout(function(){window.print()},800);
+  function tryQR(attempts) {
+    if (typeof QRCode === 'undefined') {
+      if (attempts < 20) setTimeout(function(){ tryQR(attempts+1); }, 200);
+      else setTimeout(function(){ window.print(); }, 300);
+      return;
+    }
+    var container = document.getElementById('qr-container');
+    var svgStr = '';
+    QRCode.toString('${qrValue.replace(/'/g, "\\'")}', {type:'svg',width:60,margin:0}, function(err,svg){
+      if(!err && svg){
+        container.insertAdjacentHTML('afterbegin', svg);
+      }
+      setTimeout(function(){ window.print(); }, 500);
+    });
+  }
+  tryQR(0);
 <\/script>
 </body></html>`;
     const w = window.open('', '_blank');
