@@ -99,7 +99,7 @@ const AdminResignLetters = () => {
   const { data: staffList = [] } = useQuery({
     queryKey: ['staff-for-resign'],
     queryFn: async () => {
-      const { data } = await supabase.from('staff').select('id, name, name_bn, designation, status, photo_url, staff_data').eq('status', 'active');
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en, designation, status, photo_url, staff_data').eq('status', 'active');
       return data || [];
     },
     enabled: showCreate,
