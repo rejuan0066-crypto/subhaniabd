@@ -780,7 +780,7 @@ const AdminStaffForm = () => {
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
               {isFieldActive('photo_url') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {isFieldActive('salary') && (
+                {isFieldActive('salary') && isEditMode && existingStaff?.status === 'active' && (
                 <div>
                   <Label>{bn ? (getField('salary')?.label_bn || 'বেতন (টাকা)') : (getField('salary')?.label || 'Salary (BDT)')} {isFieldRequired('salary') && <span className="text-destructive">*</span>}</Label>
                   <Input type="number" className={`bg-background mt-1 ${fieldErrors['salary'] ? 'border-destructive' : ''}`} value={salary} onChange={e => handleFieldChange('salary', e.target.value, setSalary)} placeholder="৳" />
