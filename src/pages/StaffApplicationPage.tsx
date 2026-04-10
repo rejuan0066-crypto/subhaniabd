@@ -26,22 +26,7 @@ const RELIGIONS = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
-const DESIGNATIONS = [
-  { value: 'head_teacher', bn: 'প্রধান শিক্ষক', en: 'Head Teacher' },
-  { value: 'asst_head_teacher', bn: 'সহকারী প্রধান শিক্ষক', en: 'Asst. Head Teacher' },
-  { value: 'asst_teacher', bn: 'সহকারী শিক্ষক', en: 'Asst. Teacher' },
-  { value: 'arabic_teacher', bn: 'আরবি শিক্ষক', en: 'Arabic Teacher' },
-  { value: 'hifz_teacher', bn: 'হিফয শিক্ষক', en: 'Hifz Teacher' },
-  { value: 'quran_teacher', bn: 'কোরআন শিক্ষক', en: 'Quran Teacher' },
-  { value: 'bangla_teacher', bn: 'বাংলা শিক্ষক', en: 'Bengali Teacher' },
-  { value: 'english_teacher', bn: 'ইংরেজি শিক্ষক', en: 'English Teacher' },
-  { value: 'math_teacher', bn: 'গণিত শিক্ষক', en: 'Math Teacher' },
-  { value: 'office_asst', bn: 'অফিস সহকারী', en: 'Office Assistant' },
-  { value: 'peon', bn: 'পিয়ন', en: 'Peon' },
-  { value: 'cook', bn: 'রান্না বিভাগ', en: 'Cook' },
-  { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
-  { value: 'other', bn: 'অন্যান্য', en: 'Other' },
-];
+// Designations are now fetched from database
 
 const DOC_TYPES = [
   { value: 'nid', bn: 'জাতীয় পরিচয়পত্র', en: 'NID' },
