@@ -428,6 +428,48 @@ Deno.serve(async (req) => {
       });
     }
 
+    // BAN user (disable account)
+    if (action === "ban_user") {
+      const { user_id: targetUserId } = body;
+      if (!targetUserId) {
+        return new Response(JSON.stringify({ error: "user_id is required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: banError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        ban_duration: '876600h', // ~100 years
+      });
+      if (banError) {
+        return new Response(JSON.stringify({ error: banError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // UNBAN user (re-enable account)
+    if (action === "unban_user") {
+      const { user_id: targetUserId } = body;
+      if (!targetUserId) {
+        return new Response(JSON.stringify({ error: "user_id is required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: unbanError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        ban_duration: 'none',
+      });
+      if (unbanError) {
+        return new Response(JSON.stringify({ error: unbanError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ensure_staff is handled above (before admin check)
 
     return new Response(JSON.stringify({ error: "Invalid action" }), {
