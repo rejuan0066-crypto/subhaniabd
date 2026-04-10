@@ -15,15 +15,24 @@ export type AdmissionFieldConfig = {
   placeholder: string | null;
   options: Json | null;
   validation: Json | null;
+  section: string | null;
 };
 
-type SectionKey = 'student_details' | 'student_address' | 'parents' | 'guardian';
+type SectionKey = 'student_details' | 'student_address' | 'father_info' | 'mother_info' | 'guardian_info' | 'documents';
 
 export const SECTION_INFO: Record<SectionKey, { en: string; bn: string; order: number }> = {
   student_details: { en: '1. Student Details', bn: '১. ছাত্রের তথ্য', order: 1 },
   student_address: { en: 'Address', bn: 'ঠিকানা', order: 2 },
-  parents: { en: '2. Parents Information', bn: '২. অভিভাবকের তথ্য', order: 3 },
-  guardian: { en: '3. Guardian Information', bn: '৩. অভিভাবক তথ্য', order: 4 },
+  father_info: { en: '2. Father Information', bn: '২. পিতার তথ্য', order: 3 },
+  mother_info: { en: '3. Mother Information', bn: '৩. মাতার তথ্য', order: 4 },
+  guardian_info: { en: '4. Guardian Information', bn: '৪. অভিভাবক তথ্য', order: 5 },
+  documents: { en: '5. Documents', bn: '৫. ডকুমেন্ট', order: 6 },
+};
+
+// Legacy section key mapping for backward compatibility
+const LEGACY_SECTION_MAP: Record<string, SectionKey> = {
+  parents: 'father_info', // old 'parents' mapped to father_info (mother fields have mother_info in section col)
+  guardian: 'guardian_info',
 };
 
 const DEFAULT_FIELDS: Array<{
@@ -53,23 +62,24 @@ const DEFAULT_FIELDS: Array<{
   // Address
   { label: 'Permanent Address', label_bn: 'স্থায়ী ঠিকানা', field_type: 'address_permanent', is_required: false, sort_order: 20, default_value: 'address_permanent', section: 'student_address' },
   { label: 'Present Address', label_bn: 'বর্তমান ঠিকানা', field_type: 'address_present', is_required: false, sort_order: 21, default_value: 'address_present', section: 'student_address' },
-  // Parents
-  { label: 'Father Name', label_bn: 'পিতার নাম', field_type: 'text', is_required: true, sort_order: 22, default_value: 'father_name', section: 'parents' },
-  { label: 'Father Name (English)', label_bn: 'পিতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 23, default_value: 'father_name_en', section: 'parents' },
-  { label: 'Father Occupation', label_bn: 'পিতার পেশা', field_type: 'text', is_required: false, sort_order: 24, default_value: 'father_occupation', section: 'parents' },
-  { label: 'Father NID (10/17 digits)', label_bn: 'পিতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 24, default_value: 'father_nid', section: 'parents' },
-  { label: 'Father Mobile', label_bn: 'পিতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 25, default_value: 'father_phone', section: 'parents' },
-  { label: 'Mother Name', label_bn: 'মাতার নাম', field_type: 'text', is_required: true, sort_order: 27, default_value: 'mother_name', section: 'parents' },
-  { label: 'Mother Name (English)', label_bn: 'মাতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 28, default_value: 'mother_name_en', section: 'parents' },
-  { label: 'Mother Occupation', label_bn: 'মাতার পেশা', field_type: 'text', is_required: false, sort_order: 29, default_value: 'mother_occupation', section: 'parents' },
-  { label: 'Mother NID (10/17 digits)', label_bn: 'মাতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 28, default_value: 'mother_nid', section: 'parents' },
-  { label: 'Mother Mobile', label_bn: 'মাতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 29, default_value: 'mother_phone', section: 'parents' },
+  // Father
+  { label: 'Father Name', label_bn: 'পিতার নাম', field_type: 'text', is_required: true, sort_order: 22, default_value: 'father_name', section: 'father_info' },
+  { label: 'Father Name (English)', label_bn: 'পিতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 23, default_value: 'father_name_en', section: 'father_info' },
+  { label: 'Father Occupation', label_bn: 'পিতার পেশা', field_type: 'text', is_required: false, sort_order: 24, default_value: 'father_occupation', section: 'father_info' },
+  { label: 'Father NID (10/17 digits)', label_bn: 'পিতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 25, default_value: 'father_nid', section: 'father_info' },
+  { label: 'Father Mobile', label_bn: 'পিতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 26, default_value: 'father_phone', section: 'father_info' },
+  // Mother
+  { label: 'Mother Name', label_bn: 'মাতার নাম', field_type: 'text', is_required: true, sort_order: 27, default_value: 'mother_name', section: 'mother_info' },
+  { label: 'Mother Name (English)', label_bn: 'মাতার নাম (ইংরেজি)', field_type: 'text', is_required: false, sort_order: 28, default_value: 'mother_name_en', section: 'mother_info' },
+  { label: 'Mother Occupation', label_bn: 'মাতার পেশা', field_type: 'text', is_required: false, sort_order: 29, default_value: 'mother_occupation', section: 'mother_info' },
+  { label: 'Mother NID (10/17 digits)', label_bn: 'মাতার NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: false, sort_order: 30, default_value: 'mother_nid', section: 'mother_info' },
+  { label: 'Mother Mobile', label_bn: 'মাতার মোবাইল', field_type: 'phone', is_required: false, sort_order: 31, default_value: 'mother_phone', section: 'mother_info' },
   // Guardian
-  { label: 'Guardian Type', label_bn: 'অভিভাবক', field_type: 'select', is_required: true, sort_order: 30, default_value: 'guardian_type', section: 'guardian', options: ['father', 'mother', 'other'] },
-  { label: 'Guardian Name', label_bn: 'অভিভাবকের নাম', field_type: 'text', is_required: true, sort_order: 31, default_value: 'guardian_name', section: 'guardian' },
-  { label: 'Guardian Relation', label_bn: 'সম্পর্ক', field_type: 'text', is_required: true, sort_order: 32, default_value: 'guardian_relation', section: 'guardian' },
-  { label: 'Guardian Mobile', label_bn: 'মোবাইল', field_type: 'phone', is_required: true, sort_order: 33, default_value: 'guardian_phone', section: 'guardian' },
-  { label: 'Guardian NID (10/17 digits)', label_bn: 'অভিভাবকের NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: true, sort_order: 34, default_value: 'guardian_nid', section: 'guardian' },
+  { label: 'Guardian Type', label_bn: 'অভিভাবক', field_type: 'select', is_required: true, sort_order: 32, default_value: 'guardian_type', section: 'guardian_info', options: ['father', 'mother', 'other'] },
+  { label: 'Guardian Name', label_bn: 'অভিভাবকের নাম', field_type: 'text', is_required: true, sort_order: 33, default_value: 'guardian_name', section: 'guardian_info' },
+  { label: 'Guardian Relation', label_bn: 'সম্পর্ক', field_type: 'text', is_required: true, sort_order: 34, default_value: 'guardian_relation', section: 'guardian_info' },
+  { label: 'Guardian Mobile', label_bn: 'মোবাইল', field_type: 'phone', is_required: true, sort_order: 35, default_value: 'guardian_phone', section: 'guardian_info' },
+  { label: 'Guardian NID (10/17 digits)', label_bn: 'অভিভাবকের NID (১০/১৭ ডিজিট)', field_type: 'text', is_required: true, sort_order: 36, default_value: 'guardian_nid', section: 'guardian_info' },
 ];
 
 async function seedAdmissionForm() {
@@ -99,7 +109,8 @@ async function seedAdmissionForm() {
     sort_order: f.sort_order,
     default_value: f.default_value,
     options: (f.options || []) as unknown as Json,
-    validation: { section: f.section } as unknown as Json,
+    validation: {} as unknown as Json,
+    section: f.section,
     is_active: true,
     placeholder: null,
   }));
@@ -141,15 +152,26 @@ export const useAdmissionFormConfig = () => {
 
   const activeFields = (formConfig?.fields || []).filter(f => f.is_active);
 
+  const resolveSection = (f: AdmissionFieldConfig): string | null => {
+    // Primary: use the section column
+    if (f.section) {
+      // Map legacy keys
+      return LEGACY_SECTION_MAP[f.section] || f.section;
+    }
+    // Fallback: check validation.section (legacy)
+    const val = f.validation as any;
+    if (val?.section) {
+      return LEGACY_SECTION_MAP[val.section] || val.section;
+    }
+    // Fallback: match by default_value against DEFAULT_FIELDS
+    const defaultDef = DEFAULT_FIELDS.find(d => d.default_value === f.default_value);
+    if (defaultDef) return defaultDef.section;
+    return null;
+  };
+
   const getFieldsBySection = (section: SectionKey): AdmissionFieldConfig[] => {
-    return activeFields.filter(f => {
-      const val = f.validation as any;
-      if (val?.section) return val.section === section;
-      // Fallback: match by default_value against DEFAULT_FIELDS
-      const defaultDef = DEFAULT_FIELDS.find(d => d.default_value === f.default_value);
-      if (defaultDef) return defaultDef.section === section;
-      return false;
-    }).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    return activeFields.filter(f => resolveSection(f) === section)
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
   };
 
   const isFieldActive = (fieldKey: string): boolean => {
