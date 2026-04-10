@@ -577,6 +577,63 @@ const StaffApplicationPage = () => {
           </div>
           )}
 
+          {/* Section 5: Document Upload */}
+          {isVisible('section_documents') && (
+          <div className="card-elevated p-6">
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? 'ডকুমেন্ট আপলোড (Document Upload)' : 'Document Upload'}
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+              <Select value={docType} onValueChange={setDocType}>
+                <SelectTrigger className="bg-background w-full sm:w-48"><SelectValue placeholder={bn ? 'ধরন নির্বাচন' : 'Select type'} /></SelectTrigger>
+                <SelectContent>
+                  {DOC_TYPES.map(d => <SelectItem key={d.value} value={d.value}>{bn ? d.bn : d.en}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {docType === 'other' && (
+                <Input className="bg-background sm:w-48" placeholder={bn ? 'ধরনের নাম লিখুন' : 'Type name'} value={customDocType} onChange={e => setCustomDocType(e.target.value)} />
+              )}
+              <input ref={fileInputRef} type="file" className="hidden" accept=".jpg,.jpeg,.png,.webp,.pdf" onChange={handleDocUpload} />
+              <Button type="button" variant="outline" onClick={() => { if (!docType) { toast.error(bn ? 'ধরন নির্বাচন করুন' : 'Select type first'); return; } fileInputRef.current?.click(); }} className="gap-2">
+                <Upload className="w-4 h-4" /> {bn ? 'আপলোড' : 'Upload'}
+              </Button>
+            </div>
+
+            {documents.length > 0 && (
+              <div className="border border-border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-secondary/50">
+                    <tr>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">#</th>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'ধরন' : 'Type'}</th>
+                      <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'ফাইল নাম' : 'File Name'}</th>
+                      <th className="text-right px-4 py-2 text-xs font-semibold text-muted-foreground">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {documents.map((doc, i) => (
+                      <tr key={doc.id} className="hover:bg-secondary/20">
+                        <td className="px-4 py-2 text-sm">{i + 1}</td>
+                        <td className="px-4 py-2 text-sm font-medium">{doc.type}</td>
+                        <td className="px-4 py-2 text-sm text-muted-foreground">{doc.name}</td>
+                        <td className="px-4 py-2 text-right">
+                          <div className="flex gap-1 justify-end">
+                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground"><Eye className="w-4 h-4" /></a>
+                            <button type="button" onClick={() => setDocuments(prev => prev.filter(d => d.id !== doc.id))} className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {documents.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো ডকুমেন্ট আপলোড করা হয়নি' : 'No documents uploaded'}</p>
+            )}
+          </div>
+          )}
+
           {/* Footer Text */}
           {footerText && (
             <div className="p-4 rounded-lg bg-secondary/50 border border-border text-sm text-foreground whitespace-pre-wrap">
