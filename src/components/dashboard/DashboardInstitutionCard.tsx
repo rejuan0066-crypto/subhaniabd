@@ -138,9 +138,14 @@ const DashboardInstitutionCard = () => {
       </div>
       <div className="flex-1 min-w-0 w-full">
         <h2 className="text-xl font-display font-bold text-foreground truncate">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
-        <p className="text-sm text-muted-foreground break-all sm:break-normal sm:truncate">
-          {[institution?.address, institution?.phone, institution?.email].filter(Boolean).join(' | ') || (language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email')}
-        </p>
+        <div className="text-sm text-muted-foreground space-y-0.5">
+          {institution?.address && <p className="truncate">{institution.address}</p>}
+          {institution?.phone && <p className="truncate">{institution.phone}</p>}
+          {institution?.email && <p className="truncate">{institution.email}</p>}
+          {!institution?.address && !institution?.phone && !institution?.email && (
+            <p>{language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email'}</p>
+          )}
+        </div>
         {institution?.other_info && <p className="text-xs text-muted-foreground mt-0.5 break-words">{institution.other_info}</p>}
       </div>
       <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto"><Edit2 className="w-4 h-4 mr-1" />{language === 'bn' ? 'সম্পাদনা' : 'Edit'}</Button>
