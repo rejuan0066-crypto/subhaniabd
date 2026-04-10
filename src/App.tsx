@@ -74,6 +74,7 @@ import AdminExamSessions from "./pages/admin/AdminExamSessions";
 import AdminLibrary from "./pages/admin/AdminLibrary";
 import AdminIdCards from "./pages/admin/AdminIdCards";
 import NotFound from "./pages/NotFound";
+import AttendanceCheckin from "./pages/AttendanceCheckin";
 import ScrollToTop from "./components/ScrollToTop";
 import RouteLoader from "./components/RouteLoader";
 

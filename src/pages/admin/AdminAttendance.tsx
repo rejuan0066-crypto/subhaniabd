@@ -1318,6 +1318,9 @@ const AdminAttendance = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* QR Poster Dialog */}
+        <ClassQRPoster open={qrPosterOpen} onOpenChange={setQrPosterOpen} />
       </div>
     </AdminLayout>
   );
