@@ -204,7 +204,7 @@ const AdminJoiningLetters = () => {
   .seal span{font-size:7px;color:#999;text-align:center;line-height:1.2}
   @media print{html,body{margin:0!important;padding:0!important;overflow:hidden}.page{box-shadow:none;border:3px double #444}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+
 </head><body>
 <div class="page"><div class="inner-border">
   ${r.logoUrl ? `<div class="watermark"><img src="${r.logoUrl}" alt="" /></div>` : ''}
@@ -242,8 +242,7 @@ const AdminJoiningLetters = () => {
       </div>
     </div>
     <div class="footer">
-      <div class="qr-block">
-        <canvas id="qr"></canvas>
+      <div class="qr-block" id="qr-container">
         <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
       </div>
       <div class="sig">
@@ -264,9 +263,24 @@ const AdminJoiningLetters = () => {
     </div>
   </div>
 </div></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
 <script>
-  try{QRCode.toCanvas(document.getElementById('qr'),'${qrValue.replace(/'/g, "\\'")}',{width:60,margin:0})}catch(e){}
-  setTimeout(function(){window.print()},800);
+  function tryQR(attempts) {
+    if (typeof QRCode === 'undefined') {
+      if (attempts < 20) setTimeout(function(){ tryQR(attempts+1); }, 200);
+      else setTimeout(function(){ window.print(); }, 300);
+      return;
+    }
+    var container = document.getElementById('qr-container');
+    var svgStr = '';
+    QRCode.toString('${qrValue.replace(/'/g, "\\'")}', {type:'svg',width:60,margin:0}, function(err,svg){
+      if(!err && svg){
+        container.insertAdjacentHTML('afterbegin', svg);
+      }
+      setTimeout(function(){ window.print(); }, 500);
+    });
+  }
+  tryQR(0);
 <\/script>
 </body></html>`;
     const w = window.open('', '_blank');
