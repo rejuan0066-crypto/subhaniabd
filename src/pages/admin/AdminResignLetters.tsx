@@ -154,6 +154,13 @@ const AdminResignLetters = () => {
         status: 'issued',
       });
       if (error) throw error;
+
+      // Set staff status to inactive
+      const { error: staffErr } = await supabase
+        .from('staff')
+        .update({ status: 'inactive' })
+        .eq('id', staff.id);
+      if (staffErr) console.error('Failed to deactivate staff:', staffErr);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
