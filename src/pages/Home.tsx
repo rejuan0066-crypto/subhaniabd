@@ -81,6 +81,14 @@ const Home = () => {
     },
   });
 
+  const { data: staffFormPublic } = useQuery({
+    queryKey: ['staff-form-public-home'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_public').maybeSingle();
+      return data?.value === true || data?.value === 'true';
+    },
+  });
+
   const stats = [
     { value: settings.stat_students, labelBn: 'মোট ছাত্র', labelEn: 'Total Students', icon: Users },
     { value: settings.stat_teachers, labelBn: 'শিক্ষক', labelEn: 'Teachers', icon: BookOpen },
