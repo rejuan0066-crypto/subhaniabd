@@ -1,0 +1,1 @@
+DELETE FROM public.exams WHERE id = '8b48d056-bef7-4174-87d5-63089490e5b6';
