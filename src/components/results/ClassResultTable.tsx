@@ -140,9 +140,10 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
           <tbody className="divide-y divide-border">
             {students.map((st: any, idx: number) => {
               const studentMarks = subjects.map((sub: any) => marksMap[`${st.id}_${sub.id}`] ?? 0);
+              const hasAnyMarks = studentMarks.some(m => m > 0);
               const total = studentMarks.reduce((a, b) => a + b, 0);
               const avg = subjects.length > 0 ? total / subjects.length : 0;
-              const { grade, gpa, color, hasFail, title, title_bn } = getOverallGrade(studentMarks);
+              const gradeInfo = hasAnyMarks ? getOverallGrade(studentMarks) : null;
               return (
                 <tr key={st.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-3 py-2 text-muted-foreground text-xs">{idx + 1}</td>
@@ -162,15 +163,17 @@ const ClassResultTable = ({ students, subjects, marksMap, onMarksChange, onSave,
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-center font-bold text-foreground">{total}</td>
-                  <td className="px-3 py-2 text-center text-muted-foreground">{avg.toFixed(1)}</td>
+                  <td className="px-3 py-2 text-center font-bold text-foreground">{hasAnyMarks ? total : '-'}</td>
+                  <td className="px-3 py-2 text-center text-muted-foreground">{hasAnyMarks ? avg.toFixed(1) : '-'}</td>
                   <td className="px-3 py-2 text-center">
-                    <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold ${color}`}>
-                      {grade}
-                    </span>
+                    {gradeInfo ? (
+                      <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-semibold ${gradeInfo.color}`}>
+                        {gradeInfo.grade}
+                      </span>
+                    ) : <span className="text-xs text-muted-foreground">-</span>}
                   </td>
-                  <td className="px-3 py-2 text-center font-semibold text-primary">{gpa}</td>
-                  <td className="px-3 py-2 text-center text-xs font-medium text-muted-foreground">{bn ? title_bn : title}</td>
+                  <td className="px-3 py-2 text-center font-semibold text-primary">{gradeInfo ? gradeInfo.gpa : '-'}</td>
+                  <td className="px-3 py-2 text-center text-xs font-medium text-muted-foreground">{gradeInfo ? (bn ? gradeInfo.title_bn : gradeInfo.title) : '-'}</td>
                   <td className="px-2 py-2 text-center">
                     <button
                       onClick={() => onViewMarksheet(st.id)}
