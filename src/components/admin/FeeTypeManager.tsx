@@ -277,7 +277,26 @@ const FeeTypeManager = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">{bn ? 'শিক্ষাবর্ষ' : 'Academic Session'}</label>
-              <Select value={form.session_id || 'none'} onValueChange={v => setForm(p => ({ ...p, session_id: v === 'none' ? '' : v }))}>
+              <Select value={form.session_id || 'none'} onValueChange={v => {
+                const newSessionId = v === 'none' ? '' : v;
+                setForm(p => {
+                  // Filter out months not in new session range
+                  const newSession = sessions.find((s: any) => s.id === newSessionId);
+                  let validMonths = p.applicable_months;
+                  if (newSession?.start_date && newSession?.end_date) {
+                    const start = new Date(newSession.start_date);
+                    const end = new Date(newSession.end_date);
+                    const allowedMonths: string[] = [];
+                    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+                    while (cursor <= end) {
+                      allowedMonths.push(MONTHS_EN[cursor.getMonth()]);
+                      cursor.setMonth(cursor.getMonth() + 1);
+                    }
+                    validMonths = p.applicable_months.filter(m => allowedMonths.includes(m));
+                  }
+                  return { ...p, session_id: newSessionId, applicable_months: validMonths };
+                });
+              }}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{bn ? '— সেশন ছাড়া —' : '— No Session —'}</SelectItem>
