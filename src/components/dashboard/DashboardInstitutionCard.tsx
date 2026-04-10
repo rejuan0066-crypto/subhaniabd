@@ -128,20 +128,20 @@ const DashboardInstitutionCard = () => {
   }
 
   return (
-    <div className="card-elevated p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center shrink-0 overflow-hidden">
+    <div className="card-elevated p-5 lg:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6">
+      <div className="w-16 h-16 lg:w-24 lg:h-24 rounded-xl bg-primary flex items-center justify-center shrink-0 overflow-hidden">
         {institution?.logo_url ? (
           <img src={institution.logo_url} alt="Logo" className="w-full h-full object-cover" />
         ) : (
-          <GraduationCap className="w-9 h-9 text-primary-foreground" />
+          <GraduationCap className="w-9 h-9 lg:w-12 lg:h-12 text-primary-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0 w-full flex flex-col items-center">
-        <h2 className="text-xl font-display font-bold truncate text-center text-primary">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
-        <div className="text-sm text-muted-foreground space-y-0.5 w-full">
-          {institution?.address && <p className="truncate text-center text-lg">{institution.address}</p>}
-          {institution?.phone && <p className="truncate text-center">{institution.phone}</p>}
-          {institution?.email && <p className="truncate text-center text-base font-serif">{institution.email}</p>}
+        <h2 className="text-xl lg:text-2xl font-display font-bold truncate text-center text-primary">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
+        <div className="text-sm lg:text-base text-muted-foreground space-y-0.5 lg:space-y-1 w-full">
+          {institution?.address && <p className="truncate text-center text-lg lg:text-xl">{institution.address}</p>}
+          {institution?.phone && <p className="truncate text-center lg:text-lg">{institution.phone}</p>}
+          {institution?.email && <p className="truncate text-center text-base lg:text-lg font-serif">{institution.email}</p>}
           {!institution?.address && !institution?.phone && !institution?.email && (
             <p>{language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email'}</p>
           )}
