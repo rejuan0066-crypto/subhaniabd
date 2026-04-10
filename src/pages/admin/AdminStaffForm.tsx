@@ -114,6 +114,7 @@ const AdminStaffForm = () => {
   const [education, setEducation] = useState('');
   const [experience, setExperience] = useState('');
   const [prevInstitute, setPrevInstitute] = useState('');
+  const [joiningDate, setJoiningDate] = useState('');
   const [permanentAddr, setPermanentAddr] = useState<AddressData>(emptyAddress);
   const [presentAddr, setPresentAddr] = useState<AddressData>(emptyAddress);
   const [sameAddress, setSameAddress] = useState(false);
@@ -207,6 +208,7 @@ const AdminStaffForm = () => {
     setEducation(existingStaff.education || '');
     setExperience(existingStaff.experience || '');
     setPrevInstitute(existingStaff.previous_institute || '');
+    setJoiningDate(existingStaff.joining_date || '');
     setSalary(existingStaff.salary?.toString() || '');
     setPhotoUrl(existingStaff.photo_url || null);
     if (sd.permanent_address) setPermanentAddr(sd.permanent_address);
@@ -402,6 +404,7 @@ const AdminStaffForm = () => {
         residence_type: residenceType || null,
         experience: experience || null,
         previous_institute: prevInstitute || null,
+        joining_date: joiningDate || null,
         staff_data: staffData as any,
       };
 
@@ -411,7 +414,7 @@ const AdminStaffForm = () => {
       } else {
         const { error } = await supabase.from('staff').insert({
           ...record,
-          joining_date: new Date().toISOString().split('T')[0],
+          joining_date: joiningDate || new Date().toISOString().split('T')[0],
         });
         if (error) throw error;
       }
@@ -867,6 +870,10 @@ const AdminStaffForm = () => {
                   <FieldError field="dob" />
                 </div>
                 )}
+                <div>
+                  <Label>{bn ? 'যোগদান তারিখ' : 'Joining Date'}</Label>
+                  <Input type="date" className="bg-background mt-1" value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
+                </div>
                 {isFieldActive('religion') && (
                 <div>
                   <Label>{bn ? (getField('religion')?.label_bn || 'ধর্ম') : (getField('religion')?.label || 'Religion')} {isFieldRequired('religion') && <span className="text-destructive">*</span>}</Label>
