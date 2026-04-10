@@ -229,6 +229,23 @@ const Home = () => {
         </section>
       )}
 
+      {/* ===== Staff Application Banner ===== */}
+      {staffFormPublic && (
+        <section className="py-4">
+          <div className="container mx-auto px-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
+              <Link
+                to="/staff-application"
+                className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-accent text-accent-foreground rounded-xl text-lg font-bold font-display hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <UserPlus className="w-5 h-5" />
+                {bn ? 'স্টাফ/শিক্ষক অনলাইন আবেদন করুন' : 'Apply Online for Staff/Teacher Position'}
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      )}
+
       {/* ===== Dynamic Standalone Sections ===== */}
       {orderedStandalone.map(s => renderSection(s.key))}
     </PublicLayout>
