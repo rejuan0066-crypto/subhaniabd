@@ -266,7 +266,7 @@ const AddressFields = ({ label, value, onChange, disabled }: AddressFieldsProps)
 
   return (
     <div>
-      <h3 className="text-md font-display font-semibold text-foreground mb-3 text-2xl text-center">{label}</h3>
+      <h3 className="text-md font-display font-semibold text-foreground mb-3 text-center text-lg">{label}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {sortedLevelKeys.map(levelKey => renderField(levelKey))}
       </div>
