@@ -474,6 +474,7 @@ const StaffApplicationPage = () => {
           )}
 
           {/* Section 3: Identifier */}
+          {isVisible('section_identifier') && (
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'পরিচয সনাক্তকারী তথ্য (Identifier Details)' : 'Identifier Details'}
@@ -498,6 +499,7 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
+          )
 
           {/* Section 4: Relatives Identifier */}
           <div className="card-elevated p-6">
