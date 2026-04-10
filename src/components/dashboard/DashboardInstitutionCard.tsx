@@ -137,7 +137,7 @@ const DashboardInstitutionCard = () => {
         )}
       </div>
       <div className="flex-1 min-w-0 w-full">
-        <h2 className="text-xl font-display font-bold text-foreground break-words">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
+        <h2 className="text-xl font-display font-bold text-foreground truncate">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
         <p className="text-sm text-muted-foreground break-all sm:break-normal sm:truncate">
           {[institution?.address, institution?.phone, institution?.email].filter(Boolean).join(' | ') || (language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email')}
         </p>
