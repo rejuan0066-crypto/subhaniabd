@@ -206,10 +206,12 @@ const AdminCustomFormPage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-20 mb-4 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            <TabsList>
             <TabsTrigger value="form"><Send className="h-3.5 w-3.5 mr-1" />{bn ? 'ফর্ম' : 'Form'}</TabsTrigger>
             <TabsTrigger value="submissions"><List className="h-3.5 w-3.5 mr-1" />{bn ? 'সাবমিশন' : 'Submissions'} ({submissions.length})</TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </div>
 
           <TabsContent value="form">
             <Card>
