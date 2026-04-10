@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Pencil, Trash2, Eye, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-type TableType = 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results';
+type TableType = 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exam_sessions' | 'results';
 
 interface StatsListProps {
   open: boolean;
@@ -25,8 +25,8 @@ const TABLE_CONFIG: Record<TableType, { selectQuery: string; editPath: string; n
   donors: { selectQuery: '*', editPath: '/admin/donors', nameField: 'name_bn', statusField: 'status', softDeleteField: 'status' },
   divisions: { selectQuery: '*, classes(id, name_bn, name)', editPath: '/admin/divisions', nameField: 'name_bn', statusField: 'is_active', softDeleteField: 'is_active' },
   subjects: { selectQuery: '*', editPath: '/admin/subjects', nameField: 'name_bn', statusField: 'is_active', softDeleteField: 'is_active' },
-  exams: { selectQuery: '*, divisions(name_bn)', editPath: '/admin/exam-sessions', nameField: 'name_bn', statusField: 'is_published' },
-  results: { selectQuery: '*, students(name_bn, student_id), subjects(name_bn), exams(name_bn)', editPath: '/admin/results', nameField: 'id' },
+  exam_sessions: { selectQuery: '*, academic_sessions(name, name_bn)', editPath: '/admin/exam-sessions', nameField: 'name_bn', statusField: 'is_active' },
+  results: { selectQuery: '*, students(name_bn, student_id), subjects(name_bn), exam_sessions(name_bn)', editPath: '/admin/results', nameField: 'id' },
 };
 
 const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: StatsListProps) => {
@@ -63,6 +63,7 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
       qc.invalidateQueries({ queryKey: ['dashboard-divisions'] });
       qc.invalidateQueries({ queryKey: ['dashboard-subjects'] });
       qc.invalidateQueries({ queryKey: ['dashboard-exams'] });
+      qc.invalidateQueries({ queryKey: ['dashboard-exam-sessions'] });
       qc.invalidateQueries({ queryKey: ['dashboard-results'] });
       toast.success(bn ? 'সফলভাবে মুছে ফেলা হয়েছে' : 'Deleted successfully');
     },
@@ -145,13 +146,13 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
             <td className="px-3 py-2">{getStatusBadge(item)}</td>
           </>
         );
-      case 'exams':
+      case 'exam_sessions':
         return (
           <>
             <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
             <td className="px-3 py-2 font-medium text-foreground">{item.name_bn}</td>
             <td className="px-3 py-2 text-muted-foreground">{item.exam_type || '-'}</td>
-            <td className="px-3 py-2 text-muted-foreground">{item.exam_year || '-'}</td>
+            <td className="px-3 py-2 text-muted-foreground">{item.academic_sessions?.name || '-'}</td>
             <td className="px-3 py-2">{getStatusBadge(item)}</td>
           </>
         );
@@ -161,7 +162,7 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
             <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
             <td className="px-3 py-2 font-medium text-foreground">{item.students?.name_bn || '-'}</td>
             <td className="px-3 py-2 text-muted-foreground">{item.subjects?.name_bn || '-'}</td>
-            <td className="px-3 py-2 text-muted-foreground">{item.exams?.name_bn || '-'}</td>
+            <td className="px-3 py-2 text-muted-foreground">{item.exam_sessions?.name_bn || '-'}</td>
             <td className="px-3 py-2 text-muted-foreground">{item.marks ?? item.grade ?? '-'}</td>
           </>
         );
@@ -183,7 +184,7 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
         return <>{h('#')}{h(bn ? 'নাম (বাংলা)' : 'Name (BN)')}{h(bn ? 'নাম (ইংরেজি)' : 'Name (EN)')}{h(bn ? 'শ্রেণী' : 'Classes')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
       case 'subjects':
         return <>{h('#')}{h(bn ? 'নাম (বাংলা)' : 'Name (BN)')}{h(bn ? 'নাম (ইংরেজি)' : 'Name (EN)')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
-      case 'exams':
+      case 'exam_sessions':
         return <>{h('#')}{h(bn ? 'নাম' : 'Name')}{h(bn ? 'ধরন' : 'Type')}{h(bn ? 'সাল' : 'Year')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
       case 'results':
         return <>{h('#')}{h(bn ? 'ছাত্র' : 'Student')}{h(bn ? 'বিষয়' : 'Subject')}{h(bn ? 'পরীক্ষা' : 'Exam')}{h(bn ? 'নম্বর' : 'Marks')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
