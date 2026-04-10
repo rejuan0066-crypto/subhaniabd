@@ -446,7 +446,7 @@ const AdminStaffForm = () => {
     if (isFieldActive('nid') && isFieldRequired('nid') && (!nid || (nid.length !== 10 && nid.length !== 17))) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
     reqCheck('education', education, 'শিক্ষাগত যোগ্যতা আবশ্যক', 'Education required');
     if (isFieldActive('prev_institute') && experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
-    reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
+    if (isEditMode && existingStaff?.status === 'active') reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
 
     // Parents validation
     reqCheck('father_name', fatherName, 'পিতার নাম আবশ্যক', 'Father name required');
