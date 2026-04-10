@@ -373,8 +373,14 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
           {staff.name_bn && staff.name_en && <p className="text-sm text-muted-foreground">{bn ? staff.name_en : staff.name_bn}</p>}
           <p className="text-sm text-primary font-medium">{staff.designation || '-'}</p>
           <p className="text-xs text-muted-foreground">{staff.department || ''}</p>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${staff.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+            staff.status === 'active' ? 'bg-success/10 text-success' : 
+            staff.status === 'pending' ? 'bg-warning/10 text-warning' : 
+            'bg-destructive/10 text-destructive'
+          }`}>
+            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : 
+             staff.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') : 
+             (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
           </span>
         </div>
       </div>
