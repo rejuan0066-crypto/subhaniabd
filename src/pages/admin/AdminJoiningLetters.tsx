@@ -39,17 +39,16 @@ const AdminJoiningLetters = () => {
       return data;
     },
   });
-  const { data: principal } = useQuery({
-    queryKey: ['principal-staff'],
+  const { data: principalInfo } = useQuery({
+    queryKey: ['principal-settings'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('staff')
-        .select('name_bn, name_en, designation')
-        .in('designation', ['প্রধান শিক্ষক', 'অধ্যক্ষ', 'মুহতামিম', 'Principal'])
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .from('website_settings')
+        .select('key, value')
+        .in('key', ['principal_name', 'principal_title_bn', 'principal_title_en']);
+      const map: Record<string, string> = {};
+      (data || []).forEach((r: any) => { map[r.key] = typeof r.value === 'string' ? r.value : ''; });
+      return map;
     },
   });
 
