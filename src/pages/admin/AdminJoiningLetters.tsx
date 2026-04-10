@@ -336,7 +336,7 @@ const AdminJoiningLetters = () => {
 
         {/* ── View / Edit Dialog ────────────────────────────── */}
         <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) { setViewLetter(null); resetOverrides(); } }}>
-          <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
+          <DialogContent className="sm:max-w-4xl max-h-[95vh] p-0 overflow-y-auto">
             <DialogHeader className="sr-only">
               <DialogTitle>{bn ? 'নিয়োগপত্র' : 'Official Joining Letter'}</DialogTitle>
             </DialogHeader>
