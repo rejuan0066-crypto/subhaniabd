@@ -1,20 +1,638 @@
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { useState, useRef, useCallback } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { QRCodeSVG } from 'qrcode.react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+/* ── Editable span helper ─────────────────────────── */
+interface EditableProps {
+  value: string;
+  onChange: (v: string) => void;
+  editing: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  tag?: 'span' | 'p' | 'h2' | 'h3';
+}
+
+const Editable = ({ value, onChange, editing, className = '', style, tag: Tag = 'span' }: EditableProps) => {
+  const ref = useRef<HTMLElement>(null);
+  const handleBlur = () => { if (ref.current) onChange(ref.current.innerText.trim()); };
+  return (
+    <Tag
+      ref={ref as any}
+      contentEditable={editing}
+      suppressContentEditableWarning
+      onBlur={handleBlur}
+      className={`${className} ${editing ? 'outline-none ring-1 ring-primary/30 rounded px-0.5 hover:ring-primary/60 focus:ring-primary/80 transition-shadow' : ''}`}
+      style={{ ...style, cursor: editing ? 'text' : 'default' }}
+    >
+      {value}
+    </Tag>
+  );
+};
 
 const AdminResignLetters = () => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
+  const queryClient = useQueryClient();
+  const [viewLetter, setViewLetter] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [selectedStaffId, setSelectedStaffId] = useState('');
+  const [resignDate, setResignDate] = useState('');
+  const [reason, setReason] = useState('');
+
+  /* ── Editable overrides ─────────────────── */
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const set = (key: string, val: string) => setOverrides(p => ({ ...p, [key]: val }));
+  const get = (key: string, fallback: string) => overrides[key] ?? fallback;
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [localLogo, setLocalLogo] = useState<string | null>(null);
+  const [localPhoto, setLocalPhoto] = useState<string | null>(null);
+
+  const resetOverrides = () => {
+    setOverrides({});
+    setEditMode(false);
+    setLocalLogo(null);
+    setLocalPhoto(null);
+  };
+
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('Max 5MB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setter(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  /* ── Queries ─────────────────── */
+  const { data: letters = [], isLoading } = useQuery({
+    queryKey: ['resign-letters'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('resign_letters')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: staffList = [] } = useQuery({
+    queryKey: ['staff-for-resign'],
+    queryFn: async () => {
+      const { data } = await supabase.from('staff').select('id, name, name_bn, designation, status, photo_url, staff_data').eq('status', 'active');
+      return data || [];
+    },
+    enabled: showCreate,
+  });
+
+  const { data: institution } = useQuery({
+    queryKey: ['institution-info'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('*').eq('is_default', true).maybeSingle();
+      return data;
+    },
+  });
+
+  const { data: principalInfo } = useQuery({
+    queryKey: ['principal-settings'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('website_settings')
+        .select('key, value')
+        .in('key', ['principal_name', 'principal_title_bn', 'principal_title_en']);
+      const map: Record<string, string> = {};
+      (data || []).forEach((r: any) => { map[r.key] = typeof r.value === 'string' ? r.value : ''; });
+      return map;
+    },
+  });
+
+  /* ── Generate letter number ─── */
+  const generateLetterNumber = () => {
+    const year = new Date().getFullYear();
+    const serial = String(letters.length + 1).padStart(3, '0');
+    return `RL-${year}-${serial}`;
+  };
+
+  /* ── Create mutation ─────────── */
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      const staff = staffList.find((s: any) => s.id === selectedStaffId);
+      if (!staff) throw new Error('Staff not found');
+      const letterNumber = generateLetterNumber();
+      const today = new Date().toISOString().split('T')[0];
+
+      const { error } = await supabase.from('resign_letters').insert({
+        letter_number: letterNumber,
+        staff_name: (staff as any).name || '',
+        staff_name_bn: (staff as any).name_bn || '',
+        designation: (staff as any).designation || '',
+        staff_id: staff.id,
+        letter_date: today,
+        resign_date: resignDate || today,
+        reason: reason || '',
+        letter_data: { photo_url: (staff as any).photo_url || '' },
+        status: 'issued',
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
+      toast.success(bn ? 'পদত্যাগ পত্র তৈরি হয়েছে' : 'Resign letter created');
+      setShowCreate(false);
+      setSelectedStaffId('');
+      setResignDate('');
+      setReason('');
+    },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error creating letter'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('resign_letters').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
+      toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted');
+      setDeleteId(null);
+    },
+  });
+
+  /* ── Build resolved values ──── */
+  const resolved = useCallback((letter: any) => {
+    const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' } as any;
+    const pName = principalInfo?.principal_name || '';
+    const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
+
+    return {
+      instName: get('instName', inst.name || ''),
+      instNameEn: get('instNameEn', inst.name_en || ''),
+      instAddress: get('instAddress', inst.address || ''),
+      instPhone: get('instPhone', inst.phone || ''),
+      salutation: get('salutation', bn ? 'জনাব,' : 'Dear,'),
+      staffName: get('staffName', letter.staff_name_bn || letter.staff_name || ''),
+      designation: get('designation', letter.designation || ''),
+      reason: get('reason', letter.reason || (bn ? 'ব্যক্তিগত কারণে' : 'Personal reasons')),
+      pName: get('pName', pName),
+      pTitle: get('pTitle', pTitle),
+      candidateSigLabel: get('candidateSigLabel', bn ? 'পদত্যাগকারীর স্বাক্ষর' : "Resignee's Signature"),
+      authoritySigLabel: get('authoritySigLabel', bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"),
+      logoUrl: localLogo || inst.logo_url || '',
+      photoUrl: localPhoto || (letter.letter_data as any)?.photo_url || '',
+    };
+  }, [institution, principalInfo, bn, overrides, localLogo, localPhoto]);
+
+  /* ── Print handler ──────────── */
+  const handlePrint = (letter: any) => {
+    const r = resolved(letter);
+    const qrValue = `RL:${letter.letter_number}|${letter.staff_name}|${letter.resign_date}`;
+
+    const bodyText = bn
+      ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (পত্র নং: <strong>${letter.letter_number}</strong>), <span class="highlight">"${r.designation}"</span> পদে কর্মরত, <strong>${r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।<br/><br/><strong>কারণ:</strong> ${r.reason}<br/><br/>তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।`
+      : `This is to inform that <span class="highlight">${r.staffName}</span> (Ref: <strong>${letter.letter_number}</strong>), serving as <span class="highlight">"${r.designation}"</span>, has resigned from <strong>${r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('en-US') : ''}</strong>.<br/><br/><strong>Reason:</strong> ${r.reason}<br/><br/>We express our gratitude for their service and wish them success in future endeavors.`;
+
+    const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>${bn ? 'পদত্যাগ পত্র' : 'Resign Letter'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  @page{size:A4;margin:0}
+  html,body{width:210mm;height:297mm;margin:0!important;padding:0!important;font-family:'Noto Serif Bengali','Georgia',serif;color:#1a1a1a;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;background:#fff;overflow:hidden}
+  .page{width:210mm;height:297mm;padding:12mm;box-sizing:border-box;border:3px double #444;position:relative;break-inside:avoid;page-break-inside:avoid;overflow:hidden}
+  .inner-border{border:1px solid #ccc;padding:8mm;position:relative;overflow:hidden;height:calc(297mm - 24mm - 6px);box-sizing:border-box;display:flex;flex-direction:column}
+  .watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.06;pointer-events:none;z-index:0}
+  .watermark img{width:200px;height:200px;object-fit:contain}
+  .content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column}
+  .header{text-align:center;border-bottom:3px double #333;padding-bottom:14px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+  .header-logo{width:52px;height:52px;object-fit:contain;border-radius:4px}
+  .header-text{flex:1;text-align:center}
+  .header-text h1{font-size:20px;font-weight:700}
+  .header-text p{font-size:12px;color:#555}
+  .header-spacer{width:52px}
+  .formal-title{text-align:center;margin-bottom:18px}
+  .formal-title h2{font-size:18px;font-weight:700;letter-spacing:2px}
+  .formal-title .sub{font-size:11px;color:#666;letter-spacing:1px}
+  .formal-title .underline{width:80px;border-bottom:2px solid #444;margin:6px auto 0}
+  .meta{display:flex;justify-content:space-between;margin-bottom:20px;font-size:13px;color:#555}
+  .meta strong{color:#1a1a1a}
+  .letter-body{font-size:14px;line-height:2.2;margin-bottom:20px;flex:1}
+  .letter-body p{margin-bottom:10px}
+  .letter-body .highlight{color:#991b1b;font-weight:700}
+  .body-flex{display:flex;gap:20px}
+  .body-text{flex:1}
+  .photo-box{flex-shrink:0;text-align:center}
+  .photo-box .avatar{width:80px;height:80px;border:2px solid #ccc;border-radius:6px;object-fit:cover;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:28px;color:#999}
+  .photo-label{font-size:9px;color:#888;margin-top:4px}
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:30px}
+  .qr-block{text-align:center}
+  .qr-block canvas,.qr-block svg,.qr-block img{width:60px;height:60px}
+  .qr-label{font-size:8px;color:#888;margin-top:3px}
+  .sig{text-align:center}
+  .sig .line{width:160px;border-top:1px solid #444;margin-bottom:3px}
+  .sig .name{font-size:12px;font-weight:600;margin-bottom:1px}
+  .sig .label{font-size:11px;color:#555}
+  .sig .date{font-size:10px;color:#666;margin-top:4px}
+  .sig-right{display:flex;align-items:flex-end;gap:12px}
+  .seal{width:50px;height:50px;border-radius:50%;border:2px dashed #bbb;display:flex;align-items:center;justify-content:center}
+  .seal span{font-size:7px;color:#999;text-align:center;line-height:1.2}
+  @media print{html,body{margin:0!important;padding:0!important;overflow:hidden}.page{box-shadow:none;border:3px double #444}}
+</style>
+</head><body>
+<div class="page"><div class="inner-border">
+  ${r.logoUrl ? `<div class="watermark"><img src="${r.logoUrl}" alt="" /></div>` : ''}
+  <div class="content">
+    <div class="header">
+      ${r.logoUrl ? `<img src="${r.logoUrl}" class="header-logo" alt="Logo" />` : ''}
+      <div class="header-text">
+        <h1>${r.instName}</h1>
+        ${r.instNameEn ? `<p>${r.instNameEn}</p>` : ''}
+        ${r.instAddress ? `<p>${r.instAddress}</p>` : ''}
+        ${r.instPhone ? `<p>${bn ? 'ফোন' : 'Phone'}: ${r.instPhone}</p>` : ''}
+      </div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="formal-title">
+      <h2>${bn ? 'পদত্যাগ পত্র' : 'RESIGNATION LETTER'}</h2>
+      <p class="sub">${bn ? 'RESIGNATION LETTER' : 'পদত্যাগ পত্র'}</p>
+      <div class="underline"></div>
+    </div>
+    <div class="meta">
+      <span>${bn ? 'পত্র নং' : 'Ref'}: <strong>${letter.letter_number || ''}</strong></span>
+      <span>${bn ? 'তারিখ' : 'Date'}: <strong>${letter.letter_date ? new Date(letter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : ''}</strong></span>
+    </div>
+    <div class="letter-body">
+      <div class="body-flex">
+        <div class="body-text">
+          <p>${r.salutation}</p>
+          <p class="highlight" style="font-size:15px;">${r.staffName}</p>
+          <p>${bodyText}</p>
+        </div>
+        <div class="photo-box">
+          <div class="avatar">${r.photoUrl ? `<img src="${r.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : (r.staffName || '?').charAt(0)}</div>
+          <p class="photo-label">${bn ? 'ছবি' : 'Photo'}</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="qr-block" id="qr-container">
+        <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+      </div>
+      <div class="sig">
+        <div class="line"></div>
+        <p class="label">${r.candidateSigLabel}</p>
+        <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+      </div>
+      <div class="sig-right">
+        <div class="seal"><span>${bn ? 'সিল' : 'Official<br/>Seal'}</span></div>
+        <div class="sig">
+          <div class="line"></div>
+          ${r.pName ? `<p class="name">${r.pName}</p>` : ''}
+          <p class="label">${r.authoritySigLabel}</p>
+          <p class="label">${r.pTitle}</p>
+          <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+<script>
+  function tryQR(attempts) {
+    if (typeof QRCode === 'undefined') {
+      if (attempts < 20) setTimeout(function(){ tryQR(attempts+1); }, 200);
+      else setTimeout(function(){ window.print(); }, 300);
+      return;
+    }
+    var container = document.getElementById('qr-container');
+    QRCode.toString('${qrValue.replace(/'/g, "\\'")}', {type:'svg',width:60,margin:0}, function(err,svg){
+      if(!err && svg){ container.insertAdjacentHTML('afterbegin', svg); }
+      setTimeout(function(){ window.print(); }, 500);
+    });
+  }
+  tryQR(0);
+<\/script>
+</body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(html); w.document.close(); }
+  };
+
   return (
     <AdminLayout>
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📄</div>
-          <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-            {language === 'bn' ? 'পদত্যাগ পত্র' : 'Resign Letters'}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <FileText className="w-6 h-6 text-destructive" />
+            {bn ? 'পদত্যাগ পত্র' : 'Resign Letters'}
+            <Badge variant="outline" className="ml-2">{letters.length}</Badge>
           </h1>
-          <p className="text-muted-foreground">
-            {language === 'bn' ? 'এই পেজটি শীঘ্রই তৈরি হবে' : 'This page is coming soon'}
-          </p>
+          <Button onClick={() => setShowCreate(true)} className="gap-1.5">
+            <Plus className="w-4 h-4" />
+            {bn ? 'নতুন পদত্যাগ পত্র' : 'New Resign Letter'}
+          </Button>
         </div>
+
+        <div className="card-elevated overflow-hidden">
+          {isLoading ? (
+            <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+          ) : letters.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              {bn ? 'কোনো পদত্যাগ পত্র পাওয়া যায়নি।' : 'No resign letters found.'}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{bn ? 'পত্র নং' : 'Letter No'}</TableHead>
+                  <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
+                  <TableHead>{bn ? 'পদবী' : 'Designation'}</TableHead>
+                  <TableHead>{bn ? 'পদত্যাগের তারিখ' : 'Resign Date'}</TableHead>
+                  <TableHead>{bn ? 'পত্রের তারিখ' : 'Letter Date'}</TableHead>
+                  <TableHead className="text-center w-32">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {letters.map((l: any) => (
+                  <TableRow key={l.id}>
+                    <TableCell className="font-mono text-sm">{l.letter_number}</TableCell>
+                    <TableCell>
+                      <p className="font-medium">{l.staff_name_bn || l.staff_name}</p>
+                      {l.staff_name && l.staff_name_bn && <p className="text-xs text-muted-foreground">{l.staff_name}</p>}
+                    </TableCell>
+                    <TableCell>{l.designation}</TableCell>
+                    <TableCell>{l.resign_date ? new Date(l.resign_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
+                    <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
+                          <Printer className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(l.id)} title={bn ? 'মুছুন' : 'Delete'}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {/* ── Create Dialog ─────────────────────────── */}
+        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{bn ? 'নতুন পদত্যাগ পত্র তৈরি করুন' : 'Create Resign Letter'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>{bn ? 'স্টাফ নির্বাচন করুন' : 'Select Staff'}</Label>
+                <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={bn ? 'স্টাফ বাছুন...' : 'Choose staff...'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {staffList.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name_bn || s.name} {s.designation ? `(${s.designation})` : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{bn ? 'পদত্যাগের তারিখ' : 'Resign Date'}</Label>
+                <Input type="date" value={resignDate} onChange={e => setResignDate(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{bn ? 'কারণ' : 'Reason'}</Label>
+                <Textarea
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+                  placeholder={bn ? 'পদত্যাগের কারণ লিখুন...' : 'Enter reason for resignation...'}
+                  rows={3}
+                />
+              </div>
+              <Button
+                className="w-full"
+                disabled={!selectedStaffId || createMutation.isPending}
+                onClick={() => createMutation.mutate()}
+              >
+                {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {bn ? 'পদত্যাগ পত্র তৈরি করুন' : 'Create Resign Letter'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ── View / Edit Dialog ───────────────────── */}
+        <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) { setViewLetter(null); resetOverrides(); } }}>
+          <DialogContent className="sm:max-w-4xl max-h-[95vh] p-0 overflow-y-auto">
+            <DialogHeader className="sr-only">
+              <DialogTitle>{bn ? 'পদত্যাগ পত্র' : 'Resignation Letter'}</DialogTitle>
+            </DialogHeader>
+            {viewLetter && (() => {
+              const r = resolved(viewLetter);
+              return (
+                <div className="flex flex-col">
+                  {/* Edit mode toggle */}
+                  <div className="flex items-center justify-end gap-2 px-4 pt-3">
+                    <Button size="sm" variant={editMode ? 'default' : 'outline'} onClick={() => setEditMode(!editMode)} className="gap-1.5">
+                      {editMode ? <PencilOff className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+                      {editMode ? (bn ? 'এডিট বন্ধ' : 'Exit Edit') : (bn ? 'এডিট মোড' : 'Edit Mode')}
+                    </Button>
+                  </div>
+
+                  {/* Hidden file inputs */}
+                  <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalLogo)} />
+                  <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalPhoto)} />
+
+                  {/* Document */}
+                  <div className="m-4 mt-2 border-[3px] border-double border-foreground/30 p-1" style={{ aspectRatio: '210/297', maxWidth: '100%' }}>
+                    <div className="border border-foreground/15 p-7 relative overflow-hidden h-full flex flex-col" style={{ color: '#1a1a1a' }}>
+
+                      {/* Watermark */}
+                      {r.logoUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                          <img src={r.logoUrl} alt="" className="w-56 h-56 object-contain opacity-[0.06]" />
+                        </div>
+                      )}
+
+                      <div className="relative z-10 flex flex-col flex-1">
+                        {/* Header */}
+                        <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
+                          <div
+                            className={`relative w-14 h-14 flex-shrink-0 ${editMode ? 'cursor-pointer group' : ''}`}
+                            onClick={() => editMode && logoInputRef.current?.click()}
+                          >
+                            {r.logoUrl ? (
+                              <img src={r.logoUrl} alt="Logo" className="w-14 h-14 object-contain rounded" />
+                            ) : (
+                              <div className="w-14 h-14 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">Logo</div>
+                            )}
+                            {editMode && (
+                              <div className="absolute inset-0 bg-black/40 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Upload className="w-4 h-4 text-white" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 text-center">
+                            <Editable tag="h2" value={r.instName} onChange={v => set('instName', v)} editing={editMode} className="text-xl font-bold text-foreground" />
+                            {(r.instNameEn || editMode) && <Editable tag="p" value={r.instNameEn} onChange={v => set('instNameEn', v)} editing={editMode} className="text-sm text-muted-foreground" />}
+                            {(r.instAddress || editMode) && <Editable tag="p" value={r.instAddress} onChange={v => set('instAddress', v)} editing={editMode} className="text-xs text-muted-foreground mt-0.5" />}
+                            {(r.instPhone || editMode) && (
+                              <p className="text-xs text-muted-foreground">
+                                {bn ? 'ফোন' : 'Phone'}: <Editable value={r.instPhone} onChange={v => set('instPhone', v)} editing={editMode} />
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-14" />
+                        </div>
+
+                        {/* Title */}
+                        <div className="text-center mb-5">
+                          <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
+                            {bn ? 'পদত্যাগ পত্র' : 'RESIGNATION LETTER'}
+                          </h3>
+                          <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'RESIGNATION LETTER' : 'পদত্যাগ পত্র'}</p>
+                          <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
+                        </div>
+
+                        {/* Meta */}
+                        <div className="flex justify-between text-sm mb-5" style={{ color: '#888' }}>
+                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold" style={{ color: '#1a1a1a' }}>{viewLetter.letter_number}</span></span>
+                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: '#1a1a1a' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                        </div>
+
+                        {/* Body + Photo */}
+                        <div className="flex gap-5 mb-6 flex-1">
+                          <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
+                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
+                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--destructive))' }} />
+                            <p>
+                              {bn
+                                ? <>এই পত্র দ্বারা জানানো যাচ্ছে যে, <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (পত্র নং: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong> পদে কর্মরত, <strong>{r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।</>
+                                : <>This is to inform that <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (Ref: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), serving as <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong>, has resigned from <strong>{r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('en-US') : ''}</strong>.</>
+                              }
+                            </p>
+                            <p>
+                              <strong>{bn ? 'কারণ:' : 'Reason:'}</strong>{' '}
+                              <Editable value={r.reason} onChange={v => set('reason', v)} editing={editMode} />
+                            </p>
+                            <p>
+                              {bn
+                                ? 'তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।'
+                                : 'We express our gratitude for their service and wish them success in future endeavors.'}
+                            </p>
+                          </div>
+
+                          {/* Photo */}
+                          <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+                            <div
+                              className={`relative ${editMode ? 'cursor-pointer group' : ''}`}
+                              onClick={() => editMode && photoInputRef.current?.click()}
+                            >
+                              <Avatar className="w-[88px] h-[88px] border-2 border-foreground/20 rounded-md">
+                                <AvatarImage src={r.photoUrl} className="object-cover" />
+                                <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl">
+                                  {(r.staffName || '?').charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              {editMode && (
+                                <div className="absolute inset-0 bg-black/40 rounded-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Upload className="w-5 h-5 text-white" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">{bn ? 'ছবি' : 'Photo'}</p>
+                          </div>
+                        </div>
+
+                        {/* Signature area */}
+                        <div className="flex justify-between items-end mt-12 pt-4">
+                          <div className="flex flex-col items-center gap-1">
+                            <QRCodeSVG
+                              value={`RL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.resign_date}`}
+                              size={64}
+                              level="M"
+                              className="opacity-80"
+                            />
+                            <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="w-36 border-t border-foreground/40 mb-1" />
+                            <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
+                            <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                          </div>
+                          <div className="flex items-end gap-3">
+                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
+                              <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br />{bn ? '' : 'Seal'}</span>
+                            </div>
+                            <div className="text-center">
+                              <div className="w-36 border-t border-foreground/40 mb-1" />
+                              <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
+                              <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
+                              <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
+                              <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="px-4 pb-4">
+                    <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
+                      <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirm */}
+        <AlertDialog open={!!deleteId} onOpenChange={(o) => { if (!o) setDeleteId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{bn ? 'মুছে ফেলতে চান?' : 'Delete this letter?'}</AlertDialogTitle>
+              <AlertDialogDescription>{bn ? 'এটি স্থায়ীভাবে মুছে যাবে।' : 'This will be permanently deleted.'}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{bn ? 'না' : 'Cancel'}</AlertDialogCancel>
+              <AlertDialogAction onClick={() => deleteId && deleteMutation.mutate(deleteId)} className="bg-destructive text-destructive-foreground">
+                {bn ? 'হ্যাঁ, মুছুন' : 'Yes, Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );
