@@ -52,6 +52,25 @@ const FeeTypeManager = () => {
     },
   });
 
+  // Compute applicable months based on selected session's date range
+  const sessionMonths = useMemo(() => {
+    if (!form.session_id) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    const session = sessions.find((s: any) => s.id === form.session_id);
+    if (!session?.start_date || !session?.end_date) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    
+    const start = new Date(session.start_date);
+    const end = new Date(session.end_date);
+    const months: { en: string; bn: string; index: number }[] = [];
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    
+    while (cursor <= end) {
+      const mi = cursor.getMonth();
+      months.push({ en: MONTHS_EN[mi], bn: MONTHS_BN[mi], index: mi });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return months;
+  }, [form.session_id, sessions]);
+
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['all_fee_types'],
     queryFn: async () => {
