@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User, FileText } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User, FileText, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -47,6 +47,18 @@ const AdminStaff = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from('staff').update({ status }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(status === 'active' ? (bn ? '✅ অনুমোদিত হয়েছে' : '✅ Approved') : (bn ? '❌ বাতিল করা হয়েছে' : '❌ Rejected'));
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
 
   const deleteMutation = useMutation({
@@ -217,6 +229,12 @@ const AdminStaff = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
+                        {s.status === 'pending' && isAdminRole(role) && (
+                          <>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'active' })} className="p-2 rounded-lg hover:bg-success/10 text-success" title={bn ? 'অনুমোদন' : 'Approve'} disabled={statusMutation.isPending}><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive" title={bn ? 'বাতিল' : 'Reject'} disabled={statusMutation.isPending}><X className="w-4 h-4" /></button>
+                          </>
+                        )}
                         <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
                           <button onClick={() => navigate(`/admin/staff/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
