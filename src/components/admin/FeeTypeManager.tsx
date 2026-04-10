@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -51,6 +51,25 @@ const FeeTypeManager = () => {
       return data;
     },
   });
+
+  // Compute applicable months based on selected session's date range
+  const sessionMonths = useMemo(() => {
+    if (!form.session_id) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    const session = sessions.find((s: any) => s.id === form.session_id);
+    if (!session?.start_date || !session?.end_date) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    
+    const start = new Date(session.start_date);
+    const end = new Date(session.end_date);
+    const months: { en: string; bn: string; index: number }[] = [];
+    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+    
+    while (cursor <= end) {
+      const mi = cursor.getMonth();
+      months.push({ en: MONTHS_EN[mi], bn: MONTHS_BN[mi], index: mi });
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return months;
+  }, [form.session_id, sessions]);
 
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['all_fee_types'],
@@ -258,7 +277,26 @@ const FeeTypeManager = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">{bn ? 'শিক্ষাবর্ষ' : 'Academic Session'}</label>
-              <Select value={form.session_id || 'none'} onValueChange={v => setForm(p => ({ ...p, session_id: v === 'none' ? '' : v }))}>
+              <Select value={form.session_id || 'none'} onValueChange={v => {
+                const newSessionId = v === 'none' ? '' : v;
+                setForm(p => {
+                  // Filter out months not in new session range
+                  const newSession = sessions.find((s: any) => s.id === newSessionId);
+                  let validMonths = p.applicable_months;
+                  if (newSession?.start_date && newSession?.end_date) {
+                    const start = new Date(newSession.start_date);
+                    const end = new Date(newSession.end_date);
+                    const allowedMonths: string[] = [];
+                    const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+                    while (cursor <= end) {
+                      allowedMonths.push(MONTHS_EN[cursor.getMonth()]);
+                      cursor.setMonth(cursor.getMonth() + 1);
+                    }
+                    validMonths = p.applicable_months.filter(m => allowedMonths.includes(m));
+                  }
+                  return { ...p, session_id: newSessionId, applicable_months: validMonths };
+                });
+              }}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">{bn ? '— সেশন ছাড়া —' : '— No Session —'}</SelectItem>
@@ -300,30 +338,38 @@ const FeeTypeManager = () => {
               </Select>
               {form.payment_frequency === 'monthly' && (
                 <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-foreground">{bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}</label>
+                <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">
+                      {bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}
+                      {form.session_id && (
+                        <span className="ml-1 text-muted-foreground font-normal">
+                          ({sessionMonths.length} {bn ? 'টি মাস' : 'months'})
+                        </span>
+                      )}
+                    </label>
                     <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
+                      const allSessionMonthNames = sessionMonths.map(m => m.en);
                       setForm(p => ({
                         ...p,
-                        applicable_months: p.applicable_months.length === 12 ? [] : [...MONTHS_EN]
+                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allSessionMonthNames
                       }));
                     }}>
-                      {form.applicable_months.length === 12 ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
+                      {form.applicable_months.length === sessionMonths.length ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
                     </button>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {MONTHS_EN.map((month, i) => {
-                      const isSelected = form.applicable_months.includes(month);
+                    {sessionMonths.map((month) => {
+                      const isSelected = form.applicable_months.includes(month.en);
                       return (
                         <button
-                          key={month}
+                          key={month.en}
                           type="button"
                           onClick={() => {
                             setForm(p => ({
                               ...p,
                               applicable_months: isSelected
-                                ? p.applicable_months.filter(m => m !== month)
-                                : [...p.applicable_months, month]
+                                ? p.applicable_months.filter(m => m !== month.en)
+                                : [...p.applicable_months, month.en]
                             }));
                           }}
                           className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
@@ -332,7 +378,7 @@ const FeeTypeManager = () => {
                               : 'bg-muted/30 border-border text-muted-foreground hover:border-primary/40'
                           }`}
                         >
-                          {bn ? MONTHS_BN[i] : month.slice(0, 3)}
+                          {bn ? month.bn : month.en.slice(0, 3)}
                         </button>
                       );
                     })}
