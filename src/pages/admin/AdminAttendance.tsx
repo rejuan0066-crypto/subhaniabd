@@ -78,6 +78,7 @@ const AdminAttendance = () => {
   const [selectedSessionYear, setSelectedSessionYear] = useState('');
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedShift, setSelectedShift] = useState('full_day');
+  const [qrPosterOpen, setQrPosterOpen] = useState(false);
   // Effective shift: fulltime tab always uses 'full_day'
   const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
@@ -388,8 +389,8 @@ const AdminAttendance = () => {
   // Status label helper
   const statusLabel = (status: string) => {
     const map: Record<string, string> = bn
-      ? { present: 'উপস্থিত', absent: 'অনুপস্থিত', late: 'বিলম্ব', half_day: 'অর্ধদিন', leave: 'ছুটি' }
-      : { present: 'Present', absent: 'Absent', late: 'Late', half_day: 'Half Day', leave: 'Leave' };
+      ? { present: 'উপস্থিত', absent: 'অনুপস্থিত', late: 'বিলম্ব', half_day: 'অর্ধদিন', leave: 'ছুটি', excused: 'অনুমতিপ্রাপ্ত', medical: 'চিকিৎসাজনিত' }
+      : { present: 'Present', absent: 'Absent', late: 'Late', half_day: 'Half Day', leave: 'Leave', excused: 'Excused', medical: 'Medical' };
     return map[status] || status;
   };
 
