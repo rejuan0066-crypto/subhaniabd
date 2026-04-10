@@ -98,7 +98,12 @@ const SearchableSelect = ({
           <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
         </button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start">
+      <PopoverContent
+        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        align="start"
+        onWheel={e => e.stopPropagation()}
+        onTouchMove={e => e.stopPropagation()}
+      >
         <div className="flex items-center border-b px-2">
           <Search className="h-4 w-4 shrink-0 opacity-50" />
           <Input
@@ -109,7 +114,7 @@ const SearchableSelect = ({
             className="h-9 border-0 shadow-none focus-visible:ring-0 text-sm"
           />
         </div>
-        <div className="max-h-60 overflow-y-auto p-1">
+        <div className="max-h-[40vh] overflow-y-auto overscroll-contain p-1">
           {showAddCustom && (
             <button
               type="button"
