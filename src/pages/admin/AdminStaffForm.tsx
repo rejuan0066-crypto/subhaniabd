@@ -941,36 +941,48 @@ const AdminStaffForm = () => {
               {bn ? '২. পিতা-মাতার তথ্য (Parents Details)' : '2. Parents Details'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {isFieldActive('father_name') && (
               <div>
-                <Label>{bn ? 'পিতার নাম' : 'Father Name'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_name')?.label_bn || 'পিতার নাম') : (getField('father_name')?.label || 'Father Name')} {isFieldRequired('father_name') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fieldErrors['father_name'] ? 'border-destructive' : ''}`} value={fatherName} onChange={e => handleFieldChange('father_name', e.target.value, setFatherName)} />
                 <FieldError field="father_name" />
               </div>
-              <PhoneInput label={bn ? 'পিতার মোবাইল' : 'Father Mobile'} required value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />
+              )}
+              {isFieldActive('father_mobile') && <PhoneInput label={bn ? 'পিতার মোবাইল' : 'Father Mobile'} required={isFieldRequired('father_mobile')} value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />}
+              {isFieldActive('father_nid') && (
               <div>
-                <Label>{bn ? 'পিতার NID' : 'Father NID'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_nid')?.label_bn || 'পিতার NID') : (getField('father_nid')?.label || 'Father NID')} {isFieldRequired('father_nid') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fatherNidError ? 'border-destructive' : ''}`} maxLength={17} value={fatherNid} onChange={e => validateNid(e.target.value, setFatherNid, setFatherNidError)} />
                 {fatherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fatherNidError}</p>}
               </div>
+              )}
+              {isFieldActive('father_occupation') && (
               <div>
-                <Label>{bn ? 'পিতার পেশা' : 'Father Occupation'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_occupation')?.label_bn || 'পিতার পেশা') : (getField('father_occupation')?.label || 'Father Occupation')} {isFieldRequired('father_occupation') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fieldErrors['father_occupation'] ? 'border-destructive' : ''}`} value={fatherOccupation} onChange={e => handleFieldChange('father_occupation', e.target.value, setFatherOccupation)} />
                 <FieldError field="father_occupation" />
               </div>
+              )}
+              {isFieldActive('mother_name') && (
               <div>
-                <Label>{bn ? 'মাতার নাম' : 'Mother Name'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('mother_name')?.label_bn || 'মাতার নাম') : (getField('mother_name')?.label || 'Mother Name')}</Label>
                 <Input className="bg-background mt-1" value={motherName} onChange={e => setMotherName(e.target.value)} />
               </div>
-              <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />
+              )}
+              {isFieldActive('mother_mobile') && <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />}
+              {isFieldActive('mother_nid') && (
               <div>
-                <Label>{bn ? 'মাতার NID' : 'Mother NID'}</Label>
+                <Label>{bn ? (getField('mother_nid')?.label_bn || 'মাতার NID') : (getField('mother_nid')?.label || 'Mother NID')}</Label>
                 <Input className={`bg-background mt-1 ${motherNidError ? 'border-destructive' : ''}`} maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid, setMotherNidError)} />
                 {motherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {motherNidError}</p>}
               </div>
+              )}
+              {isFieldActive('mother_occupation') && (
               <div>
-                <Label>{bn ? 'মাতার পেশা' : 'Mother Occupation'}</Label>
+                <Label>{bn ? (getField('mother_occupation')?.label_bn || 'মাতার পেশা') : (getField('mother_occupation')?.label || 'Mother Occupation')}</Label>
                 <Input className="bg-background mt-1" value={motherOccupation} onChange={e => setMotherOccupation(e.target.value)} />
               </div>
+              )}
             </div>
             {fieldErrors['parent_nid'] && <p className="text-xs text-destructive mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_nid']}</p>}
             {fieldErrors['parent_mobile'] && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_mobile']}</p>}
