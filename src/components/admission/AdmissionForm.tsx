@@ -1142,11 +1142,11 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       );
     }
 
-    // Mother info section
-    if (sectionKey === 'mother_info') {
+    // Student address section (only student address fields)
+    if (sectionKey === 'student_address') {
       return (
         <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-md">
-          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{title}</h3>
+          <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
@@ -1155,20 +1155,16 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
               return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
             })}
           </div>
-          <p className="text-xs text-destructive flex items-center gap-1 mt-2">
-            <AlertCircle className="w-3 h-3" />
-            {bn ? 'কমপক্ষে একটি NID এবং একটি মোবাইল নম্বর প্রয়োজন' : 'At least one NID and one mobile number required'}
-          </p>
         </div>
       );
     }
 
-    // Student address section
-    if (sectionKey === 'student_address') {
+    // Mother info section - also renders parent address after it
+    if (sectionKey === 'mother_info') {
       return (
         <React.Fragment key={sectionKey}>
           <div className="border rounded-lg p-4 space-y-4 shadow-md">
-            <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
+            <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{title}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {sectionFields.map(f => {
                 const key = f.default_value;
@@ -1177,8 +1173,12 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                 return <div key={f.id} data-field={key}>{renderCustomField(f)}</div>;
               })}
             </div>
+            <p className="text-xs text-destructive flex items-center gap-1 mt-2">
+              <AlertCircle className="w-3 h-3" />
+              {bn ? 'কমপক্ষে একটি NID এবং একটি মোবাইল নম্বর প্রয়োজন' : 'At least one NID and one mobile number required'}
+            </p>
           </div>
-          {/* Parent address - separate section */}
+          {/* Parent address - separate section after mother info */}
           <div className="border rounded-lg p-4 space-y-4 shadow-md">
             <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-2xl text-center bg-secondary">{bn ? 'পিতা/মাতার ঠিকানা' : 'Parent Address'}</h3>
             <div className="flex items-center gap-2">
