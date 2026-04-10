@@ -446,7 +446,7 @@ const AdminStaffForm = () => {
     if (isFieldActive('nid') && isFieldRequired('nid') && (!nid || (nid.length !== 10 && nid.length !== 17))) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
     reqCheck('education', education, 'শিক্ষাগত যোগ্যতা আবশ্যক', 'Education required');
     if (isFieldActive('prev_institute') && experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
-    reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
+    if (isEditMode && existingStaff?.status === 'active') reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
 
     // Parents validation
     reqCheck('father_name', fatherName, 'পিতার নাম আবশ্যক', 'Father name required');
@@ -780,7 +780,7 @@ const AdminStaffForm = () => {
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
               {isFieldActive('photo_url') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {isFieldActive('salary') && (
+                {isFieldActive('salary') && isEditMode && existingStaff?.status === 'active' && (
                 <div>
                   <Label>{bn ? (getField('salary')?.label_bn || 'বেতন (টাকা)') : (getField('salary')?.label || 'Salary (BDT)')} {isFieldRequired('salary') && <span className="text-destructive">*</span>}</Label>
                   <Input type="number" className={`bg-background mt-1 ${fieldErrors['salary'] ? 'border-destructive' : ''}`} value={salary} onChange={e => handleFieldChange('salary', e.target.value, setSalary)} placeholder="৳" />
