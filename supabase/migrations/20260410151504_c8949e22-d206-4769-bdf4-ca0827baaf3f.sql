@@ -1,0 +1,1 @@
+ALTER TABLE public.custom_form_fields ADD COLUMN section text DEFAULT null;
