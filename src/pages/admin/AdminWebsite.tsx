@@ -1626,6 +1626,8 @@ const FormSettingsTab = ({ language }: { language: string }) => {
   const [saving, setSaving] = useState(false);
   const [admissionPublic, setAdmissionPublic] = useState(false);
   const [admissionPublicLoading, setAdmissionPublicLoading] = useState(true);
+  const [staffFormPublic, setStaffFormPublic] = useState(false);
+  const [staffFormPublicLoading, setStaffFormPublicLoading] = useState(true);
 
   const { data: formSettings, isLoading } = useQuery({
     queryKey: ['form-settings'],
@@ -1639,30 +1641,32 @@ const FormSettingsTab = ({ language }: { language: string }) => {
     },
   });
 
-  // Load admission public setting
+  // Load public toggle settings
   useQuery({
-    queryKey: ['website-setting-admission-public'],
+    queryKey: ['website-setting-form-public-toggles'],
     queryFn: async () => {
-      const { data } = await supabase.from('website_settings').select('*').eq('key', 'admission_form_public').maybeSingle();
-      setAdmissionPublic(data?.value === true || data?.value === 'true');
+      const { data } = await supabase.from('website_settings').select('*').in('key', ['admission_form_public', 'staff_form_public']);
+      data?.forEach(row => {
+        if (row.key === 'admission_form_public') setAdmissionPublic(row.value === true || row.value === 'true');
+        if (row.key === 'staff_form_public') setStaffFormPublic(row.value === true || row.value === 'true');
+      });
       setAdmissionPublicLoading(false);
+      setStaffFormPublicLoading(false);
       return data;
     },
   });
 
-  const toggleAdmissionPublic = async () => {
-    const newVal = !admissionPublic;
-    setAdmissionPublic(newVal);
-    const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'admission_form_public').maybeSingle();
+  const togglePublicSetting = async (key: string, currentVal: boolean, setter: (v: boolean) => void, labels: { onBn: string; offBn: string; onEn: string; offEn: string }) => {
+    const newVal = !currentVal;
+    setter(newVal);
+    const { data: existing } = await supabase.from('website_settings').select('id').eq('key', key).maybeSingle();
     if (existing) {
-      await supabase.from('website_settings').update({ value: newVal, updated_at: new Date().toISOString() }).eq('key', 'admission_form_public');
+      await supabase.from('website_settings').update({ value: newVal, updated_at: new Date().toISOString() }).eq('key', key);
     } else {
-      await supabase.from('website_settings').insert({ key: 'admission_form_public', value: newVal });
+      await supabase.from('website_settings').insert({ key, value: newVal });
     }
-    queryClient.invalidateQueries({ queryKey: ['website-setting-admission-public'] });
-    toast.success(language === 'bn'
-      ? (newVal ? 'অনলাইন ভর্তি ফর্ম পাবলিশ করা হয়েছে' : 'অনলাইন ভর্তি ফর্ম হাইড করা হয়েছে')
-      : (newVal ? 'Online admission form published' : 'Online admission form hidden'));
+    queryClient.invalidateQueries({ queryKey: ['website-setting-form-public-toggles'] });
+    toast.success(language === 'bn' ? (newVal ? labels.onBn : labels.offBn) : (newVal ? labels.onEn : labels.offEn));
   };
 
   useEffect(() => {
@@ -1745,8 +1749,43 @@ const FormSettingsTab = ({ language }: { language: string }) => {
             </span>
             <Switch
               checked={admissionPublic}
-              onCheckedChange={toggleAdmissionPublic}
+              onCheckedChange={() => togglePublicSetting('admission_form_public', admissionPublic, setAdmissionPublic, {
+                onBn: 'অনলাইন ভর্তি ফর্ম পাবলিশ করা হয়েছে', offBn: 'অনলাইন ভর্তি ফর্ম হাইড করা হয়েছে',
+                onEn: 'Online admission form published', offEn: 'Online admission form hidden',
+              })}
               disabled={admissionPublicLoading}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Online Staff Form Publish Toggle */}
+      <div className="card-elevated p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Globe className="w-6 h-6 text-primary" />
+            <div>
+              <h3 className="font-display font-bold text-foreground">
+                {language === 'bn' ? 'অনলাইন স্টাফ/শিক্ষক আবেদন ফর্ম' : 'Online Staff/Teacher Application Form'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'bn' ? 'পাবলিক পেইজে স্টাফ/শিক্ষক আবেদন ফর্ম দেখান বা লুকান' : 'Show or hide staff application form on the public page'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${staffFormPublic ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+              {staffFormPublic
+                ? (language === 'bn' ? '🟢 পাবলিশড' : '🟢 Published')
+                : (language === 'bn' ? '🔴 হাইড' : '🔴 Hidden')}
+            </span>
+            <Switch
+              checked={staffFormPublic}
+              onCheckedChange={() => togglePublicSetting('staff_form_public', staffFormPublic, setStaffFormPublic, {
+                onBn: 'অনলাইন স্টাফ/শিক্ষক ফর্ম পাবলিশ করা হয়েছে', offBn: 'অনলাইন স্টাফ/শিক্ষক ফর্ম হাইড করা হয়েছে',
+                onEn: 'Online staff form published', offEn: 'Online staff form hidden',
+              })}
+              disabled={staffFormPublicLoading}
             />
           </div>
         </div>

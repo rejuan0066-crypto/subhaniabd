@@ -19,6 +19,7 @@ import Contact from "./pages/Contact";
 import ResultFind from "./pages/ResultFind";
 import StudentInfoPage from "./pages/StudentInfoPage";
 import AdmissionPage from "./pages/AdmissionPage";
+import StaffApplicationPage from "./pages/StaffApplicationPage";
 import DonationPage from "./pages/DonationPage";
 import FeePaymentPage from "./pages/FeePaymentPage";
 import Login from "./pages/Login";
@@ -122,6 +123,7 @@ const App = () => (
                   <Route path="/result" element={<ResultFind />} />
                   <Route path="/student-info" element={<StudentInfoPage />} />
                   <Route path="/admission" element={<AdmissionPage />} />
+                  <Route path="/staff-application" element={<StaffApplicationPage />} />
                   <Route path="/donation" element={<DonationPage />} />
                   <Route path="/fee-payment" element={<ProtectedRoute><FeePaymentPage /></ProtectedRoute>} />
                   <Route path="/posts" element={<PostsPage />} />
