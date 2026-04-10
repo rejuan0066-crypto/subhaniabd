@@ -135,15 +135,34 @@ const AdminJoiningLetters = () => {
     const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' } as any;
     const pName = principalInfo?.principal_name || '';
     const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
+    const instName = get('instName', inst.name || '');
+    const instNameEn = get('instNameEn', inst.name_en || '');
+    const instAddress = get('instAddress', inst.address || '');
+    const instPhone = get('instPhone', inst.phone || '');
+    const salutation = get('salutation', bn ? 'জনাব,' : 'Dear,');
+    const staffName = get('staffName', letter.staff_name_bn || letter.staff_name || '');
+    const designation = get('designation', letter.designation || '');
+    const joiningDate = letter.joining_date ? new Date(letter.joining_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '';
+    const bodyText = get(
+      'bodyText',
+      letter.letter_type === 'reinstatement'
+        ? (bn
+            ? `এতদ্বারা জানানো যাচ্ছে যে, জনাব ${staffName} (আইডি: ${letter.letter_number}), পূর্বে পদত্যাগের পর অদ্য ${joiningDate} খ্রিষ্টাব্দে ${instName || 'প্রতিষ্ঠান'}-এ "${designation}" পদে পুনরায় কর্মে বহাল করা হয়েছে। আমরা আশা করি, তিনি পূর্বের ন্যায় তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।`
+            : `This is to certify that ${staffName} (ID: ${letter.letter_number}) has been reinstated to the position of "${designation}" at ${instNameEn || instName || 'the institution'} after a prior resignation. The date of reinstatement is ${joiningDate}. We wish them continued success in their role.`)
+        : (bn
+            ? `এতদ্বারা প্রত্যয়ন করা যাচ্ছে যে, জনাব ${staffName} (আইডি: ${letter.letter_number}), অদ্য ${joiningDate} খ্রিষ্টাব্দে ${instName || 'প্রতিষ্ঠান'}-এ "${designation}" পদে আনুষ্ঠানিকভাবে যোগদান করেছেন। আমরা তাঁর এই নতুন পথচলাকে স্বাগত জানাচ্ছি। আশা করি, তিনি তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।`
+            : `This is to certify that ${staffName} (ID: ${letter.letter_number}) has officially joined ${instNameEn || instName || 'the institution'} as "${designation}". The date of joining is ${joiningDate}. We welcome them to our institution and wish them a successful career.`)
+    );
 
     return {
-      instName: get('instName', inst.name || ''),
-      instNameEn: get('instNameEn', inst.name_en || ''),
-      instAddress: get('instAddress', inst.address || ''),
-      instPhone: get('instPhone', inst.phone || ''),
-      salutation: get('salutation', bn ? 'জনাব,' : 'Dear,'),
-      staffName: get('staffName', letter.staff_name_bn || letter.staff_name || ''),
-      designation: get('designation', letter.designation || ''),
+      instName,
+      instNameEn,
+      instAddress,
+      instPhone,
+      salutation,
+      staffName,
+      designation,
+      bodyText,
       pName: get('pName', pName),
       pTitle: get('pTitle', pTitle),
       candidateSigLabel: get('candidateSigLabel', bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"),
@@ -159,13 +178,16 @@ const AdminJoiningLetters = () => {
     const qrValue = `JL:${letter.letter_number}|${letter.staff_name}|${letter.joining_date}`;
 
     const isReinstatement = letter.letter_type === 'reinstatement';
-    const bodyText = isReinstatement
-      ? (bn
-          ? `এতদ্বারা জানানো যাচ্ছে যে, জনাব <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>), পূর্বে পদত্যাগের পর অদ্য <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ <span class="highlight">"${r.designation}"</span> পদে পুনরায় কর্মে বহাল করা হয়েছে। আমরা আশা করি, তিনি পূর্বের ন্যায় তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।`
-          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has been reinstated to the position of <span class="highlight">"${r.designation}"</span> at <strong>${r.instNameEn || r.instName || 'the institution'}</strong> after a prior resignation. The date of reinstatement is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We wish them continued success in their role.`)
-      : (bn
-          ? `এতদ্বারা প্রত্যয়ন করা যাচ্ছে যে, জনাব <span class="highlight">${r.staffName}</span> (আইডি: <strong>${letter.letter_number}</strong>), অদ্য <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>${r.instName || 'প্রতিষ্ঠান'}</strong>-এ <span class="highlight">"${r.designation}"</span> পদে আনুষ্ঠানিকভাবে যোগদান করেছেন। আমরা তাঁর এই নতুন পথচলাকে স্বাগত জানাচ্ছি। আশা করি, তিনি তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।`
-          : `This is to certify that <span class="highlight">${r.staffName}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${r.instNameEn || r.instName || 'the institution'}</strong> as <span class="highlight">"${r.designation}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`);
+    const escapeHtml = (value: string) => value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    const salutationHtml = escapeHtml(r.salutation).replace(/
+/g, '<br/>');
+    const staffNameHtml = escapeHtml(r.staffName).replace(/
+/g, '<br/>');
+    const bodyTextHtml = escapeHtml(r.bodyText).replace(/
+/g, '<br/>');
 
     const html = `<!DOCTYPE html>
 <html><head>
@@ -242,9 +264,9 @@ const AdminJoiningLetters = () => {
     <div class="letter-body">
       <div class="body-flex">
         <div class="body-text">
-          <p>${r.salutation}</p>
-          <p class="highlight" style="font-size:15px;">${r.staffName}</p>
-          <p>${bodyText}</p>
+          <p style="text-align:${salutationAlign};">${salutationHtml}</p>
+          <p class="highlight" style="font-size:15px;text-align:${nameAlign};">${staffNameHtml}</p>
+          <p style="text-align:${bodyAlign};white-space:pre-line;">${bodyTextHtml}</p>
         </div>
         <div class="photo-box">
           <div class="avatar">${r.photoUrl ? `<img src="${r.photoUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : (r.staffName || '?').charAt(0)}</div>
@@ -483,18 +505,14 @@ const AdminJoiningLetters = () => {
                             )}
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="" style={{ textAlign: salutationAlign }} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))', textAlign: nameAlign }} />
-                            <p style={{ textAlign: bodyAlign }}>
-                              {viewLetter.letter_type === 'reinstatement'
-                                ? (bn
-                                    ? <>এতদ্বারা জানানো যাচ্ছে যে, জনাব <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), পূর্বে পদত্যাগের পর অদ্য <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে পুনরায় কর্মে বহাল করা হয়েছে। আমরা আশা করি, তিনি পূর্বের ন্যায় তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।</>
-                                    : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has been reinstated to the position of <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> at <strong>{r.instNameEn || r.instName || 'the institution'}</strong> after a prior resignation. The date of reinstatement is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We wish them continued success in their role.</>
-                                  )
-                                : (bn
-                                    ? <>এতদ্বারা প্রত্যয়ন করা যাচ্ছে যে, জনাব <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), অদ্য <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে আনুষ্ঠানিকভাবে যোগদান করেছেন। আমরা তাঁর এই নতুন পথচলাকে স্বাগত জানাচ্ছি। আশা করি, তিনি তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।</>
-                                    : <>This is to certify that <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (ID: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>) has officially joined <strong>{r.instNameEn || r.instName || 'the institution'}</strong> as <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong>. The date of joining is: <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.</>
-                                  )
-                              }
-                            </p>
+                            <Editable
+                              tag="p"
+                              value={r.bodyText}
+                              onChange={v => set('bodyText', v)}
+                              editing={editMode}
+                              className=""
+                              style={{ textAlign: bodyAlign, whiteSpace: 'pre-line' }}
+                            />
                           </div>
 
                           {/* Photo – clickable in edit mode */}
