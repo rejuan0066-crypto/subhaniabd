@@ -120,7 +120,9 @@ const AdminJoiningLetters = () => {
   </div>
   <div class="sig">
     <div class="line"></div>
-    <p>${bn ? 'প্রধান/অধ্যক্ষ' : 'Principal/Head'}</p>
+    ${principal ? `<p style="font-weight:600;margin-bottom:2px;">${principal.name_bn || principal.name_en || ''}</p>` : ''}
+    <p>${bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
+    <p>${principal?.designation || (bn ? 'প্রধান/অধ্যক্ষ' : 'Principal/Head')}</p>
   </div>
 </div>
 </body></html>`;
