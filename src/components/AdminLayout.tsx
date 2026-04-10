@@ -80,6 +80,14 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const iconSizeClass = iconSizeMap[adminTheme.sidebarIconSize] || 'w-[18px] h-[18px]';
   const headerHeightMap = { compact: 'py-1.5', default: 'py-2.5', tall: 'py-4' };
   const headerPadClass = headerHeightMap[adminTheme.headerHeight] || 'py-2.5';
+  const mobileHeaderOffsetMap = {
+    compact: 'pt-[calc(env(safe-area-inset-top)+3.75rem)]',
+    default: 'pt-[calc(env(safe-area-inset-top)+4.25rem)]',
+    tall: 'pt-[calc(env(safe-area-inset-top)+5rem)]',
+  };
+  const mobileHeaderOffsetClass = mobileHeaderOffsetMap[adminTheme.headerHeight] || 'pt-[calc(env(safe-area-inset-top)+4.25rem)]';
+  const headerTopPaddingMap = { compact: '0.375rem', default: '0.625rem', tall: '1rem' };
+  const headerTopPadding = headerTopPaddingMap[adminTheme.headerHeight] || '0.625rem';
 
   const sidebarStyle: React.CSSProperties = {
     ...(adminTheme.sidebarBgColor ? { backgroundColor: adminTheme.sidebarBgColor } : {}),
@@ -439,9 +447,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {renderSidebar(false)}
         {mobileSidebarOpen && renderSidebar(true)}
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className={`flex-1 flex flex-col min-w-0 ${mobileHeaderOffsetClass} lg:pt-0`}>
           {/* Top bar */}
-          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)' }}>
+          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between fixed inset-x-0 top-0 z-40 lg:sticky lg:inset-x-auto`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-5 h-5 text-muted-foreground" />
