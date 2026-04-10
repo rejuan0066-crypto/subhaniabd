@@ -62,7 +62,7 @@ const NotificationPanel = () => {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
+      <PopoverContent className="w-96 p-0 max-h-[80vh] flex flex-col" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-sm">
             {bn ? 'নোটিফিকেশন' : 'Notifications'}
@@ -78,7 +78,7 @@ const NotificationPanel = () => {
           )}
         </div>
 
-        <ScrollArea className="max-h-96">
+        <ScrollArea className="flex-1 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 52px)' }}>
           {notifications.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground text-sm">
               <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
