@@ -115,7 +115,7 @@ const AdminJoiningLetters = () => {
 <div class="signatures">
   <div class="sig">
     <div class="line"></div>
-     <p>${bn ? 'নিয়োগপ্রাপ্তকারীর স্বাক্ষর' : "Candidate's Signature"}</p>
+     <p>${bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
      <p style="font-size:11px;margin-top:4px;">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
   </div>
   <div class="sig">
@@ -287,7 +287,7 @@ const AdminJoiningLetters = () => {
                         {/* Employee signature */}
                         <div className="text-center">
                           <div className="w-36 border-t border-foreground/40 mb-1" />
-                          <p className="text-[11px] text-muted-foreground">{bn ? 'নিয়োগপ্রাপ্তকারীর স্বাক্ষর' : "Candidate's Signature"}</p>
+                          <p className="text-[11px] text-muted-foreground">{bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
                           <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                         </div>
 
