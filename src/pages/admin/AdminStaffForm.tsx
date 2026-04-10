@@ -778,27 +778,34 @@ const AdminStaffForm = () => {
               {bn ? '১. ব্যক্তিগত তথ্য (Employee Details)' : '1. Employee Details'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />
+              {isFieldActive('photo_url') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isFieldActive('salary') && (
                 <div>
-                  <Label>{bn ? 'বেতন (টাকা)' : 'Salary (BDT)'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('salary')?.label_bn || 'বেতন (টাকা)') : (getField('salary')?.label || 'Salary (BDT)')} {isFieldRequired('salary') && <span className="text-destructive">*</span>}</Label>
                   <Input type="number" className={`bg-background mt-1 ${fieldErrors['salary'] ? 'border-destructive' : ''}`} value={salary} onChange={e => handleFieldChange('salary', e.target.value, setSalary)} placeholder="৳" />
                   <FieldError field="salary" />
                 </div>
+                )}
+                {isFieldActive('first_name') && (
                 <div>
-                  <Label>{bn ? 'প্রথম নাম' : 'First Name'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('first_name')?.label_bn || 'প্রথম নাম') : (getField('first_name')?.label || 'First Name')} {isFieldRequired('first_name') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['first_name'] ? 'border-destructive' : ''}`} value={firstName} onChange={e => handleFieldChange('first_name', e.target.value, setFirstName)} />
                   <FieldError field="first_name" />
                 </div>
+                )}
+                {isFieldActive('last_name') && (
                 <div>
-                  <Label>{bn ? 'শেষ নাম' : 'Last Name'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('last_name')?.label_bn || 'শেষ নাম') : (getField('last_name')?.label || 'Last Name')} {isFieldRequired('last_name') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['last_name'] ? 'border-destructive' : ''}`} value={lastName} onChange={e => handleFieldChange('last_name', e.target.value, setLastName)} />
                   <FieldError field="last_name" />
                 </div>
-                <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />
+                )}
+                {isFieldActive('mobile') && <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required={isFieldRequired('mobile')} value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />}
+                {isFieldActive('email') && (
                 <div>
                   <Label className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" /> {bn ? 'ইমেইল' : 'Email'}
+                    <Mail className="w-4 h-4" /> {bn ? (getField('email')?.label_bn || 'ইমেইল') : (getField('email')?.label || 'Email')}
                     {emailVerified && <CheckCircle className="w-4 h-4 text-primary" />}
                   </Label>
                   <Input
@@ -812,8 +819,10 @@ const AdminStaffForm = () => {
                     <p className="text-xs text-destructive mt-1">{bn ? 'সাবমিটের সময় ইমেইল যাচাই করা হবে' : 'Email will be verified on submit'}</p>
                   )}
                 </div>
+                )}
+                {isFieldActive('employment_type') && (
                 <div>
-                  <Label>{bn ? 'চাকরির ধরন' : 'Employment Type'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('employment_type')?.label_bn || 'চাকরির ধরন') : (getField('employment_type')?.label || 'Employment Type')} {isFieldRequired('employment_type') && <span className="text-destructive">*</span>}</Label>
                   <Select value={employmentType} onValueChange={setEmploymentType}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['employment_type'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -823,8 +832,10 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="employment_type" />
                 </div>
+                )}
+                {isFieldActive('designation') && (
                 <div>
-                  <Label>{bn ? 'পদবী' : 'Designation'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('designation')?.label_bn || 'পদবী') : (getField('designation')?.label || 'Designation')} {isFieldRequired('designation') && <span className="text-destructive">*</span>}</Label>
                   <Select value={designation} onValueChange={setDesignation}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['designation'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -835,8 +846,10 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="designation" />
                 </div>
+                )}
+                {isFieldActive('residence_type') && (
                 <div>
-                  <Label>{bn ? 'আবাসিক ধরন' : 'Residential Status'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('residence_type')?.label_bn || 'আবাসিক ধরন') : (getField('residence_type')?.label || 'Residential Status')} {isFieldRequired('residence_type') && <span className="text-destructive">*</span>}</Label>
                   <Select value={residenceType} onValueChange={setResidenceType}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['residence_type'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -846,13 +859,17 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="residence_type" />
                 </div>
+                )}
+                {isFieldActive('dob') && (
                 <div>
-                  <Label>{bn ? 'জন্ম তারিখ' : 'Date of Birth'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('dob')?.label_bn || 'জন্ম তারিখ') : (getField('dob')?.label || 'Date of Birth')} {isFieldRequired('dob') && <span className="text-destructive">*</span>}</Label>
                   <Input type="date" className={`bg-background mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={e => { setDob(e.target.value); setFieldErrors(p => { const n = {...p}; delete n['dob']; return n; }); }} />
                   <FieldError field="dob" />
                 </div>
+                )}
+                {isFieldActive('religion') && (
                 <div>
-                  <Label>{bn ? 'ধর্ম' : 'Religion'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('religion')?.label_bn || 'ধর্ম') : (getField('religion')?.label || 'Religion')} {isFieldRequired('religion') && <span className="text-destructive">*</span>}</Label>
                   <Select value={religion} onValueChange={setReligion}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['religion'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -862,6 +879,7 @@ const AdminStaffForm = () => {
                   {religion === 'other' && <Input className="bg-background mt-2" placeholder={bn ? 'ধর্মের নাম লিখুন' : 'Type religion'} value={customReligion} onChange={e => setCustomReligion(e.target.value)} />}
                   <FieldError field="religion" />
                 </div>
+                )}
               </div>
             </div>
 
