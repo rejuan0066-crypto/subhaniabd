@@ -53,7 +53,7 @@ const AdminJoiningLetters = () => {
     },
   });
 
-
+  const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('joining_letters').delete().eq('id', id);
       if (error) throw error;
