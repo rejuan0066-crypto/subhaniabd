@@ -338,30 +338,38 @@ const FeeTypeManager = () => {
               </Select>
               {form.payment_frequency === 'monthly' && (
                 <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-foreground">{bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}</label>
+                <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-foreground">
+                      {bn ? 'প্রযোজ্য মাস নির্বাচন করুন:' : 'Select applicable months:'}
+                      {form.session_id && (
+                        <span className="ml-1 text-muted-foreground font-normal">
+                          ({sessionMonths.length} {bn ? 'টি মাস' : 'months'})
+                        </span>
+                      )}
+                    </label>
                     <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
+                      const allSessionMonthNames = sessionMonths.map(m => m.en);
                       setForm(p => ({
                         ...p,
-                        applicable_months: p.applicable_months.length === 12 ? [] : [...MONTHS_EN]
+                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allSessionMonthNames
                       }));
                     }}>
-                      {form.applicable_months.length === 12 ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
+                      {form.applicable_months.length === sessionMonths.length ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
                     </button>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {MONTHS_EN.map((month, i) => {
-                      const isSelected = form.applicable_months.includes(month);
+                    {sessionMonths.map((month) => {
+                      const isSelected = form.applicable_months.includes(month.en);
                       return (
                         <button
-                          key={month}
+                          key={month.en}
                           type="button"
                           onClick={() => {
                             setForm(p => ({
                               ...p,
                               applicable_months: isSelected
-                                ? p.applicable_months.filter(m => m !== month)
-                                : [...p.applicable_months, month]
+                                ? p.applicable_months.filter(m => m !== month.en)
+                                : [...p.applicable_months, month.en]
                             }));
                           }}
                           className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
@@ -370,7 +378,7 @@ const FeeTypeManager = () => {
                               : 'bg-muted/30 border-border text-muted-foreground hover:border-primary/40'
                           }`}
                         >
-                          {bn ? MONTHS_BN[i] : month.slice(0, 3)}
+                          {bn ? month.bn : month.en.slice(0, 3)}
                         </button>
                       );
                     })}
