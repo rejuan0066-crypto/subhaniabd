@@ -65,73 +65,168 @@ const AdminJoiningLetters = () => {
   });
 
   const handlePrint = (letter: any) => {
-    const inst = institution || { name: '', name_en: '', address: '', phone: '' };
+    const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' };
+    const pName = principalInfo?.principal_name || '';
+    const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
+    const qrValue = `JL:${letter.letter_number}|${letter.staff_name}|${letter.joining_date}`;
     const html = `
 <!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
-<title>Joining Letter</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<title>${bn ? 'নিয়োগপত্র' : 'Joining Letter'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans Bengali', sans-serif; padding: 40px 60px; color: #1a1a1a; }
-  .header { text-align: center; border-bottom: 3px double #333; padding-bottom: 16px; margin-bottom: 24px; }
-  .header h1 { font-size: 22px; font-weight: 700; }
-  .header p { font-size: 13px; color: #555; }
-  .meta { display: flex; justify-content: space-between; margin-bottom: 30px; font-size: 14px; }
-  .title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 24px; text-decoration: underline; }
-  .body { font-size: 15px; line-height: 2; margin-bottom: 40px; }
-  .body p { margin-bottom: 12px; }
-  .signatures { display: flex; justify-content: space-between; margin-top: 80px; }
+  @page { size: A4; margin: 20mm; }
+  body {
+    font-family: 'Noto Serif Bengali', 'Georgia', serif;
+    color: #1a1a1a;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: #fff;
+  }
+  .page {
+    width: 100%;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 10mm;
+    border: 3px double #444;
+    position: relative;
+    min-height: calc(297mm - 40mm);
+  }
+  .inner-border {
+    border: 1px solid #ccc;
+    padding: 8mm;
+    position: relative;
+    overflow: hidden;
+    min-height: calc(297mm - 60mm);
+    display: flex;
+    flex-direction: column;
+  }
+  /* Watermark */
+  .watermark {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .watermark img { width: 200px; height: 200px; object-fit: contain; }
+  .content { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+  .header { text-align: center; border-bottom: 3px double #333; padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  .header-logo { width: 52px; height: 52px; object-fit: contain; border-radius: 4px; }
+  .header-text { flex: 1; text-align: center; }
+  .header-text h1 { font-size: 20px; font-weight: 700; }
+  .header-text p { font-size: 12px; color: #555; }
+  .header-spacer { width: 52px; }
+  .formal-title { text-align: center; margin-bottom: 18px; }
+  .formal-title h2 { font-size: 18px; font-weight: 700; letter-spacing: 2px; }
+  .formal-title .sub { font-size: 11px; color: #666; letter-spacing: 1px; }
+  .formal-title .underline { width: 80px; border-bottom: 2px solid #444; margin: 6px auto 0; }
+  .meta { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; color: #555; }
+  .meta strong { color: #1a1a1a; }
+  .letter-body { font-size: 14px; line-height: 2.2; margin-bottom: 20px; flex: 1; }
+  .letter-body p { margin-bottom: 10px; }
+  .letter-body .highlight { color: hsl(142, 50%, 30%); font-weight: 700; }
+  .body-flex { display: flex; gap: 20px; }
+  .body-text { flex: 1; }
+  .photo-box { flex-shrink: 0; text-align: center; }
+  .photo-box .avatar { width: 80px; height: 80px; border: 2px solid #ccc; border-radius: 6px; object-fit: cover; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #999; }
+  .photo-label { font-size: 9px; color: #888; margin-top: 4px; }
+  .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 50px; }
+  .qr-block { text-align: center; }
+  .qr-block canvas, .qr-block svg, .qr-block img { width: 60px; height: 60px; }
+  .qr-label { font-size: 8px; color: #888; margin-top: 3px; }
   .sig { text-align: center; }
-  .sig .line { width: 180px; border-top: 1px solid #333; margin-bottom: 4px; }
-  .sig p { font-size: 13px; }
-  @media print { body { padding: 20px 40px; } }
+  .sig .line { width: 160px; border-top: 1px solid #444; margin-bottom: 3px; }
+  .sig .name { font-size: 12px; font-weight: 600; margin-bottom: 1px; }
+  .sig .label { font-size: 11px; color: #555; }
+  .sig .date { font-size: 10px; color: #666; margin-top: 4px; }
+  .sig-right { display: flex; align-items: flex-end; gap: 12px; }
+  .seal { width: 50px; height: 50px; border-radius: 50%; border: 2px dashed #bbb; display: flex; align-items: center; justify-content: center; }
+  .seal span { font-size: 7px; color: #999; text-align: center; line-height: 1.2; }
+  @media print {
+    html, body { background: #fff; margin: 0; padding: 0; }
+    .page { border: 3px double #444; box-shadow: none; margin: 0 auto; }
+  }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
 </head><body>
-<div class="header">
-  <h1>${inst.name || ''}</h1>
-  ${inst.name_en ? `<p>${inst.name_en}</p>` : ''}
-  ${inst.address ? `<p>${inst.address}</p>` : ''}
-  ${inst.phone ? `<p>${bn ? 'ফোন' : 'Phone'}: ${inst.phone}</p>` : ''}
-</div>
-<div class="meta">
-  <span>${bn ? 'পত্র নং' : 'Letter No'}: ${letter.letter_number || ''}</span>
-  <span>${bn ? 'তারিখ' : 'Date'}: ${letter.letter_date ? new Date(letter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : ''}</span>
-</div>
-<div class="title">${bn ? 'যোগদান পত্র' : 'Joining Letter'}</div>
-<div class="body">
-  <p>${bn ? 'জনাব,' : 'Dear,'}</p>
-  <p><strong>${letter.staff_name_bn || letter.staff_name || ''}</strong></p>
-  <p>${bn 
-    ? `আপনাকে জানানো যাচ্ছে যে, আপনি <strong>"${letter.designation || ''}"</strong> পদে <strong>${inst.name || 'প্রতিষ্ঠান'}</strong>-এ যোগদান করেছেন। আপনার যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>।`
-    : `This is to certify that you have joined <strong>${inst.name_en || inst.name || 'the institution'}</strong> as <strong>"${letter.designation || ''}"</strong>. Your date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>.`
-  }</p>
-  <p>${bn
-    ? 'আমরা আশা করি আপনি আন্তরিকতা ও নিষ্ঠার সাথে আপনার দায়িত্ব পালন করবেন। আপনার উজ্জ্বল ভবিষ্যৎ কামনা করি।'
-    : 'We hope you will perform your duties with sincerity and dedication. We wish you a bright future.'
-  }</p>
-</div>
-<div class="signatures">
-  <div class="sig">
-    <div class="line"></div>
-     <p>${bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
-     <p style="font-size:11px;margin-top:4px;">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+<div class="page">
+  <div class="inner-border">
+    ${(inst as any).logo_url ? `<div class="watermark"><img src="${(inst as any).logo_url}" alt="" /></div>` : ''}
+    <div class="content">
+      <div class="header">
+        ${(inst as any).logo_url ? `<img src="${(inst as any).logo_url}" class="header-logo" alt="Logo" />` : ''}
+        <div class="header-text">
+          <h1>${inst.name || ''}</h1>
+          ${inst.name_en ? `<p>${inst.name_en}</p>` : ''}
+          ${inst.address ? `<p>${inst.address}</p>` : ''}
+          ${inst.phone ? `<p>${bn ? 'ফোন' : 'Phone'}: ${inst.phone}</p>` : ''}
+        </div>
+        <div class="header-spacer"></div>
+      </div>
+      <div class="formal-title">
+        <h2>${bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}</h2>
+        <p class="sub">${bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+        <div class="underline"></div>
+      </div>
+      <div class="meta">
+        <span>${bn ? 'পত্র নং' : 'Ref'}: <strong>${letter.letter_number || ''}</strong></span>
+        <span>${bn ? 'তারিখ' : 'Date'}: <strong>${letter.letter_date ? new Date(letter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : ''}</strong></span>
+      </div>
+      <div class="letter-body">
+        <div class="body-flex">
+          <div class="body-text">
+            <p>${bn ? 'জনাব,' : 'Dear,'}</p>
+            <p class="highlight" style="font-size:15px;">${letter.staff_name_bn || letter.staff_name || ''}</p>
+            <p>${bn
+              ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, <span class="highlight">${letter.staff_name_bn || letter.staff_name || ''}</span> (আইডি: <strong>${letter.letter_number}</strong>) <span class="highlight">"${letter.designation || ''}"</span> পদে <strong>${inst.name || 'প্রতিষ্ঠান'}</strong>-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+              : `This is to certify that <span class="highlight">${letter.staff_name || letter.staff_name_bn || ''}</span> (ID: <strong>${letter.letter_number}</strong>) has officially joined <strong>${inst.name_en || inst.name || 'the institution'}</strong> as <span class="highlight">"${letter.designation || ''}"</span>. The date of joining is: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('en-US') : ''}</strong>. We welcome them to our institution and wish them a successful career.`
+            }</p>
+          </div>
+          <div class="photo-box">
+            <div class="avatar">${(letter.letter_data as any)?.photo_url ? `<img src="${(letter.letter_data as any).photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />` : (letter.staff_name_bn || letter.staff_name || '?').charAt(0)}</div>
+            <p class="photo-label">${bn ? 'প্রার্থীর ছবি' : 'Photo'}</p>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div class="qr-block">
+          <canvas id="qr"></canvas>
+          <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+        </div>
+        <div class="sig">
+          <div class="line"></div>
+          <p class="label">${bn ? 'নিয়োগপ্রাপ্তের স্বাক্ষর' : "Candidate's Signature"}</p>
+          <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+        </div>
+        <div class="sig-right">
+          <div class="seal"><span>${bn ? 'সিল' : 'Official<br/>Seal'}</span></div>
+          <div class="sig">
+            <div class="line"></div>
+            ${pName ? `<p class="name">${pName}</p>` : ''}
+            <p class="label">${bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
+            <p class="label">${pTitle}</p>
+            <p class="date">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="sig">
-    <div class="line"></div>
-    ${principalInfo?.principal_name ? `<p style="font-weight:600;margin-bottom:2px;">${principalInfo.principal_name}</p>` : ''}
-    <p>${bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-    <p>${principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head')}</p>
-    <p style="font-size:11px;margin-top:4px;">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-  </div>
 </div>
+<script>
+  try {
+    QRCode.toCanvas(document.getElementById('qr'), '${qrValue.replace(/'/g, "\\'")}', { width: 60, margin: 0 });
+  } catch(e) {}
+  setTimeout(function(){ window.print(); }, 800);
+<\/script>
 </body></html>`;
     const w = window.open('', '_blank');
     if (w) {
       w.document.write(html);
       w.document.close();
-      setTimeout(() => w.print(), 600);
     }
   };
 
