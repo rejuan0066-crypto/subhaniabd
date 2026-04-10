@@ -90,6 +90,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     tall: 'pt-[calc(env(safe-area-inset-top)+5rem)]',
   };
   const mobileHeaderOffsetClass = mobileHeaderOffsetMap[adminTheme.headerHeight] || 'pt-[calc(env(safe-area-inset-top)+4.25rem)]';
+  const desktopHeaderOffsetMap = {
+    compact: 'lg:pt-14',
+    default: 'lg:pt-16',
+    tall: 'lg:pt-20',
+  };
+  const desktopHeaderOffsetClass = desktopHeaderOffsetMap[adminTheme.headerHeight] || 'lg:pt-16';
   const headerTopPaddingMap = { compact: '0.375rem', default: '0.625rem', tall: '1rem' };
   const headerTopPadding = headerTopPaddingMap[adminTheme.headerHeight] || '0.625rem';
 
@@ -451,9 +457,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {renderSidebar(false)}
         {mobileSidebarOpen && renderSidebar(true)}
 
-        <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)] lg:pt-0`}>
+        <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between fixed inset-x-0 top-0 z-40 lg:sticky lg:top-0 lg:inset-x-auto`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-5 h-5 text-muted-foreground" />
