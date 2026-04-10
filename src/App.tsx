@@ -74,6 +74,7 @@ import AdminExamSessions from "./pages/admin/AdminExamSessions";
 import AdminLibrary from "./pages/admin/AdminLibrary";
 import AdminIdCards from "./pages/admin/AdminIdCards";
 import NotFound from "./pages/NotFound";
+import AttendanceCheckin from "./pages/AttendanceCheckin";
 import ScrollToTop from "./components/ScrollToTop";
 import RouteLoader from "./components/RouteLoader";
 
@@ -115,6 +116,7 @@ const App = () => (
                   <Route path="/photo-tools" element={<PhotoToolsPage />} />
                   <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
                   <Route path="/waiting-approval" element={<WaitingApproval />} />
+                  <Route path="/attendance-checkin" element={<AttendanceCheckin />} />
                   <Route path="/login" element={<Login />} />
 
                   <Route path="/admin" element={<AdminShell />}>
