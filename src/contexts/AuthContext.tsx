@@ -191,11 +191,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (cancelled) return;
 
         console.error('Failed to resolve auth state:', error);
-        const lastResolvedState = lastResolvedAccessState.current;
 
-        if (lastResolvedState?.userId === user.id) {
-          setRole(lastResolvedState.role);
-          setUserStatus(lastResolvedState.userStatus);
+        // Check if this is a JWT/auth error — if so, force session refresh or sign out
+        const errMsg = error instanceof Error ? error.message : String(error ?? '');
+        const isAuthError =
+          errMsg.includes('JWT expired') ||
+          errMsg.includes('PGRST303') ||
+          errMsg.includes('invalid claim');
+
+        if (isAuthError) {
+          console.warn('Auth token expired during profile fetch, attempting refresh...');
+          fetchedForUser.current = null; // Allow retry after refresh
+          try {
+            const { error: refreshErr } = await supabase.auth.refreshSession();
+            if (refreshErr) {
+              console.warn('Session refresh failed, signing out');
+              await supabase.auth.signOut();
+              return;
+            }
+            // refreshSession triggers onAuthStateChange → TOKEN_REFRESHED → re-fetch will happen
+          } catch {
+            await supabase.auth.signOut();
+          }
+          return;
+        }
+
+        const lastResolved = lastResolvedAccessState.current;
+        if (lastResolved?.userId === user.id) {
+          setRole(lastResolved.role);
+          setUserStatus(lastResolved.userStatus);
         } else {
           setRole(null);
           setUserStatus(null);
