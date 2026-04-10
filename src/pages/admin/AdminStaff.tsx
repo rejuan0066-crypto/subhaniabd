@@ -49,6 +49,18 @@ const AdminStaff = () => {
     },
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from('staff').update({ status }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(status === 'active' ? (bn ? '✅ অনুমোদিত হয়েছে' : '✅ Approved') : (bn ? '❌ বাতিল করা হয়েছে' : '❌ Rejected'));
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const staff = staffList.find((s: any) => s.id === id);
