@@ -187,8 +187,8 @@ const StaffApplicationPage = () => {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const fullName = `${firstName} ${lastName}`.trim();
-      const desigObj = DESIGNATIONS.find(d => d.value === designation);
-      const desigLabel = desigObj ? (bn ? desigObj.bn : desigObj.en) : designation;
+      const desigObj = designationsList.find(d => d.id === designation);
+      const desigLabel = desigObj ? (bn ? desigObj.name_bn : desigObj.name) : designation;
 
       const staffData = {
         first_name: firstName,
@@ -380,7 +380,7 @@ const StaffApplicationPage = () => {
                   <Select value={designation} onValueChange={setDesignation}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['designation'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
-                      {DESIGNATIONS.map(d => <SelectItem key={d.value} value={d.value}>{bn ? d.bn : d.en}</SelectItem>)}
+                      {designationsList.map(d => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FieldError field="designation" />
