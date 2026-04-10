@@ -1624,6 +1624,8 @@ const FormSettingsTab = ({ language }: { language: string }) => {
   const queryClient = useQueryClient();
   const [localSettings, setLocalSettings] = useState<FormSettingRow[]>([]);
   const [saving, setSaving] = useState(false);
+  const [admissionPublic, setAdmissionPublic] = useState(false);
+  const [admissionPublicLoading, setAdmissionPublicLoading] = useState(true);
 
   const { data: formSettings, isLoading } = useQuery({
     queryKey: ['form-settings'],
@@ -1636,6 +1638,32 @@ const FormSettingsTab = ({ language }: { language: string }) => {
       return (data || []) as FormSettingRow[];
     },
   });
+
+  // Load admission public setting
+  useQuery({
+    queryKey: ['website-setting-admission-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('*').eq('key', 'admission_form_public').maybeSingle();
+      setAdmissionPublic(data?.value === true || data?.value === 'true');
+      setAdmissionPublicLoading(false);
+      return data;
+    },
+  });
+
+  const toggleAdmissionPublic = async () => {
+    const newVal = !admissionPublic;
+    setAdmissionPublic(newVal);
+    const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'admission_form_public').maybeSingle();
+    if (existing) {
+      await supabase.from('website_settings').update({ value: newVal, updated_at: new Date().toISOString() }).eq('key', 'admission_form_public');
+    } else {
+      await supabase.from('website_settings').insert({ key: 'admission_form_public', value: newVal });
+    }
+    queryClient.invalidateQueries({ queryKey: ['website-setting-admission-public'] });
+    toast.success(language === 'bn'
+      ? (newVal ? 'অনলাইন ভর্তি ফর্ম পাবলিশ করা হয়েছে' : 'অনলাইন ভর্তি ফর্ম হাইড করা হয়েছে')
+      : (newVal ? 'Online admission form published' : 'Online admission form hidden'));
+  };
 
   useEffect(() => {
     if (formSettings) {
@@ -1695,6 +1723,35 @@ const FormSettingsTab = ({ language }: { language: string }) => {
 
   return (
     <div className="space-y-5">
+      {/* Online Admission Form Publish Toggle */}
+      <div className="card-elevated p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Globe className="w-6 h-6 text-primary" />
+            <div>
+              <h3 className="font-display font-bold text-foreground">
+                {language === 'bn' ? 'অনলাইন ভর্তি ফর্ম' : 'Online Admission Form'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'bn' ? 'পাবলিক পেইজে ভর্তি ফর্ম দেখান বা লুকান' : 'Show or hide admission form on the public page'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${admissionPublic ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+              {admissionPublic
+                ? (language === 'bn' ? '🟢 পাবলিশড' : '🟢 Published')
+                : (language === 'bn' ? '🔴 হাইড' : '🔴 Hidden')}
+            </span>
+            <Switch
+              checked={admissionPublic}
+              onCheckedChange={toggleAdmissionPublic}
+              disabled={admissionPublicLoading}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Field Visibility Toggles */}
       <div className="card-elevated p-5">
         <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
