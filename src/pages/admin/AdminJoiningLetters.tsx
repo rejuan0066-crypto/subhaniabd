@@ -419,9 +419,9 @@ const AdminJoiningLetters = () => {
                         </div>
 
                         {/* Meta */}
-                        <div className="flex justify-between text-sm text-muted-foreground mb-5">
-                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold text-foreground">{viewLetter.letter_number}</span></span>
-                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                        <div className="flex justify-between text-sm mb-5" style={{ color: 'hsl(var(--muted-foreground))' }}>
+                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{viewLetter.letter_number}</span></span>
+                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: 'hsl(var(--foreground))' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
                         </div>
 
                         {/* Body + Photo */}
