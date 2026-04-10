@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -61,12 +61,18 @@ const AdminJoiningLetters = () => {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [localLogo, setLocalLogo] = useState<string | null>(null);
   const [localPhoto, setLocalPhoto] = useState<string | null>(null);
+  const [bodyAlign, setBodyAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
+  const [salutationAlign, setSalutationAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [nameAlign, setNameAlign] = useState<'left' | 'center' | 'right'>('left');
 
   const resetOverrides = () => {
     setOverrides({});
     setEditMode(false);
     setLocalLogo(null);
     setLocalPhoto(null);
+    setBodyAlign('center');
+    setSalutationAlign('left');
+    setNameAlign('left');
   };
 
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
@@ -449,12 +455,35 @@ const AdminJoiningLetters = () => {
                           <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: '#1a1a1a' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
                         </div>
 
-                        {/* Body + Photo */}
+                         {/* Body + Photo */}
                         <div className="flex gap-5 mb-6 flex-1">
                           <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
-                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="text-left" />
-                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base text-left" style={{ color: 'hsl(var(--primary))' }} />
-                            <p className="text-center">
+                            {/* Alignment toolbar in edit mode */}
+                            {editMode && (
+                              <div className="flex flex-wrap gap-3 items-center pb-2 border-b border-dashed border-muted-foreground/20 mb-2 text-xs">
+                                <span className="text-muted-foreground font-medium">{bn ? 'সম্বোধন:' : 'Salutation:'}</span>
+                                <div className="flex gap-0.5 border rounded-md overflow-hidden">
+                                  {([['left', AlignLeft], ['center', AlignCenter], ['right', AlignRight]] as const).map(([a, Icon]) => (
+                                    <button key={a} onClick={() => setSalutationAlign(a)} className={`p-1 ${salutationAlign === a ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}><Icon className="w-3.5 h-3.5" /></button>
+                                  ))}
+                                </div>
+                                <span className="text-muted-foreground font-medium">{bn ? 'নাম:' : 'Name:'}</span>
+                                <div className="flex gap-0.5 border rounded-md overflow-hidden">
+                                  {([['left', AlignLeft], ['center', AlignCenter], ['right', AlignRight]] as const).map(([a, Icon]) => (
+                                    <button key={a} onClick={() => setNameAlign(a)} className={`p-1 ${nameAlign === a ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}><Icon className="w-3.5 h-3.5" /></button>
+                                  ))}
+                                </div>
+                                <span className="text-muted-foreground font-medium">{bn ? 'বডি:' : 'Body:'}</span>
+                                <div className="flex gap-0.5 border rounded-md overflow-hidden">
+                                  {([['left', AlignLeft], ['center', AlignCenter], ['right', AlignRight], ['justify', AlignJustify]] as const).map(([a, Icon]) => (
+                                    <button key={a} onClick={() => setBodyAlign(a)} className={`p-1 ${bodyAlign === a ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}><Icon className="w-3.5 h-3.5" /></button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className={`text-${salutationAlign}`} />
+                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className={`font-bold text-base text-${nameAlign}`} style={{ color: 'hsl(var(--primary))' }} />
+                            <p className={`text-${bodyAlign}`}>
                               {viewLetter.letter_type === 'reinstatement'
                                 ? (bn
                                     ? <>এতদ্বারা জানানো যাচ্ছে যে, জনাব <strong style={{ color: 'hsl(var(--primary))' }}>{r.staffName}</strong> (আইডি: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), পূর্বে পদত্যাগের পর অদ্য <strong>{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}</strong> খ্রিষ্টাব্দে <strong>{r.instName || 'প্রতিষ্ঠান'}</strong>-এ <strong style={{ color: 'hsl(var(--primary))' }}>"{r.designation}"</strong> পদে পুনরায় কর্মে বহাল করা হয়েছে। আমরা আশা করি, তিনি পূর্বের ন্যায় তাঁর মেধা, আন্তরিকতা ও নিষ্ঠার মাধ্যমে অত্র প্রতিষ্ঠানের শিক্ষা ও প্রশাসনিক মান উন্নয়নে গুরুত্বপূর্ণ ভূমিকা পালন করবেন। পরম করুণাময় আল্লাহ তাআলা তাঁর এই খিদমতকে কবুল করুন এবং তাঁকে উত্তম তাওফিক দান করুন।</>
