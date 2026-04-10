@@ -1256,6 +1256,26 @@ const AdmissionPage = () => {
     );
   }
 
+  if (!isAdmissionOpen) {
+    return (
+      <PublicLayout>
+        <div className="container mx-auto px-4 py-20 max-w-2xl text-center">
+          <div className="card-elevated p-10 space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="text-2xl font-display font-bold text-foreground">
+              {bn ? 'অনলাইন ভর্তি বন্ধ আছে' : 'Online Admission is Closed'}
+            </h2>
+            <p className="text-muted-foreground">
+              {bn ? 'বর্তমানে অনলাইন ভর্তি আবেদন গ্রহণ করা হচ্ছে না। পরবর্তী আপডেটের জন্য অপেক্ষা করুন।' : 'Online admission applications are not being accepted at this time. Please check back later.'}
+            </p>
+          </div>
+        </div>
+      </PublicLayout>
+    );
+  }
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-12 max-w-4xl">
