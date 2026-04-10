@@ -363,7 +363,7 @@ const AdminJoiningLetters = () => {
 
                   {/* Document with A4 proportions */}
                   <div className="m-4 mt-2 border-[3px] border-double border-foreground/30 p-1" style={{ aspectRatio: '210/297', maxWidth: '100%' }}>
-                    <div className="border border-foreground/15 p-7 relative overflow-hidden h-full flex flex-col text-[#1a1a1a] dark:text-[#e8e8e8]" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
+                    <div className="border border-foreground/15 p-7 relative overflow-hidden h-full flex flex-col">
 
                       {/* Watermark */}
                       {r.logoUrl && (
