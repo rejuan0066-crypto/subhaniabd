@@ -239,6 +239,22 @@ const AdminResignLetters = () => {
         .from('resign_letters')
         .update({ status: 'rejoined' })
         .eq('id', letter.id);
+
+      // 5. Unban user account if linked
+      const { data: staffData } = await supabase
+        .from('staff')
+        .select('user_id')
+        .eq('id', letter.staff_id)
+        .maybeSingle();
+      if (staffData?.user_id) {
+        try {
+          await supabase.functions.invoke('manage-users', {
+            body: { action: 'unban_user', user_id: staffData.user_id },
+          });
+        } catch (e) {
+          console.error('Failed to unban user account:', e);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
