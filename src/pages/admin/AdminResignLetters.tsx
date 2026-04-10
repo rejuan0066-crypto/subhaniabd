@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useCallback } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
