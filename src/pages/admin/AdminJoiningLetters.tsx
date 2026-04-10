@@ -142,7 +142,7 @@ const AdminJoiningLetters = () => {
   .photo-box { flex-shrink: 0; text-align: center; }
   .photo-box .avatar { width: 80px; height: 80px; border: 2px solid #ccc; border-radius: 6px; object-fit: cover; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #999; }
   .photo-label { font-size: 9px; color: #888; margin-top: 4px; }
-  .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 50px; }
+  .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 30px; }
   .qr-block { text-align: center; }
   .qr-block canvas, .qr-block svg, .qr-block img { width: 60px; height: 60px; }
   .qr-label { font-size: 8px; color: #888; margin-top: 3px; }
@@ -155,8 +155,8 @@ const AdminJoiningLetters = () => {
   .seal { width: 50px; height: 50px; border-radius: 50%; border: 2px dashed #bbb; display: flex; align-items: center; justify-content: center; }
   .seal span { font-size: 7px; color: #999; text-align: center; line-height: 1.2; }
   @media print {
-    html, body { background: #fff; margin: 0; padding: 0; }
-    .page { border: 3px double #444; box-shadow: none; margin: 0 auto; }
+    html, body { margin: 0 !important; padding: 0 !important; overflow: hidden; }
+    .page { box-shadow: none; border: 3px double #444; }
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
