@@ -26,22 +26,7 @@ const RELIGIONS = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
-const DESIGNATIONS = [
-  { value: 'head_teacher', bn: 'প্রধান শিক্ষক', en: 'Head Teacher' },
-  { value: 'asst_head_teacher', bn: 'সহকারী প্রধান শিক্ষক', en: 'Asst. Head Teacher' },
-  { value: 'asst_teacher', bn: 'সহকারী শিক্ষক', en: 'Asst. Teacher' },
-  { value: 'arabic_teacher', bn: 'আরবি শিক্ষক', en: 'Arabic Teacher' },
-  { value: 'hifz_teacher', bn: 'হিফয শিক্ষক', en: 'Hifz Teacher' },
-  { value: 'quran_teacher', bn: 'কোরআন শিক্ষক', en: 'Quran Teacher' },
-  { value: 'bangla_teacher', bn: 'বাংলা শিক্ষক', en: 'Bengali Teacher' },
-  { value: 'english_teacher', bn: 'ইংরেজি শিক্ষক', en: 'English Teacher' },
-  { value: 'math_teacher', bn: 'গণিত শিক্ষক', en: 'Math Teacher' },
-  { value: 'office_asst', bn: 'অফিস সহকারী', en: 'Office Assistant' },
-  { value: 'peon', bn: 'পিয়ন', en: 'Peon' },
-  { value: 'cook', bn: 'রান্না বিভাগ', en: 'Cook' },
-  { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
-  { value: 'other', bn: 'অন্যান্য', en: 'Other' },
-];
+// Designations are now fetched from database
 
 const DOC_TYPES = [
   { value: 'nid', bn: 'জাতীয় পরিচয়পত্র', en: 'NID' },
@@ -71,6 +56,15 @@ const StaffApplicationPage = () => {
     queryFn: async () => {
       const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_fields').maybeSingle();
       return (data?.value as Record<string, boolean>) || {};
+    },
+  });
+
+  // Load designations from database
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ['designations-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('designations').select('*').eq('is_active', true).order('sort_order');
+      return data || [];
     },
   });
 
@@ -193,8 +187,8 @@ const StaffApplicationPage = () => {
   const saveMutation = useMutation({
     mutationFn: async () => {
       const fullName = `${firstName} ${lastName}`.trim();
-      const desigObj = DESIGNATIONS.find(d => d.value === designation);
-      const desigLabel = desigObj ? (bn ? desigObj.bn : desigObj.en) : designation;
+      const desigObj = designationsList.find(d => d.id === designation);
+      const desigLabel = desigObj ? (bn ? desigObj.name_bn : desigObj.name) : designation;
 
       const staffData = {
         first_name: firstName,
@@ -386,7 +380,7 @@ const StaffApplicationPage = () => {
                   <Select value={designation} onValueChange={setDesignation}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['designation'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
-                      {DESIGNATIONS.map(d => <SelectItem key={d.value} value={d.value}>{bn ? d.bn : d.en}</SelectItem>)}
+                      {designationsList.map(d => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FieldError field="designation" />
