@@ -375,7 +375,7 @@ const StaffApplicationPage = () => {
                 )}
                 {isVisible('staff_joining_date') && (
                 <div>
-                  <Label>{bn ? 'যোগদান তারিখ' : 'Joining Date'}</Label>
+                  <Label>{bn ? 'আবেদন তারিখ' : 'Application Date'}</Label>
                   <Input type="date" className="bg-background mt-1" value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
                 </div>
                 )}
