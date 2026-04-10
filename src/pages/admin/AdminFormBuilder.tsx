@@ -37,6 +37,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 const FORM_TYPES = [
   { value: 'custom', label: 'Custom Form', label_bn: 'কাস্টম ফর্ম' },
   { value: 'admission', label: 'Admission Form', label_bn: 'ভর্তি ফর্ম' },
+  { value: 'staff', label: 'Staff/Teacher Form', label_bn: 'কর্মী/শিক্ষক ফর্ম' },
   { value: 'fee', label: 'Fee Form', label_bn: 'ফি ফর্ম' },
   { value: 'joining', label: 'Joining Letter', label_bn: 'জয়েনিং পত্র' },
   { value: 'resign', label: 'Resign Letter', label_bn: 'পদত্যাগ পত্র' },
