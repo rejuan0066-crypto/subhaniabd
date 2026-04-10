@@ -59,6 +59,15 @@ const StaffApplicationPage = () => {
     },
   });
 
+  // Load designations from database
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ['designations-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('designations').select('*').eq('is_active', true).order('sort_order');
+      return data || [];
+    },
+  });
+
   // Load footer text
   const { data: footerText } = useQuery({
     queryKey: ['staff-form-footer-text-public'],
