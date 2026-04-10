@@ -560,6 +560,9 @@ const AdminFormBuilder = () => {
               <TabsTrigger value="forms">{bn ? '📝 ফর্ম বিল্ডার' : '📝 Form Builder'}</TabsTrigger>
               <TabsTrigger value="layouts">{bn ? '📄 ডকুমেন্ট লেআউট' : '📄 Document Layouts'}</TabsTrigger>
             </TabsList>
+            <p className="text-xs text-muted-foreground mt-2">
+              {bn ? '⚡ এখানে চেঞ্জ করলে সব জায়গায় আপডেট হবে — যেমন ছাত্র ব্যবস্থাপনার ভর্তি ফর্ম, কর্মী/শিক্ষক যোগ ফর্ম ইত্যাদি' : '⚡ Changes here will update everywhere — e.g. Student Admission Form, Staff/Teacher Form, etc.'}
+            </p>
 
             <TabsContent value="forms" className="mt-4">
           <div className="flex items-center justify-end">
