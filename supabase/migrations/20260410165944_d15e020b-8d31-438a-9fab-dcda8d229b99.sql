@@ -1,0 +1,3 @@
+
+DELETE FROM custom_form_fields WHERE form_id = '9c696597-1528-4627-8653-2a4937bd7863';
+DELETE FROM custom_forms WHERE id = '9c696597-1528-4627-8653-2a4937bd7863';
