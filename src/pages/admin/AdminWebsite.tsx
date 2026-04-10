@@ -1891,4 +1891,107 @@ const FormSettingsTab = ({ language }: { language: string }) => {
   );
 };
 
+// ─── Staff Form Fields Control Component ───
+const StaffFormFieldsControl = ({ language }: { language: string }) => {
+  const queryClient = useQueryClient();
+  const [fields, setFields] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState(false);
+
+  const { data: savedFields, isLoading } = useQuery({
+    queryKey: ['staff-form-fields-config'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_fields').maybeSingle();
+      return (data?.value as Record<string, boolean>) || {};
+    },
+  });
+
+  useEffect(() => {
+    const defaults: Record<string, boolean> = {};
+    Object.keys(STAFF_FORM_FIELD_LABELS).forEach(k => { defaults[k] = true; });
+    if (savedFields) {
+      setFields({ ...defaults, ...savedFields });
+    } else {
+      setFields(defaults);
+    }
+  }, [savedFields]);
+
+  const toggle = (key: string) => {
+    setFields(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const saveStaffFields = async () => {
+    setSaving(true);
+    try {
+      const { data: existing } = await supabase.from('website_settings').select('id').eq('key', 'staff_form_fields').maybeSingle();
+      if (existing) {
+        await supabase.from('website_settings').update({ value: fields as any, updated_at: new Date().toISOString() }).eq('key', 'staff_form_fields');
+      } else {
+        await supabase.from('website_settings').insert({ key: 'staff_form_fields', value: fields as any });
+      }
+      queryClient.invalidateQueries({ queryKey: ['staff-form-fields-config'] });
+      toast.success(language === 'bn' ? 'স্টাফ ফর্ম ফিল্ড সেটিংস সংরক্ষিত!' : 'Staff form field settings saved!');
+    } catch {
+      toast.error(language === 'bn' ? 'সংরক্ষণে ত্রুটি' : 'Error saving');
+    }
+    setSaving(false);
+  };
+
+  if (isLoading) return <Skeleton className="h-[200px] w-full" />;
+
+  const sectionKeys = Object.keys(STAFF_FORM_FIELD_LABELS).filter(k => k.startsWith('section_'));
+  const fieldKeys = Object.keys(STAFF_FORM_FIELD_LABELS).filter(k => !k.startsWith('section_'));
+
+  return (
+    <div className="card-elevated p-5">
+      <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+        <SlidersHorizontal className="w-5 h-5 text-primary" />
+        {language === 'bn' ? 'স্টাফ আবেদন ফর্ম ফিল্ড নিয়ন্ত্রণ' : 'Staff Application Form Field Control'}
+      </h3>
+      <p className="text-sm text-muted-foreground mb-4">
+        {language === 'bn' ? 'কোন সেকশন ও ফিল্ড পাবলিক স্টাফ আবেদন ফর্মে দেখাবে তা নিয়ন্ত্রণ করুন।' : 'Control which sections and fields appear on the public staff application form.'}
+      </p>
+
+      {/* Sections */}
+      <h4 className="text-sm font-semibold text-foreground mb-2">{language === 'bn' ? 'সেকশনসমূহ' : 'Sections'}</h4>
+      <div className="space-y-2 mb-4">
+        {sectionKeys.map(key => {
+          const label = STAFF_FORM_FIELD_LABELS[key];
+          return (
+            <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-2">
+                {fields[key] ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                <span className="text-sm font-medium text-foreground">{language === 'bn' ? label.bn : label.en}</span>
+              </div>
+              <Switch checked={fields[key] ?? true} onCheckedChange={() => toggle(key)} />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Individual Fields */}
+      <h4 className="text-sm font-semibold text-foreground mb-2">{language === 'bn' ? 'পৃথক ফিল্ডসমূহ' : 'Individual Fields'}</h4>
+      <div className="space-y-2 mb-4">
+        {fieldKeys.map(key => {
+          const label = STAFF_FORM_FIELD_LABELS[key];
+          return (
+            <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+              <div className="flex items-center gap-2">
+                {fields[key] ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+                <span className="text-sm font-medium text-foreground">{language === 'bn' ? label.bn : label.en}</span>
+              </div>
+              <Switch checked={fields[key] ?? true} onCheckedChange={() => toggle(key)} />
+            </div>
+          );
+        })}
+      </div>
+
+      <Button className="btn-primary-gradient w-full" onClick={saveStaffFields} disabled={saving}>
+        <Save className="w-4 h-4 mr-2" />
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+        {language === 'bn' ? 'স্টাফ ফর্ম ফিল্ড সংরক্ষণ করুন' : 'Save Staff Form Fields'}
+      </Button>
+    </div>
+  );
+};
+
 export default AdminWebsite;
