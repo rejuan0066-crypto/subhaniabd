@@ -1823,6 +1823,9 @@ const FormSettingsTab = ({ language }: { language: string }) => {
         </div>
       </div>
 
+      {/* Staff Form Field Visibility */}
+      <StaffFormFieldsControl language={language} />
+
       {/* Field Visibility Toggles */}
       <div className="card-elevated p-5">
         <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
