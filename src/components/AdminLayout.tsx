@@ -439,9 +439,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {renderSidebar(false)}
         {mobileSidebarOpen && renderSidebar(true)}
 
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {/* Top bar */}
-          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between sticky top-0 z-40`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)' }}>
+          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between z-40 shrink-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)' }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-5 h-5 text-muted-foreground" />
@@ -482,16 +482,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
-          {/* Page title */}
-          <div className="px-4 lg:px-6 pt-5 pb-2">
-            <h1 className="text-xl font-bold text-foreground">{currentPageLabel}</h1>
-          </div>
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Page title */}
+            <div className="px-4 lg:px-6 pt-5 pb-2">
+              <h1 className="text-xl font-bold text-foreground">{currentPageLabel}</h1>
+            </div>
 
-          {/* Content */}
-          <main className="flex-1 px-4 lg:px-6 pb-6">
-            <AdminPageWithTabs>{children}</AdminPageWithTabs>
-            <BackButton />
-          </main>
+            {/* Content */}
+            <main className="px-4 lg:px-6 pb-6">
+              <AdminPageWithTabs>{children}</AdminPageWithTabs>
+              <BackButton />
+            </main>
+          </div>
         </div>
       </div>
     </AdminLayoutNestingContext.Provider>
