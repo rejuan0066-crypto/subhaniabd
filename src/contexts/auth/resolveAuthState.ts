@@ -15,7 +15,9 @@ const isTransientAuthStateError = (error: unknown) => {
     message.includes('aborterror') ||
     message.includes('lock broken') ||
     message.includes('timeout') ||
-    message.includes('request was aborted')
+    message.includes('request was aborted') ||
+    message.includes('jwt expired') ||
+    message.includes('pgrst303')
   );
 };
 
