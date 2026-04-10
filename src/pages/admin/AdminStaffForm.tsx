@@ -883,35 +883,45 @@ const AdminStaffForm = () => {
               </div>
             </div>
 
+            {(isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
             <div className="border-t border-border pt-4 mb-4">
               <h3 className="text-md font-semibold text-foreground mb-3">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isFieldActive('nid') && (
                 <div>
-                  <Label>{bn ? 'NID (১০/১৭ ডিজিট) বা জন্ম নিবন্ধন (১৭ ডিজিট)' : 'NID (10/17) or Birth Reg (17)'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('nid')?.label_bn || 'NID (১০/১৭ ডিজিট)') : (getField('nid')?.label || 'NID (10/17)')} {isFieldRequired('nid') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['nid'] || nidError ? 'border-destructive' : ''}`} maxLength={17} value={nid} onChange={e => validateNid(e.target.value, setNid, setNidError)} />
                   {nidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {nidError}</p>}
                   <FieldError field="nid" />
                 </div>
+                )}
+                {isFieldActive('education') && (
                 <div>
-                  <Label>{bn ? 'শিক্ষাগত যোগ্যতা' : 'Education Qualification'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('education')?.label_bn || 'শিক্ষাগত যোগ্যতা') : (getField('education')?.label || 'Education Qualification')} {isFieldRequired('education') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['education'] ? 'border-destructive' : ''}`} value={education} onChange={e => handleFieldChange('education', e.target.value, setEducation)} />
                   <FieldError field="education" />
                 </div>
+                )}
+                {isFieldActive('experience') && (
                 <div>
-                  <Label>{bn ? 'অভিজ্ঞতা' : 'Experience'}</Label>
+                  <Label>{bn ? (getField('experience')?.label_bn || 'অভিজ্ঞতা') : (getField('experience')?.label || 'Experience')}</Label>
                   <Input className="bg-background mt-1" value={experience} onChange={e => setExperience(e.target.value)} />
                 </div>
-                {experience && (
+                )}
+                {isFieldActive('prev_institute') && experience && (
                   <div>
-                    <Label>{bn ? 'পূর্ববর্তী কর্মস্থল' : 'Previous Job Institute'} <span className="text-destructive">*</span></Label>
+                    <Label>{bn ? (getField('prev_institute')?.label_bn || 'পূর্ববর্তী কর্মস্থল') : (getField('prev_institute')?.label || 'Previous Job Institute')} {isFieldRequired('prev_institute') && <span className="text-destructive">*</span>}</Label>
                     <Input className={`bg-background mt-1 ${fieldErrors['prev_institute'] ? 'border-destructive' : ''}`} value={prevInstitute} onChange={e => handleFieldChange('prev_institute', e.target.value, setPrevInstitute)} />
                     <FieldError field="prev_institute" />
                   </div>
                 )}
               </div>
             </div>
+            )}
 
-            <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />
+            {isFieldActive('address_permanent') && <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />}
+            {isFieldActive('address_present') && (
+            <>
             <div className="mt-4 flex items-center gap-2">
               <Checkbox id="sameAddr" checked={sameAddress} onCheckedChange={(v) => { setSameAddress(!!v); if (v) setPresentAddr({ ...permanentAddr }); }} />
               <Label htmlFor="sameAddr">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতো' : 'Present same as permanent'}</Label>
@@ -920,6 +930,8 @@ const AdminStaffForm = () => {
               <div className="mt-4">
                 <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={presentAddr} onChange={setPresentAddr} />
               </div>
+            )}
+            </>
             )}
           </div>
 
