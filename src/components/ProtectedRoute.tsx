@@ -16,12 +16,22 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   // Pending users must go to waiting-approval page
+  // But only if we've actually resolved their status (not null from failed fetch)
   if (userStatus === 'pending' && !isAdminRole(role)) {
+    // If role is null and status is pending, it might be a transient error — don't redirect
+    if (role === null && userStatus === null) {
+      return <PageLoader />;
+    }
     const path = location.pathname;
     if (path !== '/waiting-approval') {
       return <Navigate to="/waiting-approval" replace />;
     }
     return <>{children}</>;
+  }
+
+  // If auth resolved but status is null (failed fetch), show loader instead of wrong redirect
+  if (user && role === null && userStatus === null) {
+    return <PageLoader />;
   }
 
   const path = location.pathname;

@@ -184,8 +184,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (cancelled) return;
 
         console.error('Failed to resolve auth state:', error);
+        // Don't default to 'pending' on transient errors — retry will handle it
+        // Only set pending if we truly can't resolve
         setRole(null);
-        setUserStatus('pending');
+        setUserStatus(null);
       } finally {
         if (!cancelled) {
           setProfileLoading(false);
