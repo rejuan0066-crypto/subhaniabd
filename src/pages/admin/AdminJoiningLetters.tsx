@@ -102,7 +102,7 @@ const AdminJoiningLetters = () => {
 </div>
 <div class="title">${bn ? 'যোগদান পত্র' : 'Joining Letter'}</div>
 <div class="body">
-  <p>${bn ? 'প্রিয়,' : 'Dear,'}</p>
+  <p>${bn ? 'জনাব,' : 'Dear,'}</p>
   <p><strong>${letter.staff_name_bn || letter.staff_name || ''}</strong></p>
   <p>${bn 
     ? `আপনাকে জানানো যাচ্ছে যে, আপনি <strong>"${letter.designation || ''}"</strong> পদে <strong>${inst.name || 'প্রতিষ্ঠান'}</strong>-এ যোগদান করেছেন। আপনার যোগদানের তারিখ: <strong>${letter.joining_date ? new Date(letter.joining_date).toLocaleDateString('bn-BD') : ''}</strong>।`
@@ -245,7 +245,7 @@ const AdminJoiningLetters = () => {
                       {/* Profile + Letter body */}
                       <div className="flex gap-5 mb-6">
                         <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
-                          <p>{bn ? 'প্রিয়,' : 'Dear,'}</p>
+                          <p>{bn ? 'জনাব,' : 'Dear,'}</p>
                           <p className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }}>
                             {viewLetter.staff_name_bn || viewLetter.staff_name || '—'}
                           </p>
