@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useCallback } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -176,6 +176,59 @@ const AdminResignLetters = () => {
       toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted');
       setDeleteId(null);
     },
+  });
+
+  /* ── Rejoin (re-activate staff + create joining letter) ── */
+  const [rejoinId, setRejoinId] = useState<string | null>(null);
+  const rejoinMutation = useMutation({
+    mutationFn: async (letter: any) => {
+      if (!letter.staff_id) throw new Error('No staff linked');
+
+      // 1. Re-activate staff
+      const { error: staffErr } = await supabase
+        .from('staff')
+        .update({ status: 'active' })
+        .eq('id', letter.staff_id);
+      if (staffErr) throw staffErr;
+
+      // 2. Generate joining letter number
+      const { data: existingJL } = await supabase
+        .from('joining_letters')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const jlSerial = String((existingJL?.length || 0) + 1).padStart(3, '0');
+      const jlNumber = `JL-${new Date().getFullYear()}-${jlSerial}`;
+      const today = new Date().toISOString().split('T')[0];
+
+      // 3. Create joining letter
+      const { error: jlErr } = await supabase.from('joining_letters').insert({
+        letter_number: jlNumber,
+        staff_name: letter.staff_name,
+        staff_name_bn: letter.staff_name_bn,
+        designation: letter.designation,
+        staff_id: letter.staff_id,
+        letter_date: today,
+        joining_date: today,
+        letter_data: letter.letter_data || {},
+        status: 'issued',
+      });
+      if (jlErr) throw jlErr;
+
+      // 4. Update resign letter status
+      await supabase
+        .from('resign_letters')
+        .update({ status: 'rejoined' })
+        .eq('id', letter.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
+      queryClient.invalidateQueries({ queryKey: ['joining-letters'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-for-resign'] });
+      toast.success(bn ? 'পুনর্বহাল করা হয়েছে এবং নতুন যোগদান পত্র তৈরি হয়েছে' : 'Staff rejoined and new joining letter created');
+      setRejoinId(null);
+    },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error during rejoin'),
   });
 
   /* ── Build resolved values ──── */
@@ -376,8 +429,8 @@ const AdminResignLetters = () => {
                   <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
                   <TableHead>{bn ? 'পদবী' : 'Designation'}</TableHead>
                   <TableHead>{bn ? 'পদত্যাগের তারিখ' : 'Resign Date'}</TableHead>
-                  <TableHead>{bn ? 'পত্রের তারিখ' : 'Letter Date'}</TableHead>
-                  <TableHead className="text-center w-32">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
+                    <TableHead>{bn ? 'অবস্থা' : 'Status'}</TableHead>
+                    <TableHead className="text-center w-40">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -390,7 +443,13 @@ const AdminResignLetters = () => {
                     </TableCell>
                     <TableCell>{l.designation}</TableCell>
                     <TableCell>{l.resign_date ? new Date(l.resign_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
-                    <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
+                    <TableCell>
+                      {l.status === 'rejoined' ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-300">{bn ? 'পুনর্বহাল' : 'Rejoined'}</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">{bn ? 'পদত্যাগী' : 'Resigned'}</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
                         <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
@@ -399,6 +458,11 @@ const AdminResignLetters = () => {
                         <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
                           <Printer className="w-4 h-4" />
                         </Button>
+                        {l.status !== 'rejoined' && l.staff_id && (
+                          <Button size="icon" variant="ghost" className="text-blue-600 hover:bg-blue-500/10" onClick={() => setRejoinId(l.id)} title={bn ? 'পুনর্বহাল' : 'Rejoin'}>
+                            <UserCheck className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(l.id)} title={bn ? 'মুছুন' : 'Delete'}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -628,6 +692,33 @@ const AdminResignLetters = () => {
               <AlertDialogCancel>{bn ? 'না' : 'Cancel'}</AlertDialogCancel>
               <AlertDialogAction onClick={() => deleteId && deleteMutation.mutate(deleteId)} className="bg-destructive text-destructive-foreground">
                 {bn ? 'হ্যাঁ, মুছুন' : 'Yes, Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Rejoin Confirm */}
+        <AlertDialog open={!!rejoinId} onOpenChange={(o) => { if (!o) setRejoinId(null); }}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{bn ? 'পুনর্বহাল করতে চান?' : 'Rejoin this staff?'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {bn
+                  ? 'এই স্টাফকে আবার সক্রিয় করা হবে এবং একটি নতুন যোগদান পত্র স্বয়ংক্রিয়ভাবে তৈরি হবে।'
+                  : 'This staff will be reactivated and a new joining letter will be automatically created.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{bn ? 'না' : 'Cancel'}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  const letter = letters.find((l: any) => l.id === rejoinId);
+                  if (letter) rejoinMutation.mutate(letter);
+                }}
+                className="bg-primary text-primary-foreground"
+              >
+                {rejoinMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {bn ? 'হ্যাঁ, পুনর্বহাল করুন' : 'Yes, Rejoin'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
