@@ -184,6 +184,14 @@ const AdminResignLetters = () => {
     const pName = principalInfo?.principal_name || '';
     const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
 
+    const defaultBody = bn
+      ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, ${letter.staff_name_bn || letter.staff_name || ''} (পত্র নং: ${letter.letter_number}), "${letter.designation || ''}" পদে কর্মরত, ${inst.name || 'প্রতিষ্ঠান'} থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: ${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('bn-BD') : ''}।`
+      : `This is to inform that ${letter.staff_name || ''} (Ref: ${letter.letter_number}), serving as "${letter.designation || ''}", has resigned from ${inst.name_en || inst.name || 'the institution'}. The effective date of resignation is: ${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('en-US') : ''}.`;
+
+    const defaultClosing = bn
+      ? 'তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।'
+      : 'We express our gratitude for their service and wish them success in future endeavors.';
+
     return {
       instName: get('instName', inst.name || ''),
       instNameEn: get('instNameEn', inst.name_en || ''),
@@ -193,6 +201,8 @@ const AdminResignLetters = () => {
       staffName: get('staffName', letter.staff_name_bn || letter.staff_name || ''),
       designation: get('designation', letter.designation || ''),
       reason: get('reason', letter.reason || (bn ? 'ব্যক্তিগত কারণে' : 'Personal reasons')),
+      bodyText: get('bodyText', defaultBody),
+      closingText: get('closingText', defaultClosing),
       pName: get('pName', pName),
       pTitle: get('pTitle', pTitle),
       candidateSigLabel: get('candidateSigLabel', bn ? 'পদত্যাগকারীর স্বাক্ষর' : "Resignee's Signature"),
