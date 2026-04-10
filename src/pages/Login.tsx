@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
-import { isAdminRole } from '@/lib/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +10,7 @@ import LanguageToggle from '@/components/LanguageToggle';
 import ForgotPasswordDialog from '@/components/ForgotPasswordDialog';
 import { toast } from 'sonner';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
+import { getAuthenticatedHomePath, hasResolvedAuthRedirectState } from '@/lib/authRedirect';
 
 const Login = () => {
   const { t, language } = useLanguage();
@@ -21,7 +21,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
 
-  if (authLoading) {
+  if (authLoading || (user && !hasResolvedAuthRedirectState({ role, userStatus }))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -30,13 +30,7 @@ const Login = () => {
   }
 
   if (user) {
-    if (isAdminRole(role)) {
-      return <Navigate to="/admin" replace />;
-    }
-    if (userStatus === 'pending') {
-      return <Navigate to="/waiting-approval" replace />;
-    }
-    return <Navigate to="/staff-dashboard" replace />;
+    return <Navigate to={getAuthenticatedHomePath({ role, userStatus })} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { isAdminRole } from '@/lib/roles';
 import PageLoader from '@/components/PageLoader';
+import { getProtectedRouteRedirect, hasResolvedAuthRedirectState } from '@/lib/authRedirect';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, role, userStatus } = useAuth();
@@ -15,40 +15,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Pending users must go to waiting-approval page
-  // But only if we've actually resolved their status (not null from failed fetch)
-  if (userStatus === 'pending' && !isAdminRole(role)) {
-    // If role is null and status is pending, it might be a transient error — don't redirect
-    if (role === null && userStatus === null) {
-      return <PageLoader />;
-    }
-    const path = location.pathname;
-    if (path !== '/waiting-approval') {
-      return <Navigate to="/waiting-approval" replace />;
-    }
-    return <>{children}</>;
-  }
-
-  // If auth resolved but status is null (failed fetch), show loader instead of wrong redirect
-  if (user && role === null && userStatus === null) {
+  if (!hasResolvedAuthRedirectState({ role, userStatus })) {
     return <PageLoader />;
   }
 
-  const path = location.pathname;
-  const isAdminRoute = path.startsWith('/admin');
-  const isStaffDashboard = path === '/staff-dashboard';
+  const redirectPath = getProtectedRouteRedirect({
+    pathname: location.pathname,
+    role,
+    userStatus,
+  });
 
-  // Admin/Super Admin: full access to /admin, but redirect away from /staff-dashboard
-  if (isAdminRole(role)) {
-    if (isStaffDashboard) {
-      return <Navigate to="/admin" replace />;
-    }
-    return <>{children}</>;
-  }
-
-  // STRICT: Non-admin users can NEVER access /admin routes — redirect to staff dashboard
-  if (isAdminRoute) {
-    return <Navigate to="/staff-dashboard" replace />;
+  if (redirectPath && redirectPath !== location.pathname) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <>{children}</>;

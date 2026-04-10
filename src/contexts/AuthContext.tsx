@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const lastHandledAccessToken = useRef<string | null>(null);
   const sessionRef = useRef<Session | null>(null);
   const userRef = useRef<User | null>(null);
+  const lastResolvedAccessState = useRef<{ userId: string; role: string | null; userStatus: string | null } | null>(null);
 
   useEffect(() => {
     userRef.current = user;
@@ -42,6 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const resetResolvedState = () => {
       fetchedForUser.current = null;
+      lastResolvedAccessState.current = null;
       setProfileLoading(false);
       setRole(null);
       setUserStatus(null);
@@ -180,14 +182,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setRole(resolvedState.role);
         setUserStatus(resolvedState.userStatus);
+        lastResolvedAccessState.current = {
+          userId: user.id,
+          role: resolvedState.role,
+          userStatus: resolvedState.userStatus,
+        };
       } catch (error) {
         if (cancelled) return;
 
         console.error('Failed to resolve auth state:', error);
-        // Don't default to 'pending' on transient errors — retry will handle it
-        // Only set pending if we truly can't resolve
-        setRole(null);
-        setUserStatus(null);
+        const lastResolvedState = lastResolvedAccessState.current;
+
+        if (lastResolvedState?.userId === user.id) {
+          setRole(lastResolvedState.role);
+          setUserStatus(lastResolvedState.userStatus);
+        } else {
+          setRole(null);
+          setUserStatus(null);
+        }
       } finally {
         if (!cancelled) {
           setProfileLoading(false);
