@@ -217,9 +217,7 @@ const AdminResignLetters = () => {
     const r = resolved(letter);
     const qrValue = `RL:${letter.letter_number}|${letter.staff_name}|${letter.resign_date}`;
 
-    const bodyText = bn
-      ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (পত্র নং: <strong>${letter.letter_number}</strong>), <span class="highlight">"${r.designation}"</span> পদে কর্মরত, <strong>${r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।<br/><br/><strong>কারণ:</strong> ${r.reason}<br/><br/>তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।`
-      : `This is to inform that <span class="highlight">${r.staffName}</span> (Ref: <strong>${letter.letter_number}</strong>), serving as <span class="highlight">"${r.designation}"</span>, has resigned from <strong>${r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('en-US') : ''}</strong>.<br/><br/><strong>Reason:</strong> ${r.reason}<br/><br/>We express our gratitude for their service and wish them success in future endeavors.`;
+    const bodyText = `${r.bodyText}<br/><br/><strong>${bn ? 'কারণ:' : 'Reason:'}</strong> ${r.reason}<br/><br/>${r.closingText}`;
 
     const html = `<!DOCTYPE html>
 <html><head>
