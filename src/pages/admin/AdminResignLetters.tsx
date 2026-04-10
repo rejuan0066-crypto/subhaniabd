@@ -184,6 +184,14 @@ const AdminResignLetters = () => {
     const pName = principalInfo?.principal_name || '';
     const pTitle = principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head');
 
+    const defaultBody = bn
+      ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, ${letter.staff_name_bn || letter.staff_name || ''} (পত্র নং: ${letter.letter_number}), "${letter.designation || ''}" পদে কর্মরত, ${inst.name || 'প্রতিষ্ঠান'} থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: ${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('bn-BD') : ''}।`
+      : `This is to inform that ${letter.staff_name || ''} (Ref: ${letter.letter_number}), serving as "${letter.designation || ''}", has resigned from ${inst.name_en || inst.name || 'the institution'}. The effective date of resignation is: ${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('en-US') : ''}.`;
+
+    const defaultClosing = bn
+      ? 'তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।'
+      : 'We express our gratitude for their service and wish them success in future endeavors.';
+
     return {
       instName: get('instName', inst.name || ''),
       instNameEn: get('instNameEn', inst.name_en || ''),
@@ -193,6 +201,8 @@ const AdminResignLetters = () => {
       staffName: get('staffName', letter.staff_name_bn || letter.staff_name || ''),
       designation: get('designation', letter.designation || ''),
       reason: get('reason', letter.reason || (bn ? 'ব্যক্তিগত কারণে' : 'Personal reasons')),
+      bodyText: get('bodyText', defaultBody),
+      closingText: get('closingText', defaultClosing),
       pName: get('pName', pName),
       pTitle: get('pTitle', pTitle),
       candidateSigLabel: get('candidateSigLabel', bn ? 'পদত্যাগকারীর স্বাক্ষর' : "Resignee's Signature"),
@@ -207,9 +217,7 @@ const AdminResignLetters = () => {
     const r = resolved(letter);
     const qrValue = `RL:${letter.letter_number}|${letter.staff_name}|${letter.resign_date}`;
 
-    const bodyText = bn
-      ? `এই পত্র দ্বারা জানানো যাচ্ছে যে, <span class="highlight">${r.staffName}</span> (পত্র নং: <strong>${letter.letter_number}</strong>), <span class="highlight">"${r.designation}"</span> পদে কর্মরত, <strong>${r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।<br/><br/><strong>কারণ:</strong> ${r.reason}<br/><br/>তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।`
-      : `This is to inform that <span class="highlight">${r.staffName}</span> (Ref: <strong>${letter.letter_number}</strong>), serving as <span class="highlight">"${r.designation}"</span>, has resigned from <strong>${r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>${letter.resign_date ? new Date(letter.resign_date).toLocaleDateString('en-US') : ''}</strong>.<br/><br/><strong>Reason:</strong> ${r.reason}<br/><br/>We express our gratitude for their service and wish them success in future endeavors.`;
+    const bodyText = `${r.bodyText}<br/><br/><strong>${bn ? 'কারণ:' : 'Reason:'}</strong> ${r.reason}<br/><br/>${r.closingText}`;
 
     const html = `<!DOCTYPE html>
 <html><head>
@@ -534,21 +542,12 @@ const AdminResignLetters = () => {
                           <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--destructive))' }} />
-                            <p>
-                              {bn
-                                ? <>এই পত্র দ্বারা জানানো যাচ্ছে যে, <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (পত্র নং: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong> পদে কর্মরত, <strong>{r.instName || 'প্রতিষ্ঠান'}</strong> থেকে পদত্যাগ করেছেন। পদত্যাগের তারিখ: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('bn-BD') : ''}</strong>।</>
-                                : <>This is to inform that <strong style={{ color: 'hsl(var(--destructive))' }}>{r.staffName}</strong> (Ref: <span className="font-mono font-semibold">{viewLetter.letter_number}</span>), serving as <strong style={{ color: 'hsl(var(--destructive))' }}>"{r.designation}"</strong>, has resigned from <strong>{r.instNameEn || r.instName || 'the institution'}</strong>. The effective date of resignation is: <strong>{viewLetter.resign_date ? new Date(viewLetter.resign_date).toLocaleDateString('en-US') : ''}</strong>.</>
-                              }
-                            </p>
+                            <Editable tag="p" value={r.bodyText} onChange={v => set('bodyText', v)} editing={editMode} />
                             <p>
                               <strong>{bn ? 'কারণ:' : 'Reason:'}</strong>{' '}
                               <Editable value={r.reason} onChange={v => set('reason', v)} editing={editMode} />
                             </p>
-                            <p>
-                              {bn
-                                ? 'তাঁর প্রতি আমরা কৃতজ্ঞতা জ্ঞাপন করছি এবং ভবিষ্যৎ জীবনে সাফল্য কামনা করছি।'
-                                : 'We express our gratitude for their service and wish them success in future endeavors.'}
-                            </p>
+                            <Editable tag="p" value={r.closingText} onChange={v => set('closingText', v)} editing={editMode} />
                           </div>
 
                           {/* Photo */}
