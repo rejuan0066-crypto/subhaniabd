@@ -126,10 +126,29 @@ const AdminStaff = () => {
           )}
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="relative max-w-md">
+        <div className="card-elevated p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input placeholder={bn ? 'নাম বা পদবী দিয়ে খুঁজুন...' : 'Search by name or designation...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <div className="flex gap-2">
+            <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>
+              {bn ? 'সবগুলো' : 'All'} ({staffList.length})
+            </Button>
+            <Button variant={statusFilter === 'active' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('active')}>
+              {bn ? 'সক্রিয়' : 'Active'}
+            </Button>
+            <Button variant={statusFilter === 'pending' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('pending')} className="relative">
+              {bn ? 'আবেদন' : 'Pending'}
+              {pendingCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-destructive text-destructive-foreground">
+                  {pendingCount}
+                </span>
+              )}
+            </Button>
+            <Button variant={statusFilter === 'inactive' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('inactive')}>
+              {bn ? 'নিষ্ক্রিয়' : 'Inactive'}
+            </Button>
           </div>
         </div>
 
