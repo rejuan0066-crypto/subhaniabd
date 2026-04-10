@@ -449,7 +449,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex-1 flex flex-col min-w-0 ${mobileHeaderOffsetClass} lg:pt-0`}>
           {/* Top bar */}
-          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between fixed inset-x-0 top-0 z-40 lg:sticky lg:inset-x-auto`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between fixed inset-x-0 top-0 z-40 lg:sticky lg:top-0 lg:inset-x-auto`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-5 h-5 text-muted-foreground" />
