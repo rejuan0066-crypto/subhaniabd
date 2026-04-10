@@ -143,7 +143,7 @@ const AdminResignLetters = () => {
 
       const { error } = await supabase.from('resign_letters').insert({
         letter_number: letterNumber,
-        staff_name: (staff as any).name || '',
+        staff_name: (staff as any).name_en || '',
         staff_name_bn: (staff as any).name_bn || '',
         designation: (staff as any).designation || '',
         staff_id: staff.id,
