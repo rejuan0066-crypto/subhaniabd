@@ -99,10 +99,14 @@ const SearchableSelect = ({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-0 w-[var(--radix-popover-trigger-width)]"
+        className="p-0 w-[var(--radix-popover-trigger-width)] z-[9999]"
         align="start"
+        side="bottom"
+        avoidCollisions
+        collisionPadding={8}
         onWheel={e => e.stopPropagation()}
         onTouchMove={e => e.stopPropagation()}
+        onPointerDownOutside={e => e.stopPropagation()}
       >
         <div className="flex items-center border-b px-2">
           <Search className="h-4 w-4 shrink-0 opacity-50" />
@@ -114,7 +118,7 @@ const SearchableSelect = ({
             className="h-9 border-0 shadow-none focus-visible:ring-0 text-sm"
           />
         </div>
-        <div className="max-h-[40vh] overflow-y-auto overscroll-contain p-1">
+        <div className="max-h-[40vh] min-h-[120px] overflow-y-auto overscroll-contain touch-pan-y p-1" style={{ WebkitOverflowScrolling: 'touch' }}>
           {showAddCustom && (
             <button
               type="button"
