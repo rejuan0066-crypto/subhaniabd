@@ -1612,6 +1612,38 @@ const FORM_FIELD_LABELS: Record<string, { bn: string; en: string }> = {
   footer_paragraph: { bn: 'ফুটার প্যারাগ্রাফ', en: 'Footer Paragraph' },
 };
 
+// Staff form field/section labels for visibility control
+const STAFF_FORM_FIELD_LABELS: Record<string, { bn: string; en: string }> = {
+  // Sections
+  section_personal: { bn: '📋 ব্যক্তিগত তথ্য (সেকশন)', en: '📋 Personal Details (Section)' },
+  section_parents: { bn: '📋 পিতা-মাতার তথ্য (সেকশন)', en: '📋 Parents Details (Section)' },
+  section_identifier: { bn: '📋 পরিচয সনাক্তকারী তথ্য (সেকশন)', en: '📋 Identifier Details (Section)' },
+  section_relatives: { bn: '📋 আত্মীয় শনাক্তকারীর তথ্য (সেকশন)', en: '📋 Relatives Identifier (Section)' },
+  // Personal fields
+  staff_photo: { bn: 'ছবি আপলোড', en: 'Photo Upload' },
+  staff_email: { bn: 'ইমেইল', en: 'Email' },
+  staff_employment_type: { bn: 'চাকরির ধরন', en: 'Employment Type' },
+  staff_designation: { bn: 'পদবী', en: 'Designation' },
+  staff_residence_type: { bn: 'আবাসিক ধরন', en: 'Residential Status' },
+  staff_dob: { bn: 'জন্ম তারিখ', en: 'Date of Birth' },
+  staff_joining_date: { bn: 'যোগদান তারিখ', en: 'Joining Date' },
+  staff_religion: { bn: 'ধর্ম', en: 'Religion' },
+  staff_nid: { bn: 'NID', en: 'NID' },
+  staff_education: { bn: 'শিক্ষাগত যোগ্যতা', en: 'Education' },
+  staff_experience: { bn: 'অভিজ্ঞতা', en: 'Experience' },
+  staff_prev_institute: { bn: 'পূর্ববর্তী কর্মস্থল', en: 'Previous Institute' },
+  staff_permanent_addr: { bn: 'স্থায়ী ঠিকানা', en: 'Permanent Address' },
+  staff_present_addr: { bn: 'বর্তমান ঠিকানা', en: 'Present Address' },
+  // Parent fields
+  staff_father_mobile: { bn: 'পিতার মোবাইল', en: "Father's Mobile" },
+  staff_father_nid: { bn: 'পিতার NID', en: "Father's NID" },
+  staff_father_occupation: { bn: 'পিতার পেশা', en: "Father's Occupation" },
+  staff_mother_name: { bn: 'মাতার নাম', en: "Mother's Name" },
+  staff_mother_mobile: { bn: 'মাতার মোবাইল', en: "Mother's Mobile" },
+  staff_mother_nid: { bn: 'মাতার NID', en: "Mother's NID" },
+  staff_mother_occupation: { bn: 'মাতার পেশা', en: "Mother's Occupation" },
+};
+
 type FormSettingRow = {
   id: string;
   field_name: string;
