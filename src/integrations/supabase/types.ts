@@ -310,6 +310,7 @@ export type Database = {
           label_bn: string
           options: Json | null
           placeholder: string | null
+          section: string | null
           sort_order: number | null
           updated_at: string | null
           validation: Json | null
@@ -326,6 +327,7 @@ export type Database = {
           label_bn: string
           options?: Json | null
           placeholder?: string | null
+          section?: string | null
           sort_order?: number | null
           updated_at?: string | null
           validation?: Json | null
@@ -342,6 +344,7 @@ export type Database = {
           label_bn?: string
           options?: Json | null
           placeholder?: string | null
+          section?: string | null
           sort_order?: number | null
           updated_at?: string | null
           validation?: Json | null
