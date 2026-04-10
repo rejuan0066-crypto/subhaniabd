@@ -27,6 +27,7 @@ const AdminStaff = () => {
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewStaff, setViewStaff] = useState<any>(null);
 
@@ -62,7 +63,10 @@ const AdminStaff = () => {
     onError: () => toast.error('Error'),
   });
 
+  const pendingCount = staffList.filter((s: any) => s.status === 'pending').length;
+
   const filtered = staffList.filter((s: any) => {
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return s.name_bn?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q) || s.designation?.toLowerCase().includes(q);
@@ -122,10 +126,29 @@ const AdminStaff = () => {
           )}
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="relative max-w-md">
+        <div className="card-elevated p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input placeholder={bn ? 'নাম বা পদবী দিয়ে খুঁজুন...' : 'Search by name or designation...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <div className="flex gap-2">
+            <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>
+              {bn ? 'সবগুলো' : 'All'} ({staffList.length})
+            </Button>
+            <Button variant={statusFilter === 'active' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('active')}>
+              {bn ? 'সক্রিয়' : 'Active'}
+            </Button>
+            <Button variant={statusFilter === 'pending' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('pending')} className="relative">
+              {bn ? 'আবেদন' : 'Pending'}
+              {pendingCount > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-destructive text-destructive-foreground">
+                  {pendingCount}
+                </span>
+              )}
+            </Button>
+            <Button variant={statusFilter === 'inactive' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('inactive')}>
+              {bn ? 'নিষ্ক্রিয়' : 'Inactive'}
+            </Button>
           </div>
         </div>
 
@@ -183,8 +206,14 @@ const AdminStaff = () => {
                       </td>
                       )}
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${s.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-                          {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                          s.status === 'active' ? 'bg-success/10 text-success' : 
+                          s.status === 'pending' ? 'bg-warning/10 text-warning' : 
+                          'bg-destructive/10 text-destructive'
+                        }`}>
+                          {s.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : 
+                           s.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') : 
+                           (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right flex items-center justify-end gap-1">
@@ -344,8 +373,14 @@ const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
           {staff.name_bn && staff.name_en && <p className="text-sm text-muted-foreground">{bn ? staff.name_en : staff.name_bn}</p>}
           <p className="text-sm text-primary font-medium">{staff.designation || '-'}</p>
           <p className="text-xs text-muted-foreground">{staff.department || ''}</p>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${staff.status === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
-            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+            staff.status === 'active' ? 'bg-success/10 text-success' : 
+            staff.status === 'pending' ? 'bg-warning/10 text-warning' : 
+            'bg-destructive/10 text-destructive'
+          }`}>
+            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : 
+             staff.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') : 
+             (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
           </span>
         </div>
       </div>
