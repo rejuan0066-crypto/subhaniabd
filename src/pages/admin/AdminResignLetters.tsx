@@ -443,7 +443,13 @@ const AdminResignLetters = () => {
                     </TableCell>
                     <TableCell>{l.designation}</TableCell>
                     <TableCell>{l.resign_date ? new Date(l.resign_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
-                    <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
+                    <TableCell>
+                      {l.status === 'rejoined' ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-300">{bn ? 'পুনর্বহাল' : 'Rejoined'}</Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">{bn ? 'পদত্যাগী' : 'Resigned'}</Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
                         <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
@@ -452,6 +458,11 @@ const AdminResignLetters = () => {
                         <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
                           <Printer className="w-4 h-4" />
                         </Button>
+                        {l.status !== 'rejoined' && l.staff_id && (
+                          <Button size="icon" variant="ghost" className="text-blue-600 hover:bg-blue-500/10" onClick={() => setRejoinId(l.id)} title={bn ? 'পুনর্বহাল' : 'Rejoin'}>
+                            <UserCheck className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(l.id)} title={bn ? 'মুছুন' : 'Delete'}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
