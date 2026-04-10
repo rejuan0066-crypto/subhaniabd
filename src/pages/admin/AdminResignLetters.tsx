@@ -99,7 +99,7 @@ const AdminResignLetters = () => {
   const { data: staffList = [] } = useQuery({
     queryKey: ['staff-for-resign'],
     queryFn: async () => {
-      const { data } = await supabase.from('staff').select('id, name_bn, name_en, designation, status, photo_url, staff_data').eq('status', 'active');
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en, designation, status, photo_url, staff_data, user_id').eq('status', 'active');
       return data || [];
     },
     enabled: showCreate,
@@ -161,6 +161,17 @@ const AdminResignLetters = () => {
         .update({ status: 'inactive' })
         .eq('id', staff.id);
       if (staffErr) console.error('Failed to deactivate staff:', staffErr);
+
+      // Ban user account if linked
+      if ((staff as any).user_id) {
+        try {
+          await supabase.functions.invoke('manage-users', {
+            body: { action: 'ban_user', user_id: (staff as any).user_id },
+          });
+        } catch (e) {
+          console.error('Failed to ban user account:', e);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
