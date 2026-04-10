@@ -180,32 +180,29 @@ const AdminExamSessions = () => {
     },
   });
 
-  // Fetch result counts per exam (for showing which classes have results)
+  // Fetch result counts per exam session
   const { data: examResultCounts = {} } = useQuery({
-    queryKey: ['exam_result_counts'],
+    queryKey: ['exam_session_result_counts'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('exams').select('id, exam_session, exam_type, division_id');
-      if (error) throw error;
-      
-      // For each exam, count results
+      // Count results per exam_session (exam_id now references exam_sessions)
+      const { data: sessions } = await supabase.from('exam_sessions').select('id');
+      if (!sessions?.length) return {};
+      const sessionIds = sessions.map(s => s.id);
+      const { data: results, error: rErr } = await supabase
+        .from('results')
+        .select('exam_id')
+        .in('exam_id', sessionIds);
       const counts: Record<string, { examId: string; resultCount: number }> = {};
-      if (data && data.length > 0) {
-        const examIds = data.map((e: any) => e.id);
-        const { data: results, error: rErr } = await supabase
-          .from('results')
-          .select('exam_id, id')
-          .in('exam_id', examIds);
-        if (!rErr && results) {
-          const resultsByExam: Record<string, number> = {};
-          results.forEach((r: any) => {
-            resultsByExam[r.exam_id] = (resultsByExam[r.exam_id] || 0) + 1;
-          });
-          data.forEach((exam: any) => {
-            // Key: exam_session + exam_type + division_id
-            const key = `${exam.exam_session}_${exam.exam_type}_${exam.division_id}`;
-            counts[key] = { examId: exam.id, resultCount: resultsByExam[exam.id] || 0 };
-          });
-        }
+      if (!rErr && results) {
+        const resultsBySession: Record<string, number> = {};
+        results.forEach((r: any) => {
+          resultsBySession[r.exam_id] = (resultsBySession[r.exam_id] || 0) + 1;
+        });
+        sessions.forEach((s: any) => {
+          if (resultsBySession[s.id]) {
+            counts[s.id] = { examId: s.id, resultCount: resultsBySession[s.id] || 0 };
+          }
+        });
       }
       return counts;
     },
@@ -698,9 +695,7 @@ const AdminExamSessions = () => {
                           </div>
                         </div>
                         {esClasses.map((ec: any, idx: number) => {
-                          const divisionId = ec.classes?.division_id;
-                          const resultKey = `${es.name}_${es.exam_type}_${divisionId}`;
-                          const resultInfo = (examResultCounts as Record<string, any>)[resultKey];
+                          const resultInfo = (examResultCounts as Record<string, any>)[es.id];
                           const hasResults = resultInfo && resultInfo.resultCount > 0;
 
                           return (

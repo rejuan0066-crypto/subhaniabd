@@ -811,6 +811,7 @@ export type Database = {
           exam_type: string
           id: string
           is_active: boolean | null
+          is_published: boolean | null
           name: string
           name_bn: string
           updated_at: string | null
@@ -821,6 +822,7 @@ export type Database = {
           exam_type?: string
           id?: string
           is_active?: boolean | null
+          is_published?: boolean | null
           name: string
           name_bn: string
           updated_at?: string | null
@@ -831,6 +833,7 @@ export type Database = {
           exam_type?: string
           id?: string
           is_active?: boolean | null
+          is_published?: boolean | null
           name?: string
           name_bn?: string
           updated_at?: string | null
@@ -877,53 +880,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      exams: {
-        Row: {
-          created_at: string | null
-          division_id: string | null
-          exam_session: string
-          exam_type: string
-          exam_year: number
-          id: string
-          is_published: boolean | null
-          name: string
-          name_bn: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          division_id?: string | null
-          exam_session: string
-          exam_type: string
-          exam_year: number
-          id?: string
-          is_published?: boolean | null
-          name: string
-          name_bn: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          division_id?: string | null
-          exam_session?: string
-          exam_type?: string
-          exam_year?: number
-          id?: string
-          is_published?: boolean | null
-          name?: string
-          name_bn?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exams_division_id_fkey"
-            columns: ["division_id"]
-            isOneToOne: false
-            referencedRelation: "divisions"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       expense_categories: {
         Row: {
@@ -2255,6 +2211,7 @@ export type Database = {
       results: {
         Row: {
           created_at: string | null
+          division_id: string | null
           exam_id: string
           gpa: number | null
           grade: string | null
@@ -2266,6 +2223,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          division_id?: string | null
           exam_id: string
           gpa?: number | null
           grade?: string | null
@@ -2277,6 +2235,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          division_id?: string | null
           exam_id?: string
           gpa?: number | null
           grade?: string | null
@@ -2288,10 +2247,17 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "results_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "results_exam_id_fkey"
             columns: ["exam_id"]
             isOneToOne: false
-            referencedRelation: "exams"
+            referencedRelation: "exam_sessions"
             referencedColumns: ["id"]
           },
           {
