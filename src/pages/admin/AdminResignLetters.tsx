@@ -178,6 +178,59 @@ const AdminResignLetters = () => {
     },
   });
 
+  /* ── Rejoin (re-activate staff + create joining letter) ── */
+  const [rejoinId, setRejoinId] = useState<string | null>(null);
+  const rejoinMutation = useMutation({
+    mutationFn: async (letter: any) => {
+      if (!letter.staff_id) throw new Error('No staff linked');
+
+      // 1. Re-activate staff
+      const { error: staffErr } = await supabase
+        .from('staff')
+        .update({ status: 'active' })
+        .eq('id', letter.staff_id);
+      if (staffErr) throw staffErr;
+
+      // 2. Generate joining letter number
+      const { data: existingJL } = await supabase
+        .from('joining_letters')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const jlSerial = String((existingJL?.length || 0) + 1).padStart(3, '0');
+      const jlNumber = `JL-${new Date().getFullYear()}-${jlSerial}`;
+      const today = new Date().toISOString().split('T')[0];
+
+      // 3. Create joining letter
+      const { error: jlErr } = await supabase.from('joining_letters').insert({
+        letter_number: jlNumber,
+        staff_name: letter.staff_name,
+        staff_name_bn: letter.staff_name_bn,
+        designation: letter.designation,
+        staff_id: letter.staff_id,
+        letter_date: today,
+        joining_date: today,
+        letter_data: letter.letter_data || {},
+        status: 'issued',
+      });
+      if (jlErr) throw jlErr;
+
+      // 4. Update resign letter status
+      await supabase
+        .from('resign_letters')
+        .update({ status: 'rejoined' })
+        .eq('id', letter.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
+      queryClient.invalidateQueries({ queryKey: ['joining-letters'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-for-resign'] });
+      toast.success(bn ? 'পুনর্বহাল করা হয়েছে এবং নতুন যোগদান পত্র তৈরি হয়েছে' : 'Staff rejoined and new joining letter created');
+      setRejoinId(null);
+    },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error during rejoin'),
+  });
+
   /* ── Build resolved values ──── */
   const resolved = useCallback((letter: any) => {
     const inst = institution || { name: '', name_en: '', address: '', phone: '', logo_url: '' } as any;
