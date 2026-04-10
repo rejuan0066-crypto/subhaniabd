@@ -499,7 +499,7 @@ const StaffApplicationPage = () => {
               </div>
             </div>
           </div>
-          )
+          )}
 
           {/* Section 4: Relatives Identifier */}
           {isVisible('section_relatives') && (
