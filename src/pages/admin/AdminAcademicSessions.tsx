@@ -159,7 +159,6 @@ const AdminAcademicSessions = () => {
               {bn ? 'কোনো সেশন নেই। নতুন সেশন যোগ করুন।' : 'No sessions yet. Add a new session.'}
             </p>
           ) : (
-            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -217,7 +216,6 @@ const AdminAcademicSessions = () => {
                 ))}
               </TableBody>
             </Table>
-            </div>
           )}
         </div>
 
