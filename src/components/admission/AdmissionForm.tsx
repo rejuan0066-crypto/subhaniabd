@@ -1147,7 +1147,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
       return (
         <div key={sectionKey} className="border rounded-lg p-4 space-y-4 shadow-md">
           <h3 className="text-md font-display font-semibold text-foreground border-b pb-2 text-center text-2xl bg-secondary">{title}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {sectionFields.map(f => {
               const key = f.default_value;
               if (!key) return <div key={f.id} data-field={f.id}>{renderCustomField(f)}</div>;
