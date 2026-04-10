@@ -47,6 +47,7 @@ const FORM_TYPES = [
 ];
 
 const FIELD_TYPES = [
+  { value: 'section_header', label: 'Section Header', label_bn: 'সেকশন হেডার', icon: FolderOpen },
   { value: 'text', label: 'Text Box', label_bn: 'টেক্সট বক্স', icon: Type },
   { value: 'number', label: 'Number Box', label_bn: 'নম্বর বক্স', icon: Hash },
   { value: 'textarea', label: 'Text Area', label_bn: 'টেক্সট এরিয়া', icon: FileText },
@@ -65,6 +66,39 @@ const FIELD_TYPES = [
   { value: 'nid', label: 'NID', label_bn: 'এনআইডি (NID)', icon: CreditCard },
   { value: 'identity_card', label: 'Identity Card (Dropdown+Input)', label_bn: 'পরিচয়পত্র (ড্রপডাউন+ইনপুট)', icon: CreditCard },
 ];
+
+const SECTION_PRESETS: Record<string, { label: string; label_bn: string }[]> = {
+  admission: [
+    { label: 'student_details', label_bn: 'ছাত্র তথ্য' },
+    { label: 'student_address', label_bn: 'ঠিকানা' },
+    { label: 'father_info', label_bn: 'পিতার তথ্য' },
+    { label: 'mother_info', label_bn: 'মাতার তথ্য' },
+    { label: 'guardian_info', label_bn: 'অভিভাবক তথ্য' },
+    { label: 'documents', label_bn: 'ডকুমেন্ট' },
+  ],
+  staff: [
+    { label: 'personal_info', label_bn: 'ব্যক্তিগত তথ্য' },
+    { label: 'address_info', label_bn: 'ঠিকানা' },
+    { label: 'parent_info', label_bn: 'পিতা-মাতার তথ্য' },
+    { label: 'guardian_info', label_bn: 'অভিভাবক ও পরিচয়দাতা' },
+    { label: 'documents', label_bn: 'ডকুমেন্ট' },
+  ],
+  custom: [
+    { label: 'general', label_bn: 'সাধারণ' },
+    { label: 'contact', label_bn: 'যোগাযোগ' },
+    { label: 'address', label_bn: 'ঠিকানা' },
+    { label: 'documents', label_bn: 'ডকুমেন্ট' },
+    { label: 'other', label_bn: 'অন্যান্য' },
+  ],
+};
+
+const getSectionLabel = (sectionKey: string | null, formType: string, bn: boolean): string => {
+  if (!sectionKey) return bn ? 'সেকশন নির্ধারিত নয়' : 'Unsectioned';
+  const presets = SECTION_PRESETS[formType] || SECTION_PRESETS.custom;
+  const found = presets.find(s => s.label === sectionKey);
+  if (found) return bn ? found.label_bn : found.label;
+  return sectionKey;
+};
 
 type FormData = {
   id?: string;
@@ -135,12 +169,13 @@ type FieldData = {
   is_active: boolean;
   condition: ConditionData;
   validation: ValidationData;
+  section: string;
 };
 
 const emptyValidation: ValidationData = { min_length: '', max_length: '', min_value: '', max_value: '', pattern: '', error_message: '', error_message_bn: '' };
 const emptyCondition: ConditionData = { enabled: false, source_field_id: '', operator: 'equals', value: '' };
 const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type: 'custom', is_active: true, publish_to: 'none', parent_menu: '', menu_slug: '' };
-const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition }, validation: { ...emptyValidation } };
+const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition }, validation: { ...emptyValidation }, section: '' };
 
 // Sortable field item component
 const SortableFieldItem = ({ field, bn, getFieldIcon, getFieldLabel, openEditField, deleteField, fields }: any) => {
@@ -343,6 +378,7 @@ const AdminFormBuilder = () => {
         default_value: data.default_value,
         is_active: data.is_active,
         validation: JSON.stringify(validationObj),
+        section: data.section || null,
       };
       if (editingFieldId) {
         const { error } = await supabase.from('custom_form_fields').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', editingFieldId);
@@ -408,7 +444,7 @@ const AdminFormBuilder = () => {
       if (v.condition) cond = { ...emptyCondition, ...v.condition, enabled: true };
       if (v.rules) val = { ...emptyValidation, ...v.rules };
     } catch {}
-    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active, condition: cond, validation: val });
+    setFieldData({ field_type: field.field_type, label: field.label, label_bn: field.label_bn, placeholder: field.placeholder || '', is_required: field.is_required, sort_order: field.sort_order, options: opts, default_value: field.default_value || '', is_active: field.is_active, condition: cond, validation: val, section: (field as any).section || '' });
     setEditingFieldId(field.id);
     setFieldDialogOpen(true);
   };
@@ -890,6 +926,19 @@ const AdminFormBuilder = () => {
                             <Input type="number" value={fieldData.sort_order} onChange={e => setFieldData(p => ({ ...p, sort_order: parseInt(e.target.value) || 0 }))} />
                           </div>
 
+                          <div>
+                            <Label>{bn ? 'সেকশন' : 'Section'}</Label>
+                            <Select value={fieldData.section} onValueChange={v => setFieldData(p => ({ ...p, section: v === '_none' ? '' : v }))}>
+                              <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'সেকশন নির্বাচন করুন' : 'Select section'} /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="_none">{bn ? 'কোনো সেকশন নেই' : 'No Section'}</SelectItem>
+                                {(SECTION_PRESETS[selectedForm?.form_type || 'custom'] || SECTION_PRESETS.custom).map(s => (
+                                  <SelectItem key={s.label} value={s.label}>{bn ? s.label_bn : s.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
                           <Button className="w-full" onClick={() => saveField.mutate(fieldData)} disabled={!fieldData.label || !fieldData.label_bn}>
                             {editingFieldId ? (bn ? 'আপডেট করুন' : 'Update') : (bn ? 'যোগ করুন' : 'Add Field')}
                           </Button>
@@ -908,24 +957,59 @@ const AdminFormBuilder = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                      <div className="space-y-2">
-                        {fields.map(field => (
-                          <SortableFieldItem
-                            key={field.id}
-                            field={field}
-                            bn={bn}
-                            getFieldIcon={getFieldIcon}
-                            getFieldLabel={getFieldLabel}
-                            openEditField={openEditField}
-                            deleteField={(id: string) => deleteFieldMut.mutate(id)}
-                            fields={fields}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
+                  (() => {
+                    const sections = new Map<string, typeof fields>();
+                    fields.forEach(f => {
+                      const sec = (f as any).section || '_unsectioned';
+                      if (!sections.has(sec)) sections.set(sec, []);
+                      sections.get(sec)!.push(f);
+                    });
+                    // Order sections: predefined first, then unsectioned
+                    const presetKeys = (SECTION_PRESETS[selectedForm?.form_type || 'custom'] || SECTION_PRESETS.custom).map(s => s.label);
+                    const orderedSections = [...presetKeys.filter(k => sections.has(k)), ...[...sections.keys()].filter(k => !presetKeys.includes(k) && k !== '_unsectioned'), ...(sections.has('_unsectioned') ? ['_unsectioned'] : [])];
+
+                    return (
+                      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                          <div className="space-y-4">
+                            {orderedSections.map(secKey => {
+                              const secFields = sections.get(secKey) || [];
+                              return (
+                                <Collapsible key={secKey} defaultOpen>
+                                  <CollapsibleTrigger className="flex items-center justify-between w-full p-2.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-left mb-1">
+                                    <div className="flex items-center gap-2">
+                                      <FolderOpen className="h-4 w-4 text-primary" />
+                                      <span className="font-semibold text-sm text-foreground">
+                                        {getSectionLabel(secKey === '_unsectioned' ? null : secKey, selectedForm?.form_type || 'custom', bn)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="secondary" className="text-[10px]">{secFields.length}</Badge>
+                                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
+                                    </div>
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className="space-y-2 pl-2">
+                                    {secFields.map(field => (
+                                      <SortableFieldItem
+                                        key={field.id}
+                                        field={field}
+                                        bn={bn}
+                                        getFieldIcon={getFieldIcon}
+                                        getFieldLabel={getFieldLabel}
+                                        openEditField={openEditField}
+                                        deleteField={(id: string) => deleteFieldMut.mutate(id)}
+                                        fields={fields}
+                                      />
+                                    ))}
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              );
+                            })}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
+                    );
+                  })()
                 )}
 
                 {fields.length > 0 && (
