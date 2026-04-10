@@ -136,12 +136,12 @@ const DashboardInstitutionCard = () => {
           <GraduationCap className="w-9 h-9 text-primary-foreground" />
         )}
       </div>
-      <div className="flex-1 min-w-0 w-full">
-        <h2 className="text-xl font-display font-bold text-foreground truncate">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
-        <div className="text-sm text-muted-foreground space-y-0.5">
-          {institution?.address && <p className="truncate">{institution.address}</p>}
-          {institution?.phone && <p className="truncate">{institution.phone}</p>}
-          {institution?.email && <p className="truncate">{institution.email}</p>}
+      <div className="flex-1 min-w-0 w-full flex flex-col items-center">
+        <h2 className="text-xl font-display font-bold text-foreground truncate text-center">{institution?.name || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h2>
+        <div className="text-sm text-muted-foreground space-y-0.5 w-full">
+          {institution?.address && <p className="truncate text-center text-base">{institution.address}</p>}
+          {institution?.phone && <p className="truncate text-center">{institution.phone}</p>}
+          {institution?.email && <p className="truncate text-center text-base font-serif">{institution.email}</p>}
           {!institution?.address && !institution?.phone && !institution?.email && (
             <p>{language === 'bn' ? 'ঠিকানা, ফোন, ইমেইল' : 'Address, Phone, Email'}</p>
           )}
