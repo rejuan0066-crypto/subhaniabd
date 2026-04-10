@@ -1030,7 +1030,26 @@ const AdminFormBuilder = () => {
               <DialogTitle>{bn ? 'ফর্ম প্রিভিউ' : 'Form Preview'}: {bn ? selectedForm?.name_bn : selectedForm?.name}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 p-2">
-              {fields.filter(f => f.is_active).map(field => {
+              {(() => {
+                const activeFields = fields.filter(f => f.is_active);
+                const previewSections = new Map<string, typeof activeFields>();
+                activeFields.forEach(f => {
+                  const sec = (f as any).section || '_unsectioned';
+                  if (!previewSections.has(sec)) previewSections.set(sec, []);
+                  previewSections.get(sec)!.push(f);
+                });
+                const presetKeys = (SECTION_PRESETS[selectedForm?.form_type || 'custom'] || SECTION_PRESETS.custom).map(s => s.label);
+                const orderedPrevSections = [...presetKeys.filter(k => previewSections.has(k)), ...[...previewSections.keys()].filter(k => !presetKeys.includes(k) && k !== '_unsectioned'), ...(previewSections.has('_unsectioned') ? ['_unsectioned'] : [])];
+                return orderedPrevSections.map(secKey => {
+                  const secFields = previewSections.get(secKey) || [];
+                  return (
+                    <div key={secKey} className="space-y-3">
+                      {secKey !== '_unsectioned' && (
+                        <h3 className="text-base font-bold border-b pb-1 text-foreground">
+                          {getSectionLabel(secKey, selectedForm?.form_type || 'custom', bn)}
+                        </h3>
+                      )}
+                      {secFields.map(field => {
                 if (!evaluateCondition(field)) return null;
                 let opts: string[] = [];
                 try { opts = typeof field.options === 'string' ? JSON.parse(field.options as string) : (Array.isArray(field.options) ? (field.options as string[]) : []); } catch { opts = []; }
@@ -1125,6 +1144,10 @@ const AdminFormBuilder = () => {
                   </div>
                 );
               })}
+                    </div>
+                  );
+                });
+              })()}
               {fields.filter(f => f.is_active).length === 0 && (
                 <p className="text-center text-muted-foreground py-8">{bn ? 'কোনো সক্রিয় ফিল্ড নেই' : 'No active fields'}</p>
               )}
