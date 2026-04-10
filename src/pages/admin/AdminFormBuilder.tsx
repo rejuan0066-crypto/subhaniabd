@@ -332,6 +332,11 @@ const AdminFormBuilder = () => {
     enabled: !!selectedFormId,
   });
 
+  const invalidateLinkedFormConfigs = () => {
+    queryClient.invalidateQueries({ queryKey: ['admission-form-config'] });
+    queryClient.invalidateQueries({ queryKey: ['staff-form-config'] });
+  };
+
   // Form mutations
   const saveForm = useMutation({
     mutationFn: async (data: FormData) => {
@@ -345,6 +350,7 @@ const AdminFormBuilder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+      invalidateLinkedFormConfigs();
       setFormDialogOpen(false);
       setFormData(emptyForm);
       setEditingFormId(null);
@@ -360,6 +366,7 @@ const AdminFormBuilder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+      invalidateLinkedFormConfigs();
       if (selectedFormId) setSelectedFormId(null);
       toast.success(bn ? 'ফর্ম মুছে ফেলা হয়েছে' : 'Form deleted');
     },
@@ -404,6 +411,7 @@ const AdminFormBuilder = () => {
     },
     onSuccess: (newForm) => {
       queryClient.invalidateQueries({ queryKey: ['custom-forms'] });
+      invalidateLinkedFormConfigs();
       setSelectedFormId(newForm.id);
       toast.success(bn ? 'ফর্ম ডুপ্লিকেট হয়েছে' : 'Form duplicated');
     },
@@ -445,6 +453,7 @@ const AdminFormBuilder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-form-fields', selectedFormId] });
+      invalidateLinkedFormConfigs();
       setFieldDialogOpen(false);
       setFieldData(emptyField);
       setEditingFieldId(null);
@@ -460,6 +469,7 @@ const AdminFormBuilder = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['custom-form-fields', selectedFormId] });
+      invalidateLinkedFormConfigs();
       toast.success(bn ? 'ফিল্ড মুছে ফেলা হয়েছে' : 'Field deleted');
     },
   });
@@ -481,6 +491,7 @@ const AdminFormBuilder = () => {
     );
     await Promise.all(updates);
     queryClient.invalidateQueries({ queryKey: ['custom-form-fields', selectedFormId] });
+    invalidateLinkedFormConfigs();
   };
 
   const openEditForm = (form: any) => {
