@@ -57,6 +57,17 @@ const StaffApplicationPage = () => {
     },
   });
 
+  // Load field visibility settings
+  const { data: fieldConfig } = useQuery({
+    queryKey: ['staff-form-fields-public'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_fields').maybeSingle();
+      return (data?.value as Record<string, boolean>) || {};
+    },
+  });
+
+  const isVisible = (key: string) => fieldConfig?.[key] !== false;
+
   // Form state
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
