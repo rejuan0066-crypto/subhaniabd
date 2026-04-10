@@ -372,7 +372,7 @@ const AdminJoiningLetters = () => {
                         </div>
                       )}
 
-                      <div className="relative z-10">
+                      <div className="relative z-10 flex flex-col flex-1">
                         {/* Header */}
                         <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
                           {/* Logo – clickable in edit mode */}
