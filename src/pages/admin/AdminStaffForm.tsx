@@ -20,6 +20,7 @@ import { useValidationRules } from '@/hooks/useValidationRules';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import OtpVerificationDialog from '@/components/OtpVerificationDialog';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { useStaffFormConfig } from '@/hooks/useStaffFormConfig';
 
 const emptyAddress: AddressData = { division: '', district: '', upazila: '', union: '', postOffice: '', village: '' };
 
@@ -61,6 +62,7 @@ const AdminStaffForm = () => {
   const isEditMode = !!editId;
   const { validate, validateAll } = useValidationRules('staff');
   const { data: apiVerifyEnabled } = useApiVerificationEnabled();
+  const { isFieldActive, isFieldRequired, getField, isLoaded: staffConfigLoaded } = useStaffFormConfig();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const printRef = useRef<HTMLDivElement>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -426,39 +428,46 @@ const AdminStaffForm = () => {
     e.preventDefault();
     const errors: Record<string, string> = {};
 
-    if (!firstName.trim()) errors['first_name'] = bn ? 'প্রথম নাম আবশ্যক' : 'First name required';
-    if (!lastName.trim()) errors['last_name'] = bn ? 'শেষ নাম আবশ্যক' : 'Last name required';
-    if (!mobile.trim()) errors['mobile'] = bn ? 'মোবাইল নম্বর আবশ্যক' : 'Mobile required';
-    if (!employmentType) errors['employment_type'] = bn ? 'চাকরির ধরন নির্বাচন করুন' : 'Select employment type';
-    if (!designation) errors['designation'] = bn ? 'পদবী নির্বাচন করুন' : 'Select designation';
-    if (!residenceType) errors['residence_type'] = bn ? 'আবাসিক ধরন নির্বাচন করুন' : 'Select residence type';
-    if (!dob) errors['dob'] = bn ? 'জন্ম তারিখ আবশ্যক' : 'Date of birth required';
-    if (!religion) errors['religion'] = bn ? 'ধর্ম নির্বাচন করুন' : 'Select religion';
-    if (!nid || (nid.length !== 10 && nid.length !== 17)) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
-    if (!education.trim()) errors['education'] = bn ? 'শিক্ষাগত যোগ্যতা আবশ্যক' : 'Education required';
-    if (experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
-    if (!salary) errors['salary'] = bn ? 'বেতন আবশ্যক' : 'Salary required';
+    // Helper: only validate if field is active AND required (from custom builder config)
+    const reqCheck = (key: string, value: string, msgBn: string, msgEn: string) => {
+      if (isFieldActive(key) && isFieldRequired(key) && !value.trim()) {
+        errors[key] = bn ? msgBn : msgEn;
+      }
+    };
+
+    reqCheck('first_name', firstName, 'প্রথম নাম আবশ্যক', 'First name required');
+    reqCheck('last_name', lastName, 'শেষ নাম আবশ্যক', 'Last name required');
+    reqCheck('mobile', mobile, 'মোবাইল নম্বর আবশ্যক', 'Mobile required');
+    if (isFieldActive('employment_type') && isFieldRequired('employment_type') && !employmentType) errors['employment_type'] = bn ? 'চাকরির ধরন নির্বাচন করুন' : 'Select employment type';
+    if (isFieldActive('designation') && isFieldRequired('designation') && !designation) errors['designation'] = bn ? 'পদবী নির্বাচন করুন' : 'Select designation';
+    if (isFieldActive('residence_type') && isFieldRequired('residence_type') && !residenceType) errors['residence_type'] = bn ? 'আবাসিক ধরন নির্বাচন করুন' : 'Select residence type';
+    if (isFieldActive('dob') && isFieldRequired('dob') && !dob) errors['dob'] = bn ? 'জন্ম তারিখ আবশ্যক' : 'Date of birth required';
+    if (isFieldActive('religion') && isFieldRequired('religion') && !religion) errors['religion'] = bn ? 'ধর্ম নির্বাচন করুন' : 'Select religion';
+    if (isFieldActive('nid') && isFieldRequired('nid') && (!nid || (nid.length !== 10 && nid.length !== 17))) errors['nid'] = bn ? 'NID ১০ বা ১৭ ডিজিট হতে হবে' : 'NID must be 10 or 17 digits';
+    reqCheck('education', education, 'শিক্ষাগত যোগ্যতা আবশ্যক', 'Education required');
+    if (isFieldActive('prev_institute') && experience && !prevInstitute.trim()) errors['prev_institute'] = bn ? 'পূর্ববর্তী কর্মস্থল আবশ্যক' : 'Previous institute required';
+    reqCheck('salary', salary, 'বেতন আবশ্যক', 'Salary required');
 
     // Parents validation
-    if (!fatherName.trim()) errors['father_name'] = bn ? 'পিতার নাম আবশ্যক' : 'Father name required';
-    if (!fatherNid && !motherNid) errors['parent_nid'] = bn ? 'অন্তত একটি NID আবশ্যক' : 'At least one parent NID required';
-    if (!fatherMobile && !motherMobile) errors['parent_mobile'] = bn ? 'অন্তত একটি মোবাইল নম্বর আবশ্যক' : 'At least one parent mobile required';
-    if (!fatherOccupation.trim()) errors['father_occupation'] = bn ? 'পিতার পেশা আবশ্যক' : 'Father occupation required';
+    reqCheck('father_name', fatherName, 'পিতার নাম আবশ্যক', 'Father name required');
+    if (isFieldActive('father_nid') && isFieldActive('mother_nid') && !fatherNid && !motherNid) errors['parent_nid'] = bn ? 'অন্তত একটি NID আবশ্যক' : 'At least one parent NID required';
+    if (isFieldActive('father_mobile') && isFieldActive('mother_mobile') && !fatherMobile && !motherMobile) errors['parent_mobile'] = bn ? 'অন্তত একটি মোবাইল নম্বর আবশ্যক' : 'At least one parent mobile required';
+    reqCheck('father_occupation', fatherOccupation, 'পিতার পেশা আবশ্যক', 'Father occupation required');
 
     // Guardian validation
-    if (!guardianType) errors['guardian_type'] = bn ? 'অভিভাবক নির্বাচন করুন' : 'Select guardian';
+    if (isFieldActive('guardian_type') && isFieldRequired('guardian_type') && !guardianType) errors['guardian_type'] = bn ? 'অভিভাবক নির্বাচন করুন' : 'Select guardian';
     if (guardianType === 'other') {
-      if (!guardianName.trim()) errors['guardian_name'] = bn ? 'অভিভাবকের নাম আবশ্যক' : 'Guardian name required';
-      if (!guardianRelation.trim()) errors['guardian_relation'] = bn ? 'সম্পর্ক আবশ্যক' : 'Relation required';
-      if (!guardianMobile.trim()) errors['guardian_mobile'] = bn ? 'মোবাইল আবশ্যক' : 'Mobile required';
-      if (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17)) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+      reqCheck('guardian_name', guardianName, 'অভিভাবকের নাম আবশ্যক', 'Guardian name required');
+      reqCheck('guardian_relation', guardianRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+      reqCheck('guardian_mobile', guardianMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+      if (isFieldActive('guardian_nid') && isFieldRequired('guardian_nid') && (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17))) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
     }
 
     // Identifier validation
-    if (!identifierName.trim()) errors['identifier_name'] = bn ? 'পরিচয়দাতার নাম আবশ্যক' : 'Identifier name required';
-    if (!identifierRelation.trim()) errors['identifier_relation'] = bn ? 'সম্পর্ক আবশ্যক' : 'Relation required';
-    if (!identifierMobile.trim()) errors['identifier_mobile'] = bn ? 'মোবাইল আবশ্যক' : 'Mobile required';
-    if (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17)) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
+    reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+    reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+    if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -769,27 +778,34 @@ const AdminStaffForm = () => {
               {bn ? '১. ব্যক্তিগত তথ্য (Employee Details)' : '1. Employee Details'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
-              <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />
+              {isFieldActive('photo_url') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isFieldActive('salary') && (
                 <div>
-                  <Label>{bn ? 'বেতন (টাকা)' : 'Salary (BDT)'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('salary')?.label_bn || 'বেতন (টাকা)') : (getField('salary')?.label || 'Salary (BDT)')} {isFieldRequired('salary') && <span className="text-destructive">*</span>}</Label>
                   <Input type="number" className={`bg-background mt-1 ${fieldErrors['salary'] ? 'border-destructive' : ''}`} value={salary} onChange={e => handleFieldChange('salary', e.target.value, setSalary)} placeholder="৳" />
                   <FieldError field="salary" />
                 </div>
+                )}
+                {isFieldActive('first_name') && (
                 <div>
-                  <Label>{bn ? 'প্রথম নাম' : 'First Name'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('first_name')?.label_bn || 'প্রথম নাম') : (getField('first_name')?.label || 'First Name')} {isFieldRequired('first_name') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['first_name'] ? 'border-destructive' : ''}`} value={firstName} onChange={e => handleFieldChange('first_name', e.target.value, setFirstName)} />
                   <FieldError field="first_name" />
                 </div>
+                )}
+                {isFieldActive('last_name') && (
                 <div>
-                  <Label>{bn ? 'শেষ নাম' : 'Last Name'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('last_name')?.label_bn || 'শেষ নাম') : (getField('last_name')?.label || 'Last Name')} {isFieldRequired('last_name') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['last_name'] ? 'border-destructive' : ''}`} value={lastName} onChange={e => handleFieldChange('last_name', e.target.value, setLastName)} />
                   <FieldError field="last_name" />
                 </div>
-                <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />
+                )}
+                {isFieldActive('mobile') && <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} required={isFieldRequired('mobile')} value={mobile} countryCode={mobileCode} onChange={(p, c) => { setMobile(p); setMobileCode(c); }} />}
+                {isFieldActive('email') && (
                 <div>
                   <Label className="flex items-center gap-2">
-                    <Mail className="w-4 h-4" /> {bn ? 'ইমেইল' : 'Email'}
+                    <Mail className="w-4 h-4" /> {bn ? (getField('email')?.label_bn || 'ইমেইল') : (getField('email')?.label || 'Email')}
                     {emailVerified && <CheckCircle className="w-4 h-4 text-primary" />}
                   </Label>
                   <Input
@@ -803,8 +819,10 @@ const AdminStaffForm = () => {
                     <p className="text-xs text-destructive mt-1">{bn ? 'সাবমিটের সময় ইমেইল যাচাই করা হবে' : 'Email will be verified on submit'}</p>
                   )}
                 </div>
+                )}
+                {isFieldActive('employment_type') && (
                 <div>
-                  <Label>{bn ? 'চাকরির ধরন' : 'Employment Type'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('employment_type')?.label_bn || 'চাকরির ধরন') : (getField('employment_type')?.label || 'Employment Type')} {isFieldRequired('employment_type') && <span className="text-destructive">*</span>}</Label>
                   <Select value={employmentType} onValueChange={setEmploymentType}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['employment_type'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -814,8 +832,10 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="employment_type" />
                 </div>
+                )}
+                {isFieldActive('designation') && (
                 <div>
-                  <Label>{bn ? 'পদবী' : 'Designation'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('designation')?.label_bn || 'পদবী') : (getField('designation')?.label || 'Designation')} {isFieldRequired('designation') && <span className="text-destructive">*</span>}</Label>
                   <Select value={designation} onValueChange={setDesignation}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['designation'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -826,8 +846,10 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="designation" />
                 </div>
+                )}
+                {isFieldActive('residence_type') && (
                 <div>
-                  <Label>{bn ? 'আবাসিক ধরন' : 'Residential Status'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('residence_type')?.label_bn || 'আবাসিক ধরন') : (getField('residence_type')?.label || 'Residential Status')} {isFieldRequired('residence_type') && <span className="text-destructive">*</span>}</Label>
                   <Select value={residenceType} onValueChange={setResidenceType}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['residence_type'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -837,13 +859,17 @@ const AdminStaffForm = () => {
                   </Select>
                   <FieldError field="residence_type" />
                 </div>
+                )}
+                {isFieldActive('dob') && (
                 <div>
-                  <Label>{bn ? 'জন্ম তারিখ' : 'Date of Birth'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('dob')?.label_bn || 'জন্ম তারিখ') : (getField('dob')?.label || 'Date of Birth')} {isFieldRequired('dob') && <span className="text-destructive">*</span>}</Label>
                   <Input type="date" className={`bg-background mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={e => { setDob(e.target.value); setFieldErrors(p => { const n = {...p}; delete n['dob']; return n; }); }} />
                   <FieldError field="dob" />
                 </div>
+                )}
+                {isFieldActive('religion') && (
                 <div>
-                  <Label>{bn ? 'ধর্ম' : 'Religion'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('religion')?.label_bn || 'ধর্ম') : (getField('religion')?.label || 'Religion')} {isFieldRequired('religion') && <span className="text-destructive">*</span>}</Label>
                   <Select value={religion} onValueChange={setReligion}>
                     <SelectTrigger className={`bg-background mt-1 ${fieldErrors['religion'] ? 'border-destructive' : ''}`}><SelectValue placeholder={bn ? 'নির্বাচন' : 'Select'} /></SelectTrigger>
                     <SelectContent>
@@ -853,38 +879,49 @@ const AdminStaffForm = () => {
                   {religion === 'other' && <Input className="bg-background mt-2" placeholder={bn ? 'ধর্মের নাম লিখুন' : 'Type religion'} value={customReligion} onChange={e => setCustomReligion(e.target.value)} />}
                   <FieldError field="religion" />
                 </div>
+                )}
               </div>
             </div>
 
+            {(isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
             <div className="border-t border-border pt-4 mb-4">
               <h3 className="text-md font-semibold text-foreground mb-3">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {isFieldActive('nid') && (
                 <div>
-                  <Label>{bn ? 'NID (১০/১৭ ডিজিট) বা জন্ম নিবন্ধন (১৭ ডিজিট)' : 'NID (10/17) or Birth Reg (17)'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('nid')?.label_bn || 'NID (১০/১৭ ডিজিট)') : (getField('nid')?.label || 'NID (10/17)')} {isFieldRequired('nid') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['nid'] || nidError ? 'border-destructive' : ''}`} maxLength={17} value={nid} onChange={e => validateNid(e.target.value, setNid, setNidError)} />
                   {nidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {nidError}</p>}
                   <FieldError field="nid" />
                 </div>
+                )}
+                {isFieldActive('education') && (
                 <div>
-                  <Label>{bn ? 'শিক্ষাগত যোগ্যতা' : 'Education Qualification'} <span className="text-destructive">*</span></Label>
+                  <Label>{bn ? (getField('education')?.label_bn || 'শিক্ষাগত যোগ্যতা') : (getField('education')?.label || 'Education Qualification')} {isFieldRequired('education') && <span className="text-destructive">*</span>}</Label>
                   <Input className={`bg-background mt-1 ${fieldErrors['education'] ? 'border-destructive' : ''}`} value={education} onChange={e => handleFieldChange('education', e.target.value, setEducation)} />
                   <FieldError field="education" />
                 </div>
+                )}
+                {isFieldActive('experience') && (
                 <div>
-                  <Label>{bn ? 'অভিজ্ঞতা' : 'Experience'}</Label>
+                  <Label>{bn ? (getField('experience')?.label_bn || 'অভিজ্ঞতা') : (getField('experience')?.label || 'Experience')}</Label>
                   <Input className="bg-background mt-1" value={experience} onChange={e => setExperience(e.target.value)} />
                 </div>
-                {experience && (
+                )}
+                {isFieldActive('prev_institute') && experience && (
                   <div>
-                    <Label>{bn ? 'পূর্ববর্তী কর্মস্থল' : 'Previous Job Institute'} <span className="text-destructive">*</span></Label>
+                    <Label>{bn ? (getField('prev_institute')?.label_bn || 'পূর্ববর্তী কর্মস্থল') : (getField('prev_institute')?.label || 'Previous Job Institute')} {isFieldRequired('prev_institute') && <span className="text-destructive">*</span>}</Label>
                     <Input className={`bg-background mt-1 ${fieldErrors['prev_institute'] ? 'border-destructive' : ''}`} value={prevInstitute} onChange={e => handleFieldChange('prev_institute', e.target.value, setPrevInstitute)} />
                     <FieldError field="prev_institute" />
                   </div>
                 )}
               </div>
             </div>
+            )}
 
-            <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />
+            {isFieldActive('address_permanent') && <AddressFields label={bn ? 'স্থায়ী ঠিকানা' : 'Permanent Address'} value={permanentAddr} onChange={setPermanentAddr} />}
+            {isFieldActive('address_present') && (
+            <>
             <div className="mt-4 flex items-center gap-2">
               <Checkbox id="sameAddr" checked={sameAddress} onCheckedChange={(v) => { setSameAddress(!!v); if (v) setPresentAddr({ ...permanentAddr }); }} />
               <Label htmlFor="sameAddr">{bn ? 'বর্তমান ঠিকানা স্থায়ী ঠিকানার মতো' : 'Present same as permanent'}</Label>
@@ -894,6 +931,8 @@ const AdminStaffForm = () => {
                 <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={presentAddr} onChange={setPresentAddr} />
               </div>
             )}
+            </>
+            )}
           </div>
 
           {/* ========== SECTION 2: Parents Details ========== */}
@@ -902,36 +941,48 @@ const AdminStaffForm = () => {
               {bn ? '২. পিতা-মাতার তথ্য (Parents Details)' : '2. Parents Details'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {isFieldActive('father_name') && (
               <div>
-                <Label>{bn ? 'পিতার নাম' : 'Father Name'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_name')?.label_bn || 'পিতার নাম') : (getField('father_name')?.label || 'Father Name')} {isFieldRequired('father_name') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fieldErrors['father_name'] ? 'border-destructive' : ''}`} value={fatherName} onChange={e => handleFieldChange('father_name', e.target.value, setFatherName)} />
                 <FieldError field="father_name" />
               </div>
-              <PhoneInput label={bn ? 'পিতার মোবাইল' : 'Father Mobile'} required value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />
+              )}
+              {isFieldActive('father_mobile') && <PhoneInput label={bn ? 'পিতার মোবাইল' : 'Father Mobile'} required={isFieldRequired('father_mobile')} value={fatherMobile} countryCode={fatherMobileCode} onChange={(p, c) => { setFatherMobile(p); setFatherMobileCode(c); }} />}
+              {isFieldActive('father_nid') && (
               <div>
-                <Label>{bn ? 'পিতার NID' : 'Father NID'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_nid')?.label_bn || 'পিতার NID') : (getField('father_nid')?.label || 'Father NID')} {isFieldRequired('father_nid') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fatherNidError ? 'border-destructive' : ''}`} maxLength={17} value={fatherNid} onChange={e => validateNid(e.target.value, setFatherNid, setFatherNidError)} />
                 {fatherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fatherNidError}</p>}
               </div>
+              )}
+              {isFieldActive('father_occupation') && (
               <div>
-                <Label>{bn ? 'পিতার পেশা' : 'Father Occupation'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('father_occupation')?.label_bn || 'পিতার পেশা') : (getField('father_occupation')?.label || 'Father Occupation')} {isFieldRequired('father_occupation') && <span className="text-destructive">*</span>}</Label>
                 <Input className={`bg-background mt-1 ${fieldErrors['father_occupation'] ? 'border-destructive' : ''}`} value={fatherOccupation} onChange={e => handleFieldChange('father_occupation', e.target.value, setFatherOccupation)} />
                 <FieldError field="father_occupation" />
               </div>
+              )}
+              {isFieldActive('mother_name') && (
               <div>
-                <Label>{bn ? 'মাতার নাম' : 'Mother Name'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? (getField('mother_name')?.label_bn || 'মাতার নাম') : (getField('mother_name')?.label || 'Mother Name')}</Label>
                 <Input className="bg-background mt-1" value={motherName} onChange={e => setMotherName(e.target.value)} />
               </div>
-              <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />
+              )}
+              {isFieldActive('mother_mobile') && <PhoneInput label={bn ? 'মাতার মোবাইল' : 'Mother Mobile'} value={motherMobile} countryCode={motherMobileCode} onChange={(p, c) => { setMotherMobile(p); setMotherMobileCode(c); }} />}
+              {isFieldActive('mother_nid') && (
               <div>
-                <Label>{bn ? 'মাতার NID' : 'Mother NID'}</Label>
+                <Label>{bn ? (getField('mother_nid')?.label_bn || 'মাতার NID') : (getField('mother_nid')?.label || 'Mother NID')}</Label>
                 <Input className={`bg-background mt-1 ${motherNidError ? 'border-destructive' : ''}`} maxLength={17} value={motherNid} onChange={e => validateNid(e.target.value, setMotherNid, setMotherNidError)} />
                 {motherNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {motherNidError}</p>}
               </div>
+              )}
+              {isFieldActive('mother_occupation') && (
               <div>
-                <Label>{bn ? 'মাতার পেশা' : 'Mother Occupation'}</Label>
+                <Label>{bn ? (getField('mother_occupation')?.label_bn || 'মাতার পেশা') : (getField('mother_occupation')?.label || 'Mother Occupation')}</Label>
                 <Input className="bg-background mt-1" value={motherOccupation} onChange={e => setMotherOccupation(e.target.value)} />
               </div>
+              )}
             </div>
             {fieldErrors['parent_nid'] && <p className="text-xs text-destructive mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_nid']}</p>}
             {fieldErrors['parent_mobile'] && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_mobile']}</p>}
