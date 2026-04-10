@@ -1,5 +1,4 @@
-// Auth-enabled app
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import ModuleGuard from "@/components/ModuleGuard";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import AdminLayout from "@/components/AdminLayout";
@@ -78,11 +77,46 @@ import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
 import ScrollToTop from "./components/ScrollToTop";
 import RouteLoader from "./components/RouteLoader";
+import { supabase } from "@/integrations/supabase/client";
+
+let isRefreshingSession = false;
+
+const handleAuthError = async (error: unknown) => {
+  if (isRefreshingSession) return;
+  const message = error instanceof Error ? error.message : String(error ?? '');
+  const isJwtError =
+    message.includes('JWT expired') ||
+    message.includes('PGRST303') ||
+    message.includes('invalid claim: missing sub claim');
+  if (!isJwtError) return;
+
+  isRefreshingSession = true;
+  try {
+    const { error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) {
+      await supabase.auth.signOut();
+    } else {
+      queryClient.invalidateQueries();
+    }
+  } finally {
+    isRefreshingSession = false;
+  }
+};
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: handleAuthError,
+  }),
+  mutationCache: new MutationCache({
+    onError: handleAuthError,
+  }),
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: (failureCount, error) => {
+        const msg = error instanceof Error ? error.message : String(error ?? '');
+        if (msg.includes('JWT expired') || msg.includes('PGRST303')) return false;
+        return failureCount < 1;
+      },
       staleTime: 30_000,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
