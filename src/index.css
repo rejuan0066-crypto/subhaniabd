@@ -136,7 +136,7 @@
     transform: translateY(-1px);
   }
   .card-elevated {
-    @apply bg-card rounded-xl border transition-all duration-200 overflow-hidden;
+    @apply bg-card rounded-xl border transition-all duration-200;
     box-shadow: var(--shadow-soft);
   }
   .card-elevated:hover {
