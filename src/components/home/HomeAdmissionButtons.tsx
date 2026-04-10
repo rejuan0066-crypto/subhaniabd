@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
-import { GraduationCap, ArrowRight } from 'lucide-react';
+import { GraduationCap, ArrowRight, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Props {
   divisions: Array<{ name: string; nameEn: string; icon: string }>;
@@ -10,6 +12,14 @@ interface Props {
 
 const HomeAdmissionButtons = ({ divisions, language, t }: Props) => {
   const bn = language === 'bn';
+
+  const { data: staffFormPublic } = useQuery({
+    queryKey: ['staff-form-public-home'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'staff_form_public').maybeSingle();
+      return data?.value === true || data?.value === 'true';
+    },
+  });
 
   return (
     <div className="card-elevated overflow-hidden h-full flex flex-col">
@@ -36,6 +46,23 @@ const HomeAdmissionButtons = ({ divisions, language, t }: Props) => {
             </Link>
           </motion.div>
         ))}
+
+        {staffFormPublic && (
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ delay: divisions.length * 0.08 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              to="/staff-application"
+              className="block w-full px-4 py-3 bg-secondary text-secondary-foreground rounded-lg text-center text-sm font-bold hover:bg-secondary/80 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+            >
+              <UserPlus className="w-4 h-4" />
+              {bn ? 'স্টাফ/শিক্ষক আবেদন' : 'Staff/Teacher Application'}
+            </Link>
+          </motion.div>
+        )}
       </div>
     </div>
   );
