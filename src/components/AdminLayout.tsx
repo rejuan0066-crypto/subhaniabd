@@ -76,6 +76,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   // Compute dynamic styles from theme
   const sidebarWidthMap = { narrow: 'w-[200px]', default: 'w-[260px]', wide: 'w-[300px]' };
   const sidebarWidthClass = sidebarWidthMap[adminTheme.sidebarWidth] || 'w-[260px]';
+  const sidebarWidthPxMap = { narrow: 200, default: 260, wide: 300 };
+  const expandedSidebarWidth = sidebarWidthPxMap[adminTheme.sidebarWidth] || 260;
+  const collapsedSidebarWidth = 64;
+  const desktopSidebarWidth = sidebarOpen ? expandedSidebarWidth : collapsedSidebarWidth;
   const iconSizeMap = { small: 'w-4 h-4', medium: 'w-[18px] h-[18px]', large: 'w-5 h-5' };
   const iconSizeClass = iconSizeMap[adminTheme.sidebarIconSize] || 'w-[18px] h-[18px]';
   const headerHeightMap = { compact: 'py-1.5', default: 'py-2.5', tall: 'py-4' };
@@ -267,7 +271,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const breadcrumbs = getBreadcrumbs();
 
   const renderSidebar = (mobile = false) => (
-    <aside key={mobile ? 'mobile' : 'desktop'} className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:flex h-screen sticky top-0'} flex`}>
+    <aside key={mobile ? 'mobile' : 'desktop'} className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex'} flex`}>
       {mobile && (
         <div
           className="flex-1 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200"
@@ -443,11 +447,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <AdminLayoutNestingContext.Provider value>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen bg-background" style={{ ['--admin-sidebar-width' as string]: `${desktopSidebarWidth}px` }}>
         {renderSidebar(false)}
         {mobileSidebarOpen && renderSidebar(true)}
 
-        <div className={`flex-1 flex flex-col min-w-0 ${mobileHeaderOffsetClass} lg:pt-0`}>
+        <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)] lg:pt-0`}>
           {/* Top bar */}
           <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} flex items-center justify-between fixed inset-x-0 top-0 z-40 lg:sticky lg:top-0 lg:inset-x-auto`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
