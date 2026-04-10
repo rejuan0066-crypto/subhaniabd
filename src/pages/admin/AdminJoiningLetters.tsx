@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { QRCodeSVG } from 'qrcode.react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -336,7 +336,7 @@ const AdminJoiningLetters = () => {
 
         {/* ── View / Edit Dialog ────────────────────────────── */}
         <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) { setViewLetter(null); resetOverrides(); } }}>
-          <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
+          <DialogContent className="sm:max-w-4xl max-h-[95vh] p-0 overflow-y-auto">
             <DialogHeader className="sr-only">
               <DialogTitle>{bn ? 'নিয়োগপত্র' : 'Official Joining Letter'}</DialogTitle>
             </DialogHeader>
@@ -361,9 +361,9 @@ const AdminJoiningLetters = () => {
                   <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalLogo)} />
                   <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImagePick(e, setLocalPhoto)} />
 
-                  {/* Document */}
-                  <div className="m-4 mt-2 border-[3px] border-double border-foreground/30 p-1">
-                    <div className="border border-foreground/15 p-7 relative overflow-hidden" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
+                  {/* Document with A4 proportions */}
+                  <div className="m-4 mt-2 border-[3px] border-double border-foreground/30 p-1" style={{ aspectRatio: '210/297', maxWidth: '100%' }}>
+                    <div className="border border-foreground/15 p-7 relative overflow-hidden h-full flex flex-col" style={{ color: '#1a1a1a' }}>
 
                       {/* Watermark */}
                       {r.logoUrl && (
@@ -372,7 +372,7 @@ const AdminJoiningLetters = () => {
                         </div>
                       )}
 
-                      <div className="relative z-10">
+                      <div className="relative z-10 flex flex-col flex-1">
                         {/* Header */}
                         <div className="flex items-center gap-4 border-b-[3px] border-double border-foreground/40 pb-4 mb-5">
                           {/* Logo – clickable in edit mode */}
@@ -419,14 +419,14 @@ const AdminJoiningLetters = () => {
                         </div>
 
                         {/* Meta */}
-                        <div className="flex justify-between text-sm text-muted-foreground mb-5">
-                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold text-foreground">{viewLetter.letter_number}</span></span>
-                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                        <div className="flex justify-between text-sm mb-5" style={{ color: '#888' }}>
+                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold" style={{ color: '#1a1a1a' }}>{viewLetter.letter_number}</span></span>
+                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: '#1a1a1a' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
                         </div>
 
                         {/* Body + Photo */}
-                        <div className="flex gap-5 mb-6">
-                          <div className="flex-1 text-sm text-foreground space-y-3" style={{ lineHeight: '2.2' }}>
+                        <div className="flex gap-5 mb-6 flex-1">
+                          <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }} />
                             <p>
