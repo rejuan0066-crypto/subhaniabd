@@ -91,18 +91,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthReady(true);
     };
 
-    const restoreSessionSafely = () => {
+    const restoreSessionSafely = (attempt = 0) => {
       void supabase.auth.getSession().then(({ data: { session: restoredSession } }) => {
         if (cancelled) return;
         if (restoredSession?.user) {
           applySession(restoredSession);
           return;
         }
-        clearSessionState();
+        // Only clear if no existing session — prevents transient null from logging out
+        if (!sessionRef.current?.user) {
+          clearSessionState();
+        } else {
+          // Had a session but got null — could be transient, keep existing
+          setAuthReady(true);
+        }
       }).catch((error) => {
         if (cancelled) return;
-        console.error('Failed to restore auth session:', error);
-        clearSessionState();
+        console.error('Failed to restore auth session (attempt ' + attempt + '):', error);
+        // Retry up to 2 times on transient failures instead of immediately clearing
+        if (attempt < 2 && sessionRef.current?.user) {
+          setTimeout(() => {
+            if (!cancelled) restoreSessionSafely(attempt + 1);
+          }, 1500 * (attempt + 1));
+          return;
+        }
+        if (!sessionRef.current?.user) {
+          clearSessionState();
+        } else {
+          setAuthReady(true);
+        }
       });
     };
 
@@ -114,7 +131,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // TOKEN_REFRESHED — always apply the fresh session
+      if (event === 'TOKEN_REFRESHED' && nextSession?.user) {
+        applySession(nextSession);
+        return;
+      }
+
       if (!nextSession?.user) {
+        // Only attempt restore if we had a session — protects against transient null events
         if (sessionRef.current?.user || userRef.current || lastHandledAccessToken.current) {
           restoreSessionSafely();
           return;
