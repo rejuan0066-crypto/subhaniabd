@@ -1502,6 +1502,59 @@ export type Database = {
         }
         Relationships: []
       }
+      joining_letters: {
+        Row: {
+          created_at: string | null
+          designation: string | null
+          id: string
+          joining_date: string | null
+          letter_data: Json | null
+          letter_date: string | null
+          letter_number: string | null
+          staff_id: string | null
+          staff_name: string
+          staff_name_bn: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          joining_date?: string | null
+          letter_data?: Json | null
+          letter_date?: string | null
+          letter_number?: string | null
+          staff_id?: string | null
+          staff_name?: string
+          staff_name_bn?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          designation?: string | null
+          id?: string
+          joining_date?: string | null
+          letter_data?: Json | null
+          letter_date?: string | null
+          letter_number?: string | null
+          staff_id?: string | null
+          staff_name?: string
+          staff_name_bn?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "joining_letters_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_books: {
         Row: {
           author: string | null

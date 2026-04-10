@@ -53,10 +53,31 @@ const AdminStaff = () => {
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from('staff').update({ status }).eq('id', id);
       if (error) throw error;
+
+      // Auto-create joining letter when approved
+      if (status === 'active') {
+        const staff = staffList.find((s: any) => s.id === id);
+        if (staff) {
+          const sd = (staff as any).staff_data || {};
+          const year = new Date().getFullYear();
+          const serial = String(Math.floor(Math.random() * 9000) + 1000);
+          await supabase.from('joining_letters').insert({
+            staff_id: id,
+            staff_name: staff.name_en || '',
+            staff_name_bn: staff.name_bn || '',
+            designation: staff.designation || '',
+            joining_date: sd.joining_date || new Date().toISOString().split('T')[0],
+            letter_number: `JL-${year}-${serial}`,
+            letter_date: new Date().toISOString().split('T')[0],
+            letter_data: { phone: staff.phone, department: staff.department, nid: sd.nid },
+          } as any);
+        }
+      }
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success(status === 'active' ? (bn ? '✅ অনুমোদিত হয়েছে' : '✅ Approved') : (bn ? '❌ বাতিল করা হয়েছে' : '❌ Rejected'));
+      queryClient.invalidateQueries({ queryKey: ['joining-letters'] });
+      toast.success(status === 'active' ? (bn ? '✅ অনুমোদিত ও যোগদান পত্র তৈরি হয়েছে' : '✅ Approved & Joining Letter Created') : (bn ? '❌ বাতিল করা হয়েছে' : '❌ Rejected'));
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
