@@ -61,6 +61,9 @@ const AdminJoiningLetters = () => {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [localLogo, setLocalLogo] = useState<string | null>(null);
   const [localPhoto, setLocalPhoto] = useState<string | null>(null);
+  const [bodyAlign, setBodyAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
+  const [salutationAlign, setSalutationAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [nameAlign, setNameAlign] = useState<'left' | 'center' | 'right'>('left');
 
   const resetOverrides = () => {
     setOverrides({});
