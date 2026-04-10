@@ -27,6 +27,7 @@ const AdminStaff = () => {
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewStaff, setViewStaff] = useState<any>(null);
 
