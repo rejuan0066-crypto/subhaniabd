@@ -19,13 +19,15 @@ import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee,
-  Download, Printer, RotateCcw
+  Download, Printer, RotateCcw, QrCode, Send
 } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import ClassQRPoster from '@/components/attendance/ClassQRPoster';
 
 const STATUS_ICONS: Record<string, any> = {
   present: CheckCircle2, absent: XCircle, late: Clock,
   half_day: AlertCircle, leave: CalendarOff,
+  excused: CheckCircle2, medical: CheckCircle2,
 };
 const STATUS_COLORS: Record<string, string> = {
   present: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
@@ -33,6 +35,8 @@ const STATUS_COLORS: Record<string, string> = {
   late: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   half_day: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
   leave: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  excused: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  medical: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
 };
 
 const DUTY_SHIFTS = [
