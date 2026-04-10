@@ -128,7 +128,7 @@ const DashboardInstitutionCard = () => {
   }
 
   return (
-    <div className="card-elevated p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+    <div className="card-elevated p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 overflow-hidden">
       <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center shrink-0 overflow-hidden">
         {institution?.logo_url ? (
           <img src={institution.logo_url} alt="Logo" className="w-full h-full object-cover" />
