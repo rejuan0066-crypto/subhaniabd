@@ -39,7 +39,7 @@ const Dashboard = () => {
   const canViewStats = isAdmin || hasPermission('/admin', 'view');
   const [builderOpen, setBuilderOpen] = useState(false);
   const { sections } = useDashboardLayout();
-  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results'; filters: Record<string, any> }>({
+  const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exam_sessions' | 'results'; filters: Record<string, any> }>({
     open: false, title: '', table: 'students', filters: {},
   });
 
@@ -77,8 +77,8 @@ const Dashboard = () => {
     queryFn: async () => { const { data } = await supabase.from('results').select('id'); return data || []; },
   });
   const { data: exams = [] } = useQuery({
-    queryKey: ['dashboard-exams'],
-    queryFn: async () => { const { data } = await supabase.from('exams').select('id'); return data || []; },
+    queryKey: ['dashboard-exam-sessions'],
+    queryFn: async () => { const { data } = await supabase.from('exam_sessions').select('id'); return data || []; },
   });
   const { data: donors = [] } = useQuery({
     queryKey: ['dashboard-donors'],
@@ -116,7 +116,7 @@ const Dashboard = () => {
   const totalDonationAmount = donors.reduce((sum, d) => sum + Number(d.donation_amount || 0), 0);
   const activeDonors = donors.filter(d => d.status === 'active');
 
-  const openList = (title: string, table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exams' | 'results', filters: Record<string, any> = {}) => {
+  const openList = (title: string, table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exam_sessions' | 'results', filters: Record<string, any> = {}) => {
     setListDialog({ open: true, title, table, filters });
   };
 
@@ -151,7 +151,7 @@ const Dashboard = () => {
     { key: 'old_students', label: bn ? 'পুরাতন ছাত্র' : 'Old Students', value: oldStudents.length, icon: Users, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'পুরাতন ছাত্র' : 'Old Students', 'students') },
     { key: 'divisions', label: bn ? 'বিভাগ' : 'Divisions', value: divisions.length, icon: Layers, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'বিভাগসমূহ' : 'Divisions', 'divisions') },
     { key: 'subjects', label: bn ? 'বিষয়' : 'Subjects', value: subjects.length, icon: BookOpen, color: 'text-info', bg: 'bg-info/10', onClick: () => openList(bn ? 'বিষয়সমূহ' : 'Subjects', 'subjects') },
-    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'পরীক্ষাসমূহ' : 'Exams', 'exams') },
+    { key: 'exams', label: bn ? 'পরীক্ষা' : 'Exams', value: exams.length, icon: ClipboardList, color: 'text-destructive', bg: 'bg-destructive/10', onClick: () => openList(bn ? 'পরীক্ষাসমূহ' : 'Exams', 'exam_sessions') },
     { key: 'results', label: bn ? 'ফলাফল' : 'Results', value: results.length, icon: FileText, color: 'text-primary', bg: 'bg-primary/10', onClick: () => openList(bn ? 'ফলাফলসমূহ' : 'Results', 'results') },
     { key: 'admission_history', label: bn ? 'ভর্তি ইতিহাস' : 'Admission History', value: students.length, icon: History, color: 'text-accent', bg: 'bg-accent/10', onClick: () => openList(bn ? 'ভর্তি ইতিহাস' : 'Admission History', 'students') },
   ];
