@@ -248,11 +248,16 @@ const AdminResignLetters = () => {
         .maybeSingle();
       if (staffData?.user_id) {
         try {
+          // Unban user account
           await supabase.functions.invoke('manage-users', {
             body: { action: 'unban_user', user_id: staffData.user_id },
           });
+          // Set profile status to pending (requires admin approval)
+          await supabase.functions.invoke('manage-users', {
+            body: { action: 'update_status', user_id: staffData.user_id, status: 'pending' },
+          });
         } catch (e) {
-          console.error('Failed to unban user account:', e);
+          console.error('Failed to unban/reset user account:', e);
         }
       }
     },
