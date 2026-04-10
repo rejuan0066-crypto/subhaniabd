@@ -419,14 +419,14 @@ const AdminJoiningLetters = () => {
                         </div>
 
                         {/* Meta */}
-                        <div className="flex justify-between text-sm mb-5" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold" style={{ color: 'hsl(var(--foreground))' }}>{viewLetter.letter_number}</span></span>
-                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: 'hsl(var(--foreground))' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                        <div className="flex justify-between text-sm mb-5" style={{ color: '#888' }}>
+                          <span>{bn ? 'পত্র নং' : 'Ref'}: <span className="font-mono font-semibold" style={{ color: '#1a1a1a' }}>{viewLetter.letter_number}</span></span>
+                          <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium" style={{ color: '#1a1a1a' }}>{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
                         </div>
 
                         {/* Body + Photo */}
                         <div className="flex gap-5 mb-6 flex-1">
-                          <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: 'hsl(var(--foreground))' }}>
+                          <div className="flex-1 text-sm space-y-3" style={{ lineHeight: '2.2', color: '#1a1a1a' }}>
                             <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} />
                             <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))' }} />
                             <p>
