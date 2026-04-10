@@ -774,8 +774,8 @@ const AdminStaffForm = () => {
           />
           {/* ========== SECTION 1: Employee Details ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
-              {bn ? '১. ব্যক্তিগত তথ্য (Employee Details)' : '1. Employee Details'}
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-2xl text-center">
+              {bn ? 'ব্যক্তিগত তথ্য (Employee Details)' : '1. Employee Details'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-6 mb-6">
               {isFieldActive('photo_url') && <PhotoUpload value={photoUrl} onChange={setPhotoUrl} folder="staff" />}
@@ -885,7 +885,7 @@ const AdminStaffForm = () => {
 
             {(isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
             <div className="border-t border-border pt-4 mb-4">
-              <h3 className="text-md font-semibold text-foreground mb-3">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
+              <h3 className="text-md font-semibold text-foreground mb-3 text-center text-2xl">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {isFieldActive('nid') && (
                 <div>
@@ -937,8 +937,8 @@ const AdminStaffForm = () => {
 
           {/* ========== SECTION 2: Parents Details ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
-              {bn ? '২. পিতা-মাতার তথ্য (Parents Details)' : '2. Parents Details'}
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? ' পিতা-মাতার তথ্য (Parents Details)' : '2. Parents Details'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {isFieldActive('father_name') && (
@@ -1062,8 +1062,8 @@ const AdminStaffForm = () => {
 
           {/* ========== SECTION 4: Identifier Details ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
-              {bn ? '৪. পরিচয়দাতার তথ্য (Identifier Details)' : '4. Identifier Details'}
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? 'পরিচয সনাক্তকারী তথ্য (Identifier Details)' : '4. Identifier Details'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -1091,8 +1091,8 @@ const AdminStaffForm = () => {
 
           {/* ========== SECTION 5: Document Upload ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
-              {bn ? '৫. ডকুমেন্ট আপলোড (Document Upload)' : '5. Document Upload'}
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? 'ডকুমেন্ট আপলোড (Document Upload)' : '5. Document Upload'}
             </h2>
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <Select value={docType} onValueChange={setDocType}>
@@ -1146,7 +1146,7 @@ const AdminStaffForm = () => {
 
           {/* ========== Signature for Print ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'স্বাক্ষর (প্রিন্ট/ডাউনলোডে দেখাবে)' : 'Signatures (shown in print/download)'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1171,7 +1171,7 @@ const AdminStaffForm = () => {
 
           {/* ========== Approver Section ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
               {bn ? 'এপ্রোভকারীর তথ্য' : 'Approver Details'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
