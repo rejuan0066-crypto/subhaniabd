@@ -164,7 +164,8 @@ const AdminResignLetters = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resign-letters'] });
-      toast.success(bn ? 'পদত্যাগ পত্র তৈরি হয়েছে' : 'Resign letter created');
+      queryClient.invalidateQueries({ queryKey: ['staff-for-resign'] });
+      toast.success(bn ? 'পদত্যাগ পত্র তৈরি হয়েছে ও স্টাফ নিষ্ক্রিয় হয়েছে' : 'Resign letter created & staff deactivated');
       setShowCreate(false);
       setSelectedStaffId('');
       setResignDate('');
