@@ -164,7 +164,7 @@ const AdminJoiningLetters = () => {
     const html = `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8">
-<title>${bn ? 'নিয়োগপত্র' : 'Joining Letter'}</title>
+<title>${isReinstatement ? (bn ? 'পুনর্বহাল পত্র' : 'Reinstatement Letter') : (bn ? 'নিয়োগপত্র' : 'Joining Letter')}</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -225,8 +225,8 @@ const AdminJoiningLetters = () => {
       <div class="header-spacer"></div>
     </div>
     <div class="formal-title">
-      <h2>${bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}</h2>
-      <p class="sub">${bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+      <h2>${isReinstatement ? (bn ? 'পুনর্বহাল পত্র' : 'OFFICIAL REINSTATEMENT LETTER') : (bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER')}</h2>
+      <p class="sub">${isReinstatement ? (bn ? 'OFFICIAL REINSTATEMENT LETTER' : 'পুনর্বহাল পত্র') : (bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র')}</p>
       <div class="underline"></div>
     </div>
     <div class="meta">
@@ -437,9 +437,9 @@ const AdminJoiningLetters = () => {
                         {/* Title */}
                         <div className="text-center mb-5">
                           <h3 className="text-lg font-bold tracking-wider text-foreground uppercase">
-                            {bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER'}
+                            {viewLetter.letter_type === 'reinstatement' ? (bn ? 'পুনর্বহাল পত্র' : 'OFFICIAL REINSTATEMENT LETTER') : (bn ? 'নিয়োগপত্র' : 'OFFICIAL JOINING LETTER')}
                           </h3>
-                          <p className="text-xs text-muted-foreground tracking-wide">{bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র'}</p>
+                          <p className="text-xs text-muted-foreground tracking-wide">{viewLetter.letter_type === 'reinstatement' ? (bn ? 'OFFICIAL REINSTATEMENT LETTER' : 'পুনর্বহাল পত্র') : (bn ? 'OFFICIAL JOINING LETTER' : 'নিয়োগপত্র')}</p>
                           <div className="mx-auto mt-1.5 w-24 border-b-2 border-foreground/30" />
                         </div>
 
