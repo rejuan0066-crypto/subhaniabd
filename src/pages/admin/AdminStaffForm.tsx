@@ -1040,8 +1040,8 @@ const AdminStaffForm = () => {
 
           {/* ========== SECTION 3: Guardian Details ========== */}
           <div className="card-elevated p-6">
-            <h2 className="text-lg font-display font-bold text-foreground mb-4 pb-2 border-b border-border">
-              {bn ? '৩. অভিভাবক তথ্য (Guardian Details)' : '3. Guardian Details'}
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? ' অভিভাবক তথ্য (Guardian Details)' : 'Guardian Details'}
             </h2>
             <div>
               <Label>{bn ? 'অভিভাবক' : 'Guardian'} <span className="text-destructive">*</span></Label>
