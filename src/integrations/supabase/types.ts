@@ -1511,6 +1511,7 @@ export type Database = {
           letter_data: Json | null
           letter_date: string | null
           letter_number: string | null
+          letter_type: string
           staff_id: string | null
           staff_name: string
           staff_name_bn: string
@@ -1525,6 +1526,7 @@ export type Database = {
           letter_data?: Json | null
           letter_date?: string | null
           letter_number?: string | null
+          letter_type?: string
           staff_id?: string | null
           staff_name?: string
           staff_name_bn?: string
@@ -1539,6 +1541,7 @@ export type Database = {
           letter_data?: Json | null
           letter_date?: string | null
           letter_number?: string | null
+          letter_type?: string
           staff_id?: string | null
           staff_name?: string
           staff_name_bn?: string
