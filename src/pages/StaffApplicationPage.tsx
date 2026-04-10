@@ -538,6 +538,13 @@ const StaffApplicationPage = () => {
           </div>
           )}
 
+          {/* Footer Text */}
+          {footerText && (
+            <div className="p-4 rounded-lg bg-secondary/50 border border-border text-sm text-foreground whitespace-pre-wrap">
+              {footerText}
+            </div>
+          )}
+
           {/* Submit */}
           <Button type="submit" className="btn-primary-gradient w-full text-lg py-6" disabled={saveMutation.isPending}>
             {saveMutation.isPending && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
