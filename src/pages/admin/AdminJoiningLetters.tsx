@@ -39,17 +39,16 @@ const AdminJoiningLetters = () => {
       return data;
     },
   });
-  const { data: principal } = useQuery({
-    queryKey: ['principal-staff'],
+  const { data: principalInfo } = useQuery({
+    queryKey: ['principal-settings'],
     queryFn: async () => {
       const { data } = await supabase
-        .from('staff')
-        .select('name_bn, name_en, designation')
-        .in('designation', ['প্রধান শিক্ষক', 'অধ্যক্ষ', 'মুহতামিম', 'Principal'])
-        .eq('status', 'active')
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .from('website_settings')
+        .select('key, value')
+        .in('key', ['principal_name', 'principal_title_bn', 'principal_title_en']);
+      const map: Record<string, string> = {};
+      (data || []).forEach((r: any) => { map[r.key] = typeof r.value === 'string' ? r.value : ''; });
+      return map;
     },
   });
 
@@ -116,13 +115,15 @@ const AdminJoiningLetters = () => {
 <div class="signatures">
   <div class="sig">
     <div class="line"></div>
-    <p>${bn ? 'কর্মচারীর স্বাক্ষর' : "Employee's Signature"}</p>
+     <p>${bn ? 'নিয়োগপ্রাপ্তকারীর স্বাক্ষর' : "Candidate's Signature"}</p>
+     <p style="font-size:11px;margin-top:4px;">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
   </div>
   <div class="sig">
     <div class="line"></div>
-    ${principal ? `<p style="font-weight:600;margin-bottom:2px;">${principal.name_bn || principal.name_en || ''}</p>` : ''}
+    ${principalInfo?.principal_name ? `<p style="font-weight:600;margin-bottom:2px;">${principalInfo.principal_name}</p>` : ''}
     <p>${bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-    <p>${principal?.designation || (bn ? 'প্রধান/অধ্যক্ষ' : 'Principal/Head')}</p>
+    <p>${principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head')}</p>
+    <p style="font-size:11px;margin-top:4px;">${bn ? 'তারিখ: __________' : 'Date: __________'}</p>
   </div>
 </div>
 </body></html>`;
@@ -286,23 +287,22 @@ const AdminJoiningLetters = () => {
                         {/* Employee signature */}
                         <div className="text-center">
                           <div className="w-36 border-t border-foreground/40 mb-1" />
-                          <p className="text-[11px] text-muted-foreground">{bn ? 'কর্মচারীর স্বাক্ষর' : "Employee's Signature"}</p>
+                          <p className="text-[11px] text-muted-foreground">{bn ? 'নিয়োগপ্রাপ্তকারীর স্বাক্ষর' : "Candidate's Signature"}</p>
                           <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                         </div>
 
                         {/* Authority signature + Seal */}
                         <div className="flex items-end gap-3">
-                          {/* Official seal placeholder */}
                           <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
                             <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
                           </div>
                           <div className="text-center">
                             <div className="w-36 border-t border-foreground/40 mb-1" />
-                            {principal && (
-                              <p className="text-[11px] font-semibold text-foreground">{principal.name_bn || principal.name_en}</p>
+                            {principalInfo?.principal_name && (
+                              <p className="text-[11px] font-semibold text-foreground">{principalInfo.principal_name}</p>
                             )}
                             <p className="text-[11px] text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-                            <p className="text-[10px] text-muted-foreground">{principal?.designation || (bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head')}</p>
+                            <p className="text-[10px] text-muted-foreground">{principalInfo?.principal_title_bn || (bn ? 'মুহতামিম / প্রিন্সিপাল' : 'Principal / Head')}</p>
                             <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                           </div>
                         </div>
