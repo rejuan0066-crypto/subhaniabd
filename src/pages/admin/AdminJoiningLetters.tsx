@@ -242,8 +242,7 @@ const AdminJoiningLetters = () => {
       </div>
     </div>
     <div class="footer">
-      <div class="qr-block">
-        <canvas id="qr"></canvas>
+      <div class="qr-block" id="qr-container">
         <p class="qr-label">${bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
       </div>
       <div class="sig">
