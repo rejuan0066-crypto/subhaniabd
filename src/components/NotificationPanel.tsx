@@ -40,8 +40,18 @@ const NotificationPanel = () => {
     return bn ? `${days} দিন আগে` : `${days}d ago`;
   };
 
+  // Prevent background scroll when popover is open on mobile
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button className="relative p-2 rounded-lg hover:bg-secondary transition-colors">
           <Bell className="w-5 h-5 text-muted-foreground" />
