@@ -652,32 +652,36 @@ const AdminExamSessions = () => {
                   <div key={es.id} className="border border-border rounded-lg overflow-hidden">
                     {/* Session Header Row */}
                     <div
-                      className="flex items-center gap-3 px-4 py-3 bg-background hover:bg-secondary/30 cursor-pointer transition-colors"
+                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 px-4 py-3 bg-background hover:bg-secondary/30 cursor-pointer transition-colors"
                       onClick={() => setExpandedSessionId(isExpanded ? null : es.id)}
                     >
-                      <button className="p-0.5 text-muted-foreground">
-                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <span className="font-medium text-foreground text-sm">{bn ? es.name_bn : es.name}</span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}
-                        </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <button className="p-0.5 text-muted-foreground shrink-0">
+                          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </button>
+                        <div className="min-w-0">
+                          <div className="font-medium text-foreground text-sm truncate">{bn ? es.name_bn : es.name}</div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {bn ? (es.academic_sessions?.name_bn || es.academic_sessions?.name) : es.academic_sessions?.name || '-'}
+                          </div>
+                        </div>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">{getTypeLabel(es.exam_type)}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {esClasses.length} {bn ? 'ক্লাস' : 'classes'} • {totalStudents} {bn ? 'ছাত্র' : 'students'}
-                      </span>
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                        <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
-                          <GraduationCap className="w-3.5 h-3.5" />
-                          {bn ? 'ফলাফল তৈরি' : 'Create Result'}
-                        </Button>
-                        {canDeleteItem && (
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-2 flex-wrap pl-7 sm:pl-0 sm:ml-auto">
+                        <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary whitespace-nowrap">{getTypeLabel(es.exam_type)}</span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {esClasses.length} {bn ? 'ক্লাস' : 'classes'} • {totalStudents} {bn ? 'ছাত্র' : 'students'}
+                        </span>
+                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                          <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}>
+                            <GraduationCap className="w-3.5 h-3.5" />
+                            {bn ? 'ফলাফল তৈরি' : 'Create Result'}
                           </Button>
-                        )}
+                          {canDeleteItem && (
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => deleteMutation.mutate(es.id)}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
