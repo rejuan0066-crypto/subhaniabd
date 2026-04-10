@@ -688,7 +688,7 @@ const AdminExamSessions = () => {
                     {/* Expanded: Class-wise Result List */}
                     {isExpanded && esClasses.length > 0 && (
                       <div className="border-t border-border bg-muted/20">
-                        <div className="px-4 py-2 bg-muted/40 border-b border-border">
+                        <div className="hidden sm:block px-4 py-2 bg-muted/40 border-b border-border">
                           <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-muted-foreground">
                             <div className="col-span-1">#</div>
                             <div className="col-span-4">{bn ? 'শ্রেণী' : 'Class'}</div>
@@ -704,46 +704,66 @@ const AdminExamSessions = () => {
                           const hasResults = resultInfo && resultInfo.resultCount > 0;
 
                           return (
-                            <div key={ec.id} className="grid grid-cols-12 gap-2 items-center px-4 py-2.5 border-b border-border/50 last:border-b-0 hover:bg-secondary/20 transition-colors text-sm">
-                              <div className="col-span-1 text-xs text-muted-foreground">{idx + 1}</div>
-                              <div className="col-span-4 font-medium text-foreground">{bn ? ec.classes?.name_bn : ec.classes?.name}</div>
-                              <div className="col-span-2 text-center text-muted-foreground">{ec.student_count || 0}</div>
-                              <div className="col-span-2 text-center">
-                                {hasResults ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
-                                    <Check className="w-3 h-3" />
-                                    {bn ? 'সংরক্ষিত' : 'Saved'}
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
-                                    {bn ? 'অপেক্ষমান' : 'Pending'}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="col-span-3 text-right">
-                                <div className="flex items-center gap-1 justify-end">
+                            <div key={ec.id} className="border-b border-border/50 last:border-b-0 hover:bg-secondary/20 transition-colors">
+                              {/* Desktop grid */}
+                              <div className="hidden sm:grid grid-cols-12 gap-2 items-center px-4 py-2.5 text-sm">
+                                <div className="col-span-1 text-xs text-muted-foreground">{idx + 1}</div>
+                                <div className="col-span-4 font-medium text-foreground">{bn ? ec.classes?.name_bn : ec.classes?.name}</div>
+                                <div className="col-span-2 text-center text-muted-foreground">{ec.student_count || 0}</div>
+                                <div className="col-span-2 text-center">
                                   {hasResults ? (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="h-7 gap-1 text-xs"
-                                      onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
-                                    >
-                                      <Eye className="w-3.5 h-3.5" />
-                                      {bn ? 'দেখুন' : 'View'}
-                                    </Button>
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                                      <Check className="w-3 h-3" />
+                                      {bn ? 'সংরক্ষিত' : 'Saved'}
+                                    </span>
                                   ) : (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="h-7 gap-1 text-xs"
-                                      onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
-                                    >
-                                      <GraduationCap className="w-3.5 h-3.5" />
-                                      {bn ? 'এন্ট্রি' : 'Entry'}
-                                    </Button>
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+                                      {bn ? 'অপেক্ষমান' : 'Pending'}
+                                    </span>
                                   )}
                                 </div>
+                                <div className="col-span-3 text-right">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 gap-1 text-xs"
+                                    onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
+                                  >
+                                    {hasResults ? <Eye className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
+                                    {hasResults ? (bn ? 'দেখুন' : 'View') : (bn ? 'এন্ট্রি' : 'Entry')}
+                                  </Button>
+                                </div>
+                              </div>
+                              {/* Mobile card */}
+                              <div className="sm:hidden flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
+                                <div className="min-w-0">
+                                  <div className="font-medium text-foreground truncate">
+                                    <span className="text-xs text-muted-foreground mr-1">{idx + 1}.</span>
+                                    {bn ? ec.classes?.name_bn : ec.classes?.name}
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-xs text-muted-foreground">{ec.student_count || 0} {bn ? 'ছাত্র' : 'students'}</span>
+                                    {hasResults ? (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                                        <Check className="w-2.5 h-2.5" />
+                                        {bn ? 'সংরক্ষিত' : 'Saved'}
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+                                        {bn ? 'অপেক্ষমান' : 'Pending'}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 gap-1 text-xs shrink-0"
+                                  onClick={() => navigate(`/admin/results?year=${es.academic_session_id}&session=${es.id}`)}
+                                >
+                                  {hasResults ? <Eye className="w-3.5 h-3.5" /> : <GraduationCap className="w-3.5 h-3.5" />}
+                                  {hasResults ? (bn ? 'দেখুন' : 'View') : (bn ? 'এন্ট্রি' : 'Entry')}
+                                </Button>
                               </div>
                             </div>
                           );
