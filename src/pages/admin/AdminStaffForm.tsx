@@ -154,6 +154,15 @@ const AdminStaffForm = () => {
   const [identifierNid, setIdentifierNid] = useState('');
   const [identifierAddr, setIdentifierAddr] = useState<AddressData>(emptyAddress);
 
+  // Section 4b: Relatives Identifier
+  const [relIdName, setRelIdName] = useState('');
+  const [relIdRelation, setRelIdRelation] = useState('');
+  const [relIdMobile, setRelIdMobile] = useState('');
+  const [relIdMobileCode, setRelIdMobileCode] = useState('+880');
+  const [relIdNid, setRelIdNid] = useState('');
+  const [relIdNidError, setRelIdNidError] = useState('');
+  const [relIdAddr, setRelIdAddr] = useState<AddressData>(emptyAddress);
+
   // Section 5: Documents
   const [documents, setDocuments] = useState<DocFile[]>([]);
   const [docType, setDocType] = useState('');
@@ -247,6 +256,15 @@ const AdminStaffForm = () => {
       setIdentifierMobileCode(ii.mobile_code || '+880');
       setIdentifierNid(ii.nid || '');
       if (ii.address) setIdentifierAddr(ii.address);
+    }
+    if (sd.relatives_identifier) {
+      const ri = sd.relatives_identifier;
+      setRelIdName(ri.name || '');
+      setRelIdRelation(ri.relation || '');
+      setRelIdMobile(ri.mobile || '');
+      setRelIdMobileCode(ri.mobile_code || '+880');
+      setRelIdNid(ri.nid || '');
+      if (ri.address) setRelIdAddr(ri.address);
     }
     if (sd.documents) setDocuments(sd.documents.map((d: any) => ({ ...d, id: d.id || crypto.randomUUID() })));
     if (sd.signatures) {
@@ -372,6 +390,14 @@ const AdminStaffForm = () => {
           mobile_code: identifierMobileCode,
           nid: identifierNid,
           address: identifierAddr,
+        },
+        relatives_identifier: {
+          name: relIdName,
+          relation: relIdRelation,
+          mobile: relIdMobile,
+          mobile_code: relIdMobileCode,
+          nid: relIdNid,
+          address: relIdAddr,
         },
         documents: documents.map(d => ({ type: d.type, name: d.name, url: d.url })),
         signatures: {
@@ -1092,6 +1118,32 @@ const AdminStaffForm = () => {
               </div>
               <div className="sm:col-span-2">
                 <AddressFields label={bn ? 'পূর্ণ ঠিকানা' : 'Full Address'} value={identifierAddr} onChange={setIdentifierAddr} />
+              </div>
+            </div>
+          </div>
+
+          {/* ========== SECTION 4b: Relatives Identifier ========== */}
+          <div className="card-elevated p-6">
+            <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
+              {bn ? 'আত্মীয় শনাক্তকারীর তথ্য (Relatives Identifier Information)' : 'Relatives Identifier Information'}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label>{bn ? 'পূর্ণ নাম' : 'Full Name'}</Label>
+                <Input className="bg-background mt-1" value={relIdName} onChange={e => setRelIdName(e.target.value)} />
+              </div>
+              <div>
+                <Label>{bn ? 'সম্পর্ক' : 'Relation'}</Label>
+                <Input className="bg-background mt-1" value={relIdRelation} onChange={e => setRelIdRelation(e.target.value)} />
+              </div>
+              <PhoneInput label={bn ? 'মোবাইল' : 'Mobile'} value={relIdMobile} countryCode={relIdMobileCode} onChange={(p, c) => { setRelIdMobile(p); setRelIdMobileCode(c); }} />
+              <div>
+                <Label>{bn ? 'NID (১০/১৭ ডিজিট)' : 'NID (10/17 digits)'}</Label>
+                <Input className={`bg-background mt-1 ${relIdNidError ? 'border-destructive' : ''}`} maxLength={17} value={relIdNid} onChange={e => validateNid(e.target.value, setRelIdNid, setRelIdNidError)} />
+                {relIdNidError && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {relIdNidError}</p>}
+              </div>
+              <div className="sm:col-span-2">
+                <AddressFields label={bn ? 'পূর্ণ ঠিকানা' : 'Full Address'} value={relIdAddr} onChange={setRelIdAddr} />
               </div>
             </div>
           </div>
