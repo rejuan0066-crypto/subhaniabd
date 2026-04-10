@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
