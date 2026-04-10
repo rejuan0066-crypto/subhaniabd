@@ -429,8 +429,8 @@ const AdminResignLetters = () => {
                   <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
                   <TableHead>{bn ? 'পদবী' : 'Designation'}</TableHead>
                   <TableHead>{bn ? 'পদত্যাগের তারিখ' : 'Resign Date'}</TableHead>
-                  <TableHead>{bn ? 'পত্রের তারিখ' : 'Letter Date'}</TableHead>
-                  <TableHead className="text-center w-32">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
+                    <TableHead>{bn ? 'অবস্থা' : 'Status'}</TableHead>
+                    <TableHead className="text-center w-40">{bn ? 'অ্যাকশন' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
