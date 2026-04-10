@@ -296,8 +296,11 @@ const AdminJoiningLetters = () => {
                           </div>
                           <div className="text-center">
                             <div className="w-36 border-t border-foreground/40 mb-1" />
+                            {principal && (
+                              <p className="text-[11px] font-semibold text-foreground">{principal.name_bn || principal.name_en}</p>
+                            )}
                             <p className="text-[11px] text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
-                            <p className="text-[10px] text-muted-foreground">{bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head'}</p>
+                            <p className="text-[10px] text-muted-foreground">{principal?.designation || (bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head')}</p>
                             <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                           </div>
                         </div>
