@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { FileText, Printer, Trash2, Loader2, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const AdminJoiningLetters = () => {
@@ -180,25 +181,81 @@ const AdminJoiningLetters = () => {
 
         {/* View Dialog */}
         <Dialog open={!!viewLetter} onOpenChange={(o) => { if (!o) setViewLetter(null); }}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                {bn ? 'যোগদান পত্র বিস্তারিত' : 'Joining Letter Details'}
-              </DialogTitle>
+          <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
+            <DialogHeader className="sr-only">
+              <DialogTitle>{bn ? 'নিয়োগপত্র' : 'Official Joining Letter'}</DialogTitle>
             </DialogHeader>
             {viewLetter && (
-              <div className="space-y-4 pt-2">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div><p className="text-muted-foreground">{bn ? 'পত্র নং' : 'Letter No'}</p><p className="font-medium font-mono">{viewLetter.letter_number}</p></div>
-                  <div><p className="text-muted-foreground">{bn ? 'তারিখ' : 'Date'}</p><p className="font-medium">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</p></div>
-                  <div><p className="text-muted-foreground">{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'}</p><p className="font-medium">{viewLetter.staff_name_bn || '—'}</p></div>
-                  <div><p className="text-muted-foreground">{bn ? 'নাম (ইংরেজি)' : 'Name (English)'}</p><p className="font-medium">{viewLetter.staff_name || '—'}</p></div>
-                  <div><p className="text-muted-foreground">{bn ? 'পদবী' : 'Designation'}</p><p className="font-medium">{viewLetter.designation || '—'}</p></div>
-                  <div><p className="text-muted-foreground">{bn ? 'যোগদানের তারিখ' : 'Joining Date'}</p><p className="font-medium">{viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</p></div>
+              <div className="border-2 border-foreground/20 m-4 p-8" style={{ fontFamily: "'Noto Serif Bengali', 'Georgia', serif" }}>
+                {/* Header with logo + institution */}
+                <div className="flex items-center gap-4 border-b-2 border-double border-foreground/40 pb-4 mb-6">
+                  {institution?.logo_url && (
+                    <img src={institution.logo_url} alt="Logo" className="w-16 h-16 object-contain rounded" />
+                  )}
+                  <div className="flex-1 text-center">
+                    <h2 className="text-xl font-bold text-foreground">{institution?.name || ''}</h2>
+                    {institution?.name_en && <p className="text-sm text-muted-foreground">{institution.name_en}</p>}
+                    {institution?.address && <p className="text-xs text-muted-foreground mt-0.5">{institution.address}</p>}
+                    {institution?.phone && <p className="text-xs text-muted-foreground">{bn ? 'ফোন' : 'Phone'}: {institution.phone}</p>}
+                  </div>
+                  <div className="w-16" /> {/* spacer for symmetry */}
                 </div>
-                <div className="flex gap-2 pt-2">
-                  <Button className="flex-1" onClick={() => { handlePrint(viewLetter); }}>
+
+                {/* Formal title */}
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-bold tracking-wide text-foreground border-b border-foreground/30 inline-block pb-1">
+                    {bn ? 'নিয়োগপত্র / OFFICIAL JOINING LETTER' : 'OFFICIAL JOINING LETTER / নিয়োগপত্র'}
+                  </h3>
+                </div>
+
+                {/* Meta row */}
+                <div className="flex justify-between text-sm text-muted-foreground mb-6">
+                  <span>{bn ? 'পত্র নং' : 'Letter No'}: <span className="font-mono font-medium text-foreground">{viewLetter.letter_number}</span></span>
+                  <span>{bn ? 'তারিখ' : 'Date'}: <span className="font-medium text-foreground">{viewLetter.letter_date ? new Date(viewLetter.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</span></span>
+                </div>
+
+                {/* Profile + Letter body */}
+                <div className="flex gap-6 mb-8">
+                  <div className="flex-1 text-sm leading-relaxed text-foreground space-y-3" style={{ lineHeight: '2' }}>
+                    <p>{bn ? 'প্রিয়,' : 'Dear,'}</p>
+                    <p className="font-semibold text-base">{viewLetter.staff_name_bn || viewLetter.staff_name || '—'}</p>
+                    <p>
+                      {bn
+                        ? `এই পত্র দ্বারা প্রত্যয়ন করা যাচ্ছে যে, ${viewLetter.staff_name_bn || viewLetter.staff_name || ''} (আইডি: ${viewLetter.letter_number}) "${viewLetter.designation || ''}" পদে ${institution?.name || 'প্রতিষ্ঠান'}-এ আনুষ্ঠানিকভাবে যোগদান করেছেন। তাঁর যোগদানের তারিখ: ${viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('bn-BD') : ''}। আমরা তাঁকে আমাদের প্রতিষ্ঠানে স্বাগত জানাচ্ছি এবং আশা করি তিনি আন্তরিকতা ও নিষ্ঠার সাথে দায়িত্ব পালন করবেন।`
+                        : `This is to certify that ${viewLetter.staff_name || viewLetter.staff_name_bn || ''} (ID: ${viewLetter.letter_number}) has officially joined ${institution?.name_en || institution?.name || 'the institution'} as "${viewLetter.designation || ''}". The date of joining is: ${viewLetter.joining_date ? new Date(viewLetter.joining_date).toLocaleDateString('en-US') : ''}. We welcome them to our institution and wish them a successful career.`
+                      }
+                    </p>
+                  </div>
+                  {/* Profile photo */}
+                  <div className="flex-shrink-0 flex flex-col items-center gap-2">
+                    <Avatar className="w-24 h-24 border-2 border-foreground/20 rounded-md">
+                      <AvatarImage src={(viewLetter.letter_data as any)?.photo_url} className="object-cover" />
+                      <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-2xl font-serif">
+                        {(viewLetter.staff_name_bn || viewLetter.staff_name || '?').charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="text-xs text-muted-foreground">{bn ? 'প্রার্থীর ছবি' : 'Candidate Photo'}</p>
+                  </div>
+                </div>
+
+                {/* Signature area */}
+                <div className="flex justify-between items-end mt-16 pt-4">
+                  <div className="text-center">
+                    <div className="w-44 border-t border-foreground/40 mb-1" />
+                    <p className="text-xs text-muted-foreground">{bn ? 'কর্মচারীর স্বাক্ষর' : "Employee's Signature"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{bn ? 'তারিখ: _______________' : 'Date: _______________'}</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-44 border-t border-foreground/40 mb-1" />
+                    <p className="text-xs text-muted-foreground font-medium">{bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"}</p>
+                    <p className="text-xs text-muted-foreground">{bn ? 'প্রধান / অধ্যক্ষ' : 'Principal / Head'}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{bn ? 'তারিখ: _______________' : 'Date: _______________'}</p>
+                  </div>
+                </div>
+
+                {/* Print button */}
+                <div className="flex gap-2 pt-6 mt-6 border-t border-foreground/10">
+                  <Button className="flex-1" onClick={() => handlePrint(viewLetter)}>
                     <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
                   </Button>
                 </div>
