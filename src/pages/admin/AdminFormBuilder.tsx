@@ -178,49 +178,104 @@ const emptyForm: FormData = { name: '', name_bn: '', description: '', form_type:
 const emptyField: FieldData = { field_type: 'text', label: '', label_bn: '', placeholder: '', is_required: false, sort_order: 0, options: [], default_value: '', is_active: true, condition: { ...emptyCondition }, validation: { ...emptyValidation }, section: '' };
 
 // Sortable field item component
-const SortableFieldItem = ({ field, bn, getFieldIcon, getFieldLabel, openEditField, deleteField, fields }: any) => {
+const SortableLiveField = ({ field, bn, openEditField, deleteField }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
-  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : undefined, opacity: isDragging ? 0.5 : (!field.is_active ? 0.5 : 1) };
-  const Icon = getFieldIcon(field.field_type);
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : undefined, opacity: isDragging ? 0.7 : (!field.is_active ? 0.4 : 1) };
   let opts: string[] = [];
   try { opts = typeof field.options === 'string' ? JSON.parse(field.options as string) : (Array.isArray(field.options) ? (field.options as string[]) : []); } catch { opts = []; }
-  let hasCondition = false;
-  try { const v = typeof field.validation === 'string' ? JSON.parse(field.validation) : (field.validation || {}); hasCondition = !!v.condition; } catch {}
+
+  const renderInput = () => {
+    const ph = field.placeholder || '';
+    switch (field.field_type) {
+      case 'text': return <Input placeholder={ph} disabled className="bg-background" />;
+      case 'email': return <Input type="email" placeholder={ph || 'email@example.com'} disabled className="bg-background" />;
+      case 'phone': return <Input type="tel" placeholder={ph || '01XXXXXXXXX'} disabled className="bg-background" />;
+      case 'number': return <Input type="number" placeholder={ph} disabled className="bg-background" />;
+      case 'textarea': return <Textarea placeholder={ph} rows={2} disabled className="bg-background" />;
+      case 'date': return <Input type="date" disabled className="bg-background" />;
+      case 'file': return (
+        <div className="border-2 border-dashed rounded-lg p-4 text-center text-muted-foreground text-sm">
+          <Upload className="h-6 w-6 mx-auto mb-1 opacity-50" />
+          {bn ? 'ফাইল আপলোড' : 'Upload file'}
+        </div>
+      );
+      case 'switch': return <Switch disabled />;
+      case 'nid': return <Input placeholder={bn ? '১০ বা ১৭ ডিজিট NID' : '10 or 17 digit NID'} disabled className="bg-background" />;
+      case 'post_office': return <Input placeholder={bn ? 'পোস্ট অফিস' : 'Post Office'} disabled className="bg-background" />;
+      case 'village': return <Input placeholder={bn ? 'গ্রাম' : 'Village'} disabled className="bg-background" />;
+      case 'identity_card': return (
+        <div className="flex gap-2">
+          <Select disabled><SelectTrigger className="w-[160px] bg-background"><SelectValue placeholder={bn ? 'ধরন নির্বাচন' : 'Select type'} /></SelectTrigger></Select>
+          <Input className="flex-1 bg-background" placeholder={bn ? 'নম্বর' : 'Number'} disabled />
+        </div>
+      );
+      case 'select': return (
+        <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={ph || (bn ? 'নির্বাচন করুন' : 'Select...')} /></SelectTrigger></Select>
+      );
+      case 'radio': return (
+        <div className="flex flex-wrap gap-3">
+          {opts.length > 0 ? opts.map((opt, i) => (
+            <label key={i} className="flex items-center gap-1.5 text-sm"><input type="radio" disabled className="accent-primary" />{opt}</label>
+          )) : <span className="text-xs text-muted-foreground">{bn ? 'অপশন যোগ করুন' : 'Add options'}</span>}
+        </div>
+      );
+      case 'checkbox': return (
+        <div className="flex flex-wrap gap-3">
+          {opts.length > 0 ? opts.map((opt, i) => (
+            <label key={i} className="flex items-center gap-1.5 text-sm"><input type="checkbox" disabled className="accent-primary" />{opt}</label>
+          )) : <span className="text-xs text-muted-foreground">{bn ? 'অপশন যোগ করুন' : 'Add options'}</span>}
+        </div>
+      );
+      case 'address_permanent': return (
+        <div className="grid grid-cols-2 gap-2">
+          <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'বিভাগ' : 'Division'} /></SelectTrigger></Select>
+          <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'জেলা' : 'District'} /></SelectTrigger></Select>
+          <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'উপজেলা' : 'Upazila'} /></SelectTrigger></Select>
+          <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'ইউনিয়ন' : 'Union'} /></SelectTrigger></Select>
+        </div>
+      );
+      case 'address_present': return (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Checkbox disabled /><span className="text-sm text-muted-foreground">{bn ? 'স্থায়ী ঠিকানার মতো একই' : 'Same as Permanent'}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'বিভাগ' : 'Division'} /></SelectTrigger></Select>
+            <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'জেলা' : 'District'} /></SelectTrigger></Select>
+            <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'উপজেলা' : 'Upazila'} /></SelectTrigger></Select>
+            <Select disabled><SelectTrigger className="bg-background"><SelectValue placeholder={bn ? 'ইউনিয়ন' : 'Union'} /></SelectTrigger></Select>
+          </div>
+        </div>
+      );
+      default: return <Input placeholder={ph} disabled className="bg-background" />;
+    }
+  };
 
   return (
-    <Card ref={setNodeRef} style={style} className="transition-shadow">
-      <CardContent className="p-3 flex items-center gap-3">
-        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none p-1 -m-1 rounded hover:bg-muted">
-          <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+    <div ref={setNodeRef} style={style} className="group relative">
+      <div className="flex gap-2 items-start">
+        <button {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing touch-none mt-7 p-0.5 rounded hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
         </button>
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-foreground truncate">{bn ? field.label_bn : field.label}</span>
-            {field.is_required && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">*</Badge>}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium flex items-center gap-1">
+              {bn ? field.label_bn : field.label}
+              {field.is_required && <span className="text-destructive text-xs">*</span>}
+            </Label>
+            <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => openEditField(field)}>
+                <Edit2 className="h-3 w-3" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteField(field.id); }}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <Badge variant="outline" className="text-[10px]">{getFieldLabel(field.field_type)}</Badge>
-            {opts.length > 0 && <span className="text-[10px] text-muted-foreground">{opts.length} {bn ? 'টি অপশন' : 'options'}</span>}
-            {hasCondition && (
-              <Badge variant="secondary" className="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                {bn ? 'শর্তযুক্ত' : 'Conditional'}
-              </Badge>
-            )}
-          </div>
+          {renderInput()}
         </div>
-        <div className="flex items-center gap-1">
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditField(field)}>
-            <Edit2 className="h-3.5 w-3.5" />
-          </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => { if (confirm(bn ? 'ফিল্ডটি মুছে ফেলতে চান?' : 'Delete this field?')) deleteField(field.id); }}>
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
@@ -971,41 +1026,40 @@ const AdminFormBuilder = () => {
                     return (
                       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                          <div className="space-y-4">
+                          <Card className="overflow-hidden">
+                            <CardContent className="p-6 space-y-6">
+                              {/* Form title header */}
+                              <div className="text-center border-b pb-4">
+                                <h2 className="text-lg font-bold text-foreground">{bn ? selectedForm?.name_bn : selectedForm?.name}</h2>
+                                {selectedForm?.description && <p className="text-xs text-muted-foreground mt-1">{selectedForm.description}</p>}
+                              </div>
                             {orderedSections.map(secKey => {
                               const secFields = sections.get(secKey) || [];
                               return (
-                                <Collapsible key={secKey} defaultOpen>
-                                  <CollapsibleTrigger className="flex items-center justify-between w-full p-2.5 rounded-lg bg-primary/10 hover:bg-primary/15 transition-colors text-left mb-1">
-                                    <div className="flex items-center gap-2">
-                                      <FolderOpen className="h-4 w-4 text-primary" />
-                                      <span className="font-semibold text-sm text-foreground">
-                                        {getSectionLabel(secKey === '_unsectioned' ? null : secKey, selectedForm?.form_type || 'custom', bn)}
+                                <div key={secKey} className="space-y-4">
+                                  {secKey !== '_unsectioned' && (
+                                    <div className="flex items-center gap-2 border-b border-primary/30 pb-1.5 mt-2">
+                                      <span className="text-sm font-bold text-primary">
+                                        {getSectionLabel(secKey, selectedForm?.form_type || 'custom', bn)}
                                       </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="secondary" className="text-[10px]">{secFields.length}</Badge>
-                                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
-                                    </div>
-                                  </CollapsibleTrigger>
-                                  <CollapsibleContent className="space-y-2 pl-2">
+                                  )}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                                     {secFields.map(field => (
-                                      <SortableFieldItem
+                                      <SortableLiveField
                                         key={field.id}
                                         field={field}
                                         bn={bn}
-                                        getFieldIcon={getFieldIcon}
-                                        getFieldLabel={getFieldLabel}
                                         openEditField={openEditField}
                                         deleteField={(id: string) => deleteFieldMut.mutate(id)}
-                                        fields={fields}
                                       />
                                     ))}
-                                  </CollapsibleContent>
-                                </Collapsible>
+                                  </div>
+                                </div>
                               );
                             })}
-                          </div>
+                            </CardContent>
+                          </Card>
                         </SortableContext>
                       </DndContext>
                     );
