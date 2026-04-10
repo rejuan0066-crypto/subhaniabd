@@ -259,9 +259,12 @@ const AdminJoiningLetters = () => {
                       <div className="flex justify-between items-end mt-12 pt-4">
                         {/* QR placeholder */}
                         <div className="flex flex-col items-center gap-1">
-                          <div className="w-16 h-16 border border-dashed border-foreground/25 rounded flex items-center justify-center">
-                            <span className="text-[8px] text-muted-foreground text-center leading-tight">QR Code<br/>{bn ? 'যাচাই' : 'Verify'}</span>
-                          </div>
+                          <QRCodeSVG
+                            value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
+                            size={64}
+                            level="M"
+                            className="opacity-80"
+                          />
                           <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
                         </div>
 
