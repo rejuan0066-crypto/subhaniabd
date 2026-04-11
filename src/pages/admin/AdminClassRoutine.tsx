@@ -50,6 +50,7 @@ const AdminClassRoutine = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [form, setForm] = useState({ name: '', name_bn: '', class_id: '', academic_session_id: '', is_active: true });
   const [editingRoutineId, setEditingRoutineId] = useState<string | null>(null);
+  const [filterClassId, setFilterClassId] = useState<string>('all');
 
   // Fetch institution
   const { data: institution } = useQuery({
