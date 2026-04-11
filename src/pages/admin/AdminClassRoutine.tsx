@@ -41,12 +41,23 @@ interface RoutinePeriod {
 
 const AdminClassRoutine = () => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
   const qc = useQueryClient();
   const [selectedRoutineId, setSelectedRoutineId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [form, setForm] = useState({ name: '', name_bn: '', class_id: '', academic_session_id: '', is_active: true });
   const [editingRoutineId, setEditingRoutineId] = useState<string | null>(null);
+
+  // Fetch institution
+  const { data: institution } = useQuery({
+    queryKey: ['institution-default'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('name, name_en, logo_url, address, phone').eq('is_default', true).maybeSingle();
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
 
   // Fetch classes
   const { data: classes } = useQuery({
