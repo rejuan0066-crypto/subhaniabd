@@ -105,6 +105,11 @@ const AdminUserManagement = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [profileUser, setProfileUser] = useState<UserItem | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditName, setProfileEditName] = useState('');
+  const [profileEditEmail, setProfileEditEmail] = useState('');
+  const [profileNewPassword, setProfileNewPassword] = useState('');
+  const [profileShowPw, setProfileShowPw] = useState(false);
+  const [profileSaving, setProfileSaving] = useState<string | null>(null);
 
   // Create form
   const [email, setEmail] = useState('');
@@ -639,7 +644,7 @@ const AdminUserManagement = () => {
                               size="icon"
                               variant="ghost"
                               className="text-primary hover:text-primary hover:bg-primary/10"
-                              onClick={() => { setProfileUser(u); setProfileOpen(true); }}
+                              onClick={() => { setProfileUser(u); setProfileEditName(u.full_name || ''); setProfileEditEmail(u.email); setProfileNewPassword(''); setProfileShowPw(false); setProfileOpen(true); }}
                               title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}
                             >
                               <UserCircle className="w-4 h-4" />
@@ -1085,9 +1090,9 @@ const AdminUserManagement = () => {
             )}
           </DialogContent>
         </Dialog>
-        {/* ===== PROFILE VIEW DIALOG ===== */}
+        {/* ===== PROFILE VIEW & EDIT DIALOG ===== */}
         <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <UserCircle className="w-5 h-5 text-primary" />
@@ -1119,15 +1124,112 @@ const AdminUserManagement = () => {
                       <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>
                     )}
                   </div>
-                  <div className="p-3 rounded-lg border bg-card">
+                  <div className="p-3 rounded-lg border bg-card col-span-2">
                     <p className="text-xs text-muted-foreground mb-1">{bn ? 'তৈরির তারিখ' : 'Created At'}</p>
                     <p className="text-sm font-medium">
                       {new Date(profileUser.created_at).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>
-                  <div className="p-3 rounded-lg border bg-card">
-                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'ইউজার আইডি' : 'User ID'}</p>
-                    <p className="text-xs font-mono text-muted-foreground break-all">{profileUser.id}</p>
+                </div>
+
+                {/* Edit Name */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{bn ? 'নাম পরিবর্তন' : 'Change Name'}</Label>
+                  <div className="flex gap-2">
+                    <Input value={profileEditName} onChange={e => setProfileEditName(e.target.value)} placeholder={bn ? 'নতুন নাম' : 'New name'} />
+                    <Button
+                      size="sm"
+                      disabled={profileSaving === 'name' || profileEditName === profileUser.full_name}
+                      onClick={async () => {
+                        setProfileSaving('name');
+                        try {
+                          const { data, error } = await supabase.functions.invoke('manage-users', {
+                            body: { action: 'update_name', user_id: profileUser.id, full_name: profileEditName.trim() },
+                          });
+                          if (error || !data?.success) throw new Error(data?.error || error?.message);
+                          toast.success(bn ? '✅ নাম আপডেট হয়েছে' : '✅ Name updated');
+                          setProfileUser({ ...profileUser, full_name: profileEditName.trim() });
+                          fetchUsers();
+                        } catch (err: any) {
+                          toast.error(err?.message || (bn ? 'নাম আপডেট ব্যর্থ' : 'Failed to update name'));
+                        }
+                        setProfileSaving(null);
+                      }}
+                    >
+                      {profileSaving === 'name' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Edit Email */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{bn ? 'ইমেইল পরিবর্তন' : 'Change Email'}</Label>
+                  <div className="flex gap-2">
+                    <Input type="email" value={profileEditEmail} onChange={e => setProfileEditEmail(e.target.value)} placeholder={bn ? 'নতুন ইমেইল' : 'New email'} />
+                    <Button
+                      size="sm"
+                      disabled={profileSaving === 'email' || profileEditEmail === profileUser.email}
+                      onClick={async () => {
+                        if (!profileEditEmail.trim() || !profileEditEmail.includes('@')) {
+                          toast.error(bn ? 'সঠিক ইমেইল দিন' : 'Enter a valid email');
+                          return;
+                        }
+                        setProfileSaving('email');
+                        try {
+                          const { data, error } = await supabase.functions.invoke('manage-users', {
+                            body: { action: 'update_email', user_id: profileUser.id, new_email: profileEditEmail.trim() },
+                          });
+                          if (error || !data?.success) throw new Error(data?.error || error?.message);
+                          toast.success(bn ? '✅ ইমেইল আপডেট হয়েছে' : '✅ Email updated');
+                          setProfileUser({ ...profileUser, email: profileEditEmail.trim() });
+                          fetchUsers();
+                        } catch (err: any) {
+                          toast.error(err?.message || (bn ? 'ইমেইল আপডেট ব্যর্থ' : 'Failed to update email'));
+                        }
+                        setProfileSaving(null);
+                      }}
+                    >
+                      {profileSaving === 'email' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Change Password */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{bn ? 'পাসওয়ার্ড পরিবর্তন' : 'Change Password'}</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={profileShowPw ? 'text' : 'password'}
+                        value={profileNewPassword}
+                        onChange={e => setProfileNewPassword(e.target.value)}
+                        placeholder={bn ? 'নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)' : 'New password (min 6 chars)'}
+                        className="pr-10"
+                      />
+                      <button type="button" onClick={() => setProfileShowPw(!profileShowPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {profileShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={profileSaving === 'password' || profileNewPassword.length < 6}
+                      onClick={async () => {
+                        setProfileSaving('password');
+                        try {
+                          const { data, error } = await supabase.functions.invoke('manage-users', {
+                            body: { action: 'update_password', user_id: profileUser.id, new_password: profileNewPassword },
+                          });
+                          if (error || !data?.success) throw new Error(data?.error || error?.message);
+                          toast.success(bn ? '✅ পাসওয়ার্ড আপডেট হয়েছে' : '✅ Password updated');
+                          setProfileNewPassword('');
+                        } catch (err: any) {
+                          toast.error(err?.message || (bn ? 'পাসওয়ার্ড আপডেট ব্যর্থ' : 'Failed to update password'));
+                        }
+                        setProfileSaving(null);
+                      }}
+                    >
+                      {profileSaving === 'password' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -470,6 +470,77 @@ Deno.serve(async (req) => {
       });
     }
 
+    // UPDATE EMAIL (admin changes another user's email)
+    if (action === "update_email") {
+      const { user_id: targetUserId, new_email } = body;
+      if (!targetUserId || !new_email) {
+        return new Response(JSON.stringify({ error: "user_id and new_email are required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: emailError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        email: new_email,
+        email_confirm: true,
+      });
+      if (emailError) {
+        return new Response(JSON.stringify({ error: emailError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // UPDATE PASSWORD (admin resets another user's password)
+    if (action === "update_password") {
+      const { user_id: targetUserId, new_password } = body;
+      if (!targetUserId || !new_password) {
+        return new Response(JSON.stringify({ error: "user_id and new_password are required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (new_password.length < 6) {
+        return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        password: new_password,
+      });
+      if (pwError) {
+        return new Response(JSON.stringify({ error: pwError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // UPDATE NAME (admin changes another user's display name)
+    if (action === "update_name") {
+      const { user_id: targetUserId, full_name } = body;
+      if (!targetUserId || full_name === undefined) {
+        return new Response(JSON.stringify({ error: "user_id and full_name are required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: nameError } = await supabaseAdmin.from("profiles").update({ full_name }).eq("id", targetUserId);
+      if (nameError) {
+        return new Response(JSON.stringify({ error: nameError.message }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      // Also update auth user metadata
+      await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+        user_metadata: { full_name },
+      });
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ensure_staff is handled above (before admin check)
 
     return new Response(JSON.stringify({ error: "Invalid action" }), {
