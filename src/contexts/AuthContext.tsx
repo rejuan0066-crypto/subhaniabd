@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<string | null>(null);
   const [userStatus, setUserStatus] = useState<string | null>(null);
 
-  const fetchedForUser = useRef<string | null>(null);
+  const fetchedForSession = useRef<string | null>(null);
   const lastHandledAccessToken = useRef<string | null>(null);
   const sessionRef = useRef<Session | null>(null);
   const userRef = useRef<User | null>(null);
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let cancelled = false;
 
     const resetResolvedState = () => {
-      fetchedForUser.current = null;
+      fetchedForSession.current = null;
       lastResolvedAccessState.current = null;
       setProfileLoading(false);
       setRole(null);
@@ -94,17 +94,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           applySession(restoredSession);
           return;
         }
-        // Only clear if no existing session — prevents transient null from logging out
         if (!sessionRef.current?.user) {
           clearSessionState();
         } else {
-          // Had a session but got null — could be transient, keep existing
           setAuthReady(true);
         }
       }).catch((error) => {
         if (cancelled) return;
         console.error('Failed to restore auth session (attempt ' + attempt + '):', error);
-        // Retry up to 2 times on transient failures instead of immediately clearing
         if (attempt < 2 && sessionRef.current?.user) {
           setTimeout(() => {
             if (!cancelled) restoreSessionSafely(attempt + 1);
@@ -127,14 +124,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // TOKEN_REFRESHED — always apply the fresh session
       if (event === 'TOKEN_REFRESHED' && nextSession?.user) {
         applySession(nextSession);
         return;
       }
 
       if (!nextSession?.user) {
-        // Only attempt restore if we had a session — protects against transient null events
         if (sessionRef.current?.user || userRef.current || lastHandledAccessToken.current) {
           restoreSessionSafely();
           return;
@@ -163,13 +158,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    if (fetchedForUser.current === user.id) {
+    const fetchKey = `${user.id}:${session?.access_token ?? 'no-token'}`;
+
+    if (fetchedForSession.current === fetchKey) {
       setProfileLoading(false);
       return;
     }
 
     let cancelled = false;
-    fetchedForUser.current = user.id;
+    fetchedForSession.current = fetchKey;
     setProfileLoading(true);
 
     void (async () => {
@@ -192,7 +189,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         console.error('Failed to resolve auth state:', error);
 
-        // Check if this is a JWT/auth error — if so, force session refresh or sign out
         const errMsg = error instanceof Error ? error.message : String(error ?? '');
         const isAuthError =
           errMsg.includes('JWT expired') ||
@@ -201,17 +197,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (isAuthError) {
           console.warn('Auth token expired during profile fetch, attempting refresh...');
-          fetchedForUser.current = null; // Allow retry after refresh
+          fetchedForSession.current = null;
           try {
-            const { error: refreshErr } = await supabase.auth.refreshSession();
-            if (refreshErr) {
-              console.warn('Session refresh failed, signing out');
-              await supabase.auth.signOut();
+            const previousAccessToken = sessionRef.current?.access_token ?? null;
+            const { data, error: refreshErr } = await supabase.auth.refreshSession();
+            const nextAccessToken = data.session?.access_token ?? null;
+
+            if (refreshErr || !nextAccessToken || nextAccessToken === previousAccessToken) {
+              console.warn('Session refresh failed, clearing local session');
+              await supabase.auth.signOut({ scope: 'local' });
               return;
             }
-            // refreshSession triggers onAuthStateChange → TOKEN_REFRESHED → re-fetch will happen
           } catch {
-            await supabase.auth.signOut();
+            await supabase.auth.signOut({ scope: 'local' });
           }
           return;
         }
@@ -234,7 +232,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [authReady, user?.id]);
+  }, [authReady, user?.id, session?.access_token]);
 
   const loading = !authReady || profileLoading;
 
@@ -251,7 +249,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       },
       signOut: async () => {
-        await supabase.auth.signOut();
+        await supabase.auth.signOut({ scope: 'local' });
       },
     }),
     [authReady, user, session, loading, role, userStatus]

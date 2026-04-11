@@ -398,7 +398,7 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
 
 export const useWebsiteSettings = () => {
   const queryClient = useQueryClient();
-  const { loading: authLoading } = useAuth();
+  const { ready: authReady } = useAuth();
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['website-settings'],
@@ -433,7 +433,7 @@ export const useWebsiteSettings = () => {
       }
       return result;
     },
-    enabled: !authLoading,
+    enabled: authReady,
   });
 
   const updateSetting = useMutation({
