@@ -455,12 +455,14 @@ const AdminClassRoutine = () => {
   // ---- DETAIL VIEW (Formal Timetable) ----
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="ghost" size="sm" onClick={() => setSelectedRoutineId(null)}>
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <Button variant="outline" size="sm" onClick={() => setSelectedRoutineId(null)}>
           <span className="mr-1">←</span> {bn ? 'পেছনে যান' : 'Go Back'}
         </Button>
-        <div className="flex-1" />
-        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openNewPeriod(0)}>
+        <h2 className="text-sm font-bold flex-1 min-w-0 truncate text-foreground">
+          {bn ? selectedRoutine?.name_bn : selectedRoutine?.name}
+        </h2>
+        <Button size="sm" className="gap-1.5" onClick={() => openNewPeriod(0)}>
           <Plus className="h-3.5 w-3.5" /> {bn ? 'পিরিয়ড যোগ' : 'Add Period'}
         </Button>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={handlePrint}>
