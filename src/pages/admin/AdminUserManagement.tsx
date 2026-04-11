@@ -103,6 +103,8 @@ const AdminUserManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [profileUser, setProfileUser] = useState<UserItem | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Create form
   const [email, setEmail] = useState('');
