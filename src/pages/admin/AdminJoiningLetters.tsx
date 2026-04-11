@@ -127,6 +127,27 @@ const AdminJoiningLetters = () => {
     setDragPositions(prev => ({ ...prev, [id]: pos }));
   };
 
+  /* ── Load saved overrides when opening a letter ── */
+  const loadSavedOverrides = (letter: any) => {
+    const saved = letter.letter_data?.overrides as Record<string, any> | undefined;
+    if (saved) {
+      setOverrides(saved.textOverrides || {});
+      setBodyAlign(saved.bodyAlign || 'center');
+      setSalutationAlign(saved.salutationAlign || 'left');
+      setNameAlign(saved.nameAlign || 'left');
+      setDragPositions(saved.dragPositions || {});
+    } else {
+      setOverrides({});
+      setBodyAlign('center');
+      setSalutationAlign('left');
+      setNameAlign('left');
+      setDragPositions({});
+    }
+    setLocalLogo(null);
+    setLocalPhoto(null);
+    setEditMode(false);
+  };
+
   const resetOverrides = () => {
     setOverrides({});
     setEditMode(false);
