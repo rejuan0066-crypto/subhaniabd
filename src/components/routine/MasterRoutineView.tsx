@@ -125,11 +125,6 @@ const MasterRoutineView = () => {
   const selectedSession = sessions?.find(s => s.id === selectedSessionId);
   const selectedDiv = divisions?.find(d => d.id === selectedDivisionId);
 
-  const classNames = filteredRoutines.map(r => {
-    const cls = r.classes as any;
-    return bn ? cls?.name_bn : cls?.name;
-  }).filter(Boolean);
-  const classRangeText = classNames.length > 0 ? `${classNames[0]} — ${classNames[classNames.length - 1]}` : '';
 
   const daysToRender = selectedDay === 'all' ? DAYS : DAYS.filter(d => String(d.value) === selectedDay);
 
