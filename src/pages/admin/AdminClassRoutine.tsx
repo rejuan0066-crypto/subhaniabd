@@ -11,8 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit, Copy, Eye, Clock, BookOpen, Printer } from 'lucide-react';
+import { Plus, Trash2, Edit, Copy, Eye, Clock, BookOpen, Printer, LayoutGrid, List } from 'lucide-react';
+import MasterRoutineView from '@/components/routine/MasterRoutineView';
 
 const DAYS = [
   { value: 0, label_bn: 'শনিবার', label_en: 'Saturday' },
@@ -295,87 +297,105 @@ const AdminClassRoutine = () => {
   if (!selectedRoutineId) {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <h1 className="text-xl font-bold">{language === 'bn' ? 'ক্লাস রুটিন' : 'Class Routine'}</h1>
-          <Dialog open={showCreate} onOpenChange={setShowCreate}>
-            <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'নতুন রুটিন' : 'New Routine'}</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>{language === 'bn' ? 'নতুন রুটিন তৈরি' : 'Create Routine'}</DialogTitle></DialogHeader>
-              <RoutineFormFields />
-              <Button onClick={() => createRoutine.mutate()} disabled={!form.name || !form.name_bn || !form.class_id}>
-                {language === 'bn' ? 'তৈরি করুন' : 'Create'}
-              </Button>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <h1 className="text-xl font-bold">{bn ? 'ক্লাস রুটিন' : 'Class Routine'}</h1>
 
-        {isLoading ? <p className="text-muted-foreground">{language === 'bn' ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (
-          <Card>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[40px]">#</TableHead>
-                      <TableHead className="min-w-[150px]">{language === 'bn' ? 'রুটিন নাম' : 'Routine Name'}</TableHead>
-                      <TableHead className="min-w-[120px]">{language === 'bn' ? 'শ্রেণী' : 'Class'}</TableHead>
-                      <TableHead className="min-w-[120px]">{language === 'bn' ? 'সেশন' : 'Session'}</TableHead>
-                      <TableHead className="min-w-[80px]">{language === 'bn' ? 'স্ট্যাটাস' : 'Status'}</TableHead>
-                      <TableHead className="w-28 text-right">{language === 'bn' ? 'অ্যাকশন' : 'Action'}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {routines?.map((r, idx) => {
-                      const cls = r.classes as any;
-                      const div = cls?.divisions as any;
-                      const sess = r.academic_sessions as any;
-                      return (
-                        <TableRow key={r.id} className="cursor-pointer hover:bg-accent/50" onClick={() => setSelectedRoutineId(r.id)}>
-                          <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
-                          <TableCell className="font-medium">{language === 'bn' ? r.name_bn : r.name}</TableCell>
-                          <TableCell className="text-sm">{language === 'bn' ? `${div?.name_bn || ''} - ${cls?.name_bn || ''}` : `${div?.name || ''} - ${cls?.name || ''}`}</TableCell>
-                          <TableCell className="text-sm">{sess ? (language === 'bn' ? sess.name_bn || sess.name : sess.name) : '-'}</TableCell>
-                          <TableCell>
-                            <Badge variant={r.is_active ? 'default' : 'secondary'}>
-                              {r.is_active ? (language === 'bn' ? 'সক্রিয়' : 'Active') : (language === 'bn' ? 'নিষ্ক্রিয়' : 'Inactive')}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                            <div className="flex gap-1 justify-end">
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setSelectedRoutineId(r.id)}><Eye className="h-3.5 w-3.5" /></Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copyRoutine.mutate(r.id)}><Copy className="h-3.5 w-3.5" /></Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
-                                setForm({ name: r.name, name_bn: r.name_bn, class_id: r.class_id, academic_session_id: r.academic_session_id || '', is_active: r.is_active ?? true });
-                                setEditingRoutineId(r.id);
-                                setShowEdit(true);
-                              }}><Edit className="h-3.5 w-3.5" /></Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => {
-                                if (confirm(language === 'bn' ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteRoutine.mutate(r.id);
-                              }}><Trash2 className="h-3.5 w-3.5" /></Button>
-                            </div>
-                          </TableCell>
+        <Tabs defaultValue="individual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-xs">
+            <TabsTrigger value="individual" className="gap-1.5 text-xs">
+              <List className="h-3.5 w-3.5" /> {bn ? 'ক্লাস রুটিন' : 'Class Routine'}
+            </TabsTrigger>
+            <TabsTrigger value="master" className="gap-1.5 text-xs">
+              <LayoutGrid className="h-3.5 w-3.5" /> {bn ? 'মাস্টার রুটিন' : 'Master Routine'}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="individual" className="space-y-4 mt-4">
+            <div className="flex justify-end">
+              <Dialog open={showCreate} onOpenChange={setShowCreate}>
+                <DialogTrigger asChild>
+                  <Button size="sm"><Plus className="h-4 w-4 mr-1" />{bn ? 'নতুন রুটিন' : 'New Routine'}</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>{bn ? 'নতুন রুটিন তৈরি' : 'Create Routine'}</DialogTitle></DialogHeader>
+                  <RoutineFormFields />
+                  <Button onClick={() => createRoutine.mutate()} disabled={!form.name || !form.name_bn || !form.class_id}>
+                    {bn ? 'তৈরি করুন' : 'Create'}
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="min-w-[40px]">#</TableHead>
+                          <TableHead className="min-w-[150px]">{bn ? 'রুটিন নাম' : 'Routine Name'}</TableHead>
+                          <TableHead className="min-w-[120px]">{bn ? 'শ্রেণী' : 'Class'}</TableHead>
+                          <TableHead className="min-w-[120px]">{bn ? 'সেশন' : 'Session'}</TableHead>
+                          <TableHead className="min-w-[80px]">{bn ? 'স্ট্যাটাস' : 'Status'}</TableHead>
+                          <TableHead className="w-28 text-right">{bn ? 'অ্যাকশন' : 'Action'}</TableHead>
                         </TableRow>
-                      );
-                    })}
-                    {routines?.length === 0 && (
-                      <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{language === 'bn' ? 'কোনো রুটিন নেই' : 'No routines'}</TableCell></TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                      </TableHeader>
+                      <TableBody>
+                        {routines?.map((r, idx) => {
+                          const cls = r.classes as any;
+                          const div = cls?.divisions as any;
+                          const sess = r.academic_sessions as any;
+                          return (
+                            <TableRow key={r.id} className="cursor-pointer hover:bg-accent/50" onClick={() => setSelectedRoutineId(r.id)}>
+                              <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
+                              <TableCell className="font-medium">{bn ? r.name_bn : r.name}</TableCell>
+                              <TableCell className="text-sm">{bn ? `${div?.name_bn || ''} - ${cls?.name_bn || ''}` : `${div?.name || ''} - ${cls?.name || ''}`}</TableCell>
+                              <TableCell className="text-sm">{sess ? (bn ? sess.name_bn || sess.name : sess.name) : '-'}</TableCell>
+                              <TableCell>
+                                <Badge variant={r.is_active ? 'default' : 'secondary'}>
+                                  {r.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right" onClick={e => e.stopPropagation()}>
+                                <div className="flex gap-1 justify-end">
+                                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setSelectedRoutineId(r.id)}><Eye className="h-3.5 w-3.5" /></Button>
+                                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copyRoutine.mutate(r.id)}><Copy className="h-3.5 w-3.5" /></Button>
+                                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
+                                    setForm({ name: r.name, name_bn: r.name_bn, class_id: r.class_id, academic_session_id: r.academic_session_id || '', is_active: r.is_active ?? true });
+                                    setEditingRoutineId(r.id);
+                                    setShowEdit(true);
+                                  }}><Edit className="h-3.5 w-3.5" /></Button>
+                                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => {
+                                    if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteRoutine.mutate(r.id);
+                                  }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                        {routines?.length === 0 && (
+                          <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো রুটিন নেই' : 'No routines'}</TableCell></TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="master" className="mt-4">
+            <MasterRoutineView />
+          </TabsContent>
+        </Tabs>
 
         {/* Edit dialog */}
         <Dialog open={showEdit} onOpenChange={v => { setShowEdit(v); if (!v) setEditingRoutineId(null); }}>
           <DialogContent>
-            <DialogHeader><DialogTitle>{language === 'bn' ? 'রুটিন সম্পাদনা' : 'Edit Routine'}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{bn ? 'রুটিন সম্পাদনা' : 'Edit Routine'}</DialogTitle></DialogHeader>
             <RoutineFormFields />
             <Button onClick={() => updateRoutine.mutate()} disabled={!form.name || !form.name_bn || !form.class_id}>
-              {language === 'bn' ? 'আপডেট করুন' : 'Update'}
+              {bn ? 'আপডেট করুন' : 'Update'}
             </Button>
           </DialogContent>
         </Dialog>
