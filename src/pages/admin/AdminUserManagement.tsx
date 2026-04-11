@@ -116,12 +116,12 @@ const AdminUserManagement = () => {
   // OTP states
   const [emailOtpEnabled, setEmailOtpEnabled] = useState(false);
   const [pwOtpEnabled, setPwOtpEnabled] = useState(false);
+  const [emailOtpStep, setEmailOtpStep] = useState(false); // shows OTP UI after clicking change
+  const [pwOtpStep, setPwOtpStep] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [pwOtpSent, setPwOtpSent] = useState(false);
   const [emailOtpCode, setEmailOtpCode] = useState('');
   const [pwOtpCode, setPwOtpCode] = useState('');
-  const [emailOtpVerified, setEmailOtpVerified] = useState(false);
-  const [pwOtpVerified, setPwOtpVerified] = useState(false);
   const { sendOtp, verifyOtp, sending: otpSending, verifying: otpVerifying } = useOtpService();
 
   // Create form
