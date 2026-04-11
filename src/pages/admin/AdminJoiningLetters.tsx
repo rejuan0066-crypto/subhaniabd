@@ -649,7 +649,9 @@ const AdminJoiningLetters = () => {
                           </div>
                         </Draggable>
                       </div>
+                      </div>
                     </div>
+                  </div>
                   </div>
 
                   {/* Actions */}
