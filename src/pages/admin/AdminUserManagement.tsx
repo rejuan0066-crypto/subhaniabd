@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Plus, Loader2, Trash2, Eye, EyeOff, AlertTriangle, KeyRound, Save, Pencil, ShieldCheck, Tag, Shield } from 'lucide-react';
+import { Users, Plus, Loader2, Trash2, Eye, EyeOff, AlertTriangle, KeyRound, Save, Pencil, ShieldCheck, Tag, Shield, UserCircle } from 'lucide-react';
 import AccessControlTab from '@/components/admin/AccessControlTab';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -103,6 +103,8 @@ const AdminUserManagement = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [profileUser, setProfileUser] = useState<UserItem | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Create form
   const [email, setEmail] = useState('');
@@ -632,6 +634,16 @@ const AdminUserManagement = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-center gap-1">
+                            {/* Profile view */}
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-primary hover:text-primary hover:bg-primary/10"
+                              onClick={() => { setProfileUser(u); setProfileOpen(true); }}
+                              title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}
+                            >
+                              <UserCircle className="w-4 h-4" />
+                            </Button>
                             {/* Approve/Reject status */}
                             {u.role !== 'admin' && u.status !== 'approved' && (
                               <Button
@@ -1069,6 +1081,55 @@ const AdminUserManagement = () => {
                   {rolePermSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {bn ? 'পারমিশন সেভ করুন' : 'Save Permissions'}
                 </Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        {/* ===== PROFILE VIEW DIALOG ===== */}
+        <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCircle className="w-5 h-5 text-primary" />
+                {bn ? 'ইউজার প্রোফাইল' : 'User Profile'}
+              </DialogTitle>
+            </DialogHeader>
+            {profileUser && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <UserCircle className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{profileUser.full_name || '—'}</p>
+                    <p className="text-sm text-muted-foreground">{profileUser.email}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'রোল' : 'Role'}</p>
+                    <div>{roleBadge(profileUser.role)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'স্ট্যাটাস' : 'Status'}</p>
+                    {profileUser.status === 'approved' ? (
+                      <Badge variant="default" className="bg-green-600">{bn ? 'অনুমোদিত' : 'Approved'}</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>
+                    )}
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'তৈরির তারিখ' : 'Created At'}</p>
+                    <p className="text-sm font-medium">
+                      {new Date(profileUser.created_at).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'ইউজার আইডি' : 'User ID'}</p>
+                    <p className="text-xs font-mono text-muted-foreground break-all">{profileUser.id}</p>
+                  </div>
+                </div>
               </div>
             )}
           </DialogContent>
