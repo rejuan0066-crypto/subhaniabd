@@ -453,70 +453,70 @@ const AdminExamRoutine = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Entries grouped by date */}
-      {sortedDates.length === 0 && (
+      {/* Exam routine table */}
+      {(entries?.length || 0) === 0 ? (
         <p className="text-center text-muted-foreground py-8">{bn ? 'কোনো এন্ট্রি নেই। "সেশন থেকে বিষয় আনুন" বাটনে ক্লিক করে স্বয়ংক্রিয়ভাবে বিষয় যোগ করুন।' : 'No entries. Click "Auto from Session" to populate.'}</p>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[40px]">#</TableHead>
+                    <TableHead className="min-w-[120px]"><CalendarDays className="h-3 w-3 inline mr-1" />{bn ? 'তারিখ' : 'Date'}</TableHead>
+                    <TableHead className="min-w-[80px]">{bn ? 'বার' : 'Day'}</TableHead>
+                    <TableHead className="min-w-[120px]"><BookOpen className="h-3 w-3 inline mr-1" />{bn ? 'বিষয়' : 'Subject'}</TableHead>
+                    <TableHead className="min-w-[100px]">{bn ? 'শ্রেণী' : 'Class'}</TableHead>
+                    <TableHead className="min-w-[100px]"><Clock className="h-3 w-3 inline mr-1" />{bn ? 'সময়' : 'Time'}</TableHead>
+                    <TableHead>{bn ? 'রুম' : 'Room'}</TableHead>
+                    <TableHead>{bn ? 'মন্তব্য' : 'Notes'}</TableHead>
+                    <TableHead className="w-20"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {entries?.map((e, idx) => {
+                    const subj = e.subjects as any;
+                    const cls = e.classes as any;
+                    const div = cls?.divisions as any;
+                    const dateObj = new Date(e.exam_date + 'T00:00:00');
+                    const dayName = dateObj.toLocaleDateString(bn ? 'bn-BD' : 'en-GB', { weekday: 'short' });
+                    const formattedDate = dateObj.toLocaleDateString(bn ? 'bn-BD' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                    return (
+                      <TableRow key={e.id}>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{idx + 1}</TableCell>
+                        <TableCell className="text-sm font-medium whitespace-nowrap">{formattedDate}</TableCell>
+                        <TableCell className="text-xs">{dayName}</TableCell>
+                        <TableCell className="text-sm font-medium">
+                          {subj ? (bn ? subj.name_bn : subj.name) : '-'}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {cls ? (bn ? `${div?.name_bn || ''} - ${cls.name_bn}` : `${div?.name || ''} - ${cls.name}`) : (bn ? 'সকল' : 'All')}
+                        </TableCell>
+                        <TableCell className="text-xs whitespace-nowrap">
+                          {e.start_time?.slice(0, 5)} - {e.end_time?.slice(0, 5)}
+                        </TableCell>
+                        <TableCell className="text-xs">{e.room || '-'}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{bn ? e.notes_bn : e.notes || '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditEntry(e)}>
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteEntry.mutate(e.id)}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
-
-      {sortedDates.map(date => {
-        const dateEntries = entriesByDate[date] || [];
-        const formatted = new Date(date + 'T00:00:00').toLocaleDateString(bn ? 'bn-BD' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        return (
-          <Card key={date}>
-            <CardHeader className="py-3 px-4">
-              <CardTitle className="text-base flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" /> {formatted}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-4 pb-3 pt-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead><BookOpen className="h-3 w-3 inline mr-1" />{bn ? 'বিষয়' : 'Subject'}</TableHead>
-                      <TableHead>{bn ? 'শ্রেণী' : 'Class'}</TableHead>
-                      <TableHead><Clock className="h-3 w-3 inline mr-1" />{bn ? 'সময়' : 'Time'}</TableHead>
-                      <TableHead>{bn ? 'রুম' : 'Room'}</TableHead>
-                      <TableHead className="w-20"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {dateEntries.map(e => {
-                      const subj = e.subjects as any;
-                      const cls = e.classes as any;
-                      const div = cls?.divisions as any;
-                      return (
-                        <TableRow key={e.id}>
-                          <TableCell className="text-sm font-medium">
-                            {subj ? (bn ? subj.name_bn : subj.name) : '-'}
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {cls ? (bn ? `${div?.name_bn || ''} - ${cls.name_bn}` : `${div?.name || ''} - ${cls.name}`) : (bn ? 'সকল' : 'All')}
-                          </TableCell>
-                          <TableCell className="text-xs whitespace-nowrap">
-                            {e.start_time?.slice(0, 5)} - {e.end_time?.slice(0, 5)}
-                          </TableCell>
-                          <TableCell className="text-sm">{e.room || '-'}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditEntry(e)}>
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteEntry.mutate(e.id)}>
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
     </div>
   );
 };
