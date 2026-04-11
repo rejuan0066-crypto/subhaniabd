@@ -643,15 +643,14 @@ const AdminJoiningLetters = () => {
                                 <div className="w-36 border-t border-foreground/40 mb-1" />
                                 <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
                                 <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
-                              <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
-                              <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                                <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
+                                <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                              </div>
                             </div>
-                          </div>
-                        </Draggable>
-                      </div>
+                          </Draggable>
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </div>
 
                   {/* Actions */}
