@@ -360,7 +360,9 @@ const AdminClassRoutine = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
-        <BackButton onClick={() => setSelectedRoutineId(null)} />
+        <Button variant="ghost" size="sm" onClick={() => setSelectedRoutineId(null)}>
+          <span className="mr-1">←</span> {language === 'bn' ? 'পেছনে যান' : 'Go Back'}
+        </Button>
         <h1 className="text-lg font-bold flex-1 min-w-0 truncate">
           {language === 'bn' ? selectedRoutine?.name_bn : selectedRoutine?.name}
         </h1>
