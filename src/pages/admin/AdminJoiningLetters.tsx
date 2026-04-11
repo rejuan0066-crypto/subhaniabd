@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
+import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, AlignLeft, AlignCenter, AlignRight, AlignJustify, Move, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -44,6 +44,63 @@ const Editable = ({ value, onChange, editing, className = '', style, tag: Tag = 
   );
 };
 
+/* ── Draggable wrapper for edit mode ──────────────────── */
+interface DraggableProps {
+  id: string;
+  editing: boolean;
+  positions: Record<string, { x: number; y: number }>;
+  onMove: (id: string, pos: { x: number; y: number }) => void;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+const Draggable = ({ id, editing, positions, onMove, children, className = '', style }: DraggableProps) => {
+  const pos = positions[id] || { x: 0, y: 0 };
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!editing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = ev.clientX - dragRef.current.startX;
+      const dy = ev.clientY - dragRef.current.startY;
+      onMove(id, { x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+    };
+    const onMouseUp = () => {
+      dragRef.current = null;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  return (
+    <div
+      className={`${className} ${editing ? 'relative group/drag' : ''}`}
+      style={{
+        ...style,
+        transform: `translate(${pos.x}px, ${pos.y}px)`,
+        transition: dragRef.current ? 'none' : 'transform 0.15s ease',
+      }}
+    >
+      {editing && (
+        <button
+          onMouseDown={onMouseDown}
+          className="absolute -left-5 top-0 p-0.5 rounded bg-primary/10 text-primary opacity-0 group-hover/drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+          title="Drag"
+        >
+          <Move className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {children}
+    </div>
+  );
+};
 const AdminJoiningLetters = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -64,6 +121,11 @@ const AdminJoiningLetters = () => {
   const [bodyAlign, setBodyAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
   const [salutationAlign, setSalutationAlign] = useState<'left' | 'center' | 'right'>('left');
   const [nameAlign, setNameAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [dragPositions, setDragPositions] = useState<Record<string, { x: number; y: number }>>({});
+
+  const handleDragMove = (id: string, pos: { x: number; y: number }) => {
+    setDragPositions(prev => ({ ...prev, [id]: pos }));
+  };
 
   const resetOverrides = () => {
     setOverrides({});
@@ -73,6 +135,7 @@ const AdminJoiningLetters = () => {
     setBodyAlign('center');
     setSalutationAlign('left');
     setNameAlign('left');
+    setDragPositions({});
   };
 
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
@@ -396,6 +459,12 @@ const AdminJoiningLetters = () => {
                 <div className="flex flex-col">
                   {/* Edit mode toggle */}
                   <div className="flex items-center justify-end gap-2 px-4 pt-3">
+                    {editMode && Object.keys(dragPositions).length > 0 && (
+                      <Button size="sm" variant="outline" onClick={() => setDragPositions({})} className="gap-1.5 text-xs">
+                        <RotateCcw className="w-3 h-3" />
+                        {bn ? 'পজিশন রিসেট' : 'Reset Positions'}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant={editMode ? 'default' : 'outline'}
@@ -500,16 +569,22 @@ const AdminJoiningLetters = () => {
                                 </div>
                               </div>
                             )}
-                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="" style={{ textAlign: salutationAlign }} />
-                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))', textAlign: nameAlign }} />
-                            <Editable
-                              tag="p"
-                              value={r.bodyText}
-                              onChange={v => set('bodyText', v)}
-                              editing={editMode}
-                              className=""
-                              style={{ textAlign: bodyAlign, whiteSpace: 'pre-line' }}
-                            />
+                            <Draggable id="salutation" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="" style={{ textAlign: salutationAlign }} />
+                            </Draggable>
+                            <Draggable id="staffName" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))', textAlign: nameAlign }} />
+                            </Draggable>
+                            <Draggable id="bodyText" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable
+                                tag="p"
+                                value={r.bodyText}
+                                onChange={v => set('bodyText', v)}
+                                editing={editMode}
+                                className=""
+                                style={{ textAlign: bodyAlign, whiteSpace: 'pre-line' }}
+                              />
+                            </Draggable>
                           </div>
 
                           {/* Photo – clickable in edit mode */}
@@ -537,36 +612,42 @@ const AdminJoiningLetters = () => {
                         {/* Signature area */}
                         <div className="flex justify-between items-end mt-12 pt-4">
                           {/* QR */}
-                          <div className="flex flex-col items-center gap-1">
-                            <QRCodeSVG
-                              value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
-                              size={64}
-                              level="M"
-                              className="opacity-80"
-                            />
-                            <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
-                          </div>
+                          <Draggable id="qrBlock" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                            <div className="flex flex-col items-center gap-1">
+                              <QRCodeSVG
+                                value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
+                                size={64}
+                                level="M"
+                                className="opacity-80"
+                              />
+                              <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+                            </div>
+                          </Draggable>
 
                           {/* Candidate sig */}
-                          <div className="text-center">
-                            <div className="w-36 border-t border-foreground/40 mb-1" />
-                            <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
-                            <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-                          </div>
-
-                          {/* Authority sig + Seal */}
-                          <div className="flex items-end gap-3">
-                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
-                              <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
-                            </div>
+                          <Draggable id="candidateSig" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
                             <div className="text-center">
                               <div className="w-36 border-t border-foreground/40 mb-1" />
-                              <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
-                              <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
-                              <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
+                              <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
                               <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                             </div>
-                          </div>
+                          </Draggable>
+
+                          {/* Authority sig + Seal */}
+                          <Draggable id="authoritySig" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                            <div className="flex items-end gap-3">
+                              <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
+                                <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
+                              </div>
+                              <div className="text-center">
+                                <div className="w-36 border-t border-foreground/40 mb-1" />
+                                <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
+                                <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
+                                <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
+                                <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                              </div>
+                            </div>
+                          </Draggable>
                         </div>
                       </div>
                     </div>
