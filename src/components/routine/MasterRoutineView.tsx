@@ -360,12 +360,6 @@ const MasterRoutineView = () => {
                   </p>
                 )}
 
-                {/* Class range */}
-                {classRangeText && (
-                  <p className="text-[10px] text-muted-foreground font-medium">
-                    {classRangeText} {bn ? 'শ্রেণী' : ''}
-                  </p>
-                )}
 
                 {/* Student count */}
                 {studentCount !== undefined && studentCount > 0 && (
