@@ -612,32 +612,37 @@ const AdminJoiningLetters = () => {
                         {/* Signature area */}
                         <div className="flex justify-between items-end mt-12 pt-4">
                           {/* QR */}
-                          <div className="flex flex-col items-center gap-1">
-                            <QRCodeSVG
-                              value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
-                              size={64}
-                              level="M"
-                              className="opacity-80"
-                            />
-                            <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
-                          </div>
+                          <Draggable id="qrBlock" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                            <div className="flex flex-col items-center gap-1">
+                              <QRCodeSVG
+                                value={`JL:${viewLetter.letter_number}|${viewLetter.staff_name}|${viewLetter.joining_date}`}
+                                size={64}
+                                level="M"
+                                className="opacity-80"
+                              />
+                              <p className="text-[9px] text-muted-foreground">{bn ? 'ডিজিটাল যাচাই' : 'Digital Verification'}</p>
+                            </div>
+                          </Draggable>
 
                           {/* Candidate sig */}
-                          <div className="text-center">
-                            <div className="w-36 border-t border-foreground/40 mb-1" />
-                            <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
-                            <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
-                          </div>
-
-                          {/* Authority sig + Seal */}
-                          <div className="flex items-end gap-3">
-                            <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
-                              <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
-                            </div>
+                          <Draggable id="candidateSig" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
                             <div className="text-center">
                               <div className="w-36 border-t border-foreground/40 mb-1" />
-                              <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
-                              <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
+                              <Editable tag="p" value={r.candidateSigLabel} onChange={v => set('candidateSigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground" />
+                              <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
+                            </div>
+                          </Draggable>
+
+                          {/* Authority sig + Seal */}
+                          <Draggable id="authoritySig" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                            <div className="flex items-end gap-3">
+                              <div className="w-14 h-14 rounded-full border-2 border-dashed border-foreground/25 flex items-center justify-center">
+                                <span className="text-[7px] text-muted-foreground text-center leading-tight">{bn ? 'সিল' : 'Official'}<br/>{bn ? '' : 'Seal'}</span>
+                              </div>
+                              <div className="text-center">
+                                <div className="w-36 border-t border-foreground/40 mb-1" />
+                                <Editable tag="p" value={r.pName} onChange={v => set('pName', v)} editing={editMode} className="text-[11px] font-semibold text-foreground" />
+                                <Editable tag="p" value={r.authoritySigLabel} onChange={v => set('authoritySigLabel', v)} editing={editMode} className="text-[11px] text-muted-foreground font-medium" />
                               <Editable tag="p" value={r.pTitle} onChange={v => set('pTitle', v)} editing={editMode} className="text-[10px] text-muted-foreground" />
                               <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                             </div>
