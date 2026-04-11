@@ -317,43 +317,60 @@ const AdminExamRoutine = () => {
         </div>
 
         {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (
-          <div className="grid gap-3">
-            {routines?.map(r => {
-              const es = r.exam_sessions as any;
-              const acad = es?.academic_sessions as any;
-              return (
-                <Card key={r.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0" onClick={() => setSelectedRoutineId(r.id)}>
-                        <h3 className="font-semibold truncate">{bn ? r.name_bn : r.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {bn ? es?.name_bn || es?.name : es?.name}
-                          {acad && ` • ${bn ? acad.name_bn || acad.name : acad.name}`}
-                        </p>
-                        <Badge variant={r.is_active ? 'default' : 'secondary'} className="mt-1">
-                          {r.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-1 shrink-0">
-                        <Button size="icon" variant="ghost" onClick={() => setSelectedRoutineId(r.id)}><Eye className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => copyRoutine.mutate(r.id)}><Copy className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => {
-                          setForm({ name: r.name, name_bn: r.name_bn, exam_session_id: r.exam_session_id, is_active: r.is_active ?? true });
-                          setEditingId(r.id);
-                          setShowEdit(true);
-                        }}><Edit className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" className="text-destructive" onClick={() => {
-                          if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteRoutine.mutate(r.id);
-                        }}><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-            {routines?.length === 0 && <p className="text-center text-muted-foreground py-8">{bn ? 'কোনো রুটিন নেই' : 'No routines'}</p>}
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[40px]">#</TableHead>
+                      <TableHead className="min-w-[150px]">{bn ? 'রুটিন নাম' : 'Routine Name'}</TableHead>
+                      <TableHead className="min-w-[120px]">{bn ? 'পরীক্ষা সেশন' : 'Exam Session'}</TableHead>
+                      <TableHead className="min-w-[120px]">{bn ? 'একাডেমিক সেশন' : 'Academic Session'}</TableHead>
+                      <TableHead className="min-w-[80px]">{bn ? 'স্ট্যাটাস' : 'Status'}</TableHead>
+                      <TableHead className="w-28 text-right">{bn ? 'অ্যাকশন' : 'Action'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {routines?.map((r, idx) => {
+                      const es = r.exam_sessions as any;
+                      const acad = es?.academic_sessions as any;
+                      return (
+                        <TableRow key={r.id} className="cursor-pointer hover:bg-accent/50" onClick={() => setSelectedRoutineId(r.id)}>
+                          <TableCell className="text-xs text-muted-foreground">{idx + 1}</TableCell>
+                          <TableCell className="font-medium">{bn ? r.name_bn : r.name}</TableCell>
+                          <TableCell className="text-sm">{bn ? es?.name_bn || es?.name : es?.name}</TableCell>
+                          <TableCell className="text-sm">{acad ? (bn ? acad.name_bn || acad.name : acad.name) : '-'}</TableCell>
+                          <TableCell>
+                            <Badge variant={r.is_active ? 'default' : 'secondary'}>
+                              {r.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right" onClick={e => e.stopPropagation()}>
+                            <div className="flex gap-1 justify-end">
+                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setSelectedRoutineId(r.id)}><Eye className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => copyRoutine.mutate(r.id)}><Copy className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => {
+                                setForm({ name: r.name, name_bn: r.name_bn, exam_session_id: r.exam_session_id, is_active: r.is_active ?? true });
+                                setEditingId(r.id);
+                                setShowEdit(true);
+                              }}><Edit className="h-3.5 w-3.5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => {
+                                if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteRoutine.mutate(r.id);
+                              }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {routines?.length === 0 && (
+                      <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো রুটিন নেই' : 'No routines'}</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         <Dialog open={showEdit} onOpenChange={v => { setShowEdit(v); if (!v) setEditingId(null); }}>
