@@ -459,6 +459,12 @@ const AdminJoiningLetters = () => {
                 <div className="flex flex-col">
                   {/* Edit mode toggle */}
                   <div className="flex items-center justify-end gap-2 px-4 pt-3">
+                    {editMode && Object.keys(dragPositions).length > 0 && (
+                      <Button size="sm" variant="outline" onClick={() => setDragPositions({})} className="gap-1.5 text-xs">
+                        <RotateCcw className="w-3 h-3" />
+                        {bn ? 'পজিশন রিসেট' : 'Reset Positions'}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant={editMode ? 'default' : 'outline'}
