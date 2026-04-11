@@ -1178,7 +1178,7 @@ const AdminUserManagement = () => {
                 {/* ===== EMAIL CHANGE SECTION ===== */}
                 <div className="rounded-xl border-2 border-primary/20 bg-card p-4 space-y-3">
                   <h3 className="flex items-center gap-2 font-semibold text-base text-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <Mail className="w-5 h-5" />
                     {bn ? 'লগইন ইমেইল পরিবর্তন' : 'Login Email Change'}
                   </h3>
 
@@ -1186,6 +1186,88 @@ const AdminUserManagement = () => {
                     <Label className="text-xs text-muted-foreground">{bn ? 'বর্তমান ইমেইল' : 'Current Email'}</Label>
                     <Input value={profileUser.email} readOnly className="bg-muted/50 text-muted-foreground" />
                   </div>
+
+                  {/* OTP Toggle */}
+                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                    <div className="flex items-center gap-2">
+                      <Switch checked={emailOtpEnabled} onCheckedChange={(v) => { setEmailOtpEnabled(v); setEmailOtpSent(false); setEmailOtpCode(''); setEmailOtpVerified(false); }} />
+                      <div>
+                        <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                        <p className="text-xs text-muted-foreground">{bn ? 'বর্তমান ইমেইলে কোড পাঠিয়ে যাচাই করুন' : 'Verify by sending code to current email'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* OTP Send & Verify */}
+                  {emailOtpEnabled && (
+                    <div className="space-y-2 rounded-lg border border-dashed border-primary/30 p-3 bg-primary/5">
+                      {!emailOtpVerified ? (
+                        <>
+                          <div className="flex gap-2">
+                            <Input
+                              value={emailOtpCode}
+                              onChange={e => setEmailOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              placeholder={bn ? '৬ ডিজিট OTP কোড' : '6-digit OTP code'}
+                              maxLength={6}
+                              className="flex-1"
+                              disabled={!emailOtpSent}
+                            />
+                            {!emailOtpSent ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={otpSending}
+                                onClick={async () => {
+                                  const result = await sendOtp(profileUser.email, 'email_verification', profileUser.full_name);
+                                  if (result.success) {
+                                    setEmailOtpSent(true);
+                                    toast.success(bn ? `✅ OTP পাঠানো হয়েছে (${result.expiryMinutes} মিনিট)` : `✅ OTP sent (${result.expiryMinutes} min)`);
+                                  }
+                                }}
+                              >
+                                {otpSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendHorizonal className="w-4 h-4" />}
+                                <span className="ml-1">{bn ? 'OTP পাঠান' : 'Send OTP'}</span>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                disabled={otpVerifying || emailOtpCode.length !== 6}
+                                onClick={async () => {
+                                  const result = await verifyOtp(profileUser.email, emailOtpCode, 'email_verification');
+                                  if (result.valid) {
+                                    setEmailOtpVerified(true);
+                                    toast.success(bn ? '✅ OTP যাচাই সফল!' : '✅ OTP verified!');
+                                  } else {
+                                    toast.error(result.error || (bn ? 'ভুল OTP কোড' : 'Invalid OTP'));
+                                  }
+                                }}
+                              >
+                                {otpVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                                <span className="ml-1">{bn ? 'যাচাই' : 'Verify'}</span>
+                              </Button>
+                            )}
+                          </div>
+                          {emailOtpSent && (
+                            <button
+                              type="button"
+                              className="text-xs text-primary hover:underline"
+                              onClick={async () => {
+                                const result = await sendOtp(profileUser.email, 'email_verification', profileUser.full_name);
+                                if (result.success) toast.success(bn ? 'নতুন OTP পাঠানো হয়েছে' : 'New OTP sent');
+                              }}
+                            >
+                              {bn ? 'আবার OTP পাঠান' : 'Resend OTP'}
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+                          <ShieldCheck className="w-4 h-4" />
+                          {bn ? 'OTP যাচাই সম্পন্ন ✓' : 'OTP Verified ✓'}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">{bn ? 'নতুন ইমেইল' : 'New Email'}</Label>
@@ -1213,7 +1295,12 @@ const AdminUserManagement = () => {
 
                   <Button
                     className="w-full btn-primary-gradient"
-                    disabled={profileSaving === 'email' || !profileEditEmail.trim() || profileEditEmail === profileUser.email}
+                    disabled={
+                      profileSaving === 'email' ||
+                      !profileEditEmail.trim() ||
+                      profileEditEmail === profileUser.email ||
+                      (emailOtpEnabled && !emailOtpVerified)
+                    }
                     onClick={async () => {
                       if (!profileEditEmail.trim() || !profileEditEmail.includes('@')) {
                         toast.error(bn ? 'সঠিক ইমেইল দিন' : 'Enter a valid email');
@@ -1227,6 +1314,7 @@ const AdminUserManagement = () => {
                         if (error || !data?.success) throw new Error(data?.error || error?.message);
                         toast.success(bn ? '✅ ইমেইল আপডেট হয়েছে' : '✅ Email updated');
                         setProfileUser({ ...profileUser, email: profileEditEmail.trim() });
+                        setEmailOtpEnabled(false); setEmailOtpSent(false); setEmailOtpCode(''); setEmailOtpVerified(false);
                         fetchUsers();
                       } catch (err: any) {
                         toast.error(err?.message || (bn ? 'ইমেইল আপডেট ব্যর্থ' : 'Failed to update email'));
@@ -1245,6 +1333,88 @@ const AdminUserManagement = () => {
                     <KeyRound className="w-5 h-5" />
                     {bn ? 'পাসওয়ার্ড পরিবর্তন' : 'Password Change'}
                   </h3>
+
+                  {/* OTP Toggle */}
+                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                    <div className="flex items-center gap-2">
+                      <Switch checked={pwOtpEnabled} onCheckedChange={(v) => { setPwOtpEnabled(v); setPwOtpSent(false); setPwOtpCode(''); setPwOtpVerified(false); }} />
+                      <div>
+                        <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                        <p className="text-xs text-muted-foreground">{bn ? 'ইমেইলে কোড পাঠিয়ে নিরাপত্তা নিশ্চিত করুন' : 'Send code to email for security'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* OTP Send & Verify */}
+                  {pwOtpEnabled && (
+                    <div className="space-y-2 rounded-lg border border-dashed border-primary/30 p-3 bg-primary/5">
+                      {!pwOtpVerified ? (
+                        <>
+                          <div className="flex gap-2">
+                            <Input
+                              value={pwOtpCode}
+                              onChange={e => setPwOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              placeholder={bn ? '৬ ডিজিট OTP কোড' : '6-digit OTP code'}
+                              maxLength={6}
+                              className="flex-1"
+                              disabled={!pwOtpSent}
+                            />
+                            {!pwOtpSent ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={otpSending}
+                                onClick={async () => {
+                                  const result = await sendOtp(profileUser.email, 'password_reset', profileUser.full_name);
+                                  if (result.success) {
+                                    setPwOtpSent(true);
+                                    toast.success(bn ? `✅ OTP পাঠানো হয়েছে (${result.expiryMinutes} মিনিট)` : `✅ OTP sent (${result.expiryMinutes} min)`);
+                                  }
+                                }}
+                              >
+                                {otpSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <SendHorizonal className="w-4 h-4" />}
+                                <span className="ml-1">{bn ? 'OTP পাঠান' : 'Send OTP'}</span>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                disabled={otpVerifying || pwOtpCode.length !== 6}
+                                onClick={async () => {
+                                  const result = await verifyOtp(profileUser.email, pwOtpCode, 'password_reset');
+                                  if (result.valid) {
+                                    setPwOtpVerified(true);
+                                    toast.success(bn ? '✅ OTP যাচাই সফল!' : '✅ OTP verified!');
+                                  } else {
+                                    toast.error(result.error || (bn ? 'ভুল OTP কোড' : 'Invalid OTP'));
+                                  }
+                                }}
+                              >
+                                {otpVerifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                                <span className="ml-1">{bn ? 'যাচাই' : 'Verify'}</span>
+                              </Button>
+                            )}
+                          </div>
+                          {pwOtpSent && (
+                            <button
+                              type="button"
+                              className="text-xs text-primary hover:underline"
+                              onClick={async () => {
+                                const result = await sendOtp(profileUser.email, 'password_reset', profileUser.full_name);
+                                if (result.success) toast.success(bn ? 'নতুন OTP পাঠানো হয়েছে' : 'New OTP sent');
+                              }}
+                            >
+                              {bn ? 'আবার OTP পাঠান' : 'Resend OTP'}
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+                          <ShieldCheck className="w-4 h-4" />
+                          {bn ? 'OTP যাচাই সম্পন্ন ✓' : 'OTP Verified ✓'}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground">{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
@@ -1281,6 +1451,8 @@ const AdminUserManagement = () => {
                     <div className="relative">
                       <Input
                         type={profileShowPw ? 'text' : 'password'}
+                        value={profileConfirmPassword}
+                        onChange={e => setProfileConfirmPassword(e.target.value)}
                         placeholder={bn ? 'নতুন পাসওয়ার্ড পুনরায় দিন' : 'Re-enter new password'}
                         className="pr-10"
                       />
@@ -1292,8 +1464,17 @@ const AdminUserManagement = () => {
 
                   <Button
                     className="w-full btn-primary-gradient"
-                    disabled={profileSaving === 'password' || profileNewPassword.length < 6}
+                    disabled={
+                      profileSaving === 'password' ||
+                      profileNewPassword.length < 6 ||
+                      (profileConfirmPassword !== '' && profileNewPassword !== profileConfirmPassword) ||
+                      (pwOtpEnabled && !pwOtpVerified)
+                    }
                     onClick={async () => {
+                      if (profileConfirmPassword && profileNewPassword !== profileConfirmPassword) {
+                        toast.error(bn ? 'পাসওয়ার্ড মিলছে না' : 'Passwords do not match');
+                        return;
+                      }
                       setProfileSaving('password');
                       try {
                         const { data, error } = await supabase.functions.invoke('manage-users', {
@@ -1302,6 +1483,8 @@ const AdminUserManagement = () => {
                         if (error || !data?.success) throw new Error(data?.error || error?.message);
                         toast.success(bn ? '✅ পাসওয়ার্ড আপডেট হয়েছে' : '✅ Password updated');
                         setProfileNewPassword('');
+                        setProfileConfirmPassword('');
+                        setPwOtpEnabled(false); setPwOtpSent(false); setPwOtpCode(''); setPwOtpVerified(false);
                       } catch (err: any) {
                         toast.error(err?.message || (bn ? 'পাসওয়ার্ড আপডেট ব্যর্থ' : 'Failed to update password'));
                       }
