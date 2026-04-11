@@ -110,8 +110,19 @@ const AdminUserManagement = () => {
   const [profileEditName, setProfileEditName] = useState('');
   const [profileEditEmail, setProfileEditEmail] = useState('');
   const [profileNewPassword, setProfileNewPassword] = useState('');
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
   const [profileShowPw, setProfileShowPw] = useState(false);
   const [profileSaving, setProfileSaving] = useState<string | null>(null);
+  // OTP states
+  const [emailOtpEnabled, setEmailOtpEnabled] = useState(false);
+  const [pwOtpEnabled, setPwOtpEnabled] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [pwOtpSent, setPwOtpSent] = useState(false);
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [pwOtpCode, setPwOtpCode] = useState('');
+  const [emailOtpVerified, setEmailOtpVerified] = useState(false);
+  const [pwOtpVerified, setPwOtpVerified] = useState(false);
+  const { sendOtp, verifyOtp, sending: otpSending, verifying: otpVerifying } = useOtpService();
 
   // Create form
   const [email, setEmail] = useState('');
