@@ -647,7 +647,7 @@ const AdminJoiningLetters = () => {
                               <p className="text-[10px] text-muted-foreground mt-1">{bn ? 'তারিখ: __________' : 'Date: __________'}</p>
                             </div>
                           </div>
-                        </div>
+                        </Draggable>
                       </div>
                     </div>
                   </div>
