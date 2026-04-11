@@ -644,7 +644,7 @@ const AdminUserManagement = () => {
                               size="icon"
                               variant="ghost"
                               className="text-primary hover:text-primary hover:bg-primary/10"
-                              onClick={() => { setProfileUser(u); setProfileOpen(true); }}
+                              onClick={() => { setProfileUser(u); setProfileEditName(u.full_name || ''); setProfileEditEmail(u.email); setProfileNewPassword(''); setProfileShowPw(false); setProfileOpen(true); }}
                               title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}
                             >
                               <UserCircle className="w-4 h-4" />
