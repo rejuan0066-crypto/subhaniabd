@@ -121,6 +121,11 @@ const AdminJoiningLetters = () => {
   const [bodyAlign, setBodyAlign] = useState<'left' | 'center' | 'right' | 'justify'>('center');
   const [salutationAlign, setSalutationAlign] = useState<'left' | 'center' | 'right'>('left');
   const [nameAlign, setNameAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [dragPositions, setDragPositions] = useState<Record<string, { x: number; y: number }>>({});
+
+  const handleDragMove = (id: string, pos: { x: number; y: number }) => {
+    setDragPositions(prev => ({ ...prev, [id]: pos }));
+  };
 
   const resetOverrides = () => {
     setOverrides({});
@@ -130,6 +135,7 @@ const AdminJoiningLetters = () => {
     setBodyAlign('center');
     setSalutationAlign('left');
     setNameAlign('left');
+    setDragPositions({});
   };
 
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
