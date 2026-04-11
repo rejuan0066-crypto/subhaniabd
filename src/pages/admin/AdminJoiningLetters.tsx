@@ -127,6 +127,27 @@ const AdminJoiningLetters = () => {
     setDragPositions(prev => ({ ...prev, [id]: pos }));
   };
 
+  /* ── Load saved overrides when opening a letter ── */
+  const loadSavedOverrides = (letter: any) => {
+    const saved = letter.letter_data?.overrides as Record<string, any> | undefined;
+    if (saved) {
+      setOverrides(saved.textOverrides || {});
+      setBodyAlign(saved.bodyAlign || 'center');
+      setSalutationAlign(saved.salutationAlign || 'left');
+      setNameAlign(saved.nameAlign || 'left');
+      setDragPositions(saved.dragPositions || {});
+    } else {
+      setOverrides({});
+      setBodyAlign('center');
+      setSalutationAlign('left');
+      setNameAlign('left');
+      setDragPositions({});
+    }
+    setLocalLogo(null);
+    setLocalPhoto(null);
+    setEditMode(false);
+  };
+
   const resetOverrides = () => {
     setOverrides({});
     setEditMode(false);
@@ -180,7 +201,43 @@ const AdminJoiningLetters = () => {
       return map;
     },
   });
+  /* ── Save mutation ─────────────────────────── */
+  const saveMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const { error } = await supabase
+        .from('joining_letters')
+        .update({ letter_data: data, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['joining-letters'] });
+      toast.success(bn ? 'সেভ হয়েছে' : 'Saved successfully');
+    },
+    onError: () => {
+      toast.error(bn ? 'সেভ করা যায়নি' : 'Failed to save');
+    },
+  });
 
+  const handleSave = () => {
+    if (!viewLetter) return;
+    const existingData = (viewLetter.letter_data && typeof viewLetter.letter_data === 'object') ? viewLetter.letter_data : {};
+    const newData = {
+      ...existingData,
+      overrides: {
+        textOverrides: overrides,
+        bodyAlign,
+        salutationAlign,
+        nameAlign,
+        dragPositions,
+      },
+    };
+    saveMutation.mutate({ id: viewLetter.id, data: newData });
+    // Update the local viewLetter so subsequent prints use saved data
+    setViewLetter((prev: any) => prev ? { ...prev, letter_data: newData } : prev);
+  };
+
+  
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('joining_letters').delete().eq('id', id);
@@ -429,7 +486,7 @@ const AdminJoiningLetters = () => {
                     <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
+                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { loadSavedOverrides(l); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
@@ -654,8 +711,14 @@ const AdminJoiningLetters = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="px-4 pb-4">
-                    <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
+                  <div className="px-4 pb-4 flex gap-2">
+                    {editMode && (
+                      <Button variant="default" className="flex-1 gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
+                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {bn ? 'সেভ করুন' : 'Save Changes'}
+                      </Button>
+                    )}
+                    <Button variant={editMode ? 'outline' : 'default'} className="flex-1" onClick={() => handlePrint(viewLetter)}>
                       <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
                     </Button>
                   </div>
