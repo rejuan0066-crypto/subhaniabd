@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Printer } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Printer, Plus, Minus, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 const DAYS = [
   { value: 0, label_bn: 'শনিবার', label_en: 'Saturday', short_bn: 'শনি', short_en: 'Sat' },
@@ -20,13 +22,95 @@ const DAYS = [
 
 const PERIOD_LABELS_BN = ['১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
 
+const toBn = (n: number | string) => String(n).replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
+
+const fmtTime = (t: string, bn: boolean) => {
+  if (!t) return '';
+  const parts = t.slice(0, 5).split(':');
+  let h = parseInt(parts[0]);
+  const m = parts[1];
+  if (h > 12) h -= 12;
+  if (h === 0) h = 12;
+  const timeStr = `${String(h).padStart(2, '0')}:${m}`;
+  return bn ? toBn(timeStr) : timeStr;
+};
+
+/* ─── Cell Editor Popover ─── */
+interface CellEditorProps {
+  subjectId: string;
+  teacherName: string;
+  teacherNameBn: string;
+  subjects: any[];
+  bn: boolean;
+  onSave: (subjectId: string, teacherName: string, teacherNameBn: string) => void;
+  children: React.ReactNode;
+}
+
+const CellEditor = ({ subjectId, teacherName, teacherNameBn, subjects, bn, onSave, children }: CellEditorProps) => {
+  const [open, setOpen] = useState(false);
+  const [localSubjectId, setLocalSubjectId] = useState(subjectId);
+  const [localTeacher, setLocalTeacher] = useState(teacherName);
+  const [localTeacherBn, setLocalTeacherBn] = useState(teacherNameBn);
+
+  const handleOpen = (isOpen: boolean) => {
+    if (isOpen) {
+      setLocalSubjectId(subjectId);
+      setLocalTeacher(teacherName);
+      setLocalTeacherBn(teacherNameBn);
+    }
+    setOpen(isOpen);
+  };
+
+  const handleSave = () => {
+    onSave(localSubjectId, localTeacher, localTeacherBn);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={handleOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-64 p-3 space-y-2" align="center">
+        <div>
+          <Label className="text-xs">{bn ? 'বিষয়' : 'Subject'}</Label>
+          <Select value={localSubjectId} onValueChange={setLocalSubjectId}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'বিষয় নির্বাচন' : 'Select subject'} /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{bn ? '-- খালি --' : '-- Empty --'}</SelectItem>
+              {subjects.map(s => (
+                <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (বাংলা)' : 'Teacher (Bangla)'}</Label>
+          <Input className="h-8 text-xs" value={localTeacherBn} onChange={e => setLocalTeacherBn(e.target.value)} placeholder={bn ? 'শিক্ষকের নাম' : 'Teacher name BN'} />
+        </div>
+        <div>
+          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (ইংরেজি)' : 'Teacher (English)'}</Label>
+          <Input className="h-8 text-xs" value={localTeacher} onChange={e => setLocalTeacher(e.target.value)} placeholder={bn ? 'Teacher name' : 'Teacher name EN'} />
+        </div>
+        <Button size="sm" className="w-full h-7 text-xs gap-1" onClick={handleSave}>
+          <Save className="h-3 w-3" /> {bn ? 'সেভ' : 'Save'}
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+/* ─── Main Component ─── */
 const MasterRoutineView = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const queryClient = useQueryClient();
+
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [selectedDivisionId, setSelectedDivisionId] = useState<string>('all');
-  const [selectedDay, setSelectedDay] = useState<string>('all');
+  const [selectedDay, setSelectedDay] = useState<string>('0'); // default Saturday
+  const [periodCount, setPeriodCount] = useState(8);
+  const [breakAfter, setBreakAfter] = useState(4); // break after 4th period
 
+  // Queries
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
     queryFn: async () => {
@@ -52,24 +136,61 @@ const MasterRoutineView = () => {
     },
   });
 
+  const { data: allClasses } = useQuery({
+    queryKey: ['all-classes-for-routine'],
+    queryFn: async () => {
+      const { data } = await supabase.from('classes').select('*, divisions(id, name, name_bn)').eq('is_active', true).order('sort_order');
+      return data || [];
+    },
+  });
+
+  const { data: subjects } = useQuery({
+    queryKey: ['subjects-for-routine'],
+    queryFn: async () => {
+      const { data } = await supabase.from('subjects').select('id, name, name_bn').eq('is_active', true).order('name');
+      return data || [];
+    },
+  });
+
   const { data: routines } = useQuery({
     queryKey: ['master-routines', selectedSessionId],
     queryFn: async () => {
       if (!selectedSessionId) return [];
       const { data } = await supabase
         .from('class_routines')
-        .select('*, classes(id, name, name_bn, sort_order, division_id, divisions(id, name, name_bn))')
+        .select('id, class_id, name, name_bn')
         .eq('academic_session_id', selectedSessionId)
-        .eq('is_active', true)
-        .order('created_at');
+        .eq('is_active', true);
       return data || [];
     },
     enabled: !!selectedSessionId,
   });
 
-  // Get total student count
+  const routineMap = useMemo(() => {
+    const map: Record<string, string> = {}; // class_id -> routine_id
+    (routines || []).forEach(r => { map[r.class_id] = r.id; });
+    return map;
+  }, [routines]);
+
+  const routineIds = useMemo(() => Object.values(routineMap), [routineMap]);
+
+  const { data: allPeriods } = useQuery({
+    queryKey: ['master-routine-periods', routineIds, selectedDay],
+    queryFn: async () => {
+      if (routineIds.length === 0) return [];
+      const { data } = await supabase
+        .from('routine_periods')
+        .select('*, subjects(name, name_bn)')
+        .in('routine_id', routineIds)
+        .eq('day_of_week', Number(selectedDay))
+        .order('period_number');
+      return data || [];
+    },
+    enabled: routineIds.length > 0,
+  });
+
   const { data: studentCount } = useQuery({
-    queryKey: ['total-students-count', selectedSessionId],
+    queryKey: ['total-students-count'],
     queryFn: async () => {
       const { count } = await supabase.from('students').select('id', { count: 'exact', head: true }).eq('status', 'active');
       return count || 0;
@@ -77,57 +198,124 @@ const MasterRoutineView = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const filteredRoutines = (routines || []).filter(r => {
-    if (selectedDivisionId === 'all') return true;
-    return (r.classes as any)?.division_id === selectedDivisionId;
-  }).sort((a, b) => ((a.classes as any)?.sort_order || 0) - ((b.classes as any)?.sort_order || 0));
+  // Filtered classes
+  const filteredClasses = useMemo(() => {
+    if (!allClasses) return [];
+    if (selectedDivisionId === 'all') return allClasses;
+    return allClasses.filter(c => c.division_id === selectedDivisionId);
+  }, [allClasses, selectedDivisionId]);
 
-  const routineIds = filteredRoutines.map(r => r.id);
-  const { data: allPeriods } = useQuery({
-    queryKey: ['master-routine-periods', routineIds],
-    queryFn: async () => {
-      if (routineIds.length === 0) return [];
-      const { data } = await supabase
+  // Period columns: 1..periodCount with break inserted
+  const periodColumns = useMemo(() => {
+    const cols: { num: number; isBreak: boolean }[] = [];
+    let pNum = 1;
+    for (let i = 1; i <= periodCount; i++) {
+      if (i === breakAfter + 1) {
+        cols.push({ num: pNum, isBreak: true });
+        pNum++;
+      }
+      cols.push({ num: pNum, isBreak: false });
+      pNum++;
+    }
+    // If break is at end
+    if (breakAfter >= periodCount) {
+      cols.push({ num: pNum, isBreak: true });
+    }
+    return cols;
+  }, [periodCount, breakAfter]);
+
+  // Get period data for a specific class and period
+  const getPeriodData = useCallback((classId: string, periodNum: number) => {
+    const routineId = routineMap[classId];
+    if (!routineId || !allPeriods) return null;
+    return allPeriods.find(p => p.routine_id === routineId && p.period_number === periodNum);
+  }, [routineMap, allPeriods]);
+
+  // Get existing period times from data
+  const getPeriodTime = useCallback((periodNum: number) => {
+    if (!allPeriods) return { start: '', end: '' };
+    const p = allPeriods.find(pp => pp.period_number === periodNum && !pp.is_break);
+    return { start: p?.start_time || '', end: p?.end_time || '' };
+  }, [allPeriods]);
+
+  // Save cell mutation
+  const saveCellMutation = useMutation({
+    mutationFn: async ({ classId, periodNum, subjectId, teacherName, teacherNameBn, isBreak }: {
+      classId: string; periodNum: number; subjectId: string; teacherName: string; teacherNameBn: string; isBreak?: boolean;
+    }) => {
+      let routineId = routineMap[classId];
+
+      // Auto-create routine if not exists
+      if (!routineId) {
+        const cls = allClasses?.find(c => c.id === classId);
+        const { data: newRoutine, error } = await supabase.from('class_routines').insert({
+          class_id: classId,
+          academic_session_id: selectedSessionId,
+          name: cls?.name || 'Routine',
+          name_bn: cls?.name_bn || 'রুটিন',
+          is_active: true,
+        }).select('id').single();
+        if (error) throw error;
+        routineId = newRoutine.id;
+      }
+
+      // Upsert period
+      const { data: existing } = await supabase
         .from('routine_periods')
-        .select('*, subjects(name, name_bn)')
-        .in('routine_id', routineIds)
-        .order('period_number');
-      return data || [];
+        .select('id')
+        .eq('routine_id', routineId)
+        .eq('day_of_week', Number(selectedDay))
+        .eq('period_number', periodNum)
+        .maybeSingle();
+
+      const periodData = {
+        routine_id: routineId,
+        day_of_week: Number(selectedDay),
+        period_number: periodNum,
+        subject_id: subjectId === 'none' ? null : subjectId || null,
+        teacher_name: teacherName || null,
+        teacher_name_bn: teacherNameBn || null,
+        is_break: isBreak || false,
+        start_time: '08:00',
+        end_time: '08:45',
+      };
+
+      if (existing) {
+        const { error } = await supabase.from('routine_periods').update(periodData).eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('routine_periods').insert(periodData);
+        if (error) throw error;
+      }
     },
-    enabled: routineIds.length > 0,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['master-routine-periods'] });
+      queryClient.invalidateQueries({ queryKey: ['master-routines'] });
+      toast.success(bn ? 'সেভ হয়েছে' : 'Saved');
+    },
+    onError: () => toast.error(bn ? 'সেভ ব্যর্থ' : 'Save failed'),
   });
 
-  const allPeriodNums = [...new Set((allPeriods || []).map(p => p.period_number))].sort((a, b) => a - b);
-  const breakNums = new Set((allPeriods || []).filter(p => p.is_break).map(p => p.period_number));
+  const handleCellSave = (classId: string, periodNum: number, subjectId: string, teacherName: string, teacherNameBn: string) => {
+    saveCellMutation.mutate({ classId, periodNum, subjectId, teacherName, teacherNameBn });
+  };
 
-  let periodLabelIndex = 0;
-  const periodLabels: Record<number, string> = {};
-  allPeriodNums.forEach(num => {
-    if (!breakNums.has(num)) {
-      periodLabels[num] = bn ? (PERIOD_LABELS_BN[periodLabelIndex] || String(periodLabelIndex + 1)) : `P${periodLabelIndex + 1}`;
-      periodLabelIndex++;
+  const selectedSession = sessions?.find(s => s.id === selectedSessionId);
+  const selectedDiv = divisions?.find(d => d.id === selectedDivisionId);
+  const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+  const dayObj = DAYS.find(d => String(d.value) === selectedDay);
+
+  // Period label helpers
+  let periodLabelIdx = 0;
+  const periodLabelsMap: Record<number, string> = {};
+  periodColumns.forEach(col => {
+    if (!col.isBreak) {
+      periodLabelIdx++;
+      periodLabelsMap[col.num] = bn ? (PERIOD_LABELS_BN[periodLabelIdx - 1] || toBn(periodLabelIdx)) : `P${periodLabelIdx}`;
     }
   });
 
-  const fmtTime = (t: string) => {
-    if (!t) return '';
-    const parts = t.slice(0, 5).split(':');
-    let h = parseInt(parts[0]);
-    const m = parts[1];
-    if (h > 12) h -= 12;
-    if (h === 0) h = 12;
-    const timeStr = `${String(h).padStart(2, '0')}:${m}`;
-    if (!bn) return timeStr;
-    return timeStr.replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
-  };
-
-  const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
-  const selectedSession = sessions?.find(s => s.id === selectedSessionId);
-  const selectedDiv = divisions?.find(d => d.id === selectedDivisionId);
-
-
-  const daysToRender = selectedDay === 'all' ? DAYS : DAYS.filter(d => String(d.value) === selectedDay);
-
+  // Print handler
   const handlePrint = () => {
     const el = document.getElementById('master-routine-print');
     if (!el) return;
@@ -142,18 +330,17 @@ const MasterRoutineView = () => {
       table { border-collapse: collapse; width: 100%; }
       th, td { border: 1.5px solid #333; text-align: center; vertical-align: middle; }
       th { background: #d4edda; font-weight: 700; }
-      .inst-header { text-align: center; margin-bottom: 6px; }
-      .inst-header h1 { font-size: 18px; font-weight: 700; }
-      .inst-header p { font-size: 11px; margin: 2px 0; }
+      .header { text-align: center; margin-bottom: 8px; }
+      .header h1 { font-size: 18px; font-weight: 700; }
+      .header p { font-size: 11px; margin: 2px 0; }
       .date-box { position: absolute; top: 10px; right: 15px; font-size: 10px; border: 1px solid #999; padding: 2px 6px; }
       .break-col { background: #c8e6c9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 700; font-size: 10px; min-width: 26px; max-width: 30px; }
-      .class-cell { background: #f5f5f5; font-weight: 700; text-align: center; white-space: nowrap; font-size: 10px; }
-      .cell-inner { display: flex; flex-direction: column; min-height: 36px; }
-      .cell-subject { font-weight: 600; font-size: 9.5px; line-height: 1.3; padding: 2px 3px; flex: 1; display: flex; align-items: center; justify-content: center; }
-      .cell-divider { border-top: 1px solid #999; }
-      .cell-teacher { font-size: 8px; color: #555; line-height: 1.2; padding: 2px 3px; flex: 1; display: flex; align-items: center; justify-content: center; }
-      .day-header { background: #e8f5e9; font-weight: 700; font-size: 11px; text-align: center; padding: 4px; }
-      .footer { margin-top: 6px; font-size: 9px; }
+      .cell-top { font-weight: 600; font-size: 9.5px; padding: 2px 3px; border-bottom: 1px solid #999; min-height: 18px; }
+      .cell-bottom { font-size: 8px; color: #555; padding: 2px 3px; min-height: 18px; }
+      .class-cell { background: #f5f5f5; font-weight: 700; font-size: 10px; white-space: nowrap; }
+      .period-header { background: #d4edda; }
+      .day-label { background: #c8e6c9; font-weight: 700; font-size: 12px; text-align: center; padding: 4px; }
+      .footer { margin-top: 8px; font-size: 9px; }
       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
     </style></head><body><div style="position:relative;">`);
     w.document.write(el.innerHTML);
@@ -167,124 +354,15 @@ const MasterRoutineView = () => {
     }, 100);
   };
 
-  const renderDayTable = (day: typeof DAYS[0]) => {
-    const dayAllPeriods = (allPeriods || []).filter(p => p.day_of_week === day.value);
-    if (dayAllPeriods.length === 0) return null;
-
-    return (
-      <div key={day.value} className="mb-4">
-        {selectedDay === 'all' && (
-          <div className="text-center py-1.5 bg-emerald-100 dark:bg-emerald-900/20 border border-border border-b-0 font-bold text-sm text-foreground">
-            {bn ? day.label_bn : day.label_en}
-          </div>
-        )}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse" style={{ minWidth: allPeriodNums.length * 90 + 100 }}>
-            <thead>
-              <tr>
-                <th className="border border-border bg-emerald-100 dark:bg-emerald-900/20 px-2 py-2 text-center font-bold text-xs min-w-[70px]">
-                  {bn ? 'শ্রেণী' : 'Class'}
-                </th>
-                {allPeriodNums.map(num => {
-                  const sample = dayAllPeriods.find(p => p.period_number === num) || (allPeriods || []).find(p => p.period_number === num);
-                  const isBreak = breakNums.has(num);
-                  return (
-                    <th
-                      key={num}
-                      className={`border border-border text-center font-bold ${
-                        isBreak ? 'bg-emerald-200 dark:bg-emerald-800/30 min-w-[28px] max-w-[32px]' : 'bg-emerald-100 dark:bg-emerald-900/20'
-                      }`}
-                      style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px' } : { padding: '4px 2px' }}
-                      rowSpan={isBreak ? undefined : undefined}
-                    >
-                      {isBreak ? (
-                        <span className="text-[10px] font-bold">
-                          {bn ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')}
-                        </span>
-                      ) : (
-                        <div>
-                          <div className="font-bold text-xs">{periodLabels[num]}</div>
-                          {sample && (
-                            <div className="text-[8px] font-normal opacity-70">
-                              {fmtTime(sample.start_time)} - {fmtTime(sample.end_time)}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRoutines.map(routine => {
-                const cls = routine.classes as any;
-                const routinePeriods = (allPeriods || []).filter(p => p.routine_id === routine.id && p.day_of_week === day.value);
-                if (routinePeriods.length === 0) return null;
-
-                return (
-                  <tr key={routine.id} className="hover:bg-accent/10 transition-colors">
-                    <td className="border border-border bg-muted/10 px-2 py-2 font-bold text-xs whitespace-nowrap text-center">
-                      <div className="font-bold">{bn ? cls?.name_bn : cls?.name}</div>
-                    </td>
-                    {allPeriodNums.map(num => {
-                      const p = routinePeriods.find(dp => dp.period_number === num);
-                      const isBreak = breakNums.has(num);
-                      const subj = p?.subjects as any;
-
-                      if (isBreak) {
-                        return <td key={num} className="border border-border bg-emerald-50 dark:bg-emerald-900/10" />;
-                      }
-
-                      if (!p) {
-                        return <td key={num} className="border border-border p-0">
-                          <div className="flex flex-col min-h-[40px]">
-                            <div className="flex-1" />
-                            <div className="border-t border-border/50 flex-1" />
-                          </div>
-                        </td>;
-                      }
-
-                      const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
-                      const teacherName = bn ? (p.teacher_name_bn || p.teacher_name || '') : (p.teacher_name || p.teacher_name_bn || '');
-
-                      return (
-                        <td key={num} className="border border-border p-0">
-                          <div className="flex flex-col min-h-[40px]">
-                            {/* Subject - top half */}
-                            <div className="flex-1 flex items-center justify-center px-1 py-0.5">
-                              <span className="text-[10px] font-semibold text-foreground leading-tight text-center">
-                                {subjName || '-'}
-                              </span>
-                            </div>
-                            {/* Divider */}
-                            <div className="border-t border-border/70" />
-                            {/* Teacher - bottom half */}
-                            <div className="flex-1 flex items-center justify-center px-1 py-0.5">
-                              <span className="text-[8px] text-muted-foreground leading-tight text-center">
-                                {teacherName}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
+  const thStyle = "border border-border bg-emerald-100 dark:bg-emerald-900/30 px-1 py-2 text-center font-bold text-[11px]";
+  const breakThStyle = "border border-border bg-emerald-200 dark:bg-emerald-800/40 font-bold text-[10px]";
 
   return (
     <div className="space-y-4">
       {/* Filters */}
       <div className="flex items-end gap-3 flex-wrap">
-        <div className="min-w-[180px]">
-          <Label className="text-xs">{bn ? 'একাডেমিক সেশন' : 'Academic Session'}</Label>
+        <div className="min-w-[170px]">
+          <Label className="text-xs">{bn ? 'একাডেমিক সেশন' : 'Session'}</Label>
           <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
             <SelectTrigger><SelectValue placeholder={bn ? 'সেশন নির্বাচন' : 'Select session'} /></SelectTrigger>
             <SelectContent>
@@ -292,27 +370,44 @@ const MasterRoutineView = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="min-w-[150px]">
+        <div className="min-w-[140px]">
           <Label className="text-xs">{bn ? 'বিভাগ' : 'Division'}</Label>
           <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
+              <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All'}</SelectItem>
               {divisions?.map(d => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        <div className="min-w-[140px]">
+        <div className="min-w-[130px]">
           <Label className="text-xs">{bn ? 'দিন' : 'Day'}</Label>
           <Select value={selectedDay} onValueChange={setSelectedDay}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{bn ? 'সকল দিন' : 'All Days'}</SelectItem>
               {DAYS.map(d => <SelectItem key={d.value} value={String(d.value)}>{bn ? d.label_bn : d.label_en}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
-        {filteredRoutines.length > 0 && (
+        <div className="flex items-end gap-1">
+          <div>
+            <Label className="text-xs">{bn ? 'পিরিয়ড' : 'Periods'}</Label>
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setPeriodCount(p => Math.max(1, p - 1))}><Minus className="h-3 w-3" /></Button>
+              <span className="text-sm font-bold w-6 text-center">{bn ? toBn(periodCount) : periodCount}</span>
+              <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setPeriodCount(p => Math.min(12, p + 1))}><Plus className="h-3 w-3" /></Button>
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">{bn ? 'বিরতি পরে' : 'Break after'}</Label>
+            <div className="flex items-center gap-1">
+              <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setBreakAfter(p => Math.max(1, p - 1))}><Minus className="h-3 w-3" /></Button>
+              <span className="text-sm font-bold w-6 text-center">{bn ? toBn(breakAfter) : breakAfter}</span>
+              <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => setBreakAfter(p => Math.min(periodCount, p + 1))}><Plus className="h-3 w-3" /></Button>
+            </div>
+          </div>
+        </div>
+        {selectedSessionId && (
           <Button size="sm" variant="outline" className="gap-1.5" onClick={handlePrint}>
             <Printer className="h-3.5 w-3.5" /> {bn ? 'প্রিন্ট' : 'Print'}
           </Button>
@@ -323,70 +418,136 @@ const MasterRoutineView = () => {
         <div className="py-12 text-center text-muted-foreground">
           {bn ? 'একটি একাডেমিক সেশন নির্বাচন করুন' : 'Select an academic session'}
         </div>
-      ) : filteredRoutines.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">
-          {bn ? 'এই সেশনে কোনো সক্রিয় রুটিন নেই। প্রথমে "ক্লাস রুটিন" ট্যাব থেকে নির্দিষ্ট ক্লাসের রুটিন তৈরি করুন।' : 'No active routines for this session. Create class-specific routines first.'}
-        </div>
       ) : (
         <div id="master-routine-print">
-          <Card className="overflow-hidden border-2 border-border">
-            <CardContent className="p-0">
-              {/* Institution Header - matching template exactly */}
-              <div className="text-center py-3 px-4 border-b-2 border-border bg-muted/5 relative">
-                {/* Date box top-right */}
-                <div className="absolute top-2 right-3 text-[10px] text-muted-foreground border border-border rounded px-2 py-0.5">
-                  {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')} {bn ? 'ঈ:' : ''}
-                </div>
-
-                {/* Institution Logo */}
-                {institution?.logo_url && (
-                  <img src={institution.logo_url} alt="" className="w-10 h-10 object-contain mx-auto mb-1" />
-                )}
-
-                {/* Institution Name */}
-                <h1 className="text-lg font-bold text-foreground leading-tight">
-                  {instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}
-                </h1>
-
-                {/* Routine title line */}
-                <p className="text-xs font-semibold text-foreground mt-0.5">
-                  {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''} {bn ? 'ঈ:' : ''}
+          <div className="border-2 border-border rounded-lg overflow-hidden bg-background">
+            {/* Header */}
+            <div className="text-center py-3 px-4 border-b-2 border-border relative">
+              <div className="absolute top-2 right-3 text-[10px] text-muted-foreground border border-border rounded px-2 py-0.5">
+                {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')}
+              </div>
+              {institution?.logo_url && (
+                <img src={institution.logo_url} alt="" className="w-12 h-12 object-contain mx-auto mb-1" />
+              )}
+              <h1 className="text-lg font-bold text-foreground leading-tight">
+                {instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}
+              </h1>
+              {institution?.address && (
+                <p className="text-[10px] text-muted-foreground">{institution.address}</p>
+              )}
+              <p className="text-xs font-semibold text-foreground mt-0.5">
+                {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
+              </p>
+              {selectedDiv && selectedDivisionId !== 'all' && (
+                <p className="text-[11px] text-foreground font-medium">
+                  {bn ? `${selectedDiv.name_bn} শাখা` : `${selectedDiv.name} Division`}
                 </p>
+              )}
+              {studentCount !== undefined && studentCount > 0 && (
+                <p className="text-[10px] text-muted-foreground">
+                  {bn ? `মোট ছাত্র: ${toBn(studentCount)} জন` : `Total Students: ${studentCount}`}
+                </p>
+              )}
+              {/* Selected day */}
+              <p className="text-[11px] font-semibold text-foreground mt-0.5 bg-emerald-100 dark:bg-emerald-900/20 inline-block px-3 py-0.5 rounded">
+                {bn ? dayObj?.label_bn : dayObj?.label_en}
+              </p>
+            </div>
 
-                {/* Division name */}
-                {selectedDiv && selectedDivisionId !== 'all' && (
-                  <p className="text-[11px] text-foreground font-medium">
-                    {bn ? `${selectedDiv.name_bn} শাখা` : `${selectedDiv.name} Division`}
-                  </p>
-                )}
+            {/* Table */}
+            <div className="overflow-x-auto p-2">
+              <table className="w-full border-collapse" style={{ minWidth: periodColumns.length * 85 + 80 }}>
+                <thead>
+                  <tr>
+                    <th className={thStyle} style={{ minWidth: 70 }}>
+                      {bn ? 'শ্রেণী' : 'Class'}
+                    </th>
+                    {periodColumns.map((col, idx) => {
+                      if (col.isBreak) {
+                        return (
+                          <th key={`br-${idx}`} className={breakThStyle}
+                            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px', minWidth: 28, maxWidth: 32 }}>
+                            {bn ? 'বিরতি' : 'Break'}
+                          </th>
+                        );
+                      }
+                      const time = getPeriodTime(col.num);
+                      return (
+                        <th key={col.num} className={thStyle}>
+                          <div className="font-bold text-xs">{periodLabelsMap[col.num]}</div>
+                          {time.start && (
+                            <div className="text-[8px] font-normal opacity-70">
+                              {fmtTime(time.start, bn)} - {fmtTime(time.end, bn)}
+                            </div>
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredClasses.map(cls => (
+                    <tr key={cls.id} className="hover:bg-accent/5 transition-colors">
+                      {/* Class name cell */}
+                      <td className="border border-border bg-muted/10 px-2 py-1.5 font-bold text-[10px] whitespace-nowrap text-center">
+                        {bn ? cls.name_bn : cls.name}
+                      </td>
+                      {/* Period cells */}
+                      {periodColumns.map((col, idx) => {
+                        if (col.isBreak) {
+                          return <td key={`br-${idx}`} className="border border-border bg-emerald-50 dark:bg-emerald-900/10" />;
+                        }
 
+                        const period = getPeriodData(cls.id, col.num);
+                        const subj = period?.subjects as any;
+                        const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
+                        const teacherDisplay = bn
+                          ? (period?.teacher_name_bn || period?.teacher_name || '')
+                          : (period?.teacher_name || period?.teacher_name_bn || '');
 
-                {/* Student count */}
-                {studentCount !== undefined && studentCount > 0 && (
-                  <p className="text-[10px] text-muted-foreground">
-                    {bn ? `মোট ছাত্র: ${String(studentCount).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[Number(d)])} জন` : `Total Students: ${studentCount}`}
-                  </p>
-                )}
+                        return (
+                          <td key={col.num} className="border border-border p-0">
+                            <CellEditor
+                              subjectId={period?.subject_id || 'none'}
+                              teacherName={period?.teacher_name || ''}
+                              teacherNameBn={period?.teacher_name_bn || ''}
+                              subjects={subjects || []}
+                              bn={bn}
+                              onSave={(sId, tn, tnBn) => handleCellSave(cls.id, col.num, sId, tn, tnBn)}
+                            >
+                              <button className="w-full cursor-pointer hover:bg-accent/10 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/30 rounded-none">
+                                <div className="flex flex-col min-h-[42px]">
+                                  {/* Subject - top half */}
+                                  <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                                    <span className="text-[10px] font-semibold text-foreground leading-tight text-center">
+                                      {subjName || <span className="text-muted-foreground/30">+</span>}
+                                    </span>
+                                  </div>
+                                  {/* Divider */}
+                                  <div className="border-t border-border/70" />
+                                  {/* Teacher - bottom half */}
+                                  <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                                    <span className="text-[8px] text-muted-foreground leading-tight text-center">
+                                      {teacherDisplay || <span className="opacity-30">—</span>}
+                                    </span>
+                                  </div>
+                                </div>
+                              </button>
+                            </CellEditor>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                {/* Selected day */}
-                {selectedDay !== 'all' && (
-                  <p className="text-[11px] font-semibold text-foreground mt-0.5">
-                    {bn ? daysToRender[0]?.label_bn : daysToRender[0]?.label_en}
-                  </p>
-                )}
-              </div>
-
-              {/* Render tables per day */}
-              <div className="p-2">
-                {daysToRender.map(day => renderDayTable(day))}
-              </div>
-
-              {/* Footer */}
-              <div className="px-3 py-2 border-t border-border text-[9px] text-muted-foreground">
-                {bn ? 'বি.দ্র. কর্তৃপক্ষ কর্তৃক পরিবর্তন করার ক্ষমতা এবং বিশেষ প্রয়োজনে অতিরিক্ত ক্লাশ নিতে পারবেন।' : 'Note: Schedule subject to change by administration.'}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Footer */}
+            <div className="px-3 py-2 border-t border-border text-[9px] text-muted-foreground">
+              {bn ? 'বি.দ্র. কর্তৃপক্ষ কর্তৃক পরিবর্তন করার ক্ষমতা এবং বিশেষ প্রয়োজনে অতিরিক্ত ক্লাশ নিতে পারবেন।' : 'Note: Schedule subject to change by administration.'}
+            </div>
+          </div>
         </div>
       )}
     </div>
