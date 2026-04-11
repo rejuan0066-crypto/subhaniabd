@@ -182,12 +182,9 @@ const AdminJoiningLetters = () => {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    const salutationHtml = escapeHtml(r.salutation).replace(/
-/g, '<br/>');
-    const staffNameHtml = escapeHtml(r.staffName).replace(/
-/g, '<br/>');
-    const bodyTextHtml = escapeHtml(r.bodyText).replace(/
-/g, '<br/>');
+      const salutationHtml = escapeHtml(r.salutation).replace(/\n/g, '<br/>');
+      const staffNameHtml = escapeHtml(r.staffName).replace(/\n/g, '<br/>');
+      const bodyTextHtml = escapeHtml(r.bodyText).replace(/\n/g, '<br/>');
 
     const html = `<!DOCTYPE html>
 <html><head>
