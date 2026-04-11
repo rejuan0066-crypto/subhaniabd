@@ -342,6 +342,7 @@ const AdminClassRoutine = () => {
             {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (() => {
               const filtered = filterClassId === 'all' ? routines : routines?.filter(r => r.class_id === filterClassId);
               return (
+              <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <Table>
@@ -356,7 +357,7 @@ const AdminClassRoutine = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {routines?.map((r, idx) => {
+                        {filtered?.map((r, idx) => {
                           const cls = r.classes as any;
                           const div = cls?.divisions as any;
                           const sess = r.academic_sessions as any;
@@ -388,7 +389,7 @@ const AdminClassRoutine = () => {
                             </TableRow>
                           );
                         })}
-                        {routines?.length === 0 && (
+                        {(!filtered || filtered.length === 0) && (
                           <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো রুটিন নেই' : 'No routines'}</TableCell></TableRow>
                         )}
                       </TableBody>
@@ -396,7 +397,8 @@ const AdminClassRoutine = () => {
                   </div>
                 </CardContent>
               </Card>
-            )}
+              );
+            })()}
           </TabsContent>
 
           <TabsContent value="master" className="mt-4">
