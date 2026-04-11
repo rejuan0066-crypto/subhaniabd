@@ -50,6 +50,7 @@ const AdminClassRoutine = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [form, setForm] = useState({ name: '', name_bn: '', class_id: '', academic_session_id: '', is_active: true });
   const [editingRoutineId, setEditingRoutineId] = useState<string | null>(null);
+  const [filterClassId, setFilterClassId] = useState<string>('all');
 
   // Fetch institution
   const { data: institution } = useQuery({
@@ -310,7 +311,20 @@ const AdminClassRoutine = () => {
           </TabsList>
 
           <TabsContent value="individual" className="space-y-4 mt-4">
-            <div className="flex justify-end">
+            <div className="flex items-end justify-between gap-3 flex-wrap">
+              <div className="min-w-[180px]">
+                <Label className="text-xs">{bn ? 'শ্রেণী অনুযায়ী ফিল্টার' : 'Filter by Class'}</Label>
+                <Select value={filterClassId} onValueChange={setFilterClassId}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
+                    {classes?.map(c => {
+                      const div = (c as any).divisions;
+                      return <SelectItem key={c.id} value={c.id}>{bn ? `${div?.name_bn || ''} - ${c.name_bn}` : `${div?.name || ''} - ${c.name}`}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
               <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogTrigger asChild>
                   <Button size="sm"><Plus className="h-4 w-4 mr-1" />{bn ? 'নতুন রুটিন' : 'New Routine'}</Button>
@@ -325,7 +339,9 @@ const AdminClassRoutine = () => {
               </Dialog>
             </div>
 
-            {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (
+            {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (() => {
+              const filtered = filterClassId === 'all' ? routines : routines?.filter(r => r.class_id === filterClassId);
+              return (
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
@@ -341,7 +357,7 @@ const AdminClassRoutine = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {routines?.map((r, idx) => {
+                        {filtered?.map((r, idx) => {
                           const cls = r.classes as any;
                           const div = cls?.divisions as any;
                           const sess = r.academic_sessions as any;
@@ -373,7 +389,7 @@ const AdminClassRoutine = () => {
                             </TableRow>
                           );
                         })}
-                        {routines?.length === 0 && (
+                        {(!filtered || filtered.length === 0) && (
                           <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'কোনো রুটিন নেই' : 'No routines'}</TableCell></TableRow>
                         )}
                       </TableBody>
@@ -381,7 +397,8 @@ const AdminClassRoutine = () => {
                   </div>
                 </CardContent>
               </Card>
-            )}
+              );
+            })()}
           </TabsContent>
 
           <TabsContent value="master" className="mt-4">
