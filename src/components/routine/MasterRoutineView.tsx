@@ -67,6 +67,16 @@ const MasterRoutineView = () => {
     enabled: !!selectedSessionId,
   });
 
+  // Get total student count
+  const { data: studentCount } = useQuery({
+    queryKey: ['total-students-count', selectedSessionId],
+    queryFn: async () => {
+      const { count } = await supabase.from('students').select('id', { count: 'exact', head: true }).eq('status', 'active');
+      return count || 0;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const filteredRoutines = (routines || []).filter(r => {
     if (selectedDivisionId === 'all') return true;
     return (r.classes as any)?.division_id === selectedDivisionId;
@@ -90,7 +100,6 @@ const MasterRoutineView = () => {
   const allPeriodNums = [...new Set((allPeriods || []).map(p => p.period_number))].sort((a, b) => a - b);
   const breakNums = new Set((allPeriods || []).filter(p => p.is_break).map(p => p.period_number));
 
-  // Count non-break periods for proper labeling
   let periodLabelIndex = 0;
   const periodLabels: Record<number, string> = {};
   allPeriodNums.forEach(num => {
@@ -105,7 +114,6 @@ const MasterRoutineView = () => {
     const parts = t.slice(0, 5).split(':');
     let h = parseInt(parts[0]);
     const m = parts[1];
-    const suffix = h >= 12 ? '' : '';
     if (h > 12) h -= 12;
     if (h === 0) h = 12;
     const timeStr = `${String(h).padStart(2, '0')}:${m}`;
@@ -123,7 +131,6 @@ const MasterRoutineView = () => {
   }).filter(Boolean);
   const classRangeText = classNames.length > 0 ? `${classNames[0]} — ${classNames[classNames.length - 1]}` : '';
 
-  // Determine which days to render
   const daysToRender = selectedDay === 'all' ? DAYS : DAYS.filter(d => String(d.value) === selectedDay);
 
   const handlePrint = () => {
@@ -138,16 +145,18 @@ const MasterRoutineView = () => {
       body { font-family: 'Noto Sans Bengali', sans-serif; padding: 10px; }
       @page { size: A4 landscape; margin: 8mm; }
       table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1.5px solid #333; padding: 4px 6px; text-align: center; font-size: 10px; vertical-align: middle; }
+      th, td { border: 1.5px solid #333; text-align: center; vertical-align: middle; }
       th { background: #d4edda; font-weight: 700; }
       .inst-header { text-align: center; margin-bottom: 6px; }
       .inst-header h1 { font-size: 18px; font-weight: 700; }
       .inst-header p { font-size: 11px; margin: 2px 0; }
-      .date-box { position: absolute; top: 10px; right: 15px; font-size: 10px; }
+      .date-box { position: absolute; top: 10px; right: 15px; font-size: 10px; border: 1px solid #999; padding: 2px 6px; }
       .break-col { background: #c8e6c9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 700; font-size: 10px; min-width: 26px; max-width: 30px; }
       .class-cell { background: #f5f5f5; font-weight: 700; text-align: center; white-space: nowrap; font-size: 10px; }
-      .subject-text { font-weight: 600; font-size: 9.5px; line-height: 1.3; }
-      .teacher-text { font-size: 8px; color: #555; line-height: 1.2; }
+      .cell-inner { display: flex; flex-direction: column; min-height: 36px; }
+      .cell-subject { font-weight: 600; font-size: 9.5px; line-height: 1.3; padding: 2px 3px; flex: 1; display: flex; align-items: center; justify-content: center; }
+      .cell-divider { border-top: 1px solid #999; }
+      .cell-teacher { font-size: 8px; color: #555; line-height: 1.2; padding: 2px 3px; flex: 1; display: flex; align-items: center; justify-content: center; }
       .day-header { background: #e8f5e9; font-weight: 700; font-size: 11px; text-align: center; padding: 4px; }
       .footer { margin-top: 6px; font-size: 9px; }
       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
@@ -164,23 +173,21 @@ const MasterRoutineView = () => {
   };
 
   const renderDayTable = (day: typeof DAYS[0]) => {
-    // For this day, check if any class has periods
     const dayAllPeriods = (allPeriods || []).filter(p => p.day_of_week === day.value);
     if (dayAllPeriods.length === 0) return null;
 
     return (
       <div key={day.value} className="mb-4">
-        {/* Day header - only show if showing all days */}
         {selectedDay === 'all' && (
           <div className="text-center py-1.5 bg-emerald-100 dark:bg-emerald-900/20 border border-border border-b-0 font-bold text-sm text-foreground">
             {bn ? day.label_bn : day.label_en}
           </div>
         )}
         <div className="overflow-x-auto">
-          <table className="w-full text-[11px] border-collapse" style={{ minWidth: allPeriodNums.length * 90 + 100 }}>
+          <table className="w-full border-collapse" style={{ minWidth: allPeriodNums.length * 90 + 100 }}>
             <thead>
               <tr>
-                <th className="border border-border bg-emerald-100 dark:bg-emerald-900/20 px-2 py-2 text-center font-bold min-w-[70px]">
+                <th className="border border-border bg-emerald-100 dark:bg-emerald-900/20 px-2 py-2 text-center font-bold text-xs min-w-[70px]">
                   {bn ? 'শ্রেণী' : 'Class'}
                 </th>
                 {allPeriodNums.map(num => {
@@ -189,10 +196,11 @@ const MasterRoutineView = () => {
                   return (
                     <th
                       key={num}
-                      className={`border border-border px-1 py-2 text-center font-bold ${
+                      className={`border border-border text-center font-bold ${
                         isBreak ? 'bg-emerald-200 dark:bg-emerald-800/30 min-w-[28px] max-w-[32px]' : 'bg-emerald-100 dark:bg-emerald-900/20'
                       }`}
-                      style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px' } : {}}
+                      style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px' } : { padding: '4px 2px' }}
+                      rowSpan={isBreak ? undefined : undefined}
                     >
                       {isBreak ? (
                         <span className="text-[10px] font-bold">
@@ -200,7 +208,7 @@ const MasterRoutineView = () => {
                         </span>
                       ) : (
                         <div>
-                          <div className="font-bold text-[11px]">{periodLabels[num]}</div>
+                          <div className="font-bold text-xs">{periodLabels[num]}</div>
                           {sample && (
                             <div className="text-[8px] font-normal opacity-70">
                               {fmtTime(sample.start_time)} - {fmtTime(sample.end_time)}
@@ -217,14 +225,12 @@ const MasterRoutineView = () => {
               {filteredRoutines.map(routine => {
                 const cls = routine.classes as any;
                 const routinePeriods = (allPeriods || []).filter(p => p.routine_id === routine.id && p.day_of_week === day.value);
-
-                // Skip this class if no periods for this day
                 if (routinePeriods.length === 0) return null;
 
                 return (
                   <tr key={routine.id} className="hover:bg-accent/10 transition-colors">
-                    <td className="border border-border bg-muted/10 px-2 py-2 font-bold text-[11px] whitespace-nowrap text-center">
-                      <div>{bn ? cls?.name_bn : cls?.name}</div>
+                    <td className="border border-border bg-muted/10 px-2 py-2 font-bold text-xs whitespace-nowrap text-center">
+                      <div className="font-bold">{bn ? cls?.name_bn : cls?.name}</div>
                     </td>
                     {allPeriodNums.map(num => {
                       const p = routinePeriods.find(dp => dp.period_number === num);
@@ -236,19 +242,35 @@ const MasterRoutineView = () => {
                       }
 
                       if (!p) {
-                        return <td key={num} className="border border-border" />;
+                        return <td key={num} className="border border-border p-0">
+                          <div className="flex flex-col min-h-[40px]">
+                            <div className="flex-1" />
+                            <div className="border-t border-border/50 flex-1" />
+                          </div>
+                        </td>;
                       }
 
+                      const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
+                      const teacherName = bn ? (p.teacher_name_bn || p.teacher_name || '') : (p.teacher_name || p.teacher_name_bn || '');
+
                       return (
-                        <td key={num} className="border border-border px-1 py-1.5 text-center">
-                          <div className="text-[10px] font-semibold text-foreground leading-tight">
-                            {subj ? (bn ? subj.name_bn : subj.name) : '-'}
-                          </div>
-                          {(p.teacher_name_bn || p.teacher_name) && (
-                            <div className="text-[8px] text-muted-foreground leading-tight mt-0.5">
-                              {bn ? p.teacher_name_bn : p.teacher_name}
+                        <td key={num} className="border border-border p-0">
+                          <div className="flex flex-col min-h-[40px]">
+                            {/* Subject - top half */}
+                            <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                              <span className="text-[10px] font-semibold text-foreground leading-tight text-center">
+                                {subjName || '-'}
+                              </span>
                             </div>
-                          )}
+                            {/* Divider */}
+                            <div className="border-t border-border/70" />
+                            {/* Teacher - bottom half */}
+                            <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                              <span className="text-[8px] text-muted-foreground leading-tight text-center">
+                                {teacherName}
+                              </span>
+                            </div>
+                          </div>
                         </td>
                       );
                     })}
@@ -314,29 +336,50 @@ const MasterRoutineView = () => {
         <div id="master-routine-print">
           <Card className="overflow-hidden border-2 border-border">
             <CardContent className="p-0">
-              {/* Institution Header */}
-              <div className="text-center py-3 px-4 border-b-2 border-border bg-muted/20 relative">
-                <div className="absolute top-2 right-3 text-[10px] text-muted-foreground">
-                  {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')}
+              {/* Institution Header - matching template exactly */}
+              <div className="text-center py-3 px-4 border-b-2 border-border bg-muted/5 relative">
+                {/* Date box top-right */}
+                <div className="absolute top-2 right-3 text-[10px] text-muted-foreground border border-border rounded px-2 py-0.5">
+                  {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')} {bn ? 'ঈ:' : ''}
                 </div>
+
+                {/* Institution Logo */}
                 {institution?.logo_url && (
                   <img src={institution.logo_url} alt="" className="w-10 h-10 object-contain mx-auto mb-1" />
                 )}
-                <h1 className="text-lg font-bold text-foreground">{instName || ''}</h1>
-                <p className="text-xs font-semibold text-foreground">
-                  {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
+
+                {/* Institution Name */}
+                <h1 className="text-lg font-bold text-foreground leading-tight">
+                  {instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}
+                </h1>
+
+                {/* Routine title line */}
+                <p className="text-xs font-semibold text-foreground mt-0.5">
+                  {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''} {bn ? 'ঈ:' : ''}
                 </p>
+
+                {/* Division name */}
                 {selectedDiv && selectedDivisionId !== 'all' && (
-                  <p className="text-[11px] text-muted-foreground font-medium">
+                  <p className="text-[11px] text-foreground font-medium">
                     {bn ? `${selectedDiv.name_bn} শাখা` : `${selectedDiv.name} Division`}
                   </p>
                 )}
+
+                {/* Class range */}
                 {classRangeText && (
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground font-medium">
                     {classRangeText} {bn ? 'শ্রেণী' : ''}
                   </p>
                 )}
-                {/* Show selected day in header */}
+
+                {/* Student count */}
+                {studentCount !== undefined && studentCount > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {bn ? `মোট ছাত্র: ${String(studentCount).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[Number(d)])} জন` : `Total Students: ${studentCount}`}
+                  </p>
+                )}
+
+                {/* Selected day */}
                 {selectedDay !== 'all' && (
                   <p className="text-[11px] font-semibold text-foreground mt-0.5">
                     {bn ? daysToRender[0]?.label_bn : daysToRender[0]?.label_en}
