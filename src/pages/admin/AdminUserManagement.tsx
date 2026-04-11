@@ -634,6 +634,16 @@ const AdminUserManagement = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-center gap-1">
+                            {/* Profile view */}
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-primary hover:text-primary hover:bg-primary/10"
+                              onClick={() => { setProfileUser(u); setProfileOpen(true); }}
+                              title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}
+                            >
+                              <UserCircle className="w-4 h-4" />
+                            </Button>
                             {/* Approve/Reject status */}
                             {u.role !== 'admin' && u.status !== 'approved' && (
                               <Button
