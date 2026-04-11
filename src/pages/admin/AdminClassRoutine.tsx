@@ -434,50 +434,90 @@ const AdminClassRoutine = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Day-wise routine */}
-      {periodsByDay.map(day => (
-        <Card key={day.value}>
-          <CardHeader className="py-3 px-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{language === 'bn' ? day.label_bn : day.label_en}</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => openNewPeriod(day.value)}>
-                <Plus className="h-3 w-3 mr-1" />{language === 'bn' ? 'পিরিয়ড' : 'Period'}
-              </Button>
-            </div>
-          </CardHeader>
-          {day.periods.length > 0 && (
-            <CardContent className="px-4 pb-3 pt-0">
+      {/* Timetable grid view */}
+      {(() => {
+        // Collect unique period numbers across all days
+        const allPeriodNums = [...new Set((periods || []).map(p => p.period_number))].sort((a, b) => a - b);
+        if (allPeriodNums.length === 0) {
+          return <p className="text-center text-muted-foreground py-8">{language === 'bn' ? 'কোনো পিরিয়ড নেই। নিচের বাটন থেকে পিরিয়ড যোগ করুন।' : 'No periods yet. Add periods using buttons below.'}</p>;
+        }
+        return (
+          <Card>
+            <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10">#</TableHead>
-                      <TableHead><Clock className="h-3 w-3 inline mr-1" />{language === 'bn' ? 'সময়' : 'Time'}</TableHead>
-                      <TableHead><BookOpen className="h-3 w-3 inline mr-1" />{language === 'bn' ? 'বিষয়' : 'Subject'}</TableHead>
-                      <TableHead>{language === 'bn' ? 'শিক্ষক' : 'Teacher'}</TableHead>
-                      <TableHead className="w-20"></TableHead>
+                      <TableHead className="sticky left-0 bg-background z-10 min-w-[90px] border-r">
+                        {language === 'bn' ? 'বার' : 'Day'}
+                      </TableHead>
+                      {allPeriodNums.map(num => {
+                        // Get time from any day's period with this number
+                        const sample = (periods || []).find(p => p.period_number === num);
+                        const isBreak = sample?.is_break;
+                        return (
+                          <TableHead key={num} className={`text-center min-w-[100px] ${isBreak ? 'bg-muted/50' : ''}`}>
+                            <div className="text-xs font-semibold">
+                              {isBreak ? (language === 'bn' ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')) : `${language === 'bn' ? 'পিরিয়ড' : 'P'} ${num}`}
+                            </div>
+                            {sample && <div className="text-[10px] text-muted-foreground">{sample.start_time?.slice(0, 5)}-{sample.end_time?.slice(0, 5)}</div>}
+                          </TableHead>
+                        );
+                      })}
+                      <TableHead className="w-10">
+                        <Plus className="h-3 w-3" />
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {day.periods.map(p => {
-                      const subj = p.subjects as any;
+                    {DAYS.map(day => {
+                      const dayPeriods = (periods || []).filter(p => p.day_of_week === day.value);
                       return (
-                        <TableRow key={p.id} className={p.is_break ? 'bg-muted/50' : ''}>
-                          <TableCell className="font-mono text-xs">{p.period_number}</TableCell>
-                          <TableCell className="text-xs whitespace-nowrap">{p.start_time?.slice(0, 5)} - {p.end_time?.slice(0, 5)}</TableCell>
-                          <TableCell>
-                            {p.is_break ? (
-                              <Badge variant="outline">{language === 'bn' ? (p.break_label_bn || 'বিরতি') : (p.break_label || 'Break')}</Badge>
-                            ) : (
-                              <span className="text-sm">{subj ? (language === 'bn' ? subj.name_bn : subj.name) : '-'}</span>
-                            )}
+                        <TableRow key={day.value}>
+                          <TableCell className="sticky left-0 bg-background z-10 border-r font-medium text-xs">
+                            {language === 'bn' ? day.label_bn : day.label_en}
                           </TableCell>
-                          <TableCell className="text-sm">{p.is_break ? '' : (language === 'bn' ? p.teacher_name_bn : p.teacher_name) || '-'}</TableCell>
+                          {allPeriodNums.map(num => {
+                            const p = dayPeriods.find(dp => dp.period_number === num);
+                            const subj = p?.subjects as any;
+                            if (!p) {
+                              return (
+                                <TableCell key={num} className="text-center">
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 text-muted-foreground" onClick={() => {
+                                    const sample = (periods || []).find(sp => sp.period_number === num);
+                                    setPeriodForm({
+                                      day_of_week: day.value, period_number: num,
+                                      start_time: sample?.start_time || '08:00', end_time: sample?.end_time || '08:45',
+                                      subject_id: null, teacher_name: '', teacher_name_bn: '', room: '',
+                                      is_break: false, break_label: '', break_label_bn: '',
+                                    });
+                                    setShowPeriodDialog(true);
+                                  }}>
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </TableCell>
+                              );
+                            }
+                            return (
+                              <TableCell key={num} className={`text-center cursor-pointer hover:bg-accent/50 transition-colors ${p.is_break ? 'bg-muted/30' : ''}`} onClick={() => openEditPeriod(p)}>
+                                {p.is_break ? (
+                                  <Badge variant="outline" className="text-[10px]">{language === 'bn' ? (p.break_label_bn || 'বিরতি') : (p.break_label || 'Break')}</Badge>
+                                ) : (
+                                  <div>
+                                    <div className="text-xs font-medium">{subj ? (language === 'bn' ? subj.name_bn : subj.name) : '-'}</div>
+                                    {(p.teacher_name_bn || p.teacher_name) && (
+                                      <div className="text-[10px] text-muted-foreground truncate max-w-[80px] mx-auto">{language === 'bn' ? p.teacher_name_bn : p.teacher_name}</div>
+                                    )}
+                                    {p.room && <div className="text-[10px] text-muted-foreground">{p.room}</div>}
+                                  </div>
+                                )}
+                              </TableCell>
+                            );
+                          })}
                           <TableCell>
-                            <div className="flex gap-1">
-                              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditPeriod(p)}><Edit className="h-3 w-3" /></Button>
-                              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deletePeriod.mutate(p.id)}><Trash2 className="h-3 w-3" /></Button>
-                            </div>
+                            <Button size="sm" variant="ghost" className="h-7 w-7" onClick={() => openNewPeriod(day.value)}>
+                              <Plus className="h-3 w-3" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -486,9 +526,9 @@ const AdminClassRoutine = () => {
                 </Table>
               </div>
             </CardContent>
-          )}
-        </Card>
-      ))}
+          </Card>
+        );
+      })()}
     </div>
   );
 };
