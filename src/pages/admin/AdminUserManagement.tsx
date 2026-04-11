@@ -1204,15 +1204,6 @@ const AdminUserManagement = () => {
                         <Label className="text-xs text-muted-foreground">{bn ? 'নতুন ইমেইল' : 'New Email'}</Label>
                         <Input type="email" value={profileEditEmail} onChange={e => setProfileEditEmail(e.target.value)} placeholder={bn ? 'নতুন ইমেইল লিখুন' : 'Enter new email'} />
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
-                        <div className="relative">
-                          <Input type={profileShowPw ? 'text' : 'password'} placeholder={bn ? 'বর্তমান পাসওয়ার্ড দিন' : 'Enter current password'} className="pr-10" />
-                          <button type="button" onClick={() => setProfileShowPw(!profileShowPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                            {profileShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
                       <Button
                         className="w-full btn-primary-gradient"
                         disabled={profileSaving === 'email' || !profileEditEmail.trim() || profileEditEmail === profileUser.email}
@@ -1332,15 +1323,6 @@ const AdminUserManagement = () => {
 
                   {!pwOtpStep ? (
                     <>
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
-                        <div className="relative">
-                          <Input type={profileShowPw ? 'text' : 'password'} placeholder={bn ? 'বর্তমান পাসওয়ার্ড' : 'Current password'} className="pr-10" />
-                          <button type="button" onClick={() => setProfileShowPw(!profileShowPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                            {profileShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">{bn ? 'নতুন পাসওয়ার্ড' : 'New Password'}</Label>
                         <div className="relative">
