@@ -232,12 +232,13 @@ const MasterRoutineView = () => {
     return allPeriods.find(p => p.routine_id === routineId && p.period_number === periodNum);
   }, [routineMap, allPeriods]);
 
-  // Get existing period times from data
+  // Get period times: local state first, then DB
   const getPeriodTime = useCallback((periodNum: number) => {
+    if (periodTimes[periodNum]) return periodTimes[periodNum];
     if (!allPeriods) return { start: '', end: '' };
     const p = allPeriods.find(pp => pp.period_number === periodNum && !pp.is_break);
     return { start: p?.start_time || '', end: p?.end_time || '' };
-  }, [allPeriods]);
+  }, [allPeriods, periodTimes]);
 
   // Save cell mutation
   const saveCellMutation = useMutation({
