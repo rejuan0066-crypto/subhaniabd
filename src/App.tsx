@@ -81,6 +81,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 let isRefreshingSession = false;
 
+const clearLocalExpiredSession = async () => {
+  await supabase.auth.signOut({ scope: 'local' });
+  queryClient.clear();
+};
+
 const handleAuthError = async (error: unknown) => {
   if (isRefreshingSession) return;
   const message = error instanceof Error ? error.message : String(error ?? '');
@@ -92,12 +97,22 @@ const handleAuthError = async (error: unknown) => {
 
   isRefreshingSession = true;
   try {
-    const { error: refreshError } = await supabase.auth.refreshSession();
-    if (refreshError) {
-      await supabase.auth.signOut();
-    } else {
-      queryClient.invalidateQueries();
+    const {
+      data: { session: previousSession },
+    } = await supabase.auth.getSession();
+    const previousAccessToken = previousSession?.access_token ?? null;
+
+    const { data, error: refreshError } = await supabase.auth.refreshSession();
+    const nextAccessToken = data.session?.access_token ?? null;
+
+    if (refreshError || !nextAccessToken || nextAccessToken === previousAccessToken) {
+      await clearLocalExpiredSession();
+      return;
     }
+
+    queryClient.invalidateQueries();
+  } catch {
+    await clearLocalExpiredSession();
   } finally {
     isRefreshingSession = false;
   }

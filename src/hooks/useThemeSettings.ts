@@ -136,7 +136,7 @@ export const FONT_WEIGHT_OPTIONS = [
 
 export const useThemeSettings = () => {
   const queryClient = useQueryClient();
-  const { loading: authLoading } = useAuth();
+  const { ready: authReady } = useAuth();
 
   const { data: theme, isLoading } = useQuery({
     queryKey: ['theme-settings'],
@@ -152,7 +152,7 @@ export const useThemeSettings = () => {
       }
       return DEFAULT_THEME;
     },
-    enabled: !authLoading,
+    enabled: authReady,
   });
 
   const saveTheme = useMutation({
