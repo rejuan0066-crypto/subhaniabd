@@ -201,7 +201,43 @@ const AdminJoiningLetters = () => {
       return map;
     },
   });
+  /* ── Save mutation ─────────────────────────── */
+  const saveMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const { error } = await supabase
+        .from('joining_letters')
+        .update({ letter_data: data, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['joining-letters'] });
+      toast.success(bn ? 'সেভ হয়েছে' : 'Saved successfully');
+    },
+    onError: () => {
+      toast.error(bn ? 'সেভ করা যায়নি' : 'Failed to save');
+    },
+  });
 
+  const handleSave = () => {
+    if (!viewLetter) return;
+    const existingData = (viewLetter.letter_data && typeof viewLetter.letter_data === 'object') ? viewLetter.letter_data : {};
+    const newData = {
+      ...existingData,
+      overrides: {
+        textOverrides: overrides,
+        bodyAlign,
+        salutationAlign,
+        nameAlign,
+        dragPositions,
+      },
+    };
+    saveMutation.mutate({ id: viewLetter.id, data: newData });
+    // Update the local viewLetter so subsequent prints use saved data
+    setViewLetter((prev: any) => prev ? { ...prev, letter_data: newData } : prev);
+  };
+
+  
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('joining_letters').delete().eq('id', id);
