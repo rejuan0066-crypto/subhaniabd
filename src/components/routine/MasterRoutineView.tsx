@@ -9,13 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Printer } from 'lucide-react';
 
 const DAYS = [
-  { value: 0, label_bn: 'শনি', label_en: 'Sat', full_bn: 'শনিবার', full_en: 'Saturday' },
-  { value: 1, label_bn: 'রবি', label_en: 'Sun', full_bn: 'রবিবার', full_en: 'Sunday' },
-  { value: 2, label_bn: 'সোম', label_en: 'Mon', full_bn: 'সোমবার', full_en: 'Monday' },
-  { value: 3, label_bn: 'মঙ্গল', label_en: 'Tue', full_bn: 'মঙ্গলবার', full_en: 'Tuesday' },
-  { value: 4, label_bn: 'বুধ', label_en: 'Wed', full_bn: 'বুধবার', full_en: 'Wednesday' },
-  { value: 5, label_bn: 'বৃহঃ', label_en: 'Thu', full_bn: 'বৃহস্পতিবার', full_en: 'Thursday' },
-  { value: 6, label_bn: 'শুক্র', label_en: 'Fri', full_bn: 'শুক্রবার', full_en: 'Friday' },
+  { value: 0, label_bn: 'শনিবার', label_en: 'Saturday', short_bn: 'শনি', short_en: 'Sat' },
+  { value: 1, label_bn: 'রবিবার', label_en: 'Sunday', short_bn: 'রবি', short_en: 'Sun' },
+  { value: 2, label_bn: 'সোমবার', label_en: 'Monday', short_bn: 'সোম', short_en: 'Mon' },
+  { value: 3, label_bn: 'মঙ্গলবার', label_en: 'Tuesday', short_bn: 'মঙ্গল', short_en: 'Tue' },
+  { value: 4, label_bn: 'বুধবার', label_en: 'Wednesday', short_bn: 'বুধ', short_en: 'Wed' },
+  { value: 5, label_bn: 'বৃহস্পতিবার', label_en: 'Thursday', short_bn: 'বৃহঃ', short_en: 'Thu' },
+  { value: 6, label_bn: 'শুক্রবার', label_en: 'Friday', short_bn: 'শুক্র', short_en: 'Fri' },
 ];
 
 const PERIOD_LABELS_BN = ['১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
@@ -25,6 +25,7 @@ const MasterRoutineView = () => {
   const bn = language === 'bn';
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [selectedDivisionId, setSelectedDivisionId] = useState<string>('all');
+  const [selectedDay, setSelectedDay] = useState<string>('all');
 
   const { data: institution } = useQuery({
     queryKey: ['institution-default'],
@@ -51,7 +52,6 @@ const MasterRoutineView = () => {
     },
   });
 
-  // Fetch all routines for the selected session
   const { data: routines } = useQuery({
     queryKey: ['master-routines', selectedSessionId],
     queryFn: async () => {
@@ -67,18 +67,11 @@ const MasterRoutineView = () => {
     enabled: !!selectedSessionId,
   });
 
-  // Filter routines by division
   const filteredRoutines = (routines || []).filter(r => {
     if (selectedDivisionId === 'all') return true;
-    const cls = r.classes as any;
-    return cls?.division_id === selectedDivisionId;
-  }).sort((a, b) => {
-    const aSort = (a.classes as any)?.sort_order || 0;
-    const bSort = (b.classes as any)?.sort_order || 0;
-    return aSort - bSort;
-  });
+    return (r.classes as any)?.division_id === selectedDivisionId;
+  }).sort((a, b) => ((a.classes as any)?.sort_order || 0) - ((b.classes as any)?.sort_order || 0));
 
-  // Fetch ALL periods for filtered routines
   const routineIds = filteredRoutines.map(r => r.id);
   const { data: allPeriods } = useQuery({
     queryKey: ['master-routine-periods', routineIds],
@@ -94,28 +87,44 @@ const MasterRoutineView = () => {
     enabled: routineIds.length > 0,
   });
 
-  // Build combined period structure
-  // Get all unique period numbers across all routines
   const allPeriodNums = [...new Set((allPeriods || []).map(p => p.period_number))].sort((a, b) => a - b);
   const breakNums = new Set((allPeriods || []).filter(p => p.is_break).map(p => p.period_number));
 
+  // Count non-break periods for proper labeling
+  let periodLabelIndex = 0;
+  const periodLabels: Record<number, string> = {};
+  allPeriodNums.forEach(num => {
+    if (!breakNums.has(num)) {
+      periodLabels[num] = bn ? (PERIOD_LABELS_BN[periodLabelIndex] || String(periodLabelIndex + 1)) : `P${periodLabelIndex + 1}`;
+      periodLabelIndex++;
+    }
+  });
+
   const fmtTime = (t: string) => {
     if (!t) return '';
-    const s = t.slice(0, 5);
-    if (!bn) return s;
-    return s.replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
+    const parts = t.slice(0, 5).split(':');
+    let h = parseInt(parts[0]);
+    const m = parts[1];
+    const suffix = h >= 12 ? '' : '';
+    if (h > 12) h -= 12;
+    if (h === 0) h = 12;
+    const timeStr = `${String(h).padStart(2, '0')}:${m}`;
+    if (!bn) return timeStr;
+    return timeStr.replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
   };
 
   const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
   const selectedSession = sessions?.find(s => s.id === selectedSessionId);
   const selectedDiv = divisions?.find(d => d.id === selectedDivisionId);
 
-  // Get class range text
   const classNames = filteredRoutines.map(r => {
     const cls = r.classes as any;
     return bn ? cls?.name_bn : cls?.name;
   }).filter(Boolean);
   const classRangeText = classNames.length > 0 ? `${classNames[0]} — ${classNames[classNames.length - 1]}` : '';
+
+  // Determine which days to render
+  const daysToRender = selectedDay === 'all' ? DAYS : DAYS.filter(d => String(d.value) === selectedDay);
 
   const handlePrint = () => {
     const el = document.getElementById('master-routine-print');
@@ -129,17 +138,17 @@ const MasterRoutineView = () => {
       body { font-family: 'Noto Sans Bengali', sans-serif; padding: 10px; }
       @page { size: A4 landscape; margin: 8mm; }
       table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1.5px solid #333; padding: 3px 5px; text-align: center; font-size: 10px; vertical-align: middle; }
-      th { background: #f0f0f0; font-weight: 600; }
-      .header { text-align: center; margin-bottom: 8px; }
-      .header h1 { font-size: 16px; font-weight: 700; }
-      .header p { font-size: 11px; margin: 1px 0; }
+      th, td { border: 1.5px solid #333; padding: 4px 6px; text-align: center; font-size: 10px; vertical-align: middle; }
+      th { background: #d4edda; font-weight: 700; }
+      .inst-header { text-align: center; margin-bottom: 6px; }
+      .inst-header h1 { font-size: 18px; font-weight: 700; }
+      .inst-header p { font-size: 11px; margin: 2px 0; }
       .date-box { position: absolute; top: 10px; right: 15px; font-size: 10px; }
-      .break-col { background: #e8f5e9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 600; font-size: 9px; min-width: 24px; max-width: 28px; }
-      .after-break-head { background: #d4edda !important; }
-      .class-cell { background: #f5f5f5; font-weight: 600; text-align: left; padding-left: 6px; white-space: nowrap; font-size: 10px; }
-      .subject { font-weight: 600; font-size: 9px; }
-      .teacher { font-size: 8px; color: #555; }
+      .break-col { background: #c8e6c9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 700; font-size: 10px; min-width: 26px; max-width: 30px; }
+      .class-cell { background: #f5f5f5; font-weight: 700; text-align: center; white-space: nowrap; font-size: 10px; }
+      .subject-text { font-weight: 600; font-size: 9.5px; line-height: 1.3; }
+      .teacher-text { font-size: 8px; color: #555; line-height: 1.2; }
+      .day-header { background: #e8f5e9; font-weight: 700; font-size: 11px; text-align: center; padding: 4px; }
       .footer { margin-top: 6px; font-size: 9px; }
       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
     </style></head><body><div style="position:relative;">`);
@@ -152,6 +161,105 @@ const MasterRoutineView = () => {
         setTimeout(() => { w.print(); w.close(); }, 300);
       }
     }, 100);
+  };
+
+  const renderDayTable = (day: typeof DAYS[0]) => {
+    // For this day, check if any class has periods
+    const dayAllPeriods = (allPeriods || []).filter(p => p.day_of_week === day.value);
+    if (dayAllPeriods.length === 0) return null;
+
+    return (
+      <div key={day.value} className="mb-4">
+        {/* Day header - only show if showing all days */}
+        {selectedDay === 'all' && (
+          <div className="text-center py-1.5 bg-emerald-100 dark:bg-emerald-900/20 border border-border border-b-0 font-bold text-sm text-foreground">
+            {bn ? day.label_bn : day.label_en}
+          </div>
+        )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-[11px] border-collapse" style={{ minWidth: allPeriodNums.length * 90 + 100 }}>
+            <thead>
+              <tr>
+                <th className="border border-border bg-emerald-100 dark:bg-emerald-900/20 px-2 py-2 text-center font-bold min-w-[70px]">
+                  {bn ? 'শ্রেণী' : 'Class'}
+                </th>
+                {allPeriodNums.map(num => {
+                  const sample = dayAllPeriods.find(p => p.period_number === num) || (allPeriods || []).find(p => p.period_number === num);
+                  const isBreak = breakNums.has(num);
+                  return (
+                    <th
+                      key={num}
+                      className={`border border-border px-1 py-2 text-center font-bold ${
+                        isBreak ? 'bg-emerald-200 dark:bg-emerald-800/30 min-w-[28px] max-w-[32px]' : 'bg-emerald-100 dark:bg-emerald-900/20'
+                      }`}
+                      style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px' } : {}}
+                    >
+                      {isBreak ? (
+                        <span className="text-[10px] font-bold">
+                          {bn ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')}
+                        </span>
+                      ) : (
+                        <div>
+                          <div className="font-bold text-[11px]">{periodLabels[num]}</div>
+                          {sample && (
+                            <div className="text-[8px] font-normal opacity-70">
+                              {fmtTime(sample.start_time)} - {fmtTime(sample.end_time)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRoutines.map(routine => {
+                const cls = routine.classes as any;
+                const routinePeriods = (allPeriods || []).filter(p => p.routine_id === routine.id && p.day_of_week === day.value);
+
+                // Skip this class if no periods for this day
+                if (routinePeriods.length === 0) return null;
+
+                return (
+                  <tr key={routine.id} className="hover:bg-accent/10 transition-colors">
+                    <td className="border border-border bg-muted/10 px-2 py-2 font-bold text-[11px] whitespace-nowrap text-center">
+                      <div>{bn ? cls?.name_bn : cls?.name}</div>
+                    </td>
+                    {allPeriodNums.map(num => {
+                      const p = routinePeriods.find(dp => dp.period_number === num);
+                      const isBreak = breakNums.has(num);
+                      const subj = p?.subjects as any;
+
+                      if (isBreak) {
+                        return <td key={num} className="border border-border bg-emerald-50 dark:bg-emerald-900/10" />;
+                      }
+
+                      if (!p) {
+                        return <td key={num} className="border border-border" />;
+                      }
+
+                      return (
+                        <td key={num} className="border border-border px-1 py-1.5 text-center">
+                          <div className="text-[10px] font-semibold text-foreground leading-tight">
+                            {subj ? (bn ? subj.name_bn : subj.name) : '-'}
+                          </div>
+                          {(p.teacher_name_bn || p.teacher_name) && (
+                            <div className="text-[8px] text-muted-foreground leading-tight mt-0.5">
+                              {bn ? p.teacher_name_bn : p.teacher_name}
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -174,6 +282,16 @@ const MasterRoutineView = () => {
             <SelectContent>
               <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All Divisions'}</SelectItem>
               {divisions?.map(d => <SelectItem key={d.id} value={d.id}>{bn ? d.name_bn : d.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="min-w-[140px]">
+          <Label className="text-xs">{bn ? 'দিন' : 'Day'}</Label>
+          <Select value={selectedDay} onValueChange={setSelectedDay}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{bn ? 'সকল দিন' : 'All Days'}</SelectItem>
+              {DAYS.map(d => <SelectItem key={d.value} value={String(d.value)}>{bn ? d.label_bn : d.label_en}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -202,120 +320,33 @@ const MasterRoutineView = () => {
                   {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')}
                 </div>
                 {institution?.logo_url && (
-                  <img src={institution.logo_url} alt="" className="w-8 h-8 object-contain mx-auto mb-1" />
+                  <img src={institution.logo_url} alt="" className="w-10 h-10 object-contain mx-auto mb-1" />
                 )}
-                <h1 className="text-base font-bold text-foreground">{instName || ''}</h1>
+                <h1 className="text-lg font-bold text-foreground">{instName || ''}</h1>
                 <p className="text-xs font-semibold text-foreground">
                   {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
                 </p>
                 {selectedDiv && selectedDivisionId !== 'all' && (
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground font-medium">
                     {bn ? `${selectedDiv.name_bn} শাখা` : `${selectedDiv.name} Division`}
-                    {classRangeText && ` — ${classRangeText} ${bn ? 'শ্রেণী' : ''}`}
+                  </p>
+                )}
+                {classRangeText && (
+                  <p className="text-[10px] text-muted-foreground">
+                    {classRangeText} {bn ? 'শ্রেণী' : ''}
+                  </p>
+                )}
+                {/* Show selected day in header */}
+                {selectedDay !== 'all' && (
+                  <p className="text-[11px] font-semibold text-foreground mt-0.5">
+                    {bn ? daysToRender[0]?.label_bn : daysToRender[0]?.label_en}
                   </p>
                 )}
               </div>
 
-              {/* Master Timetable: one row per day, columns = periods, separate section per class */}
-              {DAYS.map(day => {
-                // Check if any routine has periods for this day
-                const dayPeriods = (allPeriods || []).filter(p => p.day_of_week === day.value);
-                if (dayPeriods.length === 0 && allPeriodNums.length > 0) return null;
-                return null; // We'll use the combined table below instead
-              })}
-
-              {/* Combined view: Rows = Classes, within each class group by day */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-[11px] border-collapse" style={{ minWidth: allPeriodNums.length * 100 + 120 }}>
-                  <thead>
-                    <tr>
-                      <th className="border border-border bg-muted/40 px-2 py-1.5 text-left font-semibold sticky left-0 z-10 min-w-[80px]">
-                        {bn ? 'শ্রেণী' : 'Class'}
-                      </th>
-                      {allPeriodNums.map((num, i) => {
-                        const sample = (allPeriods || []).find(p => p.period_number === num);
-                        const isBreak = breakNums.has(num);
-                        const isAfterBreak = breakNums.size > 0 && !isBreak && num > Math.max(...breakNums);
-                        return (
-                          <th
-                            key={num}
-                            className={`border border-border px-1 py-1.5 text-center font-semibold ${
-                              isBreak ? 'bg-emerald-100 dark:bg-emerald-900/30 min-w-[28px] max-w-[32px]' :
-                              isAfterBreak ? 'bg-emerald-50 dark:bg-emerald-900/10' : 'bg-muted/40'
-                            }`}
-                            style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '6px 2px' } : {}}
-                          >
-                            {isBreak ? (
-                              <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
-                                {bn ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')}
-                              </span>
-                            ) : (
-                              <div>
-                                <div className="font-bold text-[10px]">{bn ? PERIOD_LABELS_BN[i] || String(num) : `P${num}`}</div>
-                                {sample && <div className="text-[8px] text-muted-foreground font-normal">{fmtTime(sample.start_time)}-{fmtTime(sample.end_time)}</div>}
-                              </div>
-                            )}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredRoutines.map(routine => {
-                      const cls = routine.classes as any;
-                      const div = cls?.divisions as any;
-                      const routinePeriods = (allPeriods || []).filter(p => p.routine_id === routine.id);
-
-                      return DAYS.map(day => {
-                        const dayPeriods = routinePeriods.filter(p => p.day_of_week === day.value);
-                        if (dayPeriods.length === 0 && allPeriodNums.length > 0) {
-                          // Skip days with no periods for this class
-                          return null;
-                        }
-                        return (
-                          <tr key={`${routine.id}-${day.value}`} className="hover:bg-accent/20 transition-colors">
-                            {day.value === DAYS[0].value || !DAYS.slice(0, DAYS.indexOf(day)).some(d => routinePeriods.some(p => p.day_of_week === d.value)) ? null : null}
-                            <td className="border border-border bg-muted/10 px-2 py-1 font-semibold text-[10px] whitespace-nowrap sticky left-0 z-10">
-                              <div>{bn ? day.label_bn : day.label_en}</div>
-                              {day.value === DAYS.find(d => routinePeriods.some(p => p.day_of_week === d.value))?.value && (
-                                <div className="text-[8px] text-muted-foreground font-normal">
-                                  {bn ? cls?.name_bn : cls?.name}
-                                </div>
-                              )}
-                            </td>
-                            {allPeriodNums.map(num => {
-                              const p = dayPeriods.find(dp => dp.period_number === num);
-                              const isBreak = breakNums.has(num);
-                              const isAfterBreak = breakNums.size > 0 && !isBreak && num > Math.max(...breakNums);
-                              const subj = p?.subjects as any;
-
-                              if (isBreak) {
-                                return <td key={num} className="border border-border bg-emerald-50/50 dark:bg-emerald-900/10" />;
-                              }
-
-                              if (!p) {
-                                return <td key={num} className={`border border-border ${isAfterBreak ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`} />;
-                              }
-
-                              return (
-                                <td key={num} className={`border border-border px-1 py-1 text-center ${isAfterBreak ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`}>
-                                  <div className="text-[10px] font-semibold text-foreground leading-tight">
-                                    {subj ? (bn ? subj.name_bn : subj.name) : '-'}
-                                  </div>
-                                  {(p.teacher_name_bn || p.teacher_name) && (
-                                    <div className="text-[8px] text-muted-foreground leading-tight">
-                                      {bn ? p.teacher_name_bn : p.teacher_name}
-                                    </div>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      });
-                    })}
-                  </tbody>
-                </table>
+              {/* Render tables per day */}
+              <div className="p-2">
+                {daysToRender.map(day => renderDayTable(day))}
               </div>
 
               {/* Footer */}
