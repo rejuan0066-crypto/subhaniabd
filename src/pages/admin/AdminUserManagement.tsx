@@ -105,6 +105,11 @@ const AdminUserManagement = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [profileUser, setProfileUser] = useState<UserItem | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditName, setProfileEditName] = useState('');
+  const [profileEditEmail, setProfileEditEmail] = useState('');
+  const [profileNewPassword, setProfileNewPassword] = useState('');
+  const [profileShowPw, setProfileShowPw] = useState(false);
+  const [profileSaving, setProfileSaving] = useState<string | null>(null);
 
   // Create form
   const [email, setEmail] = useState('');
