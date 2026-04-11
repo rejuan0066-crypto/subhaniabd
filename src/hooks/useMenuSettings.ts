@@ -68,7 +68,8 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'receipt-designer', path: '/admin/receipt-designer', label_bn: 'রসিদ ডিজাইনার', label_en: 'Receipt Designer', icon: 'ReceiptText', visible: true, sort_order: 32 },
   { id: 'address-manager', path: '/admin/address-manager', label_bn: 'ঠিকানা ব্যবস্থাপনা', label_en: 'Address Manager', icon: 'MapPin', visible: true, sort_order: 33 },
   { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 34 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 35 },
+  { id: 'class-routine', path: '/admin/class-routine', label_bn: 'ক্লাস রুটিন', label_en: 'Class Routine', icon: 'CalendarClock', visible: true, sort_order: 35 },
+  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 36 },
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [
