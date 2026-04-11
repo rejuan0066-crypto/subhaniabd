@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit, Copy, Eye, Clock, BookOpen } from 'lucide-react';
+import { Plus, Trash2, Edit, Copy, Eye, Clock, BookOpen, Printer } from 'lucide-react';
 
 const DAYS = [
   { value: 0, label_bn: 'শনিবার', label_en: 'Saturday' },
@@ -41,12 +41,23 @@ interface RoutinePeriod {
 
 const AdminClassRoutine = () => {
   const { language } = useLanguage();
+  const bn = language === 'bn';
   const qc = useQueryClient();
   const [selectedRoutineId, setSelectedRoutineId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [form, setForm] = useState({ name: '', name_bn: '', class_id: '', academic_session_id: '', is_active: true });
   const [editingRoutineId, setEditingRoutineId] = useState<string | null>(null);
+
+  // Fetch institution
+  const { data: institution } = useQuery({
+    queryKey: ['institution-default'],
+    queryFn: async () => {
+      const { data } = await supabase.from('institutions').select('name, name_en, logo_url, address, phone').eq('is_default', true).maybeSingle();
+      return data;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
 
   // Fetch classes
   const { data: classes } = useQuery({
@@ -372,135 +383,263 @@ const AdminClassRoutine = () => {
     );
   }
 
-  // ---- DETAIL VIEW (Routine Builder) ----
+  // Helper: format time to bn
+  const fmtTime = (t: string) => {
+    if (!t) return '';
+    const s = t.slice(0, 5);
+    if (!bn) return s;
+    return s.replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]);
+  };
+
+  const toBnNum = (n: number) => bn ? String(n).replace(/\d/g, (d: string) => '০১২৩৪৫৬৭৮৯'[Number(d)]) : String(n);
+
+  const PERIOD_LABELS_BN = ['১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
+  const PERIOD_LABELS_EN = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
+
+  const cls = selectedRoutine?.classes as any;
+  const div = cls?.divisions as any;
+  const sess = selectedRoutine?.academic_sessions as any;
+  const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
+
+  // Collect unique period numbers across all days
+  const allPeriodNums = [...new Set((periods || []).map(p => p.period_number))].sort((a, b) => a - b);
+
+  // Find break periods
+  const breakNums = new Set((periods || []).filter(p => p.is_break).map(p => p.period_number));
+
+  // Split periods: before break, break, after break
+  const beforeBreak = allPeriodNums.filter(n => !breakNums.has(n) && (breakNums.size === 0 || n < Math.min(...breakNums)));
+  const breakPeriods = allPeriodNums.filter(n => breakNums.has(n));
+  const afterBreak = allPeriodNums.filter(n => !breakNums.has(n) && breakNums.size > 0 && n > Math.max(...breakNums));
+  const orderedNums = breakNums.size > 0 ? [...beforeBreak, ...breakPeriods, ...afterBreak] : allPeriodNums;
+
+  // Print handler
+  const handlePrint = () => {
+    const el = document.getElementById('routine-print-area');
+    if (!el) return;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${bn ? 'ক্লাস রুটিন' : 'Class Routine'}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body { font-family: 'Noto Sans Bengali', sans-serif; padding: 15px; }
+      @page { size: A4 landscape; margin: 10mm; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1.5px solid #333; padding: 4px 6px; text-align: center; font-size: 11px; vertical-align: middle; }
+      th { background: #f0f0f0; font-weight: 600; }
+      .header { text-align: center; margin-bottom: 10px; }
+      .header h1 { font-size: 18px; font-weight: 700; }
+      .header p { font-size: 12px; margin: 2px 0; }
+      .date-box { position: absolute; top: 15px; right: 20px; font-size: 11px; }
+      .break-col { background: #e8f5e9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 600; font-size: 10px; min-width: 28px; max-width: 32px; }
+      .after-break { background: #f0faf0; }
+      .after-break-head { background: #d4edda !important; }
+      .day-cell { background: #f5f5f5; font-weight: 600; text-align: left; padding-left: 8px; white-space: nowrap; }
+      .subject { font-weight: 600; font-size: 11px; }
+      .teacher { font-size: 9px; color: #555; }
+      .footer { margin-top: 8px; font-size: 10px; text-align: left; }
+      @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style></head><body><div style="position:relative;">`);
+    w.document.write(el.innerHTML);
+    w.document.write('</div></body></html>');
+    w.document.close();
+    const check = setInterval(() => {
+      if (w.document.readyState === 'complete') {
+        clearInterval(check);
+        setTimeout(() => { w.print(); w.close(); }, 300);
+      }
+    }, 100);
+  };
+
+  // ---- DETAIL VIEW (Formal Timetable) ----
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => setSelectedRoutineId(null)}>
-          <span className="mr-1">←</span> {language === 'bn' ? 'পেছনে যান' : 'Go Back'}
+          <span className="mr-1">←</span> {bn ? 'পেছনে যান' : 'Go Back'}
         </Button>
-        <h1 className="text-lg font-bold flex-1 min-w-0 truncate">
-          {language === 'bn' ? selectedRoutine?.name_bn : selectedRoutine?.name}
-        </h1>
+        <div className="flex-1" />
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => openNewPeriod(0)}>
+          <Plus className="h-3.5 w-3.5" /> {bn ? 'পিরিয়ড যোগ' : 'Add Period'}
+        </Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={handlePrint}>
+          <Printer className="h-3.5 w-3.5" /> {bn ? 'প্রিন্ট' : 'Print'}
+        </Button>
       </div>
 
-      {/* Period add dialog */}
+      {/* Period add/edit dialog */}
       <Dialog open={showPeriodDialog} onOpenChange={setShowPeriodDialog}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>{periodForm.id ? (language === 'bn' ? 'পিরিয়ড সম্পাদনা' : 'Edit Period') : (language === 'bn' ? 'নতুন পিরিয়ড' : 'New Period')}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{periodForm.id ? (bn ? 'পিরিয়ড সম্পাদনা' : 'Edit Period') : (bn ? 'নতুন পিরিয়ড' : 'New Period')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{language === 'bn' ? 'বার' : 'Day'}</Label>
+              <div><Label>{bn ? 'বার' : 'Day'}</Label>
                 <Select value={String(periodForm.day_of_week)} onValueChange={v => setPeriodForm(f => ({ ...f, day_of_week: Number(v) }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{DAYS.map(d => <SelectItem key={d.value} value={String(d.value)}>{language === 'bn' ? d.label_bn : d.label_en}</SelectItem>)}</SelectContent>
+                  <SelectContent>{DAYS.map(d => <SelectItem key={d.value} value={String(d.value)}>{bn ? d.label_bn : d.label_en}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label>{language === 'bn' ? 'পিরিয়ড নম্বর' : 'Period #'}</Label>
+              <div><Label>{bn ? 'পিরিয়ড নম্বর' : 'Period #'}</Label>
                 <Input type="number" min={1} value={periodForm.period_number} onChange={e => setPeriodForm(f => ({ ...f, period_number: Number(e.target.value) }))} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>{language === 'bn' ? 'শুরু' : 'Start'}</Label>
+              <div><Label>{bn ? 'শুরু' : 'Start'}</Label>
                 <Input type="time" value={periodForm.start_time} onChange={e => setPeriodForm(f => ({ ...f, start_time: e.target.value }))} />
               </div>
-              <div><Label>{language === 'bn' ? 'শেষ' : 'End'}</Label>
+              <div><Label>{bn ? 'শেষ' : 'End'}</Label>
                 <Input type="time" value={periodForm.end_time} onChange={e => setPeriodForm(f => ({ ...f, end_time: e.target.value }))} />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Switch checked={periodForm.is_break} onCheckedChange={v => setPeriodForm(f => ({ ...f, is_break: v }))} />
-              <Label>{language === 'bn' ? 'বিরতি/টিফিন' : 'Break/Tiffin'}</Label>
+              <Label>{bn ? 'বিরতি/টিফিন' : 'Break/Tiffin'}</Label>
             </div>
             {periodForm.is_break ? (
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>{language === 'bn' ? 'বিরতি লেবেল (বাংলা)' : 'Break Label (BN)'}</Label>
+                <div><Label>{bn ? 'বিরতি লেবেল (বাংলা)' : 'Break Label (BN)'}</Label>
                   <Input value={periodForm.break_label_bn} onChange={e => setPeriodForm(f => ({ ...f, break_label_bn: e.target.value }))} placeholder="টিফিন" />
                 </div>
-                <div><Label>{language === 'bn' ? 'বিরতি লেবেল (ইংরেজি)' : 'Break Label (EN)'}</Label>
+                <div><Label>{bn ? 'বিরতি লেবেল (ইংরেজি)' : 'Break Label (EN)'}</Label>
                   <Input value={periodForm.break_label} onChange={e => setPeriodForm(f => ({ ...f, break_label: e.target.value }))} placeholder="Tiffin" />
                 </div>
               </div>
             ) : (
               <>
-                <div><Label>{language === 'bn' ? 'বিষয়' : 'Subject'}</Label>
+                <div><Label>{bn ? 'বিষয়' : 'Subject'}</Label>
                   <Select value={periodForm.subject_id || ''} onValueChange={v => setPeriodForm(f => ({ ...f, subject_id: v || null }))}>
-                    <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'বিষয় নির্বাচন' : 'Select subject'} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={bn ? 'বিষয় নির্বাচন' : 'Select subject'} /></SelectTrigger>
                     <SelectContent>
-                      {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{language === 'bn' ? s.name_bn : s.name}</SelectItem>)}
+                      {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label>{language === 'bn' ? 'শিক্ষক (বাংলা)' : 'Teacher (BN)'}</Label>
+                  <div><Label>{bn ? 'শিক্ষক (বাংলা)' : 'Teacher (BN)'}</Label>
                     <Input value={periodForm.teacher_name_bn} onChange={e => setPeriodForm(f => ({ ...f, teacher_name_bn: e.target.value }))} /></div>
-                  <div><Label>{language === 'bn' ? 'শিক্ষক (ইংরেজি)' : 'Teacher (EN)'}</Label>
+                  <div><Label>{bn ? 'শিক্ষক (ইংরেজি)' : 'Teacher (EN)'}</Label>
                     <Input value={periodForm.teacher_name} onChange={e => setPeriodForm(f => ({ ...f, teacher_name: e.target.value }))} /></div>
                 </div>
-                <div><Label>{language === 'bn' ? 'রুম' : 'Room'}</Label>
+                <div><Label>{bn ? 'রুম' : 'Room'}</Label>
                   <Input value={periodForm.room} onChange={e => setPeriodForm(f => ({ ...f, room: e.target.value }))} /></div>
               </>
             )}
-            <Button className="w-full" onClick={() => {
-              savePeriod.mutate(periodForm);
-              setShowPeriodDialog(false);
-            }}>
-              {periodForm.id ? (language === 'bn' ? 'আপডেট' : 'Update') : (language === 'bn' ? 'যোগ করুন' : 'Add')}
-            </Button>
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={() => {
+                savePeriod.mutate(periodForm);
+                setShowPeriodDialog(false);
+              }}>
+                {periodForm.id ? (bn ? 'আপডেট' : 'Update') : (bn ? 'যোগ করুন' : 'Add')}
+              </Button>
+              {periodForm.id && (
+                <Button variant="destructive" size="icon" onClick={() => {
+                  if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) {
+                    deletePeriod.mutate(periodForm.id!);
+                    setShowPeriodDialog(false);
+                  }
+                }}><Trash2 className="h-4 w-4" /></Button>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Timetable grid view */}
-      {(() => {
-        // Collect unique period numbers across all days
-        const allPeriodNums = [...new Set((periods || []).map(p => p.period_number))].sort((a, b) => a - b);
-        if (allPeriodNums.length === 0) {
-          return <p className="text-center text-muted-foreground py-8">{language === 'bn' ? 'কোনো পিরিয়ড নেই। নিচের বাটন থেকে পিরিয়ড যোগ করুন।' : 'No periods yet. Add periods using buttons below.'}</p>;
-        }
-        return (
-          <Card>
-            <CardContent className="p-0">
+      {/* Formal Timetable matching the reference image */}
+      <div id="routine-print-area">
+        <Card className="overflow-hidden border-2 border-border">
+          <CardContent className="p-0">
+            {/* Institution Header */}
+            <div className="text-center py-4 px-6 border-b-2 border-border bg-muted/20 relative">
+              <div className="absolute top-3 right-4 text-xs text-muted-foreground">
+                {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')}
+              </div>
+              {institution?.logo_url && (
+                <img src={institution.logo_url} alt="" className="w-10 h-10 object-contain mx-auto mb-1" />
+              )}
+              <h1 className="text-lg font-bold text-foreground">{instName || ''}</h1>
+              <p className="text-sm font-semibold text-foreground">
+                {bn ? 'ক্লাস রুটিন' : 'Class Routine'}: {sess ? (bn ? sess.name_bn || sess.name : sess.name) : ''}
+              </p>
+              {div && cls && (
+                <p className="text-xs text-muted-foreground">
+                  {bn ? `${div.name_bn || ''} শাখা — ${cls.name_bn || ''} শ্রেণী` : `${div.name || ''} — ${cls.name || ''}`}
+                </p>
+              )}
+            </div>
+
+            {allPeriodNums.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">
+                {bn ? 'কোনো পিরিয়ড নেই। উপরের বাটন থেকে পিরিয়ড যোগ করুন।' : 'No periods yet. Add periods using the button above.'}
+              </div>
+            ) : (
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="sticky left-0 bg-background z-10 min-w-[90px] border-r">
-                        {language === 'bn' ? 'বার' : 'Day'}
-                      </TableHead>
-                      {allPeriodNums.map(num => {
-                        // Get time from any day's period with this number
+                <table className="w-full text-sm border-collapse" style={{ minWidth: orderedNums.length * 110 + 100 }}>
+                  <thead>
+                    <tr>
+                      <th className="border border-border bg-muted/40 px-3 py-2 text-left font-semibold text-xs min-w-[80px] sticky left-0 z-10">
+                        {bn ? 'শ্রেণী' : 'Day'}
+                      </th>
+                      {orderedNums.map((num, i) => {
                         const sample = (periods || []).find(p => p.period_number === num);
-                        const isBreak = sample?.is_break;
+                        const isBreak = breakNums.has(num);
+                        const isAfterBreak = breakNums.size > 0 && !isBreak && num > Math.max(...breakNums);
                         return (
-                          <TableHead key={num} className={`text-center min-w-[100px] ${isBreak ? 'bg-muted/50' : ''}`}>
-                            <div className="text-xs font-semibold">
-                              {isBreak ? (language === 'bn' ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')) : `${language === 'bn' ? 'পিরিয়ড' : 'P'} ${num}`}
-                            </div>
-                            {sample && <div className="text-[10px] text-muted-foreground">{sample.start_time?.slice(0, 5)}-{sample.end_time?.slice(0, 5)}</div>}
-                          </TableHead>
+                          <th
+                            key={num}
+                            className={`border border-border px-2 py-2 text-center font-semibold text-xs ${
+                              isBreak ? 'bg-emerald-100 dark:bg-emerald-900/30 min-w-[30px] max-w-[36px]' : 
+                              isAfterBreak ? 'bg-emerald-50 dark:bg-emerald-900/10' : 'bg-muted/40'
+                            }`}
+                            style={isBreak ? { writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px' } : {}}
+                            rowSpan={isBreak ? 1 : undefined}
+                          >
+                            {isBreak ? (
+                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
+                                {bn ? (sample?.break_label_bn || 'বিরতি') : (sample?.break_label || 'Break')}
+                                {sample && (
+                                  <><br /><span className="text-[8px]">{fmtTime(sample.start_time)}-{fmtTime(sample.end_time)}</span></>
+                                )}
+                              </span>
+                            ) : (
+                              <div>
+                                <div className="font-bold">{bn ? (PERIOD_LABELS_BN[beforeBreak.indexOf(num) !== -1 ? beforeBreak.indexOf(num) : (beforeBreak.length + afterBreak.indexOf(num))] || toBnNum(num)) : (PERIOD_LABELS_EN[i] || String(num))}</div>
+                                {sample && <div className="text-[10px] text-muted-foreground font-normal">{fmtTime(sample.start_time)} - {fmtTime(sample.end_time)}</div>}
+                              </div>
+                            )}
+                          </th>
                         );
                       })}
-                      <TableHead className="w-10">
-                        <Plus className="h-3 w-3" />
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {DAYS.map(day => {
                       const dayPeriods = (periods || []).filter(p => p.day_of_week === day.value);
                       return (
-                        <TableRow key={day.value}>
-                          <TableCell className="sticky left-0 bg-background z-10 border-r font-medium text-xs">
-                            {language === 'bn' ? day.label_bn : day.label_en}
-                          </TableCell>
-                          {allPeriodNums.map(num => {
+                        <tr key={day.value} className="hover:bg-accent/20 transition-colors">
+                          <td className="border border-border bg-muted/20 px-3 py-2 font-semibold text-xs whitespace-nowrap sticky left-0 z-10">
+                            {bn ? day.label_bn : day.label_en}
+                          </td>
+                          {orderedNums.map(num => {
                             const p = dayPeriods.find(dp => dp.period_number === num);
+                            const isBreak = breakNums.has(num);
+                            const isAfterBreak = breakNums.size > 0 && !isBreak && num > Math.max(...breakNums);
                             const subj = p?.subjects as any;
+
+                            if (isBreak) {
+                              return (
+                                <td key={num} className="border border-border bg-emerald-50 dark:bg-emerald-900/20 text-center cursor-pointer" onClick={() => p && openEditPeriod(p)}>
+                                  {p && !p.is_break && subj && (
+                                    <div className="text-[10px]">{bn ? subj.name_bn : subj.name}</div>
+                                  )}
+                                </td>
+                              );
+                            }
+
                             if (!p) {
                               return (
-                                <TableCell key={num} className="text-center">
-                                  <Button size="sm" variant="ghost" className="h-7 w-7 text-muted-foreground" onClick={() => {
+                                <td key={num} className={`border border-border text-center ${isAfterBreak ? 'bg-emerald-50/50 dark:bg-emerald-900/5' : ''}`}>
+                                  <button className="p-1 text-muted-foreground/40 hover:text-primary transition-colors" onClick={() => {
                                     const sample = (periods || []).find(sp => sp.period_number === num);
                                     setPeriodForm({
                                       day_of_week: day.value, period_number: num,
@@ -511,41 +650,46 @@ const AdminClassRoutine = () => {
                                     setShowPeriodDialog(true);
                                   }}>
                                     <Plus className="h-3 w-3" />
-                                  </Button>
-                                </TableCell>
+                                  </button>
+                                </td>
                               );
                             }
+
                             return (
-                              <TableCell key={num} className={`text-center cursor-pointer hover:bg-accent/50 transition-colors ${p.is_break ? 'bg-muted/30' : ''}`} onClick={() => openEditPeriod(p)}>
-                                {p.is_break ? (
-                                  <Badge variant="outline" className="text-[10px]">{language === 'bn' ? (p.break_label_bn || 'বিরতি') : (p.break_label || 'Break')}</Badge>
-                                ) : (
-                                  <div>
-                                    <div className="text-xs font-medium">{subj ? (language === 'bn' ? subj.name_bn : subj.name) : '-'}</div>
-                                    {(p.teacher_name_bn || p.teacher_name) && (
-                                      <div className="text-[10px] text-muted-foreground truncate max-w-[80px] mx-auto">{language === 'bn' ? p.teacher_name_bn : p.teacher_name}</div>
-                                    )}
-                                    {p.room && <div className="text-[10px] text-muted-foreground">{p.room}</div>}
+                              <td
+                                key={num}
+                                className={`border border-border px-2 py-1.5 text-center cursor-pointer hover:bg-primary/5 transition-colors ${isAfterBreak ? 'bg-emerald-50/50 dark:bg-emerald-900/5' : ''}`}
+                                onClick={() => openEditPeriod(p)}
+                              >
+                                <div className="text-xs font-semibold text-foreground leading-tight">
+                                  {subj ? (bn ? subj.name_bn : subj.name) : '-'}
+                                </div>
+                                {(p.teacher_name_bn || p.teacher_name) && (
+                                  <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                                    {bn ? p.teacher_name_bn : p.teacher_name}
                                   </div>
                                 )}
-                              </TableCell>
+                                {p.room && (
+                                  <div className="text-[9px] text-muted-foreground/70">{p.room}</div>
+                                )}
+                              </td>
                             );
                           })}
-                          <TableCell>
-                            <Button size="sm" variant="ghost" className="h-7 w-7" onClick={() => openNewPeriod(day.value)}>
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
+                        </tr>
                       );
                     })}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
+            )}
+
+            {/* Footer */}
+            <div className="px-4 py-2 border-t border-border text-[10px] text-muted-foreground">
+              {bn ? 'বি.দ্র. কর্তৃপক্ষ কর্তৃক পরিবর্তন করার ক্ষমতা এবং বিশেষ প্রয়োজনে অতিরিক্ত ক্লাশ নিতে পারবেন।' : 'Note: Schedule subject to change by administration.'}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
