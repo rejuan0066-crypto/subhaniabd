@@ -486,7 +486,7 @@ const AdminJoiningLetters = () => {
                     <TableCell>{l.letter_date ? new Date(l.letter_date).toLocaleDateString(bn ? 'bn-BD' : 'en-US') : '—'}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
-                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { resetOverrides(); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
+                        <Button size="icon" variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => { loadSavedOverrides(l); setViewLetter(l); }} title={bn ? 'দেখুন' : 'View'}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button size="icon" variant="ghost" className="text-green-600 hover:bg-green-500/10" onClick={() => handlePrint(l)} title={bn ? 'প্রিন্ট' : 'Print'}>
@@ -711,8 +711,14 @@ const AdminJoiningLetters = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="px-4 pb-4">
-                    <Button className="w-full" onClick={() => handlePrint(viewLetter)}>
+                  <div className="px-4 pb-4 flex gap-2">
+                    {editMode && (
+                      <Button variant="default" className="flex-1 gap-2" onClick={handleSave} disabled={saveMutation.isPending}>
+                        {saveMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {bn ? 'সেভ করুন' : 'Save Changes'}
+                      </Button>
+                    )}
+                    <Button variant={editMode ? 'outline' : 'default'} className="flex-1" onClick={() => handlePrint(viewLetter)}>
                       <Printer className="w-4 h-4 mr-2" />{bn ? 'প্রিন্ট করুন' : 'Print'}
                     </Button>
                   </div>
