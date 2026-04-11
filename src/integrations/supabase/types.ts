@@ -763,6 +763,114 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_routine_entries: {
+        Row: {
+          class_id: string | null
+          created_at: string | null
+          end_time: string
+          exam_date: string
+          id: string
+          notes: string | null
+          notes_bn: string | null
+          room: string | null
+          routine_id: string
+          sort_order: number | null
+          start_time: string
+          subject_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string | null
+          end_time: string
+          exam_date: string
+          id?: string
+          notes?: string | null
+          notes_bn?: string | null
+          room?: string | null
+          routine_id: string
+          sort_order?: number | null
+          start_time: string
+          subject_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string | null
+          end_time?: string
+          exam_date?: string
+          id?: string
+          notes?: string | null
+          notes_bn?: string | null
+          room?: string | null
+          routine_id?: string
+          sort_order?: number | null
+          start_time?: string
+          subject_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_routine_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_routine_entries_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "exam_routines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_routine_entries_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_routines: {
+        Row: {
+          created_at: string | null
+          exam_session_id: string
+          id: string
+          is_active: boolean | null
+          name: string
+          name_bn: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exam_session_id: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_bn: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exam_session_id?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_bn?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_routines_exam_session_id_fkey"
+            columns: ["exam_session_id"]
+            isOneToOne: false
+            referencedRelation: "exam_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_session_classes: {
         Row: {
           class_id: string

@@ -74,6 +74,7 @@ import AdminExamSessions from "./pages/admin/AdminExamSessions";
 import AdminLibrary from "./pages/admin/AdminLibrary";
 import AdminIdCards from "./pages/admin/AdminIdCards";
 import AdminClassRoutine from "./pages/admin/AdminClassRoutine";
+import AdminExamRoutine from "./pages/admin/AdminExamRoutine";
 import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
 import ScrollToTop from "./components/ScrollToTop";
@@ -231,6 +232,7 @@ const App = () => (
                     <Route path="library" element={<ModuleGuard menuPath="/admin/library"><AdminLibrary /></ModuleGuard>} />
                     <Route path="id-cards" element={<AdminIdCards />} />
                     <Route path="class-routine" element={<AdminClassRoutine />} />
+                    <Route path="exam-routine" element={<AdminExamRoutine />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
