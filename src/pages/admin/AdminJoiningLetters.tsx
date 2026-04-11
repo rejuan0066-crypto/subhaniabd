@@ -101,8 +101,7 @@ const Draggable = ({ id, editing, positions, onMove, children, className = '', s
     </div>
   );
 };
-
-
+const AdminJoiningLetters = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
