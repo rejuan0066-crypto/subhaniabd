@@ -339,8 +339,9 @@ const AdminClassRoutine = () => {
               </Dialog>
             </div>
 
-            {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (
-              <Card>
+            {isLoading ? <p className="text-muted-foreground">{bn ? 'লোড হচ্ছে...' : 'Loading...'}</p> : (() => {
+              const filtered = filterClassId === 'all' ? routines : routines?.filter(r => r.class_id === filterClassId);
+              return (
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <Table>
