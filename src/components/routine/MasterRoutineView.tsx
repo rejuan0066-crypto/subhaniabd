@@ -270,6 +270,7 @@ const MasterRoutineView = () => {
         .eq('period_number', periodNum)
         .maybeSingle();
 
+      const time = periodTimes[periodNum] || { start: '08:00', end: '08:45' };
       const periodData = {
         routine_id: routineId,
         day_of_week: Number(selectedDay),
@@ -278,8 +279,8 @@ const MasterRoutineView = () => {
         teacher_name: teacherName || null,
         teacher_name_bn: teacherNameBn || null,
         is_break: isBreak || false,
-        start_time: '08:00',
-        end_time: '08:45',
+        start_time: time.start,
+        end_time: time.end,
       };
 
       if (existing) {
