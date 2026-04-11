@@ -311,7 +311,20 @@ const AdminClassRoutine = () => {
           </TabsList>
 
           <TabsContent value="individual" className="space-y-4 mt-4">
-            <div className="flex justify-end">
+            <div className="flex items-end justify-between gap-3 flex-wrap">
+              <div className="min-w-[180px]">
+                <Label className="text-xs">{bn ? 'শ্রেণী অনুযায়ী ফিল্টার' : 'Filter by Class'}</Label>
+                <Select value={filterClassId} onValueChange={setFilterClassId}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
+                    {classes?.map(c => {
+                      const div = (c as any).divisions;
+                      return <SelectItem key={c.id} value={c.id}>{bn ? `${div?.name_bn || ''} - ${c.name_bn}` : `${div?.name || ''} - ${c.name}`}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
               <Dialog open={showCreate} onOpenChange={setShowCreate}>
                 <DialogTrigger asChild>
                   <Button size="sm"><Plus className="h-4 w-4 mr-1" />{bn ? 'নতুন রুটিন' : 'New Routine'}</Button>
