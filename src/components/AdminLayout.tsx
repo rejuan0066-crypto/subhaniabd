@@ -23,6 +23,7 @@ import {
   Blocks, FlaskConical, CalendarDays, ShieldCheck, BarChart3, KeyRound, Palette,
   ListOrdered, Home, Image, Mail, Phone, MapPin, Star, Award, Clock, Folder, LayoutGrid,
   HardDrive, MessageSquare, Wallet, UserPlus, Camera, Search, Maximize2, MoreVertical,
+  CalendarClock, ClipboardList,
   type LucideIcon
 } from 'lucide-react';
 
@@ -33,6 +34,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Wrench, Blocks, FlaskConical, CalendarDays, ShieldCheck, BarChart3,
   KeyRound, Palette, ListOrdered, UserCircle, FileBox, Home,
   Image, Mail, Phone, MapPin, Star, Award, Clock, Folder, LayoutGrid, HardDrive, MessageSquare, Wallet, UserPlus, Camera,
+  CalendarClock, ClipboardList,
 };
 
 const MENU_SCROLL_STORAGE_KEYS = {
