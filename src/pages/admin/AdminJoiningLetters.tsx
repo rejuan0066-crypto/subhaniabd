@@ -569,16 +569,22 @@ const AdminJoiningLetters = () => {
                                 </div>
                               </div>
                             )}
-                            <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="" style={{ textAlign: salutationAlign }} />
-                            <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))', textAlign: nameAlign }} />
-                            <Editable
-                              tag="p"
-                              value={r.bodyText}
-                              onChange={v => set('bodyText', v)}
-                              editing={editMode}
-                              className=""
-                              style={{ textAlign: bodyAlign, whiteSpace: 'pre-line' }}
-                            />
+                            <Draggable id="salutation" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable tag="p" value={r.salutation} onChange={v => set('salutation', v)} editing={editMode} className="" style={{ textAlign: salutationAlign }} />
+                            </Draggable>
+                            <Draggable id="staffName" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable tag="p" value={r.staffName} onChange={v => set('staffName', v)} editing={editMode} className="font-bold text-base" style={{ color: 'hsl(var(--primary))', textAlign: nameAlign }} />
+                            </Draggable>
+                            <Draggable id="bodyText" editing={editMode} positions={dragPositions} onMove={handleDragMove}>
+                              <Editable
+                                tag="p"
+                                value={r.bodyText}
+                                onChange={v => set('bodyText', v)}
+                                editing={editMode}
+                                className=""
+                                style={{ textAlign: bodyAlign, whiteSpace: 'pre-line' }}
+                              />
+                            </Draggable>
                           </div>
 
                           {/* Photo – clickable in edit mode */}
