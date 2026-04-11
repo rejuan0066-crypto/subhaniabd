@@ -256,6 +256,60 @@ export type Database = {
         }
         Relationships: []
       }
+      class_routines: {
+        Row: {
+          academic_session_id: string | null
+          class_id: string
+          created_at: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_bn: string
+          updated_at: string | null
+        }
+        Insert: {
+          academic_session_id?: string | null
+          class_id: string
+          created_at?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_bn: string
+          updated_at?: string | null
+        }
+        Update: {
+          academic_session_id?: string | null
+          class_id?: string
+          created_at?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_bn?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_routines_academic_session_id_fkey"
+            columns: ["academic_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_routines_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           created_at: string | null
@@ -2459,6 +2513,75 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      routine_periods: {
+        Row: {
+          break_label: string | null
+          break_label_bn: string | null
+          created_at: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          is_break: boolean | null
+          period_number: number
+          room: string | null
+          routine_id: string
+          start_time: string
+          subject_id: string | null
+          teacher_name: string | null
+          teacher_name_bn: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          break_label?: string | null
+          break_label_bn?: string | null
+          created_at?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_break?: boolean | null
+          period_number: number
+          room?: string | null
+          routine_id: string
+          start_time: string
+          subject_id?: string | null
+          teacher_name?: string | null
+          teacher_name_bn?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          break_label?: string | null
+          break_label_bn?: string | null
+          created_at?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_break?: boolean | null
+          period_number?: number
+          room?: string | null
+          routine_id?: string
+          start_time?: string
+          subject_id?: string | null
+          teacher_name?: string | null
+          teacher_name_bn?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_periods_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "class_routines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "routine_periods_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       salary_records: {
         Row: {
