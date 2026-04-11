@@ -109,6 +109,7 @@ const MasterRoutineView = () => {
   const [selectedDay, setSelectedDay] = useState<string>('0'); // default Saturday
   const [periodCount, setPeriodCount] = useState(8);
   const [breakAfter, setBreakAfter] = useState(4); // break after 4th period
+  const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({}); // periodNum -> times
 
   // Queries
   const { data: institution } = useQuery({
@@ -231,12 +232,13 @@ const MasterRoutineView = () => {
     return allPeriods.find(p => p.routine_id === routineId && p.period_number === periodNum);
   }, [routineMap, allPeriods]);
 
-  // Get existing period times from data
+  // Get period times: local state first, then DB
   const getPeriodTime = useCallback((periodNum: number) => {
+    if (periodTimes[periodNum]) return periodTimes[periodNum];
     if (!allPeriods) return { start: '', end: '' };
     const p = allPeriods.find(pp => pp.period_number === periodNum && !pp.is_break);
     return { start: p?.start_time || '', end: p?.end_time || '' };
-  }, [allPeriods]);
+  }, [allPeriods, periodTimes]);
 
   // Save cell mutation
   const saveCellMutation = useMutation({
@@ -268,6 +270,7 @@ const MasterRoutineView = () => {
         .eq('period_number', periodNum)
         .maybeSingle();
 
+      const time = periodTimes[periodNum] || { start: '08:00', end: '08:45' };
       const periodData = {
         routine_id: routineId,
         day_of_week: Number(selectedDay),
@@ -276,8 +279,8 @@ const MasterRoutineView = () => {
         teacher_name: teacherName || null,
         teacher_name_bn: teacherNameBn || null,
         is_break: isBreak || false,
-        start_time: '08:00',
-        end_time: '08:45',
+        start_time: time.start,
+        end_time: time.end,
       };
 
       if (existing) {
@@ -474,12 +477,39 @@ const MasterRoutineView = () => {
                       const time = getPeriodTime(col.num);
                       return (
                         <th key={col.num} className={thStyle}>
-                          <div className="font-bold text-xs">{periodLabelsMap[col.num]}</div>
-                          {time.start && (
-                            <div className="text-[8px] font-normal opacity-70">
-                              {fmtTime(time.start, bn)} - {fmtTime(time.end, bn)}
-                            </div>
-                          )}
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button className="w-full cursor-pointer hover:opacity-80 focus:outline-none">
+                                <div className="font-bold text-xs">{periodLabelsMap[col.num]}</div>
+                                <div className="text-[8px] font-normal opacity-70">
+                                  {time.start ? `${fmtTime(time.start, bn)} - ${fmtTime(time.end, bn)}` : (bn ? 'সময় দিন' : 'Set time')}
+                                </div>
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-52 p-3 space-y-2" align="center">
+                              <Label className="text-xs font-bold">{periodLabelsMap[col.num]} {bn ? 'পিরিয়ডের সময়' : 'Period Time'}</Label>
+                              <div className="flex gap-2">
+                                <div className="flex-1">
+                                  <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
+                                  <Input
+                                    type="time"
+                                    className="h-7 text-xs"
+                                    value={time.start}
+                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { ...prev[col.num], start: e.target.value, end: prev[col.num]?.end || time.end || '' } }))}
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
+                                  <Input
+                                    type="time"
+                                    className="h-7 text-xs"
+                                    value={time.end}
+                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { start: prev[col.num]?.start || time.start || '', end: e.target.value } }))}
+                                  />
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </th>
                       );
                     })}
