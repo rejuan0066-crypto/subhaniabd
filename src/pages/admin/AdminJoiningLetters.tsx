@@ -44,7 +44,65 @@ const Editable = ({ value, onChange, editing, className = '', style, tag: Tag = 
   );
 };
 
-const AdminJoiningLetters = () => {
+/* ── Draggable wrapper for edit mode ──────────────────── */
+interface DraggableProps {
+  id: string;
+  editing: boolean;
+  positions: Record<string, { x: number; y: number }>;
+  onMove: (id: string, pos: { x: number; y: number }) => void;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+const Draggable = ({ id, editing, positions, onMove, children, className = '', style }: DraggableProps) => {
+  const pos = positions[id] || { x: 0, y: 0 };
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!editing) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = ev.clientX - dragRef.current.startX;
+      const dy = ev.clientY - dragRef.current.startY;
+      onMove(id, { x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+    };
+    const onMouseUp = () => {
+      dragRef.current = null;
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  };
+
+  return (
+    <div
+      className={`${className} ${editing ? 'relative group/drag' : ''}`}
+      style={{
+        ...style,
+        transform: `translate(${pos.x}px, ${pos.y}px)`,
+        transition: dragRef.current ? 'none' : 'transform 0.15s ease',
+      }}
+    >
+      {editing && (
+        <button
+          onMouseDown={onMouseDown}
+          className="absolute -left-5 top-0 p-0.5 rounded bg-primary/10 text-primary opacity-0 group-hover/drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+          title="Drag"
+        >
+          <Move className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {children}
+    </div>
+  );
+};
+
+
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
