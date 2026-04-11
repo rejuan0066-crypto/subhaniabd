@@ -1085,6 +1085,55 @@ const AdminUserManagement = () => {
             )}
           </DialogContent>
         </Dialog>
+        {/* ===== PROFILE VIEW DIALOG ===== */}
+        <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCircle className="w-5 h-5 text-primary" />
+                {bn ? 'ইউজার প্রোফাইল' : 'User Profile'}
+              </DialogTitle>
+            </DialogHeader>
+            {profileUser && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                    <UserCircle className="w-8 h-8 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{profileUser.full_name || '—'}</p>
+                    <p className="text-sm text-muted-foreground">{profileUser.email}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'রোল' : 'Role'}</p>
+                    <div>{roleBadge(profileUser.role)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'স্ট্যাটাস' : 'Status'}</p>
+                    {profileUser.status === 'approved' ? (
+                      <Badge variant="default" className="bg-green-600">{bn ? 'অনুমোদিত' : 'Approved'}</Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>
+                    )}
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'তৈরির তারিখ' : 'Created At'}</p>
+                    <p className="text-sm font-medium">
+                      {new Date(profileUser.created_at).toLocaleDateString(bn ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-card">
+                    <p className="text-xs text-muted-foreground mb-1">{bn ? 'ইউজার আইডি' : 'User ID'}</p>
+                    <p className="text-xs font-mono text-muted-foreground break-all">{profileUser.id}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
