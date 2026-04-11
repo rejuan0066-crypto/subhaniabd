@@ -109,6 +109,7 @@ const MasterRoutineView = () => {
   const [selectedDay, setSelectedDay] = useState<string>('0'); // default Saturday
   const [periodCount, setPeriodCount] = useState(8);
   const [breakAfter, setBreakAfter] = useState(4); // break after 4th period
+  const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({}); // periodNum -> times
 
   // Queries
   const { data: institution } = useQuery({
