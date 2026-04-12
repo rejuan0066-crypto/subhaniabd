@@ -54,11 +54,11 @@ const DOC_TYPES = [
 
 export type StaffCategory = 'teacher' | 'administrative' | 'general' | 'all';
 
-// Section visibility config per category
+// Section visibility config per category — all categories show all sections equally
 const CATEGORY_SECTIONS: Record<StaffCategory, { showEducation: boolean; showIdentifier: boolean; showRelativesIdentifier: boolean; showGuardian: boolean; showParentAddress: boolean }> = {
   teacher: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
-  administrative: { showEducation: true, showIdentifier: true, showRelativesIdentifier: false, showGuardian: true, showParentAddress: true },
-  general: { showEducation: false, showIdentifier: false, showRelativesIdentifier: false, showGuardian: true, showParentAddress: false },
+  administrative: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+  general: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
   all: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
 };
 
