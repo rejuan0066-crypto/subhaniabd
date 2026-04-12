@@ -207,11 +207,13 @@ const MasterRoutineView = () => {
     return allClasses.filter(c => c.division_id === selectedDivisionId);
   }, [allClasses, selectedDivisionId]);
 
-  // Get or create routine for selected class
+  const isAllClasses = selectedClassId === 'all';
+
+  // Get or create routine for selected class (single class mode)
   const { data: routine } = useQuery({
     queryKey: ['class-routine', selectedSessionId, selectedClassId],
     queryFn: async () => {
-      if (!selectedSessionId || !selectedClassId) return null;
+      if (!selectedSessionId || !selectedClassId || isAllClasses) return null;
       const { data } = await supabase
         .from('class_routines')
         .select('id, class_id, name, name_bn')
@@ -221,7 +223,39 @@ const MasterRoutineView = () => {
         .maybeSingle();
       return data;
     },
-    enabled: !!selectedSessionId && !!selectedClassId,
+    enabled: !!selectedSessionId && !!selectedClassId && !isAllClasses,
+  });
+
+  // Get all routines for all classes (all classes mode)
+  const { data: allRoutines } = useQuery({
+    queryKey: ['all-class-routines', selectedSessionId, selectedDivisionId],
+    queryFn: async () => {
+      if (!selectedSessionId) return [];
+      let q = supabase
+        .from('class_routines')
+        .select('id, class_id, name, name_bn')
+        .eq('academic_session_id', selectedSessionId)
+        .eq('is_active', true);
+      const { data } = await q;
+      return data || [];
+    },
+    enabled: !!selectedSessionId && isAllClasses,
+  });
+
+  // All periods for all routines (all classes mode)
+  const { data: allClassesPeriods } = useQuery({
+    queryKey: ['all-classes-periods', allRoutines?.map(r => r.id).join(',')],
+    queryFn: async () => {
+      if (!allRoutines?.length) return [];
+      const routineIds = allRoutines.map(r => r.id);
+      const { data } = await supabase
+        .from('routine_periods')
+        .select('*, subjects(name, name_bn)')
+        .in('routine_id', routineIds)
+        .order('period_number');
+      return data || [];
+    },
+    enabled: isAllClasses && !!allRoutines?.length,
   });
 
   // All periods for this routine (all days)
