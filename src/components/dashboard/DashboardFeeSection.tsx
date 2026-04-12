@@ -130,10 +130,26 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         }
       });
 
-      // Find unpaid per month
-      const currentMonthIdx = new Date().getMonth();
+      // Find unpaid per month — use session start_date to end_date, up to current month
+      const now = new Date();
+      const currentMonthIdx = now.getMonth(); // 0-based
+      const currentYear = now.getFullYear();
+
       feeTypes.forEach((ft: any) => {
         if (ft.payment_frequency !== 'monthly') return;
+
+        // Determine session month range
+        let sessionStartMonth = 0; // default January
+        let sessionEndMonth = 11; // default December
+        if (ft.academic_sessions?.start_date) {
+          const sd = new Date(ft.academic_sessions.start_date);
+          sessionStartMonth = sd.getMonth();
+        }
+        if (ft.academic_sessions?.end_date) {
+          const ed = new Date(ft.academic_sessions.end_date);
+          sessionEndMonth = ed.getMonth();
+        }
+
         const applicableStudents = students.filter((s: any) => {
           if (s.is_free) return false;
           if (ft.division_id && ft.division_id !== s.division_id) return false;
@@ -145,12 +161,25 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           ? (ft.applicable_months as string[])
           : MONTHS_EN;
 
-        for (let mi = 0; mi <= currentMonthIdx; mi++) {
+        // Build list of months from session start to session end
+        const monthIndices: number[] = [];
+        if (sessionStartMonth <= sessionEndMonth) {
+          for (let mi = sessionStartMonth; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
+        } else {
+          // Wraps around year boundary (e.g., March to February)
+          for (let mi = sessionStartMonth; mi < 12; mi++) monthIndices.push(mi);
+          for (let mi = 0; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
+        }
+
+        // Only show up to current month (running months)
+        const runningMonths = monthIndices.filter(mi => mi <= currentMonthIdx);
+
+        runningMonths.forEach((mi) => {
           const monthName = MONTHS_EN[mi];
-          if (!applicableMonths.includes(monthName)) continue;
+          if (!applicableMonths.includes(monthName)) return;
 
           const monthLabel = bn ? (MONTHS_BN[monthName] || monthName) : monthName;
-          if (!groups[monthName]) groups[monthName] = { label: monthLabel, sortOrder: mi, total: 0, paid: [], unpaid: [] };
+          if (!groups[monthName]) groups[monthName] = { label: monthLabel, sortOrder: monthIndices.indexOf(mi), total: 0, paid: [], unpaid: [] };
 
           const paidForMonth = new Set(
             payments
@@ -175,7 +204,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
               }
             }
           });
-        }
+        });
       });
     } else {
       // ---- GROUP BY CLASS (admission, exam, other) ----
