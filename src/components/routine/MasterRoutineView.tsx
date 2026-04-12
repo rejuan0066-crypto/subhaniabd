@@ -1,35 +1,9 @@
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Select, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import * as SelectPrimitive from '@radix-ui/react-select';
-import { Check, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-/* SelectContent without portal - for use inside Popover */
-const InlineSelectContent = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Content
-    ref={ref}
-    className={cn(
-      "relative z-[300] max-h-60 min-w-[8rem] overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-      position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-      className
-    )}
-    position={position}
-    {...props}
-  >
-    <SelectPrimitive.Viewport
-      className={cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]")}
-    >
-      {children}
-    </SelectPrimitive.Viewport>
-  </SelectPrimitive.Content>
-));
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
