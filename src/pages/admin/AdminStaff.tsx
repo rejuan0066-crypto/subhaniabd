@@ -295,7 +295,22 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.department || '-'}</td>
+                      <td className="px-4 py-3">
+                        <Select
+                          value={getStaffCategory(s, designationsMap)}
+                          onValueChange={(val) => categoryMutation.mutate({ id: s.id, category: val })}
+                        >
+                          <SelectTrigger className="h-7 text-xs w-[130px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                            <SelectItem value="administrative">{bn ? 'প্রশাসনিক' : 'Administrative'}</SelectItem>
+                            <SelectItem value="support">{bn ? 'অফিস কর্মচারী' : 'Support Staff'}</SelectItem>
+                            <SelectItem value="general">{bn ? 'সহায়ক কর্মী' : 'General Staff'}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.phone || '-'}</td>
                       {isAdminRole(role) && (
                       <td className="px-4 py-3">
