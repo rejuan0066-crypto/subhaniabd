@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import {
   User, Hash, Calendar, Heart, Phone, Mail, MapPin, BookOpen, Banknote,
   BadgePercent, FileText, Pencil, CheckCircle, XCircle, Clock, Loader2,
   Plus, Trash2, GraduationCap, Users, Home, CreditCard, ClipboardList,
-  Fingerprint, School, Building2, Library, CalendarCheck
+  Fingerprint, School, Building2, Library, CalendarCheck, BarChart3, Award, TrendingUp
 } from 'lucide-react';
 import ProfileInfoItem from './ProfileInfoItem';
 import ProfileSectionCard from './ProfileSectionCard';
