@@ -63,6 +63,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [, startNavTransition] = useTransition();
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
 
+  // Fetch staff photo for sidebar avatar
+  const { data: sidebarStaffPhoto } = useQuery({
+    queryKey: ['sidebar-staff-photo', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('staff').select('photo_url, name_bn, name_en').eq('user_id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Apply default theme mode from settings
   useEffect(() => {
     const stored = localStorage.getItem('theme');
