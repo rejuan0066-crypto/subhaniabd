@@ -306,7 +306,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const breadcrumbs = getBreadcrumbs();
 
   const renderSidebar = (mobile = false) => (
-    <aside key={mobile ? 'mobile' : 'desktop'} className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex'} flex`}>
+    <aside key={mobile ? 'mobile' : 'desktop'} className={`${mobile ? 'fixed inset-0 z-50' : 'hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex'} flex`}>
       {mobile && (
         <div
           className="flex-1 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200"
@@ -314,7 +314,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : 'lg:my-3 lg:ml-3 lg:rounded-[28px] lg:h-[calc(100%-24px)]'}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : ''}`}
         style={sidebarStyle}
       >
         {/* Logo */}
@@ -542,7 +542,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-card/70 dark:bg-card/35 backdrop-blur-2xl border-b border-border/10 px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+          <header className={`bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/8 px-4 lg:px-6 ${headerPadClass} fixed top-0 right-0 left-0 lg:left-[var(--admin-sidebar-width)] z-40 flex items-center justify-between`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200">
                 <Menu className="w-5 h-5 text-muted-foreground" />
