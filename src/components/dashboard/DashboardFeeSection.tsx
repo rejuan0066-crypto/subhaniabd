@@ -646,7 +646,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                     <td className="px-5 py-4 text-base text-muted-foreground">{p.students?.classes?.name_bn || '-'}</td>
                     {category === 'monthly' && <td className="px-5 py-4 text-base text-muted-foreground">{p.month || '-'}</td>}
                     {category === 'exam' && <td className="px-5 py-4 text-base text-muted-foreground">{p.fee_types?.name_bn || '-'}</td>}
-                    <td className="px-5 py-4 text-base text-muted-foreground">{p.year || '-'}</td>
+                    <td className="px-5 py-4 text-base text-muted-foreground">{p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-'}</td>
                     <td className="px-5 py-4">
                       {listType === 'paid' ? (
                         <span className="font-bold text-emerald-700 dark:text-emerald-400 text-base"><span className="text-lg">৳</span> {p.paid_amount || p.amount}</span>
