@@ -27,6 +27,7 @@ const AdminProfile = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const { sendOtp, sending } = useOtpService();
+  const { user, role } = useAuth();
 
   const [currentEmail, setCurrentEmail] = useState('');
 
