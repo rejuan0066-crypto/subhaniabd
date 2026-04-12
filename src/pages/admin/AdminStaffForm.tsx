@@ -1088,6 +1088,8 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
             )}
           </div>
 
+          {sectionConfig.showGuardian && (
+          <>
           {/* ========== SECTION 3: Guardian Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
