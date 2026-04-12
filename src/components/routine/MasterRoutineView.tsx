@@ -148,7 +148,7 @@ const MasterRoutineView = () => {
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [periodCount, setPeriodCount] = useState(8);
   const [breakAfter, setBreakAfter] = useState(4);
-  const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({});
+  const [selectedDay, setSelectedDay] = useState<number>(0);
 
   // Queries
   const { data: institution } = useQuery({
