@@ -99,6 +99,7 @@ const AdminUserManagement = () => {
   const bn = language === 'bn';
   const queryClient = useQueryClient();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/user-management');
+  const { role: currentUserRole } = useAuth();
 
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
