@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import AdmissionForm from '@/components/admission/AdmissionForm';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const AdminStudents = () => {
   const { t, language } = useLanguage();
@@ -32,6 +33,7 @@ const AdminStudents = () => {
   const [filterClassId, setFilterClassId] = useState('all');
   const [filterApproval, setFilterApproval] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   // Realtime subscription for auto-refresh
   useEffect(() => {
     const channel = supabase
@@ -360,7 +362,7 @@ const AdminStudents = () => {
                             </button>
                           )}
                           {canDeleteItem && (
-                            <button onClick={() => deleteMutation.mutate(s.id)} className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/30 shadow-sm border border-rose-200/50 dark:border-rose-800/30 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:shadow-md hover:scale-110 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all duration-200" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" strokeWidth={1.75} /></button>
+                            <button onClick={() => setDeleteId(s.id)} className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-950/30 shadow-sm border border-rose-200/50 dark:border-rose-800/30 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:shadow-md hover:scale-110 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all duration-200" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" strokeWidth={1.75} /></button>
                           )}
                         </div>
                       </td>
@@ -420,6 +422,17 @@ const AdminStudents = () => {
         paramKey="tab"
       />
     </AdminLayout>
+  );
+  return (
+    <>
+      {mainContent}
+      <DeleteConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+        onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+        isPending={deleteMutation.isPending}
+      />
+    </>
   );
 };
 
