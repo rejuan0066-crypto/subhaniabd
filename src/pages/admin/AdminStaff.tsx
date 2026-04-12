@@ -18,12 +18,13 @@ import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
-export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative';
+export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative' | 'support';
 
 // Fallback keyword matching (used when designation has no staff_category in DB)
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
 const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক'];
-const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'driver', 'ড্রাইভার', 'অফিস সহকারী', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান'];
+const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'driver', 'ড্রাইভার'];
+const SUPPORT_STAFF_KEYWORDS = ['অফিস সহকারী', 'clerk', 'কেরানি', 'operator', 'অপারেটর', 'accountant', 'হিসাবরক্ষক', 'librarian', 'লাইব্রেরিয়ান', 'data entry', 'ডাটা এন্ট্রি'];
 
 const getStaffCategory = (staff: any, designationsMap: Map<string, string>): string => {
   const designation = staff?.designation;
@@ -35,6 +36,7 @@ const getStaffCategory = (staff: any, designationsMap: Map<string, string>): str
     const lower = designation.toLowerCase();
     if (TEACHER_KEYWORDS.some(k => lower.includes(k))) return 'teacher';
     if (ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'administrative';
+    if (SUPPORT_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'support';
     if (GENERAL_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'general';
   }
   // Fallback: use department field
@@ -42,6 +44,7 @@ const getStaffCategory = (staff: any, designationsMap: Map<string, string>): str
   if (dept === 'general' || dept === 'সাধারণ' || dept === 'সহায়ক') return 'general';
   if (dept === 'teacher' || dept === 'শিক্ষক' || dept.includes('শিক্ষা')) return 'teacher';
   if (dept === 'administrative' || dept === 'প্রশাসন' || dept === 'প্রশাসনিক') return 'administrative';
+  if (dept === 'support' || dept === 'অফিস') return 'support';
   return 'general'; // Default to general instead of unknown
 };
 
