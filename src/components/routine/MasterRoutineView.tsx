@@ -393,7 +393,7 @@ const MasterRoutineView = () => {
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
-      body { font-family: 'Noto Sans Bengali', sans-serif; padding: 10px; }
+      body { font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif; padding: 10px; }
       @page { size: A4 landscape; margin: 8mm; }
       table { border-collapse: collapse; width: 100%; }
       th, td { border: 1.5px solid #333; text-align: center; vertical-align: middle; }

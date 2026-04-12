@@ -610,7 +610,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
 
   const getPrintStyles = () => `
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm; }
+    body { font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm; }
     .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
     .form-header .logo { width: 60px; height: 60px; object-fit: contain; }
     .form-header h1 { font-size: 16pt; font-weight: 700; margin: 4px 0 2px; color: #1a5c2e; }

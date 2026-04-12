@@ -95,7 +95,7 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Noto Sans Bengali', sans-serif;
+      font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif;
       background: #f8fafc;
       display: flex;
       flex-wrap: wrap;

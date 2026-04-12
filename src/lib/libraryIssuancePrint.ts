@@ -37,7 +37,7 @@ export const printIssuanceReceipt = (data: IssuancePrintData, institution: Insti
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:14px}
+  body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:14px}
   .receipt{max-width:500px;margin:auto;border:2px solid #333;padding:24px;border-radius:8px}
   .header{text-align:center;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
   .header img{width:60px;height:60px;object-fit:contain;margin-bottom:6px}
@@ -107,7 +107,7 @@ export const downloadIssuanceReceipt = async (data: IssuancePrintData, instituti
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:14px}
+  body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:14px}
   .receipt{max-width:500px;margin:auto;border:2px solid #333;padding:24px;border-radius:8px}
   .header{text-align:center;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
   .header img{width:60px;height:60px;object-fit:contain;margin-bottom:6px}
@@ -193,7 +193,7 @@ export const printYearlyIssuanceList = (
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:12px}
+  body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:12px}
   .header{text-align:center;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
   .header img{width:50px;height:50px;object-fit:contain;margin-bottom:4px}
   .header h1{font-size:16px;font-weight:700}
@@ -299,7 +299,7 @@ export const downloadYearlyIssuanceList = async (
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:12px}
+  body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px;color:#1a1a1a;font-size:12px}
   .header{text-align:center;border-bottom:2px solid #333;padding-bottom:12px;margin-bottom:16px}
   .header img{width:50px;height:50px;object-fit:contain;margin-bottom:4px}
   .header h1{font-size:16px;font-weight:700}

@@ -57,7 +57,7 @@ const ClassQRPoster = ({ open, onOpenChange }: ClassQRPosterProps) => {
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Noto Sans Bengali',sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+        body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
         .poster { text-align:center; padding:40px; max-width:500px; }
         .poster img.logo { height:60px; margin-bottom:12px; }
         .poster h1 { font-size:22px; margin-bottom:4px; }

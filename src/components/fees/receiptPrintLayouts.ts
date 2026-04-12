@@ -189,7 +189,7 @@ function getCSS(style: ReceiptStyleConfig = DEFAULT_STYLE): string {
   return `
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Noto Sans Bengali', 'Inter', system-ui, sans-serif;
+    font-family: 'Solaiman Lipi', 'Noto Sans Bengali', 'Inter', system-ui, sans-serif;
     background: #f0f2f5;
     color: #111827;
     -webkit-print-color-adjust: exact !important;
