@@ -63,6 +63,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [, startNavTransition] = useTransition();
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
 
+  // Fetch staff photo for sidebar avatar
+  const { data: sidebarStaffPhoto } = useQuery({
+    queryKey: ['sidebar-staff-photo', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('staff').select('photo_url, name_bn, name_en').eq('user_id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   // Apply default theme mode from settings
   useEffect(() => {
     const stored = localStorage.getItem('theme');
@@ -430,13 +442,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {(sidebarOpen || mobile) && (
           <div className="p-3 border-t border-sidebar-border shrink-0">
             <div className="flex items-center gap-3 px-2 py-2">
-              <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-sidebar-primary-foreground">
-                  {user?.email?.charAt(0).toUpperCase() || 'A'}
-                </span>
+              <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden">
+                {sidebarStaffPhoto?.photo_url ? (
+                  <img src={sidebarStaffPhoto.photo_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-bold text-sidebar-primary-foreground">
+                    {user?.email?.charAt(0).toUpperCase() || 'A'}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.email?.split('@')[0] || 'Admin'}</p>
+                <p className="text-xs font-medium text-sidebar-foreground truncate">
+                  {(language === 'bn' ? sidebarStaffPhoto?.name_bn : sidebarStaffPhoto?.name_en) || sidebarStaffPhoto?.name_bn || user?.email?.split('@')[0] || 'Admin'}
+                </p>
                 <p className="text-[10px] text-sidebar-foreground/50 capitalize">{role === 'super_admin' ? (language === 'bn' ? 'সুপার অ্যাডমিন' : 'Super Admin') : (language === 'bn' ? 'অ্যাডমিন' : 'Admin')}</p>
               </div>
               <button
