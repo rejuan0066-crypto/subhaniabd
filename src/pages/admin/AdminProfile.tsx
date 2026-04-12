@@ -301,7 +301,99 @@ const AdminProfile = () => {
           {bn ? 'প্রোফাইল' : 'Profile'}
         </h1>
 
-        {/* ═══ Email Change ═══ */}
+        {/* ═══ Personal Info ═══ */}
+        <div className="card-elevated p-5">
+          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-primary" /> {bn ? 'ব্যক্তিগত তথ্য' : 'Personal Information'}
+          </h3>
+          <div className="flex items-start gap-5 mb-5">
+            {(staffData?.photo_url || profileData?.avatar_url) ? (
+              <img src={staffData?.photo_url || profileData?.avatar_url || ''} alt="" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
+                {(profileData?.full_name || staffData?.name_bn || '?')[0]}
+              </div>
+            )}
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-foreground">{staffData?.name_bn || profileData?.full_name || (bn ? 'নাম সেট করা হয়নি' : 'Name not set')}</h2>
+              {staffData?.name_en && staffData.name_en !== staffData.name_bn && (
+                <p className="text-sm text-muted-foreground">{staffData.name_en}</p>
+              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {role && (
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
+                    {role === 'super_admin' ? (bn ? 'সুপার অ্যাডমিন' : 'Super Admin') : role === 'admin' ? (bn ? 'অ্যাডমিন' : 'Admin') : role === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : role === 'staff' ? (bn ? 'স্টাফ' : 'Staff') : role}
+                  </Badge>
+                )}
+                {staffData?.designation && (
+                  <Badge variant="secondary" className="text-xs">{staffData.designation}</Badge>
+                )}
+                {staffData?.status && (
+                  <Badge variant="outline" className={`text-xs ${staffData.status === 'active' ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}>
+                    {staffData.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'পেন্ডিং' : 'Pending')}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {currentEmail && (
+              <div className="flex items-center gap-2 text-sm">
+                <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'ইমেইল:' : 'Email:'}</span>
+                <span className="text-foreground font-medium">{currentEmail}</span>
+              </div>
+            )}
+            {(staffData?.phone || profileData?.phone) && (
+              <div className="flex items-center gap-2 text-sm">
+                <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'মোবাইল:' : 'Mobile:'}</span>
+                <span className="text-foreground font-medium">{staffData?.phone || profileData?.phone}</span>
+              </div>
+            )}
+            {staffData?.department && (
+              <div className="flex items-center gap-2 text-sm">
+                <Briefcase className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'বিভাগ:' : 'Department:'}</span>
+                <span className="text-foreground font-medium">{staffData.department}</span>
+              </div>
+            )}
+            {staffData?.joining_date && (
+              <div className="flex items-center gap-2 text-sm">
+                <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'যোগদান:' : 'Joining:'}</span>
+                <span className="text-foreground font-medium">{new Date(staffData.joining_date).toLocaleDateString('bn-BD')}</span>
+              </div>
+            )}
+            {staffData?.education && (
+              <div className="flex items-center gap-2 text-sm">
+                <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'শিক্ষাগত যোগ্যতা:' : 'Education:'}</span>
+                <span className="text-foreground font-medium">{staffData.education}</span>
+              </div>
+            )}
+            {staffData?.address && (
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'ঠিকানা:' : 'Address:'}</span>
+                <span className="text-foreground font-medium">{staffData.address}</span>
+              </div>
+            )}
+            {staffData?.nid && (
+              <div className="flex items-center gap-2 text-sm">
+                <ShieldCheck className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span className="text-muted-foreground">{bn ? 'NID:' : 'NID:'}</span>
+                <span className="text-foreground font-medium">{staffData.nid}</span>
+              </div>
+            )}
+          </div>
+
+          {!staffData && !profileData && (
+            <p className="text-sm text-muted-foreground italic">{bn ? 'কোনো ব্যক্তিগত তথ্য পাওয়া যায়নি। স্টাফ প্রোফাইল তৈরি করুন।' : 'No personal info found. Create a staff profile.'}</p>
+          )}
+        </div>
+
         <div className="card-elevated p-5">
           <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
             <Mail className="w-5 h-5 text-primary" /> {bn ? 'লগইন ইমেইল পরিবর্তন' : 'Change Login Email'}
