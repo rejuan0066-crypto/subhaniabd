@@ -355,34 +355,60 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     a.click();
   };
 
+  const totalUnpaid = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.reduce((ss: number, u: any) => ss + (u.amount || 0), 0), 0);
+  const totalPaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.paid.length, 0);
+  const totalUnpaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.length, 0);
+
   return (
-    <div className="card-elevated p-4">
-      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between">
-        <div className="flex items-center gap-2 flex-wrap">
-          {icon || <CreditCard className="w-5 h-5 text-primary" />}
-          <h3 className="font-display font-bold text-foreground">{language === 'bn' ? titleBn : titleEn}</h3>
-          {sessionLabel && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{sessionLabel}</span>
-          )}
-          <span className="text-sm font-bold text-primary">৳ {totalAmount.toLocaleString()}</span>
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      {/* Card Header */}
+      <button onClick={() => setExpanded(!expanded)} className="w-full p-4 flex items-center justify-between hover:bg-accent/30 transition-colors">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            {icon || <CreditCard className="w-5 h-5 text-primary" />}
+          </div>
+          <div className="text-left">
+            <h3 className="font-display font-bold text-foreground text-base">{language === 'bn' ? titleBn : titleEn}</h3>
+            {sessionLabel && (
+              <span className="text-xs text-muted-foreground">{sessionLabel}</span>
+            )}
+          </div>
         </div>
-        {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <div className="text-lg font-bold text-primary">৳ {totalAmount.toLocaleString()}</div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-emerald-600 dark:text-emerald-400">✓ {totalPaidCount} {bn ? 'জন' : ''}</span>
+              <span className="text-destructive">✗ {totalUnpaidCount} {bn ? 'জন' : ''} (৳{totalUnpaid.toLocaleString()})</span>
+            </div>
+          </div>
+          {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+        </div>
       </button>
 
       {expanded && (
-        <div className="mt-4 space-y-2">
+        <div className="px-4 pb-4 grid gap-2">
           {enrichedGroups.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">{language === 'bn' ? 'কোনো রেকর্ড নেই' : 'No records'}</p>}
-          {enrichedGroups.map((g: any, i: number) => (
-            <div key={i}
-              onClick={() => setSelectedGroup(g)}
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer">
-              <span className="text-sm font-medium text-foreground">{g.label}</span>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs text-success">{language === 'bn' ? 'পরিশোধিত' : 'Paid'}: {g.paid.length} {bn ? 'জন' : ''} <span className="font-semibold">৳ {g.total.toLocaleString()}</span></span>
-                <span className="text-xs text-destructive">{language === 'bn' ? 'অপরিশোধিত' : 'Unpaid'}: {g.unpaid.length} {bn ? 'জন' : ''} <span className="font-semibold">৳ {g.unpaid.reduce((s: number, u: any) => s + (u.amount || 0), 0).toLocaleString()}</span></span>
+          {enrichedGroups.map((g: any, i: number) => {
+            const unpaidAmt = g.unpaid.reduce((s: number, u: any) => s + (u.amount || 0), 0);
+            return (
+              <div key={i}
+                onClick={() => setSelectedGroup(g)}
+                className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-secondary/30 hover:bg-secondary/60 hover:border-primary/30 transition-all cursor-pointer group">
+                <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{g.label}</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{g.paid.length} {bn ? 'জন' : ''} · ৳{g.total.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-destructive" />
+                    <span className="text-xs font-medium text-destructive">{g.unpaid.length} {bn ? 'জন' : ''} · ৳{unpaidAmt.toLocaleString()}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
