@@ -178,7 +178,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           ? (ft.applicable_months as string[])
           : MONTHS_EN;
 
-        // Build list of months from session start to session end
+        // Build ordered list of months from session start to session end
         const monthIndices: number[] = [];
         if (sessionStartMonth <= sessionEndMonth) {
           for (let mi = sessionStartMonth; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
@@ -188,8 +188,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           for (let mi = 0; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
         }
 
-        // Only show up to current month (running months)
-        const runningMonths = monthIndices.filter(mi => mi <= currentMonthIdx);
+        // Only show up to current month (running months) — respect session order
+        const currentPos = monthIndices.indexOf(currentMonthIdx);
+        const runningMonths = currentPos >= 0 ? monthIndices.slice(0, currentPos + 1) : monthIndices.filter(mi => mi <= currentMonthIdx && mi >= sessionStartMonth);
 
         runningMonths.forEach((mi) => {
           const monthName = MONTHS_EN[mi];
