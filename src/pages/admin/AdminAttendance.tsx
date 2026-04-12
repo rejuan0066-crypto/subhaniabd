@@ -1356,7 +1356,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   </div>
                 </div>
                 <Button className="w-full" size="sm" onClick={() => {
-                  saveRuleMutation.mutate({ ...ruleForm, rule_type: 'status', config: ruleForm.config });
+                  saveRuleMutation.mutate({ ...ruleForm, entity_type: entityType, rule_type: 'status', config: ruleForm.config });
                 }} disabled={!ruleForm.name || !ruleForm.name_bn}>
                   {editingRule ? (bn ? 'আপডেট' : 'Update') : (bn ? 'যোগ করুন' : 'Add Rule')}
                 </Button>
