@@ -36,7 +36,7 @@ const StudentProfileModal = ({
   setEditStudent, setShowDetail, setShowAdd, statusMutation, canEditItem
 }: StudentProfileModalProps) => {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'others'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'academic' | 'others'>('profile');
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
   const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_amount: '', reason: '' });
 
