@@ -339,31 +339,31 @@ const AdminStudents = () => {
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <div className="flex items-center justify-end gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
-                          <button onClick={() => setShowDetail(s)} className="p-2 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title={bn ? 'দেখুন' : 'View'}><Eye className="w-4 h-4" strokeWidth={1.5} /></button>
+                        <div className="flex items-center justify-end gap-1.5 opacity-30 group-hover:opacity-100 transition-all duration-300">
+                          <button onClick={() => setShowDetail(s)} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-emerald-500 hover:text-emerald-600 hover:shadow-lg hover:scale-110 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all duration-200" title={bn ? 'দেখুন' : 'View'}><Eye className="w-4 h-4" strokeWidth={1.5} /></button>
                           {canEditItem && (
-                            <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="p-2 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
+                            <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-teal-500 hover:text-teal-600 hover:shadow-lg hover:scale-110 hover:bg-teal-50 dark:hover:bg-teal-950/20 transition-all duration-200" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status !== 'approved') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="p-2 rounded-full hover:bg-success/10 text-muted-foreground hover:text-success transition-colors" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" strokeWidth={1.5} /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-emerald-500 hover:text-emerald-600 hover:shadow-lg hover:scale-110 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 transition-all duration-200" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status !== 'rejected') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'rejected' })} className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'প্রত্যাখ্যান' : 'Reject'}><XCircle className="w-4 h-4" strokeWidth={1.5} /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'rejected' })} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-rose-400 hover:text-rose-500 hover:shadow-lg hover:scale-110 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-200" title={bn ? 'প্রত্যাখ্যান' : 'Reject'}><XCircle className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status === 'rejected') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-full hover:bg-warning/10 text-muted-foreground hover:text-warning transition-colors" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" strokeWidth={1.5} /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-amber-500 hover:text-amber-600 hover:shadow-lg hover:scale-110 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all duration-200" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (
                             <button
                               onClick={() => toggleActiveMutation.mutate({ id: s.id, currentStatus: s.status || 'active' })}
-                              className={`p-2 rounded-full transition-colors ${(s.status || 'active') === 'active' ? 'hover:bg-warning/10 text-muted-foreground hover:text-warning' : 'hover:bg-success/10 text-muted-foreground hover:text-success'}`}
+                              className={`w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center transition-all duration-200 hover:shadow-lg hover:scale-110 ${(s.status || 'active') === 'active' ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/20' : 'text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20'}`}
                               title={(s.status || 'active') === 'active' ? (bn ? 'ডিএক্টিভ করুন' : 'Deactivate') : (bn ? 'এক্টিভ করুন' : 'Activate')}
                             >
                               {(s.status || 'active') === 'active' ? <UserX className="w-4 h-4" strokeWidth={1.5} /> : <UserCheck className="w-4 h-4" strokeWidth={1.5} />}
                             </button>
                           )}
                           {canDeleteItem && (
-                            <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+                            <button onClick={() => deleteMutation.mutate(s.id)} className="w-8 h-8 rounded-xl bg-card shadow-sm border border-border/20 flex items-center justify-center text-rose-400 hover:text-rose-500 hover:shadow-lg hover:scale-110 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-200" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                         </div>
                       </td>
