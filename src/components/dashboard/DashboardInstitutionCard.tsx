@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/hooks/useAuth';
+import { isAdminRole } from '@/lib/roles';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GraduationCap, Edit2, Save, X, Upload } from 'lucide-react';
@@ -9,6 +11,8 @@ import { toast } from 'sonner';
 
 const DashboardInstitutionCard = () => {
   const { language } = useLanguage();
+  const { role } = useAuth();
+  const isAdmin = isAdminRole(role);
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' });
