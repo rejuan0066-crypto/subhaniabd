@@ -39,6 +39,7 @@ const AdminCustomFormPage = () => {
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [viewSubmission, setViewSubmission] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('form');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: form } = useQuery({
     queryKey: ['custom-form-by-slug', slug],
@@ -454,6 +455,13 @@ const AdminCustomFormPage = () => {
         </DialogContent>
       </Dialog>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 
