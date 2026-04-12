@@ -11,6 +11,7 @@ import ForgotPasswordDialog from '@/components/ForgotPasswordDialog';
 import { toast } from 'sonner';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { getAuthenticatedHomePath, hasResolvedAuthRedirectState } from '@/lib/authRedirect';
+import PageLoader from '@/components/PageLoader';
 
 const Login = () => {
   const { t, language } = useLanguage();
@@ -22,11 +23,7 @@ const Login = () => {
   const [forgotOpen, setForgotOpen] = useState(false);
 
   if (authLoading || (user && !hasResolvedAuthRedirectState({ role, userStatus }))) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (user) {
