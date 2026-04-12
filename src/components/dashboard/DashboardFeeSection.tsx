@@ -398,7 +398,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         <td>${p.students?.roll_number || '-'}</td>
         <td>${p.students?.classes?.name_bn || '-'}</td>
         ${category === 'monthly' ? `<td>${p.month || '-'}</td>` : ''}
-        <td>${p.year || '-'}</td>
+        <td>${p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-'}</td>
         <td>${listType === 'paid' ? `৳${p.paid_amount || p.amount}` : `৳${p.amount || 0}`}</td>
       </tr>`).join('')}
       </tbody></table></body></html>`);
@@ -411,7 +411,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort(compareFeeItems);
     const headers = [bn ? 'নাম' : 'Name', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class', bn ? 'সেশন' : 'Year', listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')];
-    const rows = sorted.map((p: any) => [p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p.year || '-', listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)]);
+    const rows = sorted.map((p: any) => [p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-', listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)]);
     const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
