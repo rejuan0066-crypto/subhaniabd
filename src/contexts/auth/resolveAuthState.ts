@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const AUTH_STATE_REQUEST_TIMEOUT_MS = 6000;
 
-const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> => {
-  return await Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
+const withTimeout = async <T>(promise: PromiseLike<T>, label: string): Promise<T> => {
+  return await Promise.race<T>([
+    Promise.resolve(promise),
+    new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error(`${label} timed out after ${AUTH_STATE_REQUEST_TIMEOUT_MS}ms`)), AUTH_STATE_REQUEST_TIMEOUT_MS);
     }),
   ]);
