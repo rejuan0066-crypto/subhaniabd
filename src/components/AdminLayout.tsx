@@ -301,18 +301,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} bg-sidebar flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
         style={sidebarStyle}
       >
         {/* Logo */}
-        <div className="px-4 py-5 flex items-center gap-3 border-b border-sidebar-border shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
+        <div className="px-4 py-5 flex items-center gap-3 border-b border-sidebar-border/30 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center shrink-0 shadow-lg shadow-sidebar-primary/25">
             <span className="text-sm font-bold text-sidebar-primary-foreground">E</span>
           </div>
           {(sidebarOpen || mobile) && (
             <div className="overflow-hidden flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-sidebar-foreground truncate">EduMate BD</h2>
-              <p className="text-[11px] text-sidebar-foreground/50">{language === 'bn' ? 'মাদরাসা ম্যানেজমেন্ট' : 'Madrasa Management'}</p>
+              <h2 className="text-sm font-bold text-sidebar-foreground truncate leading-relaxed">EduMate BD</h2>
+              <p className="text-[11px] text-sidebar-foreground/50 leading-relaxed">{language === 'bn' ? 'মাদরাসা ম্যানেজমেন্ট' : 'Madrasa Management'}</p>
             </div>
           )}
           {mobile && (
