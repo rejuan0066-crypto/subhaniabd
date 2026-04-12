@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const StudentCategoryManager = () => {
   const { language } = useLanguage();
@@ -15,6 +16,7 @@ const StudentCategoryManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', name_bn: '', description: '' });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['student_categories'],
@@ -103,7 +105,7 @@ const StudentCategoryManager = () => {
                 <td className="px-4 py-3 text-right">
                   <div className="flex gap-1 justify-end">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(c)}><Pencil className="w-3.5 h-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(c.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(c.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
                   </div>
                 </td>
               </tr>
@@ -141,6 +143,13 @@ const StudentCategoryManager = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+        onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+        isPending={deleteMutation.isPending}
+      />
     </div>
   );
 };
