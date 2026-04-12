@@ -9,6 +9,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 
 type FeeCategory = 'monthly' | 'exam' | 'admission';
 
+type GroupItem = {
+  label: string;
+  sortOrder: number | null;
+  serial: number | null;
+  total: number;
+  paid: any[];
+  unpaid: any[];
+};
+
 interface FeeSectionProps {
   category: FeeCategory;
   titleBn: string;
@@ -16,12 +25,46 @@ interface FeeSectionProps {
   icon?: React.ReactNode;
 }
 
+const toEnglishDigits = (value: string) =>
+  value.replace(/[০-৯]/g, (digit) => String('০১২৩৪৫৬৭৮৯'.indexOf(digit)));
+
+const extractClassSerial = (label?: string | null) => {
+  if (!label) return null;
+  const match = toEnglishDigits(label).match(/\d+/);
+  return match ? Number.parseInt(match[0], 10) : null;
+};
+
+const compareAcademicOrder = (
+  a: { label?: string | null; sortOrder?: number | null; serial?: number | null },
+  b: { label?: string | null; sortOrder?: number | null; serial?: number | null },
+) => {
+  const aSerial = a.serial ?? Number.MAX_SAFE_INTEGER;
+  const bSerial = b.serial ?? Number.MAX_SAFE_INTEGER;
+  if (aSerial !== bSerial) return aSerial - bSerial;
+
+  const aSortOrder = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
+  const bSortOrder = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
+  if (aSortOrder !== bSortOrder) return aSortOrder - bSortOrder;
+
+  return (a.label || '').localeCompare(b.label || '', 'bn', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+};
+
 const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionProps) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const [expanded, setExpanded] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [listType, setListType] = useState<'paid' | 'unpaid'>('paid');
+
+  const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONTHS_BN: Record<string, string> = {
+    January: 'জানুয়ারি', February: 'ফেব্রুয়ারি', March: 'মার্চ', April: 'এপ্রিল',
+    May: 'মে', June: 'জুন', July: 'জুলাই', August: 'আগস্ট',
+    September: 'সেপ্টেম্বর', October: 'অক্টোবর', November: 'নভেম্বর', December: 'ডিসেম্বর',
+  };
 
   // Fetch fee payments (existing records)
   const { data: payments = [] } = useQuery({
@@ -93,34 +136,58 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     },
   });
 
-  // Helper: get class label for a student
-  const getClassLabel = (s: any) => {
-    return s?.classes?.name_bn || bn ? 'অনির্ধারিত' : 'Unassigned';
-  };
-
   const getClassLabelFromPayment = (p: any) => {
     return p?.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
   };
 
-  // Build class map for sort order
   const classMap = useMemo(() => {
-    const map: Record<string, { name_bn: string; sort_order: number }> = {};
+    const map: Record<string, { label: string; sort_order: number | null; serial: number | null }> = {};
     classes.forEach((c: any) => {
-      map[c.id] = { name_bn: c.name_bn, sort_order: c.sort_order || 0 };
+      const label = c.name_bn || c.name || '';
+      map[c.id] = {
+        label,
+        sort_order: c.sort_order ?? null,
+        serial: extractClassSerial(label),
+      };
     });
     return map;
   }, [classes]);
 
-  const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const MONTHS_BN: Record<string, string> = {
-    January: 'জানুয়ারি', February: 'ফেব্রুয়ারি', March: 'মার্চ', April: 'এপ্রিল',
-    May: 'মে', June: 'জুন', July: 'জুলাই', August: 'আগস্ট',
-    September: 'সেপ্টেম্বর', October: 'অক্টোবর', November: 'নভেম্বর', December: 'ডিসেম্বর',
+  const compareFeeItems = (a: any, b: any) => {
+    const aClassId = a.students?.class_id || 'unknown';
+    const bClassId = b.students?.class_id || 'unknown';
+
+    const aLabel = a.students?.classes?.name_bn || classMap[aClassId]?.label || '';
+    const bLabel = b.students?.classes?.name_bn || classMap[bClassId]?.label || '';
+
+    const classComparison = compareAcademicOrder(
+      {
+        label: aLabel,
+        sortOrder: a.students?.classes?.sort_order ?? classMap[aClassId]?.sort_order ?? null,
+        serial: classMap[aClassId]?.serial ?? extractClassSerial(aLabel),
+      },
+      {
+        label: bLabel,
+        sortOrder: b.students?.classes?.sort_order ?? classMap[bClassId]?.sort_order ?? null,
+        serial: classMap[bClassId]?.serial ?? extractClassSerial(bLabel),
+      },
+    );
+
+    if (classComparison !== 0) return classComparison;
+
+    const rollA = Number.parseInt(toEnglishDigits(String(a.students?.roll_number || '0')), 10) || 0;
+    const rollB = Number.parseInt(toEnglishDigits(String(b.students?.roll_number || '0')), 10) || 0;
+    if (rollA !== rollB) return rollA - rollB;
+
+    return (a.students?.name_bn || '').localeCompare(b.students?.name_bn || '', 'bn', {
+      numeric: true,
+      sensitivity: 'base',
+    });
   };
 
   // Build groups: monthly category → group by month, others → group by class
   const enrichedGroups = useMemo(() => {
-    const groups: Record<string, { label: string; sortOrder: number; total: number; paid: any[]; unpaid: any[] }> = {};
+    const groups: Record<string, GroupItem> = {};
 
     if (category === 'monthly') {
       // ---- GROUP BY MONTH ----
@@ -147,11 +214,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
       payments.forEach((p: any) => {
         const monthKey = p.month || 'N/A';
-        // Skip months outside session range
         if (validSessionMonths.size > 0 && !validSessionMonths.has(monthKey)) return;
         const monthLabel = bn ? (MONTHS_BN[monthKey] || monthKey) : monthKey;
         const sortIdx = MONTHS_EN.indexOf(monthKey);
-        if (!groups[monthKey]) groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, total: 0, paid: [], unpaid: [] };
+        if (!groups[monthKey]) {
+          groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, serial: null, total: 0, paid: [], unpaid: [] };
+        }
         const amount = p.paid_amount || p.amount || 0;
         if (p.status === 'paid' || p.status === 'pending') {
           groups[monthKey].paid.push(p);
@@ -161,15 +229,13 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
       // Find unpaid per month — use session start_date to end_date, up to current month
       const now = new Date();
-      const currentMonthIdx = now.getMonth(); // 0-based
-      const currentYear = now.getFullYear();
+      const currentMonthIdx = now.getMonth();
 
       feeTypes.forEach((ft: any) => {
         if (ft.payment_frequency !== 'monthly') return;
 
-        // Determine session month range
-        let sessionStartMonth = 0; // default January
-        let sessionEndMonth = 11; // default December
+        let sessionStartMonth = 0;
+        let sessionEndMonth = 11;
         if (ft.academic_sessions?.start_date) {
           const sd = new Date(ft.academic_sessions.start_date);
           sessionStartMonth = sd.getMonth();
@@ -186,30 +252,32 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           if (ft.session_id && ft.session_id !== s.session_id) return false;
           return true;
         });
+
         const applicableMonths: string[] = ft.applicable_months && Array.isArray(ft.applicable_months)
           ? (ft.applicable_months as string[])
           : MONTHS_EN;
 
-        // Build ordered list of months from session start to session end
         const monthIndices: number[] = [];
         if (sessionStartMonth <= sessionEndMonth) {
           for (let mi = sessionStartMonth; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
         } else {
-          // Wraps around year boundary (e.g., March to February)
           for (let mi = sessionStartMonth; mi < 12; mi++) monthIndices.push(mi);
           for (let mi = 0; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
         }
 
-        // Only show up to current month (running months) — respect session order
         const currentPos = monthIndices.indexOf(currentMonthIdx);
-        const runningMonths = currentPos >= 0 ? monthIndices.slice(0, currentPos + 1) : monthIndices.filter(mi => mi <= currentMonthIdx && mi >= sessionStartMonth);
+        const runningMonths = currentPos >= 0
+          ? monthIndices.slice(0, currentPos + 1)
+          : monthIndices.filter(mi => mi <= currentMonthIdx && mi >= sessionStartMonth);
 
         runningMonths.forEach((mi) => {
           const monthName = MONTHS_EN[mi];
           if (!applicableMonths.includes(monthName)) return;
 
           const monthLabel = bn ? (MONTHS_BN[monthName] || monthName) : monthName;
-          if (!groups[monthName]) groups[monthName] = { label: monthLabel, sortOrder: monthIndices.indexOf(mi), total: 0, paid: [], unpaid: [] };
+          if (!groups[monthName]) {
+            groups[monthName] = { label: monthLabel, sortOrder: monthIndices.indexOf(mi), serial: null, total: 0, paid: [], unpaid: [] };
+          }
 
           const paidForMonth = new Set(
             payments
@@ -241,7 +309,17 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       payments.forEach((p: any) => {
         const classId = p.students?.class_id || 'unknown';
         const className = getClassLabelFromPayment(p);
-        if (!groups[classId]) groups[classId] = { label: className, sortOrder: classMap[classId]?.sort_order || 999, total: 0, paid: [], unpaid: [] };
+        const classInfo = classMap[classId];
+        if (!groups[classId]) {
+          groups[classId] = {
+            label: className,
+            sortOrder: classInfo?.sort_order ?? null,
+            serial: classInfo?.serial ?? extractClassSerial(className),
+            total: 0,
+            paid: [],
+            unpaid: [],
+          };
+        }
         const amount = p.paid_amount || p.amount || 0;
         if (p.status === 'paid' || p.status === 'pending') {
           groups[classId].paid.push(p);
@@ -269,7 +347,17 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           if (!paidStudentIds.has(s.id)) {
             const classId = s.class_id || 'unknown';
             const className = s.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
-            if (!groups[classId]) groups[classId] = { label: className, sortOrder: classMap[classId]?.sort_order || 999, total: 0, paid: [], unpaid: [] };
+            const classInfo = classMap[classId];
+            if (!groups[classId]) {
+              groups[classId] = {
+                label: className,
+                sortOrder: classInfo?.sort_order ?? null,
+                serial: classInfo?.serial ?? extractClassSerial(className),
+                total: 0,
+                paid: [],
+                unpaid: [],
+              };
+            }
 
             const alreadyAdded = groups[classId].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
             if (!alreadyAdded) {
@@ -289,23 +377,23 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       });
     }
 
-    return Object.values(groups).sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [payments, feeTypes, students, category, bn, classMap]);
+    const values = Object.values(groups);
+    if (category === 'monthly') {
+      return values.sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
+    }
+    return values.sort((a, b) => compareAcademicOrder(a, b));
+  }, [payments, feeTypes, students, category, bn, classMap, MONTHS_EN, MONTHS_BN]);
 
   const totalAmount = enrichedGroups.reduce((s: number, g: any) => s + g.total, 0);
+  const totalUnpaid = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.reduce((ss: number, u: any) => ss + (u.amount || 0), 0), 0);
+  const totalPaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.paid.length, 0);
+  const totalUnpaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.length, 0);
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow || !selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
-    const sorted = [...list].sort((a: any, b: any) => {
-      const clsA = a.students?.classes?.sort_order ?? 999;
-      const clsB = b.students?.classes?.sort_order ?? 999;
-      if (clsA !== clsB) return clsA - clsB;
-      const rollA = parseInt(a.students?.roll_number || '0', 10) || 0;
-      const rollB = parseInt(b.students?.roll_number || '0', 10) || 0;
-      return rollA - rollB;
-    });
+    const sorted = [...list].sort(compareFeeItems);
 
     printWindow.document.write(`<html><head><title>Print</title><style>
       body{font-family:Arial,sans-serif;padding:20px}
@@ -342,14 +430,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   const handleDownloadCSV = () => {
     if (!selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
-    const sorted = [...list].sort((a: any, b: any) => {
-      const clsA = a.students?.classes?.sort_order ?? 999;
-      const clsB = b.students?.classes?.sort_order ?? 999;
-      if (clsA !== clsB) return clsA - clsB;
-      const rollA = parseInt(a.students?.roll_number || '0', 10) || 0;
-      const rollB = parseInt(b.students?.roll_number || '0', 10) || 0;
-      return rollA - rollB;
-    });
+    const sorted = [...list].sort(compareFeeItems);
 
     const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'শ্রেণী' : 'Class', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
     const rows = sorted.map((p: any) => [
@@ -365,13 +446,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     a.click();
   };
 
-  const totalUnpaid = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.reduce((ss: number, u: any) => ss + (u.amount || 0), 0), 0);
-  const totalPaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.paid.length, 0);
-  const totalUnpaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.length, 0);
-
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-      {/* Card Header */}
       <button onClick={() => setExpanded(!expanded)} className="w-full p-4 flex items-center justify-between hover:bg-accent/30 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -422,7 +498,6 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         </div>
       )}
 
-      {/* Detail Dialog */}
       <Dialog open={!!selectedGroup} onOpenChange={() => setSelectedGroup(null)}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -460,14 +535,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
               <tbody className="divide-y divide-border">
                 {((() => {
                   const list = listType === 'paid' ? (selectedGroup?.paid || []) : (selectedGroup?.unpaid || []);
-                  return [...list].sort((a: any, b: any) => {
-                    const clsA = a.students?.classes?.sort_order ?? 999;
-                    const clsB = b.students?.classes?.sort_order ?? 999;
-                    if (clsA !== clsB) return clsA - clsB;
-                    const rollA = parseInt(a.students?.roll_number || '0', 10) || 0;
-                    const rollB = parseInt(b.students?.roll_number || '0', 10) || 0;
-                    return rollA - rollB;
-                  });
+                  return [...list].sort(compareFeeItems);
                 })()).map((p: any, i: number) => (
                   <tr key={p.id} className="hover:bg-secondary/30">
                     <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
