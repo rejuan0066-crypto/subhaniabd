@@ -107,9 +107,14 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     onError: () => toast.error('Error'),
   });
 
-  const pendingCount = staffList.filter((s: any) => s.status === 'pending').length;
+  const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
+    const isTeacher = isTeacherDesignation(s.designation);
+    return staffType === 'teacher' ? isTeacher : !isTeacher;
+  });
 
-  const filtered = staffList.filter((s: any) => {
+  const pendingCount = typeFiltered.filter((s: any) => s.status === 'pending').length;
+
+  const filtered = typeFiltered.filter((s: any) => {
     if (statusFilter !== 'all' && s.status !== statusFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
