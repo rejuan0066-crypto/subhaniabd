@@ -314,7 +314,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : 'lg:my-3 lg:ml-3 lg:rounded-[28px] lg:h-[calc(100%-24px)]'}`}
         style={sidebarStyle}
       >
         {/* Logo */}
