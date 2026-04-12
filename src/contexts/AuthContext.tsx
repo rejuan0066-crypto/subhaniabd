@@ -219,8 +219,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setRole(lastResolved.role);
           setUserStatus(lastResolved.userStatus);
         } else {
-          setRole(null);
-          setUserStatus(null);
+          console.warn('Unable to resolve auth state for active session, clearing local session to avoid stuck loading state.');
+          fetchedForSession.current = null;
+          await supabase.auth.signOut({ scope: 'local' });
+          return;
         }
       } finally {
         if (!cancelled) {
