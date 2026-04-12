@@ -192,6 +192,14 @@ const MasterRoutineView = () => {
     },
   });
 
+  const { data: staff } = useQuery({
+    queryKey: ['staff-for-routine'],
+    queryFn: async () => {
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en').eq('status', 'active').order('name_bn');
+      return data || [];
+    },
+  });
+
   // Filtered classes for dropdown
   const filteredClasses = useMemo(() => {
     if (!allClasses) return [];
