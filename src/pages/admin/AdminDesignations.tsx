@@ -2,6 +2,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -31,6 +32,7 @@ const AdminDesignations = () => {
   const [description, setDescription] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
+  const [staffCategory, setStaffCategory] = useState('general');
 
   const { data: designations = [], isLoading } = useQuery({
     queryKey: ['designations'],
@@ -50,6 +52,7 @@ const AdminDesignations = () => {
     setDescription('');
     setSortOrder(0);
     setIsActive(true);
+    setStaffCategory('general');
     setEditItem(null);
   };
 
@@ -65,6 +68,7 @@ const AdminDesignations = () => {
     setDescription(item.description || '');
     setSortOrder(item.sort_order || 0);
     setIsActive(item.is_active ?? true);
+    setStaffCategory(item.staff_category || 'general');
     setDialogOpen(true);
   };
 
@@ -78,6 +82,7 @@ const AdminDesignations = () => {
         description: description.trim() || null,
         sort_order: sortOrder,
         is_active: isActive,
+        staff_category: staffCategory,
       };
 
       if (editItem) {
@@ -152,8 +157,9 @@ const AdminDesignations = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (বাংলা)' : 'Name (Bangla)'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (ইংরেজি)' : 'Name (English)'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিবরণ' : 'Description'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিবরণ' : 'Description'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
@@ -164,6 +170,15 @@ const AdminDesignations = () => {
                       <td className="px-4 py-3 text-sm font-medium text-foreground">{d.name_bn}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{d.name}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{d.description || '—'}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={
+                          d.staff_category === 'teacher' ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' :
+                          d.staff_category === 'administrative' ? 'bg-purple-500/10 text-purple-600 border-purple-500/30' :
+                          'bg-orange-500/10 text-orange-600 border-orange-500/30'
+                        }>
+                          {d.staff_category === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : d.staff_category === 'administrative' ? (bn ? 'প্রশাসনিক' : 'Administrative') : (bn ? 'সহায়ক কর্মী' : 'General Staff')}
+                        </Badge>
+                      </td>
                       <td className="px-4 py-3">
                         <Badge variant="outline" className={d.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
                           {d.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
@@ -186,7 +201,7 @@ const AdminDesignations = () => {
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={6} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো পদবি পাওয়া যায়নি' : 'No designations found'}</td></tr>
+                    <tr><td colSpan={7} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো পদবি পাওয়া যায়নি' : 'No designations found'}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -215,6 +230,19 @@ const AdminDesignations = () => {
               <div>
                 <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
                 <Input className="bg-background mt-1" value={description} onChange={e => setDescription(e.target.value)} placeholder={bn ? 'ঐচ্ছিক' : 'Optional'} />
+              </div>
+              <div>
+                <Label>{bn ? 'ক্যাটাগরি (পাথ)' : 'Category (Path)'} <span className="text-destructive">*</span></Label>
+                <Select value={staffCategory} onValueChange={setStaffCategory}>
+                  <SelectTrigger className="bg-background mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="teacher">{bn ? 'শিক্ষক (/admin/teachers)' : 'Teacher (/admin/teachers)'}</SelectItem>
+                    <SelectItem value="administrative">{bn ? 'প্রশাসনিক কর্মকর্তা (/admin/administrative-staff)' : 'Administrative (/admin/administrative-staff)'}</SelectItem>
+                    <SelectItem value="general">{bn ? 'সহায়ক কর্মী (/admin/staff)' : 'General Staff (/admin/staff)'}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label>{bn ? 'ক্রম' : 'Sort Order'}</Label>

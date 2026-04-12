@@ -20,26 +20,22 @@ import { Badge } from '@/components/ui/badge';
 
 export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative';
 
+// Fallback keyword matching (used when designation has no staff_category in DB)
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
-const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক', 'superintendent', 'সুপারিনটেনডেন্ট', 'coordinator', 'সমন্বয়কারী', 'secretary', 'সচিব'];
-const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'sweeper', 'ঝাড়ুদার', 'driver', 'ড্রাইভার', 'cook', 'রাঁধুনি', 'caretaker', 'তত্ত্বাবধায়ক', 'watchman', 'দারোয়ান', 'bearer', 'বাহক', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান'];
+const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক'];
+const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'driver', 'ড্রাইভার', 'অফিস সহকারী', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান'];
 
-const isTeacherDesignation = (designation: string | null | undefined): boolean => {
-  if (!designation) return false;
+const getStaffCategory = (designation: string | null | undefined, designationsMap: Map<string, string>): string => {
+  if (!designation) return 'unknown';
+  // First check DB-based category
+  const dbCategory = designationsMap.get(designation) || designationsMap.get(designation?.toLowerCase() || '');
+  if (dbCategory) return dbCategory;
+  // Fallback to keyword matching
   const lower = designation.toLowerCase();
-  return TEACHER_KEYWORDS.some(k => lower.includes(k));
-};
-
-const isAdministrativeDesignation = (designation: string | null | undefined): boolean => {
-  if (!designation) return false;
-  const lower = designation.toLowerCase();
-  return ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k));
-};
-
-const isGeneralStaffDesignation = (designation: string | null | undefined): boolean => {
-  if (!designation) return false;
-  const lower = designation.toLowerCase();
-  return GENERAL_STAFF_KEYWORDS.some(k => lower.includes(k));
+  if (TEACHER_KEYWORDS.some(k => lower.includes(k))) return 'teacher';
+  if (ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'administrative';
+  if (GENERAL_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'general';
+  return 'unknown';
 };
 
 const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
@@ -72,6 +68,23 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
       if (error) throw error;
       return data;
     },
+  });
+
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ['designations-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const designationsMap = new Map<string, string>();
+  designationsList.forEach((d: any) => {
+    if (d.staff_category) {
+      if (d.name) designationsMap.set(d.name.toLowerCase(), d.staff_category);
+      if (d.name_bn) designationsMap.set(d.name_bn.toLowerCase(), d.staff_category);
+    }
   });
 
   const statusMutation = useMutation({
@@ -122,13 +135,11 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   });
 
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
-    const isTeacher = isTeacherDesignation(s.designation);
-    const isAdmin = isAdministrativeDesignation(s.designation);
-    const isGeneral = isGeneralStaffDesignation(s.designation);
-    if (staffType === 'teacher') return isTeacher;
-    if (staffType === 'administrative') return isAdmin;
-    if (staffType === 'staff') return isGeneral;
-    return !isTeacher && !isAdmin && !isGeneral;
+    const category = getStaffCategory(s.designation, designationsMap);
+    if (staffType === 'teacher') return category === 'teacher';
+    if (staffType === 'administrative') return category === 'administrative';
+    if (staffType === 'staff') return category === 'general';
+    return true;
   });
 
   const pendingCount = typeFiltered.filter((s: any) => s.status === 'pending').length;

@@ -583,6 +583,7 @@ export type Database = {
           name: string
           name_bn: string
           sort_order: number | null
+          staff_category: string
           updated_at: string | null
         }
         Insert: {
@@ -593,6 +594,7 @@ export type Database = {
           name: string
           name_bn: string
           sort_order?: number | null
+          staff_category?: string
           updated_at?: string | null
         }
         Update: {
@@ -603,6 +605,7 @@ export type Database = {
           name?: string
           name_bn?: string
           sort_order?: number | null
+          staff_category?: string
           updated_at?: string | null
         }
         Relationships: []
