@@ -2915,6 +2915,7 @@ export type Database = {
           religion: string | null
           residence_type: string | null
           salary: number | null
+          staff_category: string
           staff_data: Json | null
           status: string | null
           updated_at: string | null
@@ -2943,6 +2944,7 @@ export type Database = {
           religion?: string | null
           residence_type?: string | null
           salary?: number | null
+          staff_category?: string
           staff_data?: Json | null
           status?: string | null
           updated_at?: string | null
@@ -2971,6 +2973,7 @@ export type Database = {
           religion?: string | null
           residence_type?: string | null
           salary?: number | null
+          staff_category?: string
           staff_data?: Json | null
           status?: string | null
           updated_at?: string | null

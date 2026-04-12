@@ -27,25 +27,28 @@ const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্র�
 const SUPPORT_STAFF_KEYWORDS = ['অফিস সহকারী', 'clerk', 'কেরানি', 'operator', 'অপারেটর', 'accountant', 'হিসাবরক্ষক', 'librarian', 'লাইব্রেরিয়ান', 'data entry', 'ডাটা এন্ট্রি'];
 
 const getStaffCategory = (staff: any, designationsMap: Map<string, string>): string => {
+  // 1. Use stored staff_category column if available and not default
+  if (staff?.staff_category && staff.staff_category !== 'general') return staff.staff_category;
+  // 2. Check DB-based category from designation name
   const designation = staff?.designation;
-  // First check DB-based category from designation name
   if (designation) {
     const dbCategory = designationsMap.get(designation.toLowerCase());
     if (dbCategory) return dbCategory;
-    // Fallback to keyword matching
     const lower = designation.toLowerCase();
     if (TEACHER_KEYWORDS.some(k => lower.includes(k))) return 'teacher';
     if (ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'administrative';
     if (SUPPORT_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'support';
     if (GENERAL_STAFF_KEYWORDS.some(k => lower.includes(k))) return 'general';
   }
-  // Fallback: use department field
+  // 3. Use stored staff_category (could be 'general' default)
+  if (staff?.staff_category) return staff.staff_category;
+  // 4. Fallback: department field
   const dept = (staff?.department || '').toLowerCase();
   if (dept === 'general' || dept === 'সাধারণ' || dept === 'সহায়ক') return 'general';
   if (dept === 'teacher' || dept === 'শিক্ষক' || dept.includes('শিক্ষা')) return 'teacher';
   if (dept === 'administrative' || dept === 'প্রশাসন' || dept === 'প্রশাসনিক') return 'administrative';
   if (dept === 'support' || dept === 'অফিস') return 'support';
-  return 'general'; // Default to general instead of unknown
+  return 'general';
 };
 
 const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
@@ -142,6 +145,18 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
       toast.success(bn ? 'কর্মী মুছে ফেলা হয়েছে' : 'Staff deleted');
     },
     onError: () => toast.error('Error'),
+  });
+
+  const categoryMutation = useMutation({
+    mutationFn: async ({ id, category }: { id: string; category: string }) => {
+      const { error } = await supabase.from('staff').update({ staff_category: category } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(bn ? 'ক্যাটাগরি পরিবর্তন হয়েছে' : 'Category updated');
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
 
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
@@ -256,7 +271,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                   <tr>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবী' : 'Designation'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিভাগ' : 'Department'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'মোবাইল' : 'Mobile'}</th>
                     {isAdminRole(role) && <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকাউন্ট' : 'Account'}</th>}
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
@@ -280,7 +295,22 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.department || '-'}</td>
+                      <td className="px-4 py-3">
+                        <Select
+                          value={getStaffCategory(s, designationsMap)}
+                          onValueChange={(val) => categoryMutation.mutate({ id: s.id, category: val })}
+                        >
+                          <SelectTrigger className="h-7 text-xs w-[130px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                            <SelectItem value="administrative">{bn ? 'প্রশাসনিক' : 'Administrative'}</SelectItem>
+                            <SelectItem value="support">{bn ? 'অফিস কর্মচারী' : 'Support Staff'}</SelectItem>
+                            <SelectItem value="general">{bn ? 'সহায়ক কর্মী' : 'General Staff'}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{s.phone || '-'}</td>
                       {isAdminRole(role) && (
                       <td className="px-4 py-3">
@@ -319,7 +349,11 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                         )}
                         <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
-                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : staffType === 'administrative' ? 'administrative-staff' : 'general-staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => {
+                            const cat = getStaffCategory(s, designationsMap);
+                            const path = cat === 'teacher' ? 'teachers' : cat === 'administrative' ? 'administrative-staff' : cat === 'support' ? 'support-staff' : 'general-staff';
+                            navigate(`/admin/${path}/edit/${s.id}`);
+                          }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                         )}
                         {canDeleteItem && (
                           <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" /></button>

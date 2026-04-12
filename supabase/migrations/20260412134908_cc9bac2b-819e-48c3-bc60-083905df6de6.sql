@@ -1,0 +1,1 @@
+ALTER TABLE public.staff ADD COLUMN staff_category text NOT NULL DEFAULT 'general';
