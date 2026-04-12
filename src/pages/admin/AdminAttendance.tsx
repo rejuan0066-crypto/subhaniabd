@@ -143,6 +143,22 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     }
   }, [sessionYears]);
 
+  const orderedClasses = useMemo(() => {
+    const divisionOrder = new Map(divisions.map((d: any, index: number) => [d.id, d.sort_order ?? index]));
+
+    return [...classes].sort((a: any, b: any) => {
+      const divisionA = divisionOrder.get(a.division_id) ?? 9999;
+      const divisionB = divisionOrder.get(b.division_id) ?? 9999;
+      if (divisionA !== divisionB) return divisionA - divisionB;
+
+      const classA = a.sort_order ?? 9999;
+      const classB = b.sort_order ?? 9999;
+      if (classA !== classB) return classA - classB;
+
+      return String(a.name_bn || a.name || '').localeCompare(String(b.name_bn || b.name || ''), 'bn');
+    });
+  }, [classes, divisions]);
+
   // Filter students based on sub-tab and filters
   const entities = useMemo(() => {
     if (entityType === 'staff') {
@@ -172,8 +188,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       filtered = filtered.filter((s: any) => s.class_id === selectedClassId);
     }
 
-    // Sort by class sort_order, then by roll_number numerically
-    const classOrder = new Map(classes.map((c: any, i: number) => [c.id, c.sort_order ?? i]));
+    // Sort by global class serial, then by roll_number numerically
+    const classOrder = new Map(orderedClasses.map((c: any, i: number) => [c.id, i]));
     filtered.sort((a: any, b: any) => {
       const classA = classOrder.get(a.class_id) ?? 9999;
       const classB = classOrder.get(b.class_id) ?? 9999;
@@ -184,7 +200,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     });
 
     return filtered;
-  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, classes]);
+  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, orderedClasses, staffSubTab]);
 
   // Fetch attendance for selected date (for staff, fetch by shift too)
   const { data: attendance = [] } = useQuery({
