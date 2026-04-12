@@ -240,6 +240,7 @@ const AdminDesignations = () => {
                   <SelectContent>
                     <SelectItem value="teacher">{bn ? 'শিক্ষক (/admin/teachers)' : 'Teacher (/admin/teachers)'}</SelectItem>
                     <SelectItem value="administrative">{bn ? 'প্রশাসনিক কর্মকর্তা (/admin/administrative-staff)' : 'Administrative (/admin/administrative-staff)'}</SelectItem>
+                    <SelectItem value="support">{bn ? 'অফিস কর্মচারী (/admin/support-staff)' : 'Support Staff (/admin/support-staff)'}</SelectItem>
                     <SelectItem value="general">{bn ? 'সহায়ক কর্মী (/admin/general-staff)' : 'General/Service Staff (/admin/general-staff)'}</SelectItem>
                   </SelectContent>
                 </Select>
