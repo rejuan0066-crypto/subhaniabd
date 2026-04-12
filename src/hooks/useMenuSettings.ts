@@ -70,7 +70,9 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 34 },
   { id: 'class-routine', path: '/admin/class-routine', label_bn: 'ক্লাস রুটিন', label_en: 'Class Routine', icon: 'CalendarClock', visible: true, sort_order: 35 },
   { id: 'exam-routine', path: '/admin/exam-routine', label_bn: 'পরীক্ষার রুটিন', label_en: 'Exam Routine', icon: 'ClipboardList', visible: true, sort_order: 36 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 37 },
+  { id: 'id-cards', path: '/admin/id-cards', label_bn: 'আইডি কার্ড', label_en: 'ID Cards', icon: 'CreditCard', visible: true, sort_order: 37 },
+  { id: 'student-promotion', path: '/admin/student-promotion', label_bn: 'প্রমোশন/ডিমোশন', label_en: 'Promotion/Demotion', icon: 'ArrowUpDown', visible: true, sort_order: 38 },
+  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 39 },
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [
