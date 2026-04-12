@@ -353,29 +353,27 @@ const Dashboard = () => {
   const visibleSections = [...sections].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
-    <AdminLayout>
-      <div className="space-y-5">
-        {isAdmin && (
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => setBuilderOpen(true)} className="gap-2">
-              <LayoutDashboard className="w-4 h-4" />
-              {bn ? 'ড্যাশবোর্ড বিল্ডার' : 'Dashboard Builder'}
-            </Button>
-          </div>
-        )}
+    <div className="space-y-5">
+      {isAdmin && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => setBuilderOpen(true)} className="gap-2">
+            <LayoutDashboard className="w-4 h-4" />
+            {bn ? 'ড্যাশবোর্ড বিল্ডার' : 'Dashboard Builder'}
+          </Button>
+        </div>
+      )}
 
-        {visibleSections.map(s => renderSection(s.id))}
+      {visibleSections.map(s => renderSection(s.id))}
 
-        {!canViewStats && (
-          <div className="card-elevated p-8 text-center text-muted-foreground">
-            {bn ? 'আপনার পরিসংখ্যান দেখার অনুমতি নেই।' : 'You do not have permission to view statistics.'}
-          </div>
-        )}
+      {!canViewStats && (
+        <div className="card-elevated p-8 text-center text-muted-foreground">
+          {bn ? 'আপনার পরিসংখ্যান দেখার অনুমতি নেই।' : 'You do not have permission to view statistics.'}
+        </div>
+      )}
 
-        <DashboardStatsList open={listDialog.open} onClose={() => setListDialog(d => ({ ...d, open: false }))} title={listDialog.title} table={listDialog.table} filters={listDialog.filters} />
-        <DashboardLayoutDialog open={builderOpen} onClose={() => setBuilderOpen(false)} />
-      </div>
-    </AdminLayout>
+      <DashboardStatsList open={listDialog.open} onClose={() => setListDialog(d => ({ ...d, open: false }))} title={listDialog.title} table={listDialog.table} filters={listDialog.filters} />
+      <DashboardLayoutDialog open={builderOpen} onClose={() => setBuilderOpen(false)} />
+    </div>
   );
 };
 
