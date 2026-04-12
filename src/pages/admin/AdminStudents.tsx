@@ -272,6 +272,17 @@ const AdminStudents = () => {
                 <SelectItem value="rejected">{bn ? 'প্রত্যাখ্যাত' : 'Rejected'}</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="bg-background w-full sm:w-40">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'এক্টিভ/ইনএক্টিভ' : 'Active/Inactive'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল' : 'All'}</SelectItem>
+                <SelectItem value="active">{bn ? 'সক্রিয়' : 'Active'}</SelectItem>
+                <SelectItem value="inactive">{bn ? 'নিষ্ক্রিয়' : 'Inactive'}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -291,6 +302,7 @@ const AdminStudents = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সেশন' : 'Session'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শ্রেণী' : 'Class'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অনুমোদন' : 'Approval'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
@@ -322,6 +334,11 @@ const AdminStudents = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
                       <td className="px-4 py-3">{getApprovalBadge(s.approval_status || 'pending')}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${(s.status || 'active') === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                          {(s.status || 'active') === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setShowDetail(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></button>
@@ -336,6 +353,15 @@ const AdminStudents = () => {
                           )}
                           {canEditItem && (s.approval_status === 'rejected') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-lg hover:bg-warning/10 text-muted-foreground hover:text-warning" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" /></button>
+                          )}
+                          {canEditItem && (
+                            <button
+                              onClick={() => toggleActiveMutation.mutate({ id: s.id, currentStatus: s.status || 'active' })}
+                              className={`p-2 rounded-lg ${(s.status || 'active') === 'active' ? 'hover:bg-warning/10 text-muted-foreground hover:text-warning' : 'hover:bg-success/10 text-muted-foreground hover:text-success'}`}
+                              title={(s.status || 'active') === 'active' ? (bn ? 'ডিএক্টিভ করুন' : 'Deactivate') : (bn ? 'এক্টিভ করুন' : 'Activate')}
+                            >
+                              {(s.status || 'active') === 'active' ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                            </button>
                           )}
                           {canDeleteItem && (
                             <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
