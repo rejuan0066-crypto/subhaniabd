@@ -26,7 +26,12 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   ]},
   { id: 'donors', path: '/admin/donors', label_bn: 'দাতা তালিকা', label_en: 'Donor List', icon: 'Heart', visible: true, sort_order: 1 },
   { id: 'students', path: '/admin/students', label_bn: 'ছাত্র ব্যবস্থাপনা', label_en: 'Student Management', icon: 'Users', visible: true, sort_order: 2 },
-  { id: 'staff', path: '/admin/staff', label_bn: 'স্টাফ/শিক্ষক ব্যবস্থাপনা', label_en: 'Staff/Teacher Management', icon: 'UserCog', visible: true, sort_order: 3 },
+  { id: 'staff', path: '/admin/staff', label_bn: 'স্টাফ/শিক্ষক ব্যবস্থাপনা', label_en: 'Staff/Teacher Management', icon: 'UserCog', visible: true, sort_order: 3, children: [
+    { id: 'teachers', path: '/admin/teachers', label_bn: 'শিক্ষক', label_en: 'Teachers', icon: 'GraduationCap', visible: true, sort_order: 0 },
+    { id: 'administrative-staff', path: '/admin/administrative-staff', label_bn: 'প্রশাসনিক স্টাফ', label_en: 'Administrative Staff', icon: 'Briefcase', visible: true, sort_order: 1 },
+    { id: 'general-staff', path: '/admin/general-staff', label_bn: 'সাধারণ স্টাফ', label_en: 'General Staff', icon: 'Users', visible: true, sort_order: 2 },
+    { id: 'support-staff', path: '/admin/support-staff', label_bn: 'সহায়ক স্টাফ', label_en: 'Support Staff', icon: 'Wrench', visible: true, sort_order: 3 },
+  ]},
   { id: 'divisions', path: '/admin/divisions', label_bn: 'বিভাগ ও শ্রেণী', label_en: 'Division & Class', icon: 'Layers', visible: true, sort_order: 4 },
   { id: 'academic-sessions', path: '/admin/academic-sessions', label_bn: 'একাডেমিক সেশন', label_en: 'Academic Session', icon: 'CalendarDays', visible: true, sort_order: 5 },
   { id: 'fee-receipts', path: '/admin/fee-receipts', label_bn: 'ফি রসিদ', label_en: 'Fee Receipts', icon: 'ReceiptText', visible: true, sort_order: 5 },
