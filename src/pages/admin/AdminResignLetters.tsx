@@ -89,7 +89,7 @@ const AdminResignLetters = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('resign_letters')
-        .select('*')
+        .select('*, staff:staff_id(photo_url)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
@@ -302,7 +302,7 @@ const AdminResignLetters = () => {
       candidateSigLabel: get('candidateSigLabel', bn ? 'পদত্যাগকারীর স্বাক্ষর' : "Resignee's Signature"),
       authoritySigLabel: get('authoritySigLabel', bn ? 'অনুমোদনকারীর স্বাক্ষর' : "Authority's Signature"),
       logoUrl: localLogo || inst.logo_url || '',
-      photoUrl: localPhoto || (letter.letter_data as any)?.photo_url || '',
+      photoUrl: localPhoto || (letter.letter_data as any)?.photo_url || (letter as any).staff?.photo_url || '',
     };
   }, [institution, principalInfo, bn, overrides, localLogo, localPhoto]);
 
