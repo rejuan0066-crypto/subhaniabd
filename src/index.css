@@ -157,8 +157,8 @@
     line-height: 1.6;
   }
   .sidebar-item:hover {
-    color: hsl(var(--sidebar-hover-foreground, var(--sidebar-foreground)));
-    background-color: hsl(var(--sidebar-hover-bg, var(--sidebar-accent)));
+    color: hsl(var(--sidebar-foreground));
+    background-color: hsl(var(--sidebar-primary) / 0.10);
   }
   .sidebar-item:hover .sidebar-icon {
     transform: scale(1.12);
@@ -275,7 +275,7 @@
   }
   .sidebar-sub-item:hover {
     color: hsl(var(--sidebar-foreground));
-    background: hsl(var(--sidebar-foreground) / 0.06);
+    background: hsl(var(--sidebar-primary) / 0.10);
     backdrop-filter: blur(4px);
     transform: translateX(2px);
   }
