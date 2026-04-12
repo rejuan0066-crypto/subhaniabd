@@ -197,14 +197,14 @@ const App = () => (
                     <Route path="staff/add" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="staff/edit/:id" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="general-staff" element={<ModuleGuard menuPath="/admin/general-staff"><AdminGeneralStaff /></ModuleGuard>} />
-                    <Route path="general-staff/add" element={<ModuleGuard menuPath="/admin/general-staff"><AdminStaffForm /></ModuleGuard>} />
-                    <Route path="general-staff/edit/:id" element={<ModuleGuard menuPath="/admin/general-staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="general-staff/add" element={<ModuleGuard menuPath="/admin/general-staff"><AdminGeneralStaffForm /></ModuleGuard>} />
+                    <Route path="general-staff/edit/:id" element={<ModuleGuard menuPath="/admin/general-staff"><AdminGeneralStaffForm /></ModuleGuard>} />
                     <Route path="teachers" element={<ModuleGuard menuPath="/admin/teachers"><AdminTeachers /></ModuleGuard>} />
-                    <Route path="teachers/add" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
-                    <Route path="teachers/edit/:id" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="teachers/add" element={<ModuleGuard menuPath="/admin/teachers"><AdminTeacherForm /></ModuleGuard>} />
+                    <Route path="teachers/edit/:id" element={<ModuleGuard menuPath="/admin/teachers"><AdminTeacherForm /></ModuleGuard>} />
                     <Route path="administrative-staff" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaff /></ModuleGuard>} />
-                    <Route path="administrative-staff/add" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminStaffForm /></ModuleGuard>} />
-                    <Route path="administrative-staff/edit/:id" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="administrative-staff/add" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaffForm /></ModuleGuard>} />
+                    <Route path="administrative-staff/edit/:id" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaffForm /></ModuleGuard>} />
                     <Route path="divisions" element={<ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard>} />
                     <Route path="subjects" element={<ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard>} />
                     <Route path="results" element={<ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard>} />
