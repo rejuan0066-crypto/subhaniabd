@@ -1190,7 +1190,7 @@ const AdminUserManagement = () => {
                   </div>
 
                    {/* OTP Toggle - admin only */}
-                   {isAdminRole(role) && (
+                   {isAdminRole(currentUserRole) && (
                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
                      <div className="flex items-center gap-2">
                        <Switch checked={emailOtpEnabled} onCheckedChange={(v) => { setEmailOtpEnabled(v); setEmailOtpStep(false); setEmailOtpSent(false); setEmailOtpCode(''); }} />
@@ -1315,7 +1315,7 @@ const AdminUserManagement = () => {
                   </h3>
 
                    {/* OTP Toggle - admin only */}
-                   {isAdminRole(role) && (
+                   {isAdminRole(currentUserRole) && (
                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
                      <div className="flex items-center gap-2">
                        <Switch checked={pwOtpEnabled} onCheckedChange={(v) => { setPwOtpEnabled(v); setPwOtpStep(false); setPwOtpSent(false); setPwOtpCode(''); }} />
