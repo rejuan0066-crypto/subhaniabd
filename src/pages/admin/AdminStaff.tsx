@@ -18,9 +18,10 @@ import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
-export type StaffPageType = 'all' | 'staff' | 'teacher';
+export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative';
 
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
+const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান', 'peon', 'পিয়ন', 'guard', 'প্রহরী', 'cleaner', 'পরিচ্ছন্নতাকর্মী'];
 
 const isTeacherDesignation = (designation: string | null | undefined): boolean => {
   if (!designation) return false;
@@ -28,11 +29,17 @@ const isTeacherDesignation = (designation: string | null | undefined): boolean =
   return TEACHER_KEYWORDS.some(k => lower.includes(k));
 };
 
+const isAdministrativeDesignation = (designation: string | null | undefined): boolean => {
+  if (!designation) return false;
+  const lower = designation.toLowerCase();
+  return ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k));
+};
+
 const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const menuPath = staffType === 'teacher' ? '/admin/teachers' : '/admin/staff';
+  const menuPath = staffType === 'teacher' ? '/admin/teachers' : staffType === 'administrative' ? '/admin/administrative-staff' : '/admin/staff';
   const { checkApproval } = useApprovalCheck(menuPath, 'staff');
   const { role } = useAuth();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions(menuPath);
@@ -109,7 +116,11 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
 
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
     const isTeacher = isTeacherDesignation(s.designation);
-    return staffType === 'teacher' ? isTeacher : !isTeacher;
+    const isAdmin = isAdministrativeDesignation(s.designation);
+    if (staffType === 'teacher') return isTeacher;
+    if (staffType === 'administrative') return isAdmin;
+    // 'staff' = those who are neither teacher nor administrative
+    return !isTeacher && !isAdmin;
   });
 
   const pendingCount = typeFiltered.filter((s: any) => s.status === 'pending').length;
@@ -166,14 +177,14 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-display font-bold text-foreground">
-              {staffType === 'teacher' ? (bn ? 'শিক্ষক ব্যবস্থাপনা' : 'Teacher Management') : staffType === 'staff' ? (bn ? 'স্টাফ ব্যবস্থাপনা' : 'Staff Management') : t('staff')}
+              {staffType === 'teacher' ? (bn ? 'শিক্ষক ব্যবস্থাপনা' : 'Teacher Management') : staffType === 'administrative' ? (bn ? 'প্রশাসনিক স্টাফ ব্যবস্থাপনা' : 'Administrative Staff Management') : staffType === 'staff' ? (bn ? 'স্টাফ ব্যবস্থাপনা' : 'Staff Management') : t('staff')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {staffType === 'teacher' ? (bn ? `মোট ${typeFiltered.length} জন শিক্ষক` : `Total ${typeFiltered.length} teachers`) : staffType === 'staff' ? (bn ? `মোট ${typeFiltered.length} জন স্টাফ` : `Total ${typeFiltered.length} staff`) : (bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`)}
+              {staffType === 'teacher' ? (bn ? `মোট ${typeFiltered.length} জন শিক্ষক` : `Total ${typeFiltered.length} teachers`) : staffType === 'administrative' ? (bn ? `মোট ${typeFiltered.length} জন প্রশাসনিক স্টাফ` : `Total ${typeFiltered.length} administrative staff`) : staffType === 'staff' ? (bn ? `মোট ${typeFiltered.length} জন স্টাফ` : `Total ${typeFiltered.length} staff`) : (bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`)}
             </p>
           </div>
           {canAddItem && (
-            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
+            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : staffType === 'administrative' ? '/admin/administrative-staff/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
               <Plus className="w-4 h-4" /> {t('addNew')}
             </Button>
           )}
