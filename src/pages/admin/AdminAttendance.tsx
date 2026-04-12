@@ -878,12 +878,12 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
               <div className="flex flex-wrap gap-3 items-center">
                 {/* Sub-tabs: All / Residential */}
                 <Tabs value={studentSubTab} onValueChange={(v) => setStudentSubTab(v as any)} className="shrink-0">
-                  <TabsList className="h-8">
-                    <TabsTrigger value="all" className="text-xs h-7 px-3">
-                      <Users className="h-3 w-3 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
+                  <TabsList>
+                    <TabsTrigger value="all">
+                      <Users className="h-4 w-4 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
                     </TabsTrigger>
-                    <TabsTrigger value="residential" className="text-xs h-7 px-3">
-                      <Home className="h-3 w-3 mr-1" /> {bn ? 'আবাসিক ছাত্র' : 'Residential'}
+                    <TabsTrigger value="residential">
+                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক ছাত্র' : 'Residential'}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -931,15 +931,15 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
               <div className="flex flex-wrap gap-3 items-center">
                 {/* Staff Sub-tabs: Full-time / Duty / Meal */}
                 <Tabs value={staffSubTab} onValueChange={(v) => { setStaffSubTab(v as any); setSelectedShift(v === 'fulltime' ? 'full_day' : v === 'duty' ? 'morning' : 'meal_breakfast'); }} className="shrink-0">
-                  <TabsList className="h-8">
-                    <TabsTrigger value="fulltime" className="text-xs h-7 px-3">
-                      <Users className="h-3 w-3 mr-1" /> {bn ? 'ফুল টাইম হাজিরা' : 'Full Time'}
+                  <TabsList>
+                    <TabsTrigger value="fulltime">
+                      <Users className="h-4 w-4 mr-1" /> {bn ? 'ফুল টাইম হাজিরা' : 'Full Time'}
                     </TabsTrigger>
-                    <TabsTrigger value="duty" className="text-xs h-7 px-3">
-                      <Clock className="h-3 w-3 mr-1" /> {bn ? 'আবাসিক ডিউটি' : 'Residential Duty'}
+                    <TabsTrigger value="duty">
+                      <Clock className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক ডিউটি' : 'Residential Duty'}
                     </TabsTrigger>
-                    <TabsTrigger value="meal" className="text-xs h-7 px-3">
-                      <Utensils className="h-3 w-3 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal'}
+                    <TabsTrigger value="meal">
+                      <Utensils className="h-4 w-4 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal'}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
