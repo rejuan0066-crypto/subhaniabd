@@ -363,7 +363,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
         {/* Staff Profile Detail Dialog */}
         <Dialog open={!!viewStaff} onOpenChange={o => { if (!o) setViewStaff(null); }}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{bn ? 'স্টাফ/শিক্ষক প্রোফাইল' : 'Staff/Teacher Profile'}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{staffType === 'teacher' ? (bn ? 'শিক্ষক প্রোফাইল' : 'Teacher Profile') : (bn ? 'স্টাফ প্রোফাইল' : 'Staff Profile')}</DialogTitle></DialogHeader>
             {viewStaff && <StaffProfileView staff={viewStaff} bn={bn} />}
           </DialogContent>
         </Dialog>
