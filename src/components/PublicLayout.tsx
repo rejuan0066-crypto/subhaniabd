@@ -197,8 +197,9 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
 
       {/* Main */}
       <main className="flex-1">
+        <div className="container mx-auto px-4"><BackButton position="top" /></div>
         {children}
-        <div className="container mx-auto px-4"><BackButton /></div>
+        <div className="container mx-auto px-4"><BackButton position="bottom" /></div>
       </main>
 
       {/* Footer */}

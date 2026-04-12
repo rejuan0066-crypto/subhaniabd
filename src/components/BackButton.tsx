@@ -3,7 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft } from 'lucide-react';
 
-const BackButton = forwardRef<HTMLButtonElement>((_, ref) => {
+interface BackButtonProps {
+  position?: 'top' | 'bottom';
+}
+
+const BackButton = forwardRef<HTMLButtonElement, BackButtonProps>(({ position = 'bottom' }, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
@@ -11,13 +15,24 @@ const BackButton = forwardRef<HTMLButtonElement>((_, ref) => {
   if (location.pathname === '/' || location.pathname === '/admin') return null;
 
   return (
-    <div className="mt-8 pb-4">
+    <div className={position === 'top' ? 'mb-4' : 'mt-8 pb-4'}>
       <button
         ref={ref}
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="group inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium
+          bg-background/60 backdrop-blur-md
+          border border-border/30
+          rounded-full shadow-sm
+          text-muted-foreground
+          hover:bg-background/90 hover:text-emerald-600 hover:shadow-md hover:border-emerald-200/50
+          active:scale-[0.97]
+          transition-all duration-300 ease-out
+          min-h-[44px]"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft
+          className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+          strokeWidth={1.75}
+        />
         {language === 'bn' ? 'পেছনে যান' : 'Go Back'}
       </button>
     </div>
