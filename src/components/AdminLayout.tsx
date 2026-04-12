@@ -571,30 +571,30 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           </header>
 
           {/* Content */}
-          <main className="flex-1 px-4 md:px-8 pb-8 pt-5 w-full max-w-[1440px] mx-auto overflow-x-hidden">
+          <main className="flex-1 px-4 md:px-8 pb-8 pt-4 w-full max-w-[1440px] mx-auto overflow-x-hidden">
+            <BackButton position="top" />
+            {/* Page Header - outside card for clear separation */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">{currentPageLabel}</h1>
+                {adminTheme.headerShowBreadcrumb && breadcrumbs.length > 1 && (
+                  <nav className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                    {breadcrumbs.map((crumb, i) => (
+                      <span key={crumb.path} className="flex items-center gap-1">
+                        {i > 0 && <ChevronRight className="w-3 h-3 opacity-40" />}
+                        {i === breadcrumbs.length - 1 ? (
+                          <span className="text-foreground/70 font-medium">{crumb.label}</span>
+                        ) : (
+                          <Link to={crumb.path} className="hover:text-primary transition-colors">{crumb.label}</Link>
+                        )}
+                      </span>
+                    ))}
+                  </nav>
+                )}
+              </div>
+            </div>
             {/* Modern Glass Content Container */}
             <div className="admin-page-card rounded-[36px] lg:rounded-[45px] bg-card/70 dark:bg-card/35 backdrop-blur-2xl border border-border/10 dark:border-border/8 p-5 sm:p-8 lg:p-10 min-h-[60vh] w-full" style={{ boxShadow: 'var(--shadow-float)' }}>
-              <BackButton position="top" />
-              {/* Page Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-border/30">
-                <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">{currentPageLabel}</h1>
-                  {adminTheme.headerShowBreadcrumb && breadcrumbs.length > 1 && (
-                    <nav className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
-                      {breadcrumbs.map((crumb, i) => (
-                        <span key={crumb.path} className="flex items-center gap-1">
-                          {i > 0 && <ChevronRight className="w-3 h-3 opacity-40" />}
-                          {i === breadcrumbs.length - 1 ? (
-                            <span className="text-foreground/70 font-medium">{crumb.label}</span>
-                          ) : (
-                            <Link to={crumb.path} className="hover:text-primary transition-colors">{crumb.label}</Link>
-                          )}
-                        </span>
-                      ))}
-                    </nav>
-                  )}
-                </div>
-              </div>
               <div className="overflow-x-auto">
                 <AdminPageWithTabs>{children}</AdminPageWithTabs>
               </div>
