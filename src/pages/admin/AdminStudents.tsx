@@ -422,16 +422,12 @@ const AdminStudents = () => {
         paramKey="tab"
       />
     </AdminLayout>
-  );
-  return (
-    <>
-      {mainContent}
-      <DeleteConfirmDialog
-        open={!!deleteId}
-        onOpenChange={(o) => { if (!o) setDeleteId(null); }}
-        onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
-        isPending={deleteMutation.isPending}
-      />
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
     </>
   );
 };
