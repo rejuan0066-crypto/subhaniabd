@@ -2405,6 +2405,107 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_history: {
+        Row: {
+          created_at: string
+          from_class_id: string | null
+          from_division_id: string | null
+          from_roll_number: string | null
+          from_session_id: string | null
+          id: string
+          promoted_by: string | null
+          promotion_type: string
+          remarks: string | null
+          student_id: string
+          to_class_id: string | null
+          to_division_id: string | null
+          to_roll_number: string | null
+          to_session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          from_class_id?: string | null
+          from_division_id?: string | null
+          from_roll_number?: string | null
+          from_session_id?: string | null
+          id?: string
+          promoted_by?: string | null
+          promotion_type?: string
+          remarks?: string | null
+          student_id: string
+          to_class_id?: string | null
+          to_division_id?: string | null
+          to_roll_number?: string | null
+          to_session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          from_class_id?: string | null
+          from_division_id?: string | null
+          from_roll_number?: string | null
+          from_session_id?: string | null
+          id?: string
+          promoted_by?: string | null
+          promotion_type?: string
+          remarks?: string | null
+          student_id?: string
+          to_class_id?: string | null
+          to_division_id?: string | null
+          to_roll_number?: string | null
+          to_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_history_from_class_id_fkey"
+            columns: ["from_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_from_division_id_fkey"
+            columns: ["from_division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_from_session_id_fkey"
+            columns: ["from_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_to_class_id_fkey"
+            columns: ["to_class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_to_division_id_fkey"
+            columns: ["to_division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotion_history_to_session_id_fkey"
+            columns: ["to_session_id"]
+            isOneToOne: false
+            referencedRelation: "academic_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       receipt_counter: {
         Row: {
           current_year: number
