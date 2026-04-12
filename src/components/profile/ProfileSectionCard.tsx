@@ -12,8 +12,7 @@ interface ProfileSectionCardProps {
 
 const ProfileSectionCard = ({ title, icon: Icon, children, className, columns = 2 }: ProfileSectionCardProps) => (
   <div className={cn(
-    'relative rounded-[20px] border border-border/20 bg-card/50 backdrop-blur-md p-5 shadow-sm',
-    'before:absolute before:inset-0 before:rounded-[20px] before:p-[1px] before:bg-gradient-to-br before:from-emerald-500/20 before:via-transparent before:to-teal-500/10 before:-z-10 before:pointer-events-none',
+    'relative rounded-[20px] border border-border/30 bg-card p-6 shadow-sm',
     className
   )}>
     <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border/20">
