@@ -21,63 +21,95 @@ export interface MenuConfig {
 }
 
 const DEFAULT_SIDEBAR: MenuItemConfig[] = [
+  // ড্যাশবোর্ড
   { id: 'dashboard', path: '/admin', label_bn: 'ড্যাশবোর্ড', label_en: 'Dashboard', icon: 'LayoutDashboard', visible: true, sort_order: 0, children: [
     { id: 'profile', path: '/admin/profile', label_bn: 'প্রোফাইল', label_en: 'Profile', icon: 'UserCircle', visible: true, sort_order: 0 },
   ]},
-  { id: 'donors', path: '/admin/donors', label_bn: 'দাতা তালিকা', label_en: 'Donor List', icon: 'Heart', visible: true, sort_order: 1 },
-  { id: 'students', path: '/admin/students', label_bn: 'ছাত্র ব্যবস্থাপনা', label_en: 'Student Management', icon: 'Users', visible: true, sort_order: 2 },
-  { id: 'staff', path: '/admin/staff', label_bn: 'স্টাফ/শিক্ষক ব্যবস্থাপনা', label_en: 'Staff/Teacher Management', icon: 'UserCog', visible: true, sort_order: 3, children: [
+
+  // ছাত্র ব্যবস্থাপনা
+  { id: 'student-management', path: '/admin/students', label_bn: 'ছাত্র ব্যবস্থাপনা', label_en: 'Student Management', icon: 'Users', visible: true, sort_order: 1, children: [
+    { id: 'students', path: '/admin/students', label_bn: 'ছাত্র তালিকা', label_en: 'Student List', icon: 'Users', visible: true, sort_order: 0 },
+    { id: 'student-promotion', path: '/admin/student-promotion', label_bn: 'প্রমোশন/ডিমোশন', label_en: 'Promotion/Demotion', icon: 'ArrowUpDown', visible: true, sort_order: 1 },
+    { id: 'admission-letters', path: '/admin/admission-letters', label_bn: 'ভর্তি পত্র', label_en: 'Admission Letters', icon: 'FileCheck', visible: true, sort_order: 2 },
+    { id: 'id-cards', path: '/admin/id-cards', label_bn: 'আইডি কার্ড', label_en: 'ID Cards', icon: 'CreditCard', visible: true, sort_order: 3 },
+  ]},
+
+  // স্টাফ/শিক্ষক ব্যবস্থাপনা
+  { id: 'staff', path: '/admin/staff', label_bn: 'স্টাফ/শিক্ষক', label_en: 'Staff/Teacher', icon: 'UserCog', visible: true, sort_order: 2, children: [
     { id: 'teachers', path: '/admin/teachers', label_bn: 'শিক্ষক', label_en: 'Teachers', icon: 'GraduationCap', visible: true, sort_order: 0 },
     { id: 'administrative-staff', path: '/admin/administrative-staff', label_bn: 'প্রশাসনিক স্টাফ', label_en: 'Administrative Staff', icon: 'Briefcase', visible: true, sort_order: 1 },
-    { id: 'general-staff', path: '/admin/general-staff', label_bn: 'সাধারণ স্টাফ', label_en: 'General Staff', icon: 'Users', visible: true, sort_order: 2 },
-    { id: 'support-staff', path: '/admin/support-staff', label_bn: 'সহায়ক স্টাফ', label_en: 'Support Staff', icon: 'Wrench', visible: true, sort_order: 3 },
+    { id: 'support-staff', path: '/admin/support-staff', label_bn: 'সহায়ক স্টাফ', label_en: 'Support Staff', icon: 'Wrench', visible: true, sort_order: 2 },
+    { id: 'general-staff', path: '/admin/general-staff', label_bn: 'সাধারণ স্টাফ', label_en: 'General Staff', icon: 'HardHat', visible: true, sort_order: 3 },
+    { id: 'designations', path: '/admin/designations', label_bn: 'পদবি তৈরি', label_en: 'Designations', icon: 'Tag', visible: true, sort_order: 4 },
+    { id: 'joining-letters', path: '/admin/joining-letters', label_bn: 'যোগদান পত্র', label_en: 'Joining Letters', icon: 'FilePlus', visible: true, sort_order: 5 },
+    { id: 'resign-letters', path: '/admin/resign-letters', label_bn: 'পদত্যাগ পত্র', label_en: 'Resign Letters', icon: 'FileSignature', visible: true, sort_order: 6 },
+    { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 7 },
   ]},
-  { id: 'divisions', path: '/admin/divisions', label_bn: 'বিভাগ ও শ্রেণী', label_en: 'Division & Class', icon: 'Layers', visible: true, sort_order: 4 },
-  { id: 'academic-sessions', path: '/admin/academic-sessions', label_bn: 'একাডেমিক সেশন', label_en: 'Academic Session', icon: 'CalendarDays', visible: true, sort_order: 5 },
-  { id: 'fee-receipts', path: '/admin/fee-receipts', label_bn: 'ফি রসিদ', label_en: 'Fee Receipts', icon: 'ReceiptText', visible: true, sort_order: 5 },
-  { id: 'resign-letters', path: '/admin/resign-letters', label_bn: 'পদত্যাগ পত্র', label_en: 'Resign Letters', icon: 'FileSignature', visible: true, sort_order: 6 },
-  { id: 'joining-letters', path: '/admin/joining-letters', label_bn: 'যোগদান পত্র', label_en: 'Joining Letters', icon: 'FilePlus', visible: true, sort_order: 7 },
-  { id: 'admission-letters', path: '/admin/admission-letters', label_bn: 'ভর্তি পত্র', label_en: 'Admission Letters', icon: 'FileCheck', visible: true, sort_order: 8 },
-  { id: 'results', path: '/admin/results', label_bn: 'ফলাফল', label_en: 'Results', icon: 'FileText', visible: true, sort_order: 9 },
-  { id: 'notices', path: '/admin/notices', label_bn: 'নোটিশ (অনুমোদন)', label_en: 'Notice (Approval)', icon: 'Bell', visible: true, sort_order: 10 },
-  { id: 'fees', path: '/admin/students-fees', label_bn: 'ছাত্র ফি', label_en: 'Student Fees', icon: 'CreditCard', visible: true, sort_order: 11 },
-  { id: 'expenses', path: '/admin/expenses', label_bn: 'খরচ ব্যবস্থাপনা', label_en: 'Expenses', icon: 'Receipt', visible: true, sort_order: 12 },
-  { id: 'website', path: '/admin/website', label_bn: 'ওয়েবসাইট নিয়ন্ত্রণ', label_en: 'Website Control', icon: 'Globe', visible: true, sort_order: 13 },
-  { id: 'designations', path: '/admin/designations', label_bn: 'পদবি তৈরি', label_en: 'Designations', icon: 'Tag', visible: true, sort_order: 14 },
-  { id: 'subjects', path: '/admin/subjects', label_bn: 'বিষয়সমূহ', label_en: 'Subjects', icon: 'BookOpen', visible: true, sort_order: 15 },
-  { id: 'form-builder', path: '/admin/form-builder', label_bn: 'কাস্টম বিল্ডার', label_en: 'Custom Builder', icon: 'Wrench', visible: true, sort_order: 16, children: [
-    { id: 'module-manager', path: '/admin/module-manager', label_bn: 'মডিউল ম্যানেজার', label_en: 'Module Manager', icon: 'Blocks', visible: true, sort_order: 0 },
-    { id: 'formula-builder', path: '/admin/formula-builder', label_bn: 'ফর্মুলা বিল্ডার', label_en: 'Formula Builder', icon: 'FlaskConical', visible: true, sort_order: 1 },
-    { id: 'attendance', path: '/admin/attendance', label_bn: 'অ্যাটেন্ডেন্স', label_en: 'Attendance', icon: 'CalendarDays', visible: true, sort_order: 2, children: [
-      { id: 'attendance-student', path: '/admin/attendance?tab=student', label_bn: 'ছাত্র উপস্থিতি', label_en: 'Student Attendance', icon: 'Users', visible: true, sort_order: 0 },
-      { id: 'attendance-staff', path: '/admin/attendance?tab=staff', label_bn: 'স্টাফ উপস্থিতি', label_en: 'Staff Attendance', icon: 'UserCog', visible: true, sort_order: 1 },
-    ]},
-    { id: 'validation-manager', path: '/admin/validation-manager', label_bn: 'ভ্যালিডেশন ম্যানেজার', label_en: 'Validation Manager', icon: 'ShieldCheck', visible: true, sort_order: 3 },
-    { id: 'reports', path: '/admin/reports', label_bn: 'রিপোর্ট ও অ্যানালিটিক্স', label_en: 'Reports & Analytics', icon: 'BarChart3', visible: true, sort_order: 4 },
+
+  // একাডেমিক
+  { id: 'academic', path: '/admin/divisions', label_bn: 'একাডেমিক', label_en: 'Academic', icon: 'GraduationCap', visible: true, sort_order: 3, children: [
+    { id: 'divisions', path: '/admin/divisions', label_bn: 'বিভাগ ও শ্রেণী', label_en: 'Division & Class', icon: 'Layers', visible: true, sort_order: 0 },
+    { id: 'academic-sessions', path: '/admin/academic-sessions', label_bn: 'একাডেমিক সেশন', label_en: 'Academic Session', icon: 'CalendarDays', visible: true, sort_order: 1 },
+    { id: 'subjects', path: '/admin/subjects', label_bn: 'বিষয়সমূহ', label_en: 'Subjects', icon: 'BookOpen', visible: true, sort_order: 2 },
+    { id: 'class-routine', path: '/admin/class-routine', label_bn: 'ক্লাস রুটিন', label_en: 'Class Routine', icon: 'CalendarClock', visible: true, sort_order: 3 },
+    { id: 'library', path: '/admin/library', label_bn: 'লাইব্রেরি', label_en: 'Library', icon: 'BookOpen', visible: true, sort_order: 4 },
   ]},
-  { id: 'permissions', path: '/admin/permissions', label_bn: 'পারমিশন', label_en: 'Permissions', icon: 'KeyRound', visible: true, sort_order: 17 },
-  { id: 'theme', path: '/admin/theme', label_bn: 'থিম কাস্টমাইজার', label_en: 'Theme Customizer', icon: 'Palette', visible: true, sort_order: 18 },
-  { id: 'menu-manager', path: '/admin/menu-manager', label_bn: 'মেনু ম্যানেজার', label_en: 'Menu Manager', icon: 'ListOrdered', visible: true, sort_order: 19 },
-  { id: 'widget-builder', path: '/admin/widget-builder', label_bn: 'উইজেট বিল্ডার', label_en: 'Widget Builder', icon: 'LayoutGrid', visible: true, sort_order: 20 },
-  { id: 'backup', path: '/admin/backup', label_bn: 'ব্যাকআপ', label_en: 'Backup', icon: 'HardDrive', visible: true, sort_order: 21 },
-  { id: 'guardian-notify', path: '/admin/guardian-notify', label_bn: 'অভিভাবক নোটিফিকেশন', label_en: 'Guardian Notify', icon: 'MessageSquare', visible: true, sort_order: 22 },
-  { id: 'prayer-calendar', path: '/admin/prayer-calendar', label_bn: 'নামাজ ও ক্যালেন্ডার', label_en: 'Prayer & Calendar', icon: 'Clock', visible: true, sort_order: 23 },
-  { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 24 },
-  { id: 'user-management', path: '/admin/user-management', label_bn: 'ইউজার ম্যানেজমেন্ট', label_en: 'User Management', icon: 'UserPlus', visible: true, sort_order: 25 },
-  { id: 'photo-tools', path: '/admin/photo-tools', label_bn: 'ফটো টুলস', label_en: 'Photo Tools', icon: 'Camera', visible: true, sort_order: 26 },
-  { id: 'posts', path: '/admin/posts', label_bn: 'পোস্ট ব্যবস্থাপনা', label_en: 'Post Management', icon: 'FileText', visible: true, sort_order: 27 },
-  { id: 'approvals', path: '/admin/approvals', label_bn: 'অনুমোদন', label_en: 'Approvals', icon: 'ShieldCheck', visible: true, sort_order: 28 },
-  { id: 'payments', path: '/admin/payments', label_bn: 'পেমেন্ট', label_en: 'Payments', icon: 'CreditCard', visible: true, sort_order: 29 },
-  { id: 'exam-sessions', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা সেশন', label_en: 'Exam Sessions', icon: 'CalendarDays', visible: true, sort_order: 30 },
-  { id: 'library', path: '/admin/library', label_bn: 'লাইব্রেরি', label_en: 'Library', icon: 'BookOpen', visible: true, sort_order: 31 },
-  { id: 'receipt-designer', path: '/admin/receipt-designer', label_bn: 'রসিদ ডিজাইনার', label_en: 'Receipt Designer', icon: 'ReceiptText', visible: true, sort_order: 32 },
-  { id: 'address-manager', path: '/admin/address-manager', label_bn: 'ঠিকানা ব্যবস্থাপনা', label_en: 'Address Manager', icon: 'MapPin', visible: true, sort_order: 33 },
-  { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 34 },
-  { id: 'class-routine', path: '/admin/class-routine', label_bn: 'ক্লাস রুটিন', label_en: 'Class Routine', icon: 'CalendarClock', visible: true, sort_order: 35 },
-  { id: 'exam-routine', path: '/admin/exam-routine', label_bn: 'পরীক্ষার রুটিন', label_en: 'Exam Routine', icon: 'ClipboardList', visible: true, sort_order: 36 },
-  { id: 'id-cards', path: '/admin/id-cards', label_bn: 'আইডি কার্ড', label_en: 'ID Cards', icon: 'CreditCard', visible: true, sort_order: 37 },
-  { id: 'student-promotion', path: '/admin/student-promotion', label_bn: 'প্রমোশন/ডিমোশন', label_en: 'Promotion/Demotion', icon: 'ArrowUpDown', visible: true, sort_order: 38 },
-  { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 39 },
+
+  // পরীক্ষা ও ফলাফল
+  { id: 'exam-result', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা ও ফলাফল', label_en: 'Exam & Results', icon: 'FileText', visible: true, sort_order: 4, children: [
+    { id: 'exam-sessions', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা সেশন', label_en: 'Exam Sessions', icon: 'CalendarDays', visible: true, sort_order: 0 },
+    { id: 'exam-routine', path: '/admin/exam-routine', label_bn: 'পরীক্ষার রুটিন', label_en: 'Exam Routine', icon: 'ClipboardList', visible: true, sort_order: 1 },
+    { id: 'results', path: '/admin/results', label_bn: 'ফলাফল', label_en: 'Results', icon: 'FileText', visible: true, sort_order: 2 },
+  ]},
+
+  // উপস্থিতি
+  { id: 'attendance', path: '/admin/attendance', label_bn: 'অ্যাটেন্ডেন্স', label_en: 'Attendance', icon: 'CalendarCheck', visible: true, sort_order: 5, children: [
+    { id: 'attendance-student', path: '/admin/attendance?tab=student', label_bn: 'ছাত্র উপস্থিতি', label_en: 'Student Attendance', icon: 'Users', visible: true, sort_order: 0 },
+    { id: 'attendance-staff', path: '/admin/attendance?tab=staff', label_bn: 'স্টাফ উপস্থিতি', label_en: 'Staff Attendance', icon: 'UserCog', visible: true, sort_order: 1 },
+  ]},
+
+  // আর্থিক
+  { id: 'finance', path: '/admin/students-fees', label_bn: 'আর্থিক ব্যবস্থাপনা', label_en: 'Finance', icon: 'Wallet', visible: true, sort_order: 6, children: [
+    { id: 'fees', path: '/admin/students-fees', label_bn: 'ছাত্র ফি', label_en: 'Student Fees', icon: 'CreditCard', visible: true, sort_order: 0 },
+    { id: 'fee-receipts', path: '/admin/fee-receipts', label_bn: 'ফি রসিদ', label_en: 'Fee Receipts', icon: 'ReceiptText', visible: true, sort_order: 1 },
+    { id: 'expenses', path: '/admin/expenses', label_bn: 'খরচ ব্যবস্থাপনা', label_en: 'Expenses', icon: 'Receipt', visible: true, sort_order: 2 },
+    { id: 'payments', path: '/admin/payments', label_bn: 'পেমেন্ট', label_en: 'Payments', icon: 'CreditCard', visible: true, sort_order: 3 },
+    { id: 'donors', path: '/admin/donors', label_bn: 'দাতা তালিকা', label_en: 'Donor List', icon: 'Heart', visible: true, sort_order: 4 },
+    { id: 'receipt-designer', path: '/admin/receipt-designer', label_bn: 'রসিদ ডিজাইনার', label_en: 'Receipt Designer', icon: 'ReceiptText', visible: true, sort_order: 5 },
+  ]},
+
+  // যোগাযোগ
+  { id: 'communication', path: '/admin/notices', label_bn: 'যোগাযোগ', label_en: 'Communication', icon: 'Bell', visible: true, sort_order: 7, children: [
+    { id: 'notices', path: '/admin/notices', label_bn: 'নোটিশ', label_en: 'Notices', icon: 'Bell', visible: true, sort_order: 0 },
+    { id: 'posts', path: '/admin/posts', label_bn: 'পোস্ট', label_en: 'Posts', icon: 'FileText', visible: true, sort_order: 1 },
+    { id: 'guardian-notify', path: '/admin/guardian-notify', label_bn: 'অভিভাবক নোটিফিকেশন', label_en: 'Guardian Notify', icon: 'MessageSquare', visible: true, sort_order: 2 },
+  ]},
+
+  // ওয়েবসাইট ও ডিজাইন
+  { id: 'website-design', path: '/admin/website', label_bn: 'ওয়েবসাইট ও ডিজাইন', label_en: 'Website & Design', icon: 'Globe', visible: true, sort_order: 8, children: [
+    { id: 'website', path: '/admin/website', label_bn: 'ওয়েবসাইট নিয়ন্ত্রণ', label_en: 'Website Control', icon: 'Globe', visible: true, sort_order: 0 },
+    { id: 'theme', path: '/admin/theme', label_bn: 'থিম কাস্টমাইজার', label_en: 'Theme Customizer', icon: 'Palette', visible: true, sort_order: 1 },
+    { id: 'widget-builder', path: '/admin/widget-builder', label_bn: 'উইজেট বিল্ডার', label_en: 'Widget Builder', icon: 'LayoutGrid', visible: true, sort_order: 2 },
+    { id: 'photo-tools', path: '/admin/photo-tools', label_bn: 'ফটো টুলস', label_en: 'Photo Tools', icon: 'Camera', visible: true, sort_order: 3 },
+    { id: 'prayer-calendar', path: '/admin/prayer-calendar', label_bn: 'নামাজ ও ক্যালেন্ডার', label_en: 'Prayer & Calendar', icon: 'Clock', visible: true, sort_order: 4 },
+  ]},
+
+  // সিস্টেম ও সেটিংস
+  { id: 'system', path: '/admin/settings', label_bn: 'সিস্টেম', label_en: 'System', icon: 'Settings', visible: true, sort_order: 9, children: [
+    { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 0 },
+    { id: 'permissions', path: '/admin/permissions', label_bn: 'পারমিশন', label_en: 'Permissions', icon: 'KeyRound', visible: true, sort_order: 1 },
+    { id: 'user-management', path: '/admin/user-management', label_bn: 'ইউজার ম্যানেজমেন্ট', label_en: 'User Management', icon: 'UserPlus', visible: true, sort_order: 2 },
+    { id: 'approvals', path: '/admin/approvals', label_bn: 'অনুমোদন', label_en: 'Approvals', icon: 'ShieldCheck', visible: true, sort_order: 3 },
+    { id: 'menu-manager', path: '/admin/menu-manager', label_bn: 'মেনু ম্যানেজার', label_en: 'Menu Manager', icon: 'ListOrdered', visible: true, sort_order: 4 },
+    { id: 'backup', path: '/admin/backup', label_bn: 'ব্যাকআপ', label_en: 'Backup', icon: 'HardDrive', visible: true, sort_order: 5 },
+    { id: 'address-manager', path: '/admin/address-manager', label_bn: 'ঠিকানা ব্যবস্থাপনা', label_en: 'Address Manager', icon: 'MapPin', visible: true, sort_order: 6 },
+    { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 7 },
+    { id: 'form-builder', path: '/admin/form-builder', label_bn: 'কাস্টম বিল্ডার', label_en: 'Custom Builder', icon: 'Wrench', visible: true, sort_order: 8 },
+    { id: 'module-manager', path: '/admin/module-manager', label_bn: 'মডিউল ম্যানেজার', label_en: 'Module Manager', icon: 'Blocks', visible: true, sort_order: 9 },
+    { id: 'formula-builder', path: '/admin/formula-builder', label_bn: 'ফর্মুলা বিল্ডার', label_en: 'Formula Builder', icon: 'FlaskConical', visible: true, sort_order: 10 },
+    { id: 'validation-manager', path: '/admin/validation-manager', label_bn: 'ভ্যালিডেশন ম্যানেজার', label_en: 'Validation Manager', icon: 'ShieldCheck', visible: true, sort_order: 11 },
+    { id: 'reports', path: '/admin/reports', label_bn: 'রিপোর্ট ও অ্যানালিটিক্স', label_en: 'Reports & Analytics', icon: 'BarChart3', visible: true, sort_order: 12 },
+  ]},
 ];
 
 const DEFAULT_PUBLIC: MenuItemConfig[] = [
