@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
 import { useThemeSettings } from '@/hooks/useThemeSettings';
 import { useSidebarSections } from '@/hooks/useSidebarSections';
+import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import LanguageToggle from './LanguageToggle';
 import NotificationPanel from './NotificationPanel';
 import DarkModeToggle from './DarkModeToggle';
@@ -57,6 +58,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { menuConfig } = useMenuSettings();
   const { theme: adminTheme } = useThemeSettings();
   const { sections: sidebarSections } = useSidebarSections();
+  const { settings: websiteSettings } = useWebsiteSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -306,13 +308,21 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       >
         {/* Logo */}
         <div className="px-4 py-5 flex items-center gap-3 border-b border-sidebar-border/30 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center shrink-0 shadow-lg shadow-sidebar-primary/25">
-            <span className="text-sm font-bold text-sidebar-primary-foreground">E</span>
+          <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center shrink-0 shadow-lg shadow-sidebar-primary/25 overflow-hidden">
+            {(websiteSettings.favicon_url || websiteSettings.logo_url) ? (
+              <img src={websiteSettings.favicon_url || websiteSettings.logo_url} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-sm font-bold text-sidebar-primary-foreground">
+                {(language === 'bn' ? websiteSettings.institution_name : (websiteSettings.institution_name_en || websiteSettings.institution_name))?.charAt(0) || 'E'}
+              </span>
+            )}
           </div>
           {(sidebarOpen || mobile) && (
             <div className="overflow-hidden flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-sidebar-foreground truncate leading-relaxed">EduMate BD</h2>
-              <p className="text-[11px] text-sidebar-foreground/50 leading-relaxed">{language === 'bn' ? 'মাদরাসা ম্যানেজমেন্ট' : 'Madrasa Management'}</p>
+              <h2 className="text-sm font-bold text-sidebar-foreground truncate leading-relaxed">
+                {language === 'bn' ? websiteSettings.institution_name : (websiteSettings.institution_name_en || websiteSettings.institution_name)}
+              </h2>
+              <p className="text-[11px] text-sidebar-foreground/50 leading-relaxed">{language === 'bn' ? 'ম্যানেজমেন্ট সিস্টেম' : 'Management System'}</p>
             </div>
           )}
           {mobile && (
