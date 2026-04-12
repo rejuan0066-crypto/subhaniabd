@@ -86,38 +86,25 @@ const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, subjects, 
         {showClassSelect && (
           <div>
             <Label className="text-xs">{bn ? 'শ্রেণী' : 'Class'}</Label>
-            <Select value={localClassId} onValueChange={setLocalClassId}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
-              <SelectContent>
-                {classes.map(c => (
-                  <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring" value={localClassId} onChange={e => setLocalClassId(e.target.value)}>
+              <option value="">{bn ? 'শ্রেণী নির্বাচন' : 'Select class'}</option>
+              {classes.map(c => <option key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</option>)}
+            </select>
           </div>
         )}
         <div>
           <Label className="text-xs">{bn ? 'বিষয়' : 'Subject'}</Label>
-          <Select value={localSubjectId} onValueChange={setLocalSubjectId}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'বিষয় নির্বাচন' : 'Select subject'} /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">{bn ? '-- খালি --' : '-- Empty --'}</SelectItem>
-              {subjects.map(s => (
-                <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring" value={localSubjectId} onChange={e => setLocalSubjectId(e.target.value)}>
+            <option value="none">{bn ? '-- খালি --' : '-- Empty --'}</option>
+            {subjects.map(s => <option key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</option>)}
+          </select>
         </div>
         <div>
           <Label className="text-xs">{bn ? 'শিক্ষক নির্বাচন' : 'Select Teacher'}</Label>
-          <Select onValueChange={handleStaffSelect}>
-            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শিক্ষক বাছুন' : 'Pick teacher'} /></SelectTrigger>
-            <SelectContent>
-              {staff.map(s => (
-                <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : (s.name_en || s.name_bn)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring" value="" onChange={e => handleStaffSelect(e.target.value)}>
+            <option value="">{bn ? 'শিক্ষক বাছুন' : 'Pick teacher'}</option>
+            {staff.map(s => <option key={s.id} value={s.id}>{bn ? s.name_bn : (s.name_en || s.name_bn)}</option>)}
+          </select>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
