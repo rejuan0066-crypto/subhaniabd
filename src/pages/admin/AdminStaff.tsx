@@ -173,7 +173,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
             </p>
           </div>
           {canAddItem && (
-            <Button onClick={() => navigate('/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
+            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
               <Plus className="w-4 h-4" /> {t('addNew')}
             </Button>
           )}
