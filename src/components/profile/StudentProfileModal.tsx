@@ -77,6 +77,71 @@ const StudentProfileModal = ({
     },
   });
 
+  // ── Results data ──
+  const { data: studentResults = [], isLoading: resultsLoading } = useQuery({
+    queryKey: ['student-results', student.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('results')
+        .select('*, exam_sessions(name, name_bn, exam_type), subjects(name, name_bn)')
+        .eq('student_id', student.id)
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+  });
+
+  // ── Attendance data ──
+  const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery({
+    queryKey: ['student-attendance', student.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('entity_id', student.id)
+        .eq('entity_type', 'student')
+        .eq('shift', 'full_day')
+        .order('attendance_date', { ascending: false });
+      return data || [];
+    },
+  });
+
+  // ── Computed result stats ──
+  const resultStats = useMemo(() => {
+    if (studentResults.length === 0) return null;
+    // Group by exam
+    const examMap = new Map<string, any[]>();
+    studentResults.forEach((r: any) => {
+      const examId = r.exam_id;
+      if (!examMap.has(examId)) examMap.set(examId, []);
+      examMap.get(examId)!.push(r);
+    });
+    return Array.from(examMap.entries()).map(([examId, results]) => {
+      const totalMarks = results.reduce((s: number, r: any) => s + (r.marks || 0), 0);
+      const count = results.filter((r: any) => r.marks != null).length;
+      const avgGpa = count > 0 ? results.reduce((s: number, r: any) => s + (r.gpa || 0), 0) / count : 0;
+      return {
+        examId,
+        examName: bn ? results[0]?.exam_sessions?.name_bn : results[0]?.exam_sessions?.name,
+        examType: results[0]?.exam_sessions?.exam_type,
+        results,
+        totalMarks,
+        avgGpa: Math.round(avgGpa * 100) / 100,
+        subjectCount: count,
+      };
+    });
+  }, [studentResults, bn]);
+
+  // ── Computed attendance stats ──
+  const attendanceStats = useMemo(() => {
+    const total = attendanceRecords.length;
+    const present = attendanceRecords.filter((a: any) => a.status === 'present').length;
+    const absent = attendanceRecords.filter((a: any) => a.status === 'absent').length;
+    const late = attendanceRecords.filter((a: any) => a.status === 'late').length;
+    const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+    const last7 = attendanceRecords.slice(0, 7);
+    return { total, present, absent, late, percentage, last7 };
+  }, [attendanceRecords]);
+
   const totalPaid = feePayments.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.paid_amount || p.amount || 0), 0);
   const totalApplicable = applicableFeeTypes.reduce((sum: number, ft: any) => {
     const waiver = feeWaivers.find((w: any) => w.fee_type_id === ft.id);
@@ -143,6 +208,7 @@ const StudentProfileModal = ({
   const tabs = [
     { id: 'profile' as const, label: bn ? 'প্রোফাইল' : 'Profile', icon: User },
     { id: 'finance' as const, label: bn ? 'আর্থিক' : 'Finance', icon: Banknote },
+    { id: 'academic' as const, label: bn ? 'শিক্ষা ও উপস্থিতি' : 'Academic', icon: GraduationCap },
     { id: 'others' as const, label: bn ? 'অন্যান্য' : 'Others', icon: ClipboardList },
   ];
 
