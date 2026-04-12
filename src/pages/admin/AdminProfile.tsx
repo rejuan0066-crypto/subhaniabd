@@ -294,140 +294,122 @@ const AdminProfile = () => {
     setPwCountdown(0);
   };
 
+  const roleLabel = role === 'super_admin' ? (bn ? 'সুপার অ্যাডমিন' : 'Super Admin') : role === 'admin' ? (bn ? 'অ্যাডমিন' : 'Admin') : role === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : role === 'staff' ? (bn ? 'স্টাফ' : 'Staff') : role || '';
+  const displayName = staffData?.name_bn || profileData?.full_name || (bn ? 'নাম সেট করা হয়নি' : 'Name not set');
+
   return (
     <AdminLayout>
-      <div className="space-y-6 max-w-3xl">
-        <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
-          <User className="w-6 h-6 text-primary" />
-          {bn ? 'প্রোফাইল' : 'Profile'}
-        </h1>
+      <div className="max-w-5xl mx-auto space-y-8 w-full">
 
-        {/* ═══ Personal Info ═══ */}
-        <div className="card-elevated p-5">
-          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-primary" /> {bn ? 'ব্যক্তিগত তথ্য' : 'Personal Information'}
-          </h3>
-          <div className="flex items-start gap-5 mb-5">
+        {/* ═══ Hero Profile Header ═══ */}
+        <div className="relative overflow-hidden rounded-[32px] p-8 sm:p-10" style={{ background: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #0f766e 100%)', boxShadow: '0 20px 60px -15px rgba(6, 78, 59, 0.4)' }}>
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M30 0l30 30-30 30L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
+          <div className="relative flex flex-col sm:flex-row items-center gap-6">
             {(staffData?.photo_url || profileData?.avatar_url) ? (
-              <img src={staffData?.photo_url || profileData?.avatar_url || ''} alt="" className="w-20 h-20 rounded-full object-cover border-2 border-primary/20" />
+              <img src={staffData?.photo_url || profileData?.avatar_url || ''} alt="" className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-white/30 shadow-xl" style={{ boxShadow: '0 0 30px rgba(255,255,255,0.15), 0 8px 30px rgba(0,0,0,0.2)' }} />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
-                {(profileData?.full_name || staffData?.name_bn || '?')[0]}
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-white text-3xl font-bold border-4 border-white/20" style={{ boxShadow: '0 0 30px rgba(255,255,255,0.1)' }}>
+                {displayName[0]}
               </div>
             )}
-            <div className="space-y-1">
-              <h2 className="text-xl font-bold text-foreground">{staffData?.name_bn || profileData?.full_name || (bn ? 'নাম সেট করা হয়নি' : 'Name not set')}</h2>
+            <div className="text-center sm:text-left space-y-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{displayName}</h1>
               {staffData?.name_en && staffData.name_en !== staffData.name_bn && (
-                <p className="text-sm text-muted-foreground">{staffData.name_en}</p>
+                <p className="text-white/70 text-sm">{staffData.name_en}</p>
               )}
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                 {role && (
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 text-xs">
-                    {role === 'super_admin' ? (bn ? 'সুপার অ্যাডমিন' : 'Super Admin') : role === 'admin' ? (bn ? 'অ্যাডমিন' : 'Admin') : role === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : role === 'staff' ? (bn ? 'স্টাফ' : 'Staff') : role}
-                  </Badge>
+                  <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase bg-white/15 text-white border border-white/20 backdrop-blur-sm">
+                    {roleLabel}
+                  </span>
                 )}
                 {staffData?.designation && (
-                  <Badge variant="secondary" className="text-xs">{staffData.designation}</Badge>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white/80 border border-white/10">
+                    {staffData.designation}
+                  </span>
                 )}
                 {staffData?.status && (
-                  <Badge variant="outline" className={`text-xs ${staffData.status === 'active' ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${staffData.status === 'active' ? 'bg-emerald-400/20 text-emerald-200 border border-emerald-400/20' : 'bg-amber-400/20 text-amber-200 border border-amber-400/20'}`}>
                     {staffData.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'পেন্ডিং' : 'Pending')}
-                  </Badge>
+                  </span>
                 )}
               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'ইমেইল:' : 'Email:'}</span>
-              <span className="text-foreground font-medium">{currentEmail || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'মোবাইল:' : 'Mobile:'}</span>
-              <span className="text-foreground font-medium">{staffData?.phone || profileData?.phone || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Briefcase className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'বিভাগ:' : 'Department:'}</span>
-              <span className="text-foreground font-medium">{staffData?.department || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'যোগদান:' : 'Joining:'}</span>
-              <span className="text-foreground font-medium">{staffData?.joining_date ? new Date(staffData.joining_date).toLocaleDateString('bn-BD') : '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'শিক্ষাগত যোগ্যতা:' : 'Education:'}</span>
-              <span className="text-foreground font-medium">{staffData?.education || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'ঠিকানা:' : 'Address:'}</span>
-              <span className="text-foreground font-medium">{staffData?.address || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <ShieldCheck className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'NID:' : 'NID:'}</span>
-              <span className="text-foreground font-medium">{staffData?.nid || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground">{bn ? 'জন্ম তারিখ:' : 'Date of Birth:'}</span>
-              <span className="text-foreground font-medium">{staffData?.date_of_birth ? new Date(staffData.date_of_birth).toLocaleDateString('bn-BD') : '-'}</span>
             </div>
           </div>
         </div>
 
-        <div className="card-elevated p-5">
-          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
-            <Mail className="w-5 h-5 text-primary" /> {bn ? 'লগইন ইমেইল পরিবর্তন' : 'Change Login Email'}
+        {/* ═══ Personal Info Card ═══ */}
+        <div className="rounded-[32px] border border-border/15 bg-card/75 dark:bg-card/40 backdrop-blur-xl p-7 sm:p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <h3 className="font-bold text-foreground mb-6 flex items-center gap-2.5 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10"><User className="w-4.5 h-4.5 text-primary" /></div>
+            {bn ? 'ব্যক্তিগত তথ্য' : 'Personal Information'}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {[
+              { icon: Mail, label: bn ? 'ইমেইল' : 'Email', value: currentEmail },
+              { icon: Phone, label: bn ? 'মোবাইল' : 'Mobile', value: staffData?.phone || profileData?.phone },
+              { icon: Briefcase, label: bn ? 'বিভাগ' : 'Department', value: staffData?.department },
+              { icon: Calendar, label: bn ? 'যোগদান' : 'Joining', value: staffData?.joining_date ? new Date(staffData.joining_date).toLocaleDateString('bn-BD') : null },
+              { icon: GraduationCap, label: bn ? 'শিক্ষাগত যোগ্যতা' : 'Education', value: staffData?.education },
+              { icon: MapPin, label: bn ? 'ঠিকানা' : 'Address', value: staffData?.address },
+              { icon: ShieldCheck, label: 'NID', value: staffData?.nid },
+              { icon: Calendar, label: bn ? 'জন্ম তারিখ' : 'Date of Birth', value: staffData?.date_of_birth ? new Date(staffData.date_of_birth).toLocaleDateString('bn-BD') : null },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/20 hover:bg-muted/30 transition-colors duration-300">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/8 shrink-0">
+                  <item.icon className="w-4 h-4 text-primary/70" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{item.label}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">{item.value || '-'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ Email Change Card ═══ */}
+        <div className="rounded-[32px] border border-border/15 bg-card/75 dark:bg-card/40 backdrop-blur-xl p-7 sm:p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <h3 className="font-bold text-foreground mb-6 flex items-center gap-2.5 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10"><Mail className="w-4.5 h-4.5 text-primary" /></div>
+            {bn ? 'লগইন ইমেইল পরিবর্তন' : 'Change Login Email'}
           </h3>
 
-          {/* Current email */}
-          <div className="mb-4">
-            <Label>{bn ? 'বর্তমান ইমেইল' : 'Current Email'}</Label>
-            <Input className="mt-1 bg-muted/50" value={currentEmail} readOnly />
+          <div className="mb-5">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'বর্তমান ইমেইল' : 'Current Email'}</Label>
+            <Input className="mt-1.5 bg-muted/20 border-border/20" value={currentEmail} readOnly />
           </div>
 
           {step === 'form' && (
-            <div className="space-y-4">
-              {/* OTP toggle - admin only */}
+            <div className="space-y-5">
               {isAdmin && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-muted/15 border border-border/15">
                   <Switch checked={useOtp} onCheckedChange={setUseOtp} />
                   <div>
-                    <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {useOtp
-                        ? (bn ? 'নতুন ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to new email for verification')
-                        : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
+                    <p className="text-sm font-semibold">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {useOtp ? (bn ? 'নতুন ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to new email') : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
                     </p>
                   </div>
                 </div>
               )}
-
               <div>
-                <Label>{bn ? 'নতুন ইমেইল' : 'New Email'}</Label>
-                <Input className="mt-1 bg-background" type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder={bn ? 'নতুন ইমেইল অ্যাড্রেস' : 'New email address'} />
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'নতুন ইমেইল' : 'New Email'}</Label>
+                <Input className="mt-1.5" type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder={bn ? 'নতুন ইমেইল অ্যাড্রেস' : 'New email address'} />
               </div>
               <div>
-                <Label>{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
-                <div className="mt-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
+                <div className="mt-1.5">
                   <PasswordInput value={emailPassword} onChange={setEmailPassword} show={showEmailPassword} onToggle={() => setShowEmailPassword(!showEmailPassword)} placeholder={bn ? 'পাসওয়ার্ড দিন' : 'Enter password'} />
                 </div>
               </div>
-
               {useOtp ? (
-                <Button onClick={handleSendOtp} disabled={sending || verifyingPassword} className="btn-primary-gradient">
+                <Button onClick={handleSendOtp} disabled={sending || verifyingPassword} className="rounded-full px-8 py-3 font-semibold transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', boxShadow: '0 6px 25px -5px rgba(5, 150, 105, 0.4)', color: 'white' }}>
                   {(sending || verifyingPassword) ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
                   {bn ? 'OTP কোড পাঠান' : 'Send OTP Code'}
                 </Button>
               ) : (
-                <Button onClick={handleDirectEmailChange} disabled={verifying} className="btn-primary-gradient">
+                <Button onClick={handleDirectEmailChange} disabled={verifying} className="rounded-full px-8 py-3 font-semibold transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', boxShadow: '0 6px 25px -5px rgba(5, 150, 105, 0.4)', color: 'white' }}>
                   {verifying ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
                   {bn ? 'ইমেইল পরিবর্তন করুন' : 'Change Email'}
                 </Button>
@@ -435,101 +417,91 @@ const AdminProfile = () => {
             </div>
           )}
 
-          {/* OTP step */}
           {step === 'otp' && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <div className="space-y-5">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
                 <div className="flex items-start gap-3">
                   <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                   <div className="space-y-1">
                     <p className="font-semibold text-foreground">{bn ? 'OTP কোড যাচাই করুন' : 'Verify OTP Code'}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {bn ? `${newEmail} এ পাঠানো ৬ ডিজিটের কোড দিন। মেয়াদ ${expiryMinutes} মিনিট।` : `Enter the 6-digit code sent to ${newEmail}. Expires in ${expiryMinutes} min.`}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{bn ? `${newEmail} এ পাঠানো ৬ ডিজিটের কোড দিন। মেয়াদ ${expiryMinutes} মিনিট।` : `Enter the 6-digit code sent to ${newEmail}. Expires in ${expiryMinutes} min.`}</p>
                   </div>
                 </div>
               </div>
               <div className="flex justify-center py-2">
                 <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
-                  <InputOTPGroup>
-                    {[0,1,2,3,4,5].map(i => <InputOTPSlot key={i} index={i} />)}
-                  </InputOTPGroup>
+                  <InputOTPGroup>{[0,1,2,3,4,5].map(i => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
                 </InputOTP>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Button onClick={handleVerifyAndChangeEmail} disabled={verifying || otpCode.length !== 6} className="btn-primary-gradient">
+                <Button onClick={handleVerifyAndChangeEmail} disabled={verifying || otpCode.length !== 6} className="rounded-full px-6" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', color: 'white' }}>
                   {verifying ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
                   {bn ? 'যাচাই ও পরিবর্তন' : 'Verify & Change'}
                 </Button>
-                <Button size="sm" variant="outline" onClick={handleResendOtp} disabled={countdown > 0 || sending} className="gap-2">
+                <Button size="sm" variant="outline" onClick={handleResendOtp} disabled={countdown > 0 || sending} className="gap-2 rounded-full">
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                   {countdown > 0 ? `${countdown}s` : (bn ? 'আবার পাঠান' : 'Resend')}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handleEmailReset}>{bn ? 'বাতিল' : 'Cancel'}</Button>
+                <Button size="sm" variant="ghost" onClick={handleEmailReset} className="rounded-full">{bn ? 'বাতিল' : 'Cancel'}</Button>
               </div>
             </div>
           )}
 
-          {/* Done */}
           {step === 'done' && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-primary mx-auto" />
-                <p className="font-semibold text-foreground">{bn ? 'ইমেইল সফলভাবে পরিবর্তন হয়েছে!' : 'Email Changed Successfully!'}</p>
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/8 p-6 text-center space-y-2">
+                <CheckCircle2 className="w-12 h-12 text-primary mx-auto" />
+                <p className="font-bold text-foreground text-lg">{bn ? 'ইমেইল সফলভাবে পরিবর্তন হয়েছে!' : 'Email Changed Successfully!'}</p>
                 <p className="text-sm text-muted-foreground">{bn ? `নতুন ইমেইল: ${currentEmail}` : `New email: ${currentEmail}`}</p>
               </div>
-              <Button variant="outline" onClick={handleEmailReset}>{bn ? 'ঠিক আছে' : 'OK'}</Button>
+              <Button variant="outline" onClick={handleEmailReset} className="rounded-full">{bn ? 'ঠিক আছে' : 'OK'}</Button>
             </div>
           )}
         </div>
 
-        {/* ═══ Password Change ═══ */}
-        <div className="card-elevated p-5">
-          <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-primary" /> {bn ? 'পাসওয়ার্ড পরিবর্তন' : 'Change Password'}
+        {/* ═══ Password Change Card ═══ */}
+        <div className="rounded-[32px] border border-border/15 bg-card/75 dark:bg-card/40 backdrop-blur-xl p-7 sm:p-8" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <h3 className="font-bold text-foreground mb-6 flex items-center gap-2.5 text-base">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10"><Lock className="w-4.5 h-4.5 text-primary" /></div>
+            {bn ? 'পাসওয়ার্ড পরিবর্তন' : 'Change Password'}
           </h3>
 
           {pwStep === 'form' && (
-            <div className="space-y-4">
-              {/* OTP toggle - admin only */}
+            <div className="space-y-5">
               {isAdmin && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-muted/15 border border-border/15">
                   <Switch checked={usePwOtp} onCheckedChange={setUsePwOtp} />
                   <div>
-                    <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {usePwOtp
-                        ? (bn ? 'ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to your email')
-                        : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
+                    <p className="text-sm font-semibold">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {usePwOtp ? (bn ? 'ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to your email') : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
                     </p>
                   </div>
                 </div>
               )}
-
               <div>
-                <Label>{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
-                <div className="mt-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
+                <div className="mt-1.5">
                   <PasswordInput value={currentPassword} onChange={setCurrentPassword} show={showCurrentPw} onToggle={() => setShowCurrentPw(!showCurrentPw)} placeholder={bn ? 'বর্তমান পাসওয়ার্ড' : 'Current password'} />
                 </div>
               </div>
               <div>
-                <Label>{bn ? 'নতুন পাসওয়ার্ড' : 'New Password'}</Label>
-                <div className="mt-1">
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'নতুন পাসওয়ার্ড' : 'New Password'}</Label>
+                <div className="mt-1.5">
                   <PasswordInput value={newPassword} onChange={setNewPassword} show={showNewPw} onToggle={() => setShowNewPw(!showNewPw)} placeholder={bn ? 'নতুন পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)' : 'New password (min 6 chars)'} />
                 </div>
               </div>
               <div>
-                <Label>{bn ? 'নতুন পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm New Password'}</Label>
-                <Input className="mt-1 bg-background" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder={bn ? 'আবার নতুন পাসওয়ার্ড দিন' : 'Re-enter new password'} />
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{bn ? 'নতুন পাসওয়ার্ড নিশ্চিত করুন' : 'Confirm New Password'}</Label>
+                <Input className="mt-1.5" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder={bn ? 'আবার নতুন পাসওয়ার্ড দিন' : 'Re-enter new password'} />
               </div>
-
               {usePwOtp ? (
-                <Button onClick={handlePwSendOtp} disabled={changingPassword || sending} className="btn-primary-gradient">
+                <Button onClick={handlePwSendOtp} disabled={changingPassword || sending} className="rounded-full px-8 py-3 font-semibold transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', boxShadow: '0 6px 25px -5px rgba(5, 150, 105, 0.4)', color: 'white' }}>
                   {(changingPassword || sending) ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
                   {bn ? 'OTP কোড পাঠান' : 'Send OTP Code'}
                 </Button>
               ) : (
-                <Button onClick={handleChangePassword} disabled={changingPassword} className="btn-primary-gradient">
+                <Button onClick={handleChangePassword} disabled={changingPassword} className="rounded-full px-8 py-3 font-semibold transition-all duration-500 hover:-translate-y-0.5" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', boxShadow: '0 6px 25px -5px rgba(5, 150, 105, 0.4)', color: 'white' }}>
                   {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
                   {bn ? 'পাসওয়ার্ড পরিবর্তন করুন' : 'Change Password'}
                 </Button>
@@ -538,46 +510,42 @@ const AdminProfile = () => {
           )}
 
           {pwStep === 'otp' && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <div className="space-y-5">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
                 <div className="flex items-start gap-3">
                   <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                   <div className="space-y-1">
                     <p className="font-semibold text-foreground">{bn ? 'OTP কোড যাচাই করুন' : 'Verify OTP Code'}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {bn ? `${currentEmail} এ পাঠানো ৬ ডিজিটের কোড দিন।` : `Enter the 6-digit code sent to ${currentEmail}.`}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{bn ? `${currentEmail} এ পাঠানো ৬ ডিজিটের কোড দিন।` : `Enter the 6-digit code sent to ${currentEmail}.`}</p>
                   </div>
                 </div>
               </div>
               <div className="flex justify-center py-2">
                 <InputOTP maxLength={6} value={pwOtpCode} onChange={setPwOtpCode}>
-                  <InputOTPGroup>
-                    {[0,1,2,3,4,5].map(i => <InputOTPSlot key={i} index={i} />)}
-                  </InputOTPGroup>
+                  <InputOTPGroup>{[0,1,2,3,4,5].map(i => <InputOTPSlot key={i} index={i} />)}</InputOTPGroup>
                 </InputOTP>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Button onClick={handlePwVerifyAndChange} disabled={changingPassword || pwOtpCode.length !== 6} className="btn-primary-gradient">
+                <Button onClick={handlePwVerifyAndChange} disabled={changingPassword || pwOtpCode.length !== 6} className="rounded-full px-6" style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', color: 'white' }}>
                   {changingPassword ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
                   {bn ? 'যাচাই ও পরিবর্তন' : 'Verify & Change'}
                 </Button>
-                <Button size="sm" variant="outline" onClick={handlePwResendOtp} disabled={pwCountdown > 0 || sending} className="gap-2">
+                <Button size="sm" variant="outline" onClick={handlePwResendOtp} disabled={pwCountdown > 0 || sending} className="gap-2 rounded-full">
                   {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                   {pwCountdown > 0 ? `${pwCountdown}s` : (bn ? 'আবার পাঠান' : 'Resend')}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={handlePwReset}>{bn ? 'বাতিল' : 'Cancel'}</Button>
+                <Button size="sm" variant="ghost" onClick={handlePwReset} className="rounded-full">{bn ? 'বাতিল' : 'Cancel'}</Button>
               </div>
             </div>
           )}
 
           {pwStep === 'done' && (
             <div className="space-y-4">
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-primary mx-auto" />
-                <p className="font-semibold text-foreground">{bn ? 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' : 'Password Changed Successfully!'}</p>
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/8 p-6 text-center space-y-2">
+                <CheckCircle2 className="w-12 h-12 text-primary mx-auto" />
+                <p className="font-bold text-foreground text-lg">{bn ? 'পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!' : 'Password Changed Successfully!'}</p>
               </div>
-              <Button variant="outline" onClick={handlePwReset}>{bn ? 'ঠিক আছে' : 'OK'}</Button>
+              <Button variant="outline" onClick={handlePwReset} className="rounded-full">{bn ? 'ঠিক আছে' : 'OK'}</Button>
             </div>
           )}
         </div>
