@@ -931,7 +931,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
-                    {classes.map((c: any) => {
+                    {orderedClasses.map((c: any) => {
                       const div = divisions.find((d: any) => d.id === c.division_id);
                       return (
                         <SelectItem key={c.id} value={c.id}>
