@@ -1197,7 +1197,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </div>
               </div>
 
-              {/* Residential Duty Times */}
+              {/* Residential Duty Times - Staff only */}
+              {entityType === 'staff' && (
               <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
                 <Label className="font-semibold flex items-center gap-2">
                   <Clock className="h-4 w-4 text-primary" />
@@ -1291,6 +1292,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   )}
                 </div>
               </div>
+              )}
 
               {/* Existing Rules */}
               <div className="space-y-2">
