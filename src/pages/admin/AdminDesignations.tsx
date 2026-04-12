@@ -174,9 +174,10 @@ const AdminDesignations = () => {
                         <Badge variant="outline" className={
                           d.staff_category === 'teacher' ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' :
                           d.staff_category === 'administrative' ? 'bg-purple-500/10 text-purple-600 border-purple-500/30' :
+                          d.staff_category === 'support' ? 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30' :
                           'bg-orange-500/10 text-orange-600 border-orange-500/30'
                         }>
-                          {d.staff_category === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : d.staff_category === 'administrative' ? (bn ? 'প্রশাসনিক' : 'Administrative') : (bn ? 'সহায়ক কর্মী' : 'General Staff')}
+                          {d.staff_category === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : d.staff_category === 'administrative' ? (bn ? 'প্রশাসনিক' : 'Administrative') : d.staff_category === 'support' ? (bn ? 'অফিস কর্মচারী' : 'Support Staff') : (bn ? 'সহায়ক কর্মী' : 'General Staff')}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
@@ -240,6 +241,7 @@ const AdminDesignations = () => {
                   <SelectContent>
                     <SelectItem value="teacher">{bn ? 'শিক্ষক (/admin/teachers)' : 'Teacher (/admin/teachers)'}</SelectItem>
                     <SelectItem value="administrative">{bn ? 'প্রশাসনিক কর্মকর্তা (/admin/administrative-staff)' : 'Administrative (/admin/administrative-staff)'}</SelectItem>
+                    <SelectItem value="support">{bn ? 'অফিস কর্মচারী (/admin/support-staff)' : 'Support Staff (/admin/support-staff)'}</SelectItem>
                     <SelectItem value="general">{bn ? 'সহায়ক কর্মী (/admin/general-staff)' : 'General/Service Staff (/admin/general-staff)'}</SelectItem>
                   </SelectContent>
                 </Select>

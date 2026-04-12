@@ -32,6 +32,8 @@ import AdminStaffForm from "./pages/admin/AdminStaffForm";
 import AdminTeacherForm from "./pages/admin/AdminTeacherForm";
 import AdminAdministrativeStaffForm from "./pages/admin/AdminAdministrativeStaffForm";
 import AdminGeneralStaffForm from "./pages/admin/AdminGeneralStaffForm";
+import AdminSupportStaff from "./pages/admin/AdminSupportStaff";
+import AdminSupportStaffForm from "./pages/admin/AdminSupportStaffForm";
 import AdminDivisions from "./pages/admin/AdminDivisions";
 import AdminSubjects from "./pages/admin/AdminSubjects";
 import AdminResults from "./pages/admin/AdminResults";
@@ -205,6 +207,9 @@ const App = () => (
                     <Route path="administrative-staff" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaff /></ModuleGuard>} />
                     <Route path="administrative-staff/add" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaffForm /></ModuleGuard>} />
                     <Route path="administrative-staff/edit/:id" element={<ModuleGuard menuPath="/admin/administrative-staff"><AdminAdministrativeStaffForm /></ModuleGuard>} />
+                    <Route path="support-staff" element={<ModuleGuard menuPath="/admin/support-staff"><AdminSupportStaff /></ModuleGuard>} />
+                    <Route path="support-staff/add" element={<ModuleGuard menuPath="/admin/support-staff"><AdminSupportStaffForm /></ModuleGuard>} />
+                    <Route path="support-staff/edit/:id" element={<ModuleGuard menuPath="/admin/support-staff"><AdminSupportStaffForm /></ModuleGuard>} />
                     <Route path="divisions" element={<ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard>} />
                     <Route path="subjects" element={<ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard>} />
                     <Route path="results" element={<ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard>} />
