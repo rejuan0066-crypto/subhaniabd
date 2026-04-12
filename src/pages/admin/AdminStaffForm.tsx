@@ -52,11 +52,36 @@ const DOC_TYPES = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
-const AdminStaffForm = () => {
+export type StaffCategory = 'teacher' | 'administrative' | 'general' | 'all';
+
+// Section visibility config per category
+const CATEGORY_SECTIONS: Record<StaffCategory, { showEducation: boolean; showIdentifier: boolean; showRelativesIdentifier: boolean; showGuardian: boolean; showParentAddress: boolean }> = {
+  teacher: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+  administrative: { showEducation: true, showIdentifier: true, showRelativesIdentifier: false, showGuardian: true, showParentAddress: true },
+  general: { showEducation: false, showIdentifier: false, showRelativesIdentifier: false, showGuardian: true, showParentAddress: false },
+  all: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+};
+
+const CATEGORY_TITLES: Record<StaffCategory, { bn: string; en: string; addBn: string; addEn: string; editBn: string; editEn: string }> = {
+  teacher: { bn: 'শিক্ষক', en: 'Teacher', addBn: 'নতুন শিক্ষক যোগ করুন', addEn: 'Add New Teacher', editBn: 'শিক্ষক সম্পাদনা', editEn: 'Edit Teacher' },
+  administrative: { bn: 'প্রশাসনিক কর্মকর্তা', en: 'Administrative Staff', addBn: 'নতুন প্রশাসনিক কর্মকর্তা যোগ করুন', addEn: 'Add Administrative Staff', editBn: 'প্রশাসনিক কর্মকর্তা সম্পাদনা', editEn: 'Edit Administrative Staff' },
+  general: { bn: 'সহায়ক কর্মী', en: 'General Staff', addBn: 'নতুন সহায়ক কর্মী যোগ করুন', addEn: 'Add General Staff', editBn: 'সহায়ক কর্মী সম্পাদনা', editEn: 'Edit General Staff' },
+  all: { bn: 'কর্মী/শিক্ষক', en: 'Staff/Teacher', addBn: 'নতুন কর্মী/শিক্ষক যোগ করুন', addEn: 'Add New Staff/Teacher', editBn: 'কর্মী/শিক্ষক সম্পাদনা', editEn: 'Edit Staff/Teacher' },
+};
+
+const CATEGORY_BACK_PATH: Record<StaffCategory, string> = {
+  teacher: '/admin/teachers',
+  administrative: '/admin/administrative-staff',
+  general: '/admin/general-staff',
+  all: '/admin/staff',
+};
+
+const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCategory }) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
-  const { canAddItem, canEditItem } = usePagePermissions('/admin/staff');
+  const backPath = CATEGORY_BACK_PATH[staffCategory];
+  const { canAddItem, canEditItem } = usePagePermissions(backPath);
   const navigate = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const isEditMode = !!editId;
@@ -64,6 +89,8 @@ const AdminStaffForm = () => {
   const { data: apiVerifyEnabled } = useApiVerificationEnabled();
   const { isFieldActive, isFieldRequired, getField, isLoaded: staffConfigLoaded } = useStaffFormConfig();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const sectionConfig = CATEGORY_SECTIONS[staffCategory];
+  const titleConfig = CATEGORY_TITLES[staffCategory];
   const printRef = useRef<HTMLDivElement>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -183,7 +210,7 @@ const AdminStaffForm = () => {
   const [approverDate, setApproverDate] = useState('');
   const approverSigRef = useRef<HTMLInputElement>(null);
 
-  const designations = [
+  const designationsHardcoded = [
     { value: 'head_teacher', bn: 'প্রধান শিক্ষক', en: 'Head Teacher' },
     { value: 'asst_head_teacher', bn: 'সহকারী প্রধান শিক্ষক', en: 'Asst. Head Teacher' },
     { value: 'asst_teacher', bn: 'সহকারী শিক্ষক', en: 'Asst. Teacher' },
@@ -199,6 +226,25 @@ const AdminStaffForm = () => {
     { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
     { value: 'other', bn: 'অন্যান্য', en: 'Other' },
   ];
+
+  // Load designations from DB filtered by staff_category
+  const { data: dbDesignations = [] } = useQuery({
+    queryKey: ['designations-for-form', staffCategory],
+    queryFn: async () => {
+      let query = supabase.from('designations').select('*').eq('is_active', true).order('sort_order');
+      if (staffCategory !== 'all') {
+        query = query.eq('staff_category', staffCategory);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Use DB designations if available, else fallback to hardcoded
+  const designations = dbDesignations.length > 0
+    ? dbDesignations.map(d => ({ value: d.name, bn: d.name_bn, en: d.name }))
+    : designationsHardcoded;
   // Populate form fields when editing
   useEffect(() => {
     if (!isEditMode || !existingStaff || dataLoaded) return;
@@ -447,8 +493,8 @@ const AdminStaffForm = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success(bn ? (isEditMode ? 'কর্মী/শিক্ষক সফলভাবে আপডেট হয়েছে' : 'কর্মী/শিক্ষক সফলভাবে যোগ হয়েছে') : (isEditMode ? 'Staff/Teacher updated successfully' : 'Staff/Teacher added successfully'));
-      navigate('/admin/staff');
+      toast.success(bn ? (isEditMode ? `${titleConfig.bn} সফলভাবে আপডেট হয়েছে` : `${titleConfig.bn} সফলভাবে যোগ হয়েছে`) : (isEditMode ? `${titleConfig.en} updated successfully` : `${titleConfig.en} added successfully`));
+      navigate(backPath);
     },
     onError: (e: any) => toast.error(e.message || 'Error saving staff'),
   });
@@ -492,11 +538,13 @@ const AdminStaffForm = () => {
       if (isFieldActive('guardian_nid') && isFieldRequired('guardian_nid') && (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17))) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
     }
 
-    // Identifier validation
-    reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
-    reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
-    reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
-    if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    // Identifier validation (only if section is visible)
+    if (sectionConfig.showIdentifier) {
+      reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
+      reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+      reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+      if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -781,9 +829,9 @@ const AdminStaffForm = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-display font-bold text-foreground">
-            {bn ? (isEditMode ? 'কর্মী/শিক্ষক সম্পাদনা' : 'নতুন কর্মী/শিক্ষক যোগ করুন') : (isEditMode ? 'Edit Staff/Teacher' : 'Add New Staff/Teacher')}
+            {bn ? (isEditMode ? titleConfig.editBn : titleConfig.addBn) : (isEditMode ? titleConfig.editEn : titleConfig.addEn)}
           </h1>
-          <Button variant="outline" onClick={() => navigate('/admin/staff')}>{bn ? 'ফিরে যান' : 'Back'}</Button>
+          <Button variant="outline" onClick={() => navigate(backPath)}>{bn ? 'ফিরে যান' : 'Back'}</Button>
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
@@ -916,7 +964,7 @@ const AdminStaffForm = () => {
               </div>
             </div>
 
-            {(isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
+            {sectionConfig.showEducation && (isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
             <div className="border-t border-border pt-4 mb-4">
               <h3 className="text-md font-semibold text-foreground mb-3 text-center text-2xl">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1020,6 +1068,8 @@ const AdminStaffForm = () => {
             {fieldErrors['parent_nid'] && <p className="text-xs text-destructive mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_nid']}</p>}
             {fieldErrors['parent_mobile'] && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_mobile']}</p>}
 
+            {sectionConfig.showParentAddress && (
+            <>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2">
                 <Checkbox id="parentSameStaff" checked={parentSameAsStaff} onCheckedChange={(v) => { setParentSameAsStaff(!!v); if (v) { setParentPermAddr({...permanentAddr}); setParentPresAddr(sameAddress ? {...permanentAddr} : {...presentAddr}); }}} />
@@ -1036,8 +1086,12 @@ const AdminStaffForm = () => {
                 {!parentPresSameAsPerm && <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={parentPresAddr} onChange={setParentPresAddr} />}
               </div>
             )}
+            </>
+            )}
           </div>
 
+          {sectionConfig.showGuardian && (
+          <>
           {/* ========== SECTION 3: Guardian Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
@@ -1092,7 +1146,11 @@ const AdminStaffForm = () => {
               </div>
             )}
           </div>
+          </>
+          )}
 
+          {sectionConfig.showIdentifier && (
+          <>
           {/* ========== SECTION 4: Identifier Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
@@ -1121,7 +1179,11 @@ const AdminStaffForm = () => {
               </div>
             </div>
           </div>
+          </>
+          )}
 
+          {sectionConfig.showRelativesIdentifier && (
+          <>
           {/* ========== SECTION 4b: Relatives Identifier ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
@@ -1147,6 +1209,8 @@ const AdminStaffForm = () => {
               </div>
             </div>
           </div>
+          </>
+          )}
 
           {/* ========== SECTION 5: Document Upload ========== */}
           <div className="card-elevated p-6">
@@ -1268,7 +1332,7 @@ const AdminStaffForm = () => {
           <div className="flex gap-3">
             <Button type="submit" className="btn-primary-gradient flex-1 text-lg py-6" disabled={saveMutation.isPending}>
               {saveMutation.isPending ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Plus className="w-5 h-5 mr-2" />}
-              {bn ? (isEditMode ? 'আপডেট করুন' : 'কর্মী/শিক্ষক যোগ করুন') : (isEditMode ? 'Update' : 'Add Staff/Teacher')}
+              {bn ? (isEditMode ? 'আপডেট করুন' : `${titleConfig.bn} যোগ করুন`) : (isEditMode ? 'Update' : `Add ${titleConfig.en}`)}
             </Button>
             <Button type="button" variant="outline" className="py-6 gap-2" onClick={openPrintPreview}>
               <Eye className="w-5 h-5" /> {bn ? 'প্রিভিউ' : 'Preview'}
