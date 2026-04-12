@@ -133,6 +133,17 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     return map;
   }, [classes]);
 
+  // Map fee_type_id -> session name
+  const feeTypeSessionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    feeTypes.forEach((ft: any) => {
+      if (ft.academic_sessions) {
+        map[ft.id] = bn ? (ft.academic_sessions.name_bn || ft.academic_sessions.name) : ft.academic_sessions.name;
+      }
+    });
+    return map;
+  }, [feeTypes, bn]);
+
   const compareFeeItems = (a: any, b: any) => {
     const aClassId = a.students?.class_id || 'unknown';
     const bClassId = b.students?.class_id || 'unknown';
@@ -220,6 +231,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                 groups[monthName].unpaid.push({
                   id: `unpaid-${s.id}-${ft.id}-${monthName}`, _studentId: s.id, _feeTypeId: ft.id,
                   students: s, fee_types: ft, amount: ft.amount, month: monthName, status: 'unpaid',
+                  _sessionName: ft.academic_sessions ? (bn ? ft.academic_sessions.name_bn || ft.academic_sessions.name : ft.academic_sessions.name) : '',
                 });
               }
             }
@@ -259,7 +271,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
             if (!alreadyAdded) {
               groups[classId].unpaid.push({
                 id: `unpaid-${s.id}-${ft.id}`, _studentId: s.id, _feeTypeId: ft.id,
-                students: s, fee_types: ft, amount: ft.amount, year: new Date().getFullYear(), status: 'unpaid',
+                students: s, fee_types: ft, amount: ft.amount, status: 'unpaid',
+                _sessionName: ft.academic_sessions ? (bn ? ft.academic_sessions.name_bn || ft.academic_sessions.name : ft.academic_sessions.name) : '',
               });
             }
           }
@@ -385,7 +398,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         <td>${p.students?.roll_number || '-'}</td>
         <td>${p.students?.classes?.name_bn || '-'}</td>
         ${category === 'monthly' ? `<td>${p.month || '-'}</td>` : ''}
-        <td>${p.year || '-'}</td>
+        <td>${p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-'}</td>
         <td>${listType === 'paid' ? `৳${p.paid_amount || p.amount}` : `৳${p.amount || 0}`}</td>
       </tr>`).join('')}
       </tbody></table></body></html>`);
@@ -398,7 +411,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort(compareFeeItems);
     const headers = [bn ? 'নাম' : 'Name', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class', bn ? 'সেশন' : 'Year', listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')];
-    const rows = sorted.map((p: any) => [p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p.year || '-', listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)]);
+    const rows = sorted.map((p: any) => [p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-', listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)]);
     const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -633,7 +646,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                     <td className="px-5 py-4 text-base text-muted-foreground">{p.students?.classes?.name_bn || '-'}</td>
                     {category === 'monthly' && <td className="px-5 py-4 text-base text-muted-foreground">{p.month || '-'}</td>}
                     {category === 'exam' && <td className="px-5 py-4 text-base text-muted-foreground">{p.fee_types?.name_bn || '-'}</td>}
-                    <td className="px-5 py-4 text-base text-muted-foreground">{p.year || '-'}</td>
+                    <td className="px-5 py-4 text-base text-muted-foreground">{p._sessionName || feeTypeSessionMap[p.fee_type_id] || p.year || '-'}</td>
                     <td className="px-5 py-4">
                       {listType === 'paid' ? (
                         <span className="font-bold text-emerald-700 dark:text-emerald-400 text-base"><span className="text-lg">৳</span> {p.paid_amount || p.amount}</span>
