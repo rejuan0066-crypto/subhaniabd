@@ -142,7 +142,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       payments.forEach((p: any) => {
         const monthKey = p.month || 'N/A';
         // Skip months outside session range
-        if (sessionMonthSet.size > 0 && !sessionMonthSet.has(monthKey)) return;
+        if (validSessionMonths.size > 0 && !validSessionMonths.has(monthKey)) return;
         const monthLabel = bn ? (MONTHS_BN[monthKey] || monthKey) : monthKey;
         const sortIdx = MONTHS_EN.indexOf(monthKey);
         if (!groups[monthKey]) groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, total: 0, paid: [], unpaid: [] };
