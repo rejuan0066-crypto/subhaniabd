@@ -32,6 +32,7 @@ const AdminDesignations = () => {
   const [description, setDescription] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [isActive, setIsActive] = useState(true);
+  const [staffCategory, setStaffCategory] = useState('general');
 
   const { data: designations = [], isLoading } = useQuery({
     queryKey: ['designations'],
@@ -51,6 +52,7 @@ const AdminDesignations = () => {
     setDescription('');
     setSortOrder(0);
     setIsActive(true);
+    setStaffCategory('general');
     setEditItem(null);
   };
 
@@ -66,6 +68,7 @@ const AdminDesignations = () => {
     setDescription(item.description || '');
     setSortOrder(item.sort_order || 0);
     setIsActive(item.is_active ?? true);
+    setStaffCategory(item.staff_category || 'general');
     setDialogOpen(true);
   };
 
@@ -79,6 +82,7 @@ const AdminDesignations = () => {
         description: description.trim() || null,
         sort_order: sortOrder,
         is_active: isActive,
+        staff_category: staffCategory,
       };
 
       if (editItem) {
