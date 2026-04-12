@@ -1187,16 +1187,18 @@ const AdminUserManagement = () => {
                     <Input value={profileUser.email} readOnly className="bg-muted/50 text-muted-foreground" />
                   </div>
 
-                  {/* OTP Toggle */}
-                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
-                    <div className="flex items-center gap-2">
-                      <Switch checked={emailOtpEnabled} onCheckedChange={(v) => { setEmailOtpEnabled(v); setEmailOtpStep(false); setEmailOtpSent(false); setEmailOtpCode(''); }} />
-                      <div>
-                        <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                        <p className="text-xs text-muted-foreground">{bn ? 'বর্তমান ইমেইলে কোড পাঠিয়ে যাচাই করুন' : 'Verify by sending code to current email'}</p>
-                      </div>
-                    </div>
-                  </div>
+                   {/* OTP Toggle - admin only */}
+                   {isAdminRole(role) && (
+                   <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                     <div className="flex items-center gap-2">
+                       <Switch checked={emailOtpEnabled} onCheckedChange={(v) => { setEmailOtpEnabled(v); setEmailOtpStep(false); setEmailOtpSent(false); setEmailOtpCode(''); }} />
+                       <div>
+                         <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                         <p className="text-xs text-muted-foreground">{bn ? 'বর্তমান ইমেইলে কোড পাঠিয়ে যাচাই করুন' : 'Verify by sending code to current email'}</p>
+                       </div>
+                     </div>
+                   </div>
+                   )}
 
                   {!emailOtpStep ? (
                     <>
@@ -1310,16 +1312,18 @@ const AdminUserManagement = () => {
                     {bn ? 'পাসওয়ার্ড পরিবর্তন' : 'Password Change'}
                   </h3>
 
-                  {/* OTP Toggle */}
-                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
-                    <div className="flex items-center gap-2">
-                      <Switch checked={pwOtpEnabled} onCheckedChange={(v) => { setPwOtpEnabled(v); setPwOtpStep(false); setPwOtpSent(false); setPwOtpCode(''); }} />
-                      <div>
-                        <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                        <p className="text-xs text-muted-foreground">{bn ? 'ইমেইলে কোড পাঠিয়ে নিরাপত্তা নিশ্চিত করুন' : 'Send code to email for security'}</p>
-                      </div>
-                    </div>
-                  </div>
+                   {/* OTP Toggle - admin only */}
+                   {isAdminRole(role) && (
+                   <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                     <div className="flex items-center gap-2">
+                       <Switch checked={pwOtpEnabled} onCheckedChange={(v) => { setPwOtpEnabled(v); setPwOtpStep(false); setPwOtpSent(false); setPwOtpCode(''); }} />
+                       <div>
+                         <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                         <p className="text-xs text-muted-foreground">{bn ? 'ইমেইলে কোড পাঠিয়ে নিরাপত্তা নিশ্চিত করুন' : 'Send code to email for security'}</p>
+                       </div>
+                     </div>
+                   </div>
+                   )}
 
                   {!pwOtpStep ? (
                     <>
