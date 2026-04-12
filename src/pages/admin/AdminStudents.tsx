@@ -391,6 +391,7 @@ const AdminStudents = () => {
   );
 
   return (
+    <>
     <AdminLayout>
       <TabContainer
         tabs={[
