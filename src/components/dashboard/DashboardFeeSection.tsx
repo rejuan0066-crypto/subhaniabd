@@ -343,10 +343,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     if (!selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort((a: any, b: any) => {
-      const clsA = a.students?.classes?.sort_order || 0;
-      const clsB = b.students?.classes?.sort_order || 0;
+      const clsA = a.students?.classes?.sort_order ?? 999;
+      const clsB = b.students?.classes?.sort_order ?? 999;
       if (clsA !== clsB) return clsA - clsB;
-      return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
+      const rollA = parseInt(a.students?.roll_number || '0', 10) || 0;
+      const rollB = parseInt(b.students?.roll_number || '0', 10) || 0;
+      return rollA - rollB;
     });
 
     const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'শ্রেণী' : 'Class', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
