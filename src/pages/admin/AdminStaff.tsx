@@ -124,10 +124,11 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
     const isTeacher = isTeacherDesignation(s.designation);
     const isAdmin = isAdministrativeDesignation(s.designation);
+    const isGeneral = isGeneralStaffDesignation(s.designation);
     if (staffType === 'teacher') return isTeacher;
     if (staffType === 'administrative') return isAdmin;
-    // 'staff' = those who are neither teacher nor administrative
-    return !isTeacher && !isAdmin;
+    if (staffType === 'staff') return isGeneral;
+    return !isTeacher && !isAdmin && !isGeneral;
   });
 
   const pendingCount = typeFiltered.filter((s: any) => s.status === 'pending').length;
