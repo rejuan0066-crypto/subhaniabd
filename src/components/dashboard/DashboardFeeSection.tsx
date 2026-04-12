@@ -118,19 +118,25 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
     if (category === 'monthly') {
       // ---- GROUP BY MONTH ----
-      // Determine valid session months first
-      const sessionMonthSet = new Set<string>();
+      // Determine valid session months — only up to current running month
+      const now0 = new Date();
+      const curMIdx = now0.getMonth();
+      const validSessionMonths = new Set<string>();
       feeTypes.forEach((ft: any) => {
         if (ft.payment_frequency !== 'monthly') return;
         let startM = 0, endM = 11;
         if (ft.academic_sessions?.start_date) startM = new Date(ft.academic_sessions.start_date).getMonth();
         if (ft.academic_sessions?.end_date) endM = new Date(ft.academic_sessions.end_date).getMonth();
+        const indices: number[] = [];
         if (startM <= endM) {
-          for (let i = startM; i <= endM; i++) sessionMonthSet.add(MONTHS_EN[i]);
+          for (let i = startM; i <= endM; i++) indices.push(i);
         } else {
-          for (let i = startM; i < 12; i++) sessionMonthSet.add(MONTHS_EN[i]);
-          for (let i = 0; i <= endM; i++) sessionMonthSet.add(MONTHS_EN[i]);
+          for (let i = startM; i < 12; i++) indices.push(i);
+          for (let i = 0; i <= endM; i++) indices.push(i);
         }
+        const curPos = indices.indexOf(curMIdx);
+        const running = curPos >= 0 ? indices.slice(0, curPos + 1) : indices.filter(i => i >= startM && i <= curMIdx);
+        running.forEach(i => validSessionMonths.add(MONTHS_EN[i]));
       });
 
       payments.forEach((p: any) => {
