@@ -18,13 +18,24 @@ import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
-const AdminStaff = () => {
+export type StaffPageType = 'all' | 'staff' | 'teacher';
+
+const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
+
+const isTeacherDesignation = (designation: string | null | undefined): boolean => {
+  if (!designation) return false;
+  const lower = designation.toLowerCase();
+  return TEACHER_KEYWORDS.some(k => lower.includes(k));
+};
+
+const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { checkApproval } = useApprovalCheck('/admin/staff', 'staff');
+  const menuPath = staffType === 'teacher' ? '/admin/teachers' : '/admin/staff';
+  const { checkApproval } = useApprovalCheck(menuPath, 'staff');
   const { role } = useAuth();
-  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions(menuPath);
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
