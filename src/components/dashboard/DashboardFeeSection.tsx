@@ -35,6 +35,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       if (error) throw error;
       return (data || []).filter((p: any) => p.fee_types?.fee_category === category);
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   // Fetch fee types for this category with session info
