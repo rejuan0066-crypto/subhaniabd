@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -28,7 +29,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fee_payments')
-        .select('*, students(id, name_bn, roll_number, division_id, divisions(name_bn)), fee_types(name_bn, fee_category, name, amount)')
+        .select('*, students(id, name_bn, roll_number, division_id, class_id, divisions(name_bn), classes(name_bn, sort_order)), fee_types(name_bn, fee_category, name, amount)')
         .eq('fee_types.fee_category', category)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -56,38 +57,66 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     queryFn: async () => {
       const { data } = await supabase
         .from('students')
-        .select('id, name_bn, roll_number, division_id, class_id, session_id, is_free, divisions(name_bn)')
+        .select('id, name_bn, roll_number, division_id, class_id, session_id, is_free, divisions(name_bn), classes(name_bn, sort_order)')
         .eq('status', 'active');
       return data || [];
     },
   });
 
-  // Build unpaid students list (students who should pay but have no paid/pending record)
+  // Fetch classes for grouping labels
+  const { data: classes = [] } = useQuery({
+    queryKey: ['dashboard-classes-list'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('classes')
+        .select('id, name_bn, name, sort_order, division_id, divisions(name_bn)')
+        .eq('is_active', true)
+        .order('sort_order');
+      return data || [];
+    },
+  });
+
+  // Helper: get class label for a student
+  const getClassLabel = (s: any) => {
+    return s?.classes?.name_bn || bn ? 'অনির্ধারিত' : 'Unassigned';
+  };
+
+  const getClassLabelFromPayment = (p: any) => {
+    return p?.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
+  };
+
+  // Build class map for sort order
+  const classMap = useMemo(() => {
+    const map: Record<string, { name_bn: string; sort_order: number }> = {};
+    classes.forEach((c: any) => {
+      map[c.id] = { name_bn: c.name_bn, sort_order: c.sort_order || 0 };
+    });
+    return map;
+  }, [classes]);
+
+  // Build groups by class
   const enrichedGroups = useMemo(() => {
-    // First build paid groups from existing payments
-    const groups: Record<string, { label: string; total: number; paid: any[]; unpaid: any[] }> = {};
+    const groups: Record<string, { label: string; sortOrder: number; total: number; paid: any[]; unpaid: any[] }> = {};
 
+    // Process existing payments — group by class
     payments.forEach((p: any) => {
-      let key = '';
-      if (category === 'monthly') key = p.month || 'N/A';
-      else if (category === 'exam') key = bn ? (p.fee_types?.name_bn || p.fee_types?.name || 'N/A') : (p.fee_types?.name || 'N/A');
-      else key = `${p.year || 'N/A'}`;
+      const classId = p.students?.class_id || 'unknown';
+      const className = getClassLabelFromPayment(p);
+      const key = classId;
 
-      if (!groups[key]) groups[key] = { label: key, total: 0, paid: [], unpaid: [] };
+      if (!groups[key]) groups[key] = { label: className, sortOrder: classMap[classId]?.sort_order || 999, total: 0, paid: [], unpaid: [] };
       const amount = p.paid_amount || p.amount || 0;
       if (p.status === 'paid') {
         groups[key].paid.push(p);
         groups[key].total += Number(amount);
       } else if (p.status === 'pending') {
-        groups[key].paid.push(p); // show pending with paid for now
+        groups[key].paid.push(p);
         groups[key].total += Number(amount);
       }
-      // cancelled records are ignored
     });
 
-    // Now find unpaid students - those with no payment record for each fee type
+    // Find unpaid students per class
     feeTypes.forEach((ft: any) => {
-      // Get applicable students for this fee type
       const applicableStudents = students.filter((s: any) => {
         if (s.is_free) return false;
         if (ft.division_id && ft.division_id !== s.division_id) return false;
@@ -96,28 +125,24 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         return true;
       });
 
-      // Get student IDs that have paid/pending for this fee type
       const paidStudentIds = new Set(
         payments
           .filter((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending'))
           .map((p: any) => p.student_id)
       );
 
-      // For admission/one-time fees
       if (ft.payment_frequency !== 'monthly') {
         const currentYear = new Date().getFullYear();
-        const key = category === 'exam'
-          ? (bn ? (ft.name_bn || ft.name) : (ft.name || 'N/A'))
-          : `${currentYear}`;
-
-        if (!groups[key]) groups[key] = { label: key, total: 0, paid: [], unpaid: [] };
 
         applicableStudents.forEach((s: any) => {
           if (!paidStudentIds.has(s.id)) {
-            // Check if this student is already in unpaid list
-            const alreadyAdded = groups[key].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
+            const classId = s.class_id || 'unknown';
+            const className = s.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
+            if (!groups[classId]) groups[classId] = { label: className, sortOrder: classMap[classId]?.sort_order || 999, total: 0, paid: [], unpaid: [] };
+
+            const alreadyAdded = groups[classId].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
             if (!alreadyAdded) {
-              groups[key].unpaid.push({
+              groups[classId].unpaid.push({
                 id: `unpaid-${s.id}-${ft.id}`,
                 _studentId: s.id,
                 _feeTypeId: ft.id,
@@ -131,49 +156,59 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           }
         });
       } else {
-        // Monthly fees - check each applicable month
         const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const currentMonthIdx = new Date().getMonth();
         const applicableMonths: string[] = ft.applicable_months && Array.isArray(ft.applicable_months)
           ? (ft.applicable_months as string[])
           : MONTHS_EN;
 
+        // Count applicable months up to current
+        let monthMultiplier = 0;
         for (let mi = 0; mi <= currentMonthIdx; mi++) {
-          const monthName = MONTHS_EN[mi];
-          if (!applicableMonths.includes(monthName)) continue;
+          if (applicableMonths.includes(MONTHS_EN[mi])) monthMultiplier++;
+        }
 
-          if (!groups[monthName]) groups[monthName] = { label: monthName, total: 0, paid: [], unpaid: [] };
-
-          // Find students who paid for this specific month
-          const paidForMonth = new Set(
+        applicableStudents.forEach((s: any) => {
+          // Check all applicable months for this student
+          const paidMonths = new Set(
             payments
-              .filter((p: any) => p.fee_type_id === ft.id && p.month === monthName && (p.status === 'paid' || p.status === 'pending'))
-              .map((p: any) => p.student_id)
+              .filter((p: any) => p.fee_type_id === ft.id && p.student_id === s.id && (p.status === 'paid' || p.status === 'pending'))
+              .map((p: any) => p.month)
           );
 
-          applicableStudents.forEach((s: any) => {
-            if (!paidForMonth.has(s.id)) {
-              const alreadyAdded = groups[monthName].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
-              if (!alreadyAdded) {
-                groups[monthName].unpaid.push({
-                  id: `unpaid-${s.id}-${ft.id}-${monthName}`,
-                  _studentId: s.id,
-                  _feeTypeId: ft.id,
-                  students: s,
-                  fee_types: ft,
-                  amount: ft.amount,
-                  month: monthName,
-                  status: 'unpaid',
-                });
-              }
+          let unpaidMonthCount = 0;
+          for (let mi = 0; mi <= currentMonthIdx; mi++) {
+            const monthName = MONTHS_EN[mi];
+            if (!applicableMonths.includes(monthName)) continue;
+            if (!paidMonths.has(monthName)) unpaidMonthCount++;
+          }
+
+          if (unpaidMonthCount > 0) {
+            const classId = s.class_id || 'unknown';
+            const className = s.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
+            if (!groups[classId]) groups[classId] = { label: className, sortOrder: classMap[classId]?.sort_order || 999, total: 0, paid: [], unpaid: [] };
+
+            const alreadyAdded = groups[classId].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
+            if (!alreadyAdded) {
+              groups[classId].unpaid.push({
+                id: `unpaid-${s.id}-${ft.id}-monthly`,
+                _studentId: s.id,
+                _feeTypeId: ft.id,
+                students: s,
+                fee_types: ft,
+                amount: ft.amount * unpaidMonthCount,
+                unpaidMonthCount,
+                status: 'unpaid',
+              });
             }
-          });
-        }
+          }
+        });
       }
     });
 
-    return Object.values(groups);
-  }, [payments, feeTypes, students, category, bn]);
+    // Sort by class sort_order
+    return Object.values(groups).sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [payments, feeTypes, students, category, bn, classMap]);
 
   const totalAmount = enrichedGroups.reduce((s: number, g: any) => s + g.total, 0);
 
