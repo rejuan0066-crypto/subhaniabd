@@ -827,9 +827,9 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-display font-bold text-foreground">
-            {bn ? (isEditMode ? 'কর্মী/শিক্ষক সম্পাদনা' : 'নতুন কর্মী/শিক্ষক যোগ করুন') : (isEditMode ? 'Edit Staff/Teacher' : 'Add New Staff/Teacher')}
+            {bn ? (isEditMode ? titleConfig.editBn : titleConfig.addBn) : (isEditMode ? titleConfig.editEn : titleConfig.addEn)}
           </h1>
-          <Button variant="outline" onClick={() => navigate('/admin/staff')}>{bn ? 'ফিরে যান' : 'Back'}</Button>
+          <Button variant="outline" onClick={() => navigate(backPath)}>{bn ? 'ফিরে যান' : 'Back'}</Button>
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
