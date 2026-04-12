@@ -289,7 +289,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                         )}
                         <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
-                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : 'staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : staffType === 'administrative' ? 'administrative-staff' : 'staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                         )}
                         {canDeleteItem && (
                           <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
