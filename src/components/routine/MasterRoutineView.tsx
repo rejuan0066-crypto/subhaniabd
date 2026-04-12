@@ -50,7 +50,7 @@ interface CellEditorProps {
   showClassSelect?: boolean;
 }
 
-const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, subjects, classes, staff, bn, onSave, children, showClassSelect }: CellEditorProps) => {
+const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, filterClassId, subjects, classes, staff, bn, onSave, children, showClassSelect }: CellEditorProps) => {
   const [open, setOpen] = useState(false);
   const [localSubjectId, setLocalSubjectId] = useState(subjectId);
   const [localTeacher, setLocalTeacher] = useState(teacherName);
