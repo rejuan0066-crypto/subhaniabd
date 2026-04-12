@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -28,7 +29,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fee_payments')
-        .select('*, students(id, name_bn, roll_number, division_id, divisions(name_bn)), fee_types(name_bn, fee_category, name, amount)')
+        .select('*, students(id, name_bn, roll_number, division_id, class_id, divisions(name_bn), classes(name_bn, sort_order)), fee_types(name_bn, fee_category, name, amount)')
         .eq('fee_types.fee_category', category)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -56,8 +57,21 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     queryFn: async () => {
       const { data } = await supabase
         .from('students')
-        .select('id, name_bn, roll_number, division_id, class_id, session_id, is_free, divisions(name_bn)')
+        .select('id, name_bn, roll_number, division_id, class_id, session_id, is_free, divisions(name_bn), classes(name_bn, sort_order)')
         .eq('status', 'active');
+      return data || [];
+    },
+  });
+
+  // Fetch classes for grouping labels
+  const { data: classes = [] } = useQuery({
+    queryKey: ['dashboard-classes-list'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('classes')
+        .select('id, name_bn, name, sort_order, division_id, divisions(name_bn)')
+        .eq('is_active', true)
+        .order('sort_order');
       return data || [];
     },
   });
