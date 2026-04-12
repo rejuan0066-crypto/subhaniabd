@@ -594,9 +594,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   )}
                 </div>
               </div>
+              <BackButton position="top" />
               <AdminPageWithTabs>{children}</AdminPageWithTabs>
             </div>
-            <BackButton />
+            <BackButton position="bottom" />
           </main>
         </div>
       </div>
