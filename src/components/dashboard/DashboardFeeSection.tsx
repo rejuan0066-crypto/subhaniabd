@@ -350,7 +350,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">#</th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'নাম' : 'Name'}</th>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'রোল' : 'Roll'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'বিভাগ' : 'Division'}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'শ্রেণী' : 'Class'}</th>
                   {category === 'monthly' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'মাস' : 'Month'}</th>}
                   {category === 'exam' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'সেশন' : 'Year'}</th>
@@ -361,9 +361,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                 {((() => {
                   const list = listType === 'paid' ? (selectedGroup?.paid || []) : (selectedGroup?.unpaid || []);
                   return [...list].sort((a: any, b: any) => {
-                    const divA = a.students?.divisions?.name_bn || '';
-                    const divB = b.students?.divisions?.name_bn || '';
-                    if (divA !== divB) return divA.localeCompare(divB);
+                    const clsA = a.students?.classes?.sort_order || 0;
+                    const clsB = b.students?.classes?.sort_order || 0;
+                    if (clsA !== clsB) return clsA - clsB;
                     return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
                   });
                 })()).map((p: any, i: number) => (
@@ -371,7 +371,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                     <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
                     <td className="px-3 py-2 font-medium text-foreground">{p.students?.name_bn || '-'}</td>
                     <td className="px-3 py-2 text-muted-foreground">{p.students?.roll_number || '-'}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{p.students?.divisions?.name_bn || '-'}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{p.students?.classes?.name_bn || '-'}</td>
                     {category === 'monthly' && <td className="px-3 py-2 text-muted-foreground">{p.month || '-'}</td>}
                     {category === 'exam' && <td className="px-3 py-2 text-muted-foreground">{p.fee_types?.name_bn || '-'}</td>}
                     <td className="px-3 py-2 text-muted-foreground">{p.year || '-'}</td>
