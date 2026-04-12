@@ -70,6 +70,23 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     },
   });
 
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ['designations-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const designationsMap = new Map<string, string>();
+  designationsList.forEach((d: any) => {
+    if (d.staff_category) {
+      if (d.name) designationsMap.set(d.name.toLowerCase(), d.staff_category);
+      if (d.name_bn) designationsMap.set(d.name_bn.toLowerCase(), d.staff_category);
+    }
+  });
+
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from('staff').update({ status }).eq('id', id);
