@@ -52,11 +52,36 @@ const DOC_TYPES = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
-const AdminStaffForm = () => {
+export type StaffCategory = 'teacher' | 'administrative' | 'general' | 'all';
+
+// Section visibility config per category
+const CATEGORY_SECTIONS: Record<StaffCategory, { showEducation: boolean; showIdentifier: boolean; showRelativesIdentifier: boolean; showGuardian: boolean; showParentAddress: boolean }> = {
+  teacher: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+  administrative: { showEducation: true, showIdentifier: true, showRelativesIdentifier: false, showGuardian: true, showParentAddress: true },
+  general: { showEducation: false, showIdentifier: false, showRelativesIdentifier: false, showGuardian: true, showParentAddress: false },
+  all: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+};
+
+const CATEGORY_TITLES: Record<StaffCategory, { bn: string; en: string; addBn: string; addEn: string; editBn: string; editEn: string }> = {
+  teacher: { bn: 'শিক্ষক', en: 'Teacher', addBn: 'নতুন শিক্ষক যোগ করুন', addEn: 'Add New Teacher', editBn: 'শিক্ষক সম্পাদনা', editEn: 'Edit Teacher' },
+  administrative: { bn: 'প্রশাসনিক কর্মকর্তা', en: 'Administrative Staff', addBn: 'নতুন প্রশাসনিক কর্মকর্তা যোগ করুন', addEn: 'Add Administrative Staff', editBn: 'প্রশাসনিক কর্মকর্তা সম্পাদনা', editEn: 'Edit Administrative Staff' },
+  general: { bn: 'সহায়ক কর্মী', en: 'General Staff', addBn: 'নতুন সহায়ক কর্মী যোগ করুন', addEn: 'Add General Staff', editBn: 'সহায়ক কর্মী সম্পাদনা', editEn: 'Edit General Staff' },
+  all: { bn: 'কর্মী/শিক্ষক', en: 'Staff/Teacher', addBn: 'নতুন কর্মী/শিক্ষক যোগ করুন', addEn: 'Add New Staff/Teacher', editBn: 'কর্মী/শিক্ষক সম্পাদনা', editEn: 'Edit Staff/Teacher' },
+};
+
+const CATEGORY_BACK_PATH: Record<StaffCategory, string> = {
+  teacher: '/admin/teachers',
+  administrative: '/admin/administrative-staff',
+  general: '/admin/general-staff',
+  all: '/admin/staff',
+};
+
+const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCategory }) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
-  const { canAddItem, canEditItem } = usePagePermissions('/admin/staff');
+  const backPath = CATEGORY_BACK_PATH[staffCategory];
+  const { canAddItem, canEditItem } = usePagePermissions(backPath);
   const navigate = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const isEditMode = !!editId;
@@ -64,6 +89,8 @@ const AdminStaffForm = () => {
   const { data: apiVerifyEnabled } = useApiVerificationEnabled();
   const { isFieldActive, isFieldRequired, getField, isLoaded: staffConfigLoaded } = useStaffFormConfig();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const sectionConfig = CATEGORY_SECTIONS[staffCategory];
+  const titleConfig = CATEGORY_TITLES[staffCategory];
   const printRef = useRef<HTMLDivElement>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
