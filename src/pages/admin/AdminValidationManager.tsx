@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -79,6 +80,7 @@ const AdminValidationManager = () => {
   const [ruleData, setRuleData] = useState<RuleData>(emptyRule);
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: rules = [] } = useQuery({
     queryKey: ['validation-rules'],
@@ -212,6 +214,7 @@ const AdminValidationManager = () => {
   };
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-4">
         {/* Header */}
@@ -313,7 +316,7 @@ const AdminValidationManager = () => {
                       <Edit2 className="h-3.5 w-3.5" />
                     </Button>}
                     {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
-                      onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(r.id); }}>
+                      onClick={() => setDeleteId(r.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>}
                   </div>
@@ -426,6 +429,13 @@ const AdminValidationManager = () => {
         </Dialog>
       </div>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { Plus, Check, X, Edit, RotateCcw, Loader2, Trash2 } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +21,7 @@ const AdminNotices = () => {
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: notices = [], isLoading } = useQuery({
     queryKey: ['notices'],
@@ -85,6 +87,7 @@ const AdminNotices = () => {
   const filtered = filter === 'all' ? notices : filter === 'published' ? notices.filter((n: any) => n.is_published) : notices.filter((n: any) => !n.is_published);
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -141,7 +144,7 @@ const AdminNotices = () => {
                       <button onClick={() => updateStatusMutation.mutate({ id: n.id, is_published: false })} className="p-2 rounded-lg hover:bg-warning/10 text-warning" title="Unpublish"><RotateCcw className="w-4 h-4" /></button>
                     )}
                     {canDeleteItem && (
-                      <button onClick={() => deleteMutation.mutate(n.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => setDeleteId(n.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                     )}
                   </div>
                 </div>
@@ -152,6 +155,13 @@ const AdminNotices = () => {
         )}
       </div>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 

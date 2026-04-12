@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -64,6 +65,7 @@ const AdminModuleManager = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [moduleData, setModuleData] = useState<ModuleData>(emptyModule);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: modules = [], isLoading } = useQuery({
     queryKey: ['system-modules'],
@@ -159,6 +161,7 @@ const AdminModuleManager = () => {
   const disabledCount = modules.filter((m: any) => !m.is_enabled).length;
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-4">
         {/* Header */}
@@ -251,7 +254,7 @@ const AdminModuleManager = () => {
                       </Button>}
                       {canDeleteItem && !mod.is_system && (
                         <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
-                          onClick={() => { if (confirm(bn ? 'মডিউলটি মুছে ফেলতে চান?' : 'Delete this module?')) deleteMutation.mutate(mod.id); }}>
+                          onClick={() => setDeleteId(mod.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
@@ -357,6 +360,13 @@ const AdminModuleManager = () => {
         </Dialog>
       </div>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useState } from 'react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import { FileText, Send, List, Trash2, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,6 +39,7 @@ const AdminCustomFormPage = () => {
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [viewSubmission, setViewSubmission] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('form');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: form } = useQuery({
     queryKey: ['custom-form-by-slug', slug],
@@ -195,6 +197,7 @@ const AdminCustomFormPage = () => {
   const activeFields = fields.filter(f => f.is_active);
 
   return (
+    <>
     <AdminLayout>
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
@@ -411,7 +414,7 @@ const AdminCustomFormPage = () => {
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
                             {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
-                              onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(sub.id); }}>
+                              onClick={() => setDeleteId(sub.id)}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>}
                           </TableCell>
@@ -453,6 +456,13 @@ const AdminCustomFormPage = () => {
         </DialogContent>
       </Dialog>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 

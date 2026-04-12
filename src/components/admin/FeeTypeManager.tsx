@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Loader2, Filter, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const exportFeeTypesCSV = (data: any[], categories: any[], bn: boolean) => {
   const bom = '\uFEFF';
@@ -38,6 +39,7 @@ const FeeTypeManager = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [filterSessionId, setFilterSessionId] = useState<string>('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<{ name: string; name_bn: string; amount: string; fee_category: string; division_id: string; class_id: string; session_id: string; payment_frequency: string; applicable_months: string[] }>({ name: '', name_bn: '', amount: '', fee_category: 'monthly', division_id: '', class_id: '', session_id: '', payment_frequency: 'one-time', applicable_months: [] });
 
   const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -259,7 +261,7 @@ const FeeTypeManager = () => {
                 <td className="px-4 py-3 text-right">
                   <div className="flex gap-1 justify-end">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(f)}><Pencil className="w-3.5 h-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => deleteMutation.mutate(f.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(f.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
                   </div>
                 </td>
               </tr>
@@ -437,6 +439,13 @@ const FeeTypeManager = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <DeleteConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+        onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+        isPending={deleteMutation.isPending}
+      />
     </div>
   );
 };
