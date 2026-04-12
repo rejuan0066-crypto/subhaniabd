@@ -205,28 +205,29 @@ const AdminStudents = () => {
   };
 
   const studentListContent = (
-    <div className="space-y-6">
+    <div className="space-y-8">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">{t('students')}</h1>
-            <p className="text-sm text-muted-foreground">{bn ? `মোট ${filtered.length} জন ছাত্র` : `Total ${filtered.length} students`}</p>
+            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">{t('students')}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{bn ? `মোট ${filtered.length} জন ছাত্র` : `Total ${filtered.length} students`}</p>
           </div>
           {canAddItem && (
-            <Button onClick={() => setShowAdd(true)} className="btn-primary-gradient flex items-center gap-2">
+            <Button onClick={() => setShowAdd(true)} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 rounded-full px-6 h-11 text-sm font-semibold transition-all duration-300">
               <Plus className="w-4 h-4" /> {bn ? 'নতুন ভর্তি' : 'New Admission'}
             </Button>
           )}
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+        {/* Filter Bar */}
+        <div className="rounded-[24px] border border-border/40 bg-card/80 backdrop-blur-md p-5 shadow-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[220px] max-w-sm">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+              <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} className="pl-11 h-10 rounded-full border-border/40 bg-muted/30 text-sm placeholder:text-muted-foreground/50 focus:bg-background focus:border-emerald-500/40 focus:ring-emerald-500/20 transition-all" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <Select value={filterDivisionId} onValueChange={(v) => { setFilterDivisionId(v); setFilterClassId('all'); }}>
-              <SelectTrigger className="bg-background w-full sm:w-40">
-                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+              <SelectTrigger className="h-10 rounded-full border-border/40 bg-muted/30 text-sm w-auto min-w-[120px] hover:bg-muted/50 transition-colors">
                 <SelectValue placeholder={bn ? 'বিভাগ' : 'Division'} />
               </SelectTrigger>
               <SelectContent>
@@ -237,8 +238,7 @@ const AdminStudents = () => {
               </SelectContent>
             </Select>
             <Select value={filterSessionId} onValueChange={setFilterSessionId}>
-              <SelectTrigger className="bg-background w-full sm:w-40">
-                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+              <SelectTrigger className="h-10 rounded-full border-border/40 bg-muted/30 text-sm w-auto min-w-[120px] hover:bg-muted/50 transition-colors">
                 <SelectValue placeholder={bn ? 'সেশন' : 'Session'} />
               </SelectTrigger>
               <SelectContent>
@@ -249,8 +249,7 @@ const AdminStudents = () => {
               </SelectContent>
             </Select>
             <Select value={filterClassId} onValueChange={setFilterClassId}>
-              <SelectTrigger className="bg-background w-full sm:w-40">
-                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+              <SelectTrigger className="h-10 rounded-full border-border/40 bg-muted/30 text-sm w-auto min-w-[120px] hover:bg-muted/50 transition-colors">
                 <SelectValue placeholder={bn ? 'শ্রেণী' : 'Class'} />
               </SelectTrigger>
               <SelectContent>
@@ -261,9 +260,8 @@ const AdminStudents = () => {
               </SelectContent>
             </Select>
             <Select value={filterApproval} onValueChange={setFilterApproval}>
-              <SelectTrigger className="bg-background w-full sm:w-40">
-                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
-                <SelectValue placeholder={bn ? 'স্ট্যাটাস' : 'Status'} />
+              <SelectTrigger className="h-10 rounded-full border-border/40 bg-muted/30 text-sm w-auto min-w-[120px] hover:bg-muted/50 transition-colors">
+                <SelectValue placeholder={bn ? 'অনুমোদন' : 'Approval'} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সকল স্ট্যাটাস' : 'All Status'}</SelectItem>
@@ -273,9 +271,8 @@ const AdminStudents = () => {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="bg-background w-full sm:w-40">
-                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
-                <SelectValue placeholder={bn ? 'এক্টিভ/ইনএক্টিভ' : 'Active/Inactive'} />
+              <SelectTrigger className="h-10 rounded-full border-border/40 bg-muted/30 text-sm w-auto min-w-[120px] hover:bg-muted/50 transition-colors">
+                <SelectValue placeholder={bn ? 'স্ট্যাটাস' : 'Status'} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সকল' : 'All'}</SelectItem>
@@ -286,92 +283,94 @@ const AdminStudents = () => {
           </div>
         </div>
 
-        <div className="card-elevated overflow-hidden">
+        {/* Student List Card */}
+        <div className="rounded-[32px] border border-border/30 bg-card/90 backdrop-blur-md shadow-sm overflow-hidden">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+            <div className="flex items-center justify-center py-20"><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-secondary/50">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সিরিয়াল' : 'Serial'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'আইডি' : 'ID'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রোল' : 'Roll'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিভাগ' : 'Division'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সেশন' : 'Session'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শ্রেণী' : 'Class'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অনুমোদন' : 'Approval'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                <thead>
+                  <tr className="border-b border-border/30">
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'সি.' : '#'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'নাম' : 'Name'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'আইডি' : 'ID'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'রোল' : 'Roll'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'বিভাগ' : 'Division'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'সেশন' : 'Session'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'শ্রেণী' : 'Class'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'অনুমোদন' : 'Approval'}</th>
+                    <th className="text-left px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                    <th className="text-right px-5 py-4 text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border">
-                  {sortedFiltered.map((s: any) => (
-                    <tr key={s.id} className="hover:bg-secondary/30 transition-colors">
-                      <td className="px-4 py-3 text-sm font-mono font-semibold text-primary">{getClassSerial(s)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
+                <tbody>
+                  {sortedFiltered.map((s: any, idx: number) => (
+                    <tr key={s.id} className="group border-b border-border/15 last:border-b-0 hover:bg-emerald-50/40 dark:hover:bg-emerald-950/10 transition-all duration-200 hover:scale-[1.005] origin-center">
+                      <td className="px-5 py-4 text-sm font-mono font-bold text-primary/80">{getClassSerial(s)}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3.5">
                           {s.photo_url ? (
-                            <img src={s.photo_url} className="w-9 h-9 rounded-full object-cover" alt="" />
+                            <img src={s.photo_url} className="w-10 h-10 rounded-2xl object-cover ring-2 ring-border/30 shadow-sm" alt="" />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-sm shadow-sm">
                               {s.name_bn?.[0] || '?'}
                             </div>
                           )}
-                          <div>
-                            <span className="font-medium text-foreground text-sm block">
+                          <div className="min-w-0">
+                            <span className="font-semibold text-foreground text-sm block truncate">
                               {s.name_bn}
                               {s.is_free && <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-success/15 text-success border border-success/20">{bn ? 'বিনা বেতন' : 'Free'}</span>}
                             </span>
-                            {s.name_en && <span className="text-xs text-muted-foreground">{s.name_en}</span>}
+                            {s.name_en && <span className="text-xs text-muted-foreground/60 block truncate">{s.name_en}</span>}
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.student_id}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.roll_number || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{bn ? s.divisions?.name_bn : s.divisions?.name || '-'}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
-                      <td className="px-4 py-3">{getApprovalBadge(s.approval_status || 'pending')}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${(s.status || 'active') === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                      <td className="px-5 py-4 text-sm font-mono text-muted-foreground">{s.student_id}</td>
+                      <td className="px-5 py-4 text-sm font-mono font-medium text-foreground/80">{s.roll_number || <span className="text-muted-foreground/30">—</span>}</td>
+                      <td className="px-5 py-4 text-sm text-muted-foreground">{bn ? s.divisions?.name_bn : s.divisions?.name || '-'}</td>
+                      <td className="px-5 py-4 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
+                      <td className="px-5 py-4 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
+                      <td className="px-5 py-4">{getApprovalBadge(s.approval_status || 'pending')}</td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${(s.status || 'active') === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-destructive/10 text-destructive'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${(s.status || 'active') === 'active' ? 'bg-emerald-500' : 'bg-destructive'}`} />
                           {(s.status || 'active') === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => setShowDetail(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></button>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-0.5 opacity-40 group-hover:opacity-100 transition-opacity duration-200">
+                          <button onClick={() => setShowDetail(s)} className="p-2 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title={bn ? 'দেখুন' : 'View'}><Eye className="w-4 h-4" strokeWidth={1.5} /></button>
                           {canEditItem && (
-                            <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                            <button onClick={() => { setEditStudent(s); setShowAdd(true); }} className="p-2 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status !== 'approved') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="p-2 rounded-lg hover:bg-success/10 text-muted-foreground hover:text-success" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'approved' })} className="p-2 rounded-full hover:bg-success/10 text-muted-foreground hover:text-success transition-colors" title={bn ? 'অনুমোদন' : 'Approve'}><CheckCircle className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status !== 'rejected') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'rejected' })} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive" title={bn ? 'প্রত্যাখ্যান' : 'Reject'}><XCircle className="w-4 h-4" /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'rejected' })} className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'প্রত্যাখ্যান' : 'Reject'}><XCircle className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (s.approval_status === 'rejected') && (
-                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-lg hover:bg-warning/10 text-muted-foreground hover:text-warning" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" /></button>
+                            <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-full hover:bg-warning/10 text-muted-foreground hover:text-warning transition-colors" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                           {canEditItem && (
                             <button
                               onClick={() => toggleActiveMutation.mutate({ id: s.id, currentStatus: s.status || 'active' })}
-                              className={`p-2 rounded-lg ${(s.status || 'active') === 'active' ? 'hover:bg-warning/10 text-muted-foreground hover:text-warning' : 'hover:bg-success/10 text-muted-foreground hover:text-success'}`}
+                              className={`p-2 rounded-full transition-colors ${(s.status || 'active') === 'active' ? 'hover:bg-warning/10 text-muted-foreground hover:text-warning' : 'hover:bg-success/10 text-muted-foreground hover:text-success'}`}
                               title={(s.status || 'active') === 'active' ? (bn ? 'ডিএক্টিভ করুন' : 'Deactivate') : (bn ? 'এক্টিভ করুন' : 'Activate')}
                             >
-                              {(s.status || 'active') === 'active' ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                              {(s.status || 'active') === 'active' ? <UserX className="w-4 h-4" strokeWidth={1.5} /> : <UserCheck className="w-4 h-4" strokeWidth={1.5} />}
                             </button>
                           )}
                           {canDeleteItem && (
-                            <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
+                            <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
                           )}
                         </div>
                       </td>
                     </tr>
                   ))}
                   {sortedFiltered.length === 0 && (
-                    <tr><td colSpan={10} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
+                    <tr><td colSpan={10} className="text-center py-16 text-sm text-muted-foreground/60">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
                   )}
                 </tbody>
               </table>
