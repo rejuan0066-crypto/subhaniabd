@@ -573,6 +573,7 @@ const MasterRoutineView = () => {
                                 teacherName={period?.teacher_name || ''}
                                 teacherNameBn={period?.teacher_name_bn || ''}
                                 subjects={subjects || []}
+                                filterClassId={cls.id}
                                 classes={filteredClasses || []}
                                 staff={staff || []}
                                 bn={bn}
@@ -747,6 +748,7 @@ const MasterRoutineView = () => {
                               teacherName={period?.teacher_name || ''}
                               teacherNameBn={period?.teacher_name_bn || ''}
                               subjects={subjects || []}
+                              filterClassId={selectedClassId}
                               classes={filteredClasses || []}
                               staff={staff || []}
                               bn={bn}
