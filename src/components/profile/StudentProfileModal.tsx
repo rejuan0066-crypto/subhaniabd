@@ -306,8 +306,8 @@ const StudentProfileModal = ({
             <p className="text-xl font-black text-white">৳{totalPaid.toLocaleString()}</p>
           </div>
           <div className="px-4 py-3.5 text-center">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">{bn ? 'বকেয়া' : 'Due'}</p>
-            <p className="text-xl font-black text-white">৳{totalDue.toLocaleString()}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-red-300">{bn ? 'বকেয়া' : 'Due'}</p>
+            <p className="text-xl font-black text-red-400">৳{totalDue.toLocaleString()}</p>
           </div>
         </div>
       </div>
