@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminLayout from '@/components/AdminLayout';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -37,6 +37,7 @@ const Dashboard = () => {
   const { hasPermission } = usePermissions();
   const isAdmin = isAdminRole(role);
   const canViewStats = isAdmin || hasPermission('/admin', 'view');
+  const canViewFinance = isAdmin || role === 'accountant' || hasPermission('/admin/expenses', 'view') || hasPermission('/admin/students-fees', 'view');
   const [builderOpen, setBuilderOpen] = useState(false);
   const { sections } = useDashboardLayout();
   const [listDialog, setListDialog] = useState<{ open: boolean; title: string; table: 'students' | 'staff' | 'donors' | 'divisions' | 'subjects' | 'exam_sessions' | 'results'; filters: Record<string, any> }>({
@@ -318,7 +319,7 @@ const Dashboard = () => {
           </div>
         ) : null;
       case 'donor':
-        return canViewStats ? (
+        return canViewFinance ? (
           <div key={id} className="card-elevated p-4">
             <h3 className="font-display font-bold text-foreground mb-3 flex items-center gap-2">
               <SectionIcon className="w-5 h-5 text-destructive" />
@@ -330,7 +331,7 @@ const Dashboard = () => {
       case 'fee_stats': {
         const hiddenFees = sec.hiddenCards || [];
         const visibleFees = feeCategories.filter(f => !hiddenFees.includes(f.key));
-        return canViewStats && visibleFees.length > 0 ? (
+        return canViewFinance && visibleFees.length > 0 ? (
           <div key={id} className="space-y-3">
             <h3 className="font-display font-bold text-foreground flex items-center gap-2">
               <SectionIcon className="w-5 h-5 text-primary" />
@@ -352,29 +353,27 @@ const Dashboard = () => {
   const visibleSections = [...sections].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
-    <AdminLayout>
-      <div className="space-y-5">
-        {isAdmin && (
-          <div className="flex justify-end">
-            <Button variant="outline" size="sm" onClick={() => setBuilderOpen(true)} className="gap-2">
-              <LayoutDashboard className="w-4 h-4" />
-              {bn ? 'ড্যাশবোর্ড বিল্ডার' : 'Dashboard Builder'}
-            </Button>
-          </div>
-        )}
+    <div className="space-y-5">
+      {isAdmin && (
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={() => setBuilderOpen(true)} className="gap-2">
+            <LayoutDashboard className="w-4 h-4" />
+            {bn ? 'ড্যাশবোর্ড বিল্ডার' : 'Dashboard Builder'}
+          </Button>
+        </div>
+      )}
 
-        {visibleSections.map(s => renderSection(s.id))}
+      {visibleSections.map(s => renderSection(s.id))}
 
-        {!canViewStats && (
-          <div className="card-elevated p-8 text-center text-muted-foreground">
-            {bn ? 'আপনার পরিসংখ্যান দেখার অনুমতি নেই।' : 'You do not have permission to view statistics.'}
-          </div>
-        )}
+      {!canViewStats && (
+        <div className="card-elevated p-8 text-center text-muted-foreground">
+          {bn ? 'আপনার পরিসংখ্যান দেখার অনুমতি নেই।' : 'You do not have permission to view statistics.'}
+        </div>
+      )}
 
-        <DashboardStatsList open={listDialog.open} onClose={() => setListDialog(d => ({ ...d, open: false }))} title={listDialog.title} table={listDialog.table} filters={listDialog.filters} />
-        <DashboardLayoutDialog open={builderOpen} onClose={() => setBuilderOpen(false)} />
-      </div>
-    </AdminLayout>
+      <DashboardStatsList open={listDialog.open} onClose={() => setListDialog(d => ({ ...d, open: false }))} title={listDialog.title} table={listDialog.table} filters={listDialog.filters} />
+      <DashboardLayoutDialog open={builderOpen} onClose={() => setBuilderOpen(false)} />
+    </div>
   );
 };
 

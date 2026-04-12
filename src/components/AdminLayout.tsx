@@ -455,7 +455,17 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 <p className="text-xs font-medium text-sidebar-foreground truncate">
                   {(language === 'bn' ? sidebarStaffPhoto?.name_bn : sidebarStaffPhoto?.name_en) || sidebarStaffPhoto?.name_bn || user?.email?.split('@')[0] || 'Admin'}
                 </p>
-                <p className="text-[10px] text-sidebar-foreground/50 capitalize">{role === 'super_admin' ? (language === 'bn' ? 'সুপার অ্যাডমিন' : 'Super Admin') : (language === 'bn' ? 'অ্যাডমিন' : 'Admin')}</p>
+                <p className="text-[10px] text-sidebar-foreground/50 capitalize">{(() => {
+                  const roleLabels: Record<string, { bn: string; en: string }> = {
+                    super_admin: { bn: 'সুপার অ্যাডমিন', en: 'Super Admin' },
+                    admin: { bn: 'অ্যাডমিন', en: 'Admin' },
+                    teacher: { bn: 'শিক্ষক', en: 'Teacher' },
+                    staff: { bn: 'স্টাফ', en: 'Staff' },
+                    accountant: { bn: 'হিসাবরক্ষক', en: 'Accountant' },
+                  };
+                  const r = roleLabels[role || ''] || { bn: role || '', en: role || '' };
+                  return language === 'bn' ? r.bn : r.en;
+                })()}</p>
               </div>
               <button
                 onClick={async () => { await signOut(); navigate('/login'); }}
