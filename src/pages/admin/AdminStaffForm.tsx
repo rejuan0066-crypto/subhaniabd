@@ -52,13 +52,14 @@ const DOC_TYPES = [
   { value: 'other', bn: 'অন্যান্য', en: 'Other' },
 ];
 
-export type StaffCategory = 'teacher' | 'administrative' | 'general' | 'all';
+export type StaffCategory = 'teacher' | 'administrative' | 'general' | 'support' | 'all';
 
 // Section visibility config per category — all categories show all sections equally
 const CATEGORY_SECTIONS: Record<StaffCategory, { showEducation: boolean; showIdentifier: boolean; showRelativesIdentifier: boolean; showGuardian: boolean; showParentAddress: boolean }> = {
   teacher: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
   administrative: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
   general: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
+  support: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
   all: { showEducation: true, showIdentifier: true, showRelativesIdentifier: true, showGuardian: true, showParentAddress: true },
 };
 
@@ -66,6 +67,7 @@ const CATEGORY_TITLES: Record<StaffCategory, { bn: string; en: string; addBn: st
   teacher: { bn: 'শিক্ষক', en: 'Teacher', addBn: 'নতুন শিক্ষক যোগ করুন', addEn: 'Add New Teacher', editBn: 'শিক্ষক সম্পাদনা', editEn: 'Edit Teacher' },
   administrative: { bn: 'প্রশাসনিক কর্মকর্তা', en: 'Administrative Staff', addBn: 'নতুন প্রশাসনিক কর্মকর্তা যোগ করুন', addEn: 'Add Administrative Staff', editBn: 'প্রশাসনিক কর্মকর্তা সম্পাদনা', editEn: 'Edit Administrative Staff' },
   general: { bn: 'সহায়ক কর্মী', en: 'General Staff', addBn: 'নতুন সহায়ক কর্মী যোগ করুন', addEn: 'Add General Staff', editBn: 'সহায়ক কর্মী সম্পাদনা', editEn: 'Edit General Staff' },
+  support: { bn: 'অফিস কর্মচারী', en: 'Support Staff', addBn: 'নতুন অফিস কর্মচারী যোগ করুন', addEn: 'Add Support Staff', editBn: 'অফিস কর্মচারী সম্পাদনা', editEn: 'Edit Support Staff' },
   all: { bn: 'কর্মী/শিক্ষক', en: 'Staff/Teacher', addBn: 'নতুন কর্মী/শিক্ষক যোগ করুন', addEn: 'Add New Staff/Teacher', editBn: 'কর্মী/শিক্ষক সম্পাদনা', editEn: 'Edit Staff/Teacher' },
 };
 
@@ -73,6 +75,7 @@ const CATEGORY_BACK_PATH: Record<StaffCategory, string> = {
   teacher: '/admin/teachers',
   administrative: '/admin/administrative-staff',
   general: '/admin/general-staff',
+  support: '/admin/support-staff',
   all: '/admin/staff',
 };
 
