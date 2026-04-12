@@ -445,7 +445,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   </div>
                   {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
                     <div
-                      className="sidebar-submenu-enter ml-5 mt-1 space-y-0.5 border-l-2 border-sidebar-primary/20 pl-3 py-1 rounded-br-lg bg-sidebar-accent/30"
+                      className="sidebar-submenu-enter sidebar-submenu-container"
                       onMouseEnter={() => {
                         if (!mobile) {
                           if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -474,9 +474,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                                 startNavTransition(() => navigate(child.path));
                               }
                             }}
-                            className={`sidebar-item text-xs py-1.5 ${childActive ? 'active' : ''}`}
+                            className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                           >
-                            <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
+                            <child.icon className="sidebar-icon w-[15px] h-[15px] shrink-0" />
                             <span className="truncate">{child.label}</span>
                           </Link>
                         );
@@ -493,7 +493,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {(sidebarOpen || mobile) && (
           <div className="p-3 border-t border-sidebar-border/30 shrink-0">
             <div className="flex items-center gap-3 px-2 py-2.5">
-              <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20">
+              <div className="w-10 h-10 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden sidebar-avatar-glow">
                 {sidebarStaffPhoto?.photo_url ? (
                   <img src={sidebarStaffPhoto.photo_url} alt="" className="w-full h-full object-cover" />
                 ) : (
