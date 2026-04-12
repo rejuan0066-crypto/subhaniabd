@@ -183,6 +183,23 @@
     border-radius: 0 4px 4px 0;
     background: linear-gradient(180deg, hsl(var(--sidebar-primary)), hsl(160 60% 45%));
   }
+  /* Parent menu highlight when a child is active */
+  .sidebar-item.has-active-child {
+    @apply font-semibold;
+    color: hsl(var(--sidebar-primary));
+    background: hsl(var(--sidebar-primary) / 0.08);
+  }
+  .sidebar-item.has-active-child::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    border-radius: 0 4px 4px 0;
+    background: hsl(var(--sidebar-primary) / 0.4);
+  }
   .sidebar-item:active {
     transition-duration: 80ms;
   }
