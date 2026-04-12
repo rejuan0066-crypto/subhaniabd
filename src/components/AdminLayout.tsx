@@ -314,7 +314,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-300 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : 'lg:my-3 lg:ml-3 lg:rounded-[28px] lg:h-[calc(100%-24px)]'}`}
         style={sidebarStyle}
       >
         {/* Logo */}
@@ -542,7 +542,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-card/80 backdrop-blur-xl border-b border-border/30 px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+          <header className={`bg-card/70 dark:bg-card/35 backdrop-blur-2xl border-b border-border/10 px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200">
                 <Menu className="w-5 h-5 text-muted-foreground" />
@@ -573,7 +573,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           {/* Content */}
           <main className="flex-1 px-3 lg:px-6 pb-8 pt-5">
             {/* Modern Glass Content Container */}
-            <div className="admin-page-card rounded-[28px] lg:rounded-[36px] bg-card/75 dark:bg-card/40 backdrop-blur-xl border border-border/15 dark:border-border/10 p-5 sm:p-7 lg:p-10 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-elevated)' }}>
+            <div className="admin-page-card rounded-[36px] lg:rounded-[45px] bg-card/70 dark:bg-card/35 backdrop-blur-2xl border border-border/10 dark:border-border/8 p-5 sm:p-8 lg:p-10 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-float)' }}>
               <BackButton position="top" />
               {/* Page Header */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-border/30">
