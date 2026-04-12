@@ -40,7 +40,7 @@ const AdminExamRoutine = () => {
   const { data: subjects } = useQuery({
     queryKey: ['subjects-for-exam-routine'],
     queryFn: async () => {
-      const { data } = await supabase.from('subjects').select('*').eq('is_active', true).order('sort_order');
+      const { data } = await supabase.from('subjects').select('*').eq('is_active', true).order('name');
       return data || [];
     },
   });
