@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search, Plus, Trash2, Loader2, Pencil, UserPlus, Eye, EyeOff, User, FileText, Check, X } from 'lucide-react';
+import StaffProfileModal from '@/components/profile/StaffProfileModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -437,205 +438,13 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
 
         {/* Staff Profile Detail Dialog */}
         <Dialog open={!!viewStaff} onOpenChange={o => { if (!o) setViewStaff(null); }}>
-          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{staffType === 'teacher' ? (bn ? 'শিক্ষক প্রোফাইল' : 'Teacher Profile') : (bn ? 'স্টাফ প্রোফাইল' : 'Staff Profile')}</DialogTitle></DialogHeader>
-            {viewStaff && <StaffProfileView staff={viewStaff} bn={bn} />}
+          <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-[40px]">
+            <DialogHeader><DialogTitle className="text-center">{staffType === 'teacher' ? (bn ? 'শিক্ষক প্রোফাইল' : 'Teacher Profile') : (bn ? 'স্টাফ প্রোফাইল' : 'Staff Profile')}</DialogTitle></DialogHeader>
+            {viewStaff && <StaffProfileModal staff={viewStaff} bn={bn} />}
           </DialogContent>
         </Dialog>
       </div>
     </AdminLayout>
-  );
-};
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="text-sm">
-    <span className="text-muted-foreground">{label}</span>
-    <span className="text-foreground">{value || '-'}</span>
-  </div>
-);
-
-const translateReligion = (val: string | undefined, bn: boolean): string => {
-  if (!val) return '-';
-  const map: Record<string, [string, string]> = {
-    islam: ['ইসলাম', 'Islam'], hinduism: ['হিন্দু', 'Hinduism'], christianity: ['খ্রিস্টান', 'Christianity'], buddhism: ['বৌদ্ধ', 'Buddhism'], other: ['অন্যান্য', 'Other'],
-  };
-  const m = map[val.toLowerCase()];
-  return m ? m[bn ? 0 : 1] : val;
-};
-
-const translateGender = (val: string | undefined, bn: boolean): string => {
-  if (!val) return '-';
-  const map: Record<string, [string, string]> = { male: ['পুরুষ', 'Male'], female: ['মহিলা', 'Female'], other: ['অন্যান্য', 'Other'] };
-  const m = map[val.toLowerCase()];
-  return m ? m[bn ? 0 : 1] : val;
-};
-
-const translateResidence = (val: string | undefined, bn: boolean): string => {
-  if (!val) return '-';
-  const map: Record<string, [string, string]> = { residential: ['আবাসিক', 'Residential'], non_residential: ['অনাবাসিক', 'Non-Residential'], day_scholar: ['ডে স্কলার', 'Day Scholar'] };
-  const m = map[val.toLowerCase()];
-  return m ? m[bn ? 0 : 1] : val;
-};
-
-const StaffProfileView = ({ staff, bn }: { staff: any; bn: boolean }) => {
-  const sd = staff.staff_data || {};
-  const parents = sd.parents || {};
-  const father = parents.father || {};
-  const mother = parents.mother || {};
-  const guardian = sd.guardian || {};
-  const identifier = sd.identifier || {};
-  const approver = sd.approver || {};
-  const presentAddr = sd.present_address || {};
-  const permanentAddr = sd.permanent_address || {};
-  const docs = sd.documents || [];
-
-  const formatAddr = (a: any) => [a?.village, a?.postOffice, a?.union, a?.upazila, a?.district, a?.division].filter(Boolean).join(', ');
-
-  return (
-    <div className="space-y-5 py-4">
-      {/* Header with photo */}
-      <div className="flex items-start gap-4">
-        {staff.photo_url ? (
-          <img src={staff.photo_url} className="w-24 h-28 rounded-lg object-cover border" alt="" />
-        ) : (
-          <div className="w-24 h-28 rounded-lg bg-secondary flex items-center justify-center text-3xl font-bold text-muted-foreground">
-            <User className="w-10 h-10" />
-          </div>
-        )}
-        <div className="flex-1 space-y-1">
-          <h3 className="text-lg font-bold text-foreground">{bn ? (staff.name_bn || staff.name_en) : (staff.name_en || staff.name_bn) || '-'}</h3>
-          {staff.name_bn && staff.name_en && <p className="text-sm text-muted-foreground">{bn ? staff.name_en : staff.name_bn}</p>}
-          <p className="text-sm text-primary font-medium">{staff.designation || '-'}</p>
-          <p className="text-xs text-muted-foreground">{staff.department || ''}</p>
-          <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-            staff.status === 'active' ? 'bg-success/10 text-success' : 
-            staff.status === 'pending' ? 'bg-warning/10 text-warning' : 
-            'bg-destructive/10 text-destructive'
-          }`}>
-            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') : 
-             staff.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') : 
-             (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
-          </span>
-        </div>
-      </div>
-
-      {/* Personal Info */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'}</h4>
-        <div className="grid grid-cols-2 gap-3">
-          <InfoRow label={bn ? 'জন্ম তারিখ: ' : 'DOB: '} value={staff.date_of_birth || '-'} />
-          <InfoRow label={bn ? 'ধর্ম: ' : 'Religion: '} value={translateReligion(staff.religion || sd.religion, bn)} />
-          <InfoRow label={bn ? 'লিঙ্গ: ' : 'Gender: '} value={translateGender(staff.gender || sd.gender, bn)} />
-          <InfoRow label={bn ? 'NID: ' : 'NID: '} value={staff.nid || '-'} />
-          <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={staff.phone ? `${sd.mobile_code || ''}${staff.phone}` : '-'} />
-          <InfoRow label={bn ? 'ইমেইল: ' : 'Email: '} value={staff.email || '-'} />
-          <InfoRow label={bn ? 'আবাসিক: ' : 'Residence: '} value={translateResidence(staff.residence_type || sd.residence_type, bn)} />
-        </div>
-      </div>
-
-      {/* Address */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ঠিকানা' : 'Address'}</h4>
-        <div className="grid grid-cols-1 gap-3">
-          <InfoRow label={bn ? 'বর্তমান ঠিকানা: ' : 'Present Address: '} value={formatAddr(presentAddr) || staff.address || '-'} />
-          <InfoRow label={bn ? 'স্থায়ী ঠিকানা: ' : 'Permanent Address: '} value={formatAddr(permanentAddr) || '-'} />
-        </div>
-      </div>
-
-      {/* Employment Info */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'কর্মসংস্থান তথ্য' : 'Employment Info'}</h4>
-        <div className="grid grid-cols-2 gap-3">
-          <InfoRow label={bn ? 'কর্মের ধরন: ' : 'Employment Type: '} value={staff.employment_type || sd.employment_type || '-'} />
-          <InfoRow label={bn ? 'যোগদানের তারিখ: ' : 'Joining Date: '} value={staff.joining_date || '-'} />
-          <InfoRow label={bn ? 'শিক্ষাগত যোগ্যতা: ' : 'Education: '} value={staff.education || sd.education || '-'} />
-          <InfoRow label={bn ? 'অভিজ্ঞতা: ' : 'Experience: '} value={staff.experience || sd.experience || '-'} />
-          <InfoRow label={bn ? 'বেতন: ' : 'Salary: '} value={staff.salary ? `৳${staff.salary}` : '-'} />
-          <InfoRow label={bn ? 'পূর্বের প্রতিষ্ঠান: ' : 'Previous Institute: '} value={staff.previous_institute || sd.previous_institute || '-'} />
-          <InfoRow label={bn ? 'ডিউটি শুরু: ' : 'Duty Start: '} value={staff.duty_start_time || '-'} />
-          <InfoRow label={bn ? 'ডিউটি শেষ: ' : 'Duty End: '} value={staff.duty_end_time || '-'} />
-        </div>
-      </div>
-
-      {/* Father/Mother */}
-      {(father.name || mother.name) && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পিতা-মাতার তথ্য' : 'Parents Info'}</h4>
-          <div className="grid grid-cols-2 gap-3">
-            {father.name && <InfoRow label={bn ? 'পিতার নাম: ' : 'Father: '} value={father.name} />}
-            {father.occupation && <InfoRow label={bn ? 'পিতার পেশা: ' : "Father's Occupation: "} value={father.occupation} />}
-            {father.nid && <InfoRow label={bn ? 'পিতার NID: ' : "Father's NID: "} value={father.nid} />}
-            {father.mobile && <InfoRow label={bn ? 'পিতার ফোন: ' : "Father's Phone: "} value={`${father.mobile_code || ''}${father.mobile}`} />}
-            <div className="col-span-2 border-t my-1" />
-            {mother.name && <InfoRow label={bn ? 'মাতার নাম: ' : 'Mother: '} value={mother.name} />}
-            {mother.occupation && <InfoRow label={bn ? 'মাতার পেশা: ' : "Mother's Occupation: "} value={mother.occupation} />}
-            {mother.nid && <InfoRow label={bn ? 'মাতার NID: ' : "Mother's NID: "} value={mother.nid} />}
-            {mother.mobile && <InfoRow label={bn ? 'মাতার ফোন: ' : "Mother's Phone: "} value={`${mother.mobile_code || ''}${mother.mobile}`} />}
-          </div>
-        </div>
-      )}
-
-      {/* Guardian */}
-      {(guardian.name || guardian.relation) && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অভিভাবক তথ্য' : 'Guardian Info'}</h4>
-          <div className="grid grid-cols-2 gap-3">
-            {guardian.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={guardian.name} />}
-            {guardian.relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={guardian.relation} />}
-            {guardian.nid && <InfoRow label={bn ? 'NID: ' : 'NID: '} value={guardian.nid} />}
-            {guardian.mobile && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={`${guardian.mobile_code || ''}${guardian.mobile}`} />}
-            {formatAddr(guardian.present_address) && <div className="col-span-2"><InfoRow label={bn ? 'বর্তমান ঠিকানা: ' : 'Present Address: '} value={formatAddr(guardian.present_address)} /></div>}
-            {formatAddr(guardian.permanent_address) && <div className="col-span-2"><InfoRow label={bn ? 'স্থায়ী ঠিকানা: ' : 'Permanent Address: '} value={formatAddr(guardian.permanent_address)} /></div>}
-          </div>
-        </div>
-      )}
-
-      {/* Identifier/Referee */}
-      {(identifier.name || identifier.relation) && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'পরিচয়দাতা' : 'Referee / Identifier'}</h4>
-          <div className="grid grid-cols-2 gap-3">
-            {identifier.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={identifier.name} />}
-            {identifier.relation && <InfoRow label={bn ? 'সম্পর্ক: ' : 'Relation: '} value={identifier.relation} />}
-            {identifier.nid && <InfoRow label={bn ? 'NID: ' : 'NID: '} value={identifier.nid} />}
-            {identifier.mobile && <InfoRow label={bn ? 'ফোন: ' : 'Phone: '} value={`${identifier.mobile_code || ''}${identifier.mobile}`} />}
-            {formatAddr(identifier.address) && <div className="col-span-2"><InfoRow label={bn ? 'ঠিকানা: ' : 'Address: '} value={formatAddr(identifier.address)} /></div>}
-          </div>
-        </div>
-      )}
-
-      {/* Approver */}
-      {(approver.name || approver.position) && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'অনুমোদনকারী' : 'Approver'}</h4>
-          <div className="grid grid-cols-2 gap-3">
-            {approver.name && <InfoRow label={bn ? 'নাম: ' : 'Name: '} value={approver.name} />}
-            {approver.position && <InfoRow label={bn ? 'পদবী: ' : 'Position: '} value={approver.position} />}
-            {approver.date && <InfoRow label={bn ? 'তারিখ: ' : 'Date: '} value={approver.date} />}
-          </div>
-        </div>
-      )}
-
-      {/* Documents */}
-      {docs.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b pb-1">{bn ? 'ডকুমেন্টস' : 'Documents'}</h4>
-          <div className="space-y-2">
-            {docs.map((doc: any, i: number) => (
-              <div key={i} className="flex items-center gap-2 text-sm p-2 rounded-lg bg-secondary/50">
-                <FileText className="w-4 h-4 text-primary shrink-0" />
-                <span className="flex-1 truncate">{doc.name || doc.type || `Document ${i + 1}`}</span>
-                {doc.url && (
-                  <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline shrink-0">
-                    {bn ? 'দেখুন' : 'View'}
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
   );
 };
 
