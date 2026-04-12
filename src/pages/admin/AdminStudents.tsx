@@ -31,7 +31,7 @@ const AdminStudents = () => {
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
   const [filterApproval, setFilterApproval] = useState('all');
-
+  const [filterStatus, setFilterStatus] = useState('all');
   // Realtime subscription for auto-refresh
   useEffect(() => {
     const channel = supabase
@@ -88,6 +88,20 @@ const AdminStudents = () => {
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       if (await checkApproval('edit', { id, approval_status: status }, id, `ছাত্র স্ট্যাটাস: ${status}`)) return;
       const { error } = await supabase.from('students').update({ approval_status: status, status: status === 'approved' ? 'active' : status === 'rejected' ? 'inactive' : 'active' } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      toast.success(bn ? 'স্ট্যাটাস আপডেট হয়েছে' : 'Status updated');
+    },
+    onError: () => toast.error('Error'),
+  });
+
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: string }) => {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      if (await checkApproval('edit', { id, status: newStatus }, id, `ছাত্র ${newStatus === 'inactive' ? 'ডিএক্টিভ' : 'এক্টিভ'}`)) return;
+      const { error } = await supabase.from('students').update({ status: newStatus } as any).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
