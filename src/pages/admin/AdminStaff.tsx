@@ -22,7 +22,7 @@ export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative' | 'su
 
 // Fallback keyword matching (used when designation has no staff_category in DB)
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
-const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক'];
+const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক', 'admin', 'এডমিন', 'super admin', 'সুপার এডমিন'];
 const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'driver', 'ড্রাইভার'];
 const SUPPORT_STAFF_KEYWORDS = ['অফিস সহকারী', 'clerk', 'কেরানি', 'operator', 'অপারেটর', 'accountant', 'হিসাবরক্ষক', 'librarian', 'লাইব্রেরিয়ান', 'data entry', 'ডাটা এন্ট্রি'];
 
