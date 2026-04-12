@@ -1066,6 +1066,8 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
             {fieldErrors['parent_nid'] && <p className="text-xs text-destructive mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_nid']}</p>}
             {fieldErrors['parent_mobile'] && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {fieldErrors['parent_mobile']}</p>}
 
+            {sectionConfig.showParentAddress && (
+            <>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2">
                 <Checkbox id="parentSameStaff" checked={parentSameAsStaff} onCheckedChange={(v) => { setParentSameAsStaff(!!v); if (v) { setParentPermAddr({...permanentAddr}); setParentPresAddr(sameAddress ? {...permanentAddr} : {...presentAddr}); }}} />
@@ -1081,6 +1083,8 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
                 </div>
                 {!parentPresSameAsPerm && <AddressFields label={bn ? 'বর্তমান ঠিকানা' : 'Present Address'} value={parentPresAddr} onChange={setParentPresAddr} />}
               </div>
+            )}
+            </>
             )}
           </div>
 
