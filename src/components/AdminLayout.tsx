@@ -445,7 +445,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   </div>
                   {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
                     <div
-                      className="sidebar-submenu-enter ml-5 mt-1 space-y-0.5 border-l-2 border-sidebar-primary/20 pl-3 py-1 rounded-br-lg bg-sidebar-accent/30"
+                      className="sidebar-submenu-enter sidebar-submenu-container"
                       onMouseEnter={() => {
                         if (!mobile) {
                           if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -474,10 +474,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                                 startNavTransition(() => navigate(child.path));
                               }
                             }}
-                            className={`sidebar-item text-xs py-1.5 ${childActive ? 'active' : ''}`}
+                            className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                           >
-                            <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
+                            <child.icon className="sidebar-icon w-[15px] h-[15px] shrink-0" />
                             <span className="truncate">{child.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                           </Link>
                         );
                       })}
