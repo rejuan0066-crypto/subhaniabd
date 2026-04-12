@@ -120,7 +120,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
             joining_date: sd.joining_date || new Date().toISOString().split('T')[0],
             letter_number: `JL-${year}-${serial}`,
             letter_date: new Date().toISOString().split('T')[0],
-            letter_data: { phone: staff.phone, department: staff.department, nid: sd.nid },
+            letter_data: { phone: staff.phone, department: staff.department, nid: sd.nid, photo_url: staff.photo_url || '' },
           } as any);
         }
       }
