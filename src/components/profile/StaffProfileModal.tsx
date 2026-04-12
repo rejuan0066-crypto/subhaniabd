@@ -69,36 +69,35 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
     <div className="space-y-5">
       {/* ═══════════ HERO HEADER ═══════════ */}
       <div className="relative rounded-[20px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-teal-800/80 to-emerald-950/90 dark:from-emerald-950 dark:via-teal-900 dark:to-emerald-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_60%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#064e3b] to-[#065f46]" />
 
         <div className="relative p-6 flex items-start gap-5">
           <div className="relative shrink-0">
-            <div className="absolute -inset-1 rounded-2xl bg-white/20 blur-sm" />
+            <div className="absolute -inset-1.5 rounded-2xl bg-white/25 blur-md" />
             {staff.photo_url ? (
-              <img src={staff.photo_url} className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white/80 shadow-xl" alt="" />
+              <img src={staff.photo_url} className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white shadow-xl" alt="" />
             ) : (
-              <div className="relative w-28 h-32 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border-[3px] border-white/30">
-                <User className="w-10 h-10 text-white/50" />
+              <div className="relative w-28 h-32 rounded-2xl bg-white/15 flex items-center justify-center border-[3px] border-white/50">
+                <User className="w-10 h-10 text-white" />
               </div>
             )}
           </div>
 
           <div className="flex-1 min-w-0 space-y-2">
-            <h3 className="text-xl font-bold text-white tracking-tight truncate drop-shadow-sm">
+            <h3 className="text-xl font-bold text-white tracking-tight truncate">
               {bn ? (staff.name_bn || staff.name_en) : (staff.name_en || staff.name_bn) || '-'}
             </h3>
             {staff.name_bn && staff.name_en && (
-              <p className="text-sm text-white/60 truncate">{bn ? staff.name_en : staff.name_bn}</p>
+              <p className="text-sm text-white/80 truncate">{bn ? staff.name_en : staff.name_bn}</p>
             )}
             {staff.designation && (
-              <p className="text-sm font-semibold text-emerald-300/90">{staff.designation}</p>
+              <p className="text-sm font-bold text-white">{staff.designation}</p>
             )}
-            {staff.department && <p className="text-xs text-white/50">{staff.department}</p>}
+            {staff.department && <p className="text-xs text-white/70">{staff.department}</p>}
             <div className="flex flex-wrap items-center gap-2 pt-1">
               {staff.staff_id && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/15 text-white/90 backdrop-blur-sm border border-white/10">
-                  <Hash className="w-3 h-3" /> {staff.staff_id}
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white border border-white/20">
+                  <Hash className="w-3 h-3 text-white" /> {staff.staff_id}
                 </span>
               )}
               <span className={cn(
