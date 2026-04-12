@@ -493,7 +493,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         {(sidebarOpen || mobile) && (
           <div className="p-3 border-t border-sidebar-border/30 shrink-0">
             <div className="flex items-center gap-3 px-2 py-2.5">
-              <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20">
+              <div className="w-10 h-10 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden sidebar-avatar-glow">
                 {sidebarStaffPhoto?.photo_url ? (
                   <img src={sidebarStaffPhoto.photo_url} alt="" className="w-full h-full object-cover" />
                 ) : (
