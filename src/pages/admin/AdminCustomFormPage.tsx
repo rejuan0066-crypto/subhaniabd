@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useState } from 'react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import AddressFields, { type AddressData } from '@/components/AddressFields';
 import { FileText, Send, List, Trash2, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -411,7 +412,7 @@ const AdminCustomFormPage = () => {
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
                             {canDeleteItem && <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive"
-                              onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteMutation.mutate(sub.id); }}>
+                              onClick={() => setDeleteId(sub.id)}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>}
                           </TableCell>
