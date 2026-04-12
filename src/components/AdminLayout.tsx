@@ -574,6 +574,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           <main className="flex-1 px-3 lg:px-6 pb-8 pt-5">
             {/* Modern Glass Content Container */}
             <div className="admin-page-card rounded-[28px] lg:rounded-[36px] bg-card/75 dark:bg-card/40 backdrop-blur-xl border border-border/15 dark:border-border/10 p-5 sm:p-7 lg:p-10 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-elevated)' }}>
+              <BackButton position="top" />
               {/* Page Header */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-border/30">
                 <div>
@@ -594,7 +595,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   )}
                 </div>
               </div>
-              <BackButton position="top" />
               <AdminPageWithTabs>{children}</AdminPageWithTabs>
             </div>
             <BackButton position="bottom" />
