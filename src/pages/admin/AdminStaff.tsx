@@ -148,6 +148,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     const category = getStaffCategory(s, designationsMap);
     if (staffType === 'teacher') return category === 'teacher';
     if (staffType === 'administrative') return category === 'administrative';
+    if (staffType === 'support') return category === 'support';
     if (staffType === 'staff') return category === 'general';
     return true;
   });
