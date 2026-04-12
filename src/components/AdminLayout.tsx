@@ -504,7 +504,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-sidebar-foreground truncate leading-relaxed">
-                  {(language === 'bn' ? sidebarStaffPhoto?.name_bn : sidebarStaffPhoto?.name_en) || sidebarStaffPhoto?.name_bn || user?.email?.split('@')[0] || 'Admin'}
+                  {(language === 'bn' ? sidebarStaffPhoto?.name_bn : sidebarStaffPhoto?.name_en) || sidebarStaffPhoto?.name_bn || sidebarProfile?.full_name || user?.email?.split('@')[0] || 'User'}
                 </p>
                 <span className="user-role-badge mt-0.5">{(() => {
                   const roleLabels: Record<string, { bn: string; en: string }> = {
