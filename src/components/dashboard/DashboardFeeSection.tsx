@@ -228,9 +228,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     if (!printWindow || !selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort((a: any, b: any) => {
-      const divA = a.students?.divisions?.name_bn || '';
-      const divB = b.students?.divisions?.name_bn || '';
-      if (divA !== divB) return divA.localeCompare(divB);
+      const clsA = a.students?.classes?.sort_order || 0;
+      const clsB = b.students?.classes?.sort_order || 0;
+      if (clsA !== clsB) return clsA - clsB;
       return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
     });
 
@@ -245,7 +245,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       <p>${listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত তালিকা' : 'Paid List') : (language === 'bn' ? 'অপরিশোধিত তালিকা' : 'Unpaid List')}</p>
       <table><thead><tr>
         <th>#</th><th>${language === 'bn' ? 'নাম' : 'Name'}</th><th>${language === 'bn' ? 'রোল' : 'Roll'}</th>
-        <th>${language === 'bn' ? 'বিভাগ' : 'Division'}</th>
+        <th>${language === 'bn' ? 'শ্রেণী' : 'Class'}</th>
         ${category === 'monthly' ? `<th>${language === 'bn' ? 'মাস' : 'Month'}</th>` : ''}
         ${category === 'exam' ? `<th>${language === 'bn' ? 'পরীক্ষা' : 'Exam'}</th>` : ''}
         <th>${language === 'bn' ? 'সেশন' : 'Year'}</th>
@@ -255,7 +255,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         <td>${i + 1}</td>
         <td>${p.students?.name_bn || '-'}</td>
         <td>${p.students?.roll_number || '-'}</td>
-        <td>${p.students?.divisions?.name_bn || '-'}</td>
+        <td>${p.students?.classes?.name_bn || '-'}</td>
         ${category === 'monthly' ? `<td>${p.month || '-'}</td>` : ''}
         ${category === 'exam' ? `<td>${p.fee_types?.name_bn || '-'}</td>` : ''}
         <td>${p.year || '-'}</td>
@@ -270,15 +270,15 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     if (!selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort((a: any, b: any) => {
-      const divA = a.students?.divisions?.name_bn || '';
-      const divB = b.students?.divisions?.name_bn || '';
-      if (divA !== divB) return divA.localeCompare(divB);
+      const clsA = a.students?.classes?.sort_order || 0;
+      const clsB = b.students?.classes?.sort_order || 0;
+      if (clsA !== clsB) return clsA - clsB;
       return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
     });
 
-    const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'বিভাগ' : 'Division', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
+    const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'শ্রেণী' : 'Class', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
     const rows = sorted.map((p: any) => [
-      p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.divisions?.name_bn || '-', p.year || '-',
+      p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p.year || '-',
       listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)
     ]);
     const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
