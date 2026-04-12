@@ -70,8 +70,9 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   useEffect(() => {
     setEntityType(forcedTab || (tabParam === 'staff' ? 'staff' : 'student'));
   }, [forcedTab, tabParam]);
-  const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential'>('all');
+  const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential' | 'meal'>('all');
   const [staffSubTab, setStaffSubTab] = useState<'fulltime' | 'duty' | 'meal'>('fulltime');
+  const [studentMealShift, setStudentMealShift] = useState('meal_breakfast');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSessionYear, setSelectedSessionYear] = useState('');
@@ -79,8 +80,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [selectedShift, setSelectedShift] = useState('full_day');
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
-  // Effective shift: fulltime tab always uses 'full_day'
-  const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
+  // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
+  const effectiveShift = entityType === 'student'
+    ? (studentSubTab === 'meal' ? studentMealShift : 'full_day')
+    : (staffSubTab === 'fulltime' ? 'full_day' : selectedShift);
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
   const [ruleForm, setRuleForm] = useState({ name: '', name_bn: '', entity_type: 'student', config: { color: 'green', counts_as: 'present' } });
@@ -177,8 +180,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     }
     let filtered = allStudents;
 
-    // Residential sub-tab: only residential students
-    if (studentSubTab === 'residential') {
+    // Residential or Meal sub-tab: only residential students
+    if (studentSubTab === 'residential' || studentSubTab === 'meal') {
       filtered = filtered.filter((s: any) => s.residence_type === 'resident');
     }
 
@@ -914,10 +917,26 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                       <Users className="h-4 w-4 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
                     </TabsTrigger>
                     <TabsTrigger value="residential">
-                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক ছাত্র' : 'Residential'}
+                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক' : 'Residential'}
+                    </TabsTrigger>
+                    <TabsTrigger value="meal">
+                      <Utensils className="h-4 w-4 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal'}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
+
+                {/* Student Meal Shift Selector */}
+                {studentSubTab === 'meal' && (
+                  <Tabs value={studentMealShift} onValueChange={setStudentMealShift} className="shrink-0">
+                    <TabsList>
+                      {MEAL_SHIFTS.map(sh => (
+                        <TabsTrigger key={sh.value} value={sh.value}>
+                          <sh.icon className="h-4 w-4 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                )}
 
                 {/* Session Year (both tabs) */}
                 <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
