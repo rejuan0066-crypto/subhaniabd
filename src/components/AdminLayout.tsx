@@ -470,9 +470,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         {/* Bottom - user profile + logout */}
         {(sidebarOpen || mobile) && (
-          <div className="p-3 border-t border-sidebar-border shrink-0">
-            <div className="flex items-center gap-3 px-2 py-2">
-              <div className="w-8 h-8 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="p-3 border-t border-sidebar-border/30 shrink-0">
+            <div className="flex items-center gap-3 px-2 py-2.5">
+              <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center shrink-0 overflow-hidden shadow-md shadow-sidebar-primary/20 ring-2 ring-sidebar-primary/20">
                 {sidebarStaffPhoto?.photo_url ? (
                   <img src={sidebarStaffPhoto.photo_url} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -482,10 +482,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-sidebar-foreground truncate">
+                <p className="text-xs font-medium text-sidebar-foreground truncate leading-relaxed">
                   {(language === 'bn' ? sidebarStaffPhoto?.name_bn : sidebarStaffPhoto?.name_en) || sidebarStaffPhoto?.name_bn || user?.email?.split('@')[0] || 'Admin'}
                 </p>
-                <p className="text-[10px] text-sidebar-foreground/50 capitalize">{(() => {
+                <span className="user-role-badge mt-0.5">{(() => {
                   const roleLabels: Record<string, { bn: string; en: string }> = {
                     super_admin: { bn: 'সুপার অ্যাডমিন', en: 'Super Admin' },
                     admin: { bn: 'অ্যাডমিন', en: 'Admin' },
@@ -495,11 +495,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   };
                   const r = roleLabels[role || ''] || { bn: role || '', en: role || '' };
                   return language === 'bn' ? r.bn : r.en;
-                })()}</p>
+                })()}</span>
               </div>
               <button
                 onClick={async () => { await signOut(); navigate('/login'); }}
-                className="p-1.5 rounded-md hover:bg-destructive/20 text-sidebar-foreground/60 hover:text-destructive transition-colors"
+                className="p-1.5 rounded-lg hover:bg-destructive/20 text-sidebar-foreground/60 hover:text-destructive transition-colors"
                 title={language === 'bn' ? 'লগআউট' : 'Logout'}
               >
                 <LogOut className="w-4 h-4" />
