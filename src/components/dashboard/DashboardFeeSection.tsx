@@ -409,94 +409,102 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border/40 bg-card/90 backdrop-blur-xl overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
       {/* Header */}
-      <button onClick={() => setExpanded(!expanded)} className="w-full p-4 flex items-center justify-between hover:bg-accent/30 transition-colors">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            {icon || <CreditCard className="w-5 h-5 text-primary" />}
+      <button onClick={() => setExpanded(!expanded)} className="w-full p-5 flex items-center justify-between hover:bg-accent/20 transition-all duration-300">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+            {icon || <CreditCard className="w-6 h-6 text-primary" />}
           </div>
           <div className="text-left">
-            <h3 className="font-display font-bold text-foreground text-base">{bn ? titleBn : titleEn}</h3>
-            {sessionLabel && <span className="text-xs text-muted-foreground">{sessionLabel}</span>}
+            <h3 className="font-display font-bold text-foreground text-lg">{bn ? titleBn : titleEn}</h3>
+            {sessionLabel && <span className="text-sm text-muted-foreground">{sessionLabel}</span>}
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <div className="text-right">
-            <div className="text-lg font-bold text-primary">৳ {totalAmount.toLocaleString()}</div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="text-emerald-600 dark:text-emerald-400">✓ {totalPaidCount} {bn ? 'জন' : ''}</span>
-              <span className="text-destructive">✗ {totalUnpaidCount} {bn ? 'জন' : ''} (৳{totalUnpaid.toLocaleString()})</span>
+            <div className="text-xl font-bold text-primary">
+              <span className="text-2xl">৳</span> {totalAmount.toLocaleString()}
+            </div>
+            <div className="flex items-center gap-4 text-sm mt-1">
+              <span className="text-emerald-700 dark:text-emerald-400 font-medium">✓ {totalPaidCount} {bn ? 'জন' : ''}</span>
+              <span className="text-rose-600 dark:text-rose-400 font-medium">✗ {totalUnpaidCount} {bn ? 'জন' : ''} (<span className="font-bold">৳{totalUnpaid.toLocaleString()}</span>)</span>
             </div>
           </div>
-          {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
+          {expanded ? <ChevronUp className="w-6 h-6 text-muted-foreground" /> : <ChevronDown className="w-6 h-6 text-muted-foreground" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-3">
+        <div className="px-5 pb-5 space-y-4">
           {enrichedGroups.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</p>
+            <p className="text-base text-muted-foreground text-center py-6">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</p>
           )}
 
           {/* ========== MONTHLY: Show class-wise with month breakdown table ========== */}
           {category === 'monthly' && classMonthlyBreakdown && classMonthlyBreakdown.classes.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {classMonthlyBreakdown.classes.map((cls) => {
                 const clsExpected = cls.totalPaid + cls.totalUnpaid;
                 const clsPercent = clsExpected > 0 ? Math.round((cls.totalPaid / clsExpected) * 100) : 0;
                 return (
-                  <div key={cls.id} className="rounded-lg border border-border/60 bg-secondary/20 overflow-hidden">
-                    <div className="p-3 flex items-center justify-between">
-                      <span className="text-sm font-bold text-foreground">{cls.label}</span>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">৳{cls.totalPaid.toLocaleString()}</span>
+                  <div key={cls.id} className="rounded-2xl border border-border/40 bg-card/60 backdrop-blur-lg overflow-hidden" style={{ boxShadow: 'var(--shadow-soft)' }}>
+                    {/* Class header */}
+                    <div className="p-5 flex items-center justify-between">
+                      <span className="text-base font-bold text-foreground">{cls.label}</span>
+                      <div className="flex items-center gap-6">
+                        <span className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+                          <span className="font-bold text-emerald-700 dark:text-emerald-400 text-base">
+                            <span className="text-lg">৳</span>{cls.totalPaid.toLocaleString()}
+                          </span>
                         </span>
-                        <span className="flex items-center gap-1">
-                          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
-                          <span className="font-semibold text-rose-600 dark:text-rose-400">৳{cls.totalUnpaid.toLocaleString()}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span></span>
+                          <span className="font-bold text-rose-600 dark:text-rose-400 text-base">
+                            <span className="text-lg">৳</span>{cls.totalUnpaid.toLocaleString()}
+                          </span>
                         </span>
                       </div>
                     </div>
+
                     {/* Month-wise summary table */}
                     <div className="overflow-x-auto">
-                      <table className="w-full text-xs border-t border-border/40">
+                      <table className="w-full" style={{ borderCollapse: 'collapse', borderSpacing: '0' }}>
                         <thead>
-                          <tr className="bg-muted/40">
-                            <th className="px-3 py-1.5 text-left font-semibold text-muted-foreground">{bn ? 'মাস' : 'Month'}</th>
-                            <th className="px-3 py-1.5 text-right font-semibold text-emerald-700 dark:text-emerald-400">{bn ? 'পরিশোধিত' : 'Paid'}</th>
-                            <th className="px-3 py-1.5 text-right font-semibold text-rose-600 dark:text-rose-400">{bn ? 'বকেয়া' : 'Due'}</th>
-                            <th className="px-3 py-1.5 text-center font-semibold text-muted-foreground"></th>
+                          <tr className="bg-muted/30">
+                            <th className="px-6 py-4 text-left text-sm font-bold text-foreground">{bn ? 'মাস' : 'Month'}</th>
+                            <th className="px-6 py-4 text-right text-sm font-bold text-emerald-700 dark:text-emerald-400">{bn ? 'পরিশোধিত' : 'Paid'}</th>
+                            <th className="px-6 py-4 text-right text-sm font-bold text-rose-600 dark:text-rose-400">{bn ? 'বকেয়া' : 'Due'}</th>
+                            <th className="px-6 py-4 text-center"></th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/30">
-                          {classMonthlyBreakdown.allMonths.map((m) => {
+                        <tbody>
+                          {classMonthlyBreakdown.allMonths.map((m, mIdx) => {
                             const md = cls.months[m.key];
                             if (!md) return null;
                             return (
-                              <tr key={m.key} className="hover:bg-accent/20 transition-colors">
-                                <td className="px-3 py-1.5 font-medium text-foreground">{m.label}</td>
-                                <td className="px-3 py-1.5 text-right">
-                                  <span className="inline-flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">{md.paidCount} {bn ? 'জন' : ''}</span>
-                                    <span className="text-emerald-700 dark:text-emerald-400 font-bold">· ৳{md.paidAmount.toLocaleString()}</span>
+                              <tr key={m.key} className={`hover:bg-primary/[0.04] transition-all duration-200 ${mIdx % 2 === 1 ? 'bg-muted/10' : ''}`}>
+                                <td className="px-6 py-5 text-base font-semibold text-foreground">{m.label}</td>
+                                <td className="px-6 py-5 text-right">
+                                  <span className="inline-flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                                    <span className="text-emerald-700 dark:text-emerald-400 font-semibold text-base">{md.paidCount} {bn ? 'জন' : ''}</span>
+                                    <span className="text-emerald-700 dark:text-emerald-400 font-bold text-base">· <span className="text-lg">৳</span>{md.paidAmount.toLocaleString()}</span>
                                   </span>
                                 </td>
-                                <td className="px-3 py-1.5 text-right">
-                                  <span className="inline-flex items-center gap-1">
-                                    <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span></span>
-                                    <span className="text-rose-600 dark:text-rose-400 font-medium">{md.unpaidCount} {bn ? 'জন' : ''}</span>
-                                    <span className="text-rose-600 dark:text-rose-400 font-bold">· ৳{md.unpaidAmount.toLocaleString()}</span>
+                                <td className="px-6 py-5 text-right">
+                                  <span className="inline-flex items-center gap-2">
+                                    <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
+                                    <span className="text-rose-600 dark:text-rose-400 font-semibold text-base">{md.unpaidCount} {bn ? 'জন' : ''}</span>
+                                    <span className="text-rose-600 dark:text-rose-400 font-bold text-base">· <span className="text-lg">৳</span>{md.unpaidAmount.toLocaleString()}</span>
                                   </span>
                                 </td>
-                                <td className="px-3 py-1.5 text-center">
+                                <td className="px-6 py-5 text-center">
                                   {md.unpaidCount > 0 && (
                                     <button
                                       onClick={() => openDetailedReport(m.key)}
-                                      className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-medium"
+                                      className="text-xs px-4 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-semibold"
                                     >
                                       {bn ? 'বিস্তারিত' : 'Details'}
                                     </button>
@@ -508,14 +516,15 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                         </tbody>
                       </table>
                     </div>
+
                     {/* Class summary pills */}
-                    <div className="px-3 py-2 bg-muted/30 border-t border-border/40 flex flex-wrap items-center gap-3 text-[11px]">
-                      <span className="text-muted-foreground">{bn ? 'মোট সম্ভাব্য:' : 'Expected:'} <span className="font-bold text-foreground">৳{clsExpected.toLocaleString()}</span></span>
-                      <span className="text-muted-foreground">{bn ? 'সংগৃহীত:' : 'Collected:'} <span className="font-bold text-emerald-700 dark:text-emerald-400">৳{cls.totalPaid.toLocaleString()}</span></span>
-                      <span className="text-muted-foreground">{bn ? 'বকেয়া:' : 'Due:'} <span className="font-bold text-rose-600 dark:text-rose-400">৳{cls.totalUnpaid.toLocaleString()}</span></span>
-                      <div className="flex items-center gap-1.5 ml-auto">
-                        <Progress value={clsPercent} className="w-16 h-1.5" />
-                        <span className="font-bold text-foreground">{clsPercent}%</span>
+                    <div className="px-6 py-4 bg-muted/20 border-t border-border/30 flex flex-wrap items-center gap-6 text-sm">
+                      <span className="text-muted-foreground font-medium">{bn ? 'মোট সম্ভাব্য:' : 'Expected:'} <span className="font-bold text-foreground text-base"><span className="text-lg">৳</span>{clsExpected.toLocaleString()}</span></span>
+                      <span className="text-muted-foreground font-medium">{bn ? 'সংগৃহীত:' : 'Collected:'} <span className="font-bold text-emerald-700 dark:text-emerald-400 text-base"><span className="text-lg">৳</span>{cls.totalPaid.toLocaleString()}</span></span>
+                      <span className="text-muted-foreground font-medium">{bn ? 'বকেয়া:' : 'Due:'} <span className="font-bold text-rose-600 dark:text-rose-400 text-base"><span className="text-lg">৳</span>{cls.totalUnpaid.toLocaleString()}</span></span>
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Progress value={clsPercent} className="w-24 h-2" />
+                        <span className="font-bold text-foreground text-sm">{clsPercent}%</span>
                       </div>
                     </div>
                   </div>
@@ -530,22 +539,23 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
             return (
               <div key={i}
                 onClick={() => setSelectedGroup(g)}
-                className="flex items-center justify-between p-3 rounded-lg border border-border/60 bg-secondary/30 hover:bg-secondary/60 hover:border-primary/30 transition-all cursor-pointer group">
-                <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{g.label}</span>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{g.paid.length} {bn ? 'জন' : ''} · <span className="font-bold">৳{g.total.toLocaleString()}</span></span>
+                className={`flex items-center justify-between p-5 rounded-2xl border border-border/40 hover:border-primary/30 transition-all duration-300 cursor-pointer group ${i % 2 === 1 ? 'bg-muted/10' : 'bg-card/50'}`}
+                style={{ boxShadow: 'var(--shadow-soft)' }}>
+                <span className="text-base font-bold text-foreground group-hover:text-primary transition-colors">{g.label}</span>
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                    <span className="text-base font-semibold text-emerald-700 dark:text-emerald-400">{g.paid.length} {bn ? 'জন' : ''} · <span className="font-bold text-lg">৳</span><span className="font-bold">{g.total.toLocaleString()}</span></span>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
-                    <span className="text-xs font-medium text-rose-600 dark:text-rose-400">{g.unpaid.length} {bn ? 'জন' : ''} · <span className="font-bold">৳{unpaidAmt.toLocaleString()}</span></span>
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span></span>
+                    <span className="text-base font-semibold text-rose-600 dark:text-rose-400">{g.unpaid.length} {bn ? 'জন' : ''} · <span className="font-bold text-lg">৳</span><span className="font-bold">{unpaidAmt.toLocaleString()}</span></span>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); setSelectedGroup(g); setListType('unpaid'); }}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-medium"
+                    className="text-xs px-4 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-semibold"
                   >
-                    <FileText className="w-3 h-3 inline mr-0.5" />{bn ? 'রিপোর্ট' : 'Report'}
+                    <FileText className="w-3.5 h-3.5 inline mr-1" />{bn ? 'রিপোর্ট' : 'Report'}
                   </button>
                 </div>
               </div>
@@ -553,24 +563,24 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           })}
 
           {/* ========== FINANCIAL SUMMARY PILLS ========== */}
-          <div className="rounded-lg border border-border/60 bg-gradient-to-r from-muted/50 to-muted/30 p-3 space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground font-medium">{bn ? 'মোট সম্ভাব্য আদায়:' : 'Expected Total:'}</span>
-                <span className="font-bold text-foreground text-sm">৳{totalExpected.toLocaleString()}</span>
+          <div className="rounded-2xl border border-border/40 bg-gradient-to-r from-muted/40 to-muted/20 p-5 space-y-3" style={{ boxShadow: 'var(--shadow-soft)' }}>
+            <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-semibold">{bn ? 'মোট সম্ভাব্য আদায়:' : 'Expected Total:'}</span>
+                <span className="font-bold text-foreground text-lg"><span className="text-xl">৳</span>{totalExpected.toLocaleString()}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground font-medium">{bn ? 'মোট সংগৃহীত:' : 'Total Collected:'}</span>
-                <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">৳{totalAmount.toLocaleString()}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-semibold">{bn ? 'মোট সংগৃহীত:' : 'Total Collected:'}</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 text-lg"><span className="text-xl">৳</span>{totalAmount.toLocaleString()}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground font-medium">{bn ? 'মোট বকেয়া:' : 'Total Outstanding:'}</span>
-                <span className="font-bold text-rose-600 dark:text-rose-400 text-sm">৳{totalUnpaid.toLocaleString()}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground font-semibold">{bn ? 'মোট বকেয়া:' : 'Total Outstanding:'}</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 text-lg"><span className="text-xl">৳</span>{totalUnpaid.toLocaleString()}</span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Progress value={collectionPercent} className="flex-1 h-2" />
-              <span className="text-xs font-bold text-foreground min-w-[36px] text-right">{collectionPercent}%</span>
+            <div className="flex items-center gap-3">
+              <Progress value={collectionPercent} className="flex-1 h-2.5" />
+              <span className="text-sm font-bold text-foreground min-w-[40px] text-right">{collectionPercent}%</span>
             </div>
           </div>
         </div>
