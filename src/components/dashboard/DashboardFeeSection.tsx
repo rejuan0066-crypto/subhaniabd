@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -22,12 +22,13 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [listType, setListType] = useState<'paid' | 'unpaid'>('paid');
 
+  // Fetch fee payments (existing records)
   const { data: payments = [] } = useQuery({
     queryKey: ['dashboard-fee-payments', category],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('fee_payments')
-        .select('*, students(name_bn, roll_number, division_id, divisions(name_bn)), fee_types(name_bn, fee_category, name)')
+        .select('*, students(id, name_bn, roll_number, division_id, divisions(name_bn)), fee_types(name_bn, fee_category, name, amount)')
         .eq('fee_types.fee_category', category)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -35,26 +36,146 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     },
   });
 
-  // Group by month/exam/year
-  const groups = payments.reduce((acc: any, p: any) => {
-    let key = '';
-    if (category === 'monthly') key = p.month || 'N/A';
-    else if (category === 'exam') key = bn ? (p.fee_types?.name_bn || p.fee_types?.name || 'N/A') : (p.fee_types?.name || 'N/A');
-    else key = `${p.year || 'N/A'}`;
+  // Fetch fee types for this category
+  const { data: feeTypes = [] } = useQuery({
+    queryKey: ['dashboard-fee-types', category],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('fee_types')
+        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months')
+        .eq('fee_category', category)
+        .eq('is_active', true)
+        .is('deleted_at', null);
+      return data || [];
+    },
+  });
 
-    if (!acc[key]) acc[key] = { label: key, total: 0, paid: [], unpaid: [] };
-    const amount = p.paid_amount || p.amount || 0;
-    if (p.status === 'paid') {
-      acc[key].paid.push(p);
-      acc[key].total += Number(amount);
-    } else {
-      acc[key].unpaid.push(p);
-    }
-    return acc;
-  }, {});
+  // Fetch all active students
+  const { data: students = [] } = useQuery({
+    queryKey: ['dashboard-students-for-fees'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('students')
+        .select('id, name_bn, roll_number, division_id, class_id, session_id, is_free, divisions(name_bn)')
+        .eq('status', 'active');
+      return data || [];
+    },
+  });
 
-  const groupList = Object.values(groups) as any[];
-  const totalAmount = groupList.reduce((s: number, g: any) => s + g.total, 0);
+  // Build unpaid students list (students who should pay but have no paid/pending record)
+  const enrichedGroups = useMemo(() => {
+    // First build paid groups from existing payments
+    const groups: Record<string, { label: string; total: number; paid: any[]; unpaid: any[] }> = {};
+
+    payments.forEach((p: any) => {
+      let key = '';
+      if (category === 'monthly') key = p.month || 'N/A';
+      else if (category === 'exam') key = bn ? (p.fee_types?.name_bn || p.fee_types?.name || 'N/A') : (p.fee_types?.name || 'N/A');
+      else key = `${p.year || 'N/A'}`;
+
+      if (!groups[key]) groups[key] = { label: key, total: 0, paid: [], unpaid: [] };
+      const amount = p.paid_amount || p.amount || 0;
+      if (p.status === 'paid') {
+        groups[key].paid.push(p);
+        groups[key].total += Number(amount);
+      } else if (p.status === 'pending') {
+        groups[key].paid.push(p); // show pending with paid for now
+        groups[key].total += Number(amount);
+      }
+      // cancelled records are ignored
+    });
+
+    // Now find unpaid students - those with no payment record for each fee type
+    feeTypes.forEach((ft: any) => {
+      // Get applicable students for this fee type
+      const applicableStudents = students.filter((s: any) => {
+        if (s.is_free) return false;
+        if (ft.division_id && ft.division_id !== s.division_id) return false;
+        if (ft.class_id && ft.class_id !== s.class_id) return false;
+        if (ft.session_id && ft.session_id !== s.session_id) return false;
+        return true;
+      });
+
+      // Get student IDs that have paid/pending for this fee type
+      const paidStudentIds = new Set(
+        payments
+          .filter((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending'))
+          .map((p: any) => p.student_id)
+      );
+
+      // For admission/one-time fees
+      if (ft.payment_frequency !== 'monthly') {
+        const currentYear = new Date().getFullYear();
+        const key = category === 'exam'
+          ? (bn ? (ft.name_bn || ft.name) : (ft.name || 'N/A'))
+          : `${currentYear}`;
+
+        if (!groups[key]) groups[key] = { label: key, total: 0, paid: [], unpaid: [] };
+
+        applicableStudents.forEach((s: any) => {
+          if (!paidStudentIds.has(s.id)) {
+            // Check if this student is already in unpaid list
+            const alreadyAdded = groups[key].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
+            if (!alreadyAdded) {
+              groups[key].unpaid.push({
+                id: `unpaid-${s.id}-${ft.id}`,
+                _studentId: s.id,
+                _feeTypeId: ft.id,
+                students: s,
+                fee_types: ft,
+                amount: ft.amount,
+                year: currentYear,
+                status: 'unpaid',
+              });
+            }
+          }
+        });
+      } else {
+        // Monthly fees - check each applicable month
+        const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonthIdx = new Date().getMonth();
+        const applicableMonths: string[] = ft.applicable_months && Array.isArray(ft.applicable_months)
+          ? (ft.applicable_months as string[])
+          : MONTHS_EN;
+
+        for (let mi = 0; mi <= currentMonthIdx; mi++) {
+          const monthName = MONTHS_EN[mi];
+          if (!applicableMonths.includes(monthName)) continue;
+
+          if (!groups[monthName]) groups[monthName] = { label: monthName, total: 0, paid: [], unpaid: [] };
+
+          // Find students who paid for this specific month
+          const paidForMonth = new Set(
+            payments
+              .filter((p: any) => p.fee_type_id === ft.id && p.month === monthName && (p.status === 'paid' || p.status === 'pending'))
+              .map((p: any) => p.student_id)
+          );
+
+          applicableStudents.forEach((s: any) => {
+            if (!paidForMonth.has(s.id)) {
+              const alreadyAdded = groups[monthName].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
+              if (!alreadyAdded) {
+                groups[monthName].unpaid.push({
+                  id: `unpaid-${s.id}-${ft.id}-${monthName}`,
+                  _studentId: s.id,
+                  _feeTypeId: ft.id,
+                  students: s,
+                  fee_types: ft,
+                  amount: ft.amount,
+                  month: monthName,
+                  status: 'unpaid',
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+
+    return Object.values(groups);
+  }, [payments, feeTypes, students, category, bn]);
+
+  const totalAmount = enrichedGroups.reduce((s: number, g: any) => s + g.total, 0);
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -82,7 +203,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         ${category === 'monthly' ? `<th>${language === 'bn' ? 'মাস' : 'Month'}</th>` : ''}
         ${category === 'exam' ? `<th>${language === 'bn' ? 'পরীক্ষা' : 'Exam'}</th>` : ''}
         <th>${language === 'bn' ? 'সেশন' : 'Year'}</th>
-        <th>${listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Paid') : (language === 'bn' ? 'স্ট্যাটাস' : 'Status')}</th>
+        <th>${listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Paid') : (language === 'bn' ? 'বকেয়া' : 'Due')}</th>
       </tr></thead><tbody>
       ${sorted.map((p: any, i: number) => `<tr>
         <td>${i + 1}</td>
@@ -92,7 +213,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         ${category === 'monthly' ? `<td>${p.month || '-'}</td>` : ''}
         ${category === 'exam' ? `<td>${p.fee_types?.name_bn || '-'}</td>` : ''}
         <td>${p.year || '-'}</td>
-        <td>${listType === 'paid' ? `৳ ${p.paid_amount || p.amount}` : (language === 'bn' ? 'অপরিশোধিত' : 'Unpaid')}</td>
+        <td>${listType === 'paid' ? `৳ ${p.paid_amount || p.amount}` : `৳ ${p.amount || 0}`}</td>
       </tr>`).join('')}
       </tbody></table></body></html>`);
     printWindow.document.close();
@@ -109,10 +230,10 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
     });
 
-    const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'বিভাগ' : 'Division', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'স্ট্যাটাস' : 'Status')];
+    const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'বিভাগ' : 'Division', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
     const rows = sorted.map((p: any) => [
       p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.divisions?.name_bn || '-', p.year || '-',
-      listType === 'paid' ? (p.paid_amount || p.amount) : (language === 'bn' ? 'অপরিশোধিত' : 'Unpaid')
+      listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)
     ]);
     const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -136,8 +257,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
       {expanded && (
         <div className="mt-4 space-y-2">
-          {groupList.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">{language === 'bn' ? 'কোনো রেকর্ড নেই' : 'No records'}</p>}
-          {groupList.map((g: any, i: number) => (
+          {enrichedGroups.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">{language === 'bn' ? 'কোনো রেকর্ড নেই' : 'No records'}</p>}
+          {enrichedGroups.map((g: any, i: number) => (
             <div key={i}
               onClick={() => setSelectedGroup(g)}
               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer">
@@ -184,7 +305,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                   {category === 'monthly' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'মাস' : 'Month'}</th>}
                   {category === 'exam' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'সেশন' : 'Year'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'স্ট্যাটাস' : 'Status')}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -209,7 +330,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                       {listType === 'paid' ? (
                         <span className="font-bold text-success">৳ {p.paid_amount || p.amount}</span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">{language === 'bn' ? 'অপরিশোধিত' : 'Unpaid'}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">৳ {p.amount || 0}</span>
                       )}
                     </td>
                   </tr>
