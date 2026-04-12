@@ -706,8 +706,8 @@ const AdminSalary = () => {
     const totalAllowance = Number(record.bonus || 0) + Number(record.overtime || 0) + Number(record.other_allowance || 0);
     const monthName = MONTHS.find(m => m.value === selectedMonth);
 
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Salary Slip</title>
-    <style>body{font-family:'Noto Sans Bengali',sans-serif;padding:30px;max-width:700px;margin:auto}
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Salary Slip</title><link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet">
+    <style>body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:30px;max-width:700px;margin:auto}
     .header{text-align:center;border-bottom:2px solid #333;padding-bottom:15px;margin-bottom:20px}
     h2{margin:0;font-size:18px}p{margin:4px 0;font-size:13px}
     table{width:100%;border-collapse:collapse;margin:15px 0}

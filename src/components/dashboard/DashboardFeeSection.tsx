@@ -376,8 +376,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort(compareFeeItems);
 
-    printWindow.document.write(`<html><head><title>Print</title><style>
-      body{font-family:Arial,sans-serif;padding:20px}
+    printWindow.document.write(`<html><head><title>Print</title><link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><style>
+      body{font-family:'Solaiman Lipi',Arial,sans-serif;padding:20px}
       table{width:100%;border-collapse:collapse;margin-top:10px}
       th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:13px}
       th{background:#f5f5f5}

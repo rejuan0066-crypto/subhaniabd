@@ -8,7 +8,7 @@ export const printIdCard = (cardHtml: string) => {
 <head>
   <meta charset="utf-8" />
   <title>Student ID Card</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     @page {
       size: 2.125in 3.375in;
@@ -87,7 +87,7 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
 <head>
   <meta charset="utf-8" />
   <title>Student ID Cards</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     @page {
       size: A4;
@@ -95,7 +95,7 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Noto Sans Bengali', sans-serif;
+      font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif;
       background: #f8fafc;
       display: flex;
       flex-wrap: wrap;

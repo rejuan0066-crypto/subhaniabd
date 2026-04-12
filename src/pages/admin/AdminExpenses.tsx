@@ -1843,7 +1843,7 @@ const AdminExpenses = () => {
                 if (!content) return;
                 const win = window.open('', '_blank');
                 if (!win) return;
-                win.document.write(`<html><head><title>${bn ? 'প্রকল্প প্রতিবেদন' : 'Project Report'}</title><style>body{font-family:'Noto Sans Bengali',sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 8px}th{background:#f0f0f0;text-align:left}.text-right{text-align:right}.text-center{text-align:center}h1{font-size:18px}h3{font-size:14px}.italic{font-style:italic}@media print{body{padding:0}}</style></head><body>${content.innerHTML}</body></html>`);
+                win.document.write(`<html><head><title>${bn ? 'প্রকল্প প্রতিবেদন' : 'Project Report'}</title><style>body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 8px}th{background:#f0f0f0;text-align:left}.text-right{text-align:right}.text-center{text-align:center}h1{font-size:18px}h3{font-size:14px}.italic{font-style:italic}@media print{body{padding:0}}</style></head><body>${content.innerHTML}</body></html>`);
                 win.document.close();
                 win.focus();
                 win.print();
@@ -1975,7 +1975,7 @@ const AdminExpenses = () => {
                 if (!content) return;
                 const win = window.open('', '_blank');
                 if (!win) return;
-                win.document.write(`<html><head><title>${bn ? 'জমা প্রতিবেদন' : 'Deposit Report'}</title><style>body{font-family:'Noto Sans Bengali',sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 8px}th{background:#f0f0f0;text-align:left}.text-right{text-align:right}.text-center{text-align:center}.italic{font-style:italic}@media print{body{padding:0}}</style></head><body>${content.innerHTML}</body></html>`);
+                win.document.write(`<html><head><title>${bn ? 'জমা প্রতিবেদন' : 'Deposit Report'}</title><style>body{font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px 8px}th{background:#f0f0f0;text-align:left}.text-right{text-align:right}.text-center{text-align:center}.italic{font-style:italic}@media print{body{padding:0}}</style></head><body>${content.innerHTML}</body></html>`);
                 win.document.close();
                 win.focus();
                 win.print();

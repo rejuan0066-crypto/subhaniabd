@@ -317,7 +317,7 @@ const AdminResignLetters = () => {
 <html><head>
 <meta charset="utf-8">
 <title>${bn ? 'পদত্যাগ পত্র' : 'Resign Letter'}</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   @page{size:A4;margin:0}

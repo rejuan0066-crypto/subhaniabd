@@ -759,10 +759,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     const html = `<!DOCTYPE html><html><head>
       <meta charset="utf-8">
       <title>${title} - ${selectedDate}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+      <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Noto Sans Bengali',sans-serif; padding:20px; font-size:12px; }
+        body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; padding:20px; font-size:12px; }
         .header { text-align:center; margin-bottom:16px; border-bottom:2px solid #333; padding-bottom:10px; }
         .header img { height:50px; margin-bottom:6px; }
         .header h2 { font-size:18px; margin:4px 0; }
