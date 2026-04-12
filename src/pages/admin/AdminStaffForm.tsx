@@ -538,11 +538,13 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
       if (isFieldActive('guardian_nid') && isFieldRequired('guardian_nid') && (!guardianNid || (guardianNid.length !== 10 && guardianNid.length !== 17))) errors['guardian_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
     }
 
-    // Identifier validation
-    reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
-    reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
-    reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
-    if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    // Identifier validation (only if section is visible)
+    if (sectionConfig.showIdentifier) {
+      reqCheck('identifier_name', identifierName, 'পরিচয়দাতার নাম আবশ্যক', 'Identifier name required');
+      reqCheck('identifier_relation', identifierRelation, 'সম্পর্ক আবশ্যক', 'Relation required');
+      reqCheck('identifier_mobile', identifierMobile, 'মোবাইল আবশ্যক', 'Mobile required');
+      if (isFieldActive('identifier_nid') && isFieldRequired('identifier_nid') && (!identifierNid || (identifierNid.length !== 10 && identifierNid.length !== 17))) errors['identifier_nid'] = bn ? 'NID ১০/১৭ ডিজিট হতে হবে' : 'NID 10/17 digits required';
+    }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
