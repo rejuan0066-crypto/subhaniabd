@@ -1,6 +1,4 @@
-import { createContext, useContext, ReactNode, useRef, useState, useEffect, useTransition, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { createContext, useContext, ReactNode, useRef, useState, useEffect, useTransition } from 'react';
 import BackButton from './BackButton';
 import AdminPageWithTabs from './AdminPageWithTabs';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
