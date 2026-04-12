@@ -37,19 +37,30 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     },
   });
 
-  // Fetch fee types for this category
+  // Fetch fee types for this category with session info
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['dashboard-fee-types', category],
     queryFn: async () => {
       const { data } = await supabase
         .from('fee_types')
-        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months')
+        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months, academic_sessions:session_id(name, name_bn)')
         .eq('fee_category', category)
         .eq('is_active', true)
         .is('deleted_at', null);
       return data || [];
     },
   });
+
+  // Get unique session names from fee types
+  const sessionLabel = useMemo(() => {
+    const sessions = new Set<string>();
+    feeTypes.forEach((ft: any) => {
+      if (ft.academic_sessions) {
+        sessions.add(bn ? (ft.academic_sessions.name_bn || ft.academic_sessions.name) : ft.academic_sessions.name);
+      }
+    });
+    return Array.from(sessions).join(', ');
+  }, [feeTypes, bn]);
 
   // Fetch all active students
   const { data: students = [] } = useQuery({
@@ -282,9 +293,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   return (
     <div className="card-elevated p-4">
       <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {icon || <CreditCard className="w-5 h-5 text-primary" />}
           <h3 className="font-display font-bold text-foreground">{language === 'bn' ? titleBn : titleEn}</h3>
+          {sessionLabel && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{sessionLabel}</span>
+          )}
           <span className="text-sm font-bold text-primary">৳ {totalAmount.toLocaleString()}</span>
         </div>
         {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
