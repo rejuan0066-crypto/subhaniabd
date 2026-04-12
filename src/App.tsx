@@ -25,6 +25,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminStudents from "./pages/admin/AdminStudents";
 import AdminStaff from "./pages/admin/AdminStaff";
+import AdminTeachers from "./pages/admin/AdminTeachers";
 import AdminStaffForm from "./pages/admin/AdminStaffForm";
 import AdminDivisions from "./pages/admin/AdminDivisions";
 import AdminSubjects from "./pages/admin/AdminSubjects";
@@ -187,9 +188,12 @@ const App = () => (
                   <Route path="/admin" element={<AdminShell />}>
                     <Route index element={<Dashboard />} />
                     <Route path="students" element={<ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard>} />
-                    <Route path="staff" element={<ModuleGuard menuPath="/admin/staff"><AdminStaff /></ModuleGuard>} />
+                    <Route path="staff" element={<ModuleGuard menuPath="/admin/staff"><AdminStaff staffType="staff" /></ModuleGuard>} />
                     <Route path="staff/add" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="staff/edit/:id" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="teachers" element={<ModuleGuard menuPath="/admin/teachers"><AdminTeachers /></ModuleGuard>} />
+                    <Route path="teachers/add" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="teachers/edit/:id" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="divisions" element={<ModuleGuard menuPath="/admin/divisions"><AdminDivisions /></ModuleGuard>} />
                     <Route path="subjects" element={<ModuleGuard menuPath="/admin/subjects"><AdminSubjects /></ModuleGuard>} />
                     <Route path="results" element={<ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard>} />

@@ -18,13 +18,24 @@ import { useNavigate } from 'react-router-dom';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 
-const AdminStaff = () => {
+export type StaffPageType = 'all' | 'staff' | 'teacher';
+
+const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
+
+const isTeacherDesignation = (designation: string | null | undefined): boolean => {
+  if (!designation) return false;
+  const lower = designation.toLowerCase();
+  return TEACHER_KEYWORDS.some(k => lower.includes(k));
+};
+
+const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { checkApproval } = useApprovalCheck('/admin/staff', 'staff');
+  const menuPath = staffType === 'teacher' ? '/admin/teachers' : '/admin/staff';
+  const { checkApproval } = useApprovalCheck(menuPath, 'staff');
   const { role } = useAuth();
-  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/staff');
+  const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions(menuPath);
   const bn = language === 'bn';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -96,9 +107,14 @@ const AdminStaff = () => {
     onError: () => toast.error('Error'),
   });
 
-  const pendingCount = staffList.filter((s: any) => s.status === 'pending').length;
+  const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
+    const isTeacher = isTeacherDesignation(s.designation);
+    return staffType === 'teacher' ? isTeacher : !isTeacher;
+  });
 
-  const filtered = staffList.filter((s: any) => {
+  const pendingCount = typeFiltered.filter((s: any) => s.status === 'pending').length;
+
+  const filtered = typeFiltered.filter((s: any) => {
     if (statusFilter !== 'all' && s.status !== statusFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
@@ -149,11 +165,15 @@ const AdminStaff = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">{t('staff')}</h1>
-            <p className="text-sm text-muted-foreground">{bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`}</p>
+            <h1 className="text-2xl font-display font-bold text-foreground">
+              {staffType === 'teacher' ? (bn ? 'শিক্ষক ব্যবস্থাপনা' : 'Teacher Management') : staffType === 'staff' ? (bn ? 'স্টাফ ব্যবস্থাপনা' : 'Staff Management') : t('staff')}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {staffType === 'teacher' ? (bn ? `মোট ${typeFiltered.length} জন শিক্ষক` : `Total ${typeFiltered.length} teachers`) : staffType === 'staff' ? (bn ? `মোট ${typeFiltered.length} জন স্টাফ` : `Total ${typeFiltered.length} staff`) : (bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`)}
+            </p>
           </div>
           {canAddItem && (
-            <Button onClick={() => navigate('/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
+            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
               <Plus className="w-4 h-4" /> {t('addNew')}
             </Button>
           )}
@@ -166,7 +186,7 @@ const AdminStaff = () => {
           </div>
           <div className="flex gap-2">
             <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>
-              {bn ? 'সবগুলো' : 'All'} ({staffList.length})
+              {bn ? 'সবগুলো' : 'All'} ({typeFiltered.length})
             </Button>
             <Button variant={statusFilter === 'active' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('active')}>
               {bn ? 'সক্রিয়' : 'Active'}
@@ -258,7 +278,7 @@ const AdminStaff = () => {
                         )}
                         <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
-                          <button onClick={() => navigate(`/admin/staff/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : 'staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                         )}
                         {canDeleteItem && (
                           <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
@@ -343,7 +363,7 @@ const AdminStaff = () => {
         {/* Staff Profile Detail Dialog */}
         <Dialog open={!!viewStaff} onOpenChange={o => { if (!o) setViewStaff(null); }}>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>{bn ? 'স্টাফ/শিক্ষক প্রোফাইল' : 'Staff/Teacher Profile'}</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{staffType === 'teacher' ? (bn ? 'শিক্ষক প্রোফাইল' : 'Teacher Profile') : (bn ? 'স্টাফ প্রোফাইল' : 'Staff Profile')}</DialogTitle></DialogHeader>
             {viewStaff && <StaffProfileView staff={viewStaff} bn={bn} />}
           </DialogContent>
         </Dialog>
