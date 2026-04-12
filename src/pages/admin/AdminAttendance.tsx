@@ -1003,7 +1003,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     <p className="text-sm font-medium truncate">{bn ? entity.name_bn : (entity.name_en || entity.name_bn)}</p>
                     <p className="text-[10px] text-muted-foreground">
                       {entityType === 'student'
-                        ? `${bn ? 'আইডি' : 'ID'}: ${entity.student_id || '-'} ${entity.roll_number ? `| ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number}` : ''}`
+                        ? (() => {
+                            const cls = classes.find((c: any) => c.id === entity.class_id);
+                            const div = divisions.find((d: any) => d.id === entity.division_id);
+                            const className = cls ? (bn ? cls.name_bn : cls.name) : '';
+                            const divName = div ? (bn ? div.name_bn : div.name) : '';
+                            return `${className}${divName ? ` (${divName})` : ''} | ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number || '-'}`;
+                          })()
+
                         : staffSubTab === 'duty'
                           ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
                           : `${entity.designation || '-'} | ${fmt(entity.duty_start_time || '08:00')} - ${fmt(entity.duty_end_time || '17:00')}`}
