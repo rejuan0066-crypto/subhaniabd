@@ -160,6 +160,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     setAccCreating(false);
   };
 
+  // Remove AdminLayout wrapper - it's provided by AdminShell in App.tsx
   return (
     <AdminLayout>
       <div className="space-y-6">
