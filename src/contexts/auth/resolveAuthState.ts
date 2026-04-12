@@ -1,6 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const AUTH_STATE_REQUEST_TIMEOUT_MS = 6000;
+
+const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> => {
+  return await Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error(`${label} timed out after ${AUTH_STATE_REQUEST_TIMEOUT_MS}ms`)), AUTH_STATE_REQUEST_TIMEOUT_MS);
+    }),
+  ]);
+};
 
 const isTransientAuthStateError = (error: unknown) => {
   const message = [
@@ -33,20 +43,26 @@ export const fetchResolvedAuthState = async (userId: string) => {
 
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      const rolesResult = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
+      const rolesResult = await withTimeout(
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId),
+        'user_roles lookup'
+      );
 
       if (rolesResult.error) {
         throw rolesResult.error;
       }
 
-      const profileResult = await supabase
-        .from('profiles')
-        .select('status')
-        .eq('id', userId)
-        .maybeSingle();
+      const profileResult = await withTimeout(
+        supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', userId)
+          .maybeSingle(),
+        'profiles lookup'
+      );
 
       if (profileResult.error) {
         throw profileResult.error;
