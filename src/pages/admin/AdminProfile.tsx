@@ -78,9 +78,10 @@ const AdminProfile = () => {
     enabled: !!user?.id,
   });
 
+  useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) setCurrentEmail(user.email);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser?.email) setCurrentEmail(authUser.email);
     };
     getUser();
   }, []);
