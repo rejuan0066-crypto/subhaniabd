@@ -14,15 +14,22 @@ const ProfileInfoItem = ({ icon: Icon, label, value, className, fullWidth }: Pro
   const isEmpty = displayValue === '-';
 
   return (
-    <div className={cn('flex items-start gap-3 py-2', fullWidth && 'col-span-full', className)}>
+    <div className={cn(
+      'group flex items-start gap-3 py-2.5 px-2 rounded-xl transition-colors duration-200 hover:bg-muted/30',
+      fullWidth && 'col-span-full',
+      className
+    )}>
       {Icon && (
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/8">
-          <Icon className="h-4 w-4 text-primary" />
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/10 border border-emerald-500/10 shadow-sm shadow-emerald-500/5 transition-transform duration-200 group-hover:scale-105">
+          <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/70">{label}</p>
-        <p className={cn('text-sm font-semibold mt-0.5 break-words', isEmpty ? 'text-muted-foreground/40' : 'text-foreground')}>
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60 mb-0.5">{label}</p>
+        <p className={cn(
+          'text-sm font-bold break-words leading-snug',
+          isEmpty ? 'text-muted-foreground/30 font-normal italic' : 'text-foreground'
+        )}>
           {displayValue}
         </p>
       </div>
