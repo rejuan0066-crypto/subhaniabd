@@ -77,7 +77,6 @@ const StudentProfileModal = ({
     },
   });
 
-  // ── Results data ──
   const { data: studentResults = [], isLoading: resultsLoading } = useQuery({
     queryKey: ['student-results', student.id],
     queryFn: async () => {
@@ -90,7 +89,6 @@ const StudentProfileModal = ({
     },
   });
 
-  // ── Attendance data ──
   const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery({
     queryKey: ['student-attendance', student.id],
     queryFn: async () => {
@@ -105,10 +103,8 @@ const StudentProfileModal = ({
     },
   });
 
-  // ── Computed result stats ──
   const resultStats = useMemo(() => {
     if (studentResults.length === 0) return null;
-    // Group by exam
     const examMap = new Map<string, any[]>();
     studentResults.forEach((r: any) => {
       const examId = r.exam_id;
@@ -131,14 +127,13 @@ const StudentProfileModal = ({
     });
   }, [studentResults, bn]);
 
-  // ── Computed attendance stats ──
   const attendanceStats = useMemo(() => {
     const total = attendanceRecords.length;
     const present = attendanceRecords.filter((a: any) => a.status === 'present').length;
     const absent = attendanceRecords.filter((a: any) => a.status === 'absent').length;
     const late = attendanceRecords.filter((a: any) => a.status === 'late').length;
     const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
-    const last7 = attendanceRecords.slice(0, 7);
+    const last7 = attendanceRecords.slice(0, 10);
     return { total, present, absent, late, percentage, last7 };
   }, [attendanceRecords]);
 
@@ -189,19 +184,19 @@ const StudentProfileModal = ({
 
   const getLibStatusBadge = (status: string) => {
     switch (status) {
-      case 'issued': return <Badge className="bg-blue-500/10 text-blue-600 rounded-full px-3">{bn ? 'ইস্যু' : 'Issued'}</Badge>;
-      case 'returned': return <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full px-3">{bn ? 'জমা ✓' : 'Returned ✓'}</Badge>;
-      case 'lost': return <Badge variant="destructive" className="rounded-full px-3">{bn ? 'হারিয়েছে' : 'Lost'}</Badge>;
-      default: return <Badge variant="secondary" className="rounded-full px-3">{status}</Badge>;
+      case 'issued': return <Badge className="bg-blue-500/10 text-blue-600 rounded-full px-3 text-[10px]">{bn ? 'ইস্যু' : 'Issued'}</Badge>;
+      case 'returned': return <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full px-3 text-[10px]">{bn ? 'জমা ✓' : 'Returned ✓'}</Badge>;
+      case 'lost': return <Badge variant="destructive" className="rounded-full px-3 text-[10px]">{bn ? 'হারিয়েছে' : 'Lost'}</Badge>;
+      default: return <Badge variant="secondary" className="rounded-full px-3 text-[10px]">{status}</Badge>;
     }
   };
 
   const getFeeStatusBadge = (status: string) => {
     switch (status) {
-      case 'paid': return <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full px-3 shadow-[0_0_12px_hsl(152_55%_40%/0.15)]">{bn ? 'পরিশোধিত ✓' : 'Paid ✓'}</Badge>;
-      case 'unpaid': return <Badge className="bg-destructive/10 text-destructive rounded-full px-3">{bn ? 'বকেয়া' : 'Unpaid'}</Badge>;
-      case 'pending': return <Badge className="bg-amber-500/10 text-amber-600 rounded-full px-3">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>;
-      default: return <Badge variant="secondary" className="rounded-full px-3">{status}</Badge>;
+      case 'paid': return <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full px-3 text-[10px] shadow-[0_0_12px_rgba(16,185,129,0.15)]">{bn ? 'পরিশোধিত ✓' : 'Paid ✓'}</Badge>;
+      case 'unpaid': return <Badge className="bg-destructive/10 text-destructive rounded-full px-3 text-[10px]">{bn ? 'বকেয়া' : 'Unpaid'}</Badge>;
+      case 'pending': return <Badge className="bg-amber-500/10 text-amber-600 rounded-full px-3 text-[10px]">{bn ? 'অপেক্ষমাণ' : 'Pending'}</Badge>;
+      default: return <Badge variant="secondary" className="rounded-full px-3 text-[10px]">{status}</Badge>;
     }
   };
 
@@ -230,64 +225,114 @@ const StudentProfileModal = ({
     return map[val.toLowerCase()]?.[bn ? 0 : 1] || val;
   };
 
+  const statusColor = student.approval_status === 'approved'
+    ? 'from-emerald-400 to-emerald-600 shadow-emerald-500/40'
+    : student.approval_status === 'rejected'
+    ? 'from-rose-400 to-rose-600 shadow-rose-500/40'
+    : 'from-amber-400 to-amber-500 shadow-amber-500/40';
+
+  const statusLabel = student.approval_status === 'approved'
+    ? (bn ? 'অনুমোদিত' : 'Active')
+    : student.approval_status === 'rejected'
+    ? (bn ? 'প্রত্যাখ্যাত' : 'Rejected')
+    : (bn ? 'অপেক্ষমাণ' : 'Pending');
+
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-5">
-        <div className="relative">
-          {student.photo_url ? (
-            <img src={student.photo_url} className="w-28 h-32 rounded-2xl object-cover border-2 border-primary/20 shadow-lg" alt="" />
-          ) : (
-            <div className="w-28 h-32 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-4xl font-bold text-primary/40 border-2 border-primary/10">
-              {student.name_bn?.[0] || <User className="w-10 h-10" />}
-            </div>
-          )}
-          <div className="absolute -bottom-2 -right-2">
-            {getApprovalBadge(student.approval_status || 'pending')}
-          </div>
-        </div>
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <h3 className="text-xl font-bold text-foreground tracking-tight truncate">
-            {bn ? (student.name_bn || student.name_en) : (student.name_en || student.name_bn)}
-          </h3>
-          {student.name_bn && student.name_en && (
-            <p className="text-sm text-muted-foreground truncate">{bn ? student.name_en : student.name_bn}</p>
-          )}
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-primary/8 text-primary">
-              <Hash className="w-3 h-3" /> {student.student_id}
-            </span>
-            {student.roll_number && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-secondary text-secondary-foreground">
-                {bn ? 'রোল: ' : 'Roll: '}{student.roll_number}
-              </span>
+      {/* ═══════════ HERO HEADER ═══════════ */}
+      <div className="relative rounded-[20px] overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-teal-800/80 to-emerald-950/90 dark:from-emerald-950 dark:via-teal-900 dark:to-emerald-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_60%)]" />
+
+        <div className="relative p-6 flex items-start gap-5">
+          {/* Profile Image with glow */}
+          <div className="relative shrink-0">
+            <div className="absolute -inset-1 rounded-2xl bg-white/20 blur-sm" />
+            {student.photo_url ? (
+              <img
+                src={student.photo_url}
+                className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white/80 shadow-xl"
+                alt=""
+              />
+            ) : (
+              <div className="relative w-28 h-32 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-4xl font-bold text-white/60 border-[3px] border-white/30">
+                {student.name_bn?.[0] || <User className="w-10 h-10" />}
+              </div>
             )}
           </div>
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {student.is_free && <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full text-[10px] px-2.5">{bn ? '✓ বিনা বেতন' : '✓ Free'}</Badge>}
-            {student.is_orphan && <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[10px] px-2.5">{bn ? 'এতিম' : 'Orphan'}</Badge>}
-            {student.is_poor && <Badge className="bg-blue-500/10 text-blue-600 rounded-full text-[10px] px-2.5">{bn ? 'গরীব' : 'Poor'}</Badge>}
+
+          {/* Name & Quick Info */}
+          <div className="flex-1 min-w-0 space-y-2">
+            <h3 className="text-xl font-bold text-white tracking-tight truncate drop-shadow-sm">
+              {bn ? (student.name_bn || student.name_en) : (student.name_en || student.name_bn)}
+            </h3>
+            {student.name_bn && student.name_en && (
+              <p className="text-sm text-white/60 truncate">{bn ? student.name_en : student.name_bn}</p>
+            )}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/15 text-white/90 backdrop-blur-sm border border-white/10">
+                <Hash className="w-3 h-3" /> {student.student_id}
+              </span>
+              {student.roll_number && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/10 text-white/80 backdrop-blur-sm border border-white/10">
+                  {bn ? 'রোল: ' : 'Roll: '}{student.roll_number}
+                </span>
+              )}
+              {/* Neon Status Pill */}
+              <span className={cn(
+                'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-white shadow-lg bg-gradient-to-r',
+                statusColor
+              )}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                {statusLabel}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {student.is_free && <Badge className="bg-emerald-400/20 text-emerald-200 border-emerald-400/20 rounded-full text-[10px] px-2.5">{bn ? '✓ বিনা বেতন' : '✓ Free'}</Badge>}
+              {student.is_orphan && <Badge className="bg-amber-400/20 text-amber-200 border-amber-400/20 rounded-full text-[10px] px-2.5">{bn ? 'এতিম' : 'Orphan'}</Badge>}
+              {student.is_poor && <Badge className="bg-blue-400/20 text-blue-200 border-blue-400/20 rounded-full text-[10px] px-2.5">{bn ? 'গরীব' : 'Poor'}</Badge>}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats Row */}
+        <div className="relative grid grid-cols-3 border-t border-white/10">
+          <div className="px-4 py-3 text-center border-r border-white/10">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'উপস্থিতি' : 'Attendance'}</p>
+            <p className="text-lg font-bold text-emerald-300">{attendanceStats.percentage}%</p>
+          </div>
+          <div className="px-4 py-3 text-center border-r border-white/10">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'পরিশোধিত' : 'Paid'}</p>
+            <p className="text-lg font-bold text-emerald-300">৳{totalPaid.toLocaleString()}</p>
+          </div>
+          <div className="px-4 py-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'বকেয়া' : 'Due'}</p>
+            <p className="text-lg font-bold text-rose-300">৳{totalDue.toLocaleString()}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-1.5 p-1 rounded-2xl bg-muted/50 border border-border/30">
+      {/* ═══════════ TABS ═══════════ */}
+      <div className="flex gap-1 p-1 rounded-2xl bg-muted/40 border border-border/20 backdrop-blur-sm">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300',
               activeTab === tab.id
-                ? 'bg-primary/10 text-primary shadow-sm border border-primary/20'
-                : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
+                ? 'bg-gradient-to-r from-emerald-500/15 to-teal-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm border border-emerald-500/20'
+                : 'text-muted-foreground/70 hover:text-foreground hover:bg-background/60'
             )}
           >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            <tab.icon className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
+      {/* ═══════════ PROFILE TAB ═══════════ */}
       {activeTab === 'profile' && (
         <div className="space-y-4">
           <ProfileSectionCard title={bn ? 'মৌলিক তথ্য' : 'Basic Info'} icon={User}>
@@ -307,7 +352,7 @@ const StudentProfileModal = ({
             <ProfileInfoItem icon={ClipboardList} label={bn ? 'পিতার পেশা' : 'Father Occupation'} value={student.father_occupation} />
             <ProfileInfoItem icon={CreditCard} label={bn ? 'পিতার NID' : 'Father NID'} value={student.father_nid} />
             <ProfileInfoItem icon={Phone} label={bn ? 'পিতার ফোন' : 'Father Phone'} value={student.father_phone} />
-            <div className="col-span-full border-t border-border/20 my-1" />
+            <div className="col-span-full border-t border-border/15 my-1" />
             <ProfileInfoItem icon={User} label={bn ? 'মাতা (বাংলা)' : 'Mother (BN)'} value={student.mother_name} />
             <ProfileInfoItem icon={User} label={bn ? 'মাতা (ইংরেজি)' : 'Mother (EN)'} value={student.mother_name_en} />
             <ProfileInfoItem icon={ClipboardList} label={bn ? 'মাতার পেশা' : 'Mother Occupation'} value={student.mother_occupation} />
@@ -338,29 +383,34 @@ const StudentProfileModal = ({
         </div>
       )}
 
+      {/* ═══════════ FINANCE TAB ═══════════ */}
       {activeTab === 'finance' && (
         <div className="space-y-4">
+          {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-gradient-to-br from-emerald-500/15 to-emerald-500/5 border border-emerald-500/20 p-4 text-center shadow-sm">
+            <div className="relative overflow-hidden rounded-[18px] bg-gradient-to-br from-emerald-500/15 via-emerald-500/8 to-teal-500/5 border border-emerald-500/15 p-4 text-center">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl" />
               <Banknote className="w-5 h-5 text-emerald-600 mx-auto mb-1.5" />
-              <p className="text-[11px] font-medium text-emerald-700/70 uppercase tracking-wider">{bn ? 'মোট পরিশোধিত' : 'Total Paid'}</p>
-              <p className="text-2xl font-bold text-emerald-600 mt-1">৳{totalPaid.toLocaleString()}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700/60">{bn ? 'মোট পরিশোধিত' : 'Total Paid'}</p>
+              <p className="text-2xl font-black text-emerald-600 mt-1">৳{totalPaid.toLocaleString()}</p>
             </div>
-            <div className="rounded-2xl bg-gradient-to-br from-rose-500/15 to-rose-500/5 border border-rose-500/20 p-4 text-center shadow-sm">
+            <div className="relative overflow-hidden rounded-[18px] bg-gradient-to-br from-rose-500/15 via-rose-500/8 to-orange-500/5 border border-rose-500/15 p-4 text-center">
+              <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl" />
               <CreditCard className="w-5 h-5 text-rose-600 mx-auto mb-1.5" />
-              <p className="text-[11px] font-medium text-rose-700/70 uppercase tracking-wider">{bn ? 'মোট বকেয়া' : 'Total Due'}</p>
-              <p className="text-2xl font-bold text-rose-600 mt-1">৳{totalDue.toLocaleString()}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-rose-700/60">{bn ? 'মোট বকেয়া' : 'Total Due'}</p>
+              <p className="text-2xl font-black text-rose-600 mt-1">৳{totalDue.toLocaleString()}</p>
             </div>
           </div>
 
+          {/* Applicable Fee Types */}
           <ProfileSectionCard title={bn ? 'প্রযোজ্য ফি ধরন' : 'Applicable Fee Types'} icon={FileText}>
             <div className="col-span-full">
               {feeTypesLoading ? (
-                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
               ) : applicableFeeTypes.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">{bn ? 'কোনো প্রযোজ্য ফি ধরন নেই' : 'No applicable fee types'}</p>
+                <p className="text-xs text-muted-foreground/50 text-center py-4">{bn ? 'কোনো প্রযোজ্য ফি ধরন নেই' : 'No applicable fee types'}</p>
               ) : (
-                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
                   {applicableFeeTypes.map((ft: any) => {
                     const waiver = feeWaivers.find((w: any) => w.fee_type_id === ft.id);
                     const isFreeMonthly = student.is_free && ft.fee_category === 'monthly';
@@ -376,35 +426,35 @@ const StudentProfileModal = ({
                     const categoryLabel = ft.fee_category === 'monthly' ? (bn ? 'মাসিক' : 'Monthly') : ft.fee_category === 'admission' ? (bn ? 'ভর্তি' : 'Admission') : ft.fee_category === 'exam' ? (bn ? 'পরীক্ষা' : 'Exam') : ft.fee_category;
 
                     return (
-                      <div key={ft.id} className="p-3 rounded-xl bg-muted/30 border border-border/20">
+                      <div key={ft.id} className="p-3 rounded-xl bg-muted/20 border border-border/15 hover:bg-muted/30 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate">{bn ? ft.name_bn : ft.name}</p>
-                            <p className="text-[11px] text-muted-foreground">{categoryLabel}{ft.classes?.name_bn && ` • ${ft.classes.name_bn}`}</p>
+                            <p className="font-bold text-sm truncate">{bn ? ft.name_bn : ft.name}</p>
+                            <p className="text-[10px] text-muted-foreground/60">{categoryLabel}{ft.classes?.name_bn && ` • ${ft.classes.name_bn}`}</p>
                           </div>
                           <div className="text-right ml-2 shrink-0">
                             {waiverPercent > 0 ? (
                               <div>
-                                <p className="text-[11px] line-through text-muted-foreground">৳{ft.amount}</p>
-                                <p className="font-bold text-primary text-sm">৳{netAmount}</p>
+                                <p className="text-[10px] line-through text-muted-foreground/40">৳{ft.amount}</p>
+                                <p className="font-black text-emerald-600 text-sm">৳{netAmount}</p>
                               </div>
                             ) : (
-                              <p className="font-bold text-foreground text-sm">৳{ft.amount}</p>
+                              <p className="font-black text-foreground text-sm">৳{ft.amount}</p>
                             )}
                           </div>
                         </div>
                         <div className="mt-2 flex items-center gap-1.5 flex-wrap">
                           {isFullyPaid ? (
-                            <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full text-[10px] px-2.5 shadow-[0_0_8px_hsl(152_55%_40%/0.12)]">{bn ? '✓ সম্পূর্ণ পরিশোধিত' : '✓ Fully Paid'}</Badge>
+                            <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] px-2.5 shadow-[0_0_8px_rgba(16,185,129,0.12)]">{bn ? '✓ সম্পূর্ণ পরিশোধিত' : '✓ Fully Paid'}</Badge>
                           ) : isPartialPaid ? (
                             <>
-                              <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[10px] px-2.5">{bn ? `আংশিক ৳${totalPaidForThis}` : `Partial ৳${totalPaidForThis}`}</Badge>
-                              <Badge className="bg-destructive/10 text-destructive rounded-full text-[10px] px-2.5">{bn ? `বকেয়া ৳${remaining}` : `Due ৳${remaining}`}</Badge>
+                              <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[9px] px-2.5">{bn ? `আংশিক ৳${totalPaidForThis}` : `Partial ৳${totalPaidForThis}`}</Badge>
+                              <Badge className="bg-destructive/10 text-destructive rounded-full text-[9px] px-2.5">{bn ? `বকেয়া ৳${remaining}` : `Due ৳${remaining}`}</Badge>
                             </>
                           ) : pendingPayment ? (
-                            <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[10px] px-2.5">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
+                            <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[9px] px-2.5">{bn ? '⏳ পেন্ডিং' : '⏳ Pending'}</Badge>
                           ) : (
-                            <Badge className="bg-destructive/10 text-destructive rounded-full text-[10px] px-2.5">{bn ? `বকেয়া ৳${netAmount}` : `Due ৳${netAmount}`}</Badge>
+                            <Badge className="bg-destructive/10 text-destructive rounded-full text-[9px] px-2.5">{bn ? `বকেয়া ৳${netAmount}` : `Due ৳${netAmount}`}</Badge>
                           )}
                         </div>
                       </div>
@@ -415,19 +465,20 @@ const StudentProfileModal = ({
             </div>
           </ProfileSectionCard>
 
+          {/* Payment History */}
           <ProfileSectionCard title={bn ? 'ফি পরিশোধের ইতিহাস' : 'Payment History'} icon={Banknote}>
             <div className="col-span-full">
               {feeLoading ? (
-                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
               ) : feePayments.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">{bn ? 'কোনো ফি পেমেন্ট রেকর্ড নেই' : 'No payment records'}</p>
+                <p className="text-xs text-muted-foreground/50 text-center py-4">{bn ? 'কোনো ফি পেমেন্ট রেকর্ড নেই' : 'No payment records'}</p>
               ) : (
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                   {feePayments.map((p: any) => (
-                    <div key={p.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/20">
+                    <div key={p.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/15 hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{bn ? (p.fee_types?.name_bn || p.fee_types?.name) : p.fee_types?.name || '-'}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="font-bold text-sm truncate">{bn ? (p.fee_types?.name_bn || p.fee_types?.name) : p.fee_types?.name || '-'}</p>
+                        <p className="text-[10px] text-muted-foreground/60">
                           ৳{(p.paid_amount || p.amount || 0).toLocaleString()}
                           {p.receipt_number && <> • {bn ? 'রসিদ: ' : '#'}{p.receipt_number}</>}
                         </p>
@@ -440,28 +491,29 @@ const StudentProfileModal = ({
             </div>
           </ProfileSectionCard>
 
+          {/* Discounts */}
           <ProfileSectionCard title={bn ? 'ফি ছাড় / ডিসকাউন্ট' : 'Discounts'} icon={BadgePercent}>
             <div className="col-span-full">
               <div className="flex justify-end mb-3">
-                <Button size="sm" variant="outline" className="h-8 text-xs rounded-full" onClick={() => setShowWaiverDialog(true)} disabled={availableFeeTypesForWaiver.length === 0}>
+                <Button size="sm" variant="outline" className="h-8 text-xs rounded-full border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/10" onClick={() => setShowWaiverDialog(true)} disabled={availableFeeTypesForWaiver.length === 0}>
                   <Plus className="w-3 h-3 mr-1" /> {bn ? 'ছাড় দিন' : 'Add Discount'}
                 </Button>
               </div>
               {waiverLoading ? (
-                <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+                <div className="flex justify-center py-3"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
               ) : feeWaivers.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো ছাড় নেই' : 'No waivers'}</p>
+                <p className="text-xs text-muted-foreground/50 text-center py-3">{bn ? 'কোনো ছাড় নেই' : 'No waivers'}</p>
               ) : (
-                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-36 overflow-y-auto pr-1 scrollbar-thin">
                   {feeWaivers.map((w: any) => (
                     <div key={w.id} className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{bn ? (w.fee_types?.name_bn || w.fee_types?.name) : w.fee_types?.name || '-'}</p>
-                        {w.reason && <p className="text-[11px] text-muted-foreground truncate">{w.reason}</p>}
+                        <p className="font-bold text-sm truncate">{bn ? (w.fee_types?.name_bn || w.fee_types?.name) : w.fee_types?.name || '-'}</p>
+                        {w.reason && <p className="text-[10px] text-muted-foreground/60 truncate">{w.reason}</p>}
                       </div>
                       <div className="flex items-center gap-1 ml-2 shrink-0">
-                        <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[10px] px-2.5">৳{Math.round((w.fee_types?.amount || 0) * w.waiver_percent / 100)}</Badge>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive rounded-full" onClick={() => deleteWaiverMutation.mutate(w.id)}>
+                        <Badge className="bg-amber-500/10 text-amber-600 rounded-full text-[9px] px-2.5">৳{Math.round((w.fee_types?.amount || 0) * w.waiver_percent / 100)}</Badge>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive rounded-full hover:bg-destructive/10" onClick={() => deleteWaiverMutation.mutate(w.id)}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -474,137 +526,138 @@ const StudentProfileModal = ({
         </div>
       )}
 
+      {/* ═══════════ ACADEMIC TAB ═══════════ */}
       {activeTab === 'academic' && (
         <div className="space-y-4">
-          {/* ── Attendance Overview ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-2xl bg-gradient-to-br from-blue-500/12 to-blue-500/5 border border-blue-500/20 p-4 text-center">
-              <CalendarCheck className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-              <p className="text-[10px] font-medium uppercase tracking-wider text-blue-700/70">{bn ? 'মোট কার্যদিবস' : 'Total Days'}</p>
-              <p className="text-xl font-bold text-blue-600">{attendanceStats.total}</p>
-            </div>
-            <div className="rounded-2xl bg-gradient-to-br from-emerald-500/12 to-emerald-500/5 border border-emerald-500/20 p-4 text-center">
-              <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-              <p className="text-[10px] font-medium uppercase tracking-wider text-emerald-700/70">{bn ? 'উপস্থিতি' : 'Present'}</p>
-              <p className="text-xl font-bold text-emerald-600">{attendanceStats.present}</p>
-            </div>
-            <div className="rounded-2xl bg-gradient-to-br from-rose-500/12 to-rose-500/5 border border-rose-500/20 p-4 text-center">
-              <XCircle className="w-5 h-5 text-rose-600 mx-auto mb-1" />
-              <p className="text-[10px] font-medium uppercase tracking-wider text-rose-700/70">{bn ? 'অনুপস্থিতি' : 'Absent'}</p>
-              <p className="text-xl font-bold text-rose-600">{attendanceStats.absent}</p>
-            </div>
-            <div className="rounded-2xl bg-gradient-to-br from-primary/12 to-primary/5 border border-primary/20 p-4 text-center relative overflow-hidden">
-              {/* Circular progress ring */}
-              <div className="mx-auto mb-1 relative w-14 h-14">
-                <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                  <circle cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--muted) / 0.3)" strokeWidth="4" />
-                  <circle cx="28" cy="28" r="24" fill="none" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinecap="round"
-                    strokeDasharray={`${(attendanceStats.percentage / 100) * 150.8} 150.8`} />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary">{attendanceStats.percentage}%</span>
+          {/* Attendance Circular Gauge + Stats */}
+          <div className="rounded-[20px] border border-border/20 bg-card/50 backdrop-blur-md p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/10">
+                <CalendarCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-primary/70">{bn ? 'উপস্থিতির হার' : 'Rate'}</p>
+              <h4 className="text-sm font-bold text-foreground">{bn ? 'উপস্থিতি পরিসংখ্যান' : 'Attendance Statistics'}</h4>
             </div>
-          </div>
 
-          {/* Last 7 days */}
-          <ProfileSectionCard title={bn ? 'সাম্প্রতিক উপস্থিতি (শেষ ৭ দিন)' : 'Recent Attendance (Last 7 Days)'} icon={CalendarCheck}>
-            <div className="col-span-full">
-              {attendanceLoading ? (
-                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
-              ) : attendanceStats.last7.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">{bn ? 'কোনো উপস্থিতি রেকর্ড নেই' : 'No attendance records'}</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* Large circular gauge */}
+              <div className="relative w-28 h-28 shrink-0">
+                <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
+                  <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--muted) / 0.2)" strokeWidth="8" />
+                  <circle cx="56" cy="56" r="48" fill="none" stroke="url(#gaugeGrad)" strokeWidth="8" strokeLinecap="round"
+                    strokeDasharray={`${(attendanceStats.percentage / 100) * 301.6} 301.6`}
+                    className="transition-all duration-700"
+                  />
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#14b8a6" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-black text-emerald-600">{attendanceStats.percentage}%</span>
+                  <span className="text-[9px] font-semibold uppercase text-muted-foreground/60">{bn ? 'উপস্থিতি' : 'Rate'}</span>
+                </div>
+              </div>
+
+              {/* Stats grid */}
+              <div className="flex-1 grid grid-cols-3 gap-3 w-full">
+                <div className="text-center p-3 rounded-xl bg-blue-500/8 border border-blue-500/10">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-blue-600/60">{bn ? 'কার্যদিবস' : 'Total'}</p>
+                  <p className="text-xl font-black text-blue-600">{attendanceStats.total}</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-emerald-500/8 border border-emerald-500/10">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600/60">{bn ? 'উপস্থিত' : 'Present'}</p>
+                  <p className="text-xl font-black text-emerald-600">{attendanceStats.present}</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-rose-500/8 border border-rose-500/10">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-rose-600/60">{bn ? 'অনুপস্থিত' : 'Absent'}</p>
+                  <p className="text-xl font-black text-rose-600">{attendanceStats.absent}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar Dots - Last 10 days */}
+            {attendanceStats.last7.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-border/15">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">{bn ? 'সাম্প্রতিক (শেষ ১০ দিন)' : 'Recent (Last 10 Days)'}</p>
+                <div className="flex items-center gap-2 flex-wrap">
                   {attendanceStats.last7.map((a: any, i: number) => (
-                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/30 border border-border/20 text-xs">
+                    <div key={i} className="flex flex-col items-center gap-1" title={`${a.attendance_date} - ${a.status}`}>
                       <div className={cn(
-                        'w-2.5 h-2.5 rounded-full shadow-sm',
+                        'w-4 h-4 rounded-full shadow-sm transition-transform hover:scale-125',
                         a.status === 'present' ? 'bg-emerald-500 shadow-emerald-500/30' :
                         a.status === 'late' ? 'bg-amber-500 shadow-amber-500/30' :
                         'bg-rose-500 shadow-rose-500/30'
                       )} />
-                      <span className="font-medium text-foreground">{a.attendance_date}</span>
-                      <Badge className={cn(
-                        'rounded-full text-[9px] px-2',
-                        a.status === 'present' ? 'bg-emerald-500/10 text-emerald-600' :
-                        a.status === 'late' ? 'bg-amber-500/10 text-amber-600' :
-                        'bg-rose-500/10 text-rose-600'
-                      )}>
-                        {a.status === 'present' ? (bn ? 'উপস্থিত' : 'Present') :
-                         a.status === 'late' ? (bn ? 'বিলম্ব' : 'Late') :
-                         (bn ? 'অনুপস্থিত' : 'Absent')}
-                      </Badge>
+                      <span className="text-[8px] text-muted-foreground/50 font-medium">{a.attendance_date?.slice(-2)}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </ProfileSectionCard>
+              </div>
+            )}
+          </div>
 
-          {/* ── Academic Results ── */}
+          {/* Academic Results */}
           {resultsLoading ? (
-            <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            <div className="flex justify-center py-6"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
           ) : !resultStats || resultStats.length === 0 ? (
             <ProfileSectionCard title={bn ? 'পরীক্ষার ফলাফল' : 'Exam Results'} icon={BookOpen}>
               <div className="col-span-full">
-                <p className="text-xs text-muted-foreground text-center py-6">{bn ? 'কোনো ফলাফল পাওয়া যায়নি' : 'No results found'}</p>
+                <p className="text-xs text-muted-foreground/50 text-center py-6">{bn ? 'কোনো ফলাফল পাওয়া যায়নি' : 'No results found'}</p>
               </div>
             </ProfileSectionCard>
           ) : (
             resultStats.map((exam: any) => (
               <div key={exam.examId} className="space-y-3">
                 {/* Exam Summary */}
-                <div className="rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/5 to-transparent border border-primary/15 p-4">
+                <div className="rounded-[18px] bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-transparent border border-emerald-500/12 p-4">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                        <Award className="w-4.5 h-4.5 text-primary" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/10">
+                        <Award className="w-4 h-4 text-emerald-600" />
                       </div>
                       <div>
                         <h5 className="text-sm font-bold text-foreground">{exam.examName || 'Exam'}</h5>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{exam.subjectCount} {bn ? 'বিষয়' : 'subjects'}</p>
+                        <p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">{exam.subjectCount} {bn ? 'বিষয়' : 'subjects'}</p>
                       </div>
                     </div>
-                    <div className="flex gap-3">
-                      <div className="text-center px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/15">
-                        <p className="text-[9px] font-medium uppercase text-emerald-700/70">{bn ? 'মোট নম্বর' : 'Total'}</p>
-                        <p className="text-lg font-bold text-emerald-600">{exam.totalMarks}</p>
+                    <div className="flex gap-2">
+                      <div className="text-center px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/12">
+                        <p className="text-[8px] font-bold uppercase text-emerald-700/60">{bn ? 'মোট' : 'Total'}</p>
+                        <p className="text-lg font-black text-emerald-600">{exam.totalMarks}</p>
                       </div>
-                      <div className="text-center px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/15">
-                        <p className="text-[9px] font-medium uppercase text-primary/70">{bn ? 'গড় GPA' : 'Avg GPA'}</p>
-                        <p className="text-lg font-bold text-primary">{exam.avgGpa}</p>
+                      <div className="text-center px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/12">
+                        <p className="text-[8px] font-bold uppercase text-teal-700/60">GPA</p>
+                        <p className="text-lg font-black text-teal-600">{exam.avgGpa}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Subject-wise results with progress bars */}
+                {/* Subject-wise with progress bars */}
                 <ProfileSectionCard title={bn ? 'বিষয়ভিত্তিক ফলাফল' : 'Subject-wise Results'} icon={BarChart3}>
-                  <div className="col-span-full space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                  <div className="col-span-full space-y-2.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
                     {exam.results.filter((r: any) => r.marks != null).map((r: any) => {
                       const maxMarks = 100;
                       const pct = Math.min(100, Math.round((r.marks / maxMarks) * 100));
+                      const barColor = pct >= 80 ? 'from-emerald-500 to-teal-400' : pct >= 60 ? 'from-blue-500 to-cyan-400' : pct >= 40 ? 'from-amber-500 to-orange-400' : 'from-rose-500 to-red-400';
                       return (
-                        <div key={r.id} className="p-3 rounded-xl bg-muted/30 border border-border/20">
+                        <div key={r.id} className="p-3 rounded-xl bg-muted/20 border border-border/15 hover:bg-muted/30 transition-colors">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2 min-w-0">
-                              <BookOpen className="w-3.5 h-3.5 text-primary shrink-0" />
-                              <span className="text-sm font-semibold truncate">{bn ? r.subjects?.name_bn : r.subjects?.name || '-'}</span>
+                              <BookOpen className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="text-sm font-bold truncate">{bn ? r.subjects?.name_bn : r.subjects?.name || '-'}</span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-sm font-bold text-foreground">{r.marks}</span>
-                              {r.grade && <Badge className="bg-primary/10 text-primary rounded-full text-[10px] px-2">{r.grade}</Badge>}
-                              {r.gpa != null && <span className="text-[10px] text-muted-foreground">GPA {r.gpa}</span>}
+                              <span className="text-sm font-black text-foreground">{r.marks}</span>
+                              {r.grade && <Badge className="bg-emerald-500/10 text-emerald-600 rounded-full text-[9px] px-2">{r.grade}</Badge>}
+                              {r.gpa != null && <span className="text-[9px] text-muted-foreground/60 font-semibold">GPA {r.gpa}</span>}
                             </div>
                           </div>
-                          {/* Progress bar */}
-                          <div className="w-full h-2 rounded-full bg-muted/50 overflow-hidden">
+                          <div className="w-full h-2 rounded-full bg-muted/40 overflow-hidden">
                             <div
-                              className={cn(
-                                'h-full rounded-full transition-all duration-500',
-                                pct >= 80 ? 'bg-emerald-500' : pct >= 60 ? 'bg-primary' : pct >= 40 ? 'bg-amber-500' : 'bg-rose-500'
-                              )}
+                              className={cn('h-full rounded-full bg-gradient-to-r transition-all duration-700', barColor)}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -619,21 +672,22 @@ const StudentProfileModal = ({
         </div>
       )}
 
+      {/* ═══════════ OTHERS TAB ═══════════ */}
       {activeTab === 'others' && (
         <div className="space-y-4">
           <ProfileSectionCard title={bn ? 'লাইব্রেরি বই ইতিহাস' : 'Library Book History'} icon={Library}>
             <div className="col-span-full">
               {libLoading ? (
-                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+                <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 animate-spin text-emerald-600" /></div>
               ) : libraryHistory.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">{bn ? 'কোনো বই ইস্যু/জমার রেকর্ড নেই' : 'No library records'}</p>
+                <p className="text-xs text-muted-foreground/50 text-center py-4">{bn ? 'কোনো বই ইস্যু/জমার রেকর্ড নেই' : 'No library records'}</p>
               ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
                   {libraryHistory.map((item: any) => (
-                    <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/20">
+                    <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/20 border border-border/15 hover:bg-muted/30 transition-colors">
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{bn ? (item.library_books?.title_bn || item.library_books?.title) : item.library_books?.title}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="font-bold text-sm truncate">{bn ? (item.library_books?.title_bn || item.library_books?.title) : item.library_books?.title}</p>
+                        <p className="text-[10px] text-muted-foreground/60">
                           {bn ? 'ইস্যু: ' : 'Issued: '}{item.issued_date}
                           {item.returned_date && <> • {bn ? 'জমা: ' : 'Returned: '}{item.returned_date}</>}
                         </p>
@@ -645,15 +699,10 @@ const StudentProfileModal = ({
               )}
             </div>
           </ProfileSectionCard>
-
-          <ProfileSectionCard title={bn ? 'উপস্থিতি' : 'Attendance'} icon={CalendarCheck}>
-            <div className="col-span-full">
-              <p className="text-xs text-muted-foreground text-center py-6">{bn ? 'শীঘ্রই আসছে...' : 'Coming soon...'}</p>
-            </div>
-          </ProfileSectionCard>
         </div>
       )}
 
+      {/* ═══════════ WAIVER DIALOG ═══════════ */}
       <Dialog open={showWaiverDialog} onOpenChange={setShowWaiverDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>{bn ? 'ফি ছাড় / ডিসকাউন্ট দিন' : 'Add Fee Discount'}</DialogTitle></DialogHeader>
@@ -694,22 +743,39 @@ const StudentProfileModal = ({
         </DialogContent>
       </Dialog>
 
-      <div className="flex gap-2 pt-4 border-t border-border/30">
-        <Button variant="outline" onClick={() => { setEditStudent(student); setShowDetail(null); setShowAdd(true); }} className="flex-1 rounded-full h-11">
+      {/* ═══════════ BOTTOM ACTIONS (Ghost Buttons) ═══════════ */}
+      <div className="flex gap-2 pt-4 border-t border-border/20">
+        <Button
+          variant="outline"
+          onClick={() => { setEditStudent(student); setShowDetail(null); setShowAdd(true); }}
+          className="flex-1 rounded-full h-11 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300"
+        >
           <Pencil className="w-4 h-4 mr-2" /> {bn ? 'সম্পাদনা' : 'Edit'}
         </Button>
         {student.approval_status !== 'approved' && (
-          <Button onClick={() => { statusMutation.mutate({ id: student.id, status: 'approved' }); setShowDetail(null); }} className="flex-1 rounded-full h-11 bg-emerald-600 hover:bg-emerald-600/90 text-white">
+          <Button
+            variant="outline"
+            onClick={() => { statusMutation.mutate({ id: student.id, status: 'approved' }); setShowDetail(null); }}
+            className="flex-1 rounded-full h-11 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-300"
+          >
             <CheckCircle className="w-4 h-4 mr-2" /> {bn ? 'অনুমোদন' : 'Approve'}
           </Button>
         )}
         {student.approval_status !== 'rejected' && (
-          <Button variant="destructive" onClick={() => { statusMutation.mutate({ id: student.id, status: 'rejected' }); setShowDetail(null); }} className="flex-1 rounded-full h-11">
+          <Button
+            variant="outline"
+            onClick={() => { statusMutation.mutate({ id: student.id, status: 'rejected' }); setShowDetail(null); }}
+            className="flex-1 rounded-full h-11 border-rose-500/20 text-rose-600 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all duration-300"
+          >
             <XCircle className="w-4 h-4 mr-2" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
           </Button>
         )}
         {student.approval_status === 'rejected' && (
-          <Button variant="outline" onClick={() => { statusMutation.mutate({ id: student.id, status: 'pending' }); setShowDetail(null); }} className="flex-1 rounded-full h-11">
+          <Button
+            variant="outline"
+            onClick={() => { statusMutation.mutate({ id: student.id, status: 'pending' }); setShowDetail(null); }}
+            className="flex-1 rounded-full h-11 border-amber-500/20 text-amber-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all duration-300"
+          >
             <Clock className="w-4 h-4 mr-2" /> {bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}
           </Button>
         )}
