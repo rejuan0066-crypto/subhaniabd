@@ -14,9 +14,9 @@ export const hasResolvedAuthRedirectState = ({ role, userStatus }: AuthRedirectS
 };
 
 export const getAuthenticatedHomePath = ({ role, userStatus }: AuthRedirectState): string => {
-  if (isAdminRole(role)) return '/admin';
-  if (userStatus === 'pending') return '/waiting-approval';
-  return '/staff-dashboard';
+  if (userStatus === 'pending' && !isAdminRole(role)) return '/waiting-approval';
+  // All authenticated users go to /admin (unified dashboard)
+  return '/admin';
 };
 
 export const getProtectedRouteRedirect = ({ pathname, role, userStatus }: ProtectedRouteState): string | null => {
@@ -28,12 +28,9 @@ export const getProtectedRouteRedirect = ({ pathname, role, userStatus }: Protec
     return pathname === '/waiting-approval' ? null : '/waiting-approval';
   }
 
-  if (isAdminRole(role)) {
-    return pathname === '/staff-dashboard' ? '/admin' : null;
-  }
-
-  if (pathname.startsWith('/admin')) {
-    return '/staff-dashboard';
+  // Redirect legacy /staff-dashboard to /admin for all roles
+  if (pathname === '/staff-dashboard') {
+    return '/admin';
   }
 
   return null;
@@ -48,5 +45,5 @@ export const getWaitingApprovalRedirect = ({ role, userStatus }: AuthRedirectSta
     return null;
   }
 
-  return '/staff-dashboard';
+  return '/admin';
 };

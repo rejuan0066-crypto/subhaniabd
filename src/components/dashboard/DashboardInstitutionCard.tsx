@@ -148,7 +148,9 @@ const DashboardInstitutionCard = () => {
         </div>
         {institution?.other_info && <p className="text-xs text-muted-foreground mt-0.5 break-words">{institution.other_info}</p>}
       </div>
-      <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto"><Edit2 className="w-4 h-4 mr-1" />{language === 'bn' ? 'সম্পাদনা' : 'Edit'}</Button>
+      {isAdmin && (
+        <Button size="sm" variant="outline" onClick={() => setEditing(true)} className="w-full sm:w-auto"><Edit2 className="w-4 h-4 mr-1" />{language === 'bn' ? 'সম্পাদনা' : 'Edit'}</Button>
+      )}
     </div>
   );
 };
