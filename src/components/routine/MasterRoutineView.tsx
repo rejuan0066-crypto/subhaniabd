@@ -17,7 +17,6 @@ const DAYS = [
   { value: 3, label_bn: 'মঙ্গলবার', label_en: 'Tuesday', short_bn: 'মঙ্গল', short_en: 'Tue' },
   { value: 4, label_bn: 'বুধবার', label_en: 'Wednesday', short_bn: 'বুধ', short_en: 'Wed' },
   { value: 5, label_bn: 'বৃহস্পতিবার', label_en: 'Thursday', short_bn: 'বৃহঃ', short_en: 'Thu' },
-  { value: 6, label_bn: 'শুক্রবার', label_en: 'Friday', short_bn: 'শুক্র', short_en: 'Fri' },
 ];
 
 const PERIOD_LABELS_BN = ['১ম', '২য়', '৩য়', '৪র্থ', '৫ম', '৬ষ্ঠ', '৭ম', '৮ম', '৯ম', '১০ম'];
@@ -106,10 +105,10 @@ const MasterRoutineView = () => {
 
   const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [selectedDivisionId, setSelectedDivisionId] = useState<string>('all');
-  const [selectedDay, setSelectedDay] = useState<string>('0'); // default Saturday
+  const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [periodCount, setPeriodCount] = useState(8);
-  const [breakAfter, setBreakAfter] = useState(4); // break after 4th period
-  const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({}); // periodNum -> times
+  const [breakAfter, setBreakAfter] = useState(4);
+  const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({});
 
   // Queries
   const { data: institution } = useQuery({
@@ -153,41 +152,43 @@ const MasterRoutineView = () => {
     },
   });
 
-  const { data: routines } = useQuery({
-    queryKey: ['master-routines', selectedSessionId],
+  // Filtered classes for dropdown
+  const filteredClasses = useMemo(() => {
+    if (!allClasses) return [];
+    if (selectedDivisionId === 'all') return allClasses;
+    return allClasses.filter(c => c.division_id === selectedDivisionId);
+  }, [allClasses, selectedDivisionId]);
+
+  // Get or create routine for selected class
+  const { data: routine } = useQuery({
+    queryKey: ['class-routine', selectedSessionId, selectedClassId],
     queryFn: async () => {
-      if (!selectedSessionId) return [];
+      if (!selectedSessionId || !selectedClassId) return null;
       const { data } = await supabase
         .from('class_routines')
         .select('id, class_id, name, name_bn')
         .eq('academic_session_id', selectedSessionId)
-        .eq('is_active', true);
-      return data || [];
+        .eq('class_id', selectedClassId)
+        .eq('is_active', true)
+        .maybeSingle();
+      return data;
     },
-    enabled: !!selectedSessionId,
+    enabled: !!selectedSessionId && !!selectedClassId,
   });
 
-  const routineMap = useMemo(() => {
-    const map: Record<string, string> = {}; // class_id -> routine_id
-    (routines || []).forEach(r => { map[r.class_id] = r.id; });
-    return map;
-  }, [routines]);
-
-  const routineIds = useMemo(() => Object.values(routineMap), [routineMap]);
-
+  // All periods for this routine (all days)
   const { data: allPeriods } = useQuery({
-    queryKey: ['master-routine-periods', routineIds, selectedDay],
+    queryKey: ['weekly-routine-periods', routine?.id],
     queryFn: async () => {
-      if (routineIds.length === 0) return [];
+      if (!routine?.id) return [];
       const { data } = await supabase
         .from('routine_periods')
         .select('*, subjects(name, name_bn)')
-        .in('routine_id', routineIds)
-        .eq('day_of_week', Number(selectedDay))
+        .eq('routine_id', routine.id)
         .order('period_number');
       return data || [];
     },
-    enabled: routineIds.length > 0,
+    enabled: !!routine?.id,
   });
 
   const { data: studentCount } = useQuery({
@@ -199,40 +200,30 @@ const MasterRoutineView = () => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Filtered classes
-  const filteredClasses = useMemo(() => {
-    if (!allClasses) return [];
-    if (selectedDivisionId === 'all') return allClasses;
-    return allClasses.filter(c => c.division_id === selectedDivisionId);
-  }, [allClasses, selectedDivisionId]);
-
-  // Period columns: 1..periodCount with break inserted
+  // Period columns with break
   const periodColumns = useMemo(() => {
     const cols: { num: number; isBreak: boolean }[] = [];
     let pNum = 1;
     for (let i = 1; i <= periodCount; i++) {
       if (i === breakAfter + 1) {
-        cols.push({ num: pNum, isBreak: true });
-        pNum++;
+        cols.push({ num: -1, isBreak: true });
       }
       cols.push({ num: pNum, isBreak: false });
       pNum++;
     }
-    // If break is at end
     if (breakAfter >= periodCount) {
-      cols.push({ num: pNum, isBreak: true });
+      cols.push({ num: -1, isBreak: true });
     }
     return cols;
   }, [periodCount, breakAfter]);
 
-  // Get period data for a specific class and period
-  const getPeriodData = useCallback((classId: string, periodNum: number) => {
-    const routineId = routineMap[classId];
-    if (!routineId || !allPeriods) return null;
-    return allPeriods.find(p => p.routine_id === routineId && p.period_number === periodNum);
-  }, [routineMap, allPeriods]);
+  // Get period data for a specific day and period number
+  const getPeriodData = useCallback((dayOfWeek: number, periodNum: number) => {
+    if (!allPeriods) return null;
+    return allPeriods.find(p => p.day_of_week === dayOfWeek && p.period_number === periodNum);
+  }, [allPeriods]);
 
-  // Get period times: local state first, then DB
+  // Get period times from local state or DB
   const getPeriodTime = useCallback((periodNum: number) => {
     if (periodTimes[periodNum]) return periodTimes[periodNum];
     if (!allPeriods) return { start: '', end: '' };
@@ -242,16 +233,16 @@ const MasterRoutineView = () => {
 
   // Save cell mutation
   const saveCellMutation = useMutation({
-    mutationFn: async ({ classId, periodNum, subjectId, teacherName, teacherNameBn, isBreak }: {
-      classId: string; periodNum: number; subjectId: string; teacherName: string; teacherNameBn: string; isBreak?: boolean;
+    mutationFn: async ({ dayOfWeek, periodNum, subjectId, teacherName, teacherNameBn }: {
+      dayOfWeek: number; periodNum: number; subjectId: string; teacherName: string; teacherNameBn: string;
     }) => {
-      let routineId = routineMap[classId];
+      let routineId = routine?.id;
 
       // Auto-create routine if not exists
       if (!routineId) {
-        const cls = allClasses?.find(c => c.id === classId);
+        const cls = allClasses?.find(c => c.id === selectedClassId);
         const { data: newRoutine, error } = await supabase.from('class_routines').insert({
-          class_id: classId,
+          class_id: selectedClassId,
           academic_session_id: selectedSessionId,
           name: cls?.name || 'Routine',
           name_bn: cls?.name_bn || 'রুটিন',
@@ -266,19 +257,19 @@ const MasterRoutineView = () => {
         .from('routine_periods')
         .select('id')
         .eq('routine_id', routineId)
-        .eq('day_of_week', Number(selectedDay))
+        .eq('day_of_week', dayOfWeek)
         .eq('period_number', periodNum)
         .maybeSingle();
 
       const time = periodTimes[periodNum] || { start: '08:00', end: '08:45' };
       const periodData = {
         routine_id: routineId,
-        day_of_week: Number(selectedDay),
+        day_of_week: dayOfWeek,
         period_number: periodNum,
         subject_id: subjectId === 'none' ? null : subjectId || null,
         teacher_name: teacherName || null,
         teacher_name_bn: teacherNameBn || null,
-        is_break: isBreak || false,
+        is_break: false,
         start_time: time.start,
         end_time: time.end,
       };
@@ -292,21 +283,20 @@ const MasterRoutineView = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['master-routine-periods'] });
-      queryClient.invalidateQueries({ queryKey: ['master-routines'] });
+      queryClient.invalidateQueries({ queryKey: ['weekly-routine-periods'] });
+      queryClient.invalidateQueries({ queryKey: ['class-routine'] });
       toast.success(bn ? 'সেভ হয়েছে' : 'Saved');
     },
     onError: () => toast.error(bn ? 'সেভ ব্যর্থ' : 'Save failed'),
   });
 
-  const handleCellSave = (classId: string, periodNum: number, subjectId: string, teacherName: string, teacherNameBn: string) => {
-    saveCellMutation.mutate({ classId, periodNum, subjectId, teacherName, teacherNameBn });
+  const handleCellSave = (dayOfWeek: number, periodNum: number, subjectId: string, teacherName: string, teacherNameBn: string) => {
+    saveCellMutation.mutate({ dayOfWeek, periodNum, subjectId, teacherName, teacherNameBn });
   };
 
   const selectedSession = sessions?.find(s => s.id === selectedSessionId);
-  const selectedDiv = divisions?.find(d => d.id === selectedDivisionId);
+  const selectedCls = allClasses?.find(c => c.id === selectedClassId);
   const instName = bn ? institution?.name : (institution?.name_en || institution?.name);
-  const dayObj = DAYS.find(d => String(d.value) === selectedDay);
 
   // Period label helpers
   let periodLabelIdx = 0;
@@ -324,7 +314,7 @@ const MasterRoutineView = () => {
     if (!el) return;
     const w = window.open('', '_blank');
     if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${bn ? 'মাস্টার রুটিন' : 'Master Routine'}</title>
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${bn ? 'সাপ্তাহিক রুটিন' : 'Weekly Routine'}</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
@@ -336,13 +326,11 @@ const MasterRoutineView = () => {
       .header { text-align: center; margin-bottom: 8px; }
       .header h1 { font-size: 18px; font-weight: 700; }
       .header p { font-size: 11px; margin: 2px 0; }
-      .date-box { position: absolute; top: 10px; right: 15px; font-size: 10px; border: 1px solid #999; padding: 2px 6px; }
       .break-col { background: #c8e6c9 !important; writing-mode: vertical-rl; text-orientation: mixed; font-weight: 700; font-size: 10px; min-width: 26px; max-width: 30px; }
       .cell-top { font-weight: 600; font-size: 9.5px; padding: 2px 3px; border-bottom: 1px solid #999; min-height: 18px; }
       .cell-bottom { font-size: 8px; color: #555; padding: 2px 3px; min-height: 18px; }
-      .class-cell { background: #f5f5f5; font-weight: 700; font-size: 10px; white-space: nowrap; }
+      .day-cell { background: #f5f5f5; font-weight: 700; font-size: 11px; white-space: nowrap; padding: 6px 8px; }
       .period-header { background: #d4edda; }
-      .day-label { background: #c8e6c9; font-weight: 700; font-size: 12px; text-align: center; padding: 4px; }
       .footer { margin-top: 8px; font-size: 9px; }
       @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
     </style></head><body><div style="position:relative;">`);
@@ -375,7 +363,7 @@ const MasterRoutineView = () => {
         </div>
         <div className="min-w-[140px]">
           <Label className="text-xs">{bn ? 'বিভাগ' : 'Division'}</Label>
-          <Select value={selectedDivisionId} onValueChange={setSelectedDivisionId}>
+          <Select value={selectedDivisionId} onValueChange={(v) => { setSelectedDivisionId(v); setSelectedClassId(''); }}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{bn ? 'সকল বিভাগ' : 'All'}</SelectItem>
@@ -383,12 +371,14 @@ const MasterRoutineView = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="min-w-[130px]">
-          <Label className="text-xs">{bn ? 'দিন' : 'Day'}</Label>
-          <Select value={selectedDay} onValueChange={setSelectedDay}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+        <div className="min-w-[150px]">
+          <Label className="text-xs">{bn ? 'শ্রেণী' : 'Class'}</Label>
+          <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+            <SelectTrigger><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
             <SelectContent>
-              {DAYS.map(d => <SelectItem key={d.value} value={String(d.value)}>{bn ? d.label_bn : d.label_en}</SelectItem>)}
+              {filteredClasses.map(c => (
+                <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -410,16 +400,16 @@ const MasterRoutineView = () => {
             </div>
           </div>
         </div>
-        {selectedSessionId && (
+        {selectedSessionId && selectedClassId && (
           <Button size="sm" variant="outline" className="gap-1.5" onClick={handlePrint}>
             <Printer className="h-3.5 w-3.5" /> {bn ? 'প্রিন্ট' : 'Print'}
           </Button>
         )}
       </div>
 
-      {!selectedSessionId ? (
+      {!selectedSessionId || !selectedClassId ? (
         <div className="py-12 text-center text-muted-foreground">
-          {bn ? 'একটি একাডেমিক সেশন নির্বাচন করুন' : 'Select an academic session'}
+          {bn ? 'একটি সেশন এবং শ্রেণী নির্বাচন করুন' : 'Select a session and class'}
         </div>
       ) : (
         <div id="master-routine-print">
@@ -439,31 +429,27 @@ const MasterRoutineView = () => {
                 <p className="text-[10px] text-muted-foreground">{institution.address}</p>
               )}
               <p className="text-xs font-semibold text-foreground mt-0.5">
-                {bn ? 'ক্লাস রুটিন:' : 'Class Routine:'} {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
+                {bn ? 'সাপ্তাহিক ক্লাস রুটিন' : 'Weekly Class Routine'} — {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
               </p>
-              {selectedDiv && selectedDivisionId !== 'all' && (
-                <p className="text-[11px] text-foreground font-medium">
-                  {bn ? `${selectedDiv.name_bn} শাখা` : `${selectedDiv.name} Division`}
+              {selectedCls && (
+                <p className="text-sm font-bold text-foreground mt-0.5 bg-emerald-100 dark:bg-emerald-900/20 inline-block px-4 py-0.5 rounded">
+                  {bn ? selectedCls.name_bn : selectedCls.name}
                 </p>
               )}
               {studentCount !== undefined && studentCount > 0 && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[10px] text-muted-foreground mt-0.5">
                   {bn ? `মোট ছাত্র: ${toBn(studentCount)} জন` : `Total Students: ${studentCount}`}
                 </p>
               )}
-              {/* Selected day */}
-              <p className="text-[11px] font-semibold text-foreground mt-0.5 bg-emerald-100 dark:bg-emerald-900/20 inline-block px-3 py-0.5 rounded">
-                {bn ? dayObj?.label_bn : dayObj?.label_en}
-              </p>
             </div>
 
-            {/* Table */}
+            {/* Weekly Table */}
             <div className="overflow-x-auto p-2">
-              <table className="w-full border-collapse" style={{ minWidth: periodColumns.length * 85 + 80 }}>
+              <table className="w-full border-collapse" style={{ minWidth: periodColumns.length * 85 + 90 }}>
                 <thead>
                   <tr>
-                    <th className={thStyle} style={{ minWidth: 70 }}>
-                      {bn ? 'শ্রেণী' : 'Class'}
+                    <th className={thStyle} style={{ minWidth: 80 }}>
+                      {bn ? 'দিন / পিরিয়ড' : 'Day / Period'}
                     </th>
                     {periodColumns.map((col, idx) => {
                       if (col.isBreak) {
@@ -516,19 +502,19 @@ const MasterRoutineView = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredClasses.map(cls => (
-                    <tr key={cls.id} className="hover:bg-accent/5 transition-colors">
-                      {/* Class name cell */}
-                      <td className="border border-border bg-muted/10 px-2 py-1.5 font-bold text-[10px] whitespace-nowrap text-center">
-                        {bn ? cls.name_bn : cls.name}
+                  {DAYS.map(day => (
+                    <tr key={day.value} className="hover:bg-accent/5 transition-colors">
+                      {/* Day name cell */}
+                      <td className="border border-border bg-emerald-50 dark:bg-emerald-900/10 px-3 py-2 font-bold text-[11px] whitespace-nowrap text-center">
+                        {bn ? day.label_bn : day.label_en}
                       </td>
-                      {/* Period cells */}
+                      {/* Period cells for this day */}
                       {periodColumns.map((col, idx) => {
                         if (col.isBreak) {
                           return <td key={`br-${idx}`} className="border border-border bg-emerald-50 dark:bg-emerald-900/10" />;
                         }
 
-                        const period = getPeriodData(cls.id, col.num);
+                        const period = getPeriodData(day.value, col.num);
                         const subj = period?.subjects as any;
                         const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
                         const teacherDisplay = bn
@@ -543,19 +529,16 @@ const MasterRoutineView = () => {
                               teacherNameBn={period?.teacher_name_bn || ''}
                               subjects={subjects || []}
                               bn={bn}
-                              onSave={(sId, tn, tnBn) => handleCellSave(cls.id, col.num, sId, tn, tnBn)}
+                              onSave={(sId, tn, tnBn) => handleCellSave(day.value, col.num, sId, tn, tnBn)}
                             >
                               <button className="w-full cursor-pointer hover:bg-accent/10 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/30 rounded-none">
                                 <div className="flex flex-col min-h-[42px]">
-                                  {/* Subject - top half */}
                                   <div className="flex-1 flex items-center justify-center px-1 py-0.5">
                                     <span className="text-[10px] font-semibold text-foreground leading-tight text-center">
                                       {subjName || <span className="text-muted-foreground/30">+</span>}
                                     </span>
                                   </div>
-                                  {/* Divider */}
                                   <div className="border-t border-border/70" />
-                                  {/* Teacher - bottom half */}
                                   <div className="flex-1 flex items-center justify-center px-1 py-0.5">
                                     <span className="text-[8px] text-muted-foreground leading-tight text-center">
                                       {teacherDisplay || <span className="opacity-30">—</span>}
