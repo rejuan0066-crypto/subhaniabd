@@ -1338,14 +1338,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs">{bn ? 'টাইপ' : 'Entity Type'}</Label>
-                    <Select value={ruleForm.entity_type} onValueChange={v => setRuleForm(p => ({ ...p, entity_type: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">{bn ? 'ছাত্র' : 'Student'}</SelectItem>
-                        <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-xs">{bn ? 'ক্যাটাগরি' : 'Category'}</Label>
+                    <Input value={entityType === 'student' ? (bn ? 'ছাত্র' : 'Student') : (bn ? 'স্টাফ' : 'Staff')} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label className="text-xs">{bn ? 'গণনা হিসেবে' : 'Counts As'}</Label>
