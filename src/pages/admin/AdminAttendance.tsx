@@ -832,13 +832,15 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         <Card>
           <CardContent className="p-4 space-y-3">
             <div className="flex flex-col sm:flex-row gap-3 items-center">
-              {/* Entity Type */}
-              <Tabs value={entityType} onValueChange={(v) => { setEntityType(v as any); setSearchQuery(''); }} className="shrink-0">
-                <TabsList>
-                  <TabsTrigger value="student"><Users className="h-4 w-4 mr-1" /> {bn ? 'ছাত্র' : 'Students'}</TabsTrigger>
-                  <TabsTrigger value="staff"><UserCog className="h-4 w-4 mr-1" /> {bn ? 'স্টাফ/শিক্ষক' : 'Staff/Teacher'}</TabsTrigger>
-                </TabsList>
-              </Tabs>
+              {/* Entity Type - only show switcher when not forced */}
+              {!forcedTab && (
+                <Tabs value={entityType} onValueChange={(v) => { setEntityType(v as any); setSearchQuery(''); }} className="shrink-0">
+                  <TabsList>
+                    <TabsTrigger value="student"><Users className="h-4 w-4 mr-1" /> {bn ? 'ছাত্র' : 'Students'}</TabsTrigger>
+                    <TabsTrigger value="staff"><UserCog className="h-4 w-4 mr-1" /> {bn ? 'স্টাফ/শিক্ষক' : 'Staff/Teacher'}</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              )}
 
               {/* Date Navigation */}
               <div className="flex items-center gap-2">
