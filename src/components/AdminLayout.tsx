@@ -58,6 +58,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { menuConfig } = useMenuSettings();
   const { theme: adminTheme } = useThemeSettings();
   const { sections: sidebarSections } = useSidebarSections();
+  const { settings: websiteSettings } = useWebsiteSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
