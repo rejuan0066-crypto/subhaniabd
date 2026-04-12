@@ -493,8 +493,8 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success(bn ? (isEditMode ? 'কর্মী/শিক্ষক সফলভাবে আপডেট হয়েছে' : 'কর্মী/শিক্ষক সফলভাবে যোগ হয়েছে') : (isEditMode ? 'Staff/Teacher updated successfully' : 'Staff/Teacher added successfully'));
-      navigate('/admin/staff');
+      toast.success(bn ? (isEditMode ? `${titleConfig.bn} সফলভাবে আপডেট হয়েছে` : `${titleConfig.bn} সফলভাবে যোগ হয়েছে`) : (isEditMode ? `${titleConfig.en} updated successfully` : `${titleConfig.en} added successfully`));
+      navigate(backPath);
     },
     onError: (e: any) => toast.error(e.message || 'Error saving staff'),
   });
