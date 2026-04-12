@@ -205,13 +205,10 @@ const AdminStudents = () => {
   };
 
   const studentListContent = (
-    <div className="space-y-8">
-        {/* Header */}
+    <div className="space-y-6">
+        {/* Action bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">{t('students')}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{bn ? `মোট ${filtered.length} জন ছাত্র` : `Total ${filtered.length} students`}</p>
-          </div>
+          <p className="text-sm text-muted-foreground">{bn ? `মোট ${filtered.length} জন ছাত্র` : `Total ${filtered.length} students`}</p>
           {canAddItem && (
             <Button onClick={() => setShowAdd(true)} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 rounded-full px-6 h-11 text-sm font-semibold transition-all duration-300">
               <Plus className="w-4 h-4" /> {bn ? 'নতুন ভর্তি' : 'New Admission'}

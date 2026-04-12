@@ -85,7 +85,7 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
     return (
       <div className={cn('w-full', className)}>
-      <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-20 mb-4 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky top-0 z-20 mb-4 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           {tabs.map(t => (
             <TabButton
               key={t.id}
@@ -132,7 +132,7 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
   return (
     <div className={cn('w-full', className)}>
       {/* Level-1 tabs */}
-      <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-20 mb-3 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="sticky top-0 z-20 mb-3 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         {groups.map(g => (
           <TabButton
             key={g.id}
@@ -147,7 +147,7 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
       {/* Level-2 tabs */}
       {childTabs.length > 0 && (
-        <div className="sticky top-[calc(8.5rem+env(safe-area-inset-top))] z-[19] mb-4 flex flex-wrap gap-2 border-b border-border/40 bg-background/95 py-2 pl-1 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="sticky top-12 z-[19] mb-4 flex flex-wrap gap-2 border-b border-border/40 bg-background/95 py-2 pl-1 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           {childTabs.map(t => (
             <TabButton
               key={t.id}
