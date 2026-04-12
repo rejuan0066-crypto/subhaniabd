@@ -70,10 +70,8 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-xl font-bold tracking-tight text-center py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2.5",
-      "bg-gradient-to-r from-primary/12 via-primary/8 to-transparent",
-      "text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/80",
-      "[text-fill-color:initial] [-webkit-text-fill-color:initial]",
+      "text-xl font-bold tracking-tight text-foreground text-center py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2.5",
+      "bg-gradient-to-r from-primary/10 via-primary/5 to-transparent",
       className
     )}
     {...props}
