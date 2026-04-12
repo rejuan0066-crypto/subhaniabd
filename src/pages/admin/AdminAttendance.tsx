@@ -947,10 +947,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 {/* Shift selector (only for duty/meal sub-tabs) */}
                 {staffSubTab !== 'fulltime' && (
                   <Tabs value={selectedShift} onValueChange={setSelectedShift} className="shrink-0">
-                    <TabsList className="h-8">
+                    <TabsList>
                       {(staffSubTab === 'duty' ? DUTY_SHIFTS : MEAL_SHIFTS).map(sh => (
-                        <TabsTrigger key={sh.value} value={sh.value} className="text-xs h-7 px-3">
-                          <sh.icon className="h-3 w-3 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
+                        <TabsTrigger key={sh.value} value={sh.value}>
+                          <sh.icon className="h-4 w-4 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
                         </TabsTrigger>
                       ))}
                     </TabsList>
