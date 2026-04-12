@@ -169,10 +169,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       filtered = filtered.filter((s: any) => s.session_year === selectedSessionYear);
     }
     if (selectedClassId && selectedClassId !== 'all') {
-      const selectedClass = classes.find((c: any) => c.id === selectedClassId);
-      if (selectedClass) {
-        filtered = filtered.filter((s: any) => s.division_id === selectedClass.division_id);
-      }
+      filtered = filtered.filter((s: any) => s.class_id === selectedClassId);
     }
 
     // Sort by class sort_order, then by roll_number numerically
