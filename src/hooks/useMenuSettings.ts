@@ -32,6 +32,7 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'student-promotion', path: '/admin/student-promotion', label_bn: 'প্রমোশন/ডিমোশন', label_en: 'Promotion/Demotion', icon: 'ArrowUpDown', visible: true, sort_order: 1 },
     { id: 'admission-letters', path: '/admin/admission-letters', label_bn: 'ভর্তি পত্র', label_en: 'Admission Letters', icon: 'FileCheck', visible: true, sort_order: 2 },
     { id: 'id-cards', path: '/admin/id-cards', label_bn: 'আইডি কার্ড', label_en: 'ID Cards', icon: 'CreditCard', visible: true, sort_order: 3 },
+    { id: 'attendance-student', path: '/admin/attendance?tab=student', label_bn: 'ছাত্র উপস্থিতি', label_en: 'Student Attendance', icon: 'CalendarCheck', visible: true, sort_order: 4 },
   ]},
 
   // স্টাফ/শিক্ষক ব্যবস্থাপনা
@@ -44,6 +45,7 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'joining-letters', path: '/admin/joining-letters', label_bn: 'যোগদান পত্র', label_en: 'Joining Letters', icon: 'FilePlus', visible: true, sort_order: 5 },
     { id: 'resign-letters', path: '/admin/resign-letters', label_bn: 'পদত্যাগ পত্র', label_en: 'Resign Letters', icon: 'FileSignature', visible: true, sort_order: 6 },
     { id: 'salary', path: '/admin/salary', label_bn: 'বেতন ব্যবস্থাপনা', label_en: 'Salary Management', icon: 'Wallet', visible: true, sort_order: 7 },
+    { id: 'attendance-staff', path: '/admin/attendance?tab=staff', label_bn: 'স্টাফ উপস্থিতি', label_en: 'Staff Attendance', icon: 'CalendarCheck', visible: true, sort_order: 8 },
   ]},
 
   // একাডেমিক
@@ -60,12 +62,6 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'exam-sessions', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা সেশন', label_en: 'Exam Sessions', icon: 'CalendarDays', visible: true, sort_order: 0 },
     { id: 'exam-routine', path: '/admin/exam-routine', label_bn: 'পরীক্ষার রুটিন', label_en: 'Exam Routine', icon: 'ClipboardList', visible: true, sort_order: 1 },
     { id: 'results', path: '/admin/results', label_bn: 'ফলাফল', label_en: 'Results', icon: 'FileText', visible: true, sort_order: 2 },
-  ]},
-
-  // উপস্থিতি
-  { id: 'attendance', path: '/admin/attendance', label_bn: 'অ্যাটেন্ডেন্স', label_en: 'Attendance', icon: 'CalendarCheck', visible: true, sort_order: 5, children: [
-    { id: 'attendance-student', path: '/admin/attendance?tab=student', label_bn: 'ছাত্র উপস্থিতি', label_en: 'Student Attendance', icon: 'Users', visible: true, sort_order: 0 },
-    { id: 'attendance-staff', path: '/admin/attendance?tab=staff', label_bn: 'স্টাফ উপস্থিতি', label_en: 'Staff Attendance', icon: 'UserCog', visible: true, sort_order: 1 },
   ]},
 
   // আর্থিক
