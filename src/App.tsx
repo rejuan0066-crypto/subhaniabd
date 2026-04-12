@@ -54,6 +54,8 @@ import AdminCustomFormPage from "./pages/admin/AdminCustomFormPage";
 import AdminModuleManager from "./pages/admin/AdminModuleManager";
 import AdminFormulaBuilder from "./pages/admin/AdminFormulaBuilder";
 import AdminAttendance from "./pages/admin/AdminAttendance";
+import AdminStudentAttendance from "./pages/admin/AdminStudentAttendance";
+import AdminStaffAttendance from "./pages/admin/AdminStaffAttendance";
 import AdminValidationManager from "./pages/admin/AdminValidationManager";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminPermissions from "./pages/admin/AdminPermissions";
@@ -230,6 +232,8 @@ const App = () => (
                     <Route path="module-manager" element={<AdminModuleManager />} />
                     <Route path="formula-builder" element={<AdminFormulaBuilder />} />
                     <Route path="attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminAttendance /></ModuleGuard>} />
+                    <Route path="student-attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminStudentAttendance /></ModuleGuard>} />
+                    <Route path="staff-attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminStaffAttendance /></ModuleGuard>} />
                     <Route path="validation-manager" element={<AdminValidationManager />} />
                     <Route path="reports" element={<AdminReports />} />
                     <Route path="permissions" element={<AdminPermissions />} />

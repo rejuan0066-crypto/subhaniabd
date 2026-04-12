@@ -50,7 +50,7 @@ const MEAL_SHIFTS = [
   { value: 'meal_dinner', labelBn: 'রাতের খাবার', labelEn: 'Dinner', icon: Utensils },
 ];
 
-const AdminAttendance = () => {
+const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const queryClient = useQueryClient();
@@ -61,16 +61,14 @@ const AdminAttendance = () => {
 
   // Read tab from URL: ?tab=student or ?tab=staff
   const tabParam = searchParams.get('tab');
-  const initialTab = tabParam === 'staff' ? 'staff' : tabParam === 'student' ? 'student' : undefined;
+  const resolvedTab = forcedTab || (tabParam === 'staff' ? 'staff' : 'student');
 
-  const [entityType, setEntityType] = useState<'student' | 'staff'>(initialTab || 'student');
+  const [entityType, setEntityType] = useState<'student' | 'staff'>(resolvedTab);
 
-  // Sync entityType when URL tab param changes
+  // Sync entityType when forcedTab or URL tab param changes
   useEffect(() => {
-    if (initialTab) {
-      setEntityType(initialTab);
-    }
-  }, [initialTab]);
+    setEntityType(forcedTab || (tabParam === 'staff' ? 'staff' : 'student'));
+  }, [forcedTab, tabParam]);
   const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential'>('all');
   const [staffSubTab, setStaffSubTab] = useState<'fulltime' | 'duty' | 'meal'>('fulltime');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
