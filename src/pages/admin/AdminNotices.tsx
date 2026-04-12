@@ -87,6 +87,7 @@ const AdminNotices = () => {
   const filtered = filter === 'all' ? notices : filter === 'published' ? notices.filter((n: any) => n.is_published) : notices.filter((n: any) => !n.is_published);
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">

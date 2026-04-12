@@ -93,6 +93,7 @@ const AdminDonors = () => {
   const totalAmount = activeDonations.reduce((sum: number, d: any) => sum + (d.donation_amount || 0), 0);
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
