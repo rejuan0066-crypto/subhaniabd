@@ -82,7 +82,7 @@ const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, subjects, 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-72 p-3 space-y-2" align="center">
+      <PopoverContent className="w-72 p-3 space-y-2 z-[200]" align="center" onOpenAutoFocus={e => e.preventDefault()}>
         {showClassSelect && (
           <div>
             <Label className="text-xs">{bn ? 'শ্রেণী' : 'Class'}</Label>
