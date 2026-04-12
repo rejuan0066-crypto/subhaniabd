@@ -241,41 +241,40 @@ const StudentProfileModal = ({
     <div className="space-y-5">
       {/* ═══════════ HERO HEADER ═══════════ */}
       <div className="relative rounded-[20px] overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-teal-800/80 to-emerald-950/90 dark:from-emerald-950 dark:via-teal-900 dark:to-emerald-950" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_60%)]" />
+        {/* Deep emerald gradient - high contrast */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#064e3b] to-[#065f46]" />
 
         <div className="relative p-6 flex items-start gap-5">
           {/* Profile Image with glow */}
           <div className="relative shrink-0">
-            <div className="absolute -inset-1 rounded-2xl bg-white/20 blur-sm" />
+            <div className="absolute -inset-1.5 rounded-2xl bg-white/25 blur-md" />
             {student.photo_url ? (
               <img
                 src={student.photo_url}
-                className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white/80 shadow-xl"
+                className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white shadow-xl"
                 alt=""
               />
             ) : (
-              <div className="relative w-28 h-32 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-4xl font-bold text-white/60 border-[3px] border-white/30">
-                {student.name_bn?.[0] || <User className="w-10 h-10" />}
+              <div className="relative w-28 h-32 rounded-2xl bg-white/15 flex items-center justify-center text-4xl font-bold text-white border-[3px] border-white/50">
+                {student.name_bn?.[0] || <User className="w-10 h-10 text-white" />}
               </div>
             )}
           </div>
 
-          {/* Name & Quick Info */}
+          {/* Name & Quick Info - all pure white */}
           <div className="flex-1 min-w-0 space-y-2">
-            <h3 className="text-xl font-bold text-white tracking-tight truncate drop-shadow-sm">
+            <h3 className="text-xl font-bold text-white tracking-tight truncate">
               {bn ? (student.name_bn || student.name_en) : (student.name_en || student.name_bn)}
             </h3>
             {student.name_bn && student.name_en && (
-              <p className="text-sm text-white/60 truncate">{bn ? student.name_en : student.name_bn}</p>
+              <p className="text-sm text-white/80 truncate">{bn ? student.name_en : student.name_bn}</p>
             )}
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/15 text-white/90 backdrop-blur-sm border border-white/10">
-                <Hash className="w-3 h-3" /> {student.student_id}
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-white/20 text-white border border-white/20">
+                <Hash className="w-3 h-3 text-white" /> {student.student_id}
               </span>
               {student.roll_number && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/10 text-white/80 backdrop-blur-sm border border-white/10">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-white/15 text-white border border-white/15">
                   {bn ? 'রোল: ' : 'Roll: '}{student.roll_number}
                 </span>
               )}
@@ -289,26 +288,26 @@ const StudentProfileModal = ({
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-0.5">
-              {student.is_free && <Badge className="bg-emerald-400/20 text-emerald-200 border-emerald-400/20 rounded-full text-[10px] px-2.5">{bn ? '✓ বিনা বেতন' : '✓ Free'}</Badge>}
-              {student.is_orphan && <Badge className="bg-amber-400/20 text-amber-200 border-amber-400/20 rounded-full text-[10px] px-2.5">{bn ? 'এতিম' : 'Orphan'}</Badge>}
-              {student.is_poor && <Badge className="bg-blue-400/20 text-blue-200 border-blue-400/20 rounded-full text-[10px] px-2.5">{bn ? 'গরীব' : 'Poor'}</Badge>}
+              {student.is_free && <Badge className="bg-white/20 text-white border-white/20 rounded-full text-[10px] px-2.5 font-bold">{bn ? '✓ বিনা বেতন' : '✓ Free'}</Badge>}
+              {student.is_orphan && <Badge className="bg-white/15 text-white border-white/15 rounded-full text-[10px] px-2.5 font-bold">{bn ? 'এতিম' : 'Orphan'}</Badge>}
+              {student.is_poor && <Badge className="bg-white/15 text-white border-white/15 rounded-full text-[10px] px-2.5 font-bold">{bn ? 'গরীব' : 'Poor'}</Badge>}
             </div>
           </div>
         </div>
 
-        {/* Quick Stats Row */}
-        <div className="relative grid grid-cols-3 border-t border-white/10">
-          <div className="px-4 py-3 text-center border-r border-white/10">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'উপস্থিতি' : 'Attendance'}</p>
-            <p className="text-lg font-bold text-emerald-300">{attendanceStats.percentage}%</p>
+        {/* Quick Stats Row - white text, clear dividers */}
+        <div className="relative grid grid-cols-3 border-t border-white/20">
+          <div className="px-4 py-3.5 text-center border-r border-white/20">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">{bn ? 'উপস্থিতি' : 'Attendance'}</p>
+            <p className="text-xl font-black text-white">{attendanceStats.percentage}%</p>
           </div>
-          <div className="px-4 py-3 text-center border-r border-white/10">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'পরিশোধিত' : 'Paid'}</p>
-            <p className="text-lg font-bold text-emerald-300">৳{totalPaid.toLocaleString()}</p>
+          <div className="px-4 py-3.5 text-center border-r border-white/20">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">{bn ? 'পরিশোধিত' : 'Paid'}</p>
+            <p className="text-xl font-black text-white">৳{totalPaid.toLocaleString()}</p>
           </div>
-          <div className="px-4 py-3 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">{bn ? 'বকেয়া' : 'Due'}</p>
-            <p className="text-lg font-bold text-rose-300">৳{totalDue.toLocaleString()}</p>
+          <div className="px-4 py-3.5 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/70">{bn ? 'বকেয়া' : 'Due'}</p>
+            <p className="text-xl font-black text-white">৳{totalDue.toLocaleString()}</p>
           </div>
         </div>
       </div>
