@@ -19,10 +19,11 @@ import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee,
-  Download, Printer, RotateCcw, QrCode, Send
+  Download, Printer, RotateCcw, QrCode, Send, Fingerprint
 } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import ClassQRPoster from '@/components/attendance/ClassQRPoster';
+import AttendanceDeviceManager from '@/components/attendance/AttendanceDeviceManager';
 
 const STATUS_ICONS: Record<string, any> = {
   present: CheckCircle2, absent: XCircle, late: Clock,
@@ -77,6 +78,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedShift, setSelectedShift] = useState('full_day');
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
+  const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
   // Effective shift: fulltime tab always uses 'full_day'
   const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
@@ -807,9 +809,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
           </div>
           <div className="flex gap-2 flex-wrap">
             {entityType === 'student' && (
-              <Button variant="outline" size="sm" onClick={() => setQrPosterOpen(true)}>
-                <QrCode className="h-4 w-4 mr-1" /> {bn ? 'QR পোস্টার' : 'QR Poster'}
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => setQrPosterOpen(true)}>
+                  <QrCode className="h-4 w-4 mr-1" /> {bn ? 'QR পোস্টার' : 'QR Poster'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setDeviceManagerOpen(true)}>
+                  <Fingerprint className="h-4 w-4 mr-1" /> {bn ? 'হার্ডওয়্যার ডিভাইস' : 'Hardware Devices'}
+                </Button>
+              </>
             )}
             <Button variant="outline" size="sm" onClick={async () => {
               toast.loading(bn ? 'দৈনিক সারসংক্ষেপ তৈরি হচ্ছে...' : 'Generating daily summary...');
@@ -1352,6 +1359,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
         {/* QR Poster Dialog */}
         <ClassQRPoster open={qrPosterOpen} onOpenChange={setQrPosterOpen} />
+        {/* Hardware Device Manager */}
+        <AttendanceDeviceManager open={deviceManagerOpen} onOpenChange={setDeviceManagerOpen} />
       </div>
     </AdminLayout>
   );

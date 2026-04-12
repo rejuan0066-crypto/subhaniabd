@@ -172,6 +172,60 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance_devices: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          device_type: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          last_sync_at: string | null
+          location: string | null
+          location_bn: string | null
+          model: string | null
+          name: string
+          name_bn: string
+          port: number | null
+          serial_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          device_type?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          location?: string | null
+          location_bn?: string | null
+          model?: string | null
+          name: string
+          name_bn: string
+          port?: number | null
+          serial_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          device_type?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          location?: string | null
+          location_bn?: string | null
+          model?: string | null
+          name?: string
+          name_bn?: string
+          port?: number | null
+          serial_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           attendance_date: string
