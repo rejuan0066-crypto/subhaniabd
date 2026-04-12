@@ -231,9 +231,8 @@ const App = () => (
                     <Route path="custom/:slug" element={<AdminCustomFormPage />} />
                     <Route path="module-manager" element={<AdminModuleManager />} />
                     <Route path="formula-builder" element={<AdminFormulaBuilder />} />
-                    <Route path="attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminAttendance /></ModuleGuard>} />
-                    <Route path="student-attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminStudentAttendance /></ModuleGuard>} />
-                    <Route path="staff-attendance" element={<ModuleGuard menuPath="/admin/attendance"><AdminStaffAttendance /></ModuleGuard>} />
+                    <Route path="student-attendance" element={<ModuleGuard menuPath="/admin/student-attendance"><AdminStudentAttendance /></ModuleGuard>} />
+                    <Route path="staff-attendance" element={<ModuleGuard menuPath="/admin/staff-attendance"><AdminStaffAttendance /></ModuleGuard>} />
                     <Route path="validation-manager" element={<AdminValidationManager />} />
                     <Route path="reports" element={<AdminReports />} />
                     <Route path="permissions" element={<AdminPermissions />} />
