@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
-import { useAuth } from '@/hooks/useAuth';
 
 export interface GalleryItem {
   title_bn: string;
@@ -398,7 +397,6 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
 
 export const useWebsiteSettings = () => {
   const queryClient = useQueryClient();
-  const { ready: authReady } = useAuth();
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ['website-settings'],
@@ -433,7 +431,6 @@ export const useWebsiteSettings = () => {
       }
       return result;
     },
-    enabled: authReady,
   });
 
   const updateSetting = useMutation({

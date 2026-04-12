@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
-import { useAuth } from '@/hooks/useAuth';
 
 export interface ThemeSettings {
   primaryHue: number;
@@ -136,7 +135,6 @@ export const FONT_WEIGHT_OPTIONS = [
 
 export const useThemeSettings = () => {
   const queryClient = useQueryClient();
-  const { ready: authReady } = useAuth();
 
   const { data: theme, isLoading } = useQuery({
     queryKey: ['theme-settings'],
@@ -152,7 +150,6 @@ export const useThemeSettings = () => {
       }
       return DEFAULT_THEME;
     },
-    enabled: authReady,
   });
 
   const saveTheme = useMutation({
