@@ -89,6 +89,7 @@ import AdminStudentPromotion from "./pages/admin/AdminStudentPromotion";
 import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollNavigation from "./components/ScrollNavigation";
 import RouteLoader from "./components/RouteLoader";
 import { supabase } from "@/integrations/supabase/client";
 
