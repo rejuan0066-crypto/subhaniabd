@@ -318,7 +318,6 @@ const AdminValidationManager = () => {
                       onClick={() => setDeleteId(r.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>}
-                    </Button>}
                   </div>
                 </CardContent>
               </Card>
