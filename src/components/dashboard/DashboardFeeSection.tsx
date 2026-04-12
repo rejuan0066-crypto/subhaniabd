@@ -51,6 +51,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         .is('deleted_at', null);
       return data || [];
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   // Get unique session names from fee types
