@@ -19,6 +19,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { isAdminRole } from '@/lib/roles';
 import { useOtpService } from '@/hooks/useOtpService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserItem {
   id: string;
