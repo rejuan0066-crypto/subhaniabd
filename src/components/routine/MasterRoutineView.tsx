@@ -39,36 +39,63 @@ interface CellEditorProps {
   subjectId: string;
   teacherName: string;
   teacherNameBn: string;
+  classId?: string;
   subjects: any[];
+  classes: any[];
+  staff: any[];
   bn: boolean;
-  onSave: (subjectId: string, teacherName: string, teacherNameBn: string) => void;
+  onSave: (subjectId: string, teacherName: string, teacherNameBn: string, classId?: string) => void;
   children: React.ReactNode;
+  showClassSelect?: boolean;
 }
 
-const CellEditor = ({ subjectId, teacherName, teacherNameBn, subjects, bn, onSave, children }: CellEditorProps) => {
+const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, subjects, classes, staff, bn, onSave, children, showClassSelect }: CellEditorProps) => {
   const [open, setOpen] = useState(false);
   const [localSubjectId, setLocalSubjectId] = useState(subjectId);
   const [localTeacher, setLocalTeacher] = useState(teacherName);
   const [localTeacherBn, setLocalTeacherBn] = useState(teacherNameBn);
+  const [localClassId, setLocalClassId] = useState(classId || '');
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
       setLocalSubjectId(subjectId);
       setLocalTeacher(teacherName);
       setLocalTeacherBn(teacherNameBn);
+      setLocalClassId(classId || '');
     }
     setOpen(isOpen);
   };
 
   const handleSave = () => {
-    onSave(localSubjectId, localTeacher, localTeacherBn);
+    onSave(localSubjectId, localTeacher, localTeacherBn, localClassId || undefined);
     setOpen(false);
+  };
+
+  const handleStaffSelect = (staffId: string) => {
+    const s = staff.find(st => st.id === staffId);
+    if (s) {
+      setLocalTeacher(s.name_en || '');
+      setLocalTeacherBn(s.name_bn || '');
+    }
   };
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-64 p-3 space-y-2" align="center">
+      <PopoverContent className="w-72 p-3 space-y-2" align="center">
+        {showClassSelect && (
+          <div>
+            <Label className="text-xs">{bn ? 'শ্রেণী' : 'Class'}</Label>
+            <Select value={localClassId} onValueChange={setLocalClassId}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
+              <SelectContent>
+                {classes.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div>
           <Label className="text-xs">{bn ? 'বিষয়' : 'Subject'}</Label>
           <Select value={localSubjectId} onValueChange={setLocalSubjectId}>
@@ -82,12 +109,25 @@ const CellEditor = ({ subjectId, teacherName, teacherNameBn, subjects, bn, onSav
           </Select>
         </div>
         <div>
-          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (বাংলা)' : 'Teacher (Bangla)'}</Label>
-          <Input className="h-8 text-xs" value={localTeacherBn} onChange={e => setLocalTeacherBn(e.target.value)} placeholder={bn ? 'শিক্ষকের নাম' : 'Teacher name BN'} />
+          <Label className="text-xs">{bn ? 'শিক্ষক নির্বাচন' : 'Select Teacher'}</Label>
+          <Select onValueChange={handleStaffSelect}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শিক্ষক বাছুন' : 'Pick teacher'} /></SelectTrigger>
+            <SelectContent>
+              {staff.map(s => (
+                <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : (s.name_en || s.name_bn)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div>
-          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (ইংরেজি)' : 'Teacher (English)'}</Label>
-          <Input className="h-8 text-xs" value={localTeacher} onChange={e => setLocalTeacher(e.target.value)} placeholder={bn ? 'Teacher name' : 'Teacher name EN'} />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs">{bn ? 'নাম (বাংলা)' : 'Name BN'}</Label>
+            <Input className="h-8 text-xs" value={localTeacherBn} onChange={e => setLocalTeacherBn(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">{bn ? 'নাম (ইংরেজি)' : 'Name EN'}</Label>
+            <Input className="h-8 text-xs" value={localTeacher} onChange={e => setLocalTeacher(e.target.value)} />
+          </div>
         </div>
         <Button size="sm" className="w-full h-7 text-xs gap-1" onClick={handleSave}>
           <Save className="h-3 w-3" /> {bn ? 'সেভ' : 'Save'}
