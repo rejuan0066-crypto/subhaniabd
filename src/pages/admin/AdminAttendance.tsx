@@ -180,8 +180,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     }
     let filtered = allStudents;
 
-    // Residential sub-tab: only residential students
-    if (studentSubTab === 'residential') {
+    // Residential or Meal sub-tab: only residential students
+    if (studentSubTab === 'residential' || studentSubTab === 'meal') {
       filtered = filtered.filter((s: any) => s.residence_type === 'resident');
     }
 
@@ -917,10 +917,26 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                       <Users className="h-4 w-4 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
                     </TabsTrigger>
                     <TabsTrigger value="residential">
-                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক ছাত্র' : 'Residential'}
+                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক' : 'Residential'}
+                    </TabsTrigger>
+                    <TabsTrigger value="meal">
+                      <Utensils className="h-4 w-4 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal'}
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
+
+                {/* Student Meal Shift Selector */}
+                {studentSubTab === 'meal' && (
+                  <Tabs value={studentMealShift} onValueChange={setStudentMealShift} className="shrink-0">
+                    <TabsList>
+                      {MEAL_SHIFTS.map(sh => (
+                        <TabsTrigger key={sh.value} value={sh.value}>
+                          <sh.icon className="h-4 w-4 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                )}
 
                 {/* Session Year (both tabs) */}
                 <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
