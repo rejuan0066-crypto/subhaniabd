@@ -118,8 +118,25 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
     if (category === 'monthly') {
       // ---- GROUP BY MONTH ----
+      // Determine valid session months first
+      const sessionMonthSet = new Set<string>();
+      feeTypes.forEach((ft: any) => {
+        if (ft.payment_frequency !== 'monthly') return;
+        let startM = 0, endM = 11;
+        if (ft.academic_sessions?.start_date) startM = new Date(ft.academic_sessions.start_date).getMonth();
+        if (ft.academic_sessions?.end_date) endM = new Date(ft.academic_sessions.end_date).getMonth();
+        if (startM <= endM) {
+          for (let i = startM; i <= endM; i++) sessionMonthSet.add(MONTHS_EN[i]);
+        } else {
+          for (let i = startM; i < 12; i++) sessionMonthSet.add(MONTHS_EN[i]);
+          for (let i = 0; i <= endM; i++) sessionMonthSet.add(MONTHS_EN[i]);
+        }
+      });
+
       payments.forEach((p: any) => {
         const monthKey = p.month || 'N/A';
+        // Skip months outside session range
+        if (sessionMonthSet.size > 0 && !sessionMonthSet.has(monthKey)) return;
         const monthLabel = bn ? (MONTHS_BN[monthKey] || monthKey) : monthKey;
         const sortIdx = MONTHS_EN.indexOf(monthKey);
         if (!groups[monthKey]) groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, total: 0, paid: [], unpaid: [] };
