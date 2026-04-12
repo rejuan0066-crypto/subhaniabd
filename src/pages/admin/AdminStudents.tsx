@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter } from 'lucide-react';
+import { Search, Plus, Trash2, Loader2, CheckCircle, Eye, XCircle, Clock, Pencil, Filter, UserX, UserCheck } from 'lucide-react';
 import StudentProfileModal from '@/components/profile/StudentProfileModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,7 +31,7 @@ const AdminStudents = () => {
   const [filterSessionId, setFilterSessionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
   const [filterApproval, setFilterApproval] = useState('all');
-
+  const [filterStatus, setFilterStatus] = useState('all');
   // Realtime subscription for auto-refresh
   useEffect(() => {
     const channel = supabase
@@ -97,6 +97,20 @@ const AdminStudents = () => {
     onError: () => toast.error('Error'),
   });
 
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, currentStatus }: { id: string; currentStatus: string }) => {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      if (await checkApproval('edit', { id, status: newStatus }, id, `ছাত্র ${newStatus === 'inactive' ? 'ডিএক্টিভ' : 'এক্টিভ'}`)) return;
+      const { error } = await supabase.from('students').update({ status: newStatus } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      toast.success(bn ? 'স্ট্যাটাস আপডেট হয়েছে' : 'Status updated');
+    },
+    onError: () => toast.error('Error'),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const student = students.find((s: any) => s.id === id);
@@ -128,6 +142,11 @@ const AdminStudents = () => {
     if (filterApproval !== 'all') {
       const status = s.approval_status || 'pending';
       if (status !== filterApproval) return false;
+    }
+    // Active/Inactive status filter
+    if (filterStatus !== 'all') {
+      const st = s.status || 'active';
+      if (st !== filterStatus) return false;
     }
     // Text search
     if (search) {
@@ -253,6 +272,17 @@ const AdminStudents = () => {
                 <SelectItem value="rejected">{bn ? 'প্রত্যাখ্যাত' : 'Rejected'}</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="bg-background w-full sm:w-40">
+                <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
+                <SelectValue placeholder={bn ? 'এক্টিভ/ইনএক্টিভ' : 'Active/Inactive'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{bn ? 'সকল' : 'All'}</SelectItem>
+                <SelectItem value="active">{bn ? 'সক্রিয়' : 'Active'}</SelectItem>
+                <SelectItem value="inactive">{bn ? 'নিষ্ক্রিয়' : 'Inactive'}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -272,6 +302,7 @@ const AdminStudents = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'সেশন' : 'Session'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শ্রেণী' : 'Class'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অনুমোদন' : 'Approval'}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
@@ -303,6 +334,11 @@ const AdminStudents = () => {
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getSessionName(s.session_id, s.admission_session)}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{getClassName(s.class_id)}</td>
                       <td className="px-4 py-3">{getApprovalBadge(s.approval_status || 'pending')}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${(s.status || 'active') === 'active' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                          {(s.status || 'active') === 'active' ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                        </span>
+                      </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setShowDetail(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Eye className="w-4 h-4" /></button>
@@ -318,6 +354,15 @@ const AdminStudents = () => {
                           {canEditItem && (s.approval_status === 'rejected') && (
                             <button onClick={() => statusMutation.mutate({ id: s.id, status: 'pending' })} className="p-2 rounded-lg hover:bg-warning/10 text-muted-foreground hover:text-warning" title={bn ? 'অপেক্ষমাণে ফেরত' : 'Back to Pending'}><Clock className="w-4 h-4" /></button>
                           )}
+                          {canEditItem && (
+                            <button
+                              onClick={() => toggleActiveMutation.mutate({ id: s.id, currentStatus: s.status || 'active' })}
+                              className={`p-2 rounded-lg ${(s.status || 'active') === 'active' ? 'hover:bg-warning/10 text-muted-foreground hover:text-warning' : 'hover:bg-success/10 text-muted-foreground hover:text-success'}`}
+                              title={(s.status || 'active') === 'active' ? (bn ? 'ডিএক্টিভ করুন' : 'Deactivate') : (bn ? 'এক্টিভ করুন' : 'Activate')}
+                            >
+                              {(s.status || 'active') === 'active' ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                            </button>
+                          )}
                           {canDeleteItem && (
                             <button onClick={() => deleteMutation.mutate(s.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                           )}
@@ -326,7 +371,7 @@ const AdminStudents = () => {
                     </tr>
                   ))}
                   {sortedFiltered.length === 0 && (
-                    <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
+                    <tr><td colSpan={10} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ছাত্র পাওয়া যায়নি' : 'No students found'}</td></tr>
                   )}
                 </tbody>
               </table>
