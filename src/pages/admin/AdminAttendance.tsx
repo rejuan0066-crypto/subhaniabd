@@ -1294,11 +1294,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
               {/* Existing Rules */}
               <div className="space-y-2">
-                {rules.map((rule: any) => {
+                <p className="text-xs font-semibold text-muted-foreground">{bn ? 'বিদ্যমান রুলসমূহ' : 'Existing Rules'}</p>
+                {rules.filter((r: any) => r.entity_type === entityType).length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-3">{bn ? 'কোনো রুল নেই' : 'No rules yet'}</p>
+                )}
+                {rules.filter((r: any) => r.entity_type === entityType).map((rule: any) => {
                   const cfg = rule.config as any;
                   return (
                     <div key={rule.id} className="flex items-center gap-2 p-2 border rounded-lg bg-muted/30">
-                      <Badge variant="outline" className="text-[10px]">{rule.entity_type}</Badge>
                       <span className="text-sm flex-1">{bn ? rule.name_bn : rule.name}</span>
                       <Badge className={`text-[10px] ${STATUS_COLORS[cfg?.counts_as] || 'bg-muted'}`}>{cfg?.counts_as}</Badge>
                       <Switch checked={rule.is_active} onCheckedChange={c => {
@@ -1335,14 +1338,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs">{bn ? 'টাইপ' : 'Entity Type'}</Label>
-                    <Select value={ruleForm.entity_type} onValueChange={v => setRuleForm(p => ({ ...p, entity_type: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">{bn ? 'ছাত্র' : 'Student'}</SelectItem>
-                        <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label className="text-xs">{bn ? 'ক্যাটাগরি' : 'Category'}</Label>
+                    <Input value={entityType === 'student' ? (bn ? 'ছাত্র' : 'Student') : (bn ? 'স্টাফ' : 'Staff')} disabled className="bg-muted" />
                   </div>
                   <div>
                     <Label className="text-xs">{bn ? 'গণনা হিসেবে' : 'Counts As'}</Label>
@@ -1359,7 +1356,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   </div>
                 </div>
                 <Button className="w-full" size="sm" onClick={() => {
-                  saveRuleMutation.mutate({ ...ruleForm, rule_type: 'status', config: ruleForm.config });
+                  saveRuleMutation.mutate({ ...ruleForm, entity_type: entityType, rule_type: 'status', config: ruleForm.config });
                 }} disabled={!ruleForm.name || !ruleForm.name_bn}>
                   {editingRule ? (bn ? 'আপডেট' : 'Update') : (bn ? 'যোগ করুন' : 'Add Rule')}
                 </Button>
