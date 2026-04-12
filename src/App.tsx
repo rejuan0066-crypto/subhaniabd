@@ -27,6 +27,7 @@ import AdminStudents from "./pages/admin/AdminStudents";
 import AdminStaff from "./pages/admin/AdminStaff";
 import AdminTeachers from "./pages/admin/AdminTeachers";
 import AdminAdministrativeStaff from "./pages/admin/AdminAdministrativeStaff";
+import AdminGeneralStaff from "./pages/admin/AdminGeneralStaff";
 import AdminStaffForm from "./pages/admin/AdminStaffForm";
 import AdminDivisions from "./pages/admin/AdminDivisions";
 import AdminSubjects from "./pages/admin/AdminSubjects";
@@ -189,9 +190,12 @@ const App = () => (
                   <Route path="/admin" element={<AdminShell />}>
                     <Route index element={<Dashboard />} />
                     <Route path="students" element={<ModuleGuard menuPath="/admin/students"><AdminStudents /></ModuleGuard>} />
-                    <Route path="staff" element={<ModuleGuard menuPath="/admin/staff"><AdminStaff staffType="staff" /></ModuleGuard>} />
+                    <Route path="staff" element={<ModuleGuard menuPath="/admin/staff"><AdminStaff staffType="all" /></ModuleGuard>} />
                     <Route path="staff/add" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="staff/edit/:id" element={<ModuleGuard menuPath="/admin/staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="general-staff" element={<ModuleGuard menuPath="/admin/general-staff"><AdminGeneralStaff /></ModuleGuard>} />
+                    <Route path="general-staff/add" element={<ModuleGuard menuPath="/admin/general-staff"><AdminStaffForm /></ModuleGuard>} />
+                    <Route path="general-staff/edit/:id" element={<ModuleGuard menuPath="/admin/general-staff"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="teachers" element={<ModuleGuard menuPath="/admin/teachers"><AdminTeachers /></ModuleGuard>} />
                     <Route path="teachers/add" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
                     <Route path="teachers/edit/:id" element={<ModuleGuard menuPath="/admin/teachers"><AdminStaffForm /></ModuleGuard>} />
