@@ -740,6 +740,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string | null
+          deleted_at: string | null
           donation_amount: number | null
           donation_date: string | null
           donation_type: string | null
@@ -756,6 +757,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           donation_amount?: number | null
           donation_date?: string | null
           donation_type?: string | null
@@ -772,6 +774,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           donation_amount?: number | null
           donation_date?: string | null
           donation_type?: string | null
@@ -1248,6 +1251,7 @@ export type Database = {
           amount: number
           category_id: string
           created_at: string | null
+          deleted_at: string | null
           description: string | null
           expense_date: string
           has_receipt: boolean | null
@@ -1262,6 +1266,7 @@ export type Database = {
           amount?: number
           category_id: string
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           expense_date?: string
           has_receipt?: boolean | null
@@ -1276,6 +1281,7 @@ export type Database = {
           amount?: number
           category_id?: string
           created_at?: string | null
+          deleted_at?: string | null
           description?: string | null
           expense_date?: string
           has_receipt?: boolean | null
@@ -1340,6 +1346,7 @@ export type Database = {
         Row: {
           amount: number
           created_at: string | null
+          deleted_at: string | null
           fee_type_id: string
           id: string
           month: string | null
@@ -1354,6 +1361,7 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string | null
+          deleted_at?: string | null
           fee_type_id: string
           id?: string
           month?: string | null
@@ -1368,6 +1376,7 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string | null
+          deleted_at?: string | null
           fee_type_id?: string
           id?: string
           month?: string | null
@@ -1402,6 +1411,7 @@ export type Database = {
           applicable_months: Json | null
           class_id: string | null
           created_at: string | null
+          deleted_at: string | null
           division_id: string | null
           fee_category: string
           id: string
@@ -1417,6 +1427,7 @@ export type Database = {
           applicable_months?: Json | null
           class_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           division_id?: string | null
           fee_category?: string
           id?: string
@@ -1432,6 +1443,7 @@ export type Database = {
           applicable_months?: Json | null
           class_id?: string | null
           created_at?: string | null
+          deleted_at?: string | null
           division_id?: string | null
           fee_category?: string
           id?: string
@@ -1788,6 +1800,7 @@ export type Database = {
           condition: string
           created_at: string | null
           damaged_copies: number
+          deleted_at: string | null
           id: string
           is_active: boolean | null
           lost_copies: number
@@ -1810,6 +1823,7 @@ export type Database = {
           condition?: string
           created_at?: string | null
           damaged_copies?: number
+          deleted_at?: string | null
           id?: string
           is_active?: boolean | null
           lost_copies?: number
@@ -1832,6 +1846,7 @@ export type Database = {
           condition?: string
           created_at?: string | null
           damaged_copies?: number
+          deleted_at?: string | null
           id?: string
           is_active?: boolean | null
           lost_copies?: number
@@ -2005,6 +2020,7 @@ export type Database = {
           content_bn: string | null
           created_at: string | null
           created_by: string | null
+          deleted_at: string | null
           id: string
           is_published: boolean | null
           published_at: string | null
@@ -2019,6 +2035,7 @@ export type Database = {
           content_bn?: string | null
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           id?: string
           is_published?: boolean | null
           published_at?: string | null
@@ -2033,6 +2050,7 @@ export type Database = {
           content_bn?: string | null
           created_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
           id?: string
           is_published?: boolean | null
           published_at?: string | null
@@ -3051,6 +3069,7 @@ export type Database = {
           address: string | null
           created_at: string | null
           date_of_birth: string | null
+          deleted_at: string | null
           department: string | null
           designation: string | null
           duty_end_time: string | null
@@ -3080,6 +3099,7 @@ export type Database = {
           address?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           department?: string | null
           designation?: string | null
           duty_end_time?: string | null
@@ -3109,6 +3129,7 @@ export type Database = {
           address?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           department?: string | null
           designation?: string | null
           duty_end_time?: string | null
@@ -3180,6 +3201,7 @@ export type Database = {
           class_id: string | null
           created_at: string | null
           date_of_birth: string | null
+          deleted_at: string | null
           division_id: string | null
           email: string | null
           father_name: string | null
@@ -3225,6 +3247,7 @@ export type Database = {
           class_id?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           division_id?: string | null
           email?: string | null
           father_name?: string | null
@@ -3270,6 +3293,7 @@ export type Database = {
           class_id?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          deleted_at?: string | null
           division_id?: string | null
           email?: string | null
           father_name?: string | null
