@@ -1144,7 +1144,11 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
               </div>
             )}
           </div>
+          </>
+          )}
 
+          {sectionConfig.showIdentifier && (
+          <>
           {/* ========== SECTION 4: Identifier Details ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
@@ -1173,7 +1177,11 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
               </div>
             </div>
           </div>
+          </>
+          )}
 
+          {sectionConfig.showRelativesIdentifier && (
+          <>
           {/* ========== SECTION 4b: Relatives Identifier ========== */}
           <div className="card-elevated p-6">
             <h2 className="font-display font-bold text-foreground mb-4 pb-2 border-b border-border text-center text-2xl">
@@ -1199,6 +1207,8 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
               </div>
             </div>
           </div>
+          </>
+          )}
 
           {/* ========== SECTION 5: Document Upload ========== */}
           <div className="card-elevated p-6">
