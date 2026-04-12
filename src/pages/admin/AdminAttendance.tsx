@@ -114,7 +114,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const { data: allStudents = [] } = useQuery({
     queryKey: ['students-attendance'],
     queryFn: async () => {
-      const { data } = await supabase.from('students').select('*').eq('status', 'active').order('name_bn');
+      const { data } = await supabase.from('students').select('*').eq('status', 'active');
       return data || [];
     },
     enabled: entityType === 'student',
@@ -174,6 +174,17 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         filtered = filtered.filter((s: any) => s.division_id === selectedClass.division_id);
       }
     }
+
+    // Sort by class sort_order, then by roll_number numerically
+    const classOrder = new Map(classes.map((c: any, i: number) => [c.id, c.sort_order ?? i]));
+    filtered.sort((a: any, b: any) => {
+      const classA = classOrder.get(a.class_id) ?? 9999;
+      const classB = classOrder.get(b.class_id) ?? 9999;
+      if (classA !== classB) return classA - classB;
+      const rollA = parseInt(a.roll_number || '0', 10);
+      const rollB = parseInt(b.roll_number || '0', 10);
+      return rollA - rollB;
+    });
 
     return filtered;
   }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, classes]);
