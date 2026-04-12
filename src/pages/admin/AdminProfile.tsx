@@ -394,18 +394,20 @@ const AdminProfile = () => {
 
           {step === 'form' && (
             <div className="space-y-4">
-              {/* OTP toggle */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
-                <Switch checked={useOtp} onCheckedChange={setUseOtp} />
-                <div>
-                  <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {useOtp
-                      ? (bn ? 'নতুন ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to new email for verification')
-                      : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
-                  </p>
+              {/* OTP toggle - admin only */}
+              {isAdmin && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                  <Switch checked={useOtp} onCheckedChange={setUseOtp} />
+                  <div>
+                    <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {useOtp
+                        ? (bn ? 'নতুন ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to new email for verification')
+                        : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <Label>{bn ? 'নতুন ইমেইল' : 'New Email'}</Label>
@@ -488,18 +490,20 @@ const AdminProfile = () => {
 
           {pwStep === 'form' && (
             <div className="space-y-4">
-              {/* OTP toggle */}
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
-                <Switch checked={usePwOtp} onCheckedChange={setUsePwOtp} />
-                <div>
-                  <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {usePwOtp
-                      ? (bn ? 'ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to your email')
-                      : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
-                  </p>
+              {/* OTP toggle - admin only */}
+              {isAdmin && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border">
+                  <Switch checked={usePwOtp} onCheckedChange={setUsePwOtp} />
+                  <div>
+                    <p className="text-sm font-medium">{bn ? 'OTP যাচাই ব্যবহার করুন' : 'Use OTP Verification'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {usePwOtp
+                        ? (bn ? 'ইমেইলে OTP কোড পাঠিয়ে যাচাই করা হবে' : 'OTP code will be sent to your email')
+                        : (bn ? 'শুধুমাত্র বর্তমান পাসওয়ার্ড দিয়ে পরিবর্তন হবে' : 'Change with current password only')}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <Label>{bn ? 'বর্তমান পাসওয়ার্ড' : 'Current Password'}</Label>
