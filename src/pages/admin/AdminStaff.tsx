@@ -142,7 +142,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   });
 
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
-    const category = getStaffCategory(s.designation, designationsMap);
+    const category = getStaffCategory(s, designationsMap);
     if (staffType === 'teacher') return category === 'teacher';
     if (staffType === 'administrative') return category === 'administrative';
     if (staffType === 'staff') return category === 'general';
