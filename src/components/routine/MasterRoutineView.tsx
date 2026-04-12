@@ -40,6 +40,7 @@ interface CellEditorProps {
   teacherName: string;
   teacherNameBn: string;
   classId?: string;
+  filterClassId?: string;
   subjects: any[];
   classes: any[];
   staff: any[];
