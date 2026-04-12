@@ -157,8 +157,9 @@ const AdminDesignations = () => {
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (বাংলা)' : 'Name (Bangla)'}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (ইংরেজি)' : 'Name (English)'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিবরণ' : 'Description'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিবরণ' : 'Description'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
                   </tr>
                 </thead>
@@ -169,6 +170,15 @@ const AdminDesignations = () => {
                       <td className="px-4 py-3 text-sm font-medium text-foreground">{d.name_bn}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{d.name}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{d.description || '—'}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={
+                          d.staff_category === 'teacher' ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' :
+                          d.staff_category === 'administrative' ? 'bg-purple-500/10 text-purple-600 border-purple-500/30' :
+                          'bg-orange-500/10 text-orange-600 border-orange-500/30'
+                        }>
+                          {d.staff_category === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : d.staff_category === 'administrative' ? (bn ? 'প্রশাসনিক' : 'Administrative') : (bn ? 'সহায়ক কর্মী' : 'General Staff')}
+                        </Badge>
+                      </td>
                       <td className="px-4 py-3">
                         <Badge variant="outline" className={d.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
                           {d.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
