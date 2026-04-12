@@ -299,10 +299,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     if (!printWindow || !selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort((a: any, b: any) => {
-      const clsA = a.students?.classes?.sort_order || 0;
-      const clsB = b.students?.classes?.sort_order || 0;
+      const clsA = a.students?.classes?.sort_order ?? 999;
+      const clsB = b.students?.classes?.sort_order ?? 999;
       if (clsA !== clsB) return clsA - clsB;
-      return (a.students?.roll_number || '').localeCompare(b.students?.roll_number || '');
+      const rollA = parseInt(a.students?.roll_number || '0', 10) || 0;
+      const rollB = parseInt(b.students?.roll_number || '0', 10) || 0;
+      return rollA - rollB;
     });
 
     printWindow.document.write(`<html><head><title>Print</title><style>
