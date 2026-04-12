@@ -161,7 +161,7 @@ export const printResultSheet = ({ title, students, subjects, marksMap, getOvera
 <html><head>
 <meta charset="utf-8">
 <title>${title}</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; padding:15mm; }

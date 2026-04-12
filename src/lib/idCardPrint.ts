@@ -8,7 +8,7 @@ export const printIdCard = (cardHtml: string) => {
 <head>
   <meta charset="utf-8" />
   <title>Student ID Card</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     @page {
       size: 2.125in 3.375in;
@@ -87,7 +87,7 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
 <head>
   <meta charset="utf-8" />
   <title>Student ID Cards</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     @page {
       size: A4;

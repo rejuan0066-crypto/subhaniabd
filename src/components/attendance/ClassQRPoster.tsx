@@ -54,7 +54,7 @@ const ClassQRPoster = ({ open, onOpenChange }: ClassQRPosterProps) => {
     printWindow.document.write(`<!DOCTYPE html><html><head>
       <meta charset="utf-8">
       <title>QR Attendance</title>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+      <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
