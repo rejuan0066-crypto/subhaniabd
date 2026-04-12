@@ -67,12 +67,23 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [, startNavTransition] = useTransition();
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
 
-  // Fetch staff photo for sidebar avatar
+  // Fetch staff photo & profile for sidebar avatar
   const { data: sidebarStaffPhoto } = useQuery({
     queryKey: ['sidebar-staff-photo', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       const { data } = await supabase.from('staff').select('photo_url, name_bn, name_en').eq('user_id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: sidebarProfile } = useQuery({
+    queryKey: ['sidebar-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
       return data;
     },
     enabled: !!user?.id,
