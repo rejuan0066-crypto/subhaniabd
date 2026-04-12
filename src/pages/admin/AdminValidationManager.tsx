@@ -214,6 +214,7 @@ const AdminValidationManager = () => {
   };
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-4">
         {/* Header */}

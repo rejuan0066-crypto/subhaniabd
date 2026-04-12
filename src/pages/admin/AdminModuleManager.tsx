@@ -161,6 +161,7 @@ const AdminModuleManager = () => {
   const disabledCount = modules.filter((m: any) => !m.is_enabled).length;
 
   return (
+    <>
     <AdminLayout>
       <div className="space-y-4">
         {/* Header */}
