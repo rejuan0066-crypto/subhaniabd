@@ -293,9 +293,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   return (
     <div className="card-elevated p-4">
       <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {icon || <CreditCard className="w-5 h-5 text-primary" />}
           <h3 className="font-display font-bold text-foreground">{language === 'bn' ? titleBn : titleEn}</h3>
+          {sessionLabel && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{sessionLabel}</span>
+          )}
           <span className="text-sm font-bold text-primary">৳ {totalAmount.toLocaleString()}</span>
         </div>
         {expanded ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
