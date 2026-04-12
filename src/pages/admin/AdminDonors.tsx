@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Heart, Loader2, CheckCircle, Clock, Printer, Trash2, Banknote, Globe } from 'lucide-react';
+import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { toast } from 'sonner';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
@@ -20,6 +21,7 @@ const AdminDonors = () => {
   const { canAddItem, canEditItem } = usePagePermissions('/admin/donors');
 
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'online'>('cash');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState({
     donorName: '',
     donorPhone: '',
@@ -222,7 +224,7 @@ const AdminDonors = () => {
                       <td className="px-4 py-3 font-bold text-foreground">৳ {d.donation_amount || 0}</td>
                       <td className="px-4 py-3 text-muted-foreground">{d.donation_date || '-'}</td>
                       <td className="px-4 py-3">
-                        <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(d.id)}>
+                        <Button variant="ghost" size="sm" onClick={() => setDeleteId(d.id)}>
                           <Trash2 className="w-3 h-3 text-destructive" />
                         </Button>
                       </td>
@@ -238,6 +240,13 @@ const AdminDonors = () => {
         </div>
       </div>
     </AdminLayout>
+    <DeleteConfirmDialog
+      open={!!deleteId}
+      onOpenChange={(o) => { if (!o) setDeleteId(null); }}
+      onConfirm={() => { if (deleteId) { deleteMutation.mutate(deleteId); setDeleteId(null); } }}
+      isPending={deleteMutation.isPending}
+    />
+    </>
   );
 };
 
