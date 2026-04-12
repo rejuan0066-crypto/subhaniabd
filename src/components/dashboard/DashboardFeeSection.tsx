@@ -133,6 +133,17 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     return map;
   }, [classes]);
 
+  // Map fee_type_id -> session name
+  const feeTypeSessionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    feeTypes.forEach((ft: any) => {
+      if (ft.academic_sessions) {
+        map[ft.id] = bn ? (ft.academic_sessions.name_bn || ft.academic_sessions.name) : ft.academic_sessions.name;
+      }
+    });
+    return map;
+  }, [feeTypes, bn]);
+
   const compareFeeItems = (a: any, b: any) => {
     const aClassId = a.students?.class_id || 'unknown';
     const bClassId = b.students?.class_id || 'unknown';
