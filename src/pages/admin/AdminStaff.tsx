@@ -42,7 +42,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const menuPath = staffType === 'teacher' ? '/admin/teachers' : staffType === 'administrative' ? '/admin/administrative-staff' : '/admin/staff';
+  const menuPath = staffType === 'teacher' ? '/admin/teachers' : staffType === 'administrative' ? '/admin/administrative-staff' : '/admin/general-staff';
   const { checkApproval } = useApprovalCheck(menuPath, 'staff');
   const { role } = useAuth();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions(menuPath);
@@ -203,7 +203,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
             </p>
           </div>
           {canAddItem && (
-            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : staffType === 'administrative' ? '/admin/administrative-staff/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
+            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : staffType === 'administrative' ? '/admin/administrative-staff/add' : '/admin/general-staff/add')} className="btn-primary-gradient flex items-center gap-2">
               <Plus className="w-4 h-4" /> {t('addNew')}
             </Button>
           )}
@@ -308,7 +308,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                         )}
                         <button onClick={() => setViewStaff(s)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'প্রোফাইল দেখুন' : 'View Profile'}><Eye className="w-4 h-4" /></button>
                         {canEditItem && (
-                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : staffType === 'administrative' ? 'administrative-staff' : 'staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => navigate(`/admin/${staffType === 'teacher' ? 'teachers' : staffType === 'administrative' ? 'administrative-staff' : 'general-staff'}/edit/${s.id}`)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}><Pencil className="w-4 h-4" /></button>
                         )}
                         {canDeleteItem && (
                           <button onClick={() => setDeleteId(s.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={bn ? 'মুছুন' : 'Delete'}><Trash2 className="w-4 h-4" /></button>
