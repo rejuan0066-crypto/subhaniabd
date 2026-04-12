@@ -43,7 +43,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     queryFn: async () => {
       const { data } = await supabase
         .from('fee_types')
-        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months, academic_sessions:session_id(name, name_bn)')
+        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months, academic_sessions:session_id(name, name_bn, start_date, end_date)')
         .eq('fee_category', category)
         .eq('is_active', true)
         .is('deleted_at', null);
