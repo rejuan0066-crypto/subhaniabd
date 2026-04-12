@@ -186,7 +186,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
           </div>
           <div className="flex gap-2">
             <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>
-              {bn ? 'সবগুলো' : 'All'} ({staffList.length})
+              {bn ? 'সবগুলো' : 'All'} ({typeFiltered.length})
             </Button>
             <Button variant={statusFilter === 'active' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('active')}>
               {bn ? 'সক্রিয়' : 'Active'}
