@@ -588,17 +588,17 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
       {/* Detail Dialog */}
       <Dialog open={!!selectedGroup} onOpenChange={() => setSelectedGroup(null)}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{bn ? titleBn : titleEn} - {selectedGroup?.label}</DialogTitle>
+            <DialogTitle className="text-xl">{bn ? titleBn : titleEn} - {selectedGroup?.label}</DialogTitle>
           </DialogHeader>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-3 mb-5">
             <button onClick={() => setListType('paid')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'paid' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'}`}>
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${listType === 'paid' ? 'bg-emerald-600 text-white shadow-md' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'}`}>
               {bn ? 'পরিশোধিত' : 'Paid'} ({selectedGroup?.paid?.length || 0})
             </button>
             <button onClick={() => setListType('unpaid')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'unpaid' ? 'bg-rose-600 text-white' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${listType === 'unpaid' ? 'bg-rose-600 text-white shadow-md' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
               {bn ? 'অপরিশোধিত' : 'Unpaid'} ({selectedGroup?.unpaid?.length || 0})
             </button>
             <div className="ml-auto flex gap-2">
@@ -608,43 +608,43 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary/50">
+            <table className="w-full" style={{ borderCollapse: 'collapse', borderSpacing: '0' }}>
+              <thead className="bg-muted/30">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">#</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'রোল' : 'Roll'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'শ্রেণী' : 'Class'}</th>
-                  {category === 'monthly' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'মাস' : 'Month'}</th>}
-                  {category === 'exam' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'সেশন' : 'Year'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')}</th>
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">#</th>
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'নাম' : 'Name'}</th>
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'রোল' : 'Roll'}</th>
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'শ্রেণী' : 'Class'}</th>
+                  {category === 'monthly' && <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'মাস' : 'Month'}</th>}
+                  {category === 'exam' && <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{bn ? 'সেশন' : 'Year'}</th>
+                  <th className="px-5 py-4 text-left text-sm font-bold text-foreground">{listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {((() => {
                   const list = listType === 'paid' ? (selectedGroup?.paid || []) : (selectedGroup?.unpaid || []);
                   return [...list].sort(compareFeeItems);
                 })()).map((p: any, i: number) => (
-                  <tr key={p.id} className="hover:bg-secondary/30">
-                    <td className="px-3 py-2 text-muted-foreground">{i + 1}</td>
-                    <td className="px-3 py-2 font-medium text-foreground">{p.students?.name_bn || '-'}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{p.students?.roll_number || '-'}</td>
-                    <td className="px-3 py-2 text-muted-foreground">{p.students?.classes?.name_bn || '-'}</td>
-                    {category === 'monthly' && <td className="px-3 py-2 text-muted-foreground">{p.month || '-'}</td>}
-                    {category === 'exam' && <td className="px-3 py-2 text-muted-foreground">{p.fee_types?.name_bn || '-'}</td>}
-                    <td className="px-3 py-2 text-muted-foreground">{p.year || '-'}</td>
-                    <td className="px-3 py-2">
+                  <tr key={p.id} className={`hover:bg-primary/[0.04] transition-all duration-200 ${i % 2 === 1 ? 'bg-muted/10' : ''}`}>
+                    <td className="px-5 py-4 text-base text-muted-foreground">{i + 1}</td>
+                    <td className="px-5 py-4 text-base font-semibold text-foreground">{p.students?.name_bn || '-'}</td>
+                    <td className="px-5 py-4 text-base text-muted-foreground">{p.students?.roll_number || '-'}</td>
+                    <td className="px-5 py-4 text-base text-muted-foreground">{p.students?.classes?.name_bn || '-'}</td>
+                    {category === 'monthly' && <td className="px-5 py-4 text-base text-muted-foreground">{p.month || '-'}</td>}
+                    {category === 'exam' && <td className="px-5 py-4 text-base text-muted-foreground">{p.fee_types?.name_bn || '-'}</td>}
+                    <td className="px-5 py-4 text-base text-muted-foreground">{p.year || '-'}</td>
+                    <td className="px-5 py-4">
                       {listType === 'paid' ? (
-                        <span className="font-bold text-emerald-700 dark:text-emerald-400">৳ {p.paid_amount || p.amount}</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400 text-base"><span className="text-lg">৳</span> {p.paid_amount || p.amount}</span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">৳ {p.amount || 0}</span>
+                        <span className="px-3 py-1 rounded-full text-sm font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400"><span className="text-base">৳</span> {p.amount || 0}</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {((listType === 'paid' ? selectedGroup?.paid : selectedGroup?.unpaid) || []).length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-6 text-muted-foreground">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-base text-muted-foreground">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</td></tr>
                 )}
               </tbody>
             </table>
