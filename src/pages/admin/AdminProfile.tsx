@@ -338,60 +338,47 @@ const AdminProfile = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {currentEmail && (
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'ইমেইল:' : 'Email:'}</span>
-                <span className="text-foreground font-medium">{currentEmail}</span>
-              </div>
-            )}
-            {(staffData?.phone || profileData?.phone) && (
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'মোবাইল:' : 'Mobile:'}</span>
-                <span className="text-foreground font-medium">{staffData?.phone || profileData?.phone}</span>
-              </div>
-            )}
-            {staffData?.department && (
-              <div className="flex items-center gap-2 text-sm">
-                <Briefcase className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'বিভাগ:' : 'Department:'}</span>
-                <span className="text-foreground font-medium">{staffData.department}</span>
-              </div>
-            )}
-            {staffData?.joining_date && (
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'যোগদান:' : 'Joining:'}</span>
-                <span className="text-foreground font-medium">{new Date(staffData.joining_date).toLocaleDateString('bn-BD')}</span>
-              </div>
-            )}
-            {staffData?.education && (
-              <div className="flex items-center gap-2 text-sm">
-                <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'শিক্ষাগত যোগ্যতা:' : 'Education:'}</span>
-                <span className="text-foreground font-medium">{staffData.education}</span>
-              </div>
-            )}
-            {staffData?.address && (
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'ঠিকানা:' : 'Address:'}</span>
-                <span className="text-foreground font-medium">{staffData.address}</span>
-              </div>
-            )}
-            {staffData?.nid && (
-              <div className="flex items-center gap-2 text-sm">
-                <ShieldCheck className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">{bn ? 'NID:' : 'NID:'}</span>
-                <span className="text-foreground font-medium">{staffData.nid}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'ইমেইল:' : 'Email:'}</span>
+              <span className="text-foreground font-medium">{currentEmail || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'মোবাইল:' : 'Mobile:'}</span>
+              <span className="text-foreground font-medium">{staffData?.phone || profileData?.phone || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Briefcase className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'বিভাগ:' : 'Department:'}</span>
+              <span className="text-foreground font-medium">{staffData?.department || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'যোগদান:' : 'Joining:'}</span>
+              <span className="text-foreground font-medium">{staffData?.joining_date ? new Date(staffData.joining_date).toLocaleDateString('bn-BD') : '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'শিক্ষাগত যোগ্যতা:' : 'Education:'}</span>
+              <span className="text-foreground font-medium">{staffData?.education || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'ঠিকানা:' : 'Address:'}</span>
+              <span className="text-foreground font-medium">{staffData?.address || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <ShieldCheck className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'NID:' : 'NID:'}</span>
+              <span className="text-foreground font-medium">{staffData?.nid || '-'}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">{bn ? 'জন্ম তারিখ:' : 'Date of Birth:'}</span>
+              <span className="text-foreground font-medium">{staffData?.date_of_birth ? new Date(staffData.date_of_birth).toLocaleDateString('bn-BD') : '-'}</span>
+            </div>
           </div>
-
-          {!staffData && !profileData && (
-            <p className="text-sm text-muted-foreground italic">{bn ? 'কোনো ব্যক্তিগত তথ্য পাওয়া যায়নি। স্টাফ প্রোফাইল তৈরি করুন।' : 'No personal info found. Create a staff profile.'}</p>
-          )}
         </div>
 
         <div className="card-elevated p-5">
