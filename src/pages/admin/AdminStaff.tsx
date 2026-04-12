@@ -21,7 +21,8 @@ import { Badge } from '@/components/ui/badge';
 export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative';
 
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
-const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান', 'peon', 'পিয়ন', 'guard', 'প্রহরী', 'cleaner', 'পরিচ্ছন্নতাকর্মী'];
+const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান'];
+const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'sweeper', 'ঝাড়ুদার', 'driver', 'ড্রাইভার', 'cook', 'রাঁধুনি', 'caretaker', 'তত্ত্বাবধায়ক', 'watchman', 'দারোয়ান', 'bearer', 'বাহক'];
 
 const isTeacherDesignation = (designation: string | null | undefined): boolean => {
   if (!designation) return false;
@@ -33,6 +34,12 @@ const isAdministrativeDesignation = (designation: string | null | undefined): bo
   if (!designation) return false;
   const lower = designation.toLowerCase();
   return ADMIN_STAFF_KEYWORDS.some(k => lower.includes(k));
+};
+
+const isGeneralStaffDesignation = (designation: string | null | undefined): boolean => {
+  if (!designation) return false;
+  const lower = designation.toLowerCase();
+  return GENERAL_STAFF_KEYWORDS.some(k => lower.includes(k));
 };
 
 const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
