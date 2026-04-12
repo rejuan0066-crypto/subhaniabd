@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 export type StaffPageType = 'all' | 'staff' | 'teacher' | 'administrative';
 
 const TEACHER_KEYWORDS = ['teacher', 'শিক্ষক', 'ustaz', 'ustad', 'মুআল্লিম', 'মুয়াল্লিম'];
-const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান'];
+const ADMIN_STAFF_KEYWORDS = ['administrative', 'প্রশাসনিক', 'admin staff', 'অফিস সহকারী', 'office assistant', 'accountant', 'হিসাবরক্ষক', 'clerk', 'কেরানি', 'librarian', 'লাইব্রেরিয়ান', 'principal', 'প্রিন্সিপাল', 'vice-principal', 'সহ-প্রিন্সিপাল', 'উপাধ্যক্ষ', 'অধ্যক্ষ', 'manager', 'ম্যানেজার', 'officer', 'অফিসার', 'director', 'পরিচালক', 'superintendent', 'সুপারিনটেনডেন্ট', 'coordinator', 'সমন্বয়কারী', 'secretary', 'সচিব'];
 const GENERAL_STAFF_KEYWORDS = ['peon', 'পিয়ন', 'guard', 'প্রহরী', 'গার্ড', 'cleaner', 'পরিচ্ছন্নতাকর্মী', 'সহায়ক', 'helper', 'sweeper', 'ঝাড়ুদার', 'driver', 'ড্রাইভার', 'cook', 'রাঁধুনি', 'caretaker', 'তত্ত্বাবধায়ক', 'watchman', 'দারোয়ান', 'bearer', 'বাহক'];
 
 const isTeacherDesignation = (designation: string | null | undefined): boolean => {
