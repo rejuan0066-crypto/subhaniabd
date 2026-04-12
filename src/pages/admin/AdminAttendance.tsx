@@ -1005,7 +1005,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                             const div = divisions.find((d: any) => d.id === entity.division_id);
                             const className = cls ? (bn ? cls.name_bn : cls.name) : '';
                             const divName = div ? (bn ? div.name_bn : div.name) : '';
-                            return `${className}${divName ? ` (${divName})` : ''} | ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number || '-'}`;
+                            return `${bn ? 'রেজি' : 'Reg'}: ${entity.student_id || '-'} | ${className}${divName ? ` (${divName})` : ''} | ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number || '-'}`;
                           })()
 
                         : staffSubTab === 'duty'
