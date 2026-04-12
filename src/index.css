@@ -109,10 +109,51 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     font-weight: 600;
+  }
+
+  /* ── Modern Global Input Styles ── */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([role]),
+  textarea,
+  select {
+    @apply rounded-xl border-border/60 bg-secondary/30 transition-all duration-200;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([role]):focus,
+  textarea:focus,
+  select:focus {
+    @apply ring-2 ring-primary/30 border-primary/50;
+    outline: none;
+  }
+
+  /* ── Modern Global Table Styles ── */
+  table {
+    @apply w-full text-sm;
+  }
+  table thead th {
+    @apply text-left text-xs uppercase tracking-wider text-muted-foreground font-semibold py-3 px-4 border-b-2 border-border/40 bg-muted/30;
+  }
+  table thead th:first-child {
+    @apply rounded-tl-xl;
+  }
+  table thead th:last-child {
+    @apply rounded-tr-xl;
+  }
+  table tbody tr {
+    @apply transition-colors duration-150;
+  }
+  table tbody tr:nth-child(even) {
+    @apply bg-muted/15;
+  }
+  table tbody tr:hover {
+    @apply bg-primary/[0.04];
+  }
+  table tbody td {
+    @apply py-3 px-4 border-b border-border/20;
   }
 }
 

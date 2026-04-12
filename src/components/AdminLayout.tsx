@@ -583,14 +583,32 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             </div>
           </header>
 
-          {/* Page title */}
-          <div className="px-4 lg:px-6 pt-5 pb-2">
-            <h1 className="text-xl font-bold text-foreground">{currentPageLabel}</h1>
-          </div>
-
           {/* Content */}
-          <main className="flex-1 px-4 lg:px-6 pb-6">
-            <AdminPageWithTabs>{children}</AdminPageWithTabs>
+          <main className="flex-1 px-3 lg:px-5 pb-6 pt-4">
+            {/* Modern Glass Content Container */}
+            <div className="admin-page-card rounded-2xl lg:rounded-3xl bg-card/80 dark:bg-card/60 backdrop-blur-xl border border-border/40 dark:border-border/20 p-4 sm:p-5 lg:p-7 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-card)' }}>
+              {/* Page Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-border/30">
+                <div>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">{currentPageLabel}</h1>
+                  {adminTheme.headerShowBreadcrumb && breadcrumbs.length > 1 && (
+                    <nav className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                      {breadcrumbs.map((crumb, i) => (
+                        <span key={crumb.path} className="flex items-center gap-1">
+                          {i > 0 && <ChevronRight className="w-3 h-3 opacity-40" />}
+                          {i === breadcrumbs.length - 1 ? (
+                            <span className="text-foreground/70 font-medium">{crumb.label}</span>
+                          ) : (
+                            <Link to={crumb.path} className="hover:text-primary transition-colors">{crumb.label}</Link>
+                          )}
+                        </span>
+                      ))}
+                    </nav>
+                  )}
+                </div>
+              </div>
+              <AdminPageWithTabs>{children}</AdminPageWithTabs>
+            </div>
             <BackButton />
           </main>
         </div>
