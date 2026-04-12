@@ -80,8 +80,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [selectedShift, setSelectedShift] = useState('full_day');
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
-  // Effective shift: fulltime tab always uses 'full_day'
-  const effectiveShift = entityType === 'staff' && staffSubTab === 'fulltime' ? 'full_day' : entityType === 'staff' ? selectedShift : 'full_day';
+  // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
+  const effectiveShift = entityType === 'student'
+    ? (studentSubTab === 'meal' ? studentMealShift : 'full_day')
+    : (staffSubTab === 'fulltime' ? 'full_day' : selectedShift);
   const [rulesDialogOpen, setRulesDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
   const [ruleForm, setRuleForm] = useState({ name: '', name_bn: '', entity_type: 'student', config: { color: 'green', counts_as: 'present' } });
