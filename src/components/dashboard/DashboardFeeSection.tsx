@@ -312,10 +312,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
               onClick={() => setSelectedGroup(g)}
               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer">
               <span className="text-sm font-medium text-foreground">{g.label}</span>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-success">{language === 'bn' ? 'পরিশোধিত' : 'Paid'}: {g.paid.length}</span>
-                <span className="text-xs text-destructive">{language === 'bn' ? 'অপরিশোধিত' : 'Unpaid'}: {g.unpaid.length}</span>
-                <span className="font-bold text-primary text-sm">৳ {g.total.toLocaleString()}</span>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-xs text-success">{language === 'bn' ? 'পরিশোধিত' : 'Paid'}: {g.paid.length} {bn ? 'জন' : ''} <span className="font-semibold">৳ {g.total.toLocaleString()}</span></span>
+                <span className="text-xs text-destructive">{language === 'bn' ? 'অপরিশোধিত' : 'Unpaid'}: {g.unpaid.length} {bn ? 'জন' : ''} <span className="font-semibold">৳ {g.unpaid.reduce((s: number, u: any) => s + (u.amount || 0), 0).toLocaleString()}</span></span>
               </div>
             </div>
           ))}
