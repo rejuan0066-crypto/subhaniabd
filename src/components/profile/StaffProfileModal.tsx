@@ -1,12 +1,12 @@
 import {
   User, Calendar, Heart, Phone, Mail, MapPin, CreditCard, ClipboardList,
-  Fingerprint, Building2, GraduationCap, Briefcase, Clock, Users, Home, FileText, DollarSign
+  Fingerprint, Building2, GraduationCap, Briefcase, Clock, Users, Home, FileText, DollarSign, Hash
 } from 'lucide-react';
 import ProfileInfoItem from './ProfileInfoItem';
 import ProfileSectionCard from './ProfileSectionCard';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Banknote } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface StaffProfileModalProps {
   staff: any;
@@ -53,61 +53,86 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
     { id: 'others' as const, label: bn ? 'অন্যান্য' : 'Others', icon: ClipboardList },
   ];
 
+  const statusColor = staff.status === 'active'
+    ? 'from-emerald-400 to-emerald-600 shadow-emerald-500/40'
+    : staff.status === 'pending'
+    ? 'from-amber-400 to-amber-500 shadow-amber-500/40'
+    : 'from-rose-400 to-rose-600 shadow-rose-500/40';
+
+  const statusLabel = staff.status === 'active'
+    ? (bn ? 'সক্রিয়' : 'Active')
+    : staff.status === 'pending'
+    ? (bn ? 'আবেদন' : 'Pending')
+    : (bn ? 'নিষ্ক্রিয়' : 'Inactive');
+
   return (
     <div className="space-y-5">
-      {/* ── Header ── */}
-      <div className="flex items-start gap-5">
-        <div className="relative">
-          {staff.photo_url ? (
-            <img src={staff.photo_url} className="w-28 h-32 rounded-2xl object-cover border-2 border-primary/20 shadow-lg" alt="" />
-          ) : (
-            <div className="w-28 h-32 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center border-2 border-primary/10">
-              <User className="w-10 h-10 text-primary/40" />
+      {/* ═══════════ HERO HEADER ═══════════ */}
+      <div className="relative rounded-[20px] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/90 via-teal-800/80 to-emerald-950/90 dark:from-emerald-950 dark:via-teal-900 dark:to-emerald-950" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_60%)]" />
+
+        <div className="relative p-6 flex items-start gap-5">
+          <div className="relative shrink-0">
+            <div className="absolute -inset-1 rounded-2xl bg-white/20 blur-sm" />
+            {staff.photo_url ? (
+              <img src={staff.photo_url} className="relative w-28 h-32 rounded-2xl object-cover border-[3px] border-white/80 shadow-xl" alt="" />
+            ) : (
+              <div className="relative w-28 h-32 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border-[3px] border-white/30">
+                <User className="w-10 h-10 text-white/50" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-2">
+            <h3 className="text-xl font-bold text-white tracking-tight truncate drop-shadow-sm">
+              {bn ? (staff.name_bn || staff.name_en) : (staff.name_en || staff.name_bn) || '-'}
+            </h3>
+            {staff.name_bn && staff.name_en && (
+              <p className="text-sm text-white/60 truncate">{bn ? staff.name_en : staff.name_bn}</p>
+            )}
+            {staff.designation && (
+              <p className="text-sm font-semibold text-emerald-300/90">{staff.designation}</p>
+            )}
+            {staff.department && <p className="text-xs text-white/50">{staff.department}</p>}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {staff.staff_id && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-white/15 text-white/90 backdrop-blur-sm border border-white/10">
+                  <Hash className="w-3 h-3" /> {staff.staff_id}
+                </span>
+              )}
+              <span className={cn(
+                'inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full text-white shadow-lg bg-gradient-to-r',
+                statusColor
+              )}>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                {statusLabel}
+              </span>
             </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0 space-y-1.5">
-          <h3 className="text-xl font-bold text-foreground tracking-tight truncate">
-            {bn ? (staff.name_bn || staff.name_en) : (staff.name_en || staff.name_bn) || '-'}
-          </h3>
-          {staff.name_bn && staff.name_en && (
-            <p className="text-sm text-muted-foreground truncate">{bn ? staff.name_en : staff.name_bn}</p>
-          )}
-          <p className="text-sm font-medium text-primary">{staff.designation || '-'}</p>
-          {staff.department && <p className="text-xs text-muted-foreground">{staff.department}</p>}
-          <span className={cn(
-            'inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full mt-1',
-            staff.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' :
-            staff.status === 'pending' ? 'bg-amber-500/10 text-amber-600' :
-            'bg-destructive/10 text-destructive'
-          )}>
-            {staff.status === 'active' ? (bn ? 'সক্রিয়' : 'Active') :
-             staff.status === 'pending' ? (bn ? 'আবেদন' : 'Pending') :
-             (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* ── Tab Navigation ── */}
-      <div className="flex gap-1.5 p-1 rounded-2xl bg-muted/50 border border-border/30">
+      {/* ═══════════ TABS ═══════════ */}
+      <div className="flex gap-1 p-1 rounded-2xl bg-muted/40 border border-border/20 backdrop-blur-sm">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300',
               activeTab === tab.id
-                ? 'bg-primary/10 text-primary shadow-sm border border-primary/20'
-                : 'text-muted-foreground hover:text-foreground hover:bg-background/60'
+                ? 'bg-gradient-to-r from-emerald-500/15 to-teal-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm border border-emerald-500/20'
+                : 'text-muted-foreground/70 hover:text-foreground hover:bg-background/60'
             )}
           >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            <tab.icon className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
-      {/* ── Tab Content ── */}
+      {/* ═══════════ PROFILE TAB ═══════════ */}
       {activeTab === 'profile' && (
         <div className="space-y-4">
           <ProfileSectionCard title={bn ? 'ব্যক্তিগত তথ্য' : 'Personal Info'} icon={User}>
@@ -131,7 +156,7 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
               {father.occupation && <ProfileInfoItem icon={Briefcase} label={bn ? 'পিতার পেশা' : "Father's Occupation"} value={father.occupation} />}
               {father.nid && <ProfileInfoItem icon={CreditCard} label={bn ? 'পিতার NID' : "Father's NID"} value={father.nid} />}
               {father.mobile && <ProfileInfoItem icon={Phone} label={bn ? 'পিতার ফোন' : "Father's Phone"} value={`${father.mobile_code || ''}${father.mobile}`} />}
-              {(father.name && mother.name) && <div className="col-span-full border-t border-border/20 my-1" />}
+              {(father.name && mother.name) && <div className="col-span-full border-t border-border/15 my-1" />}
               {mother.name && <ProfileInfoItem icon={User} label={bn ? 'মাতার নাম' : 'Mother'} value={mother.name} />}
               {mother.occupation && <ProfileInfoItem icon={Briefcase} label={bn ? 'মাতার পেশা' : "Mother's Occupation"} value={mother.occupation} />}
               {mother.nid && <ProfileInfoItem icon={CreditCard} label={bn ? 'মাতার NID' : "Mother's NID"} value={mother.nid} />}
@@ -141,6 +166,7 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
         </div>
       )}
 
+      {/* ═══════════ EMPLOYMENT TAB ═══════════ */}
       {activeTab === 'employment' && (
         <div className="space-y-4">
           <ProfileSectionCard title={bn ? 'কর্মসংস্থান তথ্য' : 'Employment Info'} icon={Briefcase}>
@@ -156,6 +182,7 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
         </div>
       )}
 
+      {/* ═══════════ OTHERS TAB ═══════════ */}
       {activeTab === 'others' && (
         <div className="space-y-4">
           {(guardian.name || guardian.relation) && (
@@ -191,13 +218,13 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
             <ProfileSectionCard title={bn ? 'ডকুমেন্টস' : 'Documents'} icon={FileText}>
               <div className="col-span-full space-y-2">
                 {docs.map((doc: any, i: number) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border/20">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/8">
-                      <FileText className="w-4 h-4 text-primary" />
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 border border-border/15 hover:bg-muted/30 transition-colors">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/10">
+                      <FileText className="w-4 h-4 text-emerald-600" />
                     </div>
-                    <span className="flex-1 text-sm font-medium truncate">{doc.name || doc.type || `Document ${i + 1}`}</span>
+                    <span className="flex-1 text-sm font-bold truncate">{doc.name || doc.type || `Document ${i + 1}`}</span>
                     {doc.url && (
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-primary hover:underline shrink-0 px-3 py-1.5 rounded-full bg-primary/8">
+                      <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/15 hover:bg-emerald-500/15 transition-colors shrink-0">
                         {bn ? 'দেখুন' : 'View'}
                       </a>
                     )}
@@ -207,9 +234,8 @@ const StaffProfileModal = ({ staff, bn }: StaffProfileModalProps) => {
             </ProfileSectionCard>
           )}
 
-          {/* Empty state if no extra data */}
           {!guardian.name && !identifier.name && !approver.name && docs.length === 0 && (
-            <div className="text-center py-10 text-muted-foreground text-sm">
+            <div className="text-center py-10 text-muted-foreground/50 text-sm">
               {bn ? 'কোনো অতিরিক্ত তথ্য নেই' : 'No additional information'}
             </div>
           )}

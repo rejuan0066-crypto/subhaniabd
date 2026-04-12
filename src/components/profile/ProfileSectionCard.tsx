@@ -12,19 +12,20 @@ interface ProfileSectionCardProps {
 
 const ProfileSectionCard = ({ title, icon: Icon, children, className, columns = 2 }: ProfileSectionCardProps) => (
   <div className={cn(
-    'rounded-[24px] border border-border/30 bg-card/60 backdrop-blur-sm p-5 shadow-sm',
+    'relative rounded-[20px] border border-border/20 bg-card/50 backdrop-blur-md p-5 shadow-sm',
+    'before:absolute before:inset-0 before:rounded-[20px] before:p-[1px] before:bg-gradient-to-br before:from-emerald-500/20 before:via-transparent before:to-teal-500/10 before:-z-10 before:pointer-events-none',
     className
   )}>
-    <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border/30">
+    <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-border/20">
       {Icon && (
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-          <Icon className="h-4 w-4 text-primary" />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500/15 to-teal-500/10 shadow-sm shadow-emerald-500/5">
+          <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
         </div>
       )}
       <h4 className="text-sm font-bold text-foreground tracking-tight">{title}</h4>
     </div>
     <div className={cn(
-      'grid gap-x-4 gap-y-1',
+      'grid gap-x-3 gap-y-0.5',
       columns === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'
     )}>
       {children}
