@@ -57,7 +57,27 @@ const AdminProfile = () => {
   const [pwCountdown, setPwCountdown] = useState(0);
   const pwTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
+  // Fetch profile and staff data
+  const { data: profileData } = useQuery({
+    queryKey: ['my-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: staffData } = useQuery({
+    queryKey: ['my-staff-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('staff').select('*').eq('user_id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email) setCurrentEmail(user.email);
