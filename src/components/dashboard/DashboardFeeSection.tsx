@@ -37,19 +37,30 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     },
   });
 
-  // Fetch fee types for this category
+  // Fetch fee types for this category with session info
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['dashboard-fee-types', category],
     queryFn: async () => {
       const { data } = await supabase
         .from('fee_types')
-        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months')
+        .select('id, name_bn, name, fee_category, amount, division_id, class_id, session_id, payment_frequency, applicable_months, academic_sessions:session_id(name, name_bn)')
         .eq('fee_category', category)
         .eq('is_active', true)
         .is('deleted_at', null);
       return data || [];
     },
   });
+
+  // Get unique session names from fee types
+  const sessionLabel = useMemo(() => {
+    const sessions = new Set<string>();
+    feeTypes.forEach((ft: any) => {
+      if (ft.academic_sessions) {
+        sessions.add(bn ? (ft.academic_sessions.name_bn || ft.academic_sessions.name) : ft.academic_sessions.name);
+      }
+    });
+    return Array.from(sessions).join(', ');
+  }, [feeTypes, bn]);
 
   // Fetch all active students
   const { data: students = [] } = useQuery({
