@@ -76,6 +76,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         .eq('status', 'active');
       return data || [];
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 
   // Fetch classes for grouping labels
