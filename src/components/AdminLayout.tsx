@@ -358,9 +358,24 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       {groupLabel}
                     </div>
                   )}
-                  <div className="flex items-center">
+                  <div
+                    className="flex items-center"
+                    onMouseEnter={() => {
+                      if (!mobile && hasChildren) {
+                        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                        setHoverGroup(item.path);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (!mobile && hasChildren) {
+                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
+                      }
+                    }}
+                  >
                     {(() => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
+                      const isHoverOpen = hoverGroup === item.path;
+                      const isExpanded = isGroupOpen || isHoverOpen;
                       return hasChildren ? (
                       <div className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}>
                         <Link
@@ -375,7 +390,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           className="flex items-center gap-2.5 flex-1 min-w-0"
                           title={!sidebarOpen && !mobile ? item.label : undefined}
                         >
-                          <item.icon className="w-[18px] h-[18px] shrink-0" />
+                          <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
                           {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         </Link>
                         {(sidebarOpen || mobile) && hasChildren && (
@@ -383,7 +398,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleGroup(item.path); }}
                             className="p-0.5 rounded hover:bg-sidebar-accent/50 shrink-0 ml-auto"
                           >
-                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isGroupOpen ? 'rotate-180' : ''}`} />
+                            <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 ${isExpanded ? 'open' : ''}`} />
                           </button>
                         )}
                       </div>
@@ -400,15 +415,28 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}
                         title={!sidebarOpen && !mobile ? item.label : undefined}
                       >
-                        <item.icon className="w-[18px] h-[18px] shrink-0" />
+                        <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
                         {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         {isActive && (sidebarOpen || mobile) && <ChevronRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-50" />}
                       </Link>
                     );
                     })()}
                   </div>
-                  {hasChildren && isGroupOpen && (sidebarOpen || mobile) && (
-                    <div className="ml-7 mt-0.5 space-y-0.5 border-l border-sidebar-border/50 pl-2">
+                  {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
+                    <div
+                      className="sidebar-submenu-enter ml-5 mt-1 space-y-0.5 border-l-2 border-sidebar-primary/20 pl-3 py-1 rounded-br-lg bg-sidebar-accent/30"
+                      onMouseEnter={() => {
+                        if (!mobile) {
+                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                          setHoverGroup(item.path);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!mobile) {
+                          hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
+                        }
+                      }}
+                    >
                       {item.children!.map(child => {
                         const [childPathname, childSearch] = child.path.split('?');
                         const childActive = childSearch
@@ -427,7 +455,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                             }}
                             className={`sidebar-item text-xs py-1.5 ${childActive ? 'active' : ''}`}
                           >
-                            <child.icon className="w-4 h-4 shrink-0" />
+                            <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
                             <span className="truncate">{child.label}</span>
                           </Link>
                         );
