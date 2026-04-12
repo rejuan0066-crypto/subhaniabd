@@ -25,6 +25,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminStudents from "./pages/admin/AdminStudents";
 import AdminStaff from "./pages/admin/AdminStaff";
+import AdminTeachers from "./pages/admin/AdminTeachers";
 import AdminStaffForm from "./pages/admin/AdminStaffForm";
 import AdminDivisions from "./pages/admin/AdminDivisions";
 import AdminSubjects from "./pages/admin/AdminSubjects";
