@@ -424,6 +424,7 @@ const MasterRoutineView = () => {
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">{bn ? 'সব শ্রেণী' : 'All Classes'}</SelectItem>
               {filteredClasses.map(c => (
                 <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
               ))}
@@ -576,6 +577,8 @@ const MasterRoutineView = () => {
                               teacherName={period?.teacher_name || ''}
                               teacherNameBn={period?.teacher_name_bn || ''}
                               subjects={subjects || []}
+                              classes={filteredClasses || []}
+                              staff={staff || []}
                               bn={bn}
                               onSave={(sId, tn, tnBn) => handleCellSave(day.value, col.num, sId, tn, tnBn)}
                             >
