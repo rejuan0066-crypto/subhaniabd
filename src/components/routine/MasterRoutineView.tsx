@@ -39,36 +39,63 @@ interface CellEditorProps {
   subjectId: string;
   teacherName: string;
   teacherNameBn: string;
+  classId?: string;
   subjects: any[];
+  classes: any[];
+  staff: any[];
   bn: boolean;
-  onSave: (subjectId: string, teacherName: string, teacherNameBn: string) => void;
+  onSave: (subjectId: string, teacherName: string, teacherNameBn: string, classId?: string) => void;
   children: React.ReactNode;
+  showClassSelect?: boolean;
 }
 
-const CellEditor = ({ subjectId, teacherName, teacherNameBn, subjects, bn, onSave, children }: CellEditorProps) => {
+const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, subjects, classes, staff, bn, onSave, children, showClassSelect }: CellEditorProps) => {
   const [open, setOpen] = useState(false);
   const [localSubjectId, setLocalSubjectId] = useState(subjectId);
   const [localTeacher, setLocalTeacher] = useState(teacherName);
   const [localTeacherBn, setLocalTeacherBn] = useState(teacherNameBn);
+  const [localClassId, setLocalClassId] = useState(classId || '');
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen) {
       setLocalSubjectId(subjectId);
       setLocalTeacher(teacherName);
       setLocalTeacherBn(teacherNameBn);
+      setLocalClassId(classId || '');
     }
     setOpen(isOpen);
   };
 
   const handleSave = () => {
-    onSave(localSubjectId, localTeacher, localTeacherBn);
+    onSave(localSubjectId, localTeacher, localTeacherBn, localClassId || undefined);
     setOpen(false);
+  };
+
+  const handleStaffSelect = (staffId: string) => {
+    const s = staff.find(st => st.id === staffId);
+    if (s) {
+      setLocalTeacher(s.name_en || '');
+      setLocalTeacherBn(s.name_bn || '');
+    }
   };
 
   return (
     <Popover open={open} onOpenChange={handleOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-64 p-3 space-y-2" align="center">
+      <PopoverContent className="w-72 p-3 space-y-2" align="center">
+        {showClassSelect && (
+          <div>
+            <Label className="text-xs">{bn ? 'শ্রেণী' : 'Class'}</Label>
+            <Select value={localClassId} onValueChange={setLocalClassId}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
+              <SelectContent>
+                {classes.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div>
           <Label className="text-xs">{bn ? 'বিষয়' : 'Subject'}</Label>
           <Select value={localSubjectId} onValueChange={setLocalSubjectId}>
@@ -82,12 +109,25 @@ const CellEditor = ({ subjectId, teacherName, teacherNameBn, subjects, bn, onSav
           </Select>
         </div>
         <div>
-          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (বাংলা)' : 'Teacher (Bangla)'}</Label>
-          <Input className="h-8 text-xs" value={localTeacherBn} onChange={e => setLocalTeacherBn(e.target.value)} placeholder={bn ? 'শিক্ষকের নাম' : 'Teacher name BN'} />
+          <Label className="text-xs">{bn ? 'শিক্ষক নির্বাচন' : 'Select Teacher'}</Label>
+          <Select onValueChange={handleStaffSelect}>
+            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder={bn ? 'শিক্ষক বাছুন' : 'Pick teacher'} /></SelectTrigger>
+            <SelectContent>
+              {staff.map(s => (
+                <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : (s.name_en || s.name_bn)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div>
-          <Label className="text-xs">{bn ? 'শিক্ষকের নাম (ইংরেজি)' : 'Teacher (English)'}</Label>
-          <Input className="h-8 text-xs" value={localTeacher} onChange={e => setLocalTeacher(e.target.value)} placeholder={bn ? 'Teacher name' : 'Teacher name EN'} />
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label className="text-xs">{bn ? 'নাম (বাংলা)' : 'Name BN'}</Label>
+            <Input className="h-8 text-xs" value={localTeacherBn} onChange={e => setLocalTeacherBn(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">{bn ? 'নাম (ইংরেজি)' : 'Name EN'}</Label>
+            <Input className="h-8 text-xs" value={localTeacher} onChange={e => setLocalTeacher(e.target.value)} />
+          </div>
         </div>
         <Button size="sm" className="w-full h-7 text-xs gap-1" onClick={handleSave}>
           <Save className="h-3 w-3" /> {bn ? 'সেভ' : 'Save'}
@@ -109,6 +149,7 @@ const MasterRoutineView = () => {
   const [periodCount, setPeriodCount] = useState(8);
   const [breakAfter, setBreakAfter] = useState(4);
   const [periodTimes, setPeriodTimes] = useState<Record<number, { start: string; end: string }>>({});
+  const [selectedDay, setSelectedDay] = useState<number>(0);
 
   // Queries
   const { data: institution } = useQuery({
@@ -152,6 +193,14 @@ const MasterRoutineView = () => {
     },
   });
 
+  const { data: staff } = useQuery({
+    queryKey: ['staff-for-routine'],
+    queryFn: async () => {
+      const { data } = await supabase.from('staff').select('id, name_bn, name_en').eq('status', 'active').order('name_bn');
+      return data || [];
+    },
+  });
+
   // Filtered classes for dropdown
   const filteredClasses = useMemo(() => {
     if (!allClasses) return [];
@@ -159,11 +208,13 @@ const MasterRoutineView = () => {
     return allClasses.filter(c => c.division_id === selectedDivisionId);
   }, [allClasses, selectedDivisionId]);
 
-  // Get or create routine for selected class
+  const isAllClasses = selectedClassId === 'all';
+
+  // Get or create routine for selected class (single class mode)
   const { data: routine } = useQuery({
     queryKey: ['class-routine', selectedSessionId, selectedClassId],
     queryFn: async () => {
-      if (!selectedSessionId || !selectedClassId) return null;
+      if (!selectedSessionId || !selectedClassId || isAllClasses) return null;
       const { data } = await supabase
         .from('class_routines')
         .select('id, class_id, name, name_bn')
@@ -173,7 +224,39 @@ const MasterRoutineView = () => {
         .maybeSingle();
       return data;
     },
-    enabled: !!selectedSessionId && !!selectedClassId,
+    enabled: !!selectedSessionId && !!selectedClassId && !isAllClasses,
+  });
+
+  // Get all routines for all classes (all classes mode)
+  const { data: allRoutines } = useQuery({
+    queryKey: ['all-class-routines', selectedSessionId, selectedDivisionId],
+    queryFn: async () => {
+      if (!selectedSessionId) return [];
+      let q = supabase
+        .from('class_routines')
+        .select('id, class_id, name, name_bn')
+        .eq('academic_session_id', selectedSessionId)
+        .eq('is_active', true);
+      const { data } = await q;
+      return data || [];
+    },
+    enabled: !!selectedSessionId && isAllClasses,
+  });
+
+  // All periods for all routines (all classes mode)
+  const { data: allClassesPeriods } = useQuery({
+    queryKey: ['all-classes-periods', allRoutines?.map(r => r.id).join(',')],
+    queryFn: async () => {
+      if (!allRoutines?.length) return [];
+      const routineIds = allRoutines.map(r => r.id);
+      const { data } = await supabase
+        .from('routine_periods')
+        .select('*, subjects(name, name_bn)')
+        .in('routine_id', routineIds)
+        .order('period_number');
+      return data || [];
+    },
+    enabled: isAllClasses && !!allRoutines?.length,
   });
 
   // All periods for this routine (all days)
@@ -376,6 +459,7 @@ const MasterRoutineView = () => {
           <Select value={selectedClassId} onValueChange={setSelectedClassId}>
             <SelectTrigger><SelectValue placeholder={bn ? 'শ্রেণী নির্বাচন' : 'Select class'} /></SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">{bn ? 'সব শ্রেণী' : 'All Classes'}</SelectItem>
               {filteredClasses.map(c => (
                 <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
               ))}
@@ -411,7 +495,172 @@ const MasterRoutineView = () => {
         <div className="py-12 text-center text-muted-foreground">
           {bn ? 'একটি সেশন এবং শ্রেণী নির্বাচন করুন' : 'Select a session and class'}
         </div>
+      ) : isAllClasses ? (
+        /* ─── All Classes Master Grid (Rows = Classes, Columns = Periods) ─── */
+        <div id="master-routine-print">
+          <div className="border-2 border-border rounded-lg overflow-hidden bg-background">
+            {/* Header */}
+            <div className="text-center py-3 px-4 border-b-2 border-border relative">
+              {institution?.logo_url && <img src={institution.logo_url} alt="" className="w-12 h-12 object-contain mx-auto mb-1" />}
+              <h1 className="text-lg font-bold text-foreground leading-tight">{instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
+              {institution?.address && <p className="text-[10px] text-muted-foreground">{institution.address}</p>}
+              <p className="text-xs font-semibold text-foreground mt-0.5">
+                {bn ? 'মাস্টার রুটিন' : 'Master Routine'} — {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
+              </p>
+            </div>
+
+            {/* Day selector tabs */}
+            <div className="flex gap-1 p-2 border-b border-border flex-wrap">
+              {DAYS.map(day => (
+                <Button
+                  key={day.value}
+                  size="sm"
+                  variant={selectedDay === day.value ? 'default' : 'outline'}
+                  className="text-xs h-7 px-3"
+                  onClick={() => setSelectedDay(day.value)}
+                >
+                  {bn ? day.short_bn : day.short_en}
+                </Button>
+              ))}
+            </div>
+
+            {/* Master grid: Rows = Classes, Cols = Periods */}
+            <div className="overflow-x-auto p-2">
+              <table className="w-full border-collapse" style={{ minWidth: periodColumns.length * 85 + 120 }}>
+                <thead>
+                  <tr>
+                    <th className={thStyle} style={{ minWidth: 100 }}>
+                      {bn ? 'শ্রেণী / পিরিয়ড' : 'Class / Period'}
+                    </th>
+                    {periodColumns.map((col, idx) => {
+                      if (col.isBreak) {
+                        return (
+                          <th key={`br-${idx}`} className={breakThStyle}
+                            style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', padding: '8px 2px', minWidth: 28, maxWidth: 32 }}>
+                            {bn ? 'বিরতি' : 'Break'}
+                          </th>
+                        );
+                      }
+                      return (
+                        <th key={col.num} className={thStyle}>
+                          <div className="font-bold text-xs">{periodLabelsMap[col.num]}</div>
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredClasses.map(cls => {
+                    const classRoutine = allRoutines?.find(r => r.class_id === cls.id);
+                    const classPeriods = classRoutine ? allClassesPeriods?.filter(p => p.routine_id === classRoutine.id) : [];
+
+                    const getClassPeriodData = (periodNum: number) => {
+                      return classPeriods?.find(p => p.day_of_week === selectedDay && p.period_number === periodNum) || null;
+                    };
+
+                    return (
+                      <tr key={cls.id} className="hover:bg-accent/5 transition-colors">
+                        <td className="border border-border bg-accent/5 px-3 py-2 font-bold text-[11px] whitespace-nowrap text-center">
+                          {bn ? cls.name_bn : cls.name}
+                        </td>
+                        {periodColumns.map((col, idx) => {
+                          if (col.isBreak) {
+                            return <td key={`br-${idx}`} className="border border-border bg-accent/5" />;
+                          }
+                          const period = getClassPeriodData(col.num);
+                          const subj = period?.subjects as any;
+                          const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
+                          const teacherDisplay = bn
+                            ? (period?.teacher_name_bn || period?.teacher_name || '')
+                            : (period?.teacher_name || period?.teacher_name_bn || '');
+
+                          return (
+                            <td key={col.num} className="border border-border p-0">
+                              <CellEditor
+                                subjectId={period?.subject_id || 'none'}
+                                teacherName={period?.teacher_name || ''}
+                                teacherNameBn={period?.teacher_name_bn || ''}
+                                subjects={subjects || []}
+                                classes={filteredClasses || []}
+                                staff={staff || []}
+                                bn={bn}
+                                showClassSelect
+                                classId={cls.id}
+                                onSave={(sId, tn, tnBn, cId) => {
+                                  // For all-classes mode, save with the specific class
+                                  const targetClassId = cId || cls.id;
+                                  // We need to handle saving for a specific class in all-classes mode
+                                  const saveForClass = async () => {
+                                    let routineId = allRoutines?.find(r => r.class_id === targetClassId)?.id;
+                                    if (!routineId) {
+                                      const c = allClasses?.find(cc => cc.id === targetClassId);
+                                      const { data: newR, error } = await supabase.from('class_routines').insert({
+                                        class_id: targetClassId,
+                                        academic_session_id: selectedSessionId,
+                                        name: c?.name || 'Routine',
+                                        name_bn: c?.name_bn || 'রুটিন',
+                                        is_active: true,
+                                      }).select('id').single();
+                                      if (error) { toast.error(bn ? 'সেভ ব্যর্থ' : 'Save failed'); return; }
+                                      routineId = newR.id;
+                                    }
+                                    const { data: existing } = await supabase.from('routine_periods').select('id')
+                                      .eq('routine_id', routineId).eq('day_of_week', selectedDay).eq('period_number', col.num).maybeSingle();
+                                    const periodData = {
+                                      routine_id: routineId,
+                                      day_of_week: selectedDay,
+                                      period_number: col.num,
+                                      subject_id: sId === 'none' ? null : sId || null,
+                                      teacher_name: tn || null,
+                                      teacher_name_bn: tnBn || null,
+                                      is_break: false,
+                                      start_time: '08:00',
+                                      end_time: '08:45',
+                                    };
+                                    if (existing) {
+                                      await supabase.from('routine_periods').update(periodData).eq('id', existing.id);
+                                    } else {
+                                      await supabase.from('routine_periods').insert(periodData);
+                                    }
+                                    queryClient.invalidateQueries({ queryKey: ['all-class-routines'] });
+                                    queryClient.invalidateQueries({ queryKey: ['all-classes-periods'] });
+                                    toast.success(bn ? 'সেভ হয়েছে' : 'Saved');
+                                  };
+                                  saveForClass();
+                                }}
+                              >
+                                <button className="w-full cursor-pointer hover:bg-accent/10 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/30 rounded-none">
+                                  <div className="flex flex-col min-h-[42px]">
+                                    <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                                      <span className="text-[10px] font-semibold text-foreground leading-tight text-center">
+                                        {subjName || <span className="text-muted-foreground/30">+</span>}
+                                      </span>
+                                    </div>
+                                    <div className="border-t border-border/70" />
+                                    <div className="flex-1 flex items-center justify-center px-1 py-0.5">
+                                      <span className="text-[8px] text-muted-foreground leading-tight text-center">
+                                        {teacherDisplay || <span className="opacity-30">—</span>}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </button>
+                              </CellEditor>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="px-3 py-2 border-t border-border text-[9px] text-muted-foreground">
+              {bn ? 'বি.দ্র. কর্তৃপক্ষ কর্তৃক পরিবর্তন করার ক্ষমতা এবং বিশেষ প্রয়োজনে অতিরিক্ত ক্লাশ নিতে পারবেন।' : 'Note: Schedule subject to change by administration.'}
+            </div>
+          </div>
+        </div>
       ) : (
+        /* ─── Single Class Weekly Grid (Rows = Days, Columns = Periods) ─── */
         <div id="master-routine-print">
           <div className="border-2 border-border rounded-lg overflow-hidden bg-background">
             {/* Header */}
@@ -419,26 +668,15 @@ const MasterRoutineView = () => {
               <div className="absolute top-2 right-3 text-[10px] text-muted-foreground border border-border rounded px-2 py-0.5">
                 {bn ? 'তারিখ:' : 'Date:'} {new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-GB')}
               </div>
-              {institution?.logo_url && (
-                <img src={institution.logo_url} alt="" className="w-12 h-12 object-contain mx-auto mb-1" />
-              )}
-              <h1 className="text-lg font-bold text-foreground leading-tight">
-                {instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}
-              </h1>
-              {institution?.address && (
-                <p className="text-[10px] text-muted-foreground">{institution.address}</p>
-              )}
+              {institution?.logo_url && <img src={institution.logo_url} alt="" className="w-12 h-12 object-contain mx-auto mb-1" />}
+              <h1 className="text-lg font-bold text-foreground leading-tight">{instName || (bn ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
+              {institution?.address && <p className="text-[10px] text-muted-foreground">{institution.address}</p>}
               <p className="text-xs font-semibold text-foreground mt-0.5">
                 {bn ? 'সাপ্তাহিক ক্লাস রুটিন' : 'Weekly Class Routine'} — {selectedSession ? (bn ? selectedSession.name_bn || selectedSession.name : selectedSession.name) : ''}
               </p>
               {selectedCls && (
-                <p className="text-sm font-bold text-foreground mt-0.5 bg-emerald-100 dark:bg-emerald-900/20 inline-block px-4 py-0.5 rounded">
+                <p className="text-sm font-bold text-foreground mt-0.5 bg-primary/10 inline-block px-4 py-0.5 rounded">
                   {bn ? selectedCls.name_bn : selectedCls.name}
-                </p>
-              )}
-              {studentCount !== undefined && studentCount > 0 && (
-                <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {bn ? `মোট ছাত্র: ${toBn(studentCount)} জন` : `Total Students: ${studentCount}`}
                 </p>
               )}
             </div>
@@ -477,21 +715,13 @@ const MasterRoutineView = () => {
                               <div className="flex gap-2">
                                 <div className="flex-1">
                                   <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
-                                  <Input
-                                    type="time"
-                                    className="h-7 text-xs"
-                                    value={time.start}
-                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { ...prev[col.num], start: e.target.value, end: prev[col.num]?.end || time.end || '' } }))}
-                                  />
+                                  <Input type="time" className="h-7 text-xs" value={time.start}
+                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { ...prev[col.num], start: e.target.value, end: prev[col.num]?.end || time.end || '' } }))} />
                                 </div>
                                 <div className="flex-1">
                                   <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
-                                  <Input
-                                    type="time"
-                                    className="h-7 text-xs"
-                                    value={time.end}
-                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { start: prev[col.num]?.start || time.start || '', end: e.target.value } }))}
-                                  />
+                                  <Input type="time" className="h-7 text-xs" value={time.end}
+                                    onChange={e => setPeriodTimes(prev => ({ ...prev, [col.num]: { start: prev[col.num]?.start || time.start || '', end: e.target.value } }))} />
                                 </div>
                               </div>
                             </PopoverContent>
@@ -504,16 +734,13 @@ const MasterRoutineView = () => {
                 <tbody>
                   {DAYS.map(day => (
                     <tr key={day.value} className="hover:bg-accent/5 transition-colors">
-                      {/* Day name cell */}
-                      <td className="border border-border bg-emerald-50 dark:bg-emerald-900/10 px-3 py-2 font-bold text-[11px] whitespace-nowrap text-center">
+                      <td className="border border-border bg-accent/5 px-3 py-2 font-bold text-[11px] whitespace-nowrap text-center">
                         {bn ? day.label_bn : day.label_en}
                       </td>
-                      {/* Period cells for this day */}
                       {periodColumns.map((col, idx) => {
                         if (col.isBreak) {
-                          return <td key={`br-${idx}`} className="border border-border bg-emerald-50 dark:bg-emerald-900/10" />;
+                          return <td key={`br-${idx}`} className="border border-border bg-accent/5" />;
                         }
-
                         const period = getPeriodData(day.value, col.num);
                         const subj = period?.subjects as any;
                         const subjName = subj ? (bn ? subj.name_bn : subj.name) : '';
@@ -528,6 +755,8 @@ const MasterRoutineView = () => {
                               teacherName={period?.teacher_name || ''}
                               teacherNameBn={period?.teacher_name_bn || ''}
                               subjects={subjects || []}
+                              classes={filteredClasses || []}
+                              staff={staff || []}
                               bn={bn}
                               onSave={(sId, tn, tnBn) => handleCellSave(day.value, col.num, sId, tn, tnBn)}
                             >
@@ -555,8 +784,6 @@ const MasterRoutineView = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* Footer */}
             <div className="px-3 py-2 border-t border-border text-[9px] text-muted-foreground">
               {bn ? 'বি.দ্র. কর্তৃপক্ষ কর্তৃক পরিবর্তন করার ক্ষমতা এবং বিশেষ প্রয়োজনে অতিরিক্ত ক্লাশ নিতে পারবেন।' : 'Note: Schedule subject to change by administration.'}
             </div>
