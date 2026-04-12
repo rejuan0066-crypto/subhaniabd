@@ -165,8 +165,12 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">{t('staff')}</h1>
-            <p className="text-sm text-muted-foreground">{bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`}</p>
+            <h1 className="text-2xl font-display font-bold text-foreground">
+              {staffType === 'teacher' ? (bn ? 'শিক্ষক ব্যবস্থাপনা' : 'Teacher Management') : staffType === 'staff' ? (bn ? 'স্টাফ ব্যবস্থাপনা' : 'Staff Management') : t('staff')}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {staffType === 'teacher' ? (bn ? `মোট ${typeFiltered.length} জন শিক্ষক` : `Total ${typeFiltered.length} teachers`) : staffType === 'staff' ? (bn ? `মোট ${typeFiltered.length} জন স্টাফ` : `Total ${typeFiltered.length} staff`) : (bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`)}
+            </p>
           </div>
           {canAddItem && (
             <Button onClick={() => navigate('/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
