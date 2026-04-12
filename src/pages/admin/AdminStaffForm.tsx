@@ -962,7 +962,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
               </div>
             </div>
 
-            {(isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
+            {sectionConfig.showEducation && (isFieldActive('nid') || isFieldActive('education') || isFieldActive('experience') || isFieldActive('prev_institute')) && (
             <div className="border-t border-border pt-4 mb-4">
               <h3 className="text-md font-semibold text-foreground mb-3 text-center text-2xl">{bn ? 'পরিচিতি (Identity)' : 'Identity'}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
