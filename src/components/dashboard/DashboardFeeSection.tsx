@@ -220,6 +220,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                 groups[monthName].unpaid.push({
                   id: `unpaid-${s.id}-${ft.id}-${monthName}`, _studentId: s.id, _feeTypeId: ft.id,
                   students: s, fee_types: ft, amount: ft.amount, month: monthName, status: 'unpaid',
+                  _sessionName: ft.academic_sessions ? (bn ? ft.academic_sessions.name_bn || ft.academic_sessions.name : ft.academic_sessions.name) : '',
                 });
               }
             }
@@ -259,7 +260,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
             if (!alreadyAdded) {
               groups[classId].unpaid.push({
                 id: `unpaid-${s.id}-${ft.id}`, _studentId: s.id, _feeTypeId: ft.id,
-                students: s, fee_types: ft, amount: ft.amount, year: new Date().getFullYear(), status: 'unpaid',
+                students: s, fee_types: ft, amount: ft.amount, status: 'unpaid',
+                _sessionName: ft.academic_sessions ? (bn ? ft.academic_sessions.name_bn || ft.academic_sessions.name : ft.academic_sessions.name) : '',
               });
             }
           }
