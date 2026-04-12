@@ -405,7 +405,14 @@ export const useWebsiteSettings = () => {
         .from('website_settings')
         .select('key, value');
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Website settings fetch error:', error.message);
+        // On auth errors (401/403), don't throw — return defaults so cached data is preserved
+        if (error.message?.includes('JWT') || error.code === 'PGRST301' || error.code === '401') {
+          return null;
+        }
+        throw error;
+      }
       
       const result = { ...DEFAULT_SETTINGS };
       data?.forEach((row) => {
@@ -430,6 +437,13 @@ export const useWebsiteSettings = () => {
         });
       }
       return result;
+    },
+    staleTime: 5 * 60 * 1000, // 5 min — keep cached data longer to avoid default flashes
+    gcTime: 30 * 60 * 1000,
+    retry: (failureCount, error) => {
+      // Don't retry auth errors
+      if (error?.message?.includes('JWT') || error?.message?.includes('401')) return false;
+      return failureCount < 2;
     },
   });
 

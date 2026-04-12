@@ -144,11 +144,23 @@ export const useThemeSettings = () => {
         .select('key, value')
         .eq('key', 'theme');
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Theme settings fetch error:', error.message);
+        if (error.message?.includes('JWT') || error.code === 'PGRST301' || error.code === '401') {
+          return null;
+        }
+        throw error;
+      }
       if (data && data.length > 0 && data[0].value) {
         return { ...DEFAULT_THEME, ...(data[0].value as unknown as Partial<ThemeSettings>) };
       }
       return DEFAULT_THEME;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error?.message?.includes('JWT') || error?.message?.includes('401')) return false;
+      return failureCount < 2;
     },
   });
 
