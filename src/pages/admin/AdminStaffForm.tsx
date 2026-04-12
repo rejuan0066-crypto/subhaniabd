@@ -210,7 +210,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
   const [approverDate, setApproverDate] = useState('');
   const approverSigRef = useRef<HTMLInputElement>(null);
 
-  const designations = [
+  const designationsHardcoded = [
     { value: 'head_teacher', bn: 'প্রধান শিক্ষক', en: 'Head Teacher' },
     { value: 'asst_head_teacher', bn: 'সহকারী প্রধান শিক্ষক', en: 'Asst. Head Teacher' },
     { value: 'asst_teacher', bn: 'সহকারী শিক্ষক', en: 'Asst. Teacher' },
@@ -226,6 +226,25 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
     { value: 'guard', bn: 'নিরাপত্তা প্রহরী', en: 'Security Guard' },
     { value: 'other', bn: 'অন্যান্য', en: 'Other' },
   ];
+
+  // Load designations from DB filtered by staff_category
+  const { data: dbDesignations = [] } = useQuery({
+    queryKey: ['designations-for-form', staffCategory],
+    queryFn: async () => {
+      let query = supabase.from('designations').select('*').eq('is_active', true).order('sort_order');
+      if (staffCategory !== 'all') {
+        query = query.eq('staff_category', staffCategory);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Use DB designations if available, else fallback to hardcoded
+  const designations = dbDesignations.length > 0
+    ? dbDesignations.map(d => ({ value: d.name, bn: d.name_bn, en: d.name }))
+    : designationsHardcoded;
   // Populate form fields when editing
   useEffect(() => {
     if (!isEditMode || !existingStaff || dataLoaded) return;
