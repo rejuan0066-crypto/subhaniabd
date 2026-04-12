@@ -542,7 +542,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-card border-b px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+          <header className={`bg-card/80 backdrop-blur-xl border-b border-border/30 px-4 lg:px-6 ${headerPadClass} fixed inset-x-0 top-0 z-40 flex items-center justify-between lg:left-[var(--admin-sidebar-width)] lg:right-0`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
             <div className="flex items-center gap-3">
               <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 rounded-lg hover:bg-secondary transition-colors">
                 <Menu className="w-5 h-5 text-muted-foreground" />
@@ -553,7 +553,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
             <div className="flex items-center gap-1.5">
               {/* Search */}
               {adminTheme.headerShowSearch && (
-                <div className="hidden md:flex items-center gap-2 bg-secondary rounded-lg px-3 py-1.5 text-sm text-muted-foreground min-w-[200px]">
+                <div className="hidden md:flex items-center gap-2 bg-secondary/50 backdrop-blur-sm rounded-2xl px-4 py-2 text-sm text-muted-foreground min-w-[200px] border border-border/20">
                   <Search className="w-4 h-4 shrink-0" />
                   <span className="flex-1 text-xs">{language === 'bn' ? 'শিক্ষার্থী, শিক্ষক, ক্লাস খুঁজুন...' : 'Search students, teachers...'}</span>
                   <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded border bg-card px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -573,7 +573,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
           {/* Content */}
           <main className="flex-1 px-3 lg:px-5 pb-6 pt-4">
             {/* Modern Glass Content Container */}
-            <div className="admin-page-card rounded-2xl lg:rounded-3xl bg-card/80 dark:bg-card/60 backdrop-blur-xl border border-border/40 dark:border-border/20 p-4 sm:p-5 lg:p-7 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div className="admin-page-card rounded-2xl lg:rounded-3xl bg-card/80 dark:bg-card/50 backdrop-blur-xl border border-border/25 dark:border-border/15 p-4 sm:p-5 lg:p-7 min-h-[60vh]" style={{ boxShadow: 'var(--shadow-elevated)' }}>
               {/* Page Header */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 pb-4 border-b border-border/30">
                 <div>
