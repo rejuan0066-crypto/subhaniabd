@@ -481,6 +481,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
         previous_institute: prevInstitute || null,
         joining_date: joiningDate || null,
         staff_data: staffData as any,
+        staff_category: staffCategory !== 'all' ? staffCategory : 'general',
       };
 
       if (isEditMode && editId) {
