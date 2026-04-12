@@ -97,7 +97,11 @@ const CellEditor = ({ subjectId, teacherName, teacherNameBn, classId, filterClas
           <Label className="text-xs">{bn ? 'বিষয়' : 'Subject'}</Label>
           <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring" value={localSubjectId} onChange={e => setLocalSubjectId(e.target.value)}>
             <option value="none">{bn ? '-- খালি --' : '-- Empty --'}</option>
-            {subjects.map(s => <option key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</option>)}
+            {subjects.filter(s => {
+              const cId = showClassSelect ? localClassId : filterClassId;
+              if (!cId) return true;
+              return !s.class_id || s.class_id === cId;
+            }).map(s => <option key={s.id} value={s.id}>{bn ? s.name_bn : s.name}</option>)}
           </select>
         </div>
         <div>
