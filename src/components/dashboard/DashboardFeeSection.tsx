@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
-
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { CreditCard, ChevronDown, ChevronUp, Printer, Download } from 'lucide-react';
+import { CreditCard, ChevronDown, ChevronUp, Printer, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 
 type FeeCategory = 'monthly' | 'exam' | 'admission';
 
@@ -41,15 +41,10 @@ const compareAcademicOrder = (
   const aSerial = a.serial ?? Number.MAX_SAFE_INTEGER;
   const bSerial = b.serial ?? Number.MAX_SAFE_INTEGER;
   if (aSerial !== bSerial) return aSerial - bSerial;
-
   const aSortOrder = a.sortOrder ?? Number.MAX_SAFE_INTEGER;
   const bSortOrder = b.sortOrder ?? Number.MAX_SAFE_INTEGER;
   if (aSortOrder !== bSortOrder) return aSortOrder - bSortOrder;
-
-  return (a.label || '').localeCompare(b.label || '', 'bn', {
-    numeric: true,
-    sensitivity: 'base',
-  });
+  return (a.label || '').localeCompare(b.label || '', 'bn', { numeric: true, sensitivity: 'base' });
 };
 
 const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionProps) => {
@@ -58,6 +53,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   const [expanded, setExpanded] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [listType, setListType] = useState<'paid' | 'unpaid'>('paid');
+  const [reportMonth, setReportMonth] = useState<string | null>(null);
 
   const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const MONTHS_BN: Record<string, string> = {
@@ -66,7 +62,6 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     September: 'সেপ্টেম্বর', October: 'অক্টোবর', November: 'নভেম্বর', December: 'ডিসেম্বর',
   };
 
-  // Fetch fee payments (existing records)
   const { data: payments = [] } = useQuery({
     queryKey: ['dashboard-fee-payments', category],
     queryFn: async () => {
@@ -78,11 +73,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       if (error) throw error;
       return (data || []).filter((p: any) => p.fee_types?.fee_category === category);
     },
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    refetchOnWindowFocus: true, staleTime: 0,
   });
 
-  // Fetch fee types for this category with session info
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['dashboard-fee-types', category],
     queryFn: async () => {
@@ -94,11 +87,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         .is('deleted_at', null);
       return data || [];
     },
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    refetchOnWindowFocus: true, staleTime: 0,
   });
 
-  // Get unique session names from fee types
   const sessionLabel = useMemo(() => {
     const sessions = new Set<string>();
     feeTypes.forEach((ft: any) => {
@@ -109,7 +100,6 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     return Array.from(sessions).join(', ');
   }, [feeTypes, bn]);
 
-  // Fetch all active students
   const { data: students = [] } = useQuery({
     queryKey: ['dashboard-students-for-fees'],
     queryFn: async () => {
@@ -119,11 +109,9 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         .eq('status', 'active');
       return data || [];
     },
-    refetchOnWindowFocus: true,
-    staleTime: 0,
+    refetchOnWindowFocus: true, staleTime: 0,
   });
 
-  // Fetch classes for grouping labels
   const { data: classes = [] } = useQuery({
     queryKey: ['dashboard-classes-list'],
     queryFn: async () => {
@@ -136,19 +124,11 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     },
   });
 
-  const getClassLabelFromPayment = (p: any) => {
-    return p?.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
-  };
-
   const classMap = useMemo(() => {
     const map: Record<string, { label: string; sort_order: number | null; serial: number | null }> = {};
     classes.forEach((c: any) => {
       const label = c.name_bn || c.name || '';
-      map[c.id] = {
-        label,
-        sort_order: c.sort_order ?? null,
-        serial: extractClassSerial(label),
-      };
+      map[c.id] = { label, sort_order: c.sort_order ?? null, serial: extractClassSerial(label) };
     });
     return map;
   }, [classes]);
@@ -156,42 +136,24 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
   const compareFeeItems = (a: any, b: any) => {
     const aClassId = a.students?.class_id || 'unknown';
     const bClassId = b.students?.class_id || 'unknown';
-
     const aLabel = a.students?.classes?.name_bn || classMap[aClassId]?.label || '';
     const bLabel = b.students?.classes?.name_bn || classMap[bClassId]?.label || '';
-
     const classComparison = compareAcademicOrder(
-      {
-        label: aLabel,
-        sortOrder: a.students?.classes?.sort_order ?? classMap[aClassId]?.sort_order ?? null,
-        serial: classMap[aClassId]?.serial ?? extractClassSerial(aLabel),
-      },
-      {
-        label: bLabel,
-        sortOrder: b.students?.classes?.sort_order ?? classMap[bClassId]?.sort_order ?? null,
-        serial: classMap[bClassId]?.serial ?? extractClassSerial(bLabel),
-      },
+      { label: aLabel, sortOrder: a.students?.classes?.sort_order ?? classMap[aClassId]?.sort_order ?? null, serial: classMap[aClassId]?.serial ?? extractClassSerial(aLabel) },
+      { label: bLabel, sortOrder: b.students?.classes?.sort_order ?? classMap[bClassId]?.sort_order ?? null, serial: classMap[bClassId]?.serial ?? extractClassSerial(bLabel) },
     );
-
     if (classComparison !== 0) return classComparison;
-
     const rollA = Number.parseInt(toEnglishDigits(String(a.students?.roll_number || '0')), 10) || 0;
     const rollB = Number.parseInt(toEnglishDigits(String(b.students?.roll_number || '0')), 10) || 0;
     if (rollA !== rollB) return rollA - rollB;
-
-    return (a.students?.name_bn || '').localeCompare(b.students?.name_bn || '', 'bn', {
-      numeric: true,
-      sensitivity: 'base',
-    });
+    return (a.students?.name_bn || '').localeCompare(b.students?.name_bn || '', 'bn', { numeric: true, sensitivity: 'base' });
   };
 
-  // Build groups: monthly category → group by month, others → group by class
+  // Build groups
   const enrichedGroups = useMemo(() => {
     const groups: Record<string, GroupItem> = {};
 
     if (category === 'monthly') {
-      // ---- GROUP BY MONTH ----
-      // Determine valid session months — only up to current running month
       const now0 = new Date();
       const curMIdx = now0.getMonth();
       const validSessionMonths = new Set<string>();
@@ -201,12 +163,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         if (ft.academic_sessions?.start_date) startM = new Date(ft.academic_sessions.start_date).getMonth();
         if (ft.academic_sessions?.end_date) endM = new Date(ft.academic_sessions.end_date).getMonth();
         const indices: number[] = [];
-        if (startM <= endM) {
-          for (let i = startM; i <= endM; i++) indices.push(i);
-        } else {
-          for (let i = startM; i < 12; i++) indices.push(i);
-          for (let i = 0; i <= endM; i++) indices.push(i);
-        }
+        if (startM <= endM) { for (let i = startM; i <= endM; i++) indices.push(i); }
+        else { for (let i = startM; i < 12; i++) indices.push(i); for (let i = 0; i <= endM; i++) indices.push(i); }
         const curPos = indices.indexOf(curMIdx);
         const running = curPos >= 0 ? indices.slice(0, curPos + 1) : indices.filter(i => i >= startM && i <= curMIdx);
         running.forEach(i => validSessionMonths.add(MONTHS_EN[i]));
@@ -217,9 +175,7 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         if (validSessionMonths.size > 0 && !validSessionMonths.has(monthKey)) return;
         const monthLabel = bn ? (MONTHS_BN[monthKey] || monthKey) : monthKey;
         const sortIdx = MONTHS_EN.indexOf(monthKey);
-        if (!groups[monthKey]) {
-          groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, serial: null, total: 0, paid: [], unpaid: [] };
-        }
+        if (!groups[monthKey]) groups[monthKey] = { label: monthLabel, sortOrder: sortIdx >= 0 ? sortIdx : 999, serial: null, total: 0, paid: [], unpaid: [] };
         const amount = p.paid_amount || p.amount || 0;
         if (p.status === 'paid' || p.status === 'pending') {
           groups[monthKey].paid.push(p);
@@ -227,23 +183,12 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         }
       });
 
-      // Find unpaid per month — use session start_date to end_date, up to current month
-      const now = new Date();
-      const currentMonthIdx = now.getMonth();
-
+      const currentMonthIdx = now0.getMonth();
       feeTypes.forEach((ft: any) => {
         if (ft.payment_frequency !== 'monthly') return;
-
-        let sessionStartMonth = 0;
-        let sessionEndMonth = 11;
-        if (ft.academic_sessions?.start_date) {
-          const sd = new Date(ft.academic_sessions.start_date);
-          sessionStartMonth = sd.getMonth();
-        }
-        if (ft.academic_sessions?.end_date) {
-          const ed = new Date(ft.academic_sessions.end_date);
-          sessionEndMonth = ed.getMonth();
-        }
+        let sessionStartMonth = 0, sessionEndMonth = 11;
+        if (ft.academic_sessions?.start_date) sessionStartMonth = new Date(ft.academic_sessions.start_date).getMonth();
+        if (ft.academic_sessions?.end_date) sessionEndMonth = new Date(ft.academic_sessions.end_date).getMonth();
 
         const applicableStudents = students.filter((s: any) => {
           if (s.is_free) return false;
@@ -253,51 +198,28 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           return true;
         });
 
-        const applicableMonths: string[] = ft.applicable_months && Array.isArray(ft.applicable_months)
-          ? (ft.applicable_months as string[])
-          : MONTHS_EN;
-
+        const applicableMonths: string[] = ft.applicable_months && Array.isArray(ft.applicable_months) ? (ft.applicable_months as string[]) : MONTHS_EN;
         const monthIndices: number[] = [];
-        if (sessionStartMonth <= sessionEndMonth) {
-          for (let mi = sessionStartMonth; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
-        } else {
-          for (let mi = sessionStartMonth; mi < 12; mi++) monthIndices.push(mi);
-          for (let mi = 0; mi <= sessionEndMonth; mi++) monthIndices.push(mi);
-        }
-
+        if (sessionStartMonth <= sessionEndMonth) { for (let mi = sessionStartMonth; mi <= sessionEndMonth; mi++) monthIndices.push(mi); }
+        else { for (let mi = sessionStartMonth; mi < 12; mi++) monthIndices.push(mi); for (let mi = 0; mi <= sessionEndMonth; mi++) monthIndices.push(mi); }
         const currentPos = monthIndices.indexOf(currentMonthIdx);
-        const runningMonths = currentPos >= 0
-          ? monthIndices.slice(0, currentPos + 1)
-          : monthIndices.filter(mi => mi <= currentMonthIdx && mi >= sessionStartMonth);
+        const runningMonths = currentPos >= 0 ? monthIndices.slice(0, currentPos + 1) : monthIndices.filter(mi => mi <= currentMonthIdx && mi >= sessionStartMonth);
 
         runningMonths.forEach((mi) => {
           const monthName = MONTHS_EN[mi];
           if (!applicableMonths.includes(monthName)) return;
-
           const monthLabel = bn ? (MONTHS_BN[monthName] || monthName) : monthName;
-          if (!groups[monthName]) {
-            groups[monthName] = { label: monthLabel, sortOrder: monthIndices.indexOf(mi), serial: null, total: 0, paid: [], unpaid: [] };
-          }
-
+          if (!groups[monthName]) groups[monthName] = { label: monthLabel, sortOrder: monthIndices.indexOf(mi), serial: null, total: 0, paid: [], unpaid: [] };
           const paidForMonth = new Set(
-            payments
-              .filter((p: any) => p.fee_type_id === ft.id && p.month === monthName && (p.status === 'paid' || p.status === 'pending'))
-              .map((p: any) => p.student_id)
+            payments.filter((p: any) => p.fee_type_id === ft.id && p.month === monthName && (p.status === 'paid' || p.status === 'pending')).map((p: any) => p.student_id)
           );
-
           applicableStudents.forEach((s: any) => {
             if (!paidForMonth.has(s.id)) {
               const alreadyAdded = groups[monthName].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
               if (!alreadyAdded) {
                 groups[monthName].unpaid.push({
-                  id: `unpaid-${s.id}-${ft.id}-${monthName}`,
-                  _studentId: s.id,
-                  _feeTypeId: ft.id,
-                  students: s,
-                  fee_types: ft,
-                  amount: ft.amount,
-                  month: monthName,
-                  status: 'unpaid',
+                  id: `unpaid-${s.id}-${ft.id}-${monthName}`, _studentId: s.id, _feeTypeId: ft.id,
+                  students: s, fee_types: ft, amount: ft.amount, month: monthName, status: 'unpaid',
                 });
               }
             }
@@ -305,26 +227,13 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         });
       });
     } else {
-      // ---- GROUP BY CLASS (admission, exam, other) ----
       payments.forEach((p: any) => {
         const classId = p.students?.class_id || 'unknown';
-        const className = getClassLabelFromPayment(p);
+        const className = p?.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
         const classInfo = classMap[classId];
-        if (!groups[classId]) {
-          groups[classId] = {
-            label: className,
-            sortOrder: classInfo?.sort_order ?? null,
-            serial: classInfo?.serial ?? extractClassSerial(className),
-            total: 0,
-            paid: [],
-            unpaid: [],
-          };
-        }
+        if (!groups[classId]) groups[classId] = { label: className, sortOrder: classInfo?.sort_order ?? null, serial: classInfo?.serial ?? extractClassSerial(className), total: 0, paid: [], unpaid: [] };
         const amount = p.paid_amount || p.amount || 0;
-        if (p.status === 'paid' || p.status === 'pending') {
-          groups[classId].paid.push(p);
-          groups[classId].total += Number(amount);
-        }
+        if (p.status === 'paid' || p.status === 'pending') { groups[classId].paid.push(p); groups[classId].total += Number(amount); }
       });
 
       feeTypes.forEach((ft: any) => {
@@ -337,39 +246,20 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
           return true;
         });
         const paidStudentIds = new Set(
-          payments
-            .filter((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending'))
-            .map((p: any) => p.student_id)
+          payments.filter((p: any) => p.fee_type_id === ft.id && (p.status === 'paid' || p.status === 'pending')).map((p: any) => p.student_id)
         );
-        const currentYear = new Date().getFullYear();
 
         applicableStudents.forEach((s: any) => {
           if (!paidStudentIds.has(s.id)) {
             const classId = s.class_id || 'unknown';
             const className = s.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
             const classInfo = classMap[classId];
-            if (!groups[classId]) {
-              groups[classId] = {
-                label: className,
-                sortOrder: classInfo?.sort_order ?? null,
-                serial: classInfo?.serial ?? extractClassSerial(className),
-                total: 0,
-                paid: [],
-                unpaid: [],
-              };
-            }
-
+            if (!groups[classId]) groups[classId] = { label: className, sortOrder: classInfo?.sort_order ?? null, serial: classInfo?.serial ?? extractClassSerial(className), total: 0, paid: [], unpaid: [] };
             const alreadyAdded = groups[classId].unpaid.some((u: any) => u._studentId === s.id && u._feeTypeId === ft.id);
             if (!alreadyAdded) {
               groups[classId].unpaid.push({
-                id: `unpaid-${s.id}-${ft.id}`,
-                _studentId: s.id,
-                _feeTypeId: ft.id,
-                students: s,
-                fee_types: ft,
-                amount: ft.amount,
-                year: currentYear,
-                status: 'unpaid',
+                id: `unpaid-${s.id}-${ft.id}`, _studentId: s.id, _feeTypeId: ft.id,
+                students: s, fee_types: ft, amount: ft.amount, year: new Date().getFullYear(), status: 'unpaid',
               });
             }
           }
@@ -378,16 +268,94 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     }
 
     const values = Object.values(groups);
-    if (category === 'monthly') {
-      return values.sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
-    }
+    if (category === 'monthly') return values.sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
     return values.sort((a, b) => compareAcademicOrder(a, b));
   }, [payments, feeTypes, students, category, bn, classMap, MONTHS_EN, MONTHS_BN]);
 
-  const totalAmount = enrichedGroups.reduce((s: number, g: any) => s + g.total, 0);
-  const totalUnpaid = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.reduce((ss: number, u: any) => ss + (u.amount || 0), 0), 0);
-  const totalPaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.paid.length, 0);
-  const totalUnpaidCount = enrichedGroups.reduce((s: number, g: any) => s + g.unpaid.length, 0);
+  const totalAmount = enrichedGroups.reduce((s, g) => s + g.total, 0);
+  const totalUnpaid = enrichedGroups.reduce((s, g) => s + g.unpaid.reduce((ss: number, u: any) => ss + (u.amount || 0), 0), 0);
+  const totalExpected = totalAmount + totalUnpaid;
+  const totalPaidCount = enrichedGroups.reduce((s, g) => s + g.paid.length, 0);
+  const totalUnpaidCount = enrichedGroups.reduce((s, g) => s + g.unpaid.length, 0);
+  const collectionPercent = totalExpected > 0 ? Math.round((totalAmount / totalExpected) * 100) : 0;
+
+  // For monthly category: build per-class monthly breakdown
+  const classMonthlyBreakdown = useMemo(() => {
+    if (category !== 'monthly') return null;
+    // For non-monthly (admission/exam), we show class-wise month table inside expansion
+    // For monthly, group by class → then show month-wise summary per class
+    const classGroups: Record<string, {
+      label: string; sortOrder: number | null; serial: number | null;
+      months: Record<string, { paidCount: number; paidAmount: number; unpaidCount: number; unpaidAmount: number }>;
+      totalPaid: number; totalUnpaid: number; totalPaidCount: number; totalUnpaidCount: number;
+    }> = {};
+
+    // Collect all months from enrichedGroups
+    const allMonths = enrichedGroups.map(g => {
+      // Find the English month key
+      const enKey = Object.entries(MONTHS_BN).find(([, v]) => v === g.label)?.[0] || g.label;
+      return { key: enKey, label: g.label, sortOrder: g.sortOrder };
+    });
+
+    // Process each group (month)
+    enrichedGroups.forEach((g) => {
+      const monthEnKey = Object.entries(MONTHS_BN).find(([, v]) => v === g.label)?.[0] || g.label;
+
+      // Process paid
+      g.paid.forEach((p: any) => {
+        const classId = p.students?.class_id || 'unknown';
+        const className = p.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
+        const ci = classMap[classId];
+        if (!classGroups[classId]) {
+          classGroups[classId] = {
+            label: className, sortOrder: ci?.sort_order ?? null, serial: ci?.serial ?? extractClassSerial(className),
+            months: {}, totalPaid: 0, totalUnpaid: 0, totalPaidCount: 0, totalUnpaidCount: 0,
+          };
+        }
+        if (!classGroups[classId].months[monthEnKey]) classGroups[classId].months[monthEnKey] = { paidCount: 0, paidAmount: 0, unpaidCount: 0, unpaidAmount: 0 };
+        classGroups[classId].months[monthEnKey].paidCount++;
+        classGroups[classId].months[monthEnKey].paidAmount += Number(p.paid_amount || p.amount || 0);
+        classGroups[classId].totalPaid += Number(p.paid_amount || p.amount || 0);
+        classGroups[classId].totalPaidCount++;
+      });
+
+      // Process unpaid
+      g.unpaid.forEach((u: any) => {
+        const classId = u.students?.class_id || 'unknown';
+        const className = u.students?.classes?.name_bn || (bn ? 'অনির্ধারিত' : 'Unassigned');
+        const ci = classMap[classId];
+        if (!classGroups[classId]) {
+          classGroups[classId] = {
+            label: className, sortOrder: ci?.sort_order ?? null, serial: ci?.serial ?? extractClassSerial(className),
+            months: {}, totalPaid: 0, totalUnpaid: 0, totalPaidCount: 0, totalUnpaidCount: 0,
+          };
+        }
+        if (!classGroups[classId].months[monthEnKey]) classGroups[classId].months[monthEnKey] = { paidCount: 0, paidAmount: 0, unpaidCount: 0, unpaidAmount: 0 };
+        classGroups[classId].months[monthEnKey].unpaidCount++;
+        classGroups[classId].months[monthEnKey].unpaidAmount += Number(u.amount || 0);
+        classGroups[classId].totalUnpaid += Number(u.amount || 0);
+        classGroups[classId].totalUnpaidCount++;
+      });
+    });
+
+    const sortedClasses = Object.entries(classGroups)
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => compareAcademicOrder(a, b));
+
+    return { allMonths, classes: sortedClasses };
+  }, [category, enrichedGroups, classMap, bn, MONTHS_BN]);
+
+  const openDetailedReport = (monthKey: string) => {
+    // Find the group matching this month
+    const group = enrichedGroups.find(g => {
+      const enKey = Object.entries(MONTHS_BN).find(([, v]) => v === g.label)?.[0] || g.label;
+      return enKey === monthKey;
+    });
+    if (group) {
+      setSelectedGroup(group);
+      setListType('unpaid');
+    }
+  };
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -402,15 +370,14 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       th{background:#f5f5f5}
       h2{margin:0}
     </style></head><body>
-      <h2>${language === 'bn' ? titleBn : titleEn} - ${selectedGroup.label}</h2>
-      <p>${listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত তালিকা' : 'Paid List') : (language === 'bn' ? 'অপরিশোধিত তালিকা' : 'Unpaid List')}</p>
+      <h2>${bn ? titleBn : titleEn} - ${selectedGroup.label}</h2>
+      <p>${listType === 'paid' ? (bn ? 'পরিশোধিত তালিকা' : 'Paid List') : (bn ? 'অপরিশোধিত তালিকা' : 'Unpaid List')}</p>
       <table><thead><tr>
-        <th>#</th><th>${language === 'bn' ? 'নাম' : 'Name'}</th><th>${language === 'bn' ? 'রোল' : 'Roll'}</th>
-        <th>${language === 'bn' ? 'শ্রেণী' : 'Class'}</th>
-        ${category === 'monthly' ? `<th>${language === 'bn' ? 'মাস' : 'Month'}</th>` : ''}
-        ${category === 'exam' ? `<th>${language === 'bn' ? 'পরীক্ষা' : 'Exam'}</th>` : ''}
-        <th>${language === 'bn' ? 'সেশন' : 'Year'}</th>
-        <th>${listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Paid') : (language === 'bn' ? 'বকেয়া' : 'Due')}</th>
+        <th>#</th><th>${bn ? 'নাম' : 'Name'}</th><th>${bn ? 'রোল' : 'Roll'}</th>
+        <th>${bn ? 'শ্রেণী' : 'Class'}</th>
+        ${category === 'monthly' ? `<th>${bn ? 'মাস' : 'Month'}</th>` : ''}
+        <th>${bn ? 'সেশন' : 'Year'}</th>
+        <th>${listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : (bn ? 'বকেয়া' : 'Due')}</th>
       </tr></thead><tbody>
       ${sorted.map((p: any, i: number) => `<tr>
         <td>${i + 1}</td>
@@ -418,9 +385,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
         <td>${p.students?.roll_number || '-'}</td>
         <td>${p.students?.classes?.name_bn || '-'}</td>
         ${category === 'monthly' ? `<td>${p.month || '-'}</td>` : ''}
-        ${category === 'exam' ? `<td>${p.fee_types?.name_bn || '-'}</td>` : ''}
         <td>${p.year || '-'}</td>
-        <td>${listType === 'paid' ? `৳ ${p.paid_amount || p.amount}` : `৳ ${p.amount || 0}`}</td>
+        <td>${listType === 'paid' ? `৳${p.paid_amount || p.amount}` : `৳${p.amount || 0}`}</td>
       </tr>`).join('')}
       </tbody></table></body></html>`);
     printWindow.document.close();
@@ -431,12 +397,8 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
     if (!selectedGroup) return;
     const list = listType === 'paid' ? selectedGroup.paid : selectedGroup.unpaid;
     const sorted = [...list].sort(compareFeeItems);
-
-    const headers = [language === 'bn' ? 'নাম' : 'Name', language === 'bn' ? 'রোল' : 'Roll', language === 'bn' ? 'শ্রেণী' : 'Class', language === 'bn' ? 'সেশন' : 'Year', listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')];
-    const rows = sorted.map((p: any) => [
-      p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p.year || '-',
-      listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)
-    ]);
+    const headers = [bn ? 'নাম' : 'Name', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class', bn ? 'সেশন' : 'Year', listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')];
+    const rows = sorted.map((p: any) => [p.students?.name_bn || '-', p.students?.roll_number || '-', p.students?.classes?.name_bn || '-', p.year || '-', listType === 'paid' ? (p.paid_amount || p.amount) : (p.amount || 0)]);
     const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -448,16 +410,15 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      {/* Header */}
       <button onClick={() => setExpanded(!expanded)} className="w-full p-4 flex items-center justify-between hover:bg-accent/30 transition-colors">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
             {icon || <CreditCard className="w-5 h-5 text-primary" />}
           </div>
           <div className="text-left">
-            <h3 className="font-display font-bold text-foreground text-base">{language === 'bn' ? titleBn : titleEn}</h3>
-            {sessionLabel && (
-              <span className="text-xs text-muted-foreground">{sessionLabel}</span>
-            )}
+            <h3 className="font-display font-bold text-foreground text-base">{bn ? titleBn : titleEn}</h3>
+            {sessionLabel && <span className="text-xs text-muted-foreground">{sessionLabel}</span>}
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -473,9 +434,98 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 grid gap-2">
-          {enrichedGroups.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">{language === 'bn' ? 'কোনো রেকর্ড নেই' : 'No records'}</p>}
-          {enrichedGroups.map((g: any, i: number) => {
+        <div className="px-4 pb-4 space-y-3">
+          {enrichedGroups.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</p>
+          )}
+
+          {/* ========== MONTHLY: Show class-wise with month breakdown table ========== */}
+          {category === 'monthly' && classMonthlyBreakdown && classMonthlyBreakdown.classes.length > 0 && (
+            <div className="space-y-2">
+              {classMonthlyBreakdown.classes.map((cls) => {
+                const clsExpected = cls.totalPaid + cls.totalUnpaid;
+                const clsPercent = clsExpected > 0 ? Math.round((cls.totalPaid / clsExpected) * 100) : 0;
+                return (
+                  <div key={cls.id} className="rounded-lg border border-border/60 bg-secondary/20 overflow-hidden">
+                    <div className="p-3 flex items-center justify-between">
+                      <span className="text-sm font-bold text-foreground">{cls.label}</span>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">৳{cls.totalPaid.toLocaleString()}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
+                          <span className="font-semibold text-rose-600 dark:text-rose-400">৳{cls.totalUnpaid.toLocaleString()}</span>
+                        </span>
+                      </div>
+                    </div>
+                    {/* Month-wise summary table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs border-t border-border/40">
+                        <thead>
+                          <tr className="bg-muted/40">
+                            <th className="px-3 py-1.5 text-left font-semibold text-muted-foreground">{bn ? 'মাস' : 'Month'}</th>
+                            <th className="px-3 py-1.5 text-right font-semibold text-emerald-700 dark:text-emerald-400">{bn ? 'পরিশোধিত' : 'Paid'}</th>
+                            <th className="px-3 py-1.5 text-right font-semibold text-rose-600 dark:text-rose-400">{bn ? 'বকেয়া' : 'Due'}</th>
+                            <th className="px-3 py-1.5 text-center font-semibold text-muted-foreground"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/30">
+                          {classMonthlyBreakdown.allMonths.map((m) => {
+                            const md = cls.months[m.key];
+                            if (!md) return null;
+                            return (
+                              <tr key={m.key} className="hover:bg-accent/20 transition-colors">
+                                <td className="px-3 py-1.5 font-medium text-foreground">{m.label}</td>
+                                <td className="px-3 py-1.5 text-right">
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">{md.paidCount} {bn ? 'জন' : ''}</span>
+                                    <span className="text-emerald-700 dark:text-emerald-400 font-bold">· ৳{md.paidAmount.toLocaleString()}</span>
+                                  </span>
+                                </td>
+                                <td className="px-3 py-1.5 text-right">
+                                  <span className="inline-flex items-center gap-1">
+                                    <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500"></span></span>
+                                    <span className="text-rose-600 dark:text-rose-400 font-medium">{md.unpaidCount} {bn ? 'জন' : ''}</span>
+                                    <span className="text-rose-600 dark:text-rose-400 font-bold">· ৳{md.unpaidAmount.toLocaleString()}</span>
+                                  </span>
+                                </td>
+                                <td className="px-3 py-1.5 text-center">
+                                  {md.unpaidCount > 0 && (
+                                    <button
+                                      onClick={() => openDetailedReport(m.key)}
+                                      className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-medium"
+                                    >
+                                      {bn ? 'বিস্তারিত' : 'Details'}
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* Class summary pills */}
+                    <div className="px-3 py-2 bg-muted/30 border-t border-border/40 flex flex-wrap items-center gap-3 text-[11px]">
+                      <span className="text-muted-foreground">{bn ? 'মোট সম্ভাব্য:' : 'Expected:'} <span className="font-bold text-foreground">৳{clsExpected.toLocaleString()}</span></span>
+                      <span className="text-muted-foreground">{bn ? 'সংগৃহীত:' : 'Collected:'} <span className="font-bold text-emerald-700 dark:text-emerald-400">৳{cls.totalPaid.toLocaleString()}</span></span>
+                      <span className="text-muted-foreground">{bn ? 'বকেয়া:' : 'Due:'} <span className="font-bold text-rose-600 dark:text-rose-400">৳{cls.totalUnpaid.toLocaleString()}</span></span>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <Progress value={clsPercent} className="w-16 h-1.5" />
+                        <span className="font-bold text-foreground">{clsPercent}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ========== NON-MONTHLY (admission/exam): Show class-wise rows ========== */}
+          {category !== 'monthly' && enrichedGroups.map((g, i) => {
             const unpaidAmt = g.unpaid.reduce((s: number, u: any) => s + (u.amount || 0), 0);
             return (
               <div key={i}
@@ -485,36 +535,65 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{g.paid.length} {bn ? 'জন' : ''} · ৳{g.total.toLocaleString()}</span>
+                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{g.paid.length} {bn ? 'জন' : ''} · <span className="font-bold">৳{g.total.toLocaleString()}</span></span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-destructive" />
-                    <span className="text-xs font-medium text-destructive">{g.unpaid.length} {bn ? 'জন' : ''} · ৳{unpaidAmt.toLocaleString()}</span>
+                    <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span></span>
+                    <span className="text-xs font-medium text-rose-600 dark:text-rose-400">{g.unpaid.length} {bn ? 'জন' : ''} · <span className="font-bold">৳{unpaidAmt.toLocaleString()}</span></span>
                   </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedGroup(g); setListType('unpaid'); }}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors font-medium"
+                  >
+                    <FileText className="w-3 h-3 inline mr-0.5" />{bn ? 'রিপোর্ট' : 'Report'}
+                  </button>
                 </div>
               </div>
             );
           })}
+
+          {/* ========== FINANCIAL SUMMARY PILLS ========== */}
+          <div className="rounded-lg border border-border/60 bg-gradient-to-r from-muted/50 to-muted/30 p-3 space-y-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground font-medium">{bn ? 'মোট সম্ভাব্য আদায়:' : 'Expected Total:'}</span>
+                <span className="font-bold text-foreground text-sm">৳{totalExpected.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground font-medium">{bn ? 'মোট সংগৃহীত:' : 'Total Collected:'}</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm">৳{totalAmount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground font-medium">{bn ? 'মোট বকেয়া:' : 'Total Outstanding:'}</span>
+                <span className="font-bold text-rose-600 dark:text-rose-400 text-sm">৳{totalUnpaid.toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Progress value={collectionPercent} className="flex-1 h-2" />
+              <span className="text-xs font-bold text-foreground min-w-[36px] text-right">{collectionPercent}%</span>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Detail Dialog */}
       <Dialog open={!!selectedGroup} onOpenChange={() => setSelectedGroup(null)}>
         <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{language === 'bn' ? titleBn : titleEn} - {selectedGroup?.label}</DialogTitle>
+            <DialogTitle>{bn ? titleBn : titleEn} - {selectedGroup?.label}</DialogTitle>
           </DialogHeader>
           <div className="flex items-center gap-2 mb-4">
             <button onClick={() => setListType('paid')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'paid' ? 'bg-success text-success-foreground' : 'bg-success/10 text-success'}`}>
-              {language === 'bn' ? 'পরিশোধিত' : 'Paid'} ({selectedGroup?.paid?.length || 0})
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'paid' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'}`}>
+              {bn ? 'পরিশোধিত' : 'Paid'} ({selectedGroup?.paid?.length || 0})
             </button>
             <button onClick={() => setListType('unpaid')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'unpaid' ? 'bg-destructive text-destructive-foreground' : 'bg-destructive/10 text-destructive'}`}>
-              {language === 'bn' ? 'অপরিশোধিত' : 'Unpaid'} ({selectedGroup?.unpaid?.length || 0})
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${listType === 'unpaid' ? 'bg-rose-600 text-white' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+              {bn ? 'অপরিশোধিত' : 'Unpaid'} ({selectedGroup?.unpaid?.length || 0})
             </button>
             <div className="ml-auto flex gap-2">
-              <Button size="sm" variant="outline" onClick={handlePrint}><Printer className="w-4 h-4 mr-1" />{language === 'bn' ? 'প্রিন্ট' : 'Print'}</Button>
-              <Button size="sm" variant="outline" onClick={handleDownloadCSV}><Download className="w-4 h-4 mr-1" />{language === 'bn' ? 'ডাউনলোড' : 'Download'}</Button>
+              <Button size="sm" variant="outline" onClick={handlePrint}><Printer className="w-4 h-4 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}</Button>
+              <Button size="sm" variant="outline" onClick={handleDownloadCSV}><Download className="w-4 h-4 mr-1" />{bn ? 'ডাউনলোড' : 'Download'}</Button>
             </div>
           </div>
 
@@ -523,13 +602,13 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
               <thead className="bg-secondary/50">
                 <tr>
                   <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">#</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'নাম' : 'Name'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'রোল' : 'Roll'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'শ্রেণী' : 'Class'}</th>
-                  {category === 'monthly' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'মাস' : 'Month'}</th>}
-                  {category === 'exam' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{language === 'bn' ? 'সেশন' : 'Year'}</th>
-                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{listType === 'paid' ? (language === 'bn' ? 'পরিশোধিত' : 'Amount') : (language === 'bn' ? 'বকেয়া' : 'Due')}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'নাম' : 'Name'}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'রোল' : 'Roll'}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'শ্রেণী' : 'Class'}</th>
+                  {category === 'monthly' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'মাস' : 'Month'}</th>}
+                  {category === 'exam' && <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'পরীক্ষা সেশন' : 'Exam Session'}</th>}
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{bn ? 'সেশন' : 'Year'}</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{listType === 'paid' ? (bn ? 'পরিশোধিত' : 'Amount') : (bn ? 'বকেয়া' : 'Due')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -547,15 +626,15 @@ const DashboardFeeSection = ({ category, titleBn, titleEn, icon }: FeeSectionPro
                     <td className="px-3 py-2 text-muted-foreground">{p.year || '-'}</td>
                     <td className="px-3 py-2">
                       {listType === 'paid' ? (
-                        <span className="font-bold text-success">৳ {p.paid_amount || p.amount}</span>
+                        <span className="font-bold text-emerald-700 dark:text-emerald-400">৳ {p.paid_amount || p.amount}</span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">৳ {p.amount || 0}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400">৳ {p.amount || 0}</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {((listType === 'paid' ? selectedGroup?.paid : selectedGroup?.unpaid) || []).length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-6 text-muted-foreground">{language === 'bn' ? 'কোনো রেকর্ড নেই' : 'No records'}</td></tr>
+                  <tr><td colSpan={8} className="text-center py-6 text-muted-foreground">{bn ? 'কোনো রেকর্ড নেই' : 'No records'}</td></tr>
                 )}
               </tbody>
             </table>
