@@ -143,6 +143,11 @@ const AdminStudents = () => {
       const status = s.approval_status || 'pending';
       if (status !== filterApproval) return false;
     }
+    // Active/Inactive status filter
+    if (filterStatus !== 'all') {
+      const st = s.status || 'active';
+      if (st !== filterStatus) return false;
+    }
     // Text search
     if (search) {
       const q = search.toLowerCase();
