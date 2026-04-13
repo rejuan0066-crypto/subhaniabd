@@ -36,6 +36,13 @@ Deno.serve(async (req) => {
     }
 
     const bn = language === "bn";
+    
+    // Convert English digits to Bengali digits
+    const toBnDigits = (val: string | number): string => {
+      const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+      return String(val).replace(/[0-9]/g, (d: string) => bnDigits[parseInt(d)]);
+    };
+    const fmtNum = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n.toLocaleString();
 
     // Fetch institution info
     const { data: institution } = await supabase
@@ -50,15 +57,15 @@ Deno.serve(async (req) => {
     // Generate HTML for PDF
     const staffRows = staff.map((s: any, i: number) => `
       <tr>
-        <td style="text-align:center">${i + 1}</td>
+        <td style="text-align:center">${bn ? toBnDigits(i + 1) : i + 1}</td>
         <td>${s.name}</td>
         <td>${s.designation}</td>
-        <td style="text-align:right">৳${Number(s.base_salary).toLocaleString()}</td>
-        <td style="text-align:center">${s.present}/${s.absent}/${s.late}</td>
-        <td style="text-align:right;color:#dc2626">৳${Number(s.deductions).toLocaleString()}</td>
-        <td style="text-align:right;color:#2563eb">৳${Number(s.overtime || 0).toLocaleString()}</td>
-        <td style="text-align:right;color:#dc2626">৳${Number(s.advance || 0).toLocaleString()}</td>
-        <td style="text-align:right;font-weight:bold;color:#059669">৳${Number(s.net_salary).toLocaleString()}</td>
+        <td style="text-align:right">৳${fmtNum(Number(s.base_salary))}</td>
+        <td style="text-align:center">${bn ? toBnDigits(`${s.present}/${s.absent}/${s.late}`) : `${s.present}/${s.absent}/${s.late}`}</td>
+        <td style="text-align:right;color:#dc2626">৳${fmtNum(Number(s.deductions))}</td>
+        <td style="text-align:right;color:#2563eb">৳${fmtNum(Number(s.overtime || 0))}</td>
+        <td style="text-align:right;color:#dc2626">৳${fmtNum(Number(s.advance || 0))}</td>
+        <td style="text-align:right;font-weight:bold;color:#059669">৳${fmtNum(Number(s.net_salary))}</td>
         <td style="text-align:center">${s.status === 'paid' ? (bn ? '✓ পরিশোধিত' : '✓ Paid') : (bn ? '⏳ বকেয়া' : '⏳ Pending')}</td>
       </tr>
     `).join("");
