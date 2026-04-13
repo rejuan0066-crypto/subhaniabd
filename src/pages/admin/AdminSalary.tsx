@@ -849,13 +849,19 @@ const AdminSalary = () => {
 
       if (!res.ok) throw new Error('PDF generation failed');
 
-      const html = await res.text();
+      let html = await res.text();
+      // Inject the app's font URL so Bengali renders correctly
+      const fontUrl = `${window.location.origin}/fonts/SutonnyOMJ.ttf`;
+      const fontFace = `@font-face{font-family:"SutonnyOMJ";src:url("${fontUrl}") format("truetype");font-display:swap;}`;
+      html = html.replace('</style>', `${fontFace}</style>`);
+      html = html.replace(/font-family:\s*'Noto Sans Bengali'/g, `font-family:'SutonnyOMJ','Noto Sans Bengali'`);
+      
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         printWindow.document.write(html);
         printWindow.document.close();
         // Wait for fonts to load then trigger print
-        setTimeout(() => printWindow.print(), 1000);
+        setTimeout(() => printWindow.print(), 1500);
       }
       toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
     } catch (err) {
