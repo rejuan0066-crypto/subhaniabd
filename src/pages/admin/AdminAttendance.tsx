@@ -942,20 +942,25 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
-            { label: bn ? 'মোট' : 'Total', value: stats.total, color: 'bg-primary/10 text-primary' },
-            { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-            { label: bn ? 'অনুপস্থিত' : 'Absent', value: stats.absent, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-            { label: bn ? 'বিলম্ব উপস্থিত' : 'Late Present', value: stats.late, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
-            { label: bn ? 'বাকি' : 'Unmarked', value: stats.unmarked, color: 'bg-muted text-muted-foreground' },
+            { label: bn ? 'মোট' : 'Total', value: stats.total, icon: Users, gradient: 'from-primary/15 to-primary/5', iconBg: 'bg-primary/15', iconColor: 'text-primary' },
+            { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, icon: CheckCircle2, gradient: 'from-emerald-500/15 to-emerald-500/5', iconBg: 'bg-emerald-500/15', iconColor: 'text-emerald-600' },
+            { label: bn ? 'অনুপস্থিত' : 'Absent', value: stats.absent, icon: XCircle, gradient: 'from-rose-500/15 to-rose-500/5', iconBg: 'bg-rose-500/15', iconColor: 'text-rose-600' },
+            { label: bn ? 'বিলম্ব উপস্থিত' : 'Late Present', value: stats.late, icon: Clock, gradient: 'from-amber-500/15 to-amber-500/5', iconBg: 'bg-amber-500/15', iconColor: 'text-amber-600' },
+            { label: bn ? 'বাকি' : 'Unmarked', value: stats.unmarked, icon: AlertCircle, gradient: 'from-muted to-muted/50', iconBg: 'bg-muted', iconColor: 'text-muted-foreground' },
           ].map((s, i) => (
-            <Card key={i}>
-              <CardContent className="p-3 text-center">
-                <p className="text-2xl font-bold">{s.value}</p>
-                <Badge className={`${s.color} text-[10px] mt-1`}>{s.label}</Badge>
-              </CardContent>
-            </Card>
+            <div key={i} className={`relative overflow-hidden rounded-[24px] bg-gradient-to-br ${s.gradient} backdrop-blur-md border border-border/10 p-5 shadow-[0_8px_32px_-8px_hsl(220_20%_10%/0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_-8px_hsl(220_20%_10%/0.12)]`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{s.value}</p>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">{s.label}</p>
+                </div>
+                <div className={`w-11 h-11 rounded-2xl ${s.iconBg} flex items-center justify-center`}>
+                  <s.icon className={`h-5 w-5 ${s.iconColor}`} />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
