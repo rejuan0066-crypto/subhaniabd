@@ -1023,6 +1023,16 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </Button>
               </>
             )}
+            {entityType === 'staff' && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setStaffCheckinOpen(true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                  <UserCheck className="h-4 w-4 mr-1" /> {bn ? 'চেক-ইন সিস্টেম' : 'Check-in System'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setDeviceManagerOpen(true)}>
+                  <Fingerprint className="h-4 w-4 mr-1" /> {bn ? 'হার্ডওয়্যার ডিভাইস' : 'Hardware Devices'}
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={async () => {
               toast.loading(bn ? 'দৈনিক সারসংক্ষেপ তৈরি হচ্ছে...' : 'Generating daily summary...');
               try {
