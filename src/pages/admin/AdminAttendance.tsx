@@ -72,6 +72,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   }, [forcedTab, tabParam]);
   const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential' | 'meal'>('all');
   const [staffSubTab, setStaffSubTab] = useState<'fulltime' | 'duty' | 'meal'>('fulltime');
+  const [selectedStaffCategory, setSelectedStaffCategory] = useState<string>('all');
   const [studentMealShift, setStudentMealShift] = useState('meal_breakfast');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -167,16 +168,21 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   // Filter students based on sub-tab and filters
   const entities = useMemo(() => {
     if (entityType === 'staff') {
+      let staffFiltered = allStaff;
+      // Filter by staff category
+      if (selectedStaffCategory && selectedStaffCategory !== 'all') {
+        staffFiltered = staffFiltered.filter((s: any) => s.staff_category === selectedStaffCategory);
+      }
       // Meal tab: only residential staff
       if (staffSubTab === 'meal') {
-        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+        return staffFiltered.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
       }
-      // Duty tab: only residential staff (সকাল/সন্ধ্যা ডিউটি আবাসিকদের জন্য)
+      // Duty tab: only residential staff
       if (staffSubTab === 'duty') {
-        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+        return staffFiltered.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
       }
-      // Full-time: all staff
-      return allStaff;
+      // Full-time: all filtered staff
+      return staffFiltered;
     }
     let filtered = allStudents;
 
@@ -205,7 +211,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     });
 
     return filtered;
-  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, orderedClasses, staffSubTab]);
+  }, [entityType, allStudents, allStaff, studentSubTab, selectedSessionYear, selectedClassId, orderedClasses, staffSubTab, selectedStaffCategory]);
 
   // Fetch attendance for selected date (for staff, fetch by shift too)
   const { data: attendance = [] } = useQuery({
@@ -1006,6 +1012,20 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     </TabsList>
                   </Tabs>
                 )}
+
+                {/* Staff Category Filter */}
+                <Select value={selectedStaffCategory} onValueChange={setSelectedStaffCategory}>
+                  <SelectTrigger className="w-44 h-8 text-xs">
+                    <SelectValue placeholder={bn ? 'ক্যাটাগরি' : 'Category'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{bn ? 'সকল ক্যাটাগরি' : 'All Categories'}</SelectItem>
+                    <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                    <SelectItem value="administrative">{bn ? 'প্রশাসনিক' : 'Administrative'}</SelectItem>
+                    <SelectItem value="support">{bn ? 'সাপোর্ট স্টাফ' : 'Support Staff'}</SelectItem>
+                    <SelectItem value="general">{bn ? 'সহায়ক কর্মী' : 'General Staff'}</SelectItem>
+                  </SelectContent>
+                </Select>
 
                 {/* Search */}
                 <div className="relative flex-1 min-w-[150px]">
