@@ -669,6 +669,10 @@ const AdminSalary = () => {
     ];
     sheetData.push(headers);
     
+    // Helper to format number for Excel - Bengali digits when bn
+    const fmtNum = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n;
+    const fmtIdx = (n: number) => bn ? toBnDigits(n) : n;
+    
     // Data rows
     filtered.forEach((s: any, idx: number) => {
       const rec = getRecord(s.id);
@@ -676,15 +680,15 @@ const AdminSalary = () => {
       const status = rec?.status === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : 
                      rec ? (bn ? 'বকেয়া' : 'Pending') : (bn ? 'জেনারেট হয়নি' : 'Not Generated');
       sheetData.push([
-        idx + 1,
+        fmtIdx(idx + 1),
         s.name_bn,
         getDesignation(s.designation),
-        Number(rec?.base_salary || s.salary || 0),
-        Number(rec?.bonus || 0),
-        Number(rec?.overtime || 0),
-        totalDed,
-        Number(rec?.advance_deduction || 0),
-        Number(rec?.net_salary || 0),
+        fmtNum(Number(rec?.base_salary || s.salary || 0)),
+        fmtNum(Number(rec?.bonus || 0)),
+        fmtNum(Number(rec?.overtime || 0)),
+        fmtNum(totalDed),
+        fmtNum(Number(rec?.advance_deduction || 0)),
+        fmtNum(Number(rec?.net_salary || 0)),
         status,
       ]);
     });
@@ -695,8 +699,8 @@ const AdminSalary = () => {
     // Summary row
     const summaryRowIdx = sheetData.length;
     sheetData.push([
-      '', bn ? 'মোট' : 'Total', `${filtered.length} ${bn ? 'জন' : 'staff'}`,
-      stats.totalBase, '', '', stats.totalDeduction, '', stats.totalNet, ''
+      '', bn ? 'মোট' : 'Total', bn ? toBnDigits(`${filtered.length} জন`) : `${filtered.length} staff`,
+      fmtNum(stats.totalBase), '', '', fmtNum(stats.totalDeduction), '', fmtNum(stats.totalNet), ''
     ]);
     
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
