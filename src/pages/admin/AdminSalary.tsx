@@ -1358,49 +1358,41 @@ const AdminSalary = () => {
                         <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Name'}</th>
                         <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'পদবি' : 'Designation'}</th>
                         <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মূল বেতন' : 'Base Salary'}</th>
-                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'মাস কর্মরত' : 'Months'}</th>
-                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'বছরে মোট প্রাপ্ত' : 'Year Total'}</th>
-                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'গড় বেতন' : 'Avg Salary'}</th>
-                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'বোনাস হার' : 'Rate'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'প্রতি মাস (বেতন÷১২)' : 'Per Month'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'কর্মরত মাস' : 'Months'}</th>
                         <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'বোনাস পরিমাণ' : 'Bonus Amount'}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(() => {
                         let grandTotalBonus = 0;
-                        let grandTotalPaid = 0;
                         return (
                           <>
                             {staff.map((s: any, idx: number) => {
                               const staffRecords = bonusYearRecords.filter((r: any) => r.staff_id === s.id);
-                              const totalPaid = staffRecords.reduce((sum: number, r: any) => sum + Number(r.net_salary || 0), 0);
                               const monthsPaid = staffRecords.length;
-                              const avgSalary = monthsPaid > 0 ? Math.round(totalPaid / monthsPaid) : Number(s.salary || 0);
-                              const bonusAmount = Math.round(avgSalary * bonusPercent / 100);
+                              const baseSalary = Number(s.salary || 0);
+                              const perMonthBonus = Math.round(baseSalary / 12);
+                              const bonusAmount = perMonthBonus * monthsPaid;
                               grandTotalBonus += bonusAmount;
-                              grandTotalPaid += totalPaid;
                               const fN = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n.toLocaleString();
                               return (
                                 <tr key={s.id} className="border-b hover:bg-muted/30 transition-colors">
                                   <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
                                   <td className="px-3 py-2 font-medium">{s.name_bn || s.name_en || '-'}</td>
                                   <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
-                                  <td className="px-3 py-2 text-right">৳{fN(Number(s.salary || 0))}</td>
+                                  <td className="px-3 py-2 text-right">৳{fN(baseSalary)}</td>
+                                  <td className="px-3 py-2 text-right text-blue-600">৳{fN(perMonthBonus)}</td>
                                   <td className="px-3 py-2 text-center">
                                     <Badge variant="outline" className="text-[10px]">{bn ? toBnDigits(monthsPaid) : monthsPaid}/{bn ? '১২' : '12'}</Badge>
-                                  </td>
-                                  <td className="px-3 py-2 text-right">৳{fN(totalPaid)}</td>
-                                  <td className="px-3 py-2 text-right">৳{fN(avgSalary)}</td>
-                                  <td className="px-3 py-2 text-center">
-                                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px]">{bn ? toBnDigits(bonusPercent) : bonusPercent}%</Badge>
                                   </td>
                                   <td className="px-3 py-2 text-right font-bold text-amber-700 dark:text-amber-400">৳{fN(bonusAmount)}</td>
                                 </tr>
                               );
                             })}
                             <tr className="bg-muted/50 font-bold border-t-2">
-                              <td colSpan={5} className="px-3 py-2">{bn ? 'মোট' : 'Total'} ({bn ? toBnDigits(staff.length) : staff.length} {bn ? 'জন' : 'staff'})</td>
-                              <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(grandTotalPaid.toLocaleString()) : grandTotalPaid.toLocaleString()}</td>
+                              <td colSpan={3} className="px-3 py-2">{bn ? 'মোট' : 'Total'} ({bn ? toBnDigits(staff.length) : staff.length} {bn ? 'জন' : 'staff'})</td>
+                              <td className="px-3 py-2"></td>
                               <td className="px-3 py-2"></td>
                               <td className="px-3 py-2"></td>
                               <td className="px-3 py-2 text-right text-amber-700 dark:text-amber-400">৳{bn ? toBnDigits(grandTotalBonus.toLocaleString()) : grandTotalBonus.toLocaleString()}</td>
