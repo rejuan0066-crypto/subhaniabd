@@ -1312,25 +1312,21 @@ const AdminSalary = () => {
                     <Label className="text-xs shrink-0">{bn ? 'বছর' : 'Year'}</Label>
                     <Input type="number" className="w-24 h-8 text-sm" value={bonusYear}
                       onChange={e => setBonusYear(e.target.value)} min="2020" max="2040" />
-                    <Label className="text-xs shrink-0">{bn ? 'বোনাস %' : 'Bonus %'}</Label>
-                    <Input type="number" className="w-20 h-8 text-sm" value={bonusPercent}
-                      onChange={e => setBonusPercent(Number(e.target.value))} min="0" max="500" />
                     <Button size="sm" variant="outline" onClick={() => {
                       const bData = staff.map((s: any, i: number) => {
                         const staffRecords = bonusYearRecords.filter((r: any) => r.staff_id === s.id);
-                        const totalPaid = staffRecords.reduce((sum: number, r: any) => sum + Number(r.net_salary || 0), 0);
                         const monthsPaid = staffRecords.length;
-                        const avgSalary = monthsPaid > 0 ? Math.round(totalPaid / monthsPaid) : Number(s.salary || 0);
-                        const bonusAmount = Math.round(avgSalary * bonusPercent / 100);
+                        const baseSalary = Number(s.salary || 0);
+                        const perMonthBonus = Math.round(baseSalary / 12);
+                        const bonusAmount = perMonthBonus * monthsPaid;
                         return [
                           i + 1, s.name_bn || s.name_en || '-', getDesignation(s.designation),
-                          Number(s.salary || 0), monthsPaid, totalPaid, avgSalary, `${bonusPercent}%`, bonusAmount
+                          baseSalary, perMonthBonus, monthsPaid, bonusAmount
                         ];
                       });
                       const headers = ['#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
-                        bn ? 'মূল বেতন' : 'Base Salary', bn ? 'মাস কর্মরত' : 'Months Worked',
-                        bn ? 'বছরে মোট প্রাপ্ত' : 'Total Received', bn ? 'গড় বেতন' : 'Avg Salary',
-                        bn ? 'বোনাস হার' : 'Bonus Rate', bn ? 'বোনাস পরিমাণ' : 'Bonus Amount'];
+                        bn ? 'মূল বেতন' : 'Base Salary', bn ? 'প্রতি মাস (বেতন÷১২)' : 'Per Month (Base÷12)',
+                        bn ? 'কর্মরত মাস' : 'Months Worked', bn ? 'বোনাস পরিমাণ' : 'Bonus Amount'];
                       const ws = XLSX.utils.aoa_to_sheet([
                         [bn ? `বাৎসরিক বোনাস শিট — ${toBnDigits(bonusYear)}` : `Annual Bonus Sheet — ${bonusYear}`],
                         [], headers, ...bData
