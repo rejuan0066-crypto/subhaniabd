@@ -136,6 +136,16 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     general: { bn: 'সহায়ক কর্মী', en: 'General Staff' },
   };
   const getCategoryLabel = (key: string) => categoryLabelMap[key] ? (bn ? categoryLabelMap[key].bn : categoryLabelMap[key].en) : key;
+  const getCategoryResetTone = (key: string) => {
+    const tones: Record<string, string> = {
+      teacher: 'bg-blue-500/10 text-blue-600',
+      administrative: 'bg-amber-500/10 text-amber-600',
+      support: 'bg-teal-500/10 text-teal-600',
+      general: 'bg-purple-500/10 text-purple-600',
+    };
+
+    return tones[key] || 'bg-primary/10 text-primary';
+  };
 
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
@@ -426,23 +436,26 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     },
     onSuccess: (_data, type) => {
       queryClient.invalidateQueries({ queryKey: ['attendance', selectedDate, entityType, effectiveShift] });
-      const catLabels: Record<string, string> = {
-        teacher: bn ? 'শিক্ষক' : 'Teacher',
-        administrative: bn ? 'প্রশাসনিক' : 'Administrative',
-        support: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff',
-        general: bn ? 'সহায়ক কর্মী' : 'General Staff',
-      };
       const labels: Record<string, string> = {
         all: bn ? 'সকল উপস্থিতি' : 'All attendance',
         student: bn ? 'ছাত্র হাজিরা' : 'Student attendance',
         staff: bn ? 'স্টাফ হাজিরা' : 'Staff attendance',
         division: bn ? 'বিভাগ হাজিরা' : 'Division attendance',
         single_staff: bn ? `${resetStaffName} এর হাজিরা` : `${resetStaffName}'s attendance`,
-        staff_category: bn ? `${catLabels[resetStaffCategory] || resetStaffCategory} হাজিরা` : `${catLabels[resetStaffCategory] || resetStaffCategory} attendance`,
+        staff_category: bn ? `${getCategoryLabel(resetStaffCategory) || resetStaffCategory} হাজিরা` : `${getCategoryLabel(resetStaffCategory) || resetStaffCategory} attendance`,
       };
+      setShowResetDialog(false);
       toast.success(bn ? `সাফল্যের সাথে ${labels[type]} রিসেট করা হয়েছে।` : `${labels[type]} reset successfully.`);
     },
-    onError: () => toast.error(bn ? 'রিসেট করতে সমস্যা' : 'Failed to reset'),
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : '';
+      if (message === 'No records to reset') {
+        toast.error(bn ? 'রিসেট করার মতো কোনো রেকর্ড নেই' : 'No records found to reset');
+        return;
+      }
+
+      toast.error(bn ? 'রিসেট করতে সমস্যা' : 'Failed to reset');
+    },
   });
 
   // Rule CRUD
@@ -488,6 +501,64 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     const name = e.name_bn + (e.name_en || '') + (e.student_id || '');
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+  const resettableStaffCategories = useMemo(() => {
+    const attendanceIds = new Set(attendance.map((a: any) => a.entity_id));
+
+    return dynamicStaffCategories
+      .map((key) => {
+        const matchedStaff = allStaff.filter((staff: any) => staff.staff_category === key && attendanceIds.has(staff.id));
+        if (matchedStaff.length === 0) return null;
+
+        return {
+          key,
+          label: getCategoryLabel(key),
+          count: matchedStaff.length,
+          color: getCategoryResetTone(key),
+          icon: key === 'teacher' ? Users : UserCog,
+        };
+      })
+      .filter(Boolean) as Array<{ key: string; label: string; count: number; color: string; icon: typeof Users }>;
+  }, [attendance, dynamicStaffCategories, allStaff, bn]);
+
+  const resetTargetLabel = useMemo(() => {
+    if (resetType === 'single_staff') return resetStaffName || (bn ? 'নির্বাচিত স্টাফ' : 'selected staff');
+    if (resetType === 'staff_category') return getCategoryLabel(resetStaffCategory || 'general');
+    if (resetType === 'division') {
+      const division = divisions.find((item: any) => item.id === resetDivisionId);
+      return division ? (bn ? division.name_bn : division.name) : (bn ? 'নির্বাচিত বিভাগ' : 'selected division');
+    }
+
+    const labels: Record<string, string> = {
+      all: bn ? 'সব উপস্থিতি' : 'all attendance',
+      student: bn ? 'ছাত্র হাজিরা' : 'student attendance',
+      staff: bn ? 'স্টাফ হাজিরা' : 'staff attendance',
+    };
+
+    return labels[resetType] || (bn ? 'নির্বাচিত রেকর্ড' : 'selected records');
+  }, [resetType, resetStaffName, resetStaffCategory, resetDivisionId, divisions, bn]);
+
+  const resetRecordCount = useMemo(() => {
+    if (resetType === 'all') return attendance.length;
+    if (resetType === 'student') {
+      const studentIds = new Set(allStudents.map((student: any) => student.id));
+      return attendance.filter((item: any) => studentIds.has(item.entity_id)).length;
+    }
+    if (resetType === 'staff') {
+      const staffIds = new Set(allStaff.map((staff: any) => staff.id));
+      return attendance.filter((item: any) => staffIds.has(item.entity_id)).length;
+    }
+    if (resetType === 'division') {
+      const divisionStudentIds = new Set(allStudents.filter((student: any) => student.division_id === resetDivisionId).map((student: any) => student.id));
+      return attendance.filter((item: any) => divisionStudentIds.has(item.entity_id)).length;
+    }
+    if (resetType === 'single_staff') return attendance.filter((item: any) => item.entity_id === resetStaffId).length;
+    if (resetType === 'staff_category') {
+      const categoryStaffIds = new Set(allStaff.filter((staff: any) => staff.staff_category === resetStaffCategory).map((staff: any) => staff.id));
+      return attendance.filter((item: any) => categoryStaffIds.has(item.entity_id)).length;
+    }
+    return 0;
+  }, [resetType, attendance, allStudents, allStaff, resetDivisionId, resetStaffId, resetStaffCategory]);
 
   const getAttendance = (entityId: string) => attendance.find((a: any) => a.entity_id === entityId);
 
