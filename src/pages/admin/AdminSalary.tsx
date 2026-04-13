@@ -89,6 +89,8 @@ const AdminSalary = () => {
   const [savingsDialog, setSavingsDialog] = useState<any>(null);
   const [savingsLedgerOpen, setSavingsLedgerOpen] = useState(false);
   const [mainTab, setMainTab] = useState('salary');
+  const [bonusYear, setBonusYear] = useState(String(now.getFullYear()));
+  const [bonusPercent, setBonusPercent] = useState(100);
 
   const monthYear = `${selectedYear}-${selectedMonth}`;
 
@@ -244,7 +246,19 @@ const AdminSalary = () => {
     },
   });
 
-  // Get active savings config for a staff member for current month
+  // Fetch all salary records for bonus year
+  const { data: bonusYearRecords = [] } = useQuery({
+    queryKey: ['bonus-year-records', bonusYear],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('salary_records').select('*')
+        .gte('month_year', `${bonusYear}-01`)
+        .lte('month_year', `${bonusYear}-12`);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+
   const getActiveSavings = (staffId: string): { amount: number; config: any } | null => {
     const configs = savingsConfigs.filter((c: any) => c.staff_id === staffId && c.is_active);
     for (const cfg of configs) {
@@ -1114,6 +1128,7 @@ const AdminSalary = () => {
         <Tabs value={mainTab} onValueChange={setMainTab}>
           <TabsList>
             <TabsTrigger value="salary"><Wallet className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বেতন তালিকা' : 'Salary Sheet'}</TabsTrigger>
+            <TabsTrigger value="bonus"><DollarSign className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বাৎসরিক বোনাস শিট' : 'Annual Bonus Sheet'}</TabsTrigger>
             <TabsTrigger value="savings"><PiggyBank className="h-3.5 w-3.5 mr-1.5" />{bn ? 'জমার তালিকা' : 'Savings Ledger'}</TabsTrigger>
           </TabsList>
 
@@ -1278,6 +1293,132 @@ const AdminSalary = () => {
                   <div className="p-8 text-center text-muted-foreground">
                     <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
                     <p>{bn ? 'কোনো সক্রিয় স্টাফ পাওয়া যায়নি' : 'No active staff found'}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ========== ANNUAL BONUS SHEET TAB ========== */}
+          <TabsContent value="bonus">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <DollarSign className="h-5 w-5 text-amber-600" />
+                    {bn ? 'বাৎসরিক বোনাস তৈরি শিট' : 'Annual Bonus Sheet'}
+                  </CardTitle>
+                  <div className="flex gap-2 items-center">
+                    <Label className="text-xs shrink-0">{bn ? 'বছর' : 'Year'}</Label>
+                    <Input type="number" className="w-24 h-8 text-sm" value={bonusYear}
+                      onChange={e => setBonusYear(e.target.value)} min="2020" max="2040" />
+                    <Label className="text-xs shrink-0">{bn ? 'বোনাস %' : 'Bonus %'}</Label>
+                    <Input type="number" className="w-20 h-8 text-sm" value={bonusPercent}
+                      onChange={e => setBonusPercent(Number(e.target.value))} min="0" max="500" />
+                    <Button size="sm" variant="outline" onClick={() => {
+                      const bData = staff.map((s: any, i: number) => {
+                        const staffRecords = bonusYearRecords.filter((r: any) => r.staff_id === s.id);
+                        const totalPaid = staffRecords.reduce((sum: number, r: any) => sum + Number(r.net_salary || 0), 0);
+                        const monthsPaid = staffRecords.length;
+                        const avgSalary = monthsPaid > 0 ? Math.round(totalPaid / monthsPaid) : Number(s.salary || 0);
+                        const bonusAmount = Math.round(avgSalary * bonusPercent / 100);
+                        return [
+                          i + 1, s.name_bn || s.name_en || '-', getDesignation(s.designation),
+                          Number(s.salary || 0), monthsPaid, totalPaid, avgSalary, `${bonusPercent}%`, bonusAmount
+                        ];
+                      });
+                      const headers = ['#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
+                        bn ? 'মূল বেতন' : 'Base Salary', bn ? 'মাস কর্মরত' : 'Months Worked',
+                        bn ? 'বছরে মোট প্রাপ্ত' : 'Total Received', bn ? 'গড় বেতন' : 'Avg Salary',
+                        bn ? 'বোনাস হার' : 'Bonus Rate', bn ? 'বোনাস পরিমাণ' : 'Bonus Amount'];
+                      const ws = XLSX.utils.aoa_to_sheet([
+                        [bn ? `বাৎসরিক বোনাস শিট — ${toBnDigits(bonusYear)}` : `Annual Bonus Sheet — ${bonusYear}`],
+                        [], headers, ...bData
+                      ]);
+                      ws['!cols'] = headers.map(() => ({ wch: 16 }));
+                      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }];
+                      const titleCell = ws['A1'];
+                      if (titleCell) { titleCell.s = { font: { bold: true, sz: 14 }, alignment: { horizontal: 'center' } }; }
+                      headers.forEach((_, ci) => {
+                        const cell = ws[XLSX.utils.encode_cell({ r: 2, c: ci })];
+                        if (cell) { cell.s = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '059669' } }, alignment: { horizontal: 'center' } }; }
+                      });
+                      const wb = XLSX.utils.book_new();
+                      XLSX.utils.book_append_sheet(wb, ws, bn ? 'বোনাস শিট' : 'Bonus Sheet');
+                      XLSX.writeFile(wb, `bonus_${bonusYear}.xlsx`);
+                      toast.success(bn ? 'বোনাস শিট ডাউনলোড হয়েছে' : 'Bonus sheet downloaded');
+                    }}>
+                      <Download className="h-3 w-3 mr-1" /> Excel
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-amber-50/50 dark:bg-amber-900/10">
+                        <th className="px-3 py-2 text-left text-xs font-medium">#</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Name'}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'পদবি' : 'Designation'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মূল বেতন' : 'Base Salary'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'মাস কর্মরত' : 'Months'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'বছরে মোট প্রাপ্ত' : 'Year Total'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'গড় বেতন' : 'Avg Salary'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'বোনাস হার' : 'Rate'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'বোনাস পরিমাণ' : 'Bonus Amount'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        let grandTotalBonus = 0;
+                        let grandTotalPaid = 0;
+                        return (
+                          <>
+                            {staff.map((s: any, idx: number) => {
+                              const staffRecords = bonusYearRecords.filter((r: any) => r.staff_id === s.id);
+                              const totalPaid = staffRecords.reduce((sum: number, r: any) => sum + Number(r.net_salary || 0), 0);
+                              const monthsPaid = staffRecords.length;
+                              const avgSalary = monthsPaid > 0 ? Math.round(totalPaid / monthsPaid) : Number(s.salary || 0);
+                              const bonusAmount = Math.round(avgSalary * bonusPercent / 100);
+                              grandTotalBonus += bonusAmount;
+                              grandTotalPaid += totalPaid;
+                              const fN = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n.toLocaleString();
+                              return (
+                                <tr key={s.id} className="border-b hover:bg-muted/30 transition-colors">
+                                  <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
+                                  <td className="px-3 py-2 font-medium">{s.name_bn || s.name_en || '-'}</td>
+                                  <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
+                                  <td className="px-3 py-2 text-right">৳{fN(Number(s.salary || 0))}</td>
+                                  <td className="px-3 py-2 text-center">
+                                    <Badge variant="outline" className="text-[10px]">{bn ? toBnDigits(monthsPaid) : monthsPaid}/{bn ? '১২' : '12'}</Badge>
+                                  </td>
+                                  <td className="px-3 py-2 text-right">৳{fN(totalPaid)}</td>
+                                  <td className="px-3 py-2 text-right">৳{fN(avgSalary)}</td>
+                                  <td className="px-3 py-2 text-center">
+                                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px]">{bn ? toBnDigits(bonusPercent) : bonusPercent}%</Badge>
+                                  </td>
+                                  <td className="px-3 py-2 text-right font-bold text-amber-700 dark:text-amber-400">৳{fN(bonusAmount)}</td>
+                                </tr>
+                              );
+                            })}
+                            <tr className="bg-muted/50 font-bold border-t-2">
+                              <td colSpan={5} className="px-3 py-2">{bn ? 'মোট' : 'Total'} ({bn ? toBnDigits(staff.length) : staff.length} {bn ? 'জন' : 'staff'})</td>
+                              <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(grandTotalPaid.toLocaleString()) : grandTotalPaid.toLocaleString()}</td>
+                              <td className="px-3 py-2"></td>
+                              <td className="px-3 py-2"></td>
+                              <td className="px-3 py-2 text-right text-amber-700 dark:text-amber-400">৳{bn ? toBnDigits(grandTotalBonus.toLocaleString()) : grandTotalBonus.toLocaleString()}</td>
+                            </tr>
+                          </>
+                        );
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+                {staff.length === 0 && (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>{bn ? 'কোনো স্টাফ পাওয়া যায়নি' : 'No staff found'}</p>
                   </div>
                 )}
               </CardContent>
