@@ -28,6 +28,7 @@ import {
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import ClassQRPoster from '@/components/attendance/ClassQRPoster';
 import AttendanceDeviceManager from '@/components/attendance/AttendanceDeviceManager';
+import StaffCheckinDialog from '@/components/attendance/StaffCheckinDialog';
 
 const STATUS_ICONS: Record<string, any> = {
   present: CheckCircle2, absent: XCircle, late: Clock,
