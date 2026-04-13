@@ -1185,14 +1185,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
                         : staffSubTab === 'duty'
                           ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
-                          : `${entity.designation || '-'} | ${fmt(entity.duty_start_time || '08:00')} - ${fmt(entity.duty_end_time || '17:00')}`}
+                          : `${entity.designation || '-'} | ${fmt(getCategoryTime(entity).start)} - ${fmt(getCategoryTime(entity).end)}`}
                     </p>
                   </div>
 
                   {/* Late Minutes Display for staff */}
                   {entityType === 'staff' && att?.check_in_time && (() => {
-                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : (entity.duty_start_time || '08:00');
-                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : (entity.duty_end_time || '17:00');
+                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : getCategoryTime(entity).start;
+                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : getCategoryTime(entity).end;
                     const dutyStart = effStart.split(':').map(Number);
                     const checkIn = att.check_in_time.split(':').map(Number);
                     const dutyEnd = effEnd.split(':').map(Number);
