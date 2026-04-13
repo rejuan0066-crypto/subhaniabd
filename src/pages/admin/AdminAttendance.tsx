@@ -168,16 +168,21 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   // Filter students based on sub-tab and filters
   const entities = useMemo(() => {
     if (entityType === 'staff') {
+      let staffFiltered = allStaff;
+      // Filter by staff category
+      if (selectedStaffCategory && selectedStaffCategory !== 'all') {
+        staffFiltered = staffFiltered.filter((s: any) => s.staff_category === selectedStaffCategory);
+      }
       // Meal tab: only residential staff
       if (staffSubTab === 'meal') {
-        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+        return staffFiltered.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
       }
-      // Duty tab: only residential staff (সকাল/সন্ধ্যা ডিউটি আবাসিকদের জন্য)
+      // Duty tab: only residential staff
       if (staffSubTab === 'duty') {
-        return allStaff.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
+        return staffFiltered.filter((s: any) => s.residence_type === 'residential' || s.residence_type === 'resident');
       }
-      // Full-time: all staff
-      return allStaff;
+      // Full-time: all filtered staff
+      return staffFiltered;
     }
     let filtered = allStudents;
 
