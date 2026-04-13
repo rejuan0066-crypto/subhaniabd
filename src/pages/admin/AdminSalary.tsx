@@ -1128,6 +1128,7 @@ const AdminSalary = () => {
         <Tabs value={mainTab} onValueChange={setMainTab}>
           <TabsList>
             <TabsTrigger value="salary"><Wallet className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বেতন তালিকা' : 'Salary Sheet'}</TabsTrigger>
+            <TabsTrigger value="bonus"><DollarSign className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বাৎসরিক বোনাস শিট' : 'Annual Bonus Sheet'}</TabsTrigger>
             <TabsTrigger value="savings"><PiggyBank className="h-3.5 w-3.5 mr-1.5" />{bn ? 'জমার তালিকা' : 'Savings Ledger'}</TabsTrigger>
           </TabsList>
 
