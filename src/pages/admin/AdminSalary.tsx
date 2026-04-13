@@ -20,7 +20,8 @@ import XLSX from 'xlsx-js-style';
 import {
   Wallet, Users, Search, Save, Download, Printer, Settings2,
   CheckCircle2, Clock, AlertCircle, ChevronDown, Edit2, Eye,
-  Calculator, Plus, Trash2, DollarSign, FileText, Timer, FolderOpen
+  Calculator, Plus, Trash2, DollarSign, FileText, Timer, FolderOpen,
+  PiggyBank, Landmark
 } from 'lucide-react';
 
 const MONTHS = [
@@ -51,6 +52,23 @@ const timeToMinutes = (t: string): number => {
   return (h || 0) * 60 + (m || 0);
 };
 
+// Helper: check if a month_year falls within savings range
+const isMonthInSavingsRange = (monthYear: string, startMonth: string, durationMonths: number): boolean => {
+  const [year, month] = monthYear.split('-').map(Number);
+  const [startYear, startMo] = startMonth.split('-').map(Number);
+  const current = year * 12 + month;
+  const start = startYear * 12 + startMo;
+  const end = start + durationMonths - 1;
+  return current >= start && current <= end;
+};
+
+// Helper: get months elapsed since start
+const getMonthsElapsed = (currentMonthYear: string, startMonth: string): number => {
+  const [cy, cm] = currentMonthYear.split('-').map(Number);
+  const [sy, sm] = startMonth.split('-').map(Number);
+  return (cy * 12 + cm) - (sy * 12 + sm) + 1;
+};
+
 const AdminSalary = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
@@ -68,6 +86,9 @@ const AdminSalary = () => {
   const [settingsTab, setSettingsTab] = useState('general');
   const [dutyDialog, setDutyDialog] = useState<any>(null);
   const [attendanceDetailDialog, setAttendanceDetailDialog] = useState<any>(null);
+  const [savingsDialog, setSavingsDialog] = useState<any>(null);
+  const [savingsLedgerOpen, setSavingsLedgerOpen] = useState(false);
+  const [mainTab, setMainTab] = useState('salary');
 
   const monthYear = `${selectedYear}-${selectedMonth}`;
 
@@ -204,6 +225,77 @@ const AdminSalary = () => {
     },
   });
 
+  // ========== SAVINGS QUERIES ==========
+  const { data: savingsConfigs = [] } = useQuery({
+    queryKey: ['salary-savings'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('salary_savings').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: savingsLedger = [] } = useQuery({
+    queryKey: ['salary-savings-ledger'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('salary_savings_ledger').select('*').order('month_year', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Get active savings config for a staff member for current month
+  const getActiveSavings = (staffId: string): { amount: number; config: any } | null => {
+    const configs = savingsConfigs.filter((c: any) => c.staff_id === staffId && c.is_active);
+    for (const cfg of configs) {
+      if (isMonthInSavingsRange(monthYear, cfg.start_month, cfg.duration_months)) {
+        return { amount: Number(cfg.monthly_amount), config: cfg };
+      }
+    }
+    return null;
+  };
+
+  // Save savings config mutation
+  const saveSavingsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (data.id) {
+        const { error } = await supabase.from('salary_savings').update({
+          monthly_amount: data.monthly_amount,
+          duration_months: data.duration_months,
+          start_month: data.start_month,
+          is_active: data.is_active,
+          updated_at: new Date().toISOString(),
+        }).eq('id', data.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('salary_savings').insert({
+          staff_id: data.staff_id,
+          monthly_amount: data.monthly_amount,
+          duration_months: data.duration_months,
+          start_month: data.start_month,
+        });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['salary-savings'] });
+      setSavingsDialog(null);
+      toast.success(bn ? 'জমা সেটিংস সেভ হয়েছে' : 'Savings settings saved');
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error saving'),
+  });
+
+  const deleteSavingsMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('salary_savings').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['salary-savings'] });
+      toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted');
+    },
+  });
+
   // Get setting value helper
   const getSetting = (key: string) => {
     const s = settings.find((st: any) => st.setting_key === key);
@@ -227,7 +319,6 @@ const AdminSalary = () => {
     let totalEarlyExitMinutes = 0;
     let totalOvertimeMinutes = 0;
 
-    // Per-day breakdown for detail view
     const dailyBreakdown: Array<{
       date: string; status: string; checkIn: string; checkOut: string;
       lateMin: number; earlyMin: number; overtimeMin: number;
@@ -238,7 +329,6 @@ const AdminSalary = () => {
     const dailyRate = baseSalary / 30;
     const perMinuteRate = scheduledMinutesPerDay > 0 ? dailyRate / scheduledMinutesPerDay : 0;
 
-    // Additive: each day's earning based on status
     let totalDailyEarnings = 0;
 
     records.forEach((r: any) => {
@@ -249,7 +339,6 @@ const AdminSalary = () => {
       };
 
       if (r.status === 'absent') {
-        // Absent = 0 earning, full day deduction
         entry.deduction = Math.round(dailyRate);
         entry.dailyEarning = 0;
         dailyBreakdown.push(entry);
@@ -257,7 +346,6 @@ const AdminSalary = () => {
       }
       
       if (r.status === 'leave') {
-        // Leave = 0 earning
         entry.dailyEarning = 0;
         dailyBreakdown.push(entry);
         return;
@@ -267,7 +355,6 @@ const AdminSalary = () => {
         entry.dailyEarning = Math.round(dailyRate / 2);
         entry.deduction = Math.round(dailyRate / 2);
       } else {
-        // present or late: full daily rate
         entry.dailyEarning = Math.round(dailyRate);
       }
 
@@ -286,7 +373,6 @@ const AdminSalary = () => {
       entry.earlyMin = earlyExitMinutes;
       entry.overtimeMin = overtimeMinutes;
       
-      // Deduct late/early from daily earning
       const timeDeduction = Math.round((lateMinutes + earlyExitMinutes) * perMinuteRate);
       entry.deduction += timeDeduction;
       entry.dailyEarning = Math.max(0, entry.dailyEarning - timeDeduction);
@@ -331,7 +417,6 @@ const AdminSalary = () => {
   };
 
   // Calculate salary for a staff member using additive per-day logic
-  // Works consistently for ALL months and ALL years
   const calculateSalary = (staffMember: any) => {
     const baseSalary = Number(staffMember.salary) || 0;
     const attStats = getAttendanceStats(staffMember);
@@ -340,29 +425,16 @@ const AdminSalary = () => {
     const month = Number(selectedMonth);
     const workingDays = new Date(year, month, 0).getDate();
 
-    // Additive approach: net salary = sum of daily earnings from attendance records
-    // উপস্থিত = পূর্ণ দৈনিক রেট
-    // বিলম্ব = পূর্ণ রেট - বিলম্বের মিনিট কর্তন
-    // অর্ধদিন = অর্ধেক দৈনিক রেট
-    // অনুপস্থিত/ছুটি = ০
-    // কোনো রেকর্ড নেই = ০ (যোগ হবে না)
     const totalEarned = attStats.totalDailyEarnings;
-    
-    // Additional allowances
     const bonus = 0;
     const otherAllowance = 0;
     const advanceDeduction = 0;
 
-    // Absence deduction = absent days * daily rate (for display)
     const absenceDeduction = Math.round(attStats.absent * attStats.dailyRate);
-    // Late/early deduction
     const lateDeduction = Math.round(attStats.totalMissedMinutes * attStats.perMinuteRate);
-    // Half day deduction
     const otherDeduction = Math.round(attStats.halfDay * (attStats.dailyRate / 2));
-    // Overtime from full_day
     let overtime = Math.round(attStats.totalOvertimeMinutes * attStats.perMinuteRate);
 
-    // Add residential duty overtime if enabled
     if (dutySettings?.extra_duty_enabled && dutySettings?.extra_duty_rate > 0) {
       const staffDutyRecords = dutyAttendanceData.filter((a: any) => a.entity_id === staffMember.id);
       const morningPresent = staffDutyRecords.filter((r: any) => r.shift === 'morning' && ['present', 'late'].includes(r.status)).length;
@@ -371,10 +443,11 @@ const AdminSalary = () => {
       overtime += Math.round(dutyOvertime);
     }
 
-    // ALWAYS use additive approach: net = sum of daily earnings + overtime + allowances - advance
-    // Daily earnings already account for present/late/half_day/absent per-day
-    // No records = 0 added (purely additive)
-    const netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction);
+    // Get savings deduction for this month
+    const activeSavings = getActiveSavings(staffMember.id);
+    const savingsDeduction = activeSavings ? activeSavings.amount : 0;
+
+    const netSalary = Math.max(0, totalEarned + bonus + otherAllowance + overtime - advanceDeduction - savingsDeduction);
 
     return {
       base_salary: baseSalary,
@@ -389,6 +462,7 @@ const AdminSalary = () => {
       overtime,
       other_allowance: otherAllowance,
       advance_deduction: advanceDeduction,
+      savings_deduction: savingsDeduction,
       net_salary: netSalary,
     };
   };
@@ -404,7 +478,6 @@ const AdminSalary = () => {
       for (const s of staff) {
         const existing = salaryRecords.find((r: any) => r.staff_id === s.id);
 
-        // Check if attendance exists for this staff
         if (requireAttendance) {
           const hasAttendance = attendanceData.some((a: any) => a.entity_id === s.id);
           if (!hasAttendance) {
@@ -416,12 +489,10 @@ const AdminSalary = () => {
         const calc = calculateSalary(s);
 
         if (existing) {
-          // Recalculate existing pending records with latest additive formula
           if (existing.status === 'pending') {
             updateRecords.push({
               id: existing.id,
               ...calc,
-              // Preserve manually edited fields
               bonus: Number(existing.bonus || 0),
               other_allowance: Number(existing.other_allowance || 0),
               advance_deduction: Number(existing.advance_deduction || 0),
@@ -441,11 +512,8 @@ const AdminSalary = () => {
         );
       }
 
-      // Update existing pending records with recalculated values
       for (const rec of updateRecords) {
         const { id, ...updateData } = rec;
-        // Additive: net = attendance-based earnings + overtime + bonus + allowance - advance
-        // updateData.net_salary already has totalEarned + overtime from calculateSalary
         const netSalary = Math.max(0,
           Number(updateData.net_salary) +
           Number(updateData.bonus || 0) +
@@ -469,6 +537,30 @@ const AdminSalary = () => {
         if (error) throw error;
       }
 
+      // Record savings ledger entries for new records
+      for (const rec of newRecords) {
+        const activeSavings = getActiveSavings(rec.staff_id);
+        if (activeSavings && activeSavings.amount > 0) {
+          // Check if ledger entry already exists
+          const existing = savingsLedger.find((l: any) => 
+            l.savings_id === activeSavings.config.id && l.month_year === monthYear
+          );
+          if (!existing) {
+            await supabase.from('salary_savings_ledger').insert({
+              savings_id: activeSavings.config.id,
+              staff_id: rec.staff_id,
+              month_year: monthYear,
+              amount: activeSavings.amount,
+            });
+            // Update total_saved
+            await supabase.from('salary_savings').update({
+              total_saved: Number(activeSavings.config.total_saved || 0) + activeSavings.amount,
+              updated_at: new Date().toISOString(),
+            }).eq('id', activeSavings.config.id);
+          }
+        }
+      }
+
       const msgs: string[] = [];
       if (newRecords.length > 0) msgs.push(bn ? `${newRecords.length} জন নতুন জেনারেট` : `${newRecords.length} new generated`);
       if (updateRecords.length > 0) msgs.push(bn ? `${updateRecords.length} জন রিক্যালকুলেট` : `${updateRecords.length} recalculated`);
@@ -476,6 +568,8 @@ const AdminSalary = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salary-records', monthYear] });
+      queryClient.invalidateQueries({ queryKey: ['salary-savings'] });
+      queryClient.invalidateQueries({ queryKey: ['salary-savings-ledger'] });
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error generating salary'),
   });
@@ -484,22 +578,21 @@ const AdminSalary = () => {
   const updateMutation = useMutation({
     mutationFn: async (record: any) => {
       const { staffName, ...cleanRecord } = record;
-      // For manual edits, recalculate from attendance-based additive earnings
-      // Find the staff member to get fresh attendance stats
       const staffMember = staff.find((s: any) => s.id === cleanRecord.staff_id);
       let netSalary: number;
       if (staffMember) {
         const attStats = getAttendanceStats(staffMember);
-        // Additive: daily earnings + overtime + bonus + allowance - advance
+        const activeSavings = getActiveSavings(cleanRecord.staff_id);
+        const savingsDed = activeSavings ? activeSavings.amount : 0;
         netSalary = Math.max(0,
           attStats.totalDailyEarnings +
           Number(cleanRecord.overtime || 0) +
           Number(cleanRecord.bonus || 0) +
           Number(cleanRecord.other_allowance || 0) -
-          Number(cleanRecord.advance_deduction || 0)
+          Number(cleanRecord.advance_deduction || 0) -
+          savingsDed
         );
       } else {
-        // Fallback if staff not found
         netSalary = Math.max(0,
           Number(cleanRecord.base_salary || 0) +
           Number(cleanRecord.bonus || 0) +
@@ -529,13 +622,11 @@ const AdminSalary = () => {
       const record = salaryRecords.find((r: any) => r.id === id);
       if (!record) throw new Error('Record not found');
 
-      // Update salary status
       const { error } = await supabase.from('salary_records')
         .update({ status: 'paid', paid_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
 
-      // Auto-create expense entry
       const expenseConfig = getSetting('expense_location');
       const projectId = expenseConfig?.project_id;
       const categoryId = expenseConfig?.category_id;
@@ -545,7 +636,6 @@ const AdminSalary = () => {
         const monthName = MONTHS.find(m => m.value === selectedMonth);
         const description = `${bn ? 'বেতন' : 'Salary'}: ${staffMember?.name_bn || 'Staff'} - ${bn ? monthName?.bn : monthName?.en} ${selectedYear}`;
 
-        // Generate PDF link for receipt
         const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const pdfUrl = `https://${projectRef}.supabase.co/functions/v1/salary-pdf`;
 
@@ -572,7 +662,7 @@ const AdminSalary = () => {
     },
   });
 
-  // Mark as unpaid (reverse paid status)
+  // Mark as unpaid
   const markUnpaidMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('salary_records')
@@ -638,45 +728,45 @@ const AdminSalary = () => {
     const totalDeduction = salaryRecords.reduce((s: number, r: any) => s + Number(r.late_deduction || 0) + Number(r.absence_deduction || 0) + Number(r.advance_deduction || 0) + Number(r.other_deduction || 0), 0);
     const paid = salaryRecords.filter((r: any) => r.status === 'paid').length;
     const pending = salaryRecords.filter((r: any) => r.status === 'pending').length;
-    return { totalBase, totalNet, totalDeduction, paid, pending };
-  }, [salaryRecords]);
+    
+    // Total savings this month
+    const totalSavings = filtered.reduce((sum: number, s: any) => {
+      const active = getActiveSavings(s.id);
+      return sum + (active ? active.amount : 0);
+    }, 0);
+    
+    return { totalBase, totalNet, totalDeduction, paid, pending, totalSavings };
+  }, [salaryRecords, filtered, savingsConfigs, monthYear]);
 
   // Export Excel with proper Bengali support
   const exportExcel = () => {
     const monthName = MONTHS.find(m => m.value === selectedMonth);
     const title = bn ? `বেতন শিট — ${monthName?.bn} ${selectedYear}` : `Salary Sheet — ${monthName?.en} ${selectedYear}`;
     
-    // Fetch institution name
-    const instName = bn ? 'বেতন রিপোর্ট' : 'Salary Report';
-    
     const wb = XLSX.utils.book_new();
     const sheetData: any[][] = [];
     
-    // Row 1: Title
     sheetData.push([title]);
-    // Row 2: Date info
     sheetData.push([`${bn ? 'তৈরির তারিখ' : 'Generated'}: ${new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-US')}`]);
-    // Row 3: Spacer
     sheetData.push([]);
     
-    // Row 4: Headers
     const headers = [
       '#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
       bn ? 'মূল বেতন' : 'Base Salary', bn ? 'বোনাস' : 'Bonus',
       bn ? 'ওভারটাইম' : 'Overtime', bn ? 'কর্তন' : 'Deductions',
-      bn ? 'অগ্রিম' : 'Advance', bn ? 'নিট বেতন' : 'Net Salary',
-      bn ? 'স্ট্যাটাস' : 'Status'
+      bn ? 'জমা' : 'Savings', bn ? 'অগ্রিম' : 'Advance',
+      bn ? 'নিট বেতন' : 'Net Salary', bn ? 'স্ট্যাটাস' : 'Status'
     ];
     sheetData.push(headers);
     
-    // Helper to format number for Excel - Bengali digits when bn
     const fmtNum = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n;
     const fmtIdx = (n: number) => bn ? toBnDigits(n) : n;
     
-    // Data rows
     filtered.forEach((s: any, idx: number) => {
       const rec = getRecord(s.id);
       const totalDed = Number(rec?.late_deduction || 0) + Number(rec?.absence_deduction || 0) + Number(rec?.other_deduction || 0);
+      const activeSavings = getActiveSavings(s.id);
+      const savingsAmt = activeSavings ? activeSavings.amount : 0;
       const status = rec?.status === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : 
                      rec ? (bn ? 'বকেয়া' : 'Pending') : (bn ? 'জেনারেট হয়নি' : 'Not Generated');
       sheetData.push([
@@ -687,38 +777,34 @@ const AdminSalary = () => {
         fmtNum(Number(rec?.bonus || 0)),
         fmtNum(Number(rec?.overtime || 0)),
         fmtNum(totalDed),
+        fmtNum(savingsAmt),
         fmtNum(Number(rec?.advance_deduction || 0)),
         fmtNum(Number(rec?.net_salary || 0)),
         status,
       ]);
     });
     
-    // Spacer
     sheetData.push([]);
     
-    // Summary row
     const summaryRowIdx = sheetData.length;
     sheetData.push([
       '', bn ? 'মোট' : 'Total', bn ? toBnDigits(`${filtered.length} জন`) : `${filtered.length} staff`,
-      fmtNum(stats.totalBase), '', '', fmtNum(stats.totalDeduction), '', fmtNum(stats.totalNet), ''
+      fmtNum(stats.totalBase), '', '', fmtNum(stats.totalDeduction), fmtNum(stats.totalSavings), '', fmtNum(stats.totalNet), ''
     ]);
     
     const ws = XLSX.utils.aoa_to_sheet(sheetData);
     const totalCols = headers.length;
     
-    // Merges for header rows
     ws['!merges'] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } },
       { s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } },
     ];
     
-    // Column widths
     ws['!cols'] = [
       { wch: 5 }, { wch: 28 }, { wch: 22 }, { wch: 14 }, { wch: 12 },
-      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
+      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
     ];
     
-    // Row heights
     ws['!rows'] = Array.from({ length: sheetData.length }, (_, i) => {
       if (i === 0) return { hpt: 32 };
       if (i === 1) return { hpt: 22 };
@@ -746,7 +832,6 @@ const AdminSalary = () => {
         cell.s.alignment = { vertical: 'center', horizontal: 'center', wrapText: true };
         cell.s.border = thinBorder;
         
-        // Title row
         if (r === 0) {
           cell.s.font = { name: 'SutonnyOMJ', sz: 16, bold: true, color: { rgb: 'FF064E3B' } };
           cell.s.alignment = { horizontal: 'center', vertical: 'center' };
@@ -759,24 +844,20 @@ const AdminSalary = () => {
         }
         if (r === 2) { cell.s.border = {}; }
         
-        // Header row
         if (r === headerRowIdx) {
           cell.s.fill = { fgColor: { rgb: 'FF059669' } };
           cell.s.font = { name: 'SutonnyOMJ', sz: 11, bold: true, color: { rgb: 'FFFFFFFF' } };
           cell.s.alignment = { horizontal: 'center', vertical: 'center' };
         }
         
-        // Data rows — left-align name & designation
         if (r > headerRowIdx && r < summaryRowIdx) {
           if (c === 1 || c === 2) {
             cell.s.alignment = { horizontal: 'left', vertical: 'center', wrapText: true };
           }
-          // Zebra striping
           if ((r - headerRowIdx - 1) % 2 === 1) {
             cell.s.fill = { fgColor: { rgb: 'FFF8FAFC' } };
           }
-          // Status conditional formatting
-          if (c === 9) {
+          if (c === 10) {
             const val = String(cell.v || '');
             if (val === 'পরিশোধিত' || val === 'Paid') {
               cell.s.font = { ...cell.s.font, color: { rgb: 'FF16A34A' }, bold: true };
@@ -784,18 +865,20 @@ const AdminSalary = () => {
               cell.s.font = { ...cell.s.font, color: { rgb: 'FFEA580C' }, bold: true };
             }
           }
-          // Deduction column red
-          if (c === 6 || c === 7) {
+          if (c === 6 || c === 8) {
             const numVal = Number(cell.v || 0);
             if (numVal > 0) cell.s.font = { ...cell.s.font, color: { rgb: 'FFDC2626' } };
           }
-          // Net salary green
-          if (c === 8) {
+          // Savings column - blue
+          if (c === 7) {
+            const numVal = Number(cell.v || 0);
+            if (numVal > 0) cell.s.font = { ...cell.s.font, color: { rgb: 'FF2563EB' } };
+          }
+          if (c === 9) {
             cell.s.font = { ...cell.s.font, color: { rgb: 'FF059669' }, bold: true };
           }
         }
         
-        // Summary row
         if (r >= summaryRowIdx) {
           cell.s.fill = { fgColor: { rgb: 'FFF1F5F9' } };
           cell.s.font = { name: 'SutonnyOMJ', sz: 11, bold: true, color: { rgb: 'FF0F172A' } };
@@ -860,7 +943,6 @@ const AdminSalary = () => {
       if (!res.ok) throw new Error('PDF generation failed');
 
       let html = await res.text();
-      // Inject the app's font URL so Bengali renders correctly
       const fontUrl = `${window.location.origin}/fonts/SutonnyOMJ.ttf`;
       const fontFace = `@font-face{font-family:"SutonnyOMJ";src:url("${fontUrl}") format("truetype");font-display:swap;}`;
       html = html.replace('</style>', `${fontFace}</style>`);
@@ -870,7 +952,6 @@ const AdminSalary = () => {
       if (printWindow) {
         printWindow.document.write(html);
         printWindow.document.close();
-        // Wait for fonts to load then trigger print
         setTimeout(() => printWindow.print(), 1500);
       }
       toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
@@ -886,10 +967,11 @@ const AdminSalary = () => {
   const printSlip = (staffMember: any, record: any) => {
     const totalDeduction = Number(record.late_deduction || 0) + Number(record.absence_deduction || 0) +
       Number(record.advance_deduction || 0) + Number(record.other_deduction || 0);
+    const activeSavings = getActiveSavings(staffMember.id);
+    const savingsAmt = activeSavings ? activeSavings.amount : 0;
     const totalAllowance = Number(record.bonus || 0) + Number(record.overtime || 0) + Number(record.other_allowance || 0);
     const monthName = MONTHS.find(m => m.value === selectedMonth);
 
-    // Helper for Bengali number formatting in slip
     const slipNum = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n.toLocaleString();
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Salary Slip</title><style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style>
@@ -900,6 +982,7 @@ const AdminSalary = () => {
     th,td{border:1px solid #ddd;padding:8px 12px;text-align:left;font-size:13px}
     th{background:#f5f5f5}
     .total{font-weight:bold;background:#f0f9f0}
+    .savings-row{background:#eff6ff;color:#1e40af}
     .sig{display:flex;justify-content:space-between;margin-top:60px;font-size:13px}
     .sig div{text-align:center;border-top:1px solid #333;padding-top:5px;min-width:150px}
     @media print{body{padding:20px}}</style></head><body>
@@ -928,8 +1011,9 @@ const AdminSalary = () => {
           <td>${bn ? 'অগ্রিম কর্তন' : 'Advance Ded.'}</td><td>৳${slipNum(Number(record.advance_deduction || 0))}</td></tr>
       <tr><td>${bn ? 'অন্যান্য ভাতা' : 'Other Allowance'}</td><td>৳${slipNum(Number(record.other_allowance || 0))}</td>
           <td>${bn ? 'অন্যান্য কর্তন' : 'Other Ded.'}</td><td>৳${slipNum(Number(record.other_deduction || 0))}</td></tr>
+      ${savingsAmt > 0 ? `<tr class="savings-row"><td colspan="2"></td><td>${bn ? 'বেতন জমা' : 'Salary Savings'}</td><td>৳${slipNum(savingsAmt)}</td></tr>` : ''}
       <tr class="total"><td>${bn ? 'মোট আয়' : 'Total Earnings'}</td><td>৳${slipNum(Number(record.base_salary) + totalAllowance)}</td>
-          <td>${bn ? 'মোট কর্তন' : 'Total Deductions'}</td><td>৳${slipNum(totalDeduction)}</td></tr>
+          <td>${bn ? 'মোট কর্তন' : 'Total Deductions'}</td><td>৳${slipNum(totalDeduction + savingsAmt)}</td></tr>
     </table>
     <table><tr class="total"><td style="text-align:center;font-size:16px" colspan="4">
       ${bn ? 'নিট বেতন' : 'Net Salary'}: ৳${slipNum(Number(record.net_salary))}</td></tr></table>
@@ -941,6 +1025,13 @@ const AdminSalary = () => {
     </body></html>`;
     const w = window.open('', '_blank');
     if (w) { w.document.write(html); w.document.close(); w.print(); }
+  };
+
+  // Helper: get month name from month_year string
+  const getMonthLabel = (my: string) => {
+    const [y, m] = my.split('-');
+    const mo = MONTHS.find(mm => mm.value === m);
+    return bn ? `${mo?.bn} ${toBnDigits(y)}` : `${mo?.en} ${y}`;
   };
 
   return (
@@ -963,11 +1054,12 @@ const AdminSalary = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           {[
             { label: bn ? 'মোট মূল বেতন' : 'Total Base', value: `৳${bn ? toBnDigits(stats.totalBase.toLocaleString()) : stats.totalBase.toLocaleString()}`, color: 'bg-primary/10 text-primary' },
             { label: bn ? 'মোট নিট বেতন' : 'Total Net', value: `৳${bn ? toBnDigits(stats.totalNet.toLocaleString()) : stats.totalNet.toLocaleString()}`, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
             { label: bn ? 'মোট কর্তন' : 'Total Deductions', value: `৳${bn ? toBnDigits(stats.totalDeduction.toLocaleString()) : stats.totalDeduction.toLocaleString()}`, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+            { label: bn ? 'মোট জমা' : 'Total Savings', value: `৳${bn ? toBnDigits(stats.totalSavings.toLocaleString()) : stats.totalSavings.toLocaleString()}`, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
             { label: bn ? 'পরিশোধিত' : 'Paid', value: bn ? toBnDigits(stats.paid) : stats.paid, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
             { label: bn ? 'বকেয়া' : 'Pending', value: bn ? toBnDigits(stats.pending) : stats.pending, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
           ].map((s, i) => (
@@ -1018,138 +1110,358 @@ const AdminSalary = () => {
           </CardContent>
         </Card>
 
-        {/* Salary Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-3 py-2 text-left text-xs font-medium">#</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Name'}</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'পদবি' : 'Designation'}</th>
-                    <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'ডিউটি' : 'Duty'}</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মূল বেতন' : 'Base'}</th>
-                    <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'উপ/অনু/বি' : 'P/A/L'}</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'কর্তন' : 'Ded.'}</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'ওভারটাইম' : 'OT'}</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-emerald-600">{bn ? 'নিট বেতন' : 'Net'}</th>
-                    <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
-                    <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'অ্যাকশন' : 'Actions'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((s: any, idx: number) => {
-                    const rec = getRecord(s.id);
-                    const attStats = getAttendanceStats(s);
-                    const autoCalc = calculateSalary(s);
-                    const totalDed = rec
-                      ? Number(rec.late_deduction || 0) + Number(rec.absence_deduction || 0) +
-                        Number(rec.advance_deduction || 0) + Number(rec.other_deduction || 0)
-                      : Number(autoCalc.late_deduction || 0) + Number(autoCalc.absence_deduction || 0) +
-                        Number(autoCalc.advance_deduction || 0) + Number(autoCalc.other_deduction || 0);
-                    const displayOvertime = rec ? Number(rec.overtime || 0) : Number(autoCalc.overtime || 0);
-                    const displayNet = rec ? Number(rec.net_salary) : Number(autoCalc.net_salary || 0);
+        {/* Main Tabs: Salary Table + Savings Ledger */}
+        <Tabs value={mainTab} onValueChange={setMainTab}>
+          <TabsList>
+            <TabsTrigger value="salary"><Wallet className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বেতন তালিকা' : 'Salary Sheet'}</TabsTrigger>
+            <TabsTrigger value="savings"><PiggyBank className="h-3.5 w-3.5 mr-1.5" />{bn ? 'জমার তালিকা' : 'Savings Ledger'}</TabsTrigger>
+          </TabsList>
 
-                    return (
-                      <tr key={s.id} className="border-b hover:bg-muted/30 transition-colors">
-                        <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
-                        <td className="px-3 py-2">
-                          <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
-                        <td className="px-3 py-2 text-center">
-                          <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
-                            className="text-[10px] text-primary hover:underline">
-                            <Timer className="h-3 w-3 inline mr-0.5" />
-                            {bn ? toBnDigits(`${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`) : `${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`}
-                          </button>
-                        </td>
-                        <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(Number(rec?.base_salary || s.salary || 0).toLocaleString()) : Number(rec?.base_salary || s.salary || 0).toLocaleString()}</td>
-                        <td className="px-3 py-2 text-center">
-                          <button
-                            onClick={() => setAttendanceDetailDialog({ staff: s, stats: attStats })}
-                            className="hover:bg-muted/50 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
-                            title={bn ? 'বিস্তারিত দেখুন' : 'View details'}
-                          >
-                            <span className="text-emerald-600">{bn ? toBnDigits(attStats.present) : attStats.present}</span>/
-                            <span className="text-red-500">{bn ? toBnDigits(attStats.absent) : attStats.absent}</span>/
-                            <span className="text-yellow-600">{bn ? toBnDigits(attStats.late) : attStats.late}</span>
-                            {attStats.totalLateArrivalMinutes > 0 && (
-                              <span className="text-[9px] text-yellow-600 ml-1">({bn ? toBnDigits(attStats.totalLateArrivalMinutes) : attStats.totalLateArrivalMinutes}{bn ? 'মি.' : 'm'})</span>
-                            )}
-                          </button>
-                        </td>
-                        <td className="px-3 py-2 text-right text-red-500">
-                          ৳{bn ? toBnDigits(totalDed.toLocaleString()) : totalDed.toLocaleString()}{!rec && totalDed > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
-                        </td>
-                        <td className="px-3 py-2 text-right text-blue-600">
-                          ৳{bn ? toBnDigits(displayOvertime.toLocaleString()) : displayOvertime.toLocaleString()}{!rec && displayOvertime > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
-                        </td>
-                        <td className="px-3 py-2 text-right font-bold text-emerald-700 dark:text-emerald-400">
-                          ৳{bn ? toBnDigits(displayNet.toLocaleString()) : displayNet.toLocaleString()}{!rec ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          {rec ? (
-                            <Badge className={rec.status === 'paid'
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}>
-                              {rec.status === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : (bn ? 'বকেয়া' : 'Pending')}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-[10px]">{bn ? 'জেনারেট হয়নি' : 'Not Generated'}</Badge>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <div className="flex gap-1 justify-center">
-                            {rec && (
-                              <>
-                                {canEditItem && <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
-                                  <Edit2 className="h-3 w-3" />
-                                </Button>}
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => printSlip(s, rec)}>
-                                  <Printer className="h-3 w-3" />
-                                </Button>
-                                {rec.status !== 'paid' ? (
-                                  <Button size="icon" variant="ghost" className="h-6 w-6 text-emerald-600" title={bn ? 'পরিশোধিত' : 'Mark Paid'} onClick={() => markPaidMutation.mutate(rec.id)}>
-                                    <CheckCircle2 className="h-3 w-3" />
-                                  </Button>
-                                ) : (
-                                  <Button size="icon" variant="ghost" className="h-6 w-6 text-yellow-600" title={bn ? 'অপরিশোধিত করুন' : 'Mark Unpaid'} onClick={() => { if (confirm(bn ? 'অপরিশোধিত করতে চান?' : 'Mark as unpaid?')) markUnpaidMutation.mutate(rec.id); }}>
-                                    <AlertCircle className="h-3 w-3" />
-                                  </Button>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </td>
+          <TabsContent value="salary">
+            {/* Salary Table */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="px-3 py-2 text-left text-xs font-medium">#</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Name'}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'পদবি' : 'Designation'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'ডিউটি' : 'Duty'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মূল বেতন' : 'Base'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'উপ/অনু/বি' : 'P/A/L'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'কর্তন' : 'Ded.'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'ওভারটাইম' : 'OT'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-blue-600">{bn ? 'জমা' : 'Savings'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-emerald-600">{bn ? 'নিট বেতন' : 'Net'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'অ্যাকশন' : 'Actions'}</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-                {salaryRecords.length > 0 && (
-                  <tfoot>
-                    <tr className="bg-muted/50 font-bold">
-                      <td colSpan={4} className="px-3 py-2">{bn ? 'মোট' : 'Total'}</td>
-                      <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(stats.totalBase.toLocaleString()) : stats.totalBase.toLocaleString()}</td>
-                      <td className="px-3 py-2"></td>
-                      <td className="px-3 py-2 text-right text-red-500">৳{bn ? toBnDigits(stats.totalDeduction.toLocaleString()) : stats.totalDeduction.toLocaleString()}</td>
-                      <td className="px-3 py-2"></td>
-                      <td className="px-3 py-2 text-right text-emerald-700 dark:text-emerald-400">৳{bn ? toBnDigits(stats.totalNet.toLocaleString()) : stats.totalNet.toLocaleString()}</td>
-                      <td colSpan={2}></td>
-                    </tr>
-                  </tfoot>
+                    </thead>
+                    <tbody>
+                      {filtered.map((s: any, idx: number) => {
+                        const rec = getRecord(s.id);
+                        const attStats = getAttendanceStats(s);
+                        const autoCalc = calculateSalary(s);
+                        const totalDed = rec
+                          ? Number(rec.late_deduction || 0) + Number(rec.absence_deduction || 0) +
+                            Number(rec.advance_deduction || 0) + Number(rec.other_deduction || 0)
+                          : Number(autoCalc.late_deduction || 0) + Number(autoCalc.absence_deduction || 0) +
+                            Number(autoCalc.advance_deduction || 0) + Number(autoCalc.other_deduction || 0);
+                        const displayOvertime = rec ? Number(rec.overtime || 0) : Number(autoCalc.overtime || 0);
+                        const displayNet = rec ? Number(rec.net_salary) : Number(autoCalc.net_salary || 0);
+                        const activeSavings = getActiveSavings(s.id);
+                        const savingsAmt = activeSavings ? activeSavings.amount : 0;
+
+                        return (
+                          <tr key={s.id} className="border-b hover:bg-muted/30 transition-colors">
+                            <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
+                            <td className="px-3 py-2">
+                              <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
+                            <td className="px-3 py-2 text-center">
+                              <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
+                                className="text-[10px] text-primary hover:underline">
+                                <Timer className="h-3 w-3 inline mr-0.5" />
+                                {bn ? toBnDigits(`${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`) : `${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`}
+                              </button>
+                            </td>
+                            <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(Number(rec?.base_salary || s.salary || 0).toLocaleString()) : Number(rec?.base_salary || s.salary || 0).toLocaleString()}</td>
+                            <td className="px-3 py-2 text-center">
+                              <button
+                                onClick={() => setAttendanceDetailDialog({ staff: s, stats: attStats })}
+                                className="hover:bg-muted/50 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                                title={bn ? 'বিস্তারিত দেখুন' : 'View details'}
+                              >
+                                <span className="text-emerald-600">{bn ? toBnDigits(attStats.present) : attStats.present}</span>/
+                                <span className="text-red-500">{bn ? toBnDigits(attStats.absent) : attStats.absent}</span>/
+                                <span className="text-yellow-600">{bn ? toBnDigits(attStats.late) : attStats.late}</span>
+                                {attStats.totalLateArrivalMinutes > 0 && (
+                                  <span className="text-[9px] text-yellow-600 ml-1">({bn ? toBnDigits(attStats.totalLateArrivalMinutes) : attStats.totalLateArrivalMinutes}{bn ? 'মি.' : 'm'})</span>
+                                )}
+                              </button>
+                            </td>
+                            <td className="px-3 py-2 text-right text-red-500">
+                              ৳{bn ? toBnDigits(totalDed.toLocaleString()) : totalDed.toLocaleString()}{!rec && totalDed > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                            </td>
+                            <td className="px-3 py-2 text-right text-blue-600">
+                              ৳{bn ? toBnDigits(displayOvertime.toLocaleString()) : displayOvertime.toLocaleString()}{!rec && displayOvertime > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                            </td>
+                            {/* Savings Column */}
+                            <td className="px-3 py-2 text-right">
+                              {savingsAmt > 0 ? (
+                                <button onClick={() => {
+                                  const existingConfig = savingsConfigs.find((c: any) => c.staff_id === s.id && c.is_active);
+                                  setSavingsDialog({
+                                    staff_id: s.id,
+                                    staff_name: s.name_bn,
+                                    ...(existingConfig || { monthly_amount: 0, duration_months: 6, start_month: monthYear }),
+                                    id: existingConfig?.id,
+                                  });
+                                }}>
+                                  <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-100 cursor-pointer text-[10px]">
+                                    ৳{bn ? toBnDigits(savingsAmt.toLocaleString()) : savingsAmt.toLocaleString()}
+                                  </Badge>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setSavingsDialog({
+                                    staff_id: s.id, staff_name: s.name_bn,
+                                    monthly_amount: 0, duration_months: 6, start_month: monthYear,
+                                  })}
+                                  className="text-[10px] text-muted-foreground hover:text-blue-600 transition-colors"
+                                >
+                                  <Plus className="h-3 w-3 inline" />
+                                </button>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-right font-bold text-emerald-700 dark:text-emerald-400">
+                              ৳{bn ? toBnDigits(displayNet.toLocaleString()) : displayNet.toLocaleString()}{!rec ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              {rec ? (
+                                <Badge className={rec.status === 'paid'
+                                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                  : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}>
+                                  {rec.status === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : (bn ? 'বকেয়া' : 'Pending')}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-[10px]">{bn ? 'জেনারেট হয়নি' : 'Not Generated'}</Badge>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <div className="flex gap-1 justify-center">
+                                {rec && (
+                                  <>
+                                    {canEditItem && <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setEditDialog({ ...rec, staffName: s.name_bn })}>
+                                      <Edit2 className="h-3 w-3" />
+                                    </Button>}
+                                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => printSlip(s, rec)}>
+                                      <Printer className="h-3 w-3" />
+                                    </Button>
+                                    {rec.status !== 'paid' ? (
+                                      <Button size="icon" variant="ghost" className="h-6 w-6 text-emerald-600" title={bn ? 'পরিশোধিত' : 'Mark Paid'} onClick={() => markPaidMutation.mutate(rec.id)}>
+                                        <CheckCircle2 className="h-3 w-3" />
+                                      </Button>
+                                    ) : (
+                                      <Button size="icon" variant="ghost" className="h-6 w-6 text-yellow-600" title={bn ? 'অপরিশোধিত করুন' : 'Mark Unpaid'} onClick={() => { if (confirm(bn ? 'অপরিশোধিত করতে চান?' : 'Mark as unpaid?')) markUnpaidMutation.mutate(rec.id); }}>
+                                        <AlertCircle className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    {salaryRecords.length > 0 && (
+                      <tfoot>
+                        <tr className="bg-muted/50 font-bold">
+                          <td colSpan={4} className="px-3 py-2">{bn ? 'মোট' : 'Total'}</td>
+                          <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(stats.totalBase.toLocaleString()) : stats.totalBase.toLocaleString()}</td>
+                          <td className="px-3 py-2"></td>
+                          <td className="px-3 py-2 text-right text-red-500">৳{bn ? toBnDigits(stats.totalDeduction.toLocaleString()) : stats.totalDeduction.toLocaleString()}</td>
+                          <td className="px-3 py-2"></td>
+                          <td className="px-3 py-2 text-right text-blue-600">৳{bn ? toBnDigits(stats.totalSavings.toLocaleString()) : stats.totalSavings.toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right text-emerald-700 dark:text-emerald-400">৳{bn ? toBnDigits(stats.totalNet.toLocaleString()) : stats.totalNet.toLocaleString()}</td>
+                          <td colSpan={2}></td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+                {filtered.length === 0 && (
+                  <div className="p-8 text-center text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>{bn ? 'কোনো সক্রিয় স্টাফ পাওয়া যায়নি' : 'No active staff found'}</p>
+                  </div>
                 )}
-              </table>
-            </div>
-            {filtered.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground">
-                <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                <p>{bn ? 'কোনো সক্রিয় স্টাফ পাওয়া যায়নি' : 'No active staff found'}</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ========== SAVINGS LEDGER TAB ========== */}
+          <TabsContent value="savings">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Landmark className="h-5 w-5 text-blue-600" />
+                  {bn ? 'জমার তালিকা (Savings Ledger)' : 'Savings Ledger'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-blue-50/50 dark:bg-blue-900/10">
+                        <th className="px-3 py-2 text-left text-xs font-medium">#</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Staff Name'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মাসিক জমা' : 'Monthly'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'সময়কাল' : 'Duration'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'শুরু' : 'Start'}</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মোট জমা' : 'Total Saved'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'বাকি মাস' : 'Remaining'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'মাসভিত্তিক বিবরণ' : 'Monthly Breakdown'}</th>
+                        <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'অ্যাকশন' : 'Actions'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {savingsConfigs.length === 0 ? (
+                        <tr><td colSpan={10} className="px-3 py-8 text-center text-muted-foreground">
+                          <PiggyBank className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                          <p>{bn ? 'কোনো জমা সেটআপ নেই' : 'No savings configured yet'}</p>
+                          <p className="text-xs mt-1">{bn ? 'বেতন তালিকায় "+" বাটনে ক্লিক করে জমা সেটআপ করুন' : 'Click "+" in salary table to set up savings'}</p>
+                        </td></tr>
+                      ) : savingsConfigs.map((cfg: any, idx: number) => {
+                        const staffMember = staff.find((s: any) => s.id === cfg.staff_id);
+                        const ledgerEntries = savingsLedger.filter((l: any) => l.savings_id === cfg.id);
+                        const elapsed = getMonthsElapsed(monthYear, cfg.start_month);
+                        const remaining = Math.max(0, cfg.duration_months - Math.max(0, elapsed));
+                        const isComplete = elapsed > cfg.duration_months;
+                        const isActive = cfg.is_active && !isComplete;
+
+                        return (
+                          <tr key={cfg.id} className="border-b hover:bg-muted/30 transition-colors">
+                            <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
+                            <td className="px-3 py-2 font-medium">{staffMember?.name_bn || '-'}</td>
+                            <td className="px-3 py-2 text-right text-blue-700 font-semibold">
+                              ৳{bn ? toBnDigits(Number(cfg.monthly_amount).toLocaleString()) : Number(cfg.monthly_amount).toLocaleString()}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              {bn ? toBnDigits(cfg.duration_months) : cfg.duration_months} {bn ? 'মাস' : 'months'}
+                            </td>
+                            <td className="px-3 py-2 text-center text-xs">{getMonthLabel(cfg.start_month)}</td>
+                            <td className="px-3 py-2 text-right font-bold text-blue-700">
+                              ৳{bn ? toBnDigits(Number(cfg.total_saved || 0).toLocaleString()) : Number(cfg.total_saved || 0).toLocaleString()}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              {isComplete ? (
+                                <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">{bn ? 'সম্পূর্ণ' : 'Complete'}</Badge>
+                              ) : (
+                                <span>{bn ? toBnDigits(remaining) : remaining} {bn ? 'মাস' : 'mo'}</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <Badge className={isActive 
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-[10px]'
+                                : 'bg-muted text-muted-foreground text-[10px]'}>
+                                {isActive ? (bn ? 'চলমান' : 'Active') : isComplete ? (bn ? 'সম্পূর্ণ' : 'Done') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                              </Badge>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-wrap gap-1 max-w-[250px]">
+                                {ledgerEntries.length === 0 ? (
+                                  <span className="text-xs text-muted-foreground">{bn ? 'এখনো কোনো কর্তন হয়নি' : 'No deductions yet'}</span>
+                                ) : ledgerEntries.slice(0, 6).map((entry: any) => (
+                                  <Badge key={entry.id} variant="outline" className="text-[9px] bg-blue-50/50 dark:bg-blue-900/10">
+                                    {getMonthLabel(entry.month_year)} - ৳{bn ? toBnDigits(Number(entry.amount).toLocaleString()) : Number(entry.amount).toLocaleString()}
+                                  </Badge>
+                                ))}
+                                {ledgerEntries.length > 6 && (
+                                  <Badge variant="outline" className="text-[9px]">+{ledgerEntries.length - 6}</Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-center">
+                              <div className="flex gap-1 justify-center">
+                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setSavingsDialog({
+                                  ...cfg, staff_name: staffMember?.name_bn || '-',
+                                })}>
+                                  <Edit2 className="h-3 w-3" />
+                                </Button>
+                                <Button size="icon" variant="ghost" className="h-6 w-6 text-red-500" onClick={() => {
+                                  if (confirm(bn ? 'এই জমা সেটআপ মুছে ফেলবেন?' : 'Delete this savings config?')) {
+                                    deleteSavingsMutation.mutate(cfg.id);
+                                  }
+                                }}>
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Savings Setup Dialog */}
+        <Dialog open={!!savingsDialog} onOpenChange={() => setSavingsDialog(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PiggyBank className="h-5 w-5 text-blue-600" />
+                {bn ? 'বেতন জমা সেটিংস' : 'Retainment Setup'}
+              </DialogTitle>
+            </DialogHeader>
+            {savingsDialog && (
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">{savingsDialog.staff_name}</p>
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'মাসিক জমা (৳)' : 'Monthly Savings Amount (৳)'}</Label>
+                  <Input type="number" value={savingsDialog.monthly_amount || ''}
+                    onChange={e => setSavingsDialog({ ...savingsDialog, monthly_amount: Number(e.target.value) })}
+                    placeholder="1000" />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'সময়কাল (মাস)' : 'Duration (Months)'}</Label>
+                  <Input type="number" value={savingsDialog.duration_months || ''}
+                    onChange={e => setSavingsDialog({ ...savingsDialog, duration_months: Number(e.target.value) })}
+                    placeholder="6" min="1" max="60" />
+                </div>
+                <div>
+                  <Label className="text-xs">{bn ? 'শুরু মাস (YYYY-MM)' : 'Start Month (YYYY-MM)'}</Label>
+                  <Input type="month" value={savingsDialog.start_month || ''}
+                    onChange={e => setSavingsDialog({ ...savingsDialog, start_month: e.target.value })} />
+                </div>
+                {savingsDialog.monthly_amount > 0 && savingsDialog.duration_months > 0 && (
+                  <div className="p-3 bg-blue-50/80 dark:bg-blue-900/20 rounded-lg text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{bn ? 'মোট জমা হবে' : 'Total will be saved'}</span>
+                      <span className="font-bold text-blue-700">
+                        ৳{bn ? toBnDigits((savingsDialog.monthly_amount * savingsDialog.duration_months).toLocaleString()) 
+                             : (savingsDialog.monthly_amount * savingsDialog.duration_months).toLocaleString()}
+                      </span>
+                    </div>
+                    {savingsDialog.id && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">{bn ? 'এখন পর্যন্ত জমা' : 'Saved so far'}</span>
+                        <span className="font-bold text-emerald-600">
+                          ৳{bn ? toBnDigits(Number(savingsDialog.total_saved || 0).toLocaleString()) 
+                               : Number(savingsDialog.total_saved || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {savingsDialog.id && (
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <Label className="text-xs">{bn ? 'সক্রিয়' : 'Active'}</Label>
+                    <Switch
+                      checked={savingsDialog.is_active !== false}
+                      onCheckedChange={v => setSavingsDialog({ ...savingsDialog, is_active: v })}
+                    />
+                  </div>
+                )}
+                <Button className="w-full" onClick={() => saveSavingsMutation.mutate(savingsDialog)}
+                  disabled={saveSavingsMutation.isPending || !savingsDialog.monthly_amount || !savingsDialog.duration_months}>
+                  <Save className="h-4 w-4 mr-1" /> {bn ? 'সেভ করুন' : 'Save'}
+                </Button>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </DialogContent>
+        </Dialog>
 
         {/* Duty Time Dialog */}
         <Dialog open={!!dutyDialog} onOpenChange={() => setDutyDialog(null)}>
@@ -1385,7 +1697,7 @@ const AdminSalary = () => {
                     <p>• <strong>{bn ? 'অনুপস্থিতি কর্তন' : 'Absence Ded.'}</strong> = {bn ? 'অনুপস্থিত দিন × দৈনিক হার' : 'Absent Days × Daily Rate'}</p>
                     <p>• <strong>{bn ? 'বিলম্ব উপস্থিত কর্তন' : 'Late Present Ded.'}</strong> = {bn ? 'মিসড মিনিট × প্রতি মিনিট হার' : 'Missed Minutes × Per-Minute Rate'}</p>
                     <p>• <strong>{bn ? 'ওভারটাইম' : 'Overtime'}</strong> = {bn ? 'অতিরিক্ত মিনিট × প্রতি মিনিট হার' : 'Extra Minutes × Per-Minute Rate'}</p>
-                    <p>• <strong>{bn ? 'নিট বেতন' : 'Net Salary'}</strong> = {bn ? 'মূল + ওভারটাইম + বোনাস - সকল কর্তন' : 'Base + OT + Bonus - All Deductions'}</p>
+                    <p>• <strong>{bn ? 'নিট বেতন' : 'Net Salary'}</strong> = {bn ? 'মূল + ওভারটাইম + বোনাস - সকল কর্তন - জমা' : 'Base + OT + Bonus - All Deductions - Savings'}</p>
                   </div>
                 </div>
                 <div className="border-t pt-3">
@@ -1403,6 +1715,7 @@ const AdminSalary = () => {
             </Tabs>
           </DialogContent>
         </Dialog>
+
         {/* Attendance Detail Dialog */}
         <Dialog open={!!attendanceDetailDialog} onOpenChange={() => setAttendanceDetailDialog(null)}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -1429,7 +1742,6 @@ const AdminSalary = () => {
 
               return (
                 <div className="space-y-4">
-                  {/* Summary Cards */}
                   <div className="grid grid-cols-5 gap-2">
                     {[
                       { label: bn ? 'উপস্থিত' : 'Present', value: stats.present, color: 'text-emerald-600' },
@@ -1445,7 +1757,6 @@ const AdminSalary = () => {
                     ))}
                   </div>
 
-                  {/* Minute & Money Breakdown */}
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="p-2 border rounded-lg space-y-1">
                       <p className="text-xs font-semibold text-red-600">{bn ? 'কর্তন বিবরণ' : 'Deductions'}</p>
@@ -1483,14 +1794,12 @@ const AdminSalary = () => {
                     </div>
                   </div>
 
-                  {/* Per-Minute Rate Info */}
                   <div className="p-2 bg-muted/50 rounded-lg text-xs text-muted-foreground">
                     <Calculator className="h-3 w-3 inline mr-1" />
                     {bn ? 'প্রতি মিনিট রেট' : 'Per-min rate'}: ৳{stats.perMinuteRate.toFixed(2)} | 
                     {bn ? ' দৈনিক রেট' : ' Daily rate'}: ৳{Math.round(stats.dailyRate).toLocaleString()}
                   </div>
 
-                  {/* Daily Records Table */}
                   <div className="border rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
                       <thead>
@@ -1569,4 +1878,3 @@ const AdminSalary = () => {
 };
 
 export default AdminSalary;
-
