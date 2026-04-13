@@ -337,15 +337,13 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       if (type === 'all') {
         ids = attendance.map((a: any) => a.id);
       } else if (type === 'student') {
-        // Get student entity IDs from students list
-        const studentIds = new Set(students.map((s: any) => s.id));
+        const studentIds = new Set(allStudents.map((s: any) => s.id));
         ids = attendance.filter((a: any) => studentIds.has(a.entity_id)).map((a: any) => a.id);
       } else if (type === 'staff') {
-        const staffIds = new Set(staffList.map((s: any) => s.id));
+        const staffIds = new Set(allStaff.map((s: any) => s.id));
         ids = attendance.filter((a: any) => staffIds.has(a.entity_id)).map((a: any) => a.id);
       } else if (type === 'division') {
-        // Get students of the selected division
-        const divStudentIds = new Set(students.filter((s: any) => s.division_id === resetDivisionId).map((s: any) => s.id));
+        const divStudentIds = new Set(allStudents.filter((s: any) => s.division_id === resetDivisionId).map((s: any) => s.id));
         ids = attendance.filter((a: any) => divStudentIds.has(a.entity_id)).map((a: any) => a.id);
       }
       if (ids.length === 0) throw new Error('No records to reset');
