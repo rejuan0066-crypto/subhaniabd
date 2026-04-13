@@ -101,8 +101,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     evening_days: 30,
     total_salary: 0,
   });
+  const defaultCategoryTimes: Record<string, { start: string; end: string }> = {
+    teacher: { start: '08:00', end: '14:00' },
+    administrative: { start: '09:00', end: '17:00' },
+    support: { start: '08:00', end: '17:00' },
+    general: { start: '08:00', end: '17:00' },
+  };
+  const [categoryShiftTimes, setCategoryShiftTimes] = useState<Record<string, { start: string; end: string }>>(defaultCategoryTimes);
 
-  // Fetch divisions
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
     queryFn: async () => {
@@ -283,6 +289,40 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       toast.success(bn ? 'ডিউটি টাইম সেভ হয়েছে' : 'Duty times saved');
     },
   });
+
+  // Fetch category shift times
+  const { data: savedCategoryTimes } = useQuery({
+    queryKey: ['category-shift-times'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'category_shift_times').maybeSingle();
+      return data?.value as any;
+    },
+  });
+  useMemo(() => {
+    if (savedCategoryTimes) {
+      setCategoryShiftTimes({ ...defaultCategoryTimes, ...savedCategoryTimes });
+    }
+  }, [savedCategoryTimes]);
+
+  const saveCategoryTimesMutation = useMutation({
+    mutationFn: async (times: Record<string, { start: string; end: string }>) => {
+      const { error } = await supabase.from('website_settings').upsert(
+        { key: 'category_shift_times', value: times, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['category-shift-times'] });
+      toast.success(bn ? 'ক্যাটাগরি শিফট টাইম সেভ হয়েছে' : 'Category shift times saved');
+    },
+  });
+
+  // Helper: get shift time for a staff entity
+  const getCategoryTime = (entity: any) => {
+    const cat = entity.staff_category || 'general';
+    return categoryShiftTimes[cat] || defaultCategoryTimes.general;
+  };
 
   const statusOptions = useMemo(() => {
     return rules.filter((r: any) => r.entity_type === entityType && r.rule_type === 'status' && r.is_active);
@@ -1145,14 +1185,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
                         : staffSubTab === 'duty'
                           ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
-                          : `${entity.designation || '-'} | ${fmt(entity.duty_start_time || '08:00')} - ${fmt(entity.duty_end_time || '17:00')}`}
+                          : `${entity.designation || '-'} | ${fmt(getCategoryTime(entity).start)} - ${fmt(getCategoryTime(entity).end)}`}
                     </p>
                   </div>
 
                   {/* Late Minutes Display for staff */}
                   {entityType === 'staff' && att?.check_in_time && (() => {
-                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : (entity.duty_start_time || '08:00');
-                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : (entity.duty_end_time || '17:00');
+                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : getCategoryTime(entity).start;
+                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : getCategoryTime(entity).end;
                     const dutyStart = effStart.split(':').map(Number);
                     const checkIn = att.check_in_time.split(':').map(Number);
                     const dutyEnd = effEnd.split(':').map(Number);
@@ -1237,8 +1277,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                                   mutateData.check_out_time = dutyTimes.evening_end;
                                 }
                               } else if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
-                                mutateData.check_in_time = entity.duty_start_time || '08:00';
-                                mutateData.check_out_time = entity.duty_end_time || '17:00';
+                                mutateData.check_in_time = getCategoryTime(entity).start;
+                                mutateData.check_out_time = getCategoryTime(entity).end;
                               }
                               if (countsAs === 'absent' || countsAs === 'leave') {
                                 mutateData.check_in_time = '';
@@ -1289,6 +1329,41 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <span className="text-xs text-muted-foreground">24h</span>
                 </div>
               </div>
+
+              {/* Category-wise Fulltime Shift Times - Staff only */}
+              {entityType === 'staff' && (
+              <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
+                <Label className="font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  {bn ? 'ক্যাটাগরি অনুযায়ী ফুল টাইম শিফট' : 'Fulltime Shift by Category'}
+                </Label>
+                {[
+                  { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher' },
+                  { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative' },
+                  { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff' },
+                  { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff' },
+                ].map(cat => (
+                  <div key={cat.key} className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">{cat.label}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
+                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.start || '08:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], start: e.target.value } }))} />
+                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.start || '08:00')}</span>
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
+                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.end || '17:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], end: e.target.value } }))} />
+                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.end || '17:00')}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" className="w-full" onClick={() => saveCategoryTimesMutation.mutate(categoryShiftTimes)}>
+                  <Save className="h-3 w-3 mr-1" /> {bn ? 'ক্যাটাগরি শিফট সেভ করুন' : 'Save Category Shifts'}
+                </Button>
+              </div>
+              )}
 
               {/* Residential Duty Times - Staff only */}
               {entityType === 'staff' && (
