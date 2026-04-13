@@ -597,7 +597,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
     printWindow.document.open();
     printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Staff Form</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
       <style>${styles}</style></head><body>${content.innerHTML}</body></html>`);
     printWindow.document.close();
     // Wait for fonts to load before printing
@@ -610,7 +610,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
 
   const getPrintStyles = () => `
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm; }
+    body { font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif; font-size: 11pt; color: #000; padding: 15mm; }
     .form-header { text-align: center; border-bottom: 3px double #1a5c2e; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
     .form-header .logo { width: 60px; height: 60px; object-fit: contain; }
     .form-header h1 { font-size: 16pt; font-weight: 700; margin: 4px 0 2px; color: #1a5c2e; }
