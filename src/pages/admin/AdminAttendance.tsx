@@ -84,8 +84,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division'>('all');
+  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff'>('all');
   const [resetDivisionId, setResetDivisionId] = useState<string>('');
+  const [resetStaffId, setResetStaffId] = useState<string>('');
+  const [resetStaffName, setResetStaffName] = useState<string>('');
   const [showResetMenu, setShowResetMenu] = useState(false);
   // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
   const effectiveShift = entityType === 'student'
@@ -395,7 +397,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
   // Reset attendance selectively
   const resetMutation = useMutation({
-    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division') => {
+    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division' | 'single_staff') => {
       let ids: string[] = [];
       if (type === 'all') {
         ids = attendance.map((a: any) => a.id);
@@ -408,6 +410,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       } else if (type === 'division') {
         const divStudentIds = new Set(allStudents.filter((s: any) => s.division_id === resetDivisionId).map((s: any) => s.id));
         ids = attendance.filter((a: any) => divStudentIds.has(a.entity_id)).map((a: any) => a.id);
+      } else if (type === 'single_staff') {
+        ids = attendance.filter((a: any) => a.entity_id === resetStaffId).map((a: any) => a.id);
       }
       if (ids.length === 0) throw new Error('No records to reset');
       const { error } = await supabase.from('attendance_records').delete().in('id', ids);
@@ -421,6 +425,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         student: bn ? 'ছাত্র হাজিরা' : 'Student attendance',
         staff: bn ? 'স্টাফ হাজিরা' : 'Staff attendance',
         division: bn ? 'বিভাগ হাজিরা' : 'Division attendance',
+        single_staff: bn ? `${resetStaffName} এর হাজিরা` : `${resetStaffName}'s attendance`,
       };
       toast.success(bn ? `সাফল্যের সাথে ${labels[type]} রিসেট করা হয়েছে।` : `${labels[type]} reset successfully.`);
     },
@@ -1002,6 +1007,21 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                           </button>
                           <div className="border-t border-border/20 my-1" />
                           <div className="px-2 py-1">
+                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট স্টাফ রিসেট করুন' : 'Reset Individual Staff'}</p>
+                            <div className="max-h-[180px] overflow-y-auto scrollbar-hidden hover:scrollbar-thin space-y-0.5">
+                              {(() => {
+                                const staffWithAttendance = allStaff.filter((s: any) => attendance.some((a: any) => a.entity_id === s.id));
+                                return staffWithAttendance.map((s: any) => (
+                                  <button key={s.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('single_staff'); setResetStaffId(s.id); setResetStaffName(bn ? s.name_bn : (s.name_en || s.name_bn)); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                    <div className="w-7 h-7 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0"><UserCog className="h-3.5 w-3.5 text-rose-500" /></div>
+                                    <span className="text-sm text-foreground truncate">{bn ? s.name_bn : (s.name_en || s.name_bn)}</span>
+                                  </button>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+                          <div className="border-t border-border/20 my-1" />
+                          <div className="px-2 py-1">
                             <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
                             {divisions.map((d: any) => (
                               <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
@@ -1027,6 +1047,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                             {resetType === 'staff' && (bn ? 'আপনি কি নিশ্চিত যে শুধু স্টাফ হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only staff attendance? This cannot be undone.')}
                             {resetType === 'division' && (() => { const div = divisions.find((d: any) => d.id === resetDivisionId); return bn ? `আপনি কি নিশ্চিত যে "${div?.name_bn || ''}" বিভাগের হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${div?.name || ''}" division? This cannot be undone.`; })()}
                             {resetType === 'all' && (bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This cannot be undone.')}
+                            {resetType === 'single_staff' && (bn ? `আপনি কি নিশ্চিত যে "${resetStaffName}" এর হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${resetStaffName}"? This cannot be undone.`)}
                           </p>
                         </DialogHeader>
                         <div className="flex justify-center gap-3 pt-4">
