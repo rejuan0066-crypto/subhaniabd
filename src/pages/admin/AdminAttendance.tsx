@@ -1017,9 +1017,9 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     {showResetMenu && (
                       <>
                         <div className="fixed inset-0 z-[9998]" onClick={() => setShowResetMenu(false)} />
-                        <div className="fixed z-[9999] w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200"
+                        <div className="fixed z-[9999] w-72 max-h-[70vh] overflow-y-auto rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200 scrollbar-hidden hover:scrollbar-thin"
                           style={{
-                            top: (resetBtnRef.current?.getBoundingClientRect().bottom ?? 0) + 8,
+                            bottom: window.innerHeight - (resetBtnRef.current?.getBoundingClientRect().top ?? 0) + 8,
                             right: window.innerWidth - (resetBtnRef.current?.getBoundingClientRect().right ?? 0),
                           }}>
                           <div className="px-2 py-1">
