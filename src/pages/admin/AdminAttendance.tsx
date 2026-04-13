@@ -1049,7 +1049,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                               })()}
                             </div>
                           </div>
-                          {activeTab === 'student' && (
+                          {entityType === 'student' && (
                             <>
                               <div className="border-t border-border/20 my-1" />
                               <div className="px-2 py-1">
