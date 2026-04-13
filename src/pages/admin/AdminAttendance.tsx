@@ -1066,7 +1066,12 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                       )}
                     </PopoverContent>
                   </Popover>
-                {/* Session Year (both tabs) */}
+                )}
+              </div>
+            </div>
+
+            {entityType === 'student' && (
+              <div className="flex flex-wrap gap-3 items-center">
                 <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
                   <SelectTrigger className="w-36 h-8 text-xs">
                     <SelectValue placeholder={bn ? 'সেশন ইয়ার' : 'Session Year'} />
