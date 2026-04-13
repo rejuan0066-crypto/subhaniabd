@@ -65,6 +65,27 @@ const AdminSalary = () => {
 
   const monthYear = `${selectedYear}-${selectedMonth}`;
 
+  // Fetch designations for Bengali name lookup
+  const { data: designationsList = [] } = useQuery({
+    queryKey: ['designations-list'],
+    queryFn: async () => {
+      const { data } = await supabase.from('designations').select('name, name_bn').eq('is_active', true);
+      return data || [];
+    },
+  });
+
+  // Helper to get designation in correct language
+  const getDesignation = (desig: string | null) => {
+    if (!desig) return '-';
+    if (bn) {
+      const match = designationsList.find((d: any) => d.name === desig || d.name_bn === desig);
+      return match?.name_bn || desig;
+    } else {
+      const match = designationsList.find((d: any) => d.name === desig || d.name_bn === desig);
+      return match?.name || desig;
+    }
+  };
+
   // Fetch active staff
   const { data: staff = [] } = useQuery({
     queryKey: ['salary-staff'],
