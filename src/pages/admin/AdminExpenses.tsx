@@ -5,6 +5,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -953,7 +954,7 @@ const AdminExpenses = () => {
                     <div className="space-y-3">
                       <div>
                         <Label>{bn ? 'তারিখ' : 'Date'} *</Label>
-                        <Input type="date" value={depositForm.deposit_date} onChange={e => setDepositForm(f => ({ ...f, deposit_date: e.target.value }))} />
+                        <DatePicker bengali={bn} value={depositForm.deposit_date} onChange={v => setDepositForm(f => ({ ...f, deposit_date: v }))} />
                       </div>
                       <div>
                         <Label>{bn ? 'ব্যাংক বিবরণ' : 'Bank Details'}</Label>
@@ -1451,7 +1452,7 @@ const AdminExpenses = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>{bn ? 'তারিখ' : 'Date'} *</Label>
-                <Input type="date" value={expenseForm.expense_date} onChange={e => setExpenseForm(f => ({ ...f, expense_date: e.target.value }))} />
+                <DatePicker bengali={bn} value={expenseForm.expense_date} onChange={v => setExpenseForm(f => ({ ...f, expense_date: v }))} />
               </div>
               <div>
                 <Label>{bn ? 'পরিমাণ' : 'Quantity'}</Label>

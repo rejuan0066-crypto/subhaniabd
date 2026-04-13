@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2, Search, BookOpen } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import SearchableSelect from '@/components/SearchableSelect';
-
+import { DatePicker } from '@/components/ui/date-picker';
 const DEFAULT_BOOK_CATEGORIES = [
   { key: 'textbook', label: 'Textbook', label_bn: 'পাঠ্যবই' },
   { key: 'reference', label: 'Reference', label_bn: 'রেফারেন্স' },
@@ -297,7 +297,7 @@ const LibraryInventory = () => {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>{bn ? 'কেনার তারিখ' : 'Purchase Date'}</Label><Input type="date" value={form.purchase_date} onChange={e => setForm({ ...form, purchase_date: e.target.value })} /></div>
+              <div><Label>{bn ? 'কেনার তারিখ' : 'Purchase Date'}</Label><DatePicker bengali={bn} value={form.purchase_date} onChange={v => setForm({ ...form, purchase_date: v })} /></div>
               <div><Label>{bn ? 'দাম (৳)' : 'Price (৳)'}</Label><Input type="number" value={form.buying_price || ''} onChange={e => setForm({ ...form, buying_price: Number(e.target.value) })} /></div>
               <div><Label>{bn ? 'কপি সংখ্যা' : 'Copies'}</Label><Input type="number" min={1} value={form.total_copies || ''} onChange={e => setForm({ ...form, total_copies: Number(e.target.value) })} /></div>
             </div>

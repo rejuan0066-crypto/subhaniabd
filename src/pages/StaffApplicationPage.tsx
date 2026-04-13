@@ -2,6 +2,7 @@ import PublicLayout from '@/components/PublicLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -401,14 +402,14 @@ const StaffApplicationPage = () => {
                 {isVisible('staff_dob') && (
                 <div>
                   <Label>{bn ? 'জন্ম তারিখ' : 'Date of Birth'} <span className="text-destructive">*</span></Label>
-                  <Input type="date" className={`bg-background mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={e => handleFieldChange('dob', e.target.value, setDob)} />
+                  <DatePicker bengali={bn} className={`mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={v => handleFieldChange('dob', v, setDob)} />
                   <FieldError field="dob" />
                 </div>
                 )}
                 {isVisible('staff_joining_date') && (
                 <div>
                   <Label>{bn ? 'আবেদন তারিখ' : 'Application Date'}</Label>
-                  <Input type="date" className="bg-background mt-1" value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
+                  <DatePicker bengali={bn} className="mt-1" value={joiningDate} onChange={v => setJoiningDate(v)} />
                 </div>
                 )}
                 {isVisible('staff_religion') && (

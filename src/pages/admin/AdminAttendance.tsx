@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TimePicker } from '@/components/ui/time-picker';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -973,8 +974,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="relative">
-                  <CalendarDays className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="pl-8 w-40 h-8 text-sm" />
+                  <DatePicker bengali={bn} className="w-40 h-8 text-sm" value={selectedDate} onChange={v => setSelectedDate(v)} />
                 </div>
                 <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => changeDate(1)}>
                   <ChevronRight className="h-4 w-4" />

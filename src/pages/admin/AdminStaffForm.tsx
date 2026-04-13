@@ -2,6 +2,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -944,13 +945,13 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
                 {isFieldActive('dob') && (
                 <div>
                   <Label>{bn ? (getField('dob')?.label_bn || 'জন্ম তারিখ') : (getField('dob')?.label || 'Date of Birth')} {isFieldRequired('dob') && <span className="text-destructive">*</span>}</Label>
-                  <Input type="date" className={`bg-background mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={e => { setDob(e.target.value); setFieldErrors(p => { const n = {...p}; delete n['dob']; return n; }); }} />
+                  <DatePicker bengali={bn} className={`mt-1 ${fieldErrors['dob'] ? 'border-destructive' : ''}`} value={dob} onChange={v => { setDob(v); setFieldErrors(p => { const n = {...p}; delete n['dob']; return n; }); }} />
                   <FieldError field="dob" />
                 </div>
                 )}
                 <div>
                   <Label>{bn ? 'যোগদান তারিখ' : 'Joining Date'}</Label>
-                  <Input type="date" className="bg-background mt-1" value={joiningDate} onChange={e => setJoiningDate(e.target.value)} />
+                  <DatePicker bengali={bn} className="mt-1" value={joiningDate} onChange={v => setJoiningDate(v)} />
                 </div>
                 {isFieldActive('religion') && (
                 <div>
@@ -1328,7 +1329,7 @@ const AdminStaffForm = ({ staffCategory = 'all' }: { staffCategory?: StaffCatego
               </div>
               <div>
                 <Label>{bn ? 'তারিখ' : 'Date'}</Label>
-                <Input type="date" className="bg-background mt-1" value={approverDate} onChange={e => setApproverDate(e.target.value)} />
+                <DatePicker bengali={bn} className="mt-1" value={approverDate} onChange={v => setApproverDate(v)} />
               </div>
             </div>
           </div>

@@ -3,8 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Loader2, CalendarDays, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -35,8 +34,8 @@ const AdminAcademicSessions = () => {
   const [name, setName] = useState('');
   const [nameBn, setNameBn] = useState('');
   const [isActive, setIsActive] = useState(true);
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const bn = language === 'bn';
 
   const { data: sessions = [], isLoading } = useQuery({
@@ -62,8 +61,8 @@ const AdminAcademicSessions = () => {
         name: name.trim(),
         name_bn: nameBn.trim(),
         is_active: isActive,
-        start_date: format(startDate, 'yyyy-MM-dd'),
-        end_date: format(endDate, 'yyyy-MM-dd'),
+        start_date: startDate,
+        end_date: endDate,
       } as any;
 
       if (editId) {
@@ -114,8 +113,8 @@ const AdminAcademicSessions = () => {
     setName('');
     setNameBn('');
     setIsActive(true);
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate('');
+    setEndDate('');
   };
 
   const openEdit = (session: any) => {
@@ -123,8 +122,8 @@ const AdminAcademicSessions = () => {
     setName(session.name);
     setNameBn(session.name_bn || '');
     setIsActive(session.is_active);
-    setStartDate(session.start_date ? new Date(session.start_date + 'T00:00:00') : undefined);
-    setEndDate(session.end_date ? new Date(session.end_date + 'T00:00:00') : undefined);
+    setStartDate(session.start_date || '');
+    setEndDate(session.end_date || '');
     setDialogOpen(true);
   };
 
@@ -256,52 +255,13 @@ const AdminAcademicSessions = () => {
                   <label className="text-sm font-medium text-foreground mb-1 block">
                     {bn ? 'শুরুর তারিখ' : 'Start Date'} *
                   </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, 'dd/MM/yyyy') : (bn ? 'তারিখ নির্বাচন' : 'Pick date')}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={setStartDate}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePicker bengali={bn} value={startDate} onChange={setStartDate} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-1 block">
                     {bn ? 'শেষের তারিখ' : 'End Date'} *
                   </label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, 'dd/MM/yyyy') : (bn ? 'তারিখ নির্বাচন' : 'Pick date')}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={setEndDate}
-                        disabled={(date) => startDate ? date <= startDate : false}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <DatePicker bengali={bn} value={endDate} onChange={setEndDate} />
                 </div>
               </div>
               <div className="flex items-center gap-3">

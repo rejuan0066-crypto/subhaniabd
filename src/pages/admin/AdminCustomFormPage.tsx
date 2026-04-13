@@ -23,7 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Json } from '@/integrations/supabase/types';
-
+import { DatePicker } from '@/components/ui/date-picker';
 const AdminCustomFormPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { language } = useLanguage();
@@ -234,7 +234,7 @@ const AdminCustomFormPage = () => {
                       {field.field_type === 'phone' && <Input type="tel" placeholder={field.placeholder || ''} value={value} onChange={e => updateValue(field.id, e.target.value)} />}
                       {field.field_type === 'number' && <Input type="number" placeholder={field.placeholder || ''} value={value} onChange={e => updateValue(field.id, e.target.value)} />}
                       {field.field_type === 'textarea' && <Textarea placeholder={field.placeholder || ''} rows={3} value={value} onChange={e => updateValue(field.id, e.target.value)} />}
-                      {field.field_type === 'date' && <Input type="date" value={value} onChange={e => updateValue(field.id, e.target.value)} />}
+                      {field.field_type === 'date' && <DatePicker bengali={bn} value={value} onChange={v => updateValue(field.id, v)} />}
                       {field.field_type === 'file' && <Input type="file" onChange={e => updateValue(field.id, e.target.files?.[0]?.name || '')} />}
                       {field.field_type === 'switch' && <Switch checked={!!value} onCheckedChange={c => updateValue(field.id, c)} />}
                       {field.field_type === 'post_office' && <Input placeholder={bn ? 'পোস্ট অফিস লিখুন' : 'Enter post office'} value={value} onChange={e => updateValue(field.id, e.target.value)} />}

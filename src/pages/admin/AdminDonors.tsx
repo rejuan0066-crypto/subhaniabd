@@ -3,6 +3,7 @@ import AdminLayout from '@/components/AdminLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -143,7 +144,7 @@ const AdminDonors = () => {
             </div>
             <div>
               <Label className="text-sm font-medium text-foreground">{bn ? 'তারিখ' : 'Date'}</Label>
-              <Input type="date" className="bg-background mt-1" value={form.donationDate} onChange={(e) => updateField('donationDate', e.target.value)} />
+              <DatePicker bengali={bn} className="bg-background mt-1" value={form.donationDate} onChange={(v) => updateField('donationDate', v)} />
             </div>
             <div>
               <Label className="text-sm font-medium text-foreground">{bn ? 'টাকার পরিমাণ' : 'Amount'} *</Label>
