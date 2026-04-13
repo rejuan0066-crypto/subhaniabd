@@ -3091,6 +3091,7 @@ export type Database = {
           salary: number | null
           staff_category: string
           staff_data: Json | null
+          staff_id: string | null
           status: string | null
           updated_at: string | null
           user_id: string | null
@@ -3121,6 +3122,7 @@ export type Database = {
           salary?: number | null
           staff_category?: string
           staff_data?: Json | null
+          staff_id?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -3151,6 +3153,7 @@ export type Database = {
           salary?: number | null
           staff_category?: string
           staff_data?: Json | null
+          staff_id?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -3163,6 +3166,8 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          id_prefix: string | null
+          id_start_range: number | null
           is_active: boolean | null
           key: string
           name: string
@@ -3176,6 +3181,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          id_prefix?: string | null
+          id_start_range?: number | null
           is_active?: boolean | null
           key: string
           name: string
@@ -3189,6 +3196,8 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          id_prefix?: string | null
+          id_start_range?: number | null
           is_active?: boolean | null
           key?: string
           name?: string
@@ -3654,6 +3663,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_staff_id: {
+        Args: { p_category_key: string; p_joining_year?: number }
+        Returns: string
+      }
       get_next_receipt_serial: { Args: never; Returns: string }
       has_role: {
         Args: {
