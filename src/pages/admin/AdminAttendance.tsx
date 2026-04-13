@@ -86,6 +86,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [selectedShift, setSelectedShift] = useState('full_day');
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
+  const [staffCheckinOpen, setStaffCheckinOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff' | 'staff_category'>('all');
   const [resetDivisionId, setResetDivisionId] = useState<string>('');
