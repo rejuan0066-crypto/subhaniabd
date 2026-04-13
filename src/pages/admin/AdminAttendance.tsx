@@ -993,13 +993,13 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
               {/* Bulk Actions */}
               <div className="flex gap-1 shrink-0 ml-auto">
-                {canEditItem && <Button size="sm" variant="outline" className="text-xs" onClick={() => bulkMutation.mutate('present')}>
-                  <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
+                {canEditItem && <Button size="sm" className="text-xs rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_4px_16px_hsl(160_84%_30%/0.25)] hover:shadow-[0_6px_24px_hsl(160_84%_30%/0.35)] transition-all duration-200" onClick={() => bulkMutation.mutate('present')}>
+                  <Check className="h-3.5 w-3.5 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
                 {canDeleteItem && attendance.length > 0 && (
                   <div className="relative">
-                    <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setShowResetMenu(!showResetMenu)}>
-                      <RotateCcw className="h-3 w-3 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
+                    <Button size="sm" className="text-xs rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 shadow-sm transition-all duration-200" onClick={() => setShowResetMenu(!showResetMenu)}>
+                      <RotateCcw className="h-3.5 w-3.5 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
                       <Settings2 className="h-3 w-3 ml-1 opacity-60" />
                     </Button>
                     {showResetMenu && (
