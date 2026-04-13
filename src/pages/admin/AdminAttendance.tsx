@@ -1010,142 +1010,62 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <Check className="h-3.5 w-3.5 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
                 {canDeleteItem && attendance.length > 0 && (
-                  <div className="relative" ref={resetBtnRef}>
-                    <Button size="sm" className="text-xs rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 shadow-sm transition-all duration-200" onClick={() => setShowResetMenu(!showResetMenu)}>
-                      <RotateCcw className="h-3.5 w-3.5 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
-                      <Settings2 className="h-3 w-3 ml-1 opacity-60" />
-                    </Button>
-                    {showResetMenu && (
-                      <>
-                        <div className="fixed inset-0 z-[9998]" onClick={() => setShowResetMenu(false)} />
-                        <div className="fixed z-[9999] w-72 max-h-[60vh] overflow-y-auto rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200 scrollbar-hidden hover:scrollbar-thin"
-                          style={(() => {
-                            const rect = resetBtnRef.current?.getBoundingClientRect();
-                            if (!rect) return {};
-                            const spaceBelow = window.innerHeight - rect.bottom;
-                            const spaceAbove = rect.top;
-                            const right = window.innerWidth - rect.right;
-                            if (spaceBelow >= 300) {
-                              return { top: rect.bottom + 8, right };
-                            } else if (spaceAbove >= 300) {
-                              return { bottom: window.innerHeight - rect.top + 8, right };
-                            } else {
-                              return { top: Math.max(8, rect.top - 200), right };
-                            }
-                          })()}>
+                  <Popover open={showResetMenu} onOpenChange={setShowResetMenu}>
+                    <PopoverTrigger asChild>
+                      <Button size="sm" className="text-xs rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 shadow-sm transition-all duration-200">
+                        <RotateCcw className="h-3.5 w-3.5 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
+                        <Settings2 className="h-3 w-3 ml-1 opacity-60" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" side="bottom" sideOffset={8} avoidCollisions collisionPadding={16} className="w-72 max-h-[60vh] overflow-y-auto rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 scrollbar-hidden hover:scrollbar-thin z-[9999]">
+                      <div className="px-2 py-1">
+                        <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
+                        {[
+                          { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher', icon: Users, color: 'bg-blue-500/10 text-blue-600' },
+                          { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative', icon: UserCog, color: 'bg-amber-500/10 text-amber-600' },
+                          { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff', icon: UserCog, color: 'bg-teal-500/10 text-teal-600' },
+                          { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff', icon: UserCog, color: 'bg-purple-500/10 text-purple-600' },
+                        ].filter(cat => allStaff.some((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id))).map(cat => (
+                          <button key={cat.key} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('staff_category'); setResetStaffCategory(cat.key); setShowResetMenu(false); setShowResetDialog(true); }}>
+                            <div className={`w-8 h-8 rounded-full ${cat.color} flex items-center justify-center shrink-0`}><cat.icon className="h-3.5 w-3.5" /></div>
+                            <div>
+                              <span className="text-sm text-foreground">{cat.label}</span>
+                              <p className="text-[10px] text-muted-foreground">{allStaff.filter((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id)).length} {bn ? 'জন' : 'records'}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="border-t border-border/20 my-1" />
+                      <div className="px-2 py-1">
+                        <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট স্টাফ রিসেট করুন' : 'Reset Individual Staff'}</p>
+                        <div className="max-h-[180px] overflow-y-auto scrollbar-hidden hover:scrollbar-thin space-y-0.5">
+                          {(() => {
+                            const staffWithAttendance = allStaff.filter((s: any) => attendance.some((a: any) => a.entity_id === s.id));
+                            return staffWithAttendance.map((s: any) => (
+                              <button key={s.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('single_staff'); setResetStaffId(s.id); setResetStaffName(bn ? s.name_bn : (s.name_en || s.name_bn)); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                <div className="w-7 h-7 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0"><UserCog className="h-3.5 w-3.5 text-rose-500" /></div>
+                                <span className="text-sm text-foreground truncate">{bn ? s.name_bn : (s.name_en || s.name_bn)}</span>
+                              </button>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                      {entityType === 'student' && (
+                        <>
+                          <div className="border-t border-border/20 my-1" />
                           <div className="px-2 py-1">
-                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
-                            {[
-                              { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher', icon: Users, color: 'bg-blue-500/10 text-blue-600' },
-                              { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative', icon: UserCog, color: 'bg-amber-500/10 text-amber-600' },
-                              { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff', icon: UserCog, color: 'bg-teal-500/10 text-teal-600' },
-                              { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff', icon: UserCog, color: 'bg-purple-500/10 text-purple-600' },
-                            ].filter(cat => allStaff.some((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id))).map(cat => (
-                              <button key={cat.key} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('staff_category'); setResetStaffCategory(cat.key); setShowResetMenu(false); setShowResetDialog(true); }}>
-                                <div className={`w-8 h-8 rounded-full ${cat.color} flex items-center justify-center shrink-0`}><cat.icon className="h-3.5 w-3.5" /></div>
-                                <div>
-                                  <span className="text-sm text-foreground">{cat.label}</span>
-                                  <p className="text-[10px] text-muted-foreground">{allStaff.filter((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id)).length} {bn ? 'জন' : 'records'}</p>
-                                </div>
+                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
+                            {divisions.map((d: any) => (
+                              <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Home className="h-3.5 w-3.5 text-emerald-600" /></div>
+                                <span className="text-sm text-foreground">{bn ? d.name_bn : d.name}</span>
                               </button>
                             ))}
                           </div>
-                          <div className="border-t border-border/20 my-1" />
-                          <div className="px-2 py-1">
-                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট স্টাফ রিসেট করুন' : 'Reset Individual Staff'}</p>
-                            <div className="max-h-[180px] overflow-y-auto scrollbar-hidden hover:scrollbar-thin space-y-0.5">
-                              {(() => {
-                                const staffWithAttendance = allStaff.filter((s: any) => attendance.some((a: any) => a.entity_id === s.id));
-                                return staffWithAttendance.map((s: any) => (
-                                  <button key={s.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('single_staff'); setResetStaffId(s.id); setResetStaffName(bn ? s.name_bn : (s.name_en || s.name_bn)); setShowResetMenu(false); setShowResetDialog(true); }}>
-                                    <div className="w-7 h-7 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0"><UserCog className="h-3.5 w-3.5 text-rose-500" /></div>
-                                    <span className="text-sm text-foreground truncate">{bn ? s.name_bn : (s.name_en || s.name_bn)}</span>
-                                  </button>
-                                ));
-                              })()}
-                            </div>
-                          </div>
-                          {entityType === 'student' && (
-                            <>
-                              <div className="border-t border-border/20 my-1" />
-                              <div className="px-2 py-1">
-                                <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
-                                {divisions.map((d: any) => (
-                                  <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
-                                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Home className="h-3.5 w-3.5 text-emerald-600" /></div>
-                                    <span className="text-sm text-foreground">{bn ? d.name_bn : d.name}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </>
-                    )}
-                    <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-                      <DialogContent className="sm:max-w-md rounded-[32px] backdrop-blur-2xl bg-white/80 dark:bg-slate-900/80 border border-white/30 dark:border-white/10 shadow-2xl">
-                        <DialogHeader className="flex flex-col items-center text-center gap-3">
-                          <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-1">
-                            <RotateCcw className="w-8 h-8 text-rose-500" />
-                          </div>
-                          <DialogTitle className="text-xl font-bold text-foreground">
-                            {bn ? 'উপস্থিতি রিসেট নিশ্চিতকরণ' : 'Confirm Attendance Reset'}
-                          </DialogTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {resetType === 'student' && (bn ? 'আপনি কি নিশ্চিত যে শুধু ছাত্র হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only student attendance? This cannot be undone.')}
-                            {resetType === 'staff' && (bn ? 'আপনি কি নিশ্চিত যে শুধু স্টাফ হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only staff attendance? This cannot be undone.')}
-                            {resetType === 'division' && (() => { const div = divisions.find((d: any) => d.id === resetDivisionId); return bn ? `আপনি কি নিশ্চিত যে "${div?.name_bn || ''}" বিভাগের হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${div?.name || ''}" division? This cannot be undone.`; })()}
-                            {resetType === 'all' && (bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This cannot be undone.')}
-                            {resetType === 'single_staff' && (bn ? `আপনি কি নিশ্চিত যে "${resetStaffName}" এর হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${resetStaffName}"? This cannot be undone.`)}
-                            {resetType === 'staff_category' && (() => { const catLabels: Record<string, string> = { teacher: bn ? 'শিক্ষক' : 'Teacher', administrative: bn ? 'প্রশাসনিক' : 'Administrative', support: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff', general: bn ? 'সহায়ক কর্মী' : 'General Staff' }; return bn ? `আপনি কি নিশ্চিত যে "${catLabels[resetStaffCategory] || resetStaffCategory}" ক্যাটাগরির হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${catLabels[resetStaffCategory] || resetStaffCategory}" category? This cannot be undone.`; })()}
-                          </p>
-                        </DialogHeader>
-                        <div className="flex justify-center gap-3 pt-4">
-                          <Button variant="ghost" className="rounded-full px-6" onClick={() => setShowResetDialog(false)}>
-                            {bn ? 'না, থাক' : 'Cancel'}
-                          </Button>
-                          <Button className="rounded-full px-6 bg-rose-500 hover:bg-rose-600 text-white shadow-[0_0_15px_hsl(350_80%_55%/0.3)]" onClick={() => { resetMutation.mutate(resetType); setShowResetDialog(false); }}>
-                            {bn ? 'হ্যাঁ, রিসেট করুন' : 'Yes, Reset'}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Student Filters Row */}
-            {entityType === 'student' && (
-              <div className="flex flex-wrap gap-3 items-center">
-                {/* Sub-tabs: All / Residential */}
-                <Tabs value={studentSubTab} onValueChange={(v) => setStudentSubTab(v as any)} className="shrink-0">
-                  <TabsList>
-                    <TabsTrigger value="all">
-                      <Users className="h-4 w-4 mr-1" /> {bn ? 'সকল ছাত্র' : 'All Students'}
-                    </TabsTrigger>
-                    <TabsTrigger value="residential">
-                      <Home className="h-4 w-4 mr-1" /> {bn ? 'আবাসিক' : 'Residential'}
-                    </TabsTrigger>
-                    <TabsTrigger value="meal">
-                      <Utensils className="h-4 w-4 mr-1" /> {bn ? 'খাওয়া হাজিরা' : 'Meal'}
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-
-                {/* Student Meal Shift Selector */}
-                {studentSubTab === 'meal' && (
-                  <Tabs value={studentMealShift} onValueChange={setStudentMealShift} className="shrink-0">
-                    <TabsList>
-                      {MEAL_SHIFTS.map(sh => (
-                        <TabsTrigger key={sh.value} value={sh.value}>
-                          <sh.icon className="h-4 w-4 mr-1" /> {bn ? sh.labelBn : sh.labelEn}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </Tabs>
-                )}
-
+                        </>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 {/* Session Year (both tabs) */}
                 <Select value={selectedSessionYear} onValueChange={setSelectedSessionYear}>
                   <SelectTrigger className="w-36 h-8 text-xs">
