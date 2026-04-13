@@ -330,17 +330,38 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     },
   });
 
-  // Reset all attendance for current date/shift
+  // Reset attendance selectively
   const resetMutation = useMutation({
-    mutationFn: async () => {
-      const ids = attendance.map((a: any) => a.id);
+    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division') => {
+      let ids: string[] = [];
+      if (type === 'all') {
+        ids = attendance.map((a: any) => a.id);
+      } else if (type === 'student') {
+        // Get student entity IDs from students list
+        const studentIds = new Set(students.map((s: any) => s.id));
+        ids = attendance.filter((a: any) => studentIds.has(a.entity_id)).map((a: any) => a.id);
+      } else if (type === 'staff') {
+        const staffIds = new Set(staffList.map((s: any) => s.id));
+        ids = attendance.filter((a: any) => staffIds.has(a.entity_id)).map((a: any) => a.id);
+      } else if (type === 'division') {
+        // Get students of the selected division
+        const divStudentIds = new Set(students.filter((s: any) => s.division_id === resetDivisionId).map((s: any) => s.id));
+        ids = attendance.filter((a: any) => divStudentIds.has(a.entity_id)).map((a: any) => a.id);
+      }
       if (ids.length === 0) throw new Error('No records to reset');
       const { error } = await supabase.from('attendance_records').delete().in('id', ids);
       if (error) throw error;
+      return type;
     },
-    onSuccess: () => {
+    onSuccess: (_data, type) => {
       queryClient.invalidateQueries({ queryKey: ['attendance', selectedDate, entityType, effectiveShift] });
-      toast.success(bn ? 'উপস্থিতি রিসেট হয়েছে' : 'Attendance reset');
+      const labels: Record<string, string> = {
+        all: bn ? 'সকল উপস্থিতি' : 'All attendance',
+        student: bn ? 'ছাত্র হাজিরা' : 'Student attendance',
+        staff: bn ? 'স্টাফ হাজিরা' : 'Staff attendance',
+        division: bn ? 'বিভাগ হাজিরা' : 'Division attendance',
+      };
+      toast.success(bn ? `সাফল্যের সাথে ${labels[type]} রিসেট করা হয়েছে।` : `${labels[type]} reset successfully.`);
     },
     onError: () => toast.error(bn ? 'রিসেট করতে সমস্যা' : 'Failed to reset'),
   });
