@@ -89,6 +89,8 @@ const AdminSalary = () => {
   const [savingsDialog, setSavingsDialog] = useState<any>(null);
   const [savingsLedgerOpen, setSavingsLedgerOpen] = useState(false);
   const [mainTab, setMainTab] = useState('salary');
+  const [bonusYear, setBonusYear] = useState(String(now.getFullYear()));
+  const [bonusPercent, setBonusPercent] = useState(100);
 
   const monthYear = `${selectedYear}-${selectedMonth}`;
 
