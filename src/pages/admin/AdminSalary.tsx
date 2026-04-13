@@ -635,27 +635,172 @@ const AdminSalary = () => {
     return { totalBase, totalNet, totalDeduction, paid, pending };
   }, [salaryRecords]);
 
-  // Export CSV
-  const exportCSV = () => {
-    const BOM = '\uFEFF';
-    const headers = [bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation', bn ? 'মূল বেতন' : 'Base Salary',
-      bn ? 'বোনাস' : 'Bonus', bn ? 'ওভারটাইম' : 'Overtime', bn ? 'কর্তন' : 'Deductions', bn ? 'অগ্রিম' : 'Advance', bn ? 'নিট বেতন' : 'Net Salary', bn ? 'স্ট্যাটাস' : 'Status'];
-    const rows = filtered.map((s: any) => {
+  // Export Excel with proper Bengali support
+  const exportExcel = () => {
+    const monthName = MONTHS.find(m => m.value === selectedMonth);
+    const title = bn ? `বেতন শিট — ${monthName?.bn} ${selectedYear}` : `Salary Sheet — ${monthName?.en} ${selectedYear}`;
+    
+    // Fetch institution name
+    const instName = bn ? 'বেতন রিপোর্ট' : 'Salary Report';
+    
+    const wb = XLSX.utils.book_new();
+    const sheetData: any[][] = [];
+    
+    // Row 1: Title
+    sheetData.push([title]);
+    // Row 2: Date info
+    sheetData.push([`${bn ? 'তৈরির তারিখ' : 'Generated'}: ${new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-US')}`]);
+    // Row 3: Spacer
+    sheetData.push([]);
+    
+    // Row 4: Headers
+    const headers = [
+      '#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
+      bn ? 'মূল বেতন' : 'Base Salary', bn ? 'বোনাস' : 'Bonus',
+      bn ? 'ওভারটাইম' : 'Overtime', bn ? 'কর্তন' : 'Deductions',
+      bn ? 'অগ্রিম' : 'Advance', bn ? 'নিট বেতন' : 'Net Salary',
+      bn ? 'স্ট্যাটাস' : 'Status'
+    ];
+    sheetData.push(headers);
+    
+    // Data rows
+    filtered.forEach((s: any, idx: number) => {
       const rec = getRecord(s.id);
-      return [
-        s.name_bn, s.designation || '-',
-        rec?.base_salary || s.salary || 0, rec?.bonus || 0, rec?.overtime || 0,
-        (Number(rec?.late_deduction || 0) + Number(rec?.absence_deduction || 0) + Number(rec?.other_deduction || 0)),
-        rec?.advance_deduction || 0,
-        rec?.net_salary || 0, rec?.status || 'not_generated'
-      ].join(',');
+      const totalDed = Number(rec?.late_deduction || 0) + Number(rec?.absence_deduction || 0) + Number(rec?.other_deduction || 0);
+      const status = rec?.status === 'paid' ? (bn ? 'পরিশোধিত' : 'Paid') : 
+                     rec ? (bn ? 'বকেয়া' : 'Pending') : (bn ? 'জেনারেট হয়নি' : 'Not Generated');
+      sheetData.push([
+        idx + 1,
+        s.name_bn,
+        getDesignation(s.designation),
+        Number(rec?.base_salary || s.salary || 0),
+        Number(rec?.bonus || 0),
+        Number(rec?.overtime || 0),
+        totalDed,
+        Number(rec?.advance_deduction || 0),
+        Number(rec?.net_salary || 0),
+        status,
+      ]);
     });
-    const csv = BOM + [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `salary_${monthYear}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    
+    // Spacer
+    sheetData.push([]);
+    
+    // Summary row
+    const summaryRowIdx = sheetData.length;
+    sheetData.push([
+      '', bn ? 'মোট' : 'Total', `${filtered.length} ${bn ? 'জন' : 'staff'}`,
+      stats.totalBase, '', '', stats.totalDeduction, '', stats.totalNet, ''
+    ]);
+    
+    const ws = XLSX.utils.aoa_to_sheet(sheetData);
+    const totalCols = headers.length;
+    
+    // Merges for header rows
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } },
+    ];
+    
+    // Column widths
+    ws['!cols'] = [
+      { wch: 5 }, { wch: 28 }, { wch: 22 }, { wch: 14 }, { wch: 12 },
+      { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 16 },
+    ];
+    
+    // Row heights
+    ws['!rows'] = Array.from({ length: sheetData.length }, (_, i) => {
+      if (i === 0) return { hpt: 32 };
+      if (i === 1) return { hpt: 22 };
+      return { hpt: 25 };
+    });
+    
+    const thinBorder = {
+      top: { style: 'thin', color: { rgb: 'FFD1D5DB' } },
+      bottom: { style: 'thin', color: { rgb: 'FFD1D5DB' } },
+      left: { style: 'thin', color: { rgb: 'FFD1D5DB' } },
+      right: { style: 'thin', color: { rgb: 'FFD1D5DB' } },
+    };
+    
+    const headerRowIdx = 3;
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+    
+    for (let r = range.s.r; r <= range.e.r; r++) {
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+        if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
+        const cell = ws[cellRef];
+        if (!cell.s) cell.s = {};
+        
+        cell.s.font = { name: 'SutonnyOMJ', sz: 11, color: { rgb: 'FF1E293B' } };
+        cell.s.alignment = { vertical: 'center', horizontal: 'center', wrapText: true };
+        cell.s.border = thinBorder;
+        
+        // Title row
+        if (r === 0) {
+          cell.s.font = { name: 'SutonnyOMJ', sz: 16, bold: true, color: { rgb: 'FF064E3B' } };
+          cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+          cell.s.border = {};
+        }
+        if (r === 1) {
+          cell.s.font = { name: 'SutonnyOMJ', sz: 10, color: { rgb: 'FF64748B' } };
+          cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+          cell.s.border = {};
+        }
+        if (r === 2) { cell.s.border = {}; }
+        
+        // Header row
+        if (r === headerRowIdx) {
+          cell.s.fill = { fgColor: { rgb: 'FF059669' } };
+          cell.s.font = { name: 'SutonnyOMJ', sz: 11, bold: true, color: { rgb: 'FFFFFFFF' } };
+          cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+        }
+        
+        // Data rows — left-align name & designation
+        if (r > headerRowIdx && r < summaryRowIdx) {
+          if (c === 1 || c === 2) {
+            cell.s.alignment = { horizontal: 'left', vertical: 'center', wrapText: true };
+          }
+          // Zebra striping
+          if ((r - headerRowIdx - 1) % 2 === 1) {
+            cell.s.fill = { fgColor: { rgb: 'FFF8FAFC' } };
+          }
+          // Status conditional formatting
+          if (c === 9) {
+            const val = String(cell.v || '');
+            if (val === 'পরিশোধিত' || val === 'Paid') {
+              cell.s.font = { ...cell.s.font, color: { rgb: 'FF16A34A' }, bold: true };
+            } else if (val === 'বকেয়া' || val === 'Pending') {
+              cell.s.font = { ...cell.s.font, color: { rgb: 'FFEA580C' }, bold: true };
+            }
+          }
+          // Deduction column red
+          if (c === 6 || c === 7) {
+            const numVal = Number(cell.v || 0);
+            if (numVal > 0) cell.s.font = { ...cell.s.font, color: { rgb: 'FFDC2626' } };
+          }
+          // Net salary green
+          if (c === 8) {
+            cell.s.font = { ...cell.s.font, color: { rgb: 'FF059669' }, bold: true };
+          }
+        }
+        
+        // Summary row
+        if (r >= summaryRowIdx) {
+          cell.s.fill = { fgColor: { rgb: 'FFF1F5F9' } };
+          cell.s.font = { name: 'SutonnyOMJ', sz: 11, bold: true, color: { rgb: 'FF0F172A' } };
+          cell.s.border = {
+            top: { style: 'medium', color: { rgb: 'FF94A3B8' } },
+            bottom: { style: 'medium', color: { rgb: 'FF94A3B8' } },
+            left: { style: 'medium', color: { rgb: 'FF94A3B8' } },
+            right: { style: 'medium', color: { rgb: 'FF94A3B8' } },
+          };
+        }
+      }
+    }
+    
+    XLSX.utils.book_append_sheet(wb, ws, (bn ? 'বেতন শিট' : 'Salary Sheet').slice(0, 31));
+    XLSX.writeFile(wb, `salary_${monthYear}.xlsx`, { bookType: 'xlsx', cellStyles: true });
   };
 
   // Export PDF via edge function
