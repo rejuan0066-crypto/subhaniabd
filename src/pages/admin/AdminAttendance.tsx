@@ -1330,6 +1330,41 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </div>
               </div>
 
+              {/* Category-wise Fulltime Shift Times - Staff only */}
+              {entityType === 'staff' && (
+              <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
+                <Label className="font-semibold flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  {bn ? 'ক্যাটাগরি অনুযায়ী ফুল টাইম শিফট' : 'Fulltime Shift by Category'}
+                </Label>
+                {[
+                  { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher' },
+                  { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative' },
+                  { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff' },
+                  { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff' },
+                ].map(cat => (
+                  <div key={cat.key} className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">{cat.label}</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
+                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.start || '08:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], start: e.target.value } }))} />
+                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.start || '08:00')}</span>
+                      </div>
+                      <div>
+                        <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
+                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.end || '17:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], end: e.target.value } }))} />
+                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.end || '17:00')}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <Button size="sm" className="w-full" onClick={() => saveCategoryTimesMutation.mutate(categoryShiftTimes)}>
+                  <Save className="h-3 w-3 mr-1" /> {bn ? 'ক্যাটাগরি শিফট সেভ করুন' : 'Save Category Shifts'}
+                </Button>
+              </div>
+              )}
+
               {/* Residential Duty Times - Staff only */}
               {entityType === 'staff' && (
               <div className="border rounded-lg p-3 bg-muted/20 space-y-3">
