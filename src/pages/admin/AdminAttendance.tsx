@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { TimePicker } from '@/components/ui/time-picker';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -1228,25 +1229,23 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   {entityType === 'staff' && staffSubTab !== 'meal' && (
                     <div className="flex gap-1 items-center shrink-0">
                       <div className="flex flex-col items-center">
-                        <Input
-                          type="time"
-                          className="h-7 w-24 text-xs"
+                        <TimePicker
+                          className="h-7 w-28 text-xs"
                           placeholder="In"
+                          displayFormat={timeFormat}
                           value={att?.check_in_time || ''}
-                          onChange={e => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: e.target.value, check_out_time: att?.check_out_time || '' })}
+                          onChange={v => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: v, check_out_time: att?.check_out_time || '' })}
                         />
-                        {att?.check_in_time && <span className="text-[9px] text-muted-foreground">{fmt(att.check_in_time)}</span>}
                       </div>
                       <span className="text-[10px] text-muted-foreground">-</span>
                       <div className="flex flex-col items-center">
-                        <Input
-                          type="time"
-                          className="h-7 w-24 text-xs"
+                        <TimePicker
+                          className="h-7 w-28 text-xs"
                           placeholder="Out"
+                          displayFormat={timeFormat}
                           value={att?.check_out_time || ''}
-                          onChange={e => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: att?.check_in_time || '', check_out_time: e.target.value })}
+                          onChange={v => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: att?.check_in_time || '', check_out_time: v })}
                         />
-                        {att?.check_out_time && <span className="text-[9px] text-muted-foreground">{fmt(att.check_out_time)}</span>}
                       </div>
                     </div>
                   )}
@@ -1360,13 +1359,11 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
-                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.start || '08:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], start: e.target.value } }))} />
-                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.start || '08:00')}</span>
+                        <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={categoryShiftTimes[cat.key]?.start || '08:00'} onChange={v => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], start: v } }))} />
                       </div>
                       <div>
                         <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
-                        <Input type="time" className="h-8 text-sm" value={categoryShiftTimes[cat.key]?.end || '17:00'} onChange={e => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], end: e.target.value } }))} />
-                        <span className="text-[10px] text-primary font-medium">{fmt(categoryShiftTimes[cat.key]?.end || '17:00')}</span>
+                        <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={categoryShiftTimes[cat.key]?.end || '17:00'} onChange={v => setCategoryShiftTimes(p => ({ ...p, [cat.key]: { ...p[cat.key], end: v } }))} />
                       </div>
                     </div>
                   </div>
@@ -1389,13 +1386,11 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
-                      <Input type="time" className="h-8 text-sm" value={dutyTimes.morning_start} onChange={e => setDutyTimes(p => ({ ...p, morning_start: e.target.value }))} />
-                      <span className="text-[10px] text-primary font-medium">{fmt(dutyTimes.morning_start)}</span>
+                      <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={dutyTimes.morning_start} onChange={v => setDutyTimes(p => ({ ...p, morning_start: v }))} />
                     </div>
                     <div>
                       <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
-                      <Input type="time" className="h-8 text-sm" value={dutyTimes.morning_end} onChange={e => setDutyTimes(p => ({ ...p, morning_end: e.target.value }))} />
-                      <span className="text-[10px] text-primary font-medium">{fmt(dutyTimes.morning_end)}</span>
+                      <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={dutyTimes.morning_end} onChange={v => setDutyTimes(p => ({ ...p, morning_end: v }))} />
                     </div>
                   </div>
                 </div>
@@ -1404,13 +1399,11 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-[10px]">{bn ? 'শুরু' : 'Start'}</Label>
-                      <Input type="time" className="h-8 text-sm" value={dutyTimes.evening_start} onChange={e => setDutyTimes(p => ({ ...p, evening_start: e.target.value }))} />
-                      <span className="text-[10px] text-primary font-medium">{fmt(dutyTimes.evening_start)}</span>
+                      <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={dutyTimes.evening_start} onChange={v => setDutyTimes(p => ({ ...p, evening_start: v }))} />
                     </div>
                     <div>
                       <Label className="text-[10px]">{bn ? 'শেষ' : 'End'}</Label>
-                      <Input type="time" className="h-8 text-sm" value={dutyTimes.evening_end} onChange={e => setDutyTimes(p => ({ ...p, evening_end: e.target.value }))} />
-                      <span className="text-[10px] text-primary font-medium">{fmt(dutyTimes.evening_end)}</span>
+                      <TimePicker className="h-8 text-sm" displayFormat={timeFormat} value={dutyTimes.evening_end} onChange={v => setDutyTimes(p => ({ ...p, evening_end: v }))} />
                     </div>
                   </div>
                 </div>
