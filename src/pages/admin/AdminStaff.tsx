@@ -150,12 +150,17 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
 
   const categoryMutation = useMutation({
     mutationFn: async ({ id, category }: { id: string; category: string }) => {
-      const { error } = await supabase.from('staff').update({ staff_category: category } as any).eq('id', id);
+      // Find the first designation matching the new category
+      const matchingDesignation = designationsList.find((d: any) => d.staff_category === category);
+      const newDesignation = matchingDesignation ? (bn ? matchingDesignation.name_bn : matchingDesignation.name) : null;
+      const updateData: any = { staff_category: category };
+      if (newDesignation) updateData.designation = newDesignation;
+      const { error } = await supabase.from('staff').update(updateData).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast.success(bn ? 'ক্যাটাগরি পরিবর্তন হয়েছে' : 'Category updated');
+      toast.success(bn ? 'ক্যাটাগরি ও পদবী পরিবর্তন হয়েছে' : 'Category & designation updated');
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
