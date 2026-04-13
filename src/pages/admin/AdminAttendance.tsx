@@ -1033,7 +1033,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
               <Send className="h-4 w-4 mr-1" /> {bn ? 'দৈনিক সারসংক্ষেপ' : 'Daily Summary'}
             </Button>
             <Button variant="outline" size="sm" onClick={handleDownloadCSV}>
-              <Download className="h-4 w-4 mr-1" /> {bn ? 'ডাউনলোড' : 'Download'}
+              <Download className="h-4 w-4 mr-1" /> {bn ? 'এক্সেল' : 'Excel'}
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-1" /> {bn ? 'প্রিন্ট' : 'Print'}
