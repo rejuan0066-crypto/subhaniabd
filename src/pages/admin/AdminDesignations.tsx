@@ -8,12 +8,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Pencil, Trash2, Loader2, Search, Tag } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Pencil, Trash2, Loader2, Search, Tag, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+
+const COLOR_OPTIONS = [
+  { value: 'blue', label: 'Blue', className: 'bg-blue-500/10 text-blue-600 border-blue-500/30' },
+  { value: 'purple', label: 'Purple', className: 'bg-purple-500/10 text-purple-600 border-purple-500/30' },
+  { value: 'cyan', label: 'Cyan', className: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30' },
+  { value: 'orange', label: 'Orange', className: 'bg-orange-500/10 text-orange-600 border-orange-500/30' },
+  { value: 'green', label: 'Green', className: 'bg-green-500/10 text-green-600 border-green-500/30' },
+  { value: 'red', label: 'Red', className: 'bg-red-500/10 text-red-600 border-red-500/30' },
+  { value: 'pink', label: 'Pink', className: 'bg-pink-500/10 text-pink-600 border-pink-500/30' },
+  { value: 'yellow', label: 'Yellow', className: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30' },
+  { value: 'gray', label: 'Gray', className: 'bg-gray-500/10 text-gray-600 border-gray-500/30' },
+];
+
+const getColorClass = (color: string) => COLOR_OPTIONS.find(c => c.value === color)?.className || 'bg-gray-500/10 text-gray-600 border-gray-500/30';
 
 const AdminDesignations = () => {
   const { language } = useLanguage();
@@ -21,97 +36,91 @@ const AdminDesignations = () => {
   const queryClient = useQueryClient();
   const { canAddItem, canEditItem, canDeleteItem } = usePagePermissions('/admin/designations');
 
-  const [search, setSearch] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  // Form state
-  const [name, setName] = useState('');
-  const [nameBn, setNameBn] = useState('');
-  const [description, setDescription] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
-  const [isActive, setIsActive] = useState(true);
-  const [staffCategory, setStaffCategory] = useState('general');
-
-  const { data: designations = [], isLoading } = useQuery({
-    queryKey: ['designations'],
+  // ─── Staff Categories ───
+  const { data: staffCategories = [], isLoading: catLoading } = useQuery({
+    queryKey: ['staff_categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('designations')
-        .select('*')
-        .order('sort_order', { ascending: true });
+      const { data, error } = await supabase.from('staff_categories').select('*').order('sort_order', { ascending: true });
       if (error) throw error;
       return data;
     },
   });
 
-  const resetForm = () => {
-    setName('');
-    setNameBn('');
-    setDescription('');
-    setSortOrder(0);
-    setIsActive(true);
-    setStaffCategory('general');
-    setEditItem(null);
-  };
+  // ─── Designations ───
+  const [search, setSearch] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [nameBn, setNameBn] = useState('');
+  const [description, setDescription] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
+  const [isActive, setIsActive] = useState(true);
+  const [staffCategory, setStaffCategory] = useState('');
 
-  const openAdd = () => {
-    resetForm();
-    setDialogOpen(true);
-  };
+  // ─── Category Dialog ───
+  const [catDialogOpen, setCatDialogOpen] = useState(false);
+  const [catEditItem, setCatEditItem] = useState<any>(null);
+  const [catDeleteId, setCatDeleteId] = useState<string | null>(null);
+  const [catKey, setCatKey] = useState('');
+  const [catName, setCatName] = useState('');
+  const [catNameBn, setCatNameBn] = useState('');
+  const [catRoutePath, setCatRoutePath] = useState('');
+  const [catColor, setCatColor] = useState('gray');
+  const [catSortOrder, setCatSortOrder] = useState(0);
+  const [catIsActive, setCatIsActive] = useState(true);
+  const [catDescription, setCatDescription] = useState('');
 
-  const openEdit = (item: any) => {
-    setEditItem(item);
-    setName(item.name || '');
-    setNameBn(item.name_bn || '');
-    setDescription(item.description || '');
-    setSortOrder(item.sort_order || 0);
-    setIsActive(item.is_active ?? true);
-    setStaffCategory(item.staff_category || 'general');
-    setDialogOpen(true);
-  };
+  const { data: designations = [], isLoading } = useQuery({
+    queryKey: ['designations'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('designations').select('*').order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // ─── Designation helpers ───
+  const resetForm = () => { setName(''); setNameBn(''); setDescription(''); setSortOrder(0); setIsActive(true); setStaffCategory(staffCategories[0]?.key || ''); setEditItem(null); };
+  const openAdd = () => { resetForm(); setStaffCategory(staffCategories[0]?.key || ''); setDialogOpen(true); };
+  const openEdit = (item: any) => { setEditItem(item); setName(item.name || ''); setNameBn(item.name_bn || ''); setDescription(item.description || ''); setSortOrder(item.sort_order || 0); setIsActive(item.is_active ?? true); setStaffCategory(item.staff_category || ''); setDialogOpen(true); };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!name.trim() || !nameBn.trim()) throw new Error(bn ? 'নাম আবশ্যক' : 'Name is required');
-
-      const record = {
-        name: name.trim(),
-        name_bn: nameBn.trim(),
-        description: description.trim() || null,
-        sort_order: sortOrder,
-        is_active: isActive,
-        staff_category: staffCategory,
-      };
-
-      if (editItem) {
-        const { error } = await supabase.from('designations').update(record).eq('id', editItem.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('designations').insert(record);
-        if (error) throw error;
-      }
+      const record = { name: name.trim(), name_bn: nameBn.trim(), description: description.trim() || null, sort_order: sortOrder, is_active: isActive, staff_category: staffCategory };
+      if (editItem) { const { error } = await supabase.from('designations').update(record).eq('id', editItem.id); if (error) throw error; }
+      else { const { error } = await supabase.from('designations').insert(record); if (error) throw error; }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['designations'] });
-      toast.success(editItem ? (bn ? 'পদবি আপডেট হয়েছে' : 'Designation updated') : (bn ? 'পদবি যোগ হয়েছে' : 'Designation added'));
-      setDialogOpen(false);
-      resetForm();
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['designations'] }); toast.success(editItem ? (bn ? 'পদবি আপডেট হয়েছে' : 'Designation updated') : (bn ? 'পদবি যোগ হয়েছে' : 'Designation added')); setDialogOpen(false); resetForm(); },
     onError: (e: any) => toast.error(e.message || 'Error'),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('designations').delete().eq('id', id);
-      if (error) throw error;
+    mutationFn: async (id: string) => { const { error } = await supabase.from('designations').delete().eq('id', id); if (error) throw error; },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['designations'] }); toast.success(bn ? 'পদবি মুছে ফেলা হয়েছে' : 'Designation deleted'); setDeleteId(null); },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
+  });
+
+  // ─── Category helpers ───
+  const resetCatForm = () => { setCatKey(''); setCatName(''); setCatNameBn(''); setCatRoutePath(''); setCatColor('gray'); setCatSortOrder(0); setCatIsActive(true); setCatDescription(''); setCatEditItem(null); };
+  const openCatAdd = () => { resetCatForm(); setCatDialogOpen(true); };
+  const openCatEdit = (item: any) => { setCatEditItem(item); setCatKey(item.key || ''); setCatName(item.name || ''); setCatNameBn(item.name_bn || ''); setCatRoutePath(item.route_path || ''); setCatColor(item.color || 'gray'); setCatSortOrder(item.sort_order || 0); setCatIsActive(item.is_active ?? true); setCatDescription(item.description || ''); setCatDialogOpen(true); };
+
+  const saveCatMutation = useMutation({
+    mutationFn: async () => {
+      if (!catName.trim() || !catNameBn.trim() || !catKey.trim()) throw new Error(bn ? 'নাম ও কী আবশ্যক' : 'Name and Key are required');
+      const record = { key: catKey.trim().toLowerCase().replace(/\s+/g, '_'), name: catName.trim(), name_bn: catNameBn.trim(), description: catDescription.trim() || null, route_path: catRoutePath.trim() || null, color: catColor, sort_order: catSortOrder, is_active: catIsActive };
+      if (catEditItem) { const { error } = await supabase.from('staff_categories').update(record).eq('id', catEditItem.id); if (error) throw error; }
+      else { const { error } = await supabase.from('staff_categories').insert(record); if (error) throw error; }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['designations'] });
-      toast.success(bn ? 'পদবি মুছে ফেলা হয়েছে' : 'Designation deleted');
-      setDeleteId(null);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['staff_categories'] }); toast.success(catEditItem ? (bn ? 'ক্যাটাগরি আপডেট হয়েছে' : 'Category updated') : (bn ? 'ক্যাটাগরি যোগ হয়েছে' : 'Category added')); setCatDialogOpen(false); resetCatForm(); },
+    onError: (e: any) => toast.error(e.message || 'Error'),
+  });
+
+  const deleteCatMutation = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from('staff_categories').delete().eq('id', id); if (error) throw error; },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['staff_categories'] }); toast.success(bn ? 'ক্যাটাগরি মুছে ফেলা হয়েছে' : 'Category deleted'); setCatDeleteId(null); },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
 
@@ -121,139 +130,174 @@ const AdminDesignations = () => {
     return d.name?.toLowerCase().includes(q) || d.name_bn?.toLowerCase().includes(q);
   });
 
+  const getCategoryLabel = (key: string) => {
+    const cat = staffCategories.find((c: any) => c.key === key);
+    return cat ? (bn ? cat.name_bn : cat.name) : key;
+  };
+
+  const getCategoryColor = (key: string) => {
+    const cat = staffCategories.find((c: any) => c.key === key);
+    return getColorClass(cat?.color || 'gray');
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
-              <Tag className="w-6 h-6 text-primary" />
-              {bn ? 'পদবি ব্যবস্থাপনা' : 'Designation Management'}
-            </h1>
-            <p className="text-sm text-muted-foreground">{bn ? `মোট ${designations.length}টি পদবি` : `Total ${designations.length} designations`}</p>
-          </div>
-          {canAddItem && (
-            <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
-              <Plus className="w-4 h-4" /> {bn ? 'নতুন পদবি' : 'Add Designation'}
-            </Button>
-          )}
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
+            <Tag className="w-6 h-6 text-primary" />
+            {bn ? 'পদবি ও ক্যাটাগরি ব্যবস্থাপনা' : 'Designation & Category Management'}
+          </h1>
+          <p className="text-sm text-muted-foreground">{bn ? 'পদবি ও স্টাফ ক্যাটাগরি পরিচালনা করুন' : 'Manage designations and staff categories'}</p>
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input placeholder={bn ? 'পদবি খুঁজুন...' : 'Search designations...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
-          </div>
-        </div>
+        <Tabs defaultValue="designations" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="designations" className="flex items-center gap-1.5"><Tag className="w-4 h-4" /> {bn ? 'পদবি' : 'Designations'}</TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-1.5"><FolderOpen className="w-4 h-4" /> {bn ? 'ক্যাটাগরি' : 'Categories'}</TabsTrigger>
+          </TabsList>
 
-        <div className="card-elevated overflow-hidden">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-secondary/50">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (বাংলা)' : 'Name (Bangla)'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (ইংরেজি)' : 'Name (English)'}</th>
-                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'বিবরণ' : 'Description'}</th>
-                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
-                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filtered.map((d: any, i: number) => (
-                    <tr key={d.id} className="hover:bg-secondary/30 transition-colors">
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{i + 1}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-foreground">{d.name_bn}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{d.name}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{d.description || '—'}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline" className={
-                          d.staff_category === 'teacher' ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' :
-                          d.staff_category === 'administrative' ? 'bg-purple-500/10 text-purple-600 border-purple-500/30' :
-                          d.staff_category === 'support' ? 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30' :
-                          'bg-orange-500/10 text-orange-600 border-orange-500/30'
-                        }>
-                          {d.staff_category === 'teacher' ? (bn ? 'শিক্ষক' : 'Teacher') : d.staff_category === 'administrative' ? (bn ? 'প্রশাসনিক' : 'Administrative') : d.staff_category === 'support' ? (bn ? 'অফিস কর্মচারী' : 'Support Staff') : (bn ? 'সহায়ক কর্মী' : 'General Staff')}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline" className={d.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
-                          {d.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {canEditItem && (
-                            <button onClick={() => openEdit(d)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary" title={bn ? 'সম্পাদনা' : 'Edit'}>
-                              <Pencil className="w-4 h-4" />
-                            </button>
-                          )}
-                          {canDeleteItem && (
-                            <button onClick={() => setDeleteId(d.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive" title={bn ? 'মুছুন' : 'Delete'}>
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {filtered.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো পদবি পাওয়া যায়নি' : 'No designations found'}</td></tr>
-                  )}
-                </tbody>
-              </table>
+          {/* ─── Designations Tab ─── */}
+          <TabsContent value="designations" className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="relative max-w-md w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Input placeholder={bn ? 'পদবি খুঁজুন...' : 'Search designations...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
+              </div>
+              {canAddItem && (
+                <Button onClick={openAdd} className="btn-primary-gradient flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> {bn ? 'নতুন পদবি' : 'Add Designation'}
+                </Button>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Add/Edit Dialog */}
+            <div className="card-elevated overflow-hidden">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-secondary/50">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (বাংলা)' : 'Name (BN)'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবি (ইংরেজি)' : 'Name (EN)'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filtered.map((d: any, i: number) => (
+                        <tr key={d.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{i + 1}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-foreground">{d.name_bn}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{d.name}</td>
+                          <td className="px-4 py-3"><Badge variant="outline" className={getCategoryColor(d.staff_category)}>{getCategoryLabel(d.staff_category)}</Badge></td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className={d.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
+                              {d.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {canEditItem && <button onClick={() => openEdit(d)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>}
+                              {canDeleteItem && <button onClick={() => setDeleteId(d.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filtered.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো পদবি পাওয়া যায়নি' : 'No designations found'}</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ─── Categories Tab ─── */}
+          <TabsContent value="categories" className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">{bn ? `মোট ${staffCategories.length}টি ক্যাটাগরি` : `Total ${staffCategories.length} categories`}</p>
+              {canAddItem && (
+                <Button onClick={openCatAdd} className="btn-primary-gradient flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> {bn ? 'নতুন ক্যাটাগরি' : 'Add Category'}
+                </Button>
+              )}
+            </div>
+
+            <div className="card-elevated overflow-hidden">
+              {catLoading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-secondary/50">
+                      <tr>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'কী' : 'Key'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম (বাংলা)' : 'Name (BN)'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম (ইংরেজি)' : 'Name (EN)'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রাউট পাথ' : 'Route Path'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রঙ' : 'Color'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                        <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {staffCategories.map((c: any, i: number) => (
+                        <tr key={c.id} className="hover:bg-secondary/30 transition-colors">
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{i + 1}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{c.key}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-foreground">{c.name_bn}</td>
+                          <td className="px-4 py-3 text-sm text-muted-foreground">{c.name}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{c.route_path || '—'}</td>
+                          <td className="px-4 py-3"><Badge variant="outline" className={getColorClass(c.color)}>{c.color}</Badge></td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className={c.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
+                              {c.is_active ? (bn ? 'সক্রিয়' : 'Active') : (bn ? 'নিষ্ক্রিয়' : 'Inactive')}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              {canEditItem && <button onClick={() => openCatEdit(c)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-primary"><Pencil className="w-4 h-4" /></button>}
+                              {canDeleteItem && <button onClick={() => setCatDeleteId(c.id)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button>}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {staffCategories.length === 0 && <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটাগরি নেই' : 'No categories found'}</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* ─── Designation Add/Edit Dialog ─── */}
         <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setDialogOpen(false); resetForm(); } }}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Tag className="w-5 h-5 text-primary" />
-                {editItem ? (bn ? 'পদবি সম্পাদনা' : 'Edit Designation') : (bn ? 'নতুন পদবি যোগ করুন' : 'Add New Designation')}
-              </DialogTitle>
+              <DialogTitle className="flex items-center gap-2"><Tag className="w-5 h-5 text-primary" /> {editItem ? (bn ? 'পদবি সম্পাদনা' : 'Edit Designation') : (bn ? 'নতুন পদবি যোগ করুন' : 'Add New Designation')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
+              <div><Label>{bn ? 'পদবি (বাংলা)' : 'Name (Bangla)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1" value={nameBn} onChange={e => setNameBn(e.target.value)} placeholder={bn ? 'যেমন: প্রধান শিক্ষক' : 'e.g. প্রধান শিক্ষক'} /></div>
+              <div><Label>{bn ? 'পদবি (ইংরেজি)' : 'Name (English)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1" value={name} onChange={e => setName(e.target.value)} placeholder={bn ? 'যেমন: Head Teacher' : 'e.g. Head Teacher'} /></div>
+              <div><Label>{bn ? 'বিবরণ' : 'Description'}</Label><Input className="bg-background mt-1" value={description} onChange={e => setDescription(e.target.value)} placeholder={bn ? 'ঐচ্ছিক' : 'Optional'} /></div>
               <div>
-                <Label>{bn ? 'পদবি (বাংলা)' : 'Name (Bangla)'} <span className="text-destructive">*</span></Label>
-                <Input className="bg-background mt-1" value={nameBn} onChange={e => setNameBn(e.target.value)} placeholder={bn ? 'যেমন: প্রধান শিক্ষক' : 'e.g. প্রধান শিক্ষক'} />
-              </div>
-              <div>
-                <Label>{bn ? 'পদবি (ইংরেজি)' : 'Name (English)'} <span className="text-destructive">*</span></Label>
-                <Input className="bg-background mt-1" value={name} onChange={e => setName(e.target.value)} placeholder={bn ? 'যেমন: Head Teacher' : 'e.g. Head Teacher'} />
-              </div>
-              <div>
-                <Label>{bn ? 'বিবরণ' : 'Description'}</Label>
-                <Input className="bg-background mt-1" value={description} onChange={e => setDescription(e.target.value)} placeholder={bn ? 'ঐচ্ছিক' : 'Optional'} />
-              </div>
-              <div>
-                <Label>{bn ? 'ক্যাটাগরি (পাথ)' : 'Category (Path)'} <span className="text-destructive">*</span></Label>
+                <Label>{bn ? 'ক্যাটাগরি' : 'Category'} <span className="text-destructive">*</span></Label>
                 <Select value={staffCategory} onValueChange={setStaffCategory}>
-                  <SelectTrigger className="bg-background mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'ক্যাটাগরি নির্বাচন করুন' : 'Select category'} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="teacher">{bn ? 'শিক্ষক (/admin/teachers)' : 'Teacher (/admin/teachers)'}</SelectItem>
-                    <SelectItem value="administrative">{bn ? 'প্রশাসনিক কর্মকর্তা (/admin/administrative-staff)' : 'Administrative (/admin/administrative-staff)'}</SelectItem>
-                    <SelectItem value="support">{bn ? 'অফিস কর্মচারী (/admin/support-staff)' : 'Support Staff (/admin/support-staff)'}</SelectItem>
-                    <SelectItem value="general">{bn ? 'সহায়ক কর্মী (/admin/general-staff)' : 'General/Service Staff (/admin/general-staff)'}</SelectItem>
+                    {staffCategories.filter((c: any) => c.is_active).map((c: any) => (
+                      <SelectItem key={c.key} value={c.key}>{bn ? c.name_bn : c.name} {c.route_path ? `(${c.route_path})` : ''}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label>{bn ? 'ক্রম' : 'Sort Order'}</Label>
-                <Input type="number" className="bg-background mt-1 w-24" value={sortOrder} onChange={e => setSortOrder(parseInt(e.target.value) || 0)} />
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch checked={isActive} onCheckedChange={setIsActive} />
-                <Label>{bn ? 'সক্রিয়' : 'Active'}</Label>
-              </div>
+              <div><Label>{bn ? 'ক্রম' : 'Sort Order'}</Label><Input type="number" className="bg-background mt-1 w-24" value={sortOrder} onChange={e => setSortOrder(parseInt(e.target.value) || 0)} /></div>
+              <div className="flex items-center gap-3"><Switch checked={isActive} onCheckedChange={setIsActive} /><Label>{bn ? 'সক্রিয়' : 'Active'}</Label></div>
               <Button onClick={() => saveMutation.mutate()} className="btn-primary-gradient w-full" disabled={saveMutation.isPending}>
                 {saveMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {editItem ? (bn ? 'আপডেট করুন' : 'Update') : (bn ? 'যোগ করুন' : 'Add')}
@@ -262,20 +306,59 @@ const AdminDesignations = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Delete confirmation */}
+        {/* ─── Category Add/Edit Dialog ─── */}
+        <Dialog open={catDialogOpen} onOpenChange={(open) => { if (!open) { setCatDialogOpen(false); resetCatForm(); } }}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><FolderOpen className="w-5 h-5 text-primary" /> {catEditItem ? (bn ? 'ক্যাটাগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটাগরি যোগ করুন' : 'Add New Category')}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div><Label>{bn ? 'কী (ইউনিক)' : 'Key (unique)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1 font-mono" value={catKey} onChange={e => setCatKey(e.target.value)} placeholder="e.g. teacher" disabled={!!catEditItem} /></div>
+              <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1" value={catNameBn} onChange={e => setCatNameBn(e.target.value)} placeholder={bn ? 'যেমন: শিক্ষক' : 'e.g. শিক্ষক'} /></div>
+              <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1" value={catName} onChange={e => setCatName(e.target.value)} placeholder="e.g. Teacher" /></div>
+              <div><Label>{bn ? 'বিবরণ' : 'Description'}</Label><Input className="bg-background mt-1" value={catDescription} onChange={e => setCatDescription(e.target.value)} placeholder={bn ? 'ঐচ্ছিক' : 'Optional'} /></div>
+              <div><Label>{bn ? 'রাউট পাথ' : 'Route Path'}</Label><Input className="bg-background mt-1 font-mono" value={catRoutePath} onChange={e => setCatRoutePath(e.target.value)} placeholder="/admin/teachers" /></div>
+              <div>
+                <Label>{bn ? 'রঙ' : 'Color'}</Label>
+                <Select value={catColor} onValueChange={setCatColor}>
+                  <SelectTrigger className="bg-background mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {COLOR_OPTIONS.map(c => (
+                      <SelectItem key={c.value} value={c.value}>
+                        <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full bg-${c.value}-500`} /> {c.label}</div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div><Label>{bn ? 'ক্রম' : 'Sort Order'}</Label><Input type="number" className="bg-background mt-1 w-24" value={catSortOrder} onChange={e => setCatSortOrder(parseInt(e.target.value) || 0)} /></div>
+              <div className="flex items-center gap-3"><Switch checked={catIsActive} onCheckedChange={setCatIsActive} /><Label>{bn ? 'সক্রিয়' : 'Active'}</Label></div>
+              <Button onClick={() => saveCatMutation.mutate()} className="btn-primary-gradient w-full" disabled={saveCatMutation.isPending}>
+                {saveCatMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {catEditItem ? (bn ? 'আপডেট করুন' : 'Update') : (bn ? 'যোগ করুন' : 'Add')}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* ─── Designation Delete ─── */}
         <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
           <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{bn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {bn ? 'এই পদবি স্থায়ীভাবে মুছে ফেলা হবে।' : 'This designation will be permanently deleted.'}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+            <AlertDialogHeader><AlertDialogTitle>{bn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}</AlertDialogTitle><AlertDialogDescription>{bn ? 'এই পদবি স্থায়ীভাবে মুছে ফেলা হবে।' : 'This designation will be permanently deleted.'}</AlertDialogDescription></AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{bn ? 'বাতিল' : 'Cancel'}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => deleteId && deleteMutation.mutate(deleteId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                {bn ? 'মুছুন' : 'Delete'}
-              </AlertDialogAction>
+              <AlertDialogAction onClick={() => deleteId && deleteMutation.mutate(deleteId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{bn ? 'মুছুন' : 'Delete'}</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* ─── Category Delete ─── */}
+        <AlertDialog open={!!catDeleteId} onOpenChange={(open) => !open && setCatDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader><AlertDialogTitle>{bn ? 'আপনি কি নিশ্চিত?' : 'Are you sure?'}</AlertDialogTitle><AlertDialogDescription>{bn ? 'এই ক্যাটাগরি মুছে ফেলা হলে সংশ্লিষ্ট পদবিগুলো প্রভাবিত হতে পারে।' : 'Deleting this category may affect related designations.'}</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{bn ? 'বাতিল' : 'Cancel'}</AlertDialogCancel>
+              <AlertDialogAction onClick={() => catDeleteId && deleteCatMutation.mutate(catDeleteId)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{bn ? 'মুছুন' : 'Delete'}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
