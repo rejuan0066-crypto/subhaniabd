@@ -103,14 +103,17 @@ const AdminDesignations = () => {
   });
 
   // ─── Category helpers ───
-  const resetCatForm = () => { setCatKey(''); setCatName(''); setCatNameBn(''); setCatRoutePath(''); setCatColor('gray'); setCatSortOrder(0); setCatIsActive(true); setCatDescription(''); setCatEditItem(null); };
+  const [catIdPrefix, setCatIdPrefix] = useState('');
+  const [catIdStartRange, setCatIdStartRange] = useState(1001);
+
+  const resetCatForm = () => { setCatKey(''); setCatName(''); setCatNameBn(''); setCatRoutePath(''); setCatColor('gray'); setCatSortOrder(0); setCatIsActive(true); setCatDescription(''); setCatIdPrefix(''); setCatIdStartRange(1001); setCatEditItem(null); };
   const openCatAdd = () => { resetCatForm(); setCatDialogOpen(true); };
-  const openCatEdit = (item: any) => { setCatEditItem(item); setCatKey(item.key || ''); setCatName(item.name || ''); setCatNameBn(item.name_bn || ''); setCatRoutePath(item.route_path || ''); setCatColor(item.color || 'gray'); setCatSortOrder(item.sort_order || 0); setCatIsActive(item.is_active ?? true); setCatDescription(item.description || ''); setCatDialogOpen(true); };
+  const openCatEdit = (item: any) => { setCatEditItem(item); setCatKey(item.key || ''); setCatName(item.name || ''); setCatNameBn(item.name_bn || ''); setCatRoutePath(item.route_path || ''); setCatColor(item.color || 'gray'); setCatSortOrder(item.sort_order || 0); setCatIsActive(item.is_active ?? true); setCatDescription(item.description || ''); setCatIdPrefix((item as any).id_prefix || ''); setCatIdStartRange((item as any).id_start_range || 1001); setCatDialogOpen(true); };
 
   const saveCatMutation = useMutation({
     mutationFn: async () => {
       if (!catName.trim() || !catNameBn.trim() || !catKey.trim()) throw new Error(bn ? 'নাম ও কী আবশ্যক' : 'Name and Key are required');
-      const record = { key: catKey.trim().toLowerCase().replace(/\s+/g, '_'), name: catName.trim(), name_bn: catNameBn.trim(), description: catDescription.trim() || null, route_path: catRoutePath.trim() || null, color: catColor, sort_order: catSortOrder, is_active: catIsActive };
+      const record = { key: catKey.trim().toLowerCase().replace(/\s+/g, '_'), name: catName.trim(), name_bn: catNameBn.trim(), description: catDescription.trim() || null, route_path: catRoutePath.trim() || null, color: catColor, sort_order: catSortOrder, is_active: catIsActive, id_prefix: catIdPrefix.trim().toUpperCase() || null, id_start_range: catIdStartRange } as any;
       if (catEditItem) { const { error } = await supabase.from('staff_categories').update(record).eq('id', catEditItem.id); if (error) throw error; }
       else { const { error } = await supabase.from('staff_categories').insert(record); if (error) throw error; }
     },
@@ -234,11 +237,12 @@ const AdminDesignations = () => {
                   <table className="w-full">
                     <thead className="bg-secondary/50">
                       <tr>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
+                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">#</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'কী' : 'Key'}</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম (বাংলা)' : 'Name (BN)'}</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম (ইংরেজি)' : 'Name (EN)'}</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রাউট পাথ' : 'Route Path'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'আইডি প্রিফিক্স' : 'ID Prefix'}</th>
+                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'শুরু রেঞ্জ' : 'Start Range'}</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'রঙ' : 'Color'}</th>
                         <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
                         <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
@@ -251,7 +255,8 @@ const AdminDesignations = () => {
                           <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{c.key}</td>
                           <td className="px-4 py-3 text-sm font-medium text-foreground">{c.name_bn}</td>
                           <td className="px-4 py-3 text-sm text-muted-foreground">{c.name}</td>
-                          <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{c.route_path || '—'}</td>
+                          <td className="px-4 py-3"><Badge variant="outline" className="font-mono">{(c as any).id_prefix || '—'}</Badge></td>
+                          <td className="px-4 py-3 text-sm font-mono text-muted-foreground">{(c as any).id_start_range || '—'}</td>
                           <td className="px-4 py-3"><Badge variant="outline" className={getColorClass(c.color)}>{c.color}</Badge></td>
                           <td className="px-4 py-3">
                             <Badge variant="outline" className={c.is_active ? 'bg-success/10 text-success border-success/30' : 'bg-destructive/10 text-destructive border-destructive/30'}>
@@ -266,7 +271,7 @@ const AdminDesignations = () => {
                           </td>
                         </tr>
                       ))}
-                      {staffCategories.length === 0 && <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটাগরি নেই' : 'No categories found'}</td></tr>}
+                      {staffCategories.length === 0 && <tr><td colSpan={9} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটাগরি নেই' : 'No categories found'}</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -318,6 +323,10 @@ const AdminDesignations = () => {
               <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1" value={catName} onChange={e => setCatName(e.target.value)} placeholder="e.g. Teacher" /></div>
               <div><Label>{bn ? 'বিবরণ' : 'Description'}</Label><Input className="bg-background mt-1" value={catDescription} onChange={e => setCatDescription(e.target.value)} placeholder={bn ? 'ঐচ্ছিক' : 'Optional'} /></div>
               <div><Label>{bn ? 'রাউট পাথ' : 'Route Path'}</Label><Input className="bg-background mt-1 font-mono" value={catRoutePath} onChange={e => setCatRoutePath(e.target.value)} placeholder="/admin/teachers" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>{bn ? 'আইডি প্রিফিক্স' : 'ID Prefix'} <span className="text-destructive">*</span></Label><Input className="bg-background mt-1 font-mono uppercase" value={catIdPrefix} onChange={e => setCatIdPrefix(e.target.value)} placeholder="TCH" maxLength={5} /></div>
+                <div><Label>{bn ? 'শুরু রেঞ্জ' : 'Start Range'}</Label><Input type="number" className="bg-background mt-1 font-mono" value={catIdStartRange} onChange={e => setCatIdStartRange(parseInt(e.target.value) || 1001)} placeholder="2001" /></div>
+              </div>
               <div>
                 <Label>{bn ? 'রঙ' : 'Color'}</Label>
                 <Select value={catColor} onValueChange={setCatColor}>

@@ -192,7 +192,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     if (statusFilter !== 'all' && s.status !== statusFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
-    return s.name_bn?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q) || s.designation?.toLowerCase().includes(q);
+    return s.name_bn?.toLowerCase().includes(q) || s.name_en?.toLowerCase().includes(q) || s.designation?.toLowerCase().includes(q) || (s as any).staff_id?.toLowerCase().includes(q);
   });
 
   const openAccountDialog = (staff: any) => {
@@ -286,15 +286,16 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-secondary/50">
-                  <tr>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবী' : 'Designation'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'মোবাইল' : 'Mobile'}</th>
-                    {isAdminRole(role) && <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকাউন্ট' : 'Account'}</th>}
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
-                  </tr>
+                   <tr>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'নাম' : 'Name'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্টাফ আইডি' : 'Staff ID'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'পদবী' : 'Designation'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'ক্যাটাগরি' : 'Category'}</th>
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'মোবাইল' : 'Mobile'}</th>
+                     {isAdminRole(role) && <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকাউন্ট' : 'Account'}</th>}
+                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'স্ট্যাটাস' : 'Status'}</th>
+                     <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">{bn ? 'অ্যাকশন' : 'Action'}</th>
+                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filtered.map((s: any) => (
@@ -311,6 +312,13 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                             {s.name_bn && s.name_en && <span className="text-xs text-muted-foreground">{bn ? s.name_en : s.name_bn}</span>}
                           </div>
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(s as any).staff_id ? (
+                          <Badge variant="outline" className="font-mono text-xs bg-primary/5 text-primary border-primary/20">{(s as any).staff_id}</Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">{bn ? 'জেনারেট হয়নি' : 'Not generated'}</span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {(() => {
@@ -402,7 +410,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                     </tr>
                   ))}
                   {filtered.length === 0 && (
-                    <tr><td colSpan={7} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো কর্মী পাওয়া যায়নি' : 'No staff found'}</td></tr>
+                    <tr><td colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{bn ? 'কোনো কর্মী পাওয়া যায়নি' : 'No staff found'}</td></tr>
                   )}
                 </tbody>
               </table>
