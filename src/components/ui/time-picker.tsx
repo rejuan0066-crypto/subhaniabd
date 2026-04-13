@@ -20,6 +20,7 @@ const TimePicker = ({ value, onChange, className, placeholder = "সময়", 
   const [selectedHour, setSelectedHour] = React.useState<number | null>(null);
   const [selectedMinute, setSelectedMinute] = React.useState<number | null>(null);
   const [period, setPeriod] = React.useState<'AM' | 'PM'>('AM');
+  const minuteListRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (value) {
@@ -29,6 +30,14 @@ const TimePicker = ({ value, onChange, className, placeholder = "সময়", 
       setPeriod(h >= 12 ? 'PM' : 'AM');
     }
   }, [value]);
+
+  // Auto-scroll minute list to selected minute when opened
+  React.useEffect(() => {
+    if (open && minuteListRef.current && selectedMinute !== null) {
+      const btn = minuteListRef.current.querySelector(`[data-minute="${selectedMinute}"]`) as HTMLElement;
+      if (btn) btn.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+  }, [open, selectedMinute]);
 
   const formatDisplay = (val: string) => {
     if (!val) return '';
@@ -129,11 +138,12 @@ const TimePicker = ({ value, onChange, className, placeholder = "সময়", 
         {/* Minutes – Two-column scrollable list */}
         <div className="px-4 pb-2 pt-1">
           <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">মিনিট</p>
-          <div className="grid grid-cols-2 gap-x-2 max-h-[140px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin">
+          <div ref={minuteListRef} className="grid grid-cols-2 gap-x-2 max-h-[140px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin">
             {ALL_MINUTES.map(m => (
               <button
                 key={m}
                 type="button"
+                data-minute={m}
                 onClick={() => setSelectedMinute(m)}
                 className={cn(
                   "h-7 w-full rounded-lg text-xs font-medium transition-all duration-200 shrink-0",
