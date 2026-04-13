@@ -925,34 +925,63 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
                 {canDeleteItem && attendance.length > 0 && (
-                  <>
-                    <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setShowResetDialog(true)}>
+                  <div className="relative">
+                    <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setShowResetMenu(!showResetMenu)}>
                       <RotateCcw className="h-3 w-3 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
+                      <Settings2 className="h-3 w-3 ml-1 opacity-60" />
                     </Button>
+                    {showResetMenu && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowResetMenu(false)} />
+                        <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200">
+                          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/60 transition-colors text-left group" onClick={() => { setResetType('student'); setShowResetMenu(false); setShowResetDialog(true); }}>
+                            <div className="w-9 h-9 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0"><Users className="h-4 w-4 text-blue-600" /></div>
+                            <div><p className="text-sm font-medium text-foreground">{bn ? 'ছাত্র হাজিরা রিসেট করুন' : 'Reset Student Attendance'}</p><p className="text-xs text-muted-foreground">{bn ? 'শুধু ছাত্রদের হাজিরা মুছুন' : 'Delete only student records'}</p></div>
+                          </button>
+                          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/60 transition-colors text-left group" onClick={() => { setResetType('staff'); setShowResetMenu(false); setShowResetDialog(true); }}>
+                            <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0"><UserCog className="h-4 w-4 text-amber-600" /></div>
+                            <div><p className="text-sm font-medium text-foreground">{bn ? 'স্টাফ হাজিরা রিসেট করুন' : 'Reset Staff Attendance'}</p><p className="text-xs text-muted-foreground">{bn ? 'শুধু স্টাফদের হাজিরা মুছুন' : 'Delete only staff records'}</p></div>
+                          </button>
+                          <div className="border-t border-border/20 my-1" />
+                          <div className="px-2 py-1">
+                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
+                            {divisions.map((d: any) => (
+                              <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Home className="h-3.5 w-3.5 text-emerald-600" /></div>
+                                <span className="text-sm text-foreground">{bn ? d.name_bn : d.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
                     <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
                       <DialogContent className="sm:max-w-md rounded-[32px] backdrop-blur-2xl bg-white/80 dark:bg-slate-900/80 border border-white/30 dark:border-white/10 shadow-2xl">
                         <DialogHeader className="flex flex-col items-center text-center gap-3">
                           <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-1">
                             <RotateCcw className="w-8 h-8 text-rose-500" />
                           </div>
-                          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                          <DialogTitle className="text-xl font-bold text-foreground">
                             {bn ? 'উপস্থিতি রিসেট নিশ্চিতকরণ' : 'Confirm Attendance Reset'}
                           </DialogTitle>
                           <p className="text-sm text-muted-foreground">
-                            {bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This action cannot be undone.'}
+                            {resetType === 'student' && (bn ? 'আপনি কি নিশ্চিত যে শুধু ছাত্র হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only student attendance? This cannot be undone.')}
+                            {resetType === 'staff' && (bn ? 'আপনি কি নিশ্চিত যে শুধু স্টাফ হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only staff attendance? This cannot be undone.')}
+                            {resetType === 'division' && (() => { const div = divisions.find((d: any) => d.id === resetDivisionId); return bn ? `আপনি কি নিশ্চিত যে "${div?.name_bn || ''}" বিভাগের হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${div?.name || ''}" division? This cannot be undone.`; })()}
+                            {resetType === 'all' && (bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This cannot be undone.')}
                           </p>
                         </DialogHeader>
                         <div className="flex justify-center gap-3 pt-4">
                           <Button variant="ghost" className="rounded-full px-6" onClick={() => setShowResetDialog(false)}>
                             {bn ? 'না, থাক' : 'Cancel'}
                           </Button>
-                          <Button className="rounded-full px-6 bg-rose-500 hover:bg-rose-600 text-white shadow-[0_0_15px_hsl(350_80%_55%/0.3)]" onClick={() => { resetMutation.mutate(); setShowResetDialog(false); }}>
+                          <Button className="rounded-full px-6 bg-rose-500 hover:bg-rose-600 text-white shadow-[0_0_15px_hsl(350_80%_55%/0.3)]" onClick={() => { resetMutation.mutate(resetType); setShowResetDialog(false); }}>
                             {bn ? 'হ্যাঁ, রিসেট করুন' : 'Yes, Reset'}
                           </Button>
                         </div>
                       </DialogContent>
                     </Dialog>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
