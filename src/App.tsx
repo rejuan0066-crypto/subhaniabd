@@ -89,6 +89,7 @@ import AdminExamRoutine from "./pages/admin/AdminExamRoutine";
 import AdminStudentPromotion from "./pages/admin/AdminStudentPromotion";
 import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
+import StaffCheckin from "./pages/StaffCheckin";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollNavigation from "./components/ScrollNavigation";
 import RouteLoader from "./components/RouteLoader";
@@ -196,6 +197,7 @@ const App = () => (
                   <Route path="/staff-dashboard" element={<ProtectedRoute><StaffDashboard /></ProtectedRoute>} />
                   <Route path="/waiting-approval" element={<WaitingApproval />} />
                   <Route path="/attendance-checkin" element={<AttendanceCheckin />} />
+                  <Route path="/staff-checkin" element={<StaffCheckin />} />
                   <Route path="/login" element={<Login />} />
 
                   <Route path="/admin" element={<AdminShell />}>
