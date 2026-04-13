@@ -109,6 +109,27 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   };
   const [categoryShiftTimes, setCategoryShiftTimes] = useState<Record<string, { start: string; end: string }>>(defaultCategoryTimes);
 
+  // Dynamic staff categories from designations table
+  const { data: dynamicStaffCategories = [] } = useQuery({
+    queryKey: ['staff-categories-for-shift'],
+    queryFn: async () => {
+      const { data } = await supabase.from('designations').select('staff_category').eq('is_active', true);
+      const unique = [...new Set((data || []).map((d: any) => d.staff_category))];
+      // Ensure default categories are always included
+      const defaults = ['teacher', 'administrative', 'support', 'general'];
+      defaults.forEach(d => { if (!unique.includes(d)) unique.push(d); });
+      return unique;
+    },
+  });
+
+  const categoryLabelMap: Record<string, { bn: string; en: string }> = {
+    teacher: { bn: 'শিক্ষক', en: 'Teacher' },
+    administrative: { bn: 'প্রশাসনিক', en: 'Administrative' },
+    support: { bn: 'সাপোর্ট স্টাফ', en: 'Support Staff' },
+    general: { bn: 'সহায়ক কর্মী', en: 'General Staff' },
+  };
+  const getCategoryLabel = (key: string) => categoryLabelMap[key] ? (bn ? categoryLabelMap[key].bn : categoryLabelMap[key].en) : key;
+
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
     queryFn: async () => {
@@ -1337,12 +1358,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <Clock className="h-4 w-4 text-primary" />
                   {bn ? 'ক্যাটাগরি অনুযায়ী ফুল টাইম শিফট' : 'Fulltime Shift by Category'}
                 </Label>
-                {[
-                  { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher' },
-                  { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative' },
-                  { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff' },
-                  { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff' },
-                ].map(cat => (
+                {dynamicStaffCategories.map(catKey => ({ key: catKey, label: getCategoryLabel(catKey) })).map(cat => (
                   <div key={cat.key} className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">{cat.label}</p>
                     <div className="grid grid-cols-2 gap-3">
