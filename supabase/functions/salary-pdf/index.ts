@@ -107,15 +107,15 @@ Deno.serve(async (req) => {
 <div class="summary">
   <div class="summary-card base">
     <p>${bn ? "মোট মূল বেতন" : "Total Base"}</p>
-    <p>৳${Number(totals?.base || 0).toLocaleString()}</p>
+    <p>৳${fmtNum(Number(totals?.base || 0))}</p>
   </div>
   <div class="summary-card ded">
     <p>${bn ? "মোট কর্তন" : "Total Deductions"}</p>
-    <p>৳${Number(totals?.deductions || 0).toLocaleString()}</p>
+    <p>৳${fmtNum(Number(totals?.deductions || 0))}</p>
   </div>
   <div class="summary-card net">
     <p>${bn ? "মোট নিট বেতন" : "Total Net"}</p>
-    <p>৳${Number(totals?.net || 0).toLocaleString()}</p>
+    <p>৳${fmtNum(Number(totals?.net || 0))}</p>
   </div>
 </div>
 
@@ -137,13 +137,13 @@ Deno.serve(async (req) => {
   <tbody>
     ${staffRows}
     <tr class="totals-row">
-      <td colspan="3" style="text-align:center">${bn ? "মোট" : "Total"} (${staff.length} ${bn ? "জন" : "staff"})</td>
-      <td style="text-align:right">৳${Number(totals?.base || 0).toLocaleString()}</td>
+      <td colspan="3" style="text-align:center">${bn ? "মোট" : "Total"} (${bn ? toBnDigits(staff.length) : staff.length} ${bn ? "জন" : "staff"})</td>
+      <td style="text-align:right">৳${fmtNum(Number(totals?.base || 0))}</td>
       <td></td>
-      <td style="text-align:right;color:#dc2626">৳${Number(totals?.deductions || 0).toLocaleString()}</td>
+      <td style="text-align:right;color:#dc2626">৳${fmtNum(Number(totals?.deductions || 0))}</td>
       <td></td>
       <td></td>
-      <td style="text-align:right;color:#059669">৳${Number(totals?.net || 0).toLocaleString()}</td>
+      <td style="text-align:right;color:#059669">৳${fmtNum(Number(totals?.net || 0))}</td>
       <td></td>
     </tr>
   </tbody>
