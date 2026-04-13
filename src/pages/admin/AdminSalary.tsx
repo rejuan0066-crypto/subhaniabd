@@ -820,7 +820,7 @@ const AdminSalary = () => {
             Number(rec.advance_deduction || 0) + Number(rec.other_deduction || 0) : 0;
           return {
             name: s.name_bn,
-            designation: s.designation || '-',
+            designation: getDesignation(s.designation),
             base_salary: Number(rec?.base_salary || s.salary || 0),
             present: rec?.present_days || 0,
             absent: rec?.absent_days || 0,
@@ -1038,7 +1038,7 @@ const AdminSalary = () => {
                         <td className="px-3 py-2">
                           <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
                         </td>
-                        <td className="px-3 py-2 text-muted-foreground">{s.designation || '-'}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
                         <td className="px-3 py-2 text-center">
                           <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
                             className="text-[10px] text-primary hover:underline">
