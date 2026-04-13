@@ -23,11 +23,12 @@ import {
   CalendarDays, Users, UserCog, Search, Check, X, Clock,
   CalendarOff, Save, Settings2, Plus, Trash2, Edit2,
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight, Home, Sun, Sunset, Moon, Utensils, Coffee,
-  Download, Printer, RotateCcw, QrCode, Send, Fingerprint
+  Download, Printer, RotateCcw, QrCode, Send, Fingerprint, UserCheck
 } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import ClassQRPoster from '@/components/attendance/ClassQRPoster';
 import AttendanceDeviceManager from '@/components/attendance/AttendanceDeviceManager';
+import StaffCheckinDialog from '@/components/attendance/StaffCheckinDialog';
 
 const STATUS_ICONS: Record<string, any> = {
   present: CheckCircle2, absent: XCircle, late: Clock,
@@ -85,6 +86,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [selectedShift, setSelectedShift] = useState('full_day');
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
+  const [staffCheckinOpen, setStaffCheckinOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff' | 'staff_category'>('all');
   const [resetDivisionId, setResetDivisionId] = useState<string>('');
@@ -1021,6 +1023,16 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                 </Button>
               </>
             )}
+            {entityType === 'staff' && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setStaffCheckinOpen(true)} className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
+                  <UserCheck className="h-4 w-4 mr-1" /> {bn ? 'চেক-ইন সিস্টেম' : 'Check-in System'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setDeviceManagerOpen(true)}>
+                  <Fingerprint className="h-4 w-4 mr-1" /> {bn ? 'হার্ডওয়্যার ডিভাইস' : 'Hardware Devices'}
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={async () => {
               toast.loading(bn ? 'দৈনিক সারসংক্ষেপ তৈরি হচ্ছে...' : 'Generating daily summary...');
               try {
@@ -1704,6 +1716,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         <ClassQRPoster open={qrPosterOpen} onOpenChange={setQrPosterOpen} />
         {/* Hardware Device Manager */}
         <AttendanceDeviceManager open={deviceManagerOpen} onOpenChange={setDeviceManagerOpen} />
+        {/* Staff Check-in Dialog */}
+        <StaffCheckinDialog open={staffCheckinOpen} onOpenChange={setStaffCheckinOpen} selectedDate={selectedDate} />
       </div>
     </AdminLayout>
   );
