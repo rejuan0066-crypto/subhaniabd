@@ -13,7 +13,7 @@ interface TimePickerProps {
 }
 
 const HOURS_24 = Array.from({ length: 24 }, (_, i) => i);
-const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+const ALL_MINUTES = Array.from({ length: 60 }, (_, i) => i);
 
 const TimePicker = ({ value, onChange, className, placeholder = "সময়", displayFormat = '12h' }: TimePickerProps) => {
   const [open, setOpen] = React.useState(false);
@@ -126,20 +126,20 @@ const TimePicker = ({ value, onChange, className, placeholder = "সময়", 
           </div>
         </div>
 
-        {/* Minutes Grid */}
+        {/* Minutes – Two-column scrollable list */}
         <div className="px-4 pb-2 pt-1">
           <p className="text-[10px] font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">মিনিট</p>
-          <div className="grid grid-cols-6 gap-1">
-            {MINUTES.map(m => (
+          <div className="grid grid-cols-2 gap-x-2 max-h-[140px] overflow-y-auto overscroll-contain pr-1 scrollbar-thin">
+            {ALL_MINUTES.map(m => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setSelectedMinute(m)}
                 className={cn(
-                  "h-8 w-full rounded-lg text-xs font-medium transition-all duration-200",
+                  "h-7 w-full rounded-lg text-xs font-medium transition-all duration-200 shrink-0",
                   selectedMinute === m
-                    ? "bg-primary text-primary-foreground shadow-md scale-105"
-                    : "text-foreground hover:bg-primary/10 hover:scale-105"
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "text-foreground hover:bg-primary/10"
                 )}
               >
                 {String(m).padStart(2, '0')}
