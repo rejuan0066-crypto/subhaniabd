@@ -165,6 +165,18 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
 
+  const designationMutation = useMutation({
+    mutationFn: async ({ id, designation }: { id: string; designation: string }) => {
+      const { error } = await supabase.from('staff').update({ designation } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(bn ? 'পদবী পরিবর্তন হয়েছে' : 'Designation updated');
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
+  });
+
   const typeFiltered = staffType === 'all' ? staffList : staffList.filter((s: any) => {
     const category = getStaffCategory(s, designationsMap);
     if (staffType === 'teacher') return category === 'teacher';
