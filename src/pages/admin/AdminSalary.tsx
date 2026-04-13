@@ -896,7 +896,7 @@ const AdminSalary = () => {
     </div>
     <table>
       <tr><th>${bn ? 'নাম' : 'Name'}</th><td>${staffMember.name_bn}</td>
-          <th>${bn ? 'পদবি' : 'Designation'}</th><td>${staffMember.designation || '-'}</td></tr>
+          <th>${bn ? 'পদবি' : 'Designation'}</th><td>${getDesignation(staffMember.designation)}</td></tr>
       <tr><th>${bn ? 'বিভাগ' : 'Department'}</th><td>${staffMember.department || '-'}</td>
           <th>${bn ? 'কর্মদিবস' : 'Working Days'}</th><td>${record.working_days}</td></tr>
       <tr><th>${bn ? 'উপস্থিত' : 'Present'}</th><td>${record.present_days}</td>
