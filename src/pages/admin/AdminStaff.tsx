@@ -312,7 +312,29 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const cat = getStaffCategory(s, designationsMap);
+                          const catDesignations = designationsList.filter((d: any) => d.staff_category === cat);
+                          return (
+                            <Select
+                              value={s.designation || ''}
+                              onValueChange={(val) => designationMutation.mutate({ id: s.id, designation: val })}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-[150px]">
+                                <SelectValue placeholder={bn ? 'পদবী নির্বাচন' : 'Select'} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {catDesignations.map((d: any) => (
+                                  <SelectItem key={d.name} value={bn ? d.name_bn : d.name}>
+                                    {bn ? d.name_bn : d.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        })()}
+                      </td>
                       <td className="px-4 py-3">
                         <Select
                           value={getStaffCategory(s, designationsMap)}
