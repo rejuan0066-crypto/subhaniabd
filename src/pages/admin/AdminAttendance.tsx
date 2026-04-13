@@ -1091,17 +1091,12 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     <PopoverContent align="end" side="bottom" sideOffset={8} avoidCollisions collisionPadding={16} className="w-72 max-h-[60vh] overflow-y-auto rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 scrollbar-hidden hover:scrollbar-thin z-[9999]">
                       <div className="px-2 py-1">
                         <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
-                        {[
-                          { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher', icon: Users, color: 'bg-blue-500/10 text-blue-600' },
-                          { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative', icon: UserCog, color: 'bg-amber-500/10 text-amber-600' },
-                          { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff', icon: UserCog, color: 'bg-teal-500/10 text-teal-600' },
-                          { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff', icon: UserCog, color: 'bg-purple-500/10 text-purple-600' },
-                        ].filter(cat => allStaff.some((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id))).map(cat => (
+                        {resettableStaffCategories.map(cat => (
                           <button key={cat.key} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('staff_category'); setResetStaffCategory(cat.key); setShowResetMenu(false); setShowResetDialog(true); }}>
                             <div className={`w-8 h-8 rounded-full ${cat.color} flex items-center justify-center shrink-0`}><cat.icon className="h-3.5 w-3.5" /></div>
                             <div>
                               <span className="text-sm text-foreground">{cat.label}</span>
-                              <p className="text-[10px] text-muted-foreground">{allStaff.filter((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id)).length} {bn ? 'জন' : 'records'}</p>
+                              <p className="text-[10px] text-muted-foreground">{cat.count} {bn ? 'জন' : 'records'}</p>
                             </div>
                           </button>
                         ))}
@@ -1234,6 +1229,46 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="max-w-md rounded-[28px] border border-border/20 bg-background/95 p-0 backdrop-blur-xl shadow-[0_24px_80px_-16px_hsl(var(--foreground)/0.25)] overflow-hidden">
+            <div className="border-b border-border/10 bg-destructive/5 px-6 py-5">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3 text-left text-lg">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                    <RotateCcw className="h-5 w-5" />
+                  </span>
+                  <span>{bn ? 'রিসেট নিশ্চিত করুন' : 'Confirm reset'}</span>
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+
+            <div className="space-y-4 px-6 py-5">
+              <div className="rounded-2xl border border-border/15 bg-muted/30 p-4">
+                <p className="text-sm font-semibold text-foreground">{resetTargetLabel}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {bn
+                    ? `এই তারিখের ${resetRecordCount}টি হাজিরা রেকর্ড মুছে যাবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।`
+                    : `${resetRecordCount} attendance records for this date will be removed. This action cannot be undone.`}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowResetDialog(false)} disabled={resetMutation.isPending}>
+                  {bn ? 'বাতিল' : 'Cancel'}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => resetMutation.mutate(resetType)}
+                  disabled={resetMutation.isPending || resetRecordCount === 0}
+                >
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {resetMutation.isPending ? (bn ? 'রিসেট হচ্ছে...' : 'Resetting...') : (bn ? 'রিসেট করুন' : 'Reset now')}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Attendance List */}
         <div className="space-y-3">
