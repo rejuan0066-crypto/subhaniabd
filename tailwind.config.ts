@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', '"Noto Sans Bengali"', 'serif'],
-        body: ['Inter', '"Noto Sans Bengali"', 'sans-serif'],
-        bengali: ['"Noto Sans Bengali"', 'sans-serif'],
+        display: ['SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
+        body: ['SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
+        bengali: ['SutonnyOMJ', '"Noto Sans Bengali"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
