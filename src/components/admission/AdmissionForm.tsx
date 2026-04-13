@@ -786,8 +786,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
-            <Input type="date" className={`bg-background mt-1 ${errorBorder}`}
-              value={form.date_of_birth} onChange={e => setForm(prev => ({ ...prev, date_of_birth: e.target.value }))} />
+            <DatePicker bengali={bn} className={`mt-1 ${errorBorder}`}
+              value={form.date_of_birth} onChange={v => setForm(prev => ({ ...prev, date_of_birth: v }))} />
             {form.date_of_birth && <p className="text-xs text-primary mt-1 font-medium">{bn ? 'বয়স: ' : 'Age: '}{calculateAge(form.date_of_birth)}</p>}
             <FieldError field={fieldKey} />
           </div>
@@ -900,8 +900,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         return (
           <div>
             <Label className={errorLabel}>{label} {reqStar}</Label>
-            <Input type="date" className={`bg-background mt-1 ${errorBorder}`} value={form.admission_date}
-              onChange={e => setForm(prev => ({ ...prev, admission_date: e.target.value }))} />
+            <DatePicker bengali={bn} className={`mt-1 ${errorBorder}`} value={form.admission_date}
+              onChange={v => setForm(prev => ({ ...prev, admission_date: v }))} />
             <FieldError field={fieldKey} />
           </div>
         );
@@ -982,7 +982,7 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
         {config.field_type === 'text' && <Input className="bg-background mt-1" value={val} onChange={e => update(e.target.value)} placeholder={config.placeholder || ''} />}
         {config.field_type === 'number' && <Input type="number" className="bg-background mt-1" value={val} onChange={e => update(e.target.value)} />}
         {config.field_type === 'textarea' && <Textarea className="bg-background mt-1" rows={3} value={val} onChange={e => update(e.target.value)} />}
-        {config.field_type === 'date' && <Input type="date" className="bg-background mt-1" value={val} onChange={e => update(e.target.value)} />}
+        {config.field_type === 'date' && <DatePicker bengali={bn} className="mt-1" value={val} onChange={v => update(v)} />}
         {config.field_type === 'email' && <Input type="email" className="bg-background mt-1" value={val} onChange={e => update(e.target.value)} />}
         {config.field_type === 'switch' && <Switch checked={!!val} onCheckedChange={c => update(c)} />}
         {config.field_type === 'select' && (
@@ -1341,8 +1341,8 @@ const AdmissionForm = ({ open, onOpenChange, editStudent }: AdmissionFormProps) 
                   </div>
                   <div>
                     <Label>{bn ? 'অনুমোদনের তারিখ' : 'Approval Date'}</Label>
-                    <Input type="date" className="bg-background mt-1" value={form.approver_date || ''}
-                      onChange={e => setForm(prev => ({ ...prev, approver_date: e.target.value }))} />
+                    <DatePicker bengali={bn} className="mt-1" value={form.approver_date || ''}
+                      onChange={v => setForm(prev => ({ ...prev, approver_date: v }))} />
                   </div>
                   <div>
                     <Label>{bn ? 'স্বাক্ষর' : 'Signature'}</Label>
