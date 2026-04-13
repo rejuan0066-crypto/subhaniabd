@@ -1716,6 +1716,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         <ClassQRPoster open={qrPosterOpen} onOpenChange={setQrPosterOpen} />
         {/* Hardware Device Manager */}
         <AttendanceDeviceManager open={deviceManagerOpen} onOpenChange={setDeviceManagerOpen} />
+        {/* Staff Check-in Dialog */}
+        <StaffCheckinDialog open={staffCheckinOpen} onOpenChange={setStaffCheckinOpen} selectedDate={selectedDate} />
       </div>
     </AdminLayout>
   );
