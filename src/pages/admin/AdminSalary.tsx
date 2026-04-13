@@ -38,6 +38,12 @@ const MONTHS = [
   { value: '12', bn: 'ডিসেম্বর', en: 'December' },
 ];
 
+// Convert English digits to Bengali digits
+const toBnDigits = (val: string | number): string => {
+  const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  return String(val).replace(/[0-9]/g, d => bnDigits[parseInt(d)]);
+};
+
 // Helper: parse "HH:MM" to total minutes from midnight
 const timeToMinutes = (t: string): number => {
   if (!t) return 0;
