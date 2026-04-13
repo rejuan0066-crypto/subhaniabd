@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTimeFormat, formatTimeDisplay } from '@/hooks/useTimeFormat';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
@@ -90,6 +90,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [resetStaffName, setResetStaffName] = useState<string>('');
   const [resetStaffCategory, setResetStaffCategory] = useState<string>('');
   const [showResetMenu, setShowResetMenu] = useState(false);
+  const resetBtnRef = useRef<HTMLDivElement>(null);
   // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
   const effectiveShift = entityType === 'student'
     ? (studentSubTab === 'meal' ? studentMealShift : 'full_day')
@@ -1008,15 +1009,19 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <Check className="h-3.5 w-3.5 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
                 {canDeleteItem && attendance.length > 0 && (
-                  <div className="relative">
+                  <div className="relative" ref={resetBtnRef}>
                     <Button size="sm" className="text-xs rounded-full bg-rose-500/10 text-rose-600 border border-rose-500/20 hover:bg-rose-500/20 shadow-sm transition-all duration-200" onClick={() => setShowResetMenu(!showResetMenu)}>
                       <RotateCcw className="h-3.5 w-3.5 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
                       <Settings2 className="h-3 w-3 ml-1 opacity-60" />
                     </Button>
                     {showResetMenu && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowResetMenu(false)} />
-                        <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200">
+                        <div className="fixed inset-0 z-[9998]" onClick={() => setShowResetMenu(false)} />
+                        <div className="fixed z-[9999] w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200"
+                          style={{
+                            top: (resetBtnRef.current?.getBoundingClientRect().bottom ?? 0) + 8,
+                            right: window.innerWidth - (resetBtnRef.current?.getBoundingClientRect().right ?? 0),
+                          }}>
                           <div className="px-2 py-1">
                             <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
                             {[
