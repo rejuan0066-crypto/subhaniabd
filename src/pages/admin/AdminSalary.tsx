@@ -988,8 +988,8 @@ const AdminSalary = () => {
                 {canAddItem && <Button size="sm" onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
                   <Calculator className="h-3 w-3 mr-1" /> {bn ? 'জেনারেট' : 'Generate'}
                 </Button>}
-                <Button size="sm" variant="outline" onClick={exportCSV}>
-                  <Download className="h-3 w-3 mr-1" /> CSV
+                <Button size="sm" variant="outline" onClick={exportExcel}>
+                  <Download className="h-3 w-3 mr-1" /> Excel
                 </Button>
                 <Button size="sm" variant="outline" onClick={exportPDF} disabled={pdfLoading}>
                   <FileText className="h-3 w-3 mr-1" /> {pdfLoading ? '...' : 'PDF'}
