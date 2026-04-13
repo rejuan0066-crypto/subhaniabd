@@ -1049,16 +1049,20 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                               })()}
                             </div>
                           </div>
-                          <div className="border-t border-border/20 my-1" />
-                          <div className="px-2 py-1">
-                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
-                            {divisions.map((d: any) => (
-                              <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
-                                <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Home className="h-3.5 w-3.5 text-emerald-600" /></div>
-                                <span className="text-sm text-foreground">{bn ? d.name_bn : d.name}</span>
-                              </button>
-                            ))}
-                          </div>
+                          {entityType === 'student' && (
+                            <>
+                              <div className="border-t border-border/20 my-1" />
+                              <div className="px-2 py-1">
+                                <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
+                                {divisions.map((d: any) => (
+                                  <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                    <div className="w-7 h-7 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Home className="h-3.5 w-3.5 text-emerald-600" /></div>
+                                    <span className="text-sm text-foreground">{bn ? d.name_bn : d.name}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </>
                     )}
