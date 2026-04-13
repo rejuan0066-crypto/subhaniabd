@@ -1007,6 +1007,21 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                           </button>
                           <div className="border-t border-border/20 my-1" />
                           <div className="px-2 py-1">
+                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট স্টাফ রিসেট করুন' : 'Reset Individual Staff'}</p>
+                            <div className="max-h-[180px] overflow-y-auto scrollbar-hidden hover:scrollbar-thin space-y-0.5">
+                              {(() => {
+                                const staffWithAttendance = allStaff.filter((s: any) => attendance.some((a: any) => a.entity_id === s.id));
+                                return staffWithAttendance.map((s: any) => (
+                                  <button key={s.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('single_staff'); setResetStaffId(s.id); setResetStaffName(bn ? s.name_bn : (s.name_en || s.name_bn)); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                    <div className="w-7 h-7 rounded-full bg-rose-500/10 flex items-center justify-center shrink-0"><User className="h-3.5 w-3.5 text-rose-500" /></div>
+                                    <span className="text-sm text-foreground truncate">{bn ? s.name_bn : (s.name_en || s.name_bn)}</span>
+                                  </button>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+                          <div className="border-t border-border/20 my-1" />
+                          <div className="px-2 py-1">
                             <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট বিভাগ রিসেট করুন' : 'Reset by Division'}</p>
                             {divisions.map((d: any) => (
                               <button key={d.id} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left" onClick={() => { setResetType('division'); setResetDivisionId(d.id); setShowResetMenu(false); setShowResetDialog(true); }}>
