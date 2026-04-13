@@ -85,9 +85,9 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   });
 
   const { data: designationsList = [] } = useQuery({
-    queryKey: ['designations-categories'],
+    queryKey: ['designations-all'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category');
+      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category').eq('is_active', true).order('sort_order');
       if (error) throw error;
       return data;
     },
