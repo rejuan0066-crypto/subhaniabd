@@ -1195,104 +1195,119 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         </Card>
 
         {/* Attendance List */}
-        <div className="space-y-1">
+        <div className="space-y-3">
           {filtered.map((entity: any, idx: number) => {
             const att = getAttendance(entity.id);
             const currentStatus = att?.status || '';
             return (
-              <Card key={entity.id} className={`transition-all ${!currentStatus ? 'border-dashed' : ''}`}>
-                <CardContent className="p-3 flex items-center gap-3">
-                  {/* Index */}
-                  <span className="text-xs text-muted-foreground w-6 text-center shrink-0">{idx + 1}</span>
-                  
-                  {/* Photo */}
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                    {entity.photo_url ? (
-                      <img src={entity.photo_url} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                    )}
+              <div
+                key={entity.id}
+                className={`group relative rounded-[24px] border transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_12px_40px_-8px_hsl(220_20%_10%/0.1)] ${
+                  currentStatus 
+                    ? 'bg-background/80 backdrop-blur-md border-border/15 shadow-[0_4px_20px_-4px_hsl(220_20%_10%/0.06)]' 
+                    : 'bg-background/60 backdrop-blur-sm border-dashed border-border/20 shadow-sm'
+                }`}
+              >
+                <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  {/* Left: Index + Avatar + Info */}
+                  <div className="flex items-center gap-4 min-w-0 flex-shrink-0">
+                    <span className="text-xs font-medium text-muted-foreground/60 w-6 text-center tabular-nums">{idx + 1}</span>
+                    
+                    {/* Avatar with emerald ring */}
+                    <div className={`relative h-11 w-11 rounded-full flex items-center justify-center shrink-0 overflow-hidden ring-2 transition-all ${currentStatus === 'present' ? 'ring-emerald-400/60' : currentStatus === 'absent' ? 'ring-rose-400/40' : 'ring-border/20'}`}>
+                      {entity.photo_url ? (
+                        <img src={entity.photo_url} alt="" className="h-full w-full object-cover rounded-full" />
+                      ) : (
+                        <div className="h-full w-full bg-muted/60 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      {currentStatus === 'present' && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-background" />
+                      )}
+                    </div>
+
+                    {/* Name & Info */}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{bn ? entity.name_bn : (entity.name_en || entity.name_bn)}</p>
+                      <p className="text-[11px] text-muted-foreground/70 mt-0.5">
+                        {entityType === 'student'
+                          ? (() => {
+                              const cls = classes.find((c: any) => c.id === entity.class_id);
+                              const div = divisions.find((d: any) => d.id === entity.division_id);
+                              const className = cls ? (bn ? cls.name_bn : cls.name) : '';
+                              const divName = div ? (bn ? div.name_bn : div.name) : '';
+                              return `${bn ? 'রেজি' : 'Reg'}: ${entity.student_id || '-'} | ${className}${divName ? ` (${divName})` : ''} | ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number || '-'}`;
+                            })()
+                          : staffSubTab === 'duty'
+                            ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
+                            : `${entity.designation || '-'} | ${fmt(getCategoryTime(entity).start)} - ${fmt(getCategoryTime(entity).end)}`}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{bn ? entity.name_bn : (entity.name_en || entity.name_bn)}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {entityType === 'student'
-                        ? (() => {
-                            const cls = classes.find((c: any) => c.id === entity.class_id);
-                            const div = divisions.find((d: any) => d.id === entity.division_id);
-                            const className = cls ? (bn ? cls.name_bn : cls.name) : '';
-                            const divName = div ? (bn ? div.name_bn : div.name) : '';
-                            return `${bn ? 'রেজি' : 'Reg'}: ${entity.student_id || '-'} | ${className}${divName ? ` (${divName})` : ''} | ${bn ? 'রোল' : 'Roll'}: ${entity.roll_number || '-'}`;
-                          })()
+                  {/* Center: Late badges + Time inputs */}
+                  <div className="flex items-center gap-3 flex-wrap sm:ml-auto">
+                    {/* Late Minutes Display for staff */}
+                    {entityType === 'staff' && att?.check_in_time && (() => {
+                      const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : getCategoryTime(entity).start;
+                      const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : getCategoryTime(entity).end;
+                      const dutyStart = effStart.split(':').map(Number);
+                      const checkIn = att.check_in_time.split(':').map(Number);
+                      const dutyEnd = effEnd.split(':').map(Number);
+                      const checkOut = att.check_out_time ? att.check_out_time.split(':').map(Number) : dutyEnd;
+                      const lateMin = Math.max(0, (checkIn[0] * 60 + checkIn[1]) - (dutyStart[0] * 60 + dutyStart[1]));
+                      const earlyMin = Math.max(0, (dutyEnd[0] * 60 + dutyEnd[1]) - (checkOut[0] * 60 + checkOut[1]));
+                      return (lateMin > 0 || earlyMin > 0) ? (
+                        <div className="flex gap-1.5 shrink-0">
+                          {lateMin > 0 && <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-600 border border-amber-500/15">{bn ? `${lateMin} মি. বিলম্ব` : `${lateMin}m late`}</span>}
+                          {earlyMin > 0 && <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-medium bg-orange-500/10 text-orange-600 border border-orange-500/15">{bn ? `${earlyMin} মি. আগে` : `${earlyMin}m early`}</span>}
+                        </div>
+                      ) : null;
+                    })()}
 
-                        : staffSubTab === 'duty'
-                          ? `${entity.designation || '-'} | ${selectedShift === 'morning' ? `${fmt(dutyTimes.morning_start)} - ${fmt(dutyTimes.morning_end)}` : `${fmt(dutyTimes.evening_start)} - ${fmt(dutyTimes.evening_end)}`}`
-                          : `${entity.designation || '-'} | ${fmt(getCategoryTime(entity).start)} - ${fmt(getCategoryTime(entity).end)}`}
-                    </p>
-                  </div>
-
-                  {/* Late Minutes Display for staff */}
-                  {entityType === 'staff' && att?.check_in_time && (() => {
-                    const effStart = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start) : getCategoryTime(entity).start;
-                    const effEnd = staffSubTab === 'duty' ? (selectedShift === 'morning' ? dutyTimes.morning_end : dutyTimes.evening_end) : getCategoryTime(entity).end;
-                    const dutyStart = effStart.split(':').map(Number);
-                    const checkIn = att.check_in_time.split(':').map(Number);
-                    const dutyEnd = effEnd.split(':').map(Number);
-                    const checkOut = att.check_out_time ? att.check_out_time.split(':').map(Number) : dutyEnd;
-                    const lateMin = Math.max(0, (checkIn[0] * 60 + checkIn[1]) - (dutyStart[0] * 60 + dutyStart[1]));
-                    const earlyMin = Math.max(0, (dutyEnd[0] * 60 + dutyEnd[1]) - (checkOut[0] * 60 + checkOut[1]));
-                    return (lateMin > 0 || earlyMin > 0) ? (
-                      <div className="flex gap-1 shrink-0">
-                        {lateMin > 0 && <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 text-[9px]">{bn ? `${lateMin} মি. বিলম্ব` : `${lateMin}m late`}</Badge>}
-                        {earlyMin > 0 && <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-[9px]">{bn ? `${earlyMin} মি. আগে` : `${earlyMin}m early`}</Badge>}
-                      </div>
-                    ) : null;
-                  })()}
-
-                  {/* Time Inputs for Staff (hide for meal tab) */}
-                  {entityType === 'staff' && staffSubTab !== 'meal' && (
-                    <div className="flex gap-1 items-center shrink-0">
-                      <div className="flex flex-col items-center">
+                    {/* Time Inputs for Staff (hide for meal tab) */}
+                    {entityType === 'staff' && staffSubTab !== 'meal' && (
+                      <div className="flex gap-2 items-center shrink-0">
                         <TimePicker
-                          className="h-7 w-28 text-xs"
+                          className="h-8 w-[120px] text-xs rounded-xl bg-muted/30 border-border/20 focus-within:border-emerald-500/40 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all"
                           placeholder="In"
                           displayFormat={timeFormat}
                           value={att?.check_in_time || ''}
                           onChange={v => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: v, check_out_time: att?.check_out_time || '' })}
                         />
-                      </div>
-                      <span className="text-[10px] text-muted-foreground">-</span>
-                      <div className="flex flex-col items-center">
+                        <span className="text-muted-foreground/40 text-xs">—</span>
                         <TimePicker
-                          className="h-7 w-28 text-xs"
+                          className="h-8 w-[120px] text-xs rounded-xl bg-muted/30 border-border/20 focus-within:border-emerald-500/40 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all"
                           placeholder="Out"
                           displayFormat={timeFormat}
                           value={att?.check_out_time || ''}
                           onChange={v => saveMutation.mutate({ entityId: entity.id, status: currentStatus || 'present', check_in_time: att?.check_in_time || '', check_out_time: v })}
                         />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Status Buttons */}
-                  <div className="flex gap-1 flex-wrap justify-end">
+                  {/* Right: Status Pills */}
+                  <div className="flex gap-1.5 flex-wrap justify-end shrink-0">
                     {entityType === 'staff' && staffSubTab === 'meal' ? (
-                      // Meal tab: only Present / Absent
                       <>
                         {[
-                          { status: 'present', label: bn ? 'উপস্থিত' : 'Present', Icon: CheckCircle2, colors: STATUS_COLORS.present },
-                          { status: 'absent', label: bn ? 'অনুপস্থিত' : 'Absent', Icon: XCircle, colors: STATUS_COLORS.absent },
+                          { status: 'present', label: bn ? 'উপস্থিত' : 'Present', Icon: CheckCircle2, activeBg: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30 shadow-[0_0_12px_hsl(160_84%_40%/0.15)]', activeRing: 'ring-emerald-500/30' },
+                          { status: 'absent', label: bn ? 'অনুপস্থিত' : 'Absent', Icon: XCircle, activeBg: 'bg-rose-500/15 text-rose-700 border-rose-500/30 shadow-[0_0_12px_hsl(350_80%_50%/0.15)]', activeRing: 'ring-rose-500/30' },
                         ].map(opt => {
                           const isActive = currentStatus === opt.status;
                           return (
                             <button
                               key={opt.status}
                               onClick={() => saveMutation.mutate({ entityId: entity.id, status: opt.status })}
-                              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-all ${isActive ? opt.colors + ' ring-1 ring-offset-1 ring-primary/30' : 'bg-background hover:bg-muted/50'}`}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all duration-200 hover:scale-105 ${
+                                isActive 
+                                  ? `${opt.activeBg} ring-1 ${opt.activeRing}` 
+                                  : 'bg-muted/30 text-muted-foreground border-border/15 hover:bg-muted/50'
+                              }`}
                             >
-                              <opt.Icon className="h-3 w-3" />
+                              <opt.Icon className="h-3.5 w-3.5" />
                               <span className="hidden sm:inline">{opt.label}</span>
                             </button>
                           );
@@ -1304,7 +1319,17 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                         const countsAs = cfg?.counts_as || rule.name.toLowerCase();
                         const isActive = currentStatus === countsAs;
                         const Icon = STATUS_ICONS[countsAs] || Check;
-                        const colorClass = isActive ? (STATUS_COLORS[countsAs] || 'bg-muted') : 'bg-background hover:bg-muted/50';
+                        
+                        const activeStyles: Record<string, string> = {
+                          present: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30 shadow-[0_0_12px_hsl(160_84%_40%/0.15)] ring-1 ring-emerald-500/30',
+                          absent: 'bg-rose-500/15 text-rose-700 border-rose-500/30 shadow-[0_0_12px_hsl(350_80%_50%/0.15)] ring-1 ring-rose-500/30',
+                          late: 'bg-amber-500/15 text-amber-700 border-amber-500/30 shadow-[0_0_12px_hsl(40_90%_50%/0.15)] ring-1 ring-amber-500/30',
+                          half_day: 'bg-orange-500/15 text-orange-700 border-orange-500/30 ring-1 ring-orange-500/30',
+                          leave: 'bg-blue-500/15 text-blue-700 border-blue-500/30 ring-1 ring-blue-500/30',
+                          excused: 'bg-teal-500/15 text-teal-700 border-teal-500/30 ring-1 ring-teal-500/30',
+                          medical: 'bg-purple-500/15 text-purple-700 border-purple-500/30 ring-1 ring-purple-500/30',
+                        };
+                        
                         return (
                           <button
                             key={rule.id}
@@ -1328,24 +1353,30 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                               }
                               saveMutation.mutate(mutateData);
                             }}
-                            className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium border transition-all ${colorClass} ${isActive ? 'ring-1 ring-offset-1 ring-primary/30' : ''}`}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all duration-200 hover:scale-105 ${
+                              isActive 
+                                ? (activeStyles[countsAs] || 'bg-muted text-foreground border-border/30 ring-1 ring-primary/30')
+                                : 'bg-muted/30 text-muted-foreground border-border/15 hover:bg-muted/50'
+                            }`}
                           >
-                            <Icon className="h-3 w-3" />
+                            <Icon className="h-3.5 w-3.5" />
                             <span className="hidden sm:inline">{bn ? rule.name_bn : rule.name}</span>
                           </button>
                         );
                       })
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
           {filtered.length === 0 && (
-            <Card><CardContent className="p-8 text-center text-muted-foreground">
-              <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p>{bn ? 'কোনো রেকর্ড পাওয়া যায়নি' : 'No records found'}</p>
-            </CardContent></Card>
+            <div className="rounded-[24px] bg-background/60 backdrop-blur-sm border border-dashed border-border/20 p-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-muted-foreground/30" />
+              </div>
+              <p className="text-muted-foreground">{bn ? 'কোনো রেকর্ড পাওয়া যায়নি' : 'No records found'}</p>
+            </div>
           )}
         </div>
 
