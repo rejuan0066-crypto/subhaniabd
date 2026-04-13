@@ -1053,7 +1053,7 @@ const AdminSalary = () => {
 
                     return (
                       <tr key={s.id} className="border-b hover:bg-muted/30 transition-colors">
-                        <td className="px-3 py-2 text-muted-foreground">{idx + 1}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{bn ? toBnDigits(idx + 1) : idx + 1}</td>
                         <td className="px-3 py-2">
                           <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
                         </td>
@@ -1062,32 +1062,32 @@ const AdminSalary = () => {
                           <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
                             className="text-[10px] text-primary hover:underline">
                             <Timer className="h-3 w-3 inline mr-0.5" />
-                            {fmt(s.duty_start_time || '08:00')}-{fmt(s.duty_end_time || '17:00')}
+                            {bn ? toBnDigits(`${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`) : `${fmt(s.duty_start_time || '08:00')}-${fmt(s.duty_end_time || '17:00')}`}
                           </button>
                         </td>
-                        <td className="px-3 py-2 text-right">৳{Number(rec?.base_salary || s.salary || 0).toLocaleString()}</td>
+                        <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(Number(rec?.base_salary || s.salary || 0).toLocaleString()) : Number(rec?.base_salary || s.salary || 0).toLocaleString()}</td>
                         <td className="px-3 py-2 text-center">
                           <button
                             onClick={() => setAttendanceDetailDialog({ staff: s, stats: attStats })}
                             className="hover:bg-muted/50 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
                             title={bn ? 'বিস্তারিত দেখুন' : 'View details'}
                           >
-                            <span className="text-emerald-600">{attStats.present}</span>/
-                            <span className="text-red-500">{attStats.absent}</span>/
-                            <span className="text-yellow-600">{attStats.late}</span>
+                            <span className="text-emerald-600">{bn ? toBnDigits(attStats.present) : attStats.present}</span>/
+                            <span className="text-red-500">{bn ? toBnDigits(attStats.absent) : attStats.absent}</span>/
+                            <span className="text-yellow-600">{bn ? toBnDigits(attStats.late) : attStats.late}</span>
                             {attStats.totalLateArrivalMinutes > 0 && (
-                              <span className="text-[9px] text-yellow-600 ml-1">({attStats.totalLateArrivalMinutes}{bn ? 'মি.' : 'm'})</span>
+                              <span className="text-[9px] text-yellow-600 ml-1">({bn ? toBnDigits(attStats.totalLateArrivalMinutes) : attStats.totalLateArrivalMinutes}{bn ? 'মি.' : 'm'})</span>
                             )}
                           </button>
                         </td>
                         <td className="px-3 py-2 text-right text-red-500">
-                          ৳{totalDed.toLocaleString()}{!rec && totalDed > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                          ৳{bn ? toBnDigits(totalDed.toLocaleString()) : totalDed.toLocaleString()}{!rec && totalDed > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
                         </td>
                         <td className="px-3 py-2 text-right text-blue-600">
-                          ৳{displayOvertime.toLocaleString()}{!rec && displayOvertime > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                          ৳{bn ? toBnDigits(displayOvertime.toLocaleString()) : displayOvertime.toLocaleString()}{!rec && displayOvertime > 0 ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
                         </td>
                         <td className="px-3 py-2 text-right font-bold text-emerald-700 dark:text-emerald-400">
-                          ৳{displayNet.toLocaleString()}{!rec ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
+                          ৳{bn ? toBnDigits(displayNet.toLocaleString()) : displayNet.toLocaleString()}{!rec ? <span className="text-[8px] ml-0.5 opacity-60">~</span> : ''}
                         </td>
                         <td className="px-3 py-2 text-center">
                           {rec ? (
