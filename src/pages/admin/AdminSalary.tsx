@@ -889,6 +889,9 @@ const AdminSalary = () => {
     const totalAllowance = Number(record.bonus || 0) + Number(record.overtime || 0) + Number(record.other_allowance || 0);
     const monthName = MONTHS.find(m => m.value === selectedMonth);
 
+    // Helper for Bengali number formatting in slip
+    const slipNum = (n: number) => bn ? toBnDigits(n.toLocaleString()) : n.toLocaleString();
+
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Salary Slip</title><style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style>
     <style>body{font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif;padding:30px;max-width:700px;margin:auto}
     .header{text-align:center;border-bottom:2px solid #333;padding-bottom:15px;margin-bottom:20px}
@@ -902,34 +905,34 @@ const AdminSalary = () => {
     @media print{body{padding:20px}}</style></head><body>
     <div class="header">
       <h2>${bn ? 'বেতন স্লিপ' : 'Salary Slip'}</h2>
-      <p>${bn ? 'মাস' : 'Month'}: ${bn ? monthName?.bn : monthName?.en} ${selectedYear}</p>
+      <p>${bn ? 'মাস' : 'Month'}: ${bn ? monthName?.bn : monthName?.en} ${bn ? toBnDigits(selectedYear) : selectedYear}</p>
     </div>
     <table>
       <tr><th>${bn ? 'নাম' : 'Name'}</th><td>${staffMember.name_bn}</td>
           <th>${bn ? 'পদবি' : 'Designation'}</th><td>${getDesignation(staffMember.designation)}</td></tr>
       <tr><th>${bn ? 'বিভাগ' : 'Department'}</th><td>${staffMember.department || '-'}</td>
-          <th>${bn ? 'কর্মদিবস' : 'Working Days'}</th><td>${record.working_days}</td></tr>
-      <tr><th>${bn ? 'উপস্থিত' : 'Present'}</th><td>${record.present_days}</td>
-          <th>${bn ? 'অনুপস্থিত' : 'Absent'}</th><td>${record.absent_days}</td></tr>
+          <th>${bn ? 'কর্মদিবস' : 'Working Days'}</th><td>${bn ? toBnDigits(record.working_days) : record.working_days}</td></tr>
+      <tr><th>${bn ? 'উপস্থিত' : 'Present'}</th><td>${bn ? toBnDigits(record.present_days) : record.present_days}</td>
+          <th>${bn ? 'অনুপস্থিত' : 'Absent'}</th><td>${bn ? toBnDigits(record.absent_days) : record.absent_days}</td></tr>
       <tr><th>${bn ? 'ডিউটি সময়' : 'Duty Time'}</th><td>${fmt(staffMember.duty_start_time || '08:00')} - ${fmt(staffMember.duty_end_time || '17:00')}</td>
-          <th>${bn ? 'বিলম্ব উপস্থিত দিন' : 'Late Present Days'}</th><td>${record.late_days || 0}</td></tr>
+          <th>${bn ? 'বিলম্ব উপস্থিত দিন' : 'Late Present Days'}</th><td>${bn ? toBnDigits(record.late_days || 0) : (record.late_days || 0)}</td></tr>
     </table>
     <table>
       <tr><th colspan="2" style="text-align:center">${bn ? 'আয়' : 'Earnings'}</th>
           <th colspan="2" style="text-align:center">${bn ? 'কর্তন' : 'Deductions'}</th></tr>
-      <tr><td>${bn ? 'মূল বেতন' : 'Base Salary'}</td><td>৳${Number(record.base_salary).toLocaleString()}</td>
-          <td>${bn ? 'বিলম্ব উপস্থিত কর্তন' : 'Late Present Ded.'}</td><td>৳${Number(record.late_deduction || 0).toLocaleString()}</td></tr>
-      <tr><td>${bn ? 'বোনাস' : 'Bonus'}</td><td>৳${Number(record.bonus || 0).toLocaleString()}</td>
-          <td>${bn ? 'অনুপস্থিতি কর্তন' : 'Absence Ded.'}</td><td>৳${Number(record.absence_deduction || 0).toLocaleString()}</td></tr>
-      <tr><td>${bn ? 'ওভারটাইম' : 'Overtime'}</td><td>৳${Number(record.overtime || 0).toLocaleString()}</td>
-          <td>${bn ? 'অগ্রিম কর্তন' : 'Advance Ded.'}</td><td>৳${Number(record.advance_deduction || 0).toLocaleString()}</td></tr>
-      <tr><td>${bn ? 'অন্যান্য ভাতা' : 'Other Allowance'}</td><td>৳${Number(record.other_allowance || 0).toLocaleString()}</td>
-          <td>${bn ? 'অন্যান্য কর্তন' : 'Other Ded.'}</td><td>৳${Number(record.other_deduction || 0).toLocaleString()}</td></tr>
-      <tr class="total"><td>${bn ? 'মোট আয়' : 'Total Earnings'}</td><td>৳${(Number(record.base_salary) + totalAllowance).toLocaleString()}</td>
-          <td>${bn ? 'মোট কর্তন' : 'Total Deductions'}</td><td>৳${totalDeduction.toLocaleString()}</td></tr>
+      <tr><td>${bn ? 'মূল বেতন' : 'Base Salary'}</td><td>৳${slipNum(Number(record.base_salary))}</td>
+          <td>${bn ? 'বিলম্ব উপস্থিত কর্তন' : 'Late Present Ded.'}</td><td>৳${slipNum(Number(record.late_deduction || 0))}</td></tr>
+      <tr><td>${bn ? 'বোনাস' : 'Bonus'}</td><td>৳${slipNum(Number(record.bonus || 0))}</td>
+          <td>${bn ? 'অনুপস্থিতি কর্তন' : 'Absence Ded.'}</td><td>৳${slipNum(Number(record.absence_deduction || 0))}</td></tr>
+      <tr><td>${bn ? 'ওভারটাইম' : 'Overtime'}</td><td>৳${slipNum(Number(record.overtime || 0))}</td>
+          <td>${bn ? 'অগ্রিম কর্তন' : 'Advance Ded.'}</td><td>৳${slipNum(Number(record.advance_deduction || 0))}</td></tr>
+      <tr><td>${bn ? 'অন্যান্য ভাতা' : 'Other Allowance'}</td><td>৳${slipNum(Number(record.other_allowance || 0))}</td>
+          <td>${bn ? 'অন্যান্য কর্তন' : 'Other Ded.'}</td><td>৳${slipNum(Number(record.other_deduction || 0))}</td></tr>
+      <tr class="total"><td>${bn ? 'মোট আয়' : 'Total Earnings'}</td><td>৳${slipNum(Number(record.base_salary) + totalAllowance)}</td>
+          <td>${bn ? 'মোট কর্তন' : 'Total Deductions'}</td><td>৳${slipNum(totalDeduction)}</td></tr>
     </table>
     <table><tr class="total"><td style="text-align:center;font-size:16px" colspan="4">
-      ${bn ? 'নিট বেতন' : 'Net Salary'}: ৳${Number(record.net_salary).toLocaleString()}</td></tr></table>
+      ${bn ? 'নিট বেতন' : 'Net Salary'}: ৳${slipNum(Number(record.net_salary))}</td></tr></table>
     <div class="sig">
       <div>${bn ? 'প্রাপকের স্বাক্ষর' : "Recipient's Signature"}</div>
       <div>${bn ? 'হিসাবরক্ষক' : 'Accountant'}</div>
