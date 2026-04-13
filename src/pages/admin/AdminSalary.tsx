@@ -246,7 +246,19 @@ const AdminSalary = () => {
     },
   });
 
-  // Get active savings config for a staff member for current month
+  // Fetch all salary records for bonus year
+  const { data: bonusYearRecords = [] } = useQuery({
+    queryKey: ['bonus-year-records', bonusYear],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('salary_records').select('*')
+        .gte('month_year', `${bonusYear}-01`)
+        .lte('month_year', `${bonusYear}-12`);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+
   const getActiveSavings = (staffId: string): { amount: number; config: any } | null => {
     const configs = savingsConfigs.filter((c: any) => c.staff_id === staffId && c.is_active);
     for (const cfg of configs) {
