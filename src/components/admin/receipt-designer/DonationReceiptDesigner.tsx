@@ -129,7 +129,7 @@ const DonationReceiptDesigner = () => {
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{bn ? 'তারিখ' : 'Date'}</Label>
-            <Input className="h-8 text-sm" type="date" value={form.date} onChange={(e) => updateField('date', e.target.value)} />
+            <DatePicker bengali={bn} className="h-8 text-sm" value={form.date} onChange={(v) => updateField('date', v)} />
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{bn ? 'দাতার নাম' : 'Donor Name'}</Label>
