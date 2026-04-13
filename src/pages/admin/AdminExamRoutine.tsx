@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -423,7 +424,7 @@ const AdminExamRoutine = () => {
           </DialogHeader>
           <div className="space-y-3">
             <div><Label>{bn ? 'পরীক্ষার তারিখ' : 'Exam Date'}</Label>
-              <Input type="date" value={entryForm.exam_date} onChange={e => setEntryForm(f => ({ ...f, exam_date: e.target.value }))} />
+              <DatePicker bengali={bn} value={entryForm.exam_date} onChange={v => setEntryForm(f => ({ ...f, exam_date: v }))} />
             </div>
             <div><Label>{bn ? 'বিষয়' : 'Subject'}</Label>
               <Select value={entryForm.subject_id} onValueChange={v => setEntryForm(f => ({ ...f, subject_id: v }))}>

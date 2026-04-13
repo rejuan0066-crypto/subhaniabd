@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { FileText, Printer, Trash2, Loader2, Eye, Pencil, PencilOff, Upload, Plus, UserCheck } from 'lucide-react';
@@ -540,7 +541,7 @@ const AdminResignLetters = () => {
               </div>
               <div className="space-y-2">
                 <Label>{bn ? 'পদত্যাগের তারিখ' : 'Resign Date'}</Label>
-                <Input type="date" value={resignDate} onChange={e => setResignDate(e.target.value)} />
+                <DatePicker bengali={bn} value={resignDate} onChange={v => setResignDate(v)} />
               </div>
               <div className="space-y-2">
                 <Label>{bn ? 'কারণ' : 'Reason'}</Label>

@@ -973,8 +973,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="relative">
-                  <CalendarDays className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} className="pl-8 w-40 h-8 text-sm" />
+                  <DatePicker bengali={bn} className="w-40 h-8 text-sm" value={selectedDate} onChange={v => setSelectedDate(v)} />
                 </div>
                 <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => changeDate(1)}>
                   <ChevronRight className="h-4 w-4" />
