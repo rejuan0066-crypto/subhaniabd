@@ -85,9 +85,9 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   });
 
   const { data: designationsList = [] } = useQuery({
-    queryKey: ['designations-categories'],
+    queryKey: ['designations-all'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category');
+      const { data, error } = await supabase.from('designations').select('name, name_bn, staff_category').eq('is_active', true).order('sort_order');
       if (error) throw error;
       return data;
     },
@@ -161,6 +161,18 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast.success(bn ? 'ক্যাটাগরি ও পদবী পরিবর্তন হয়েছে' : 'Category & designation updated');
+    },
+    onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
+  });
+
+  const designationMutation = useMutation({
+    mutationFn: async ({ id, designation }: { id: string; designation: string }) => {
+      const { error } = await supabase.from('staff').update({ designation } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(bn ? 'পদবী পরিবর্তন হয়েছে' : 'Designation updated');
     },
     onError: () => toast.error(bn ? 'সমস্যা হয়েছে' : 'Error'),
   });
@@ -300,7 +312,29 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{s.designation || '-'}</td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const cat = getStaffCategory(s, designationsMap);
+                          const catDesignations = designationsList.filter((d: any) => d.staff_category === cat);
+                          return (
+                            <Select
+                              value={s.designation || ''}
+                              onValueChange={(val) => designationMutation.mutate({ id: s.id, designation: val })}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-[150px]">
+                                <SelectValue placeholder={bn ? 'পদবী নির্বাচন' : 'Select'} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {catDesignations.map((d: any) => (
+                                  <SelectItem key={d.name} value={bn ? d.name_bn : d.name}>
+                                    {bn ? d.name_bn : d.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        })()}
+                      </td>
                       <td className="px-4 py-3">
                         <Select
                           value={getStaffCategory(s, designationsMap)}
