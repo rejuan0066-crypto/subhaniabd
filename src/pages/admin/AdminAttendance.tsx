@@ -290,7 +290,40 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     },
   });
 
-  const statusOptions = useMemo(() => {
+  // Fetch category shift times
+  const { data: savedCategoryTimes } = useQuery({
+    queryKey: ['category-shift-times'],
+    queryFn: async () => {
+      const { data } = await supabase.from('website_settings').select('value').eq('key', 'category_shift_times').maybeSingle();
+      return data?.value as any;
+    },
+  });
+  useMemo(() => {
+    if (savedCategoryTimes) {
+      setCategoryShiftTimes({ ...defaultCategoryTimes, ...savedCategoryTimes });
+    }
+  }, [savedCategoryTimes]);
+
+  const saveCategoryTimesMutation = useMutation({
+    mutationFn: async (times: Record<string, { start: string; end: string }>) => {
+      const { error } = await supabase.from('website_settings').upsert(
+        { key: 'category_shift_times', value: times, updated_at: new Date().toISOString() },
+        { onConflict: 'key' }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['category-shift-times'] });
+      toast.success(bn ? 'ক্যাটাগরি শিফট টাইম সেভ হয়েছে' : 'Category shift times saved');
+    },
+  });
+
+  // Helper: get shift time for a staff entity
+  const getCategoryTime = (entity: any) => {
+    const cat = entity.staff_category || 'general';
+    return categoryShiftTimes[cat] || defaultCategoryTimes.general;
+  };
+
     return rules.filter((r: any) => r.entity_type === entityType && r.rule_type === 'status' && r.is_active);
   }, [rules, entityType]);
 
