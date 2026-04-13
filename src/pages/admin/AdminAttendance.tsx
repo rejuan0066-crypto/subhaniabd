@@ -1047,6 +1047,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                             {resetType === 'staff' && (bn ? 'আপনি কি নিশ্চিত যে শুধু স্টাফ হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset only staff attendance? This cannot be undone.')}
                             {resetType === 'division' && (() => { const div = divisions.find((d: any) => d.id === resetDivisionId); return bn ? `আপনি কি নিশ্চিত যে "${div?.name_bn || ''}" বিভাগের হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${div?.name || ''}" division? This cannot be undone.`; })()}
                             {resetType === 'all' && (bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This cannot be undone.')}
+                            {resetType === 'single_staff' && (bn ? `আপনি কি নিশ্চিত যে "${resetStaffName}" এর হাজিরা রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।` : `Are you sure you want to reset attendance for "${resetStaffName}"? This cannot be undone.`)}
                           </p>
                         </DialogHeader>
                         <div className="flex justify-center gap-3 pt-4">
