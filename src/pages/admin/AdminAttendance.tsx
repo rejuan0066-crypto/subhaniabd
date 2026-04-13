@@ -1015,8 +1015,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                     </Button>
                     {showResetMenu && (
                       <>
-                        <div className="fixed inset-0 z-40" onClick={() => setShowResetMenu(false)} />
-                        <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200">
+                        <div className="fixed inset-0 z-[9998]" onClick={() => setShowResetMenu(false)} />
+                        <div className="fixed right-4 z-[9999] w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200" style={{ top: 'min(50%, calc(100vh - 400px))' }}>
                           <div className="px-2 py-1">
                             <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
                             {[
