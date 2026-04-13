@@ -1013,6 +1013,20 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   </Tabs>
                 )}
 
+                {/* Staff Category Filter */}
+                <Select value={selectedStaffCategory} onValueChange={setSelectedStaffCategory}>
+                  <SelectTrigger className="w-44 h-8 text-xs">
+                    <SelectValue placeholder={bn ? 'ক্যাটাগরি' : 'Category'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{bn ? 'সকল ক্যাটাগরি' : 'All Categories'}</SelectItem>
+                    <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                    <SelectItem value="administrative">{bn ? 'প্রশাসনিক' : 'Administrative'}</SelectItem>
+                    <SelectItem value="support">{bn ? 'সাপোর্ট স্টাফ' : 'Support Staff'}</SelectItem>
+                    <SelectItem value="general">{bn ? 'সহায়ক কর্মী' : 'General Staff'}</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 {/* Search */}
                 <div className="relative flex-1 min-w-[150px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
