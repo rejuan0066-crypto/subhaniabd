@@ -72,6 +72,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   }, [forcedTab, tabParam]);
   const [studentSubTab, setStudentSubTab] = useState<'all' | 'residential' | 'meal'>('all');
   const [staffSubTab, setStaffSubTab] = useState<'fulltime' | 'duty' | 'meal'>('fulltime');
+  const [selectedStaffCategory, setSelectedStaffCategory] = useState<string>('all');
   const [studentMealShift, setStudentMealShift] = useState('meal_breakfast');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [searchQuery, setSearchQuery] = useState('');
