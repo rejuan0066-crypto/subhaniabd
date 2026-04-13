@@ -965,11 +965,11 @@ const AdminSalary = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
-            { label: bn ? 'মোট মূল বেতন' : 'Total Base', value: `৳${stats.totalBase.toLocaleString()}`, color: 'bg-primary/10 text-primary' },
-            { label: bn ? 'মোট নিট বেতন' : 'Total Net', value: `৳${stats.totalNet.toLocaleString()}`, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-            { label: bn ? 'মোট কর্তন' : 'Total Deductions', value: `৳${stats.totalDeduction.toLocaleString()}`, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
-            { label: bn ? 'পরিশোধিত' : 'Paid', value: stats.paid, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-            { label: bn ? 'বকেয়া' : 'Pending', value: stats.pending, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
+            { label: bn ? 'মোট মূল বেতন' : 'Total Base', value: `৳${bn ? toBnDigits(stats.totalBase.toLocaleString()) : stats.totalBase.toLocaleString()}`, color: 'bg-primary/10 text-primary' },
+            { label: bn ? 'মোট নিট বেতন' : 'Total Net', value: `৳${bn ? toBnDigits(stats.totalNet.toLocaleString()) : stats.totalNet.toLocaleString()}`, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+            { label: bn ? 'মোট কর্তন' : 'Total Deductions', value: `৳${bn ? toBnDigits(stats.totalDeduction.toLocaleString()) : stats.totalDeduction.toLocaleString()}`, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+            { label: bn ? 'পরিশোধিত' : 'Paid', value: bn ? toBnDigits(stats.paid) : stats.paid, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+            { label: bn ? 'বকেয়া' : 'Pending', value: bn ? toBnDigits(stats.pending) : stats.pending, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' },
           ].map((s, i) => (
             <Card key={i}>
               <CardContent className="p-3 text-center">
@@ -1131,11 +1131,11 @@ const AdminSalary = () => {
                   <tfoot>
                     <tr className="bg-muted/50 font-bold">
                       <td colSpan={4} className="px-3 py-2">{bn ? 'মোট' : 'Total'}</td>
-                      <td className="px-3 py-2 text-right">৳{stats.totalBase.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right">৳{bn ? toBnDigits(stats.totalBase.toLocaleString()) : stats.totalBase.toLocaleString()}</td>
                       <td className="px-3 py-2"></td>
-                      <td className="px-3 py-2 text-right text-red-500">৳{stats.totalDeduction.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right text-red-500">৳{bn ? toBnDigits(stats.totalDeduction.toLocaleString()) : stats.totalDeduction.toLocaleString()}</td>
                       <td className="px-3 py-2"></td>
-                      <td className="px-3 py-2 text-right text-emerald-700 dark:text-emerald-400">৳{stats.totalNet.toLocaleString()}</td>
+                      <td className="px-3 py-2 text-right text-emerald-700 dark:text-emerald-400">৳{bn ? toBnDigits(stats.totalNet.toLocaleString()) : stats.totalNet.toLocaleString()}</td>
                       <td colSpan={2}></td>
                     </tr>
                   </tfoot>
