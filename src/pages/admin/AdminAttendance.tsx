@@ -84,10 +84,11 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff'>('all');
+  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff' | 'staff_category'>('all');
   const [resetDivisionId, setResetDivisionId] = useState<string>('');
   const [resetStaffId, setResetStaffId] = useState<string>('');
   const [resetStaffName, setResetStaffName] = useState<string>('');
+  const [resetStaffCategory, setResetStaffCategory] = useState<string>('');
   const [showResetMenu, setShowResetMenu] = useState(false);
   // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
   const effectiveShift = entityType === 'student'
@@ -397,7 +398,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
   // Reset attendance selectively
   const resetMutation = useMutation({
-    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division' | 'single_staff') => {
+    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division' | 'single_staff' | 'staff_category') => {
       let ids: string[] = [];
       if (type === 'all') {
         ids = attendance.map((a: any) => a.id);
@@ -412,6 +413,9 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         ids = attendance.filter((a: any) => divStudentIds.has(a.entity_id)).map((a: any) => a.id);
       } else if (type === 'single_staff') {
         ids = attendance.filter((a: any) => a.entity_id === resetStaffId).map((a: any) => a.id);
+      } else if (type === 'staff_category') {
+        const catStaffIds = new Set(allStaff.filter((s: any) => s.staff_category === resetStaffCategory).map((s: any) => s.id));
+        ids = attendance.filter((a: any) => catStaffIds.has(a.entity_id)).map((a: any) => a.id);
       }
       if (ids.length === 0) throw new Error('No records to reset');
       const { error } = await supabase.from('attendance_records').delete().in('id', ids);
@@ -420,12 +424,19 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     },
     onSuccess: (_data, type) => {
       queryClient.invalidateQueries({ queryKey: ['attendance', selectedDate, entityType, effectiveShift] });
+      const catLabels: Record<string, string> = {
+        teacher: bn ? 'শিক্ষক' : 'Teacher',
+        administrative: bn ? 'প্রশাসনিক' : 'Administrative',
+        support: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff',
+        general: bn ? 'সহায়ক কর্মী' : 'General Staff',
+      };
       const labels: Record<string, string> = {
         all: bn ? 'সকল উপস্থিতি' : 'All attendance',
         student: bn ? 'ছাত্র হাজিরা' : 'Student attendance',
         staff: bn ? 'স্টাফ হাজিরা' : 'Staff attendance',
         division: bn ? 'বিভাগ হাজিরা' : 'Division attendance',
         single_staff: bn ? `${resetStaffName} এর হাজিরা` : `${resetStaffName}'s attendance`,
+        staff_category: bn ? `${catLabels[resetStaffCategory] || resetStaffCategory} হাজিরা` : `${catLabels[resetStaffCategory] || resetStaffCategory} attendance`,
       };
       toast.success(bn ? `সাফল্যের সাথে ${labels[type]} রিসেট করা হয়েছে।` : `${labels[type]} reset successfully.`);
     },
