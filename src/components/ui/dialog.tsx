@@ -19,7 +19,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-slate-900/20 backdrop-blur-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
@@ -36,15 +36,18 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-5 border-0 border-border/10 bg-background/95 backdrop-blur-xl p-8 duration-400 max-h-[90vh] overflow-y-auto rounded-[32px] sm:rounded-[36px]",
-        "shadow-[0_20px_60px_rgba(0,0,0,0.1)]",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-5 p-8 duration-400 max-h-[90vh] rounded-[38px]",
+        "bg-gradient-to-b from-background to-muted/30 backdrop-blur-2xl",
+        "border border-border/10",
+        "shadow-[0_32px_80px_-12px_rgba(0,0,0,0.12),0_0_0_1px_rgba(255,255,255,0.06)]",
+        "overflow-y-auto scrollbar-hidden",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-bottom-[6%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-bottom-[6%]",
         className,
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-6 top-6 w-10 h-10 rounded-full flex items-center justify-center bg-muted/60 text-foreground/70 transition-all duration-300 hover:bg-destructive/10 hover:text-destructive hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-5 top-5 w-10 h-10 rounded-full flex items-center justify-center bg-muted/40 backdrop-blur-sm text-foreground/60 transition-all duration-300 hover:bg-destructive/10 hover:text-destructive hover:scale-110 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -59,7 +62,7 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogHeader.displayName = "DialogHeader";
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 pt-4 border-t border-border/30", className)} {...props} />
+  <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 pt-4 border-t border-border/10", className)} {...props} />
 );
 DialogFooter.displayName = "DialogFooter";
 
