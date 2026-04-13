@@ -2947,6 +2947,92 @@ export type Database = {
           },
         ]
       }
+      salary_savings: {
+        Row: {
+          created_at: string
+          duration_months: number
+          id: string
+          is_active: boolean
+          monthly_amount: number
+          staff_id: string
+          start_month: string
+          total_saved: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_months?: number
+          id?: string
+          is_active?: boolean
+          monthly_amount?: number
+          staff_id: string
+          start_month: string
+          total_saved?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_months?: number
+          id?: string
+          is_active?: boolean
+          monthly_amount?: number
+          staff_id?: string
+          start_month?: string
+          total_saved?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_savings_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_savings_ledger: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          month_year: string
+          savings_id: string
+          staff_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          month_year: string
+          savings_id: string
+          staff_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          month_year?: string
+          savings_id?: string
+          staff_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_savings_ledger_savings_id_fkey"
+            columns: ["savings_id"]
+            isOneToOne: false
+            referencedRelation: "salary_savings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_savings_ledger_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salary_settings: {
         Row: {
           created_at: string | null
