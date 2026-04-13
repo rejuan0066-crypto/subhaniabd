@@ -1017,10 +1017,23 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowResetMenu(false)} />
                         <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-2xl border border-border/30 bg-background/95 backdrop-blur-2xl shadow-[0_16px_48px_-8px_hsl(220_20%_10%/0.15)] p-2 space-y-1 animate-in fade-in-0 zoom-in-95 duration-200">
-                          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/60 transition-colors text-left group" onClick={() => { setResetType('staff'); setShowResetMenu(false); setShowResetDialog(true); }}>
-                            <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0"><UserCog className="h-4 w-4 text-amber-600" /></div>
-                            <div><p className="text-sm font-medium text-foreground">{bn ? 'স্টাফ হাজিরা রিসেট করুন' : 'Reset Staff Attendance'}</p><p className="text-xs text-muted-foreground">{bn ? 'শুধু স্টাফদের হাজিরা মুছুন' : 'Delete only staff records'}</p></div>
-                          </button>
+                          <div className="px-2 py-1">
+                            <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'ক্যাটাগরি অনুযায়ী রিসেট করুন' : 'Reset by Category'}</p>
+                            {[
+                              { key: 'teacher', label: bn ? 'শিক্ষক' : 'Teacher', icon: Users, color: 'bg-blue-500/10 text-blue-600' },
+                              { key: 'administrative', label: bn ? 'প্রশাসনিক' : 'Administrative', icon: UserCog, color: 'bg-amber-500/10 text-amber-600' },
+                              { key: 'support', label: bn ? 'সাপোর্ট স্টাফ' : 'Support Staff', icon: UserCog, color: 'bg-teal-500/10 text-teal-600' },
+                              { key: 'general', label: bn ? 'সহায়ক কর্মী' : 'General Staff', icon: UserCog, color: 'bg-purple-500/10 text-purple-600' },
+                            ].filter(cat => allStaff.some((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id))).map(cat => (
+                              <button key={cat.key} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-destructive/10 transition-colors text-left" onClick={() => { setResetType('staff_category'); setResetStaffCategory(cat.key); setShowResetMenu(false); setShowResetDialog(true); }}>
+                                <div className={`w-8 h-8 rounded-full ${cat.color} flex items-center justify-center shrink-0`}><cat.icon className="h-3.5 w-3.5" /></div>
+                                <div>
+                                  <span className="text-sm text-foreground">{cat.label}</span>
+                                  <p className="text-[10px] text-muted-foreground">{allStaff.filter((s: any) => s.staff_category === cat.key && attendance.some((a: any) => a.entity_id === s.id)).length} {bn ? 'জন' : 'records'}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
                           <div className="border-t border-border/20 my-1" />
                           <div className="px-2 py-1">
                             <p className="text-xs font-medium text-muted-foreground mb-2 px-2">{bn ? 'নির্দিষ্ট স্টাফ রিসেট করুন' : 'Reset Individual Staff'}</p>
