@@ -84,8 +84,10 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division'>('all');
+  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division' | 'single_staff'>('all');
   const [resetDivisionId, setResetDivisionId] = useState<string>('');
+  const [resetStaffId, setResetStaffId] = useState<string>('');
+  const [resetStaffName, setResetStaffName] = useState<string>('');
   const [showResetMenu, setShowResetMenu] = useState(false);
   // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
   const effectiveShift = entityType === 'student'
@@ -395,7 +397,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
 
   // Reset attendance selectively
   const resetMutation = useMutation({
-    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division') => {
+    mutationFn: async (type: 'all' | 'student' | 'staff' | 'division' | 'single_staff') => {
       let ids: string[] = [];
       if (type === 'all') {
         ids = attendance.map((a: any) => a.id);
@@ -408,6 +410,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
       } else if (type === 'division') {
         const divStudentIds = new Set(allStudents.filter((s: any) => s.division_id === resetDivisionId).map((s: any) => s.id));
         ids = attendance.filter((a: any) => divStudentIds.has(a.entity_id)).map((a: any) => a.id);
+      } else if (type === 'single_staff') {
+        ids = attendance.filter((a: any) => a.entity_id === resetStaffId).map((a: any) => a.id);
       }
       if (ids.length === 0) throw new Error('No records to reset');
       const { error } = await supabase.from('attendance_records').delete().in('id', ids);
@@ -421,6 +425,7 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
         student: bn ? 'ছাত্র হাজিরা' : 'Student attendance',
         staff: bn ? 'স্টাফ হাজিরা' : 'Staff attendance',
         division: bn ? 'বিভাগ হাজিরা' : 'Division attendance',
+        single_staff: bn ? `${resetStaffName} এর হাজিরা` : `${resetStaffName}'s attendance`,
       };
       toast.success(bn ? `সাফল্যের সাথে ${labels[type]} রিসেট করা হয়েছে।` : `${labels[type]} reset successfully.`);
     },
