@@ -161,10 +161,10 @@ export const printResultSheet = ({ title, students, subjects, marksMap, getOvera
 <html><head>
 <meta charset="utf-8">
 <title>${title}</title>
-<link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; padding:15mm; }
+  body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; padding:15mm; }
   @media print { body { padding:10mm; } }
   .header { text-align:center; margin-bottom:16px; }
   .header-logo { width:50px; height:50px; object-fit:contain; margin:0 auto 8px; display:block; }

@@ -1017,10 +1017,10 @@ const AdmissionPage = () => {
     return `<!DOCTYPE html><html><head>
       <meta charset="utf-8">
       <title>ভর্তি আবেদন ফর্ম</title>
-      <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+      <style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif; padding: 10mm 12mm; font-size: 11px; color: #333; }
+        body { font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif; padding: 10mm 12mm; font-size: 11px; color: #333; }
         .header { text-align: center; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 6px; }
         .header img { height: 50px; margin-bottom: 3px; }
         .header h1 { font-size: 16px; font-weight: 700; }

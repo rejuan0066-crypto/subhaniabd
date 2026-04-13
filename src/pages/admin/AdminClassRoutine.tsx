@@ -457,10 +457,10 @@ const AdminClassRoutine = () => {
     const w = window.open('', '_blank');
     if (!w) return;
     w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${bn ? 'ক্লাস রুটিন' : 'Class Routine'}</title>
-    <link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
       * { margin:0; padding:0; box-sizing:border-box; }
-      body { font-family: 'Solaiman Lipi', 'Noto Sans Bengali', sans-serif; padding: 15px; }
+      body { font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif; padding: 15px; }
       @page { size: A4 landscape; margin: 10mm; }
       table { border-collapse: collapse; width: 100%; }
       th, td { border: 1.5px solid #333; padding: 4px 6px; text-align: center; font-size: 11px; vertical-align: middle; }

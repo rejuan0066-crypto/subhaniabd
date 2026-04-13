@@ -310,7 +310,7 @@ const AdminJoiningLetters = () => {
 <html><head>
 <meta charset="utf-8">
 <title>${isReinstatement ? (bn ? 'পুনর্বহাল পত্র' : 'Reinstatement Letter') : (bn ? 'নিয়োগপত্র' : 'Joining Letter')}</title>
-<link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   @page{size:A4;margin:0}

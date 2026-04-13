@@ -100,10 +100,10 @@ const IndividualMarksheet = ({ student, subjects, marksMap, examTitle, onBack }:
 <html><head>
 <meta charset="utf-8">
 <title>${examTitle} - ${studentName}</title>
-<link href="https://banglawebfonts.pages.dev/css/solaiman-lipi.min.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Solaiman Lipi','Noto Sans Bengali',sans-serif; padding:15mm; max-width:700px; margin:0 auto; color:#1f2937; }
+  body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; padding:15mm; max-width:700px; margin:0 auto; color:#1f2937; }
   @media print { body { padding:10mm; } }
   .header { text-align:center; margin-bottom:16px; background:linear-gradient(135deg,#16a34a,#15803d); color:#fff; padding:18px 20px; border-radius:12px; }
   .header-logo { width:54px; height:54px; object-fit:contain; margin:0 auto 8px; display:block; border-radius:50%; background:#fff; padding:3px; }
