@@ -82,6 +82,9 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
   const [qrPosterOpen, setQrPosterOpen] = useState(false);
   const [deviceManagerOpen, setDeviceManagerOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetType, setResetType] = useState<'all' | 'student' | 'staff' | 'division'>('all');
+  const [resetDivisionId, setResetDivisionId] = useState<string>('');
+  const [showResetMenu, setShowResetMenu] = useState(false);
   // Effective shift: for students, meal tab uses meal shift; for staff, fulltime=full_day, others use selected
   const effectiveShift = entityType === 'student'
     ? (studentSubTab === 'meal' ? studentMealShift : 'full_day')
