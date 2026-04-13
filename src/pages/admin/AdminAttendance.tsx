@@ -101,8 +101,14 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     evening_days: 30,
     total_salary: 0,
   });
+  const defaultCategoryTimes: Record<string, { start: string; end: string }> = {
+    teacher: { start: '08:00', end: '14:00' },
+    administrative: { start: '09:00', end: '17:00' },
+    support: { start: '08:00', end: '17:00' },
+    general: { start: '08:00', end: '17:00' },
+  };
+  const [categoryShiftTimes, setCategoryShiftTimes] = useState<Record<string, { start: string; end: string }>>(defaultCategoryTimes);
 
-  // Fetch divisions
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
     queryFn: async () => {
