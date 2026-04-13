@@ -1277,8 +1277,8 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                                   mutateData.check_out_time = dutyTimes.evening_end;
                                 }
                               } else if (entityType === 'staff' && ['present', 'late', 'half_day'].includes(countsAs)) {
-                                mutateData.check_in_time = entity.duty_start_time || '08:00';
-                                mutateData.check_out_time = entity.duty_end_time || '17:00';
+                                mutateData.check_in_time = getCategoryTime(entity).start;
+                                mutateData.check_out_time = getCategoryTime(entity).end;
                               }
                               if (countsAs === 'absent' || countsAs === 'leave') {
                                 mutateData.check_in_time = '';
