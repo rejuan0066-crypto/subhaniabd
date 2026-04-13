@@ -724,48 +724,66 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
     }
     const getAtt = (id: string) => entityType === 'student' ? studentAttData.find((a: any) => a.entity_id === id) : getAttendance(id);
 
-    const rows: string[][] = [];
-    const header = [
-      bn ? 'ক্রম' : 'SL',
-      bn ? 'নাম' : 'Name',
-      entityType === 'student' ? (bn ? 'আইডি' : 'ID') : (bn ? 'পদবী' : 'Designation'),
-      bn ? 'স্ট্যাটাস' : 'Status',
+    // Build columns for Excel
+    const excelColumns: { key: string; label: string; center?: boolean }[] = [
+      { key: 'sl', label: bn ? 'ক্রম' : 'SL', center: true },
+      { key: 'name', label: bn ? 'নাম' : 'Name', center: false },
+      { key: 'designation', label: entityType === 'student' ? (bn ? 'আইডি' : 'ID') : (bn ? 'পদবী' : 'Designation'), center: false },
+      { key: 'status', label: bn ? 'স্ট্যাটাস' : 'Status', center: true },
     ];
     if (entityType === 'staff') {
-      header.push(bn ? 'চেক-ইন' : 'Check In', bn ? 'চেক-আউট' : 'Check Out');
+      excelColumns.push(
+        { key: 'checkIn', label: bn ? 'চেক-ইন' : 'Check In', center: true },
+        { key: 'checkOut', label: bn ? 'চেক-আউট' : 'Check Out', center: true },
+        { key: 'late', label: bn ? 'বিলম্ব (মিনিট)' : 'Late (Min)', center: true },
+      );
     }
-    rows.push(header);
 
-    filtered.forEach((entity: any, idx: number) => {
+    let totalLateMinutes = 0;
+    const excelRows = filtered.map((entity: any, idx: number) => {
       const att = getAtt(entity.id);
-      const row = [
-        String(idx + 1),
-        entity.name_bn,
-        entityType === 'student' ? (entity.student_id || '-') : (entity.designation || '-'),
-        att ? statusLabel(att.status) : (bn ? 'চিহ্নিত হয়নি' : 'Unmarked'),
-      ];
+      const row: Record<string, any> = {
+        sl: idx + 1,
+        name: entity.name_bn,
+        designation: entityType === 'student' ? (entity.student_id || '-') : (entity.designation || '-'),
+        status: att ? statusLabel(att.status) : (bn ? 'চিহ্নিত হয়নি' : 'Unmarked'),
+      };
       if (entityType === 'staff') {
-        row.push(att?.check_in_time ? fmt(att.check_in_time) : '-');
-        row.push(att?.check_out_time ? fmt(att.check_out_time) : '-');
+        row.checkIn = att?.check_in_time ? fmt(att.check_in_time) : '-';
+        row.checkOut = att?.check_out_time ? fmt(att.check_out_time) : '-';
+        // Calculate late
+        const shiftStart = staffSubTab === 'duty'
+          ? (selectedShift === 'morning' ? dutyTimes.morning_start : dutyTimes.evening_start)
+          : getCategoryTime(entity).start;
+        const lateMins = calcLateMinutes(att?.check_in_time || null, shiftStart);
+        totalLateMinutes += lateMins;
+        row.late = lateMins > 0 ? `${lateMins} ${bn ? 'মিনিট' : 'Min'}` : '-';
       }
-      rows.push(row);
+      return row;
     });
 
     const csvPresent = entityType === 'student' ? studentAttData.filter((a: any) => a.status === 'present').length : stats.present;
     const csvAbsent = entityType === 'student' ? studentAttData.filter((a: any) => a.status === 'absent').length : stats.absent;
-    rows.push([]);
-    rows.push([bn ? 'মোট' : 'Total', String(filtered.length), bn ? 'উপস্থিত' : 'Present', String(csvPresent), bn ? 'অনুপস্থিত' : 'Absent', String(csvAbsent)]);
 
-    const bom = '\uFEFF';
-    const csv = bom + rows.map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentTabLabel}_${selectedDate}${currentShiftLabel ? `_${currentShiftLabel}` : ''}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(bn ? 'CSV ডাউনলোড হয়েছে' : 'CSV downloaded');
+    const instName = institution?.name || (bn ? 'প্রতিষ্ঠান' : 'Institution');
+    const today = new Date().toLocaleDateString(bn ? 'bn-BD' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    exportAttendanceExcel({
+      title: `${currentTabLabel}${currentShiftLabel ? ` (${currentShiftLabel})` : ''}`,
+      institutionName: instName,
+      reportDate: today,
+      selectedDate,
+      columns: excelColumns,
+      rows: excelRows,
+      stats: {
+        total: filtered.length,
+        present: csvPresent,
+        absent: csvAbsent,
+        ...(entityType === 'staff' ? { totalLateMinutes } : {}),
+      },
+      bn,
+    });
+    toast.success(bn ? 'এক্সেল ডাউনলোড হয়েছে' : 'Excel downloaded');
   };
 
   // Print attendance
