@@ -902,13 +902,34 @@ const AdminAttendance = ({ forcedTab }: { forcedTab?: 'student' | 'staff' }) => 
                   <Check className="h-3 w-3 mr-1" /> {bn ? 'সবাই উপস্থিত' : 'All Present'}
                 </Button>}
                 {canDeleteItem && attendance.length > 0 && (
-                  <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => {
-                    if (window.confirm(bn ? 'আজকের সকল উপস্থিতি রিসেট করতে চান?' : 'Reset all attendance for today?')) {
-                      resetMutation.mutate();
-                    }
-                  }}>
-                    <RotateCcw className="h-3 w-3 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
-                  </Button>
+                  <>
+                    <Button size="sm" variant="outline" className="text-xs text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => setShowResetDialog(true)}>
+                      <RotateCcw className="h-3 w-3 mr-1" /> {bn ? 'রিসেট' : 'Reset'}
+                    </Button>
+                    <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+                      <DialogContent className="sm:max-w-md rounded-[32px] backdrop-blur-2xl bg-white/80 dark:bg-slate-900/80 border border-white/30 dark:border-white/10 shadow-2xl">
+                        <DialogHeader className="flex flex-col items-center text-center gap-3">
+                          <div className="w-16 h-16 rounded-full bg-rose-500/10 flex items-center justify-center mb-1">
+                            <RotateCcw className="w-8 h-8 text-rose-500" />
+                          </div>
+                          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                            {bn ? 'উপস্থিতি রিসেট নিশ্চিতকরণ' : 'Confirm Attendance Reset'}
+                          </DialogTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {bn ? 'আপনি কি নিশ্চিত যে আজকের সকল উপস্থিতি রিসেট করতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।' : 'Are you sure you want to reset all attendance for today? This action cannot be undone.'}
+                          </p>
+                        </DialogHeader>
+                        <div className="flex justify-center gap-3 pt-4">
+                          <Button variant="ghost" className="rounded-full px-6" onClick={() => setShowResetDialog(false)}>
+                            {bn ? 'না, থাক' : 'Cancel'}
+                          </Button>
+                          <Button className="rounded-full px-6 bg-rose-500 hover:bg-rose-600 text-white shadow-[0_0_15px_hsl(350_80%_55%/0.3)]" onClick={() => { resetMutation.mutate(); setShowResetDialog(false); }}>
+                            {bn ? 'হ্যাঁ, রিসেট করুন' : 'Yes, Reset'}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </>
                 )}
               </div>
             </div>
