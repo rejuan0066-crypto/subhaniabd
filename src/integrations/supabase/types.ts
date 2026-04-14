@@ -2580,15 +2580,20 @@ export type Database = {
       }
       question_papers: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           class_id: string | null
           created_at: string
           created_by: string | null
           division_id: string | null
           duration_minutes: number
           exam_session_id: string | null
+          font_config: Json | null
+          header_config: Json | null
           id: string
           instructions: string | null
           instructions_bn: string | null
+          rejection_note: string | null
           status: string
           subject_id: string | null
           subject_type: string
@@ -2598,15 +2603,20 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           class_id?: string | null
           created_at?: string
           created_by?: string | null
           division_id?: string | null
           duration_minutes?: number
           exam_session_id?: string | null
+          font_config?: Json | null
+          header_config?: Json | null
           id?: string
           instructions?: string | null
           instructions_bn?: string | null
+          rejection_note?: string | null
           status?: string
           subject_id?: string | null
           subject_type?: string
@@ -2616,15 +2626,20 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           class_id?: string | null
           created_at?: string
           created_by?: string | null
           division_id?: string | null
           duration_minutes?: number
           exam_session_id?: string | null
+          font_config?: Json | null
+          header_config?: Json | null
           id?: string
           instructions?: string | null
           instructions_bn?: string | null
+          rejection_note?: string | null
           status?: string
           subject_id?: string | null
           subject_type?: string
