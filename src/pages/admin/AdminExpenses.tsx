@@ -276,20 +276,6 @@ const AdminExpenses = () => {
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
-  const addExpInst = useMutation({
-    mutationFn: async () => {
-      if (!expInstForm.name || !expInstForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
-      if (editingExpInstId) {
-        const { error } = await supabase.from('expense_institutions').update({ name: expInstForm.name, name_bn: expInstForm.name_bn }).eq('id', editingExpInstId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('expense_institutions').insert(expInstForm);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setExpInstDialog(false); setExpInstForm({ institution_id: '', name: '', name_bn: '' }); setEditingExpInstId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
-    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
-  });
 
   const deleteExpInst = useMutation({
     mutationFn: async (id: string) => {
@@ -614,8 +600,8 @@ const AdminExpenses = () => {
   const handleInstExcelDownload = (instId: string) => {
     const inst = expenseInstitutions.find((p: any) => p.id === instId);
     if (!inst) return;
-    const instExpenses = expenses.filter((e: any) => e.institution_id === projectId);
-    const instTotal = instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+    const instExpensesFiltered = expenses.filter((e: any) => e.institution_id === instId);
+    const instTotal = instExpensesFiltered.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
     const rows: string[][] = [];
     rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? instName : instNameEn]);
     rows.push([bn ? 'ঠিকানা' : 'Address', instAddress]);
@@ -626,7 +612,7 @@ const AdminExpenses = () => {
     rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? inst.name_bn : inst.name}`, selectedMonthYear]);
     rows.push([]);
 
-    const instCatsForPrint = categories.filter((c: any) => c.institution_id === projectId);
+    const instCatsForPrint = categories.filter((c: any) => c.institution_id === instId);
     instCatsForPrint.forEach((cat: any) => {
       const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
       if (catExpenses.length === 0) return;
