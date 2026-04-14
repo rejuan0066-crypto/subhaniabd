@@ -110,8 +110,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const expandedSidebarWidth = sidebarWidthPxMap[adminTheme.sidebarWidth] || 260;
   const collapsedSidebarWidth = 64;
   const desktopSidebarWidth = sidebarOpen ? expandedSidebarWidth : collapsedSidebarWidth;
-  const iconSizeMap = { small: 'w-4 h-4', medium: 'w-[18px] h-[18px]', large: 'w-5 h-5' };
-  const iconSizeClass = iconSizeMap[adminTheme.sidebarIconSize] || 'w-[18px] h-[18px]';
+  const iconSizeMap = { small: 'w-[18px] h-[18px]', medium: 'w-5 h-5', large: 'w-[22px] h-[22px]' };
+  const iconSizeClass = iconSizeMap[adminTheme.sidebarIconSize] || 'w-5 h-5';
   const headerHeightMap = { compact: 'py-1.5', default: 'py-2.5', tall: 'py-4' };
   const headerPadClass = headerHeightMap[adminTheme.headerHeight] || 'py-2.5';
   const mobileHeaderOffsetMap = {
