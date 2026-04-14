@@ -1,0 +1,2 @@
+ALTER TABLE public.question_papers 
+ADD COLUMN IF NOT EXISTS layout_settings JSONB DEFAULT '{"orientation":"portrait","columns":1,"marginTop":20,"marginBottom":20,"marginLeft":15,"marginRight":15,"lineSpacing":1.5,"watermark":false,"headerStyle":"simple"}'::jsonb;

@@ -14,15 +14,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Plus, Trash2, Printer, ArrowLeft, Check, X, Clock, Eye, Keyboard, Type, ChevronDown, ChevronUp, GripVertical, FileCheck, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Printer, ArrowLeft, Check, X, Clock, Eye, Keyboard, Type, ChevronDown, ChevronUp, GripVertical, FileCheck, AlertCircle, Settings2, Columns, RotateCcw, Bold, Italic, Underline, Hash } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useAuth } from '@/hooks/useAuth';
 
 // ─── Arabic Virtual Keyboard Layout (IBM PC Arabic Keyboard) ───
-// Row 0: Number row (` 1-0 - =)
-// Row 1: QWERTY top row
-// Row 2: Home row (Caps Lock row)
-// Row 3: Bottom row (Shift row)
 const ARABIC_ROWS_NORMAL = [
   ['ذ', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '٠', '-', '='],
   ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د', '\\'],
@@ -36,67 +32,53 @@ const ARABIC_ROWS_SHIFTED = [
   ['~', 'ْ', '{', '}', 'لآ', 'آ', '\'', ',', '.', '؟'],
 ];
 
-// Physical keyboard → Arabic character mapping using KeyboardEvent.code (physical key position)
-// This works regardless of OS keyboard layout (English or Arabic)
 const PHYSICAL_CODE_TO_ARABIC: Record<string, string> = {
-  // Number row (unshifted)
   'Backquote': 'ذ',
   'Digit1': '١', 'Digit2': '٢', 'Digit3': '٣', 'Digit4': '٤', 'Digit5': '٥',
   'Digit6': '٦', 'Digit7': '٧', 'Digit8': '٨', 'Digit9': '٩', 'Digit0': '٠',
   'Minus': '-', 'Equal': '=',
-  // Top row (QWERTY positions)
   'KeyQ': 'ض', 'KeyW': 'ص', 'KeyE': 'ث', 'KeyR': 'ق', 'KeyT': 'ف',
   'KeyY': 'غ', 'KeyU': 'ع', 'KeyI': 'ه', 'KeyO': 'خ', 'KeyP': 'ح',
   'BracketLeft': 'ج', 'BracketRight': 'د', 'Backslash': '\\',
-  // Home row
   'KeyA': 'ش', 'KeyS': 'س', 'KeyD': 'ي', 'KeyF': 'ب', 'KeyG': 'ل',
   'KeyH': 'ا', 'KeyJ': 'ت', 'KeyK': 'ن', 'KeyL': 'م',
   'Semicolon': 'ك', 'Quote': 'ط',
-  // Bottom row
   'KeyZ': 'ئ', 'KeyX': 'ء', 'KeyC': 'ؤ', 'KeyV': 'ر', 'KeyB': 'لا',
   'KeyN': 'ى', 'KeyM': 'ة', 'Comma': 'و', 'Period': 'ز', 'Slash': 'ظ',
 };
 
 const PHYSICAL_CODE_TO_ARABIC_SHIFTED: Record<string, string> = {
-  // Number row (shifted)
   'Backquote': 'ّ',
   'Digit1': '!', 'Digit2': '@', 'Digit3': '#', 'Digit4': '$', 'Digit5': '%',
   'Digit6': '^', 'Digit7': '&', 'Digit8': '*', 'Digit9': ')', 'Digit0': '(',
   'Minus': '_', 'Equal': '+',
-  // Top row (shifted)
   'KeyQ': 'َ', 'KeyW': 'ً', 'KeyE': 'ُ', 'KeyR': 'ٌ', 'KeyT': 'لإ',
   'KeyY': 'إ', 'KeyU': '\'', 'KeyI': '÷', 'KeyO': '×', 'KeyP': '؛',
   'BracketLeft': '<', 'BracketRight': '>', 'Backslash': '|',
-  // Home row (shifted)
   'KeyA': 'ِ', 'KeyS': 'ٍ', 'KeyD': ']', 'KeyF': '[', 'KeyG': 'لأ',
   'KeyH': 'أ', 'KeyJ': 'ـ', 'KeyK': '،', 'KeyL': '/',
   'Semicolon': ':', 'Quote': '"',
-  // Bottom row (shifted)
   'KeyZ': '~', 'KeyX': 'ْ', 'KeyC': '{', 'KeyV': '}', 'KeyB': 'لآ',
   'KeyN': 'آ', 'KeyM': '\'', 'Comma': ',', 'Period': '.', 'Slash': '؟',
 };
 
-// Legacy key-based map for virtual keyboard highlighting (char → physical code)
-const ARABIC_TO_PHYSICAL_CODE: Record<string, string> = {};
-for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
-  ARABIC_TO_PHYSICAL_CODE[ar] = code;
-}
-
-// Reverse map: Arabic char → physical key (for highlighting)
 const ARABIC_TO_PHYSICAL: Record<string, string> = {};
 for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
   ARABIC_TO_PHYSICAL[ar] = code;
 }
 
+// ─── Quick Symbols ───
+const QUICK_SYMBOLS = {
+  math: ['±', '×', '÷', '≠', '≤', '≥', '√', '∞', 'π', '∑', '∫', '°', '²', '³', '½', '¼', '¾', '%'],
+  arabic: ['بسم الله الرحمن الرحيم', 'ﷺ', 'ﷻ', '﷽', 'ؐ', '۞', '۩', '﴿', '﴾'],
+  bengali: ['৳', '।', '॥', '্', 'ঃ', 'ং', 'ঁ', '়'],
+};
+
 // ─── Arabic Keyboard Component ───
 const ArabicKeyboard = ({
-  onKeyPress,
-  onClose,
-  highlightedKey,
+  onKeyPress, onClose, highlightedKey,
 }: {
-  onKeyPress: (char: string) => void;
-  onClose: () => void;
-  highlightedKey: string | null;
+  onKeyPress: (char: string) => void; onClose: () => void; highlightedKey: string | null;
 }) => {
   const [position, setPosition] = useState({ x: 100, y: 300 });
   const [dragging, setDragging] = useState(false);
@@ -119,7 +101,6 @@ const ArabicKeyboard = ({
     return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); };
   }, [dragging, dragOffset]);
 
-  // Listen for physical Shift key
   useEffect(() => {
     const down = (e: KeyboardEvent) => { if (e.key === 'Shift') setShifted(true); };
     const up = (e: KeyboardEvent) => { if (e.key === 'Shift') setShifted(false); };
@@ -129,7 +110,6 @@ const ArabicKeyboard = ({
   }, []);
 
   const rows = shifted ? ARABIC_ROWS_SHIFTED : ARABIC_ROWS_NORMAL;
-  const rowLabels = ['', 'Tab', 'Caps', 'Shift'];
 
   return (
     <div
@@ -142,7 +122,6 @@ const ArabicKeyboard = ({
         <span className="text-xs font-semibold text-muted-foreground">⌨️ Arabic Keyboard</span>
         <div className="flex items-center gap-2">
           {shifted && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">SHIFT</span>}
-          <span className="text-[10px] text-muted-foreground">Physical keys mapped when AR is ON</span>
         </div>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}><X className="h-3 w-3" /></Button>
       </div>
@@ -185,6 +164,50 @@ const ArabicKeyboard = ({
   );
 };
 
+// ─── Quick Symbols Bar ───
+const QuickSymbolsBar = ({ onInsert, activeInputRef }: { onInsert: (char: string) => void; activeInputRef: HTMLInputElement | HTMLTextAreaElement | null }) => {
+  const [category, setCategory] = useState<'math' | 'arabic' | 'bengali'>('math');
+  const symbols = QUICK_SYMBOLS[category];
+
+  const handleInsert = (sym: string) => {
+    if (!activeInputRef) return;
+    const el = activeInputRef;
+    el.focus();
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? start;
+    const newVal = el.value.slice(0, start) + sym + el.value.slice(end);
+    const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    setter?.call(el, newVal);
+    el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    const newPos = start + sym.length;
+    requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
+  };
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap bg-muted/50 rounded-xl px-2 py-1.5">
+      <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <div className="flex gap-0.5 mr-1">
+        {(['math', 'arabic', 'bengali'] as const).map(cat => (
+          <button key={cat} onClick={() => setCategory(cat)}
+            className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${category === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-primary/20'}`}>
+            {cat === 'math' ? '∑' : cat === 'arabic' ? 'عر' : 'বাং'}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-0.5 flex-wrap">
+        {symbols.map((sym, i) => (
+          <button key={i} onClick={() => handleInsert(sym)}
+            className="h-7 min-w-[1.8rem] px-1 rounded bg-secondary/80 hover:bg-primary/20 hover:text-primary text-xs font-medium transition-colors"
+            title={sym}>
+            {sym.length > 4 ? sym.slice(0, 4) + '…' : sym}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const QUESTION_TYPES = [
   { value: 'descriptive', labelBn: 'বর্ণনামূলক', labelEn: 'Descriptive' },
   { value: 'mcq', labelBn: 'বহুনির্বাচনী (MCQ)', labelEn: 'MCQ' },
@@ -221,6 +244,12 @@ const FONT_PRESETS = {
   ],
 };
 
+const HEADER_STYLES = [
+  { value: 'simple', labelBn: 'সিম্পল', labelEn: 'Simple' },
+  { value: 'decorative', labelBn: 'ডেকোরেটিভ', labelEn: 'Decorative' },
+  { value: 'classic', labelBn: 'ক্লাসিক ERP', labelEn: 'Classic ERP' },
+];
+
 interface FontConfig {
   arabic: string;
   bengali: string;
@@ -233,6 +262,30 @@ interface HeaderConfig {
   showInstitutionName: boolean;
   centered: boolean;
 }
+
+interface LayoutSettings {
+  orientation: 'portrait' | 'landscape';
+  columns: 1 | 2;
+  marginTop: number;
+  marginBottom: number;
+  marginLeft: number;
+  marginRight: number;
+  lineSpacing: number;
+  watermark: boolean;
+  headerStyle: 'simple' | 'decorative' | 'classic';
+}
+
+const DEFAULT_LAYOUT: LayoutSettings = {
+  orientation: 'portrait',
+  columns: 1,
+  marginTop: 20,
+  marginBottom: 20,
+  marginLeft: 15,
+  marginRight: 15,
+  lineSpacing: 1.5,
+  watermark: false,
+  headerStyle: 'simple',
+};
 
 interface Question {
   id?: string;
@@ -247,6 +300,11 @@ interface Question {
   answer: string;
 }
 
+const toBengaliNum = (n: number): string => {
+  const digits = '০১২৩৪৫৬৭৮৯';
+  return String(n).replace(/[0-9]/g, d => digits[parseInt(d)]);
+};
+
 const StatusBadge = ({ status, language }: { status: string; language: string }) => {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const Icon = config.icon;
@@ -258,12 +316,72 @@ const StatusBadge = ({ status, language }: { status: string; language: string })
   );
 };
 
+// ─── Header Renderers ───
+const renderHeader = (style: string, paper: any, institution: any, language: string, fontFamily: string, totalMarks: number, sessionName: string, subjectName: string, showLogo: boolean, showName: boolean) => {
+  if (style === 'decorative') {
+    return (
+      <div className="mb-4 pb-3 text-center" style={{ fontFamily }}>
+        <div className="border-2 border-black p-3 rounded-lg">
+          <div className="border border-black/30 p-2 rounded">
+            {showLogo && institution?.logo_url && <img src={institution.logo_url} alt="" className="h-12 mx-auto mb-1" />}
+            {showName && institution && <h2 className="text-lg font-bold tracking-wide">{language === 'bn' ? institution.name : institution.name_en || institution.name}</h2>}
+            {institution?.address && <p className="text-[10px] text-gray-500">{institution.address}</p>}
+            <div className="my-1 border-t border-dashed border-black/30" />
+            {sessionName && <p className="text-xs font-semibold">{sessionName}</p>}
+            <h1 className="text-sm font-bold mt-0.5">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
+            {subjectName && <p className="text-xs">📖 {subjectName}</p>}
+            <div className="flex justify-between mt-1.5 text-[10px] font-medium">
+              <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
+              <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (style === 'classic') {
+    return (
+      <div className="mb-4 text-center" style={{ fontFamily }}>
+        <div className="flex items-center justify-center gap-3 mb-1">
+          {showLogo && institution?.logo_url && <img src={institution.logo_url} alt="" className="h-14" />}
+          <div>
+            {showName && institution && <h2 className="text-lg font-bold">{language === 'bn' ? institution.name : institution.name_en || institution.name}</h2>}
+            {institution?.address && <p className="text-[10px] text-gray-500">{institution.address}</p>}
+          </div>
+        </div>
+        <div className="border-t-2 border-b border-black my-1 py-1">
+          {sessionName && <p className="text-xs font-semibold">{sessionName}</p>}
+          <h1 className="text-sm font-bold">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
+        </div>
+        <div className="flex justify-between items-center mt-1 text-[10px]">
+          {subjectName && <span className="font-medium">📖 {subjectName}</span>}
+          <span>{language === 'bn' ? 'পূর্ণমান' : 'Marks'}: {totalMarks}</span>
+          <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+        </div>
+      </div>
+    );
+  }
+  // simple (default)
+  return (
+    <div className="mb-4 pb-3 border-b-2 border-black text-center" style={{ fontFamily }}>
+      {showLogo && institution?.logo_url && <img src={institution.logo_url} alt="" className="h-14 mx-auto mb-2" />}
+      {showName && institution && <h2 className="text-lg font-bold">{language === 'bn' ? institution.name : institution.name_en || institution.name}</h2>}
+      {institution?.address && <p className="text-xs text-gray-600">{institution.address}</p>}
+      {sessionName && <p className="text-sm font-semibold mt-1">{sessionName}</p>}
+      <h1 className="text-base font-bold mt-1">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
+      {subjectName && <p className="text-sm">📖 {subjectName}</p>}
+      <div className="flex justify-between mt-2 text-xs">
+        <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
+        <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+      </div>
+    </div>
+  );
+};
+
 // ─── Live Preview Component ───
-const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, language }: {
-  paper: any; questions: Question[]; fontConfig: FontConfig; headerConfig: HeaderConfig; institution: any; language: string;
+const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, language, layout }: {
+  paper: any; questions: Question[]; fontConfig: FontConfig; headerConfig: HeaderConfig; institution: any; language: string; layout: LayoutSettings;
 }) => {
-  // When SutonnyMJ (Bijoy) is selected, text is converted to Unicode by the interceptor,
-  // so we must use a Unicode-capable Bengali font for rendering in the preview.
   const effectiveBengaliFont = fontConfig.bengali === 'SutonnyMJ'
     ? '"Noto Sans Bengali", "SutonnyOMJ", sans-serif'
     : fontConfig.bengali;
@@ -271,33 +389,78 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
   const sessionName = paper?.exam_sessions ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name) : '';
   const subjectName = paper?.subjects ? (language === 'bn' ? paper.subjects.name_bn : paper.subjects.name) : '';
 
+  const isLandscape = layout.orientation === 'landscape';
+  const aspectRatio = isLandscape ? '297/210' : '210/297';
+
+  const questionItems = questions.map((q, i) => {
+    const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
+    const isArabic = /[\u0600-\u06FF]/.test(qText);
+    const fontFamily = isArabic ? fontConfig.arabic : effectiveBengaliFont;
+    const serial = language === 'bn' ? toBengaliNum(i + 1) : String(i + 1);
+
+    return (
+      <div key={i} className="mb-2" style={{ fontFamily, lineHeight: layout.lineSpacing }}>
+        {q.group_label_bn && (i === 0 || q.group_label_bn !== questions[i - 1]?.group_label_bn) ? (
+          <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100">
+            {language === 'bn' ? q.group_label_bn : q.group_label}
+          </div>
+        ) : null}
+        <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
+          <span>{serial}। {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
+          <span className="text-gray-500 shrink-0 ml-2">[{language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span>
+        </div>
+        {q.question_type === 'mcq' && Array.isArray(q.options) && (
+          <div className="ml-6 mt-1 grid grid-cols-2 gap-x-4 text-xs">
+            {q.options.map((opt: any, oi: number) => (
+              <span key={oi}>{String.fromCharCode(65 + oi)}. {language === 'bn' ? opt.text_bn || opt.text : opt.text}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  });
+
+  // Split into columns if needed
+  const renderQuestions = () => {
+    if (layout.columns === 2 && questions.length > 0) {
+      const mid = Math.ceil(questions.length / 2);
+      return (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="border-r border-gray-200 pr-3">
+            {questionItems.slice(0, mid)}
+          </div>
+          <div className="pl-1">
+            {questionItems.slice(mid)}
+          </div>
+        </div>
+      );
+    }
+    return <div>{questionItems}</div>;
+  };
+
   return (
-    <div className="bg-white text-black rounded-xl shadow-lg border border-border/20 overflow-hidden">
-      {/* A4 Preview */}
+    <div className="bg-white text-black rounded-xl overflow-hidden"
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)' }}>
       <div className="p-1">
-        <div className="relative" style={{ fontFamily: effectiveBengaliFont, fontSize: `${fontConfig.fontSize}px`, aspectRatio: '210/297', maxHeight: '70vh', overflow: 'auto' }}>
-          <div className="p-6 sm:p-8">
-            {/* Header */}
-            <div className={`mb-4 pb-3 border-b-2 border-black ${headerConfig.centered ? 'text-center' : ''}`}>
-              {headerConfig.showLogo && institution?.logo_url && (
-                <img src={institution.logo_url} alt="" className="h-14 mx-auto mb-2" />
-              )}
-              {headerConfig.showInstitutionName && institution && (
-                <h2 className="text-lg font-bold" style={{ fontFamily: effectiveBengaliFont }}>
-                  {language === 'bn' ? institution.name : institution.name_en || institution.name}
-                </h2>
-              )}
-              {institution?.address && (
-                <p className="text-xs text-gray-600">{institution.address}</p>
-              )}
-              {sessionName && <p className="text-sm font-semibold mt-1">{sessionName}</p>}
-              <h1 className="text-base font-bold mt-1">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
-              {subjectName && <p className="text-sm">📖 {subjectName}</p>}
-              <div className="flex justify-between mt-2 text-xs">
-                <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
-                <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
-              </div>
+        <div className="relative" style={{
+          fontFamily: effectiveBengaliFont,
+          fontSize: `${fontConfig.fontSize}px`,
+          aspectRatio,
+          maxHeight: '72vh',
+          overflow: 'auto',
+        }}>
+          {/* Watermark */}
+          {layout.watermark && institution?.logo_url && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] z-0">
+              <img src={institution.logo_url} alt="" className="w-2/3 max-w-[300px]" />
             </div>
+          )}
+
+          <div className="relative z-10" style={{
+            padding: `${layout.marginTop}px ${layout.marginRight}px ${layout.marginBottom}px ${layout.marginLeft}px`,
+          }}>
+            {/* Header */}
+            {renderHeader(layout.headerStyle, paper, institution, language, effectiveBengaliFont, totalMarks, sessionName, subjectName, headerConfig.showLogo, headerConfig.showInstitutionName)}
 
             {/* Instructions */}
             {(paper?.instructions_bn || paper?.instructions) && (
@@ -307,34 +470,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
             )}
 
             {/* Questions */}
-            {questions.map((q, i) => {
-              const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
-              const isArabic = /[\u0600-\u06FF]/.test(qText);
-              const fontFamily = isArabic ? fontConfig.arabic : effectiveBengaliFont;
-
-              return (
-                <div key={i} className="mb-3" style={{ fontFamily }}>
-                  {q.group_label_bn && i === 0 || (i > 0 && q.group_label_bn !== questions[i - 1]?.group_label_bn) ? (
-                    <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100">
-                      {language === 'bn' ? q.group_label_bn : q.group_label}
-                    </div>
-                  ) : null}
-                  <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
-                    <span>{i + 1}। {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
-                    <span className="text-gray-500 shrink-0 ml-2">[{q.marks}]</span>
-                  </div>
-                  {q.question_type === 'mcq' && Array.isArray(q.options) && (
-                    <div className="ml-6 mt-1 grid grid-cols-2 gap-x-4 text-xs">
-                      {q.options.map((opt: any, oi: number) => (
-                        <span key={oi}>{String.fromCharCode(65 + oi)}. {language === 'bn' ? opt.text_bn || opt.text : opt.text}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {questions.length === 0 && (
+            {questions.length > 0 ? renderQuestions() : (
               <div className="text-center text-gray-400 py-12 text-sm">
                 {language === 'bn' ? 'বাম পাশে প্রশ্ন যোগ করুন — এখানে লাইভ প্রিভিউ দেখাবে' : 'Add questions on the left — live preview will appear here'}
               </div>
@@ -343,6 +479,87 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
         </div>
       </div>
     </div>
+  );
+};
+
+// ─── Layout Settings Panel ───
+const LayoutSettingsPanel = ({ layout, setLayout, language }: { layout: LayoutSettings; setLayout: (l: LayoutSettings) => void; language: string }) => {
+  return (
+    <Card className="card-elevated">
+      <CardContent className="pt-4 pb-3 space-y-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Settings2 className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">{language === 'bn' ? 'পেজ সেটআপ' : 'Page Setup'}</span>
+        </div>
+
+        {/* Row 1: Orientation + Columns + Header Style */}
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'ওরিয়েন্টেশন' : 'Orientation'}</Label>
+            <Select value={layout.orientation} onValueChange={(v: 'portrait' | 'landscape') => setLayout({ ...layout, orientation: v })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="portrait">{language === 'bn' ? '📄 লম্বালম্বি' : '📄 Portrait'}</SelectItem>
+                <SelectItem value="landscape">{language === 'bn' ? '📄 আড়াআড়ি' : '📄 Landscape'}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'কলাম' : 'Columns'}</Label>
+            <Select value={String(layout.columns)} onValueChange={v => setLayout({ ...layout, columns: Number(v) as 1 | 2 })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">{language === 'bn' ? '১ কলাম (পূর্ণ)' : '1 Column'}</SelectItem>
+                <SelectItem value="2">{language === 'bn' ? '২ কলাম (স্প্লিট)' : '2 Columns'}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'হেডার স্টাইল' : 'Header Style'}</Label>
+            <Select value={layout.headerStyle} onValueChange={(v: any) => setLayout({ ...layout, headerStyle: v })}>
+              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {HEADER_STYLES.map(s => (
+                  <SelectItem key={s.value} value={s.value}>{language === 'bn' ? s.labelBn : s.labelEn}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Row 2: Margins */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'উপরের মার্জিন' : 'Top'}: {layout.marginTop}px</Label>
+            <Slider value={[layout.marginTop]} onValueChange={([v]) => setLayout({ ...layout, marginTop: v })} min={5} max={50} step={1} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'নিচের মার্জিন' : 'Bottom'}: {layout.marginBottom}px</Label>
+            <Slider value={[layout.marginBottom]} onValueChange={([v]) => setLayout({ ...layout, marginBottom: v })} min={5} max={50} step={1} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'বাম মার্জিন' : 'Left'}: {layout.marginLeft}px</Label>
+            <Slider value={[layout.marginLeft]} onValueChange={([v]) => setLayout({ ...layout, marginLeft: v })} min={5} max={40} step={1} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'ডান মার্জিন' : 'Right'}: {layout.marginRight}px</Label>
+            <Slider value={[layout.marginRight]} onValueChange={([v]) => setLayout({ ...layout, marginRight: v })} min={5} max={40} step={1} className="mt-1" />
+          </div>
+        </div>
+
+        {/* Row 3: Line Spacing + Watermark */}
+        <div className="flex items-center gap-6 pt-1 border-t border-border/50">
+          <div className="flex-1">
+            <Label className="text-xs">{language === 'bn' ? 'লাইন স্পেসিং' : 'Line Spacing'}: {layout.lineSpacing}</Label>
+            <Slider value={[layout.lineSpacing]} onValueChange={([v]) => setLayout({ ...layout, lineSpacing: v })} min={1} max={3} step={0.1} className="mt-1" />
+          </div>
+          <label className="flex items-center gap-2 text-xs whitespace-nowrap">
+            <Switch checked={layout.watermark} onCheckedChange={v => setLayout({ ...layout, watermark: v })} />
+            {language === 'bn' ? 'ওয়াটারমার্ক' : 'Watermark'}
+          </label>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -361,66 +578,53 @@ const AdminQuestionPapers = () => {
   const [activeInputRef, setActiveInputRef] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const [highlightedArabicKey, setHighlightedArabicKey] = useState<string | null>(null);
   const [showFontPanel, setShowFontPanel] = useState(false);
+  const [showLayoutPanel, setShowLayoutPanel] = useState(false);
+  const [showSymbols, setShowSymbols] = useState(false);
   const [rejectionNote, setRejectionNote] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
 
   const [fontConfig, setFontConfig] = useState<FontConfig>({ arabic: 'Amiri', bengali: 'SutonnyOMJ', english: 'Arial', fontSize: 14 });
   const [headerConfig, setHeaderConfig] = useState<HeaderConfig>({ showLogo: true, showInstitutionName: true, centered: true });
+  const [layoutSettings, setLayoutSettings] = useState<LayoutSettings>(DEFAULT_LAYOUT);
 
-  // Bijoy mode: active when SutonnyMJ (ASCII/Bijoy) font is selected
   const bijoyMode = fontConfig.bengali === 'SutonnyMJ';
 
   // Bijoy ASCII→Unicode keydown interceptor
   useEffect(() => {
     if (!bijoyMode) return;
-
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.altKey || e.metaKey) return;
       const target = e.target as HTMLElement;
       const isInput = target.tagName === 'INPUT';
       const isTextarea = target.tagName === 'TEXTAREA';
       if (!isInput && !isTextarea) return;
-
-      // Only intercept on text-type inputs
       if (isInput) {
         const inputType = (target as HTMLInputElement).type?.toLowerCase() || 'text';
         if (!['text', 'search', ''].includes(inputType)) return;
       }
-
       const char = e.key;
       if (char.length !== 1) return;
       if (!isBijoyKey(char)) return;
-
       const unicodeChar = bijoyCharToUnicode(char);
       if (unicodeChar === char) return;
-
       e.preventDefault();
       e.stopImmediatePropagation();
-
       const el = target as HTMLInputElement | HTMLTextAreaElement;
       el.focus();
-
-      // Try execCommand first (works well with React controlled inputs)
       const success = document.execCommand('insertText', false, unicodeChar);
       if (!success) {
-        // Fallback: native setter approach
         const start = el.selectionStart ?? el.value.length;
         const end = el.selectionEnd ?? start;
         const newValue = el.value.slice(0, start) + unicodeChar + el.value.slice(end);
         const newCursor = start + unicodeChar.length;
         const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
         const descriptor = Object.getOwnPropertyDescriptor(proto, 'value');
-        if (descriptor?.set) {
-          descriptor.set.call(el, newValue);
-        } else {
-          el.value = newValue;
-        }
+        if (descriptor?.set) { descriptor.set.call(el, newValue); } else { el.value = newValue; }
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
         requestAnimationFrame(() => el.setSelectionRange(newCursor, newCursor));
       }
     };
-
     document.addEventListener('keydown', handler, true);
     return () => document.removeEventListener('keydown', handler, true);
   }, [bijoyMode]);
@@ -507,7 +711,7 @@ const AdminQuestionPapers = () => {
     enabled: !!selectedPaper?.id,
   });
 
-  // Load font config from paper
+  // Load configs from paper
   useEffect(() => {
     if (selectedPaper) {
       if (selectedPaper.font_config) {
@@ -515,6 +719,14 @@ const AdminQuestionPapers = () => {
       }
       if (selectedPaper.header_config) {
         try { setHeaderConfig(typeof selectedPaper.header_config === 'string' ? JSON.parse(selectedPaper.header_config) : selectedPaper.header_config); } catch { }
+      }
+      if (selectedPaper.layout_settings) {
+        try {
+          const ls = typeof selectedPaper.layout_settings === 'string' ? JSON.parse(selectedPaper.layout_settings) : selectedPaper.layout_settings;
+          setLayoutSettings({ ...DEFAULT_LAYOUT, ...ls });
+        } catch { }
+      } else {
+        setLayoutSettings(DEFAULT_LAYOUT);
       }
     }
   }, [selectedPaper?.id]);
@@ -541,6 +753,7 @@ const AdminQuestionPapers = () => {
         division_id: newPaper.division_id || null, subject_id: newPaper.subject_id || null,
         status: 'pending', created_by: user?.id || null,
         font_config: fontConfig as any, header_config: headerConfig as any,
+        layout_settings: layoutSettings as any,
       });
       if (error) throw error;
     },
@@ -569,8 +782,11 @@ const AdminQuestionPapers = () => {
   const saveQuestions = useMutation({
     mutationFn: async () => {
       if (!selectedPaper?.id) return;
-      // Save font/header config too
-      await supabase.from('question_papers').update({ font_config: fontConfig as any, header_config: headerConfig as any }).eq('id', selectedPaper.id);
+      await supabase.from('question_papers').update({
+        font_config: fontConfig as any,
+        header_config: headerConfig as any,
+        layout_settings: layoutSettings as any,
+      }).eq('id', selectedPaper.id);
       await supabase.from('questions').delete().eq('paper_id', selectedPaper.id);
       if (questions.length > 0) {
         const rows = questions.map((q, i) => ({
@@ -648,14 +864,13 @@ const AdminQuestionPapers = () => {
     }));
   };
 
-  // Arabic keyboard handler - inserts at cursor position
+  // Arabic keyboard handler
   const handleArabicKey = useCallback((char: string) => {
     if (!activeInputRef) return;
     const el = activeInputRef;
     el.focus();
     const start = el.selectionStart ?? el.value.length;
     const end = el.selectionEnd ?? start;
-
     if (char === 'BACKSPACE') {
       if (start > 0) {
         const newVal = el.value.slice(0, start - 1) + el.value.slice(end);
@@ -679,28 +894,19 @@ const AdminQuestionPapers = () => {
   // Physical keyboard → Arabic mapping when AR keyboard is open
   useEffect(() => {
     if (!showArabicKeyboard) return;
-
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.altKey || e.metaKey) return;
-      
       const target = e.target as HTMLElement;
       const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isEditable) return;
-
       const code = e.code;
       if (!code) return;
-
       const arabicChar = e.shiftKey ? PHYSICAL_CODE_TO_ARABIC_SHIFTED[code] : PHYSICAL_CODE_TO_ARABIC[code];
       if (!arabicChar) return;
-
       e.preventDefault();
       e.stopImmediatePropagation();
-
-      // Highlight the key on virtual keyboard
       setHighlightedArabicKey(arabicChar);
       setTimeout(() => setHighlightedArabicKey(null), 200);
-
-      // Insert Arabic character
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
         const el = target as HTMLInputElement | HTMLTextAreaElement;
         setActiveInputRef(el);
@@ -717,7 +923,6 @@ const AdminQuestionPapers = () => {
         document.execCommand('insertText', false, arabicChar);
       }
     };
-
     document.addEventListener('keydown', handler, true);
     return () => document.removeEventListener('keydown', handler, true);
   }, [showArabicKeyboard]);
@@ -728,50 +933,98 @@ const AdminQuestionPapers = () => {
     const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
     const sessionName = selectedPaper.exam_sessions ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name) : '';
     const subjectName = selectedPaper.subjects ? (language === 'bn' ? selectedPaper.subjects.name_bn : selectedPaper.subjects.name) : '';
+    const ls = layoutSettings;
+    const isLandscape = ls.orientation === 'landscape';
+    const pageSize = isLandscape ? 'A4 landscape' : 'A4';
+
+    const effectiveBengaliFont = fontConfig.bengali === 'SutonnyMJ'
+      ? '"Noto Sans Bengali", "SutonnyOMJ", sans-serif'
+      : fontConfig.bengali;
+
+    // Header HTML based on style
+    const buildHeaderHtml = () => {
+      const logoHtml = headerConfig.showLogo && institution?.logo_url ? `<img src="${institution.logo_url}" style="height:50px;margin:0 auto 8px;display:block" />` : '';
+      const nameHtml = headerConfig.showInstitutionName && institution ? `<h2 style="font-size:20px;font-weight:700;margin:0">${language === 'bn' ? institution.name : institution.name_en || institution.name}</h2>` : '';
+      const addressHtml = institution?.address ? `<p style="font-size:11px;color:#555;margin:2px 0">${institution.address}</p>` : '';
+      const sessionHtml = sessionName ? `<p style="font-size:13px;font-weight:600;margin:4px 0">${sessionName}</p>` : '';
+      const titleHtml = `<h1 style="font-size:16px;font-weight:700;margin:4px 0">${language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>`;
+      const subjectHtml = subjectName ? `<p style="font-size:13px;margin:2px 0">📖 ${subjectName}</p>` : '';
+      const metaHtml = `<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px"><span>${language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: ${totalMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${selectedPaper.duration_minutes} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div>`;
+
+      if (ls.headerStyle === 'decorative') {
+        return `<div style="text-align:center;margin-bottom:16px;padding:12px;border:2px solid #000;border-radius:8px"><div style="border:1px solid rgba(0,0,0,0.3);padding:8px;border-radius:4px">${logoHtml}${nameHtml}${addressHtml}<div style="border-top:1px dashed rgba(0,0,0,0.3);margin:6px 0"></div>${sessionHtml}${titleHtml}${subjectHtml}${metaHtml}</div></div>`;
+      }
+      if (ls.headerStyle === 'classic') {
+        return `<div style="text-align:center;margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px">${logoHtml ? logoHtml.replace('display:block', 'display:inline') : ''}<div>${nameHtml}${addressHtml}</div></div><div style="border-top:2px solid #000;border-bottom:1px solid #000;padding:4px 0;margin:4px 0">${sessionHtml}${titleHtml}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px">${subjectHtml ? `<span style="font-weight:500">📖 ${subjectName}</span>` : ''}<span>${language === 'bn' ? 'পূর্ণমান' : 'Marks'}: ${totalMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${selectedPaper.duration_minutes} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div></div>`;
+      }
+      return `<div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #000">${logoHtml}${nameHtml}${addressHtml}${sessionHtml}${titleHtml}${subjectHtml}${metaHtml}</div>`;
+    };
 
     const buildQuestionsHtml = () => {
       let currentGroup = '';
-      return questions.map((q, i) => {
+      const items = questions.map((q, i) => {
         let groupHtml = '';
         const gl = language === 'bn' ? q.group_label_bn : q.group_label;
         if (gl && gl !== currentGroup) { currentGroup = gl; groupHtml = '<div class="group-label">' + gl + '</div>'; }
         const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
         const isArabic = /[\u0600-\u06FF]/.test(qText);
         const dir = isArabic ? 'rtl' : 'ltr';
-        const ff = isArabic ? fontConfig.arabic : fontConfig.bengali;
+        const ff = isArabic ? fontConfig.arabic : effectiveBengaliFont;
+        const serial = language === 'bn' ? toBengaliNum(i + 1) : String(i + 1);
         const opts = Array.isArray(q.options) ? '<div class="options">' + q.options.map((o: any, oi: number) =>
           '<span class="option">' + String.fromCharCode(65 + oi) + '. ' + (language === 'bn' ? o.text_bn || o.text : o.text) + '</span>'
         ).join('') + '</div>' : '';
-        return groupHtml + '<div class="question" style="font-family:\'' + ff + '\';direction:' + dir + '"><div class="q-header"><span>' + (i + 1) + '। ' + qText + '</span><span>[' + q.marks + ']</span></div>' + opts + '</div>';
+        return groupHtml + `<div class="question" style="font-family:'${ff}';direction:${dir}"><div class="q-header"><span>${serial}। ${qText}</span><span>[${language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span></div>${opts}</div>`;
       }).join('');
+
+      if (ls.columns === 2) {
+        const mid = Math.ceil(questions.length / 2);
+        const allItems = items.split('<div class="question"');
+        // Re-split properly
+        let col1 = '', col2 = '';
+        let count = 0;
+        questions.forEach((q, i) => {
+          let groupHtml = '';
+          const gl = language === 'bn' ? q.group_label_bn : q.group_label;
+          if (gl && (i === 0 || gl !== (language === 'bn' ? questions[i-1]?.group_label_bn : questions[i-1]?.group_label))) {
+            groupHtml = '<div class="group-label">' + gl + '</div>';
+          }
+          const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
+          const isArabic = /[\u0600-\u06FF]/.test(qText);
+          const dir = isArabic ? 'rtl' : 'ltr';
+          const ff = isArabic ? fontConfig.arabic : effectiveBengaliFont;
+          const serial = language === 'bn' ? toBengaliNum(i + 1) : String(i + 1);
+          const opts = Array.isArray(q.options) ? '<div class="options">' + q.options.map((o: any, oi: number) =>
+            '<span class="option">' + String.fromCharCode(65 + oi) + '. ' + (language === 'bn' ? o.text_bn || o.text : o.text) + '</span>'
+          ).join('') + '</div>' : '';
+          const html = groupHtml + `<div class="question" style="font-family:'${ff}';direction:${dir}"><div class="q-header"><span>${serial}। ${qText}</span><span>[${language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span></div>${opts}</div>`;
+          if (i < mid) col1 += html; else col2 += html;
+        });
+        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="border-right:1px solid #ddd;padding-right:12px">${col1}</div><div style="padding-left:4px">${col2}</div></div>`;
+      }
+      return items;
     };
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-      @page { margin: 15mm; size: A4; }
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: '${fontConfig.bengali}', 'Noto Sans Bengali', sans-serif; padding: 30px; font-size: ${fontConfig.fontSize}px; }
-      .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 14px; }
-      .header h1 { font-size: 18px; } .header h2 { font-size: 22px; margin-bottom: 4px; }
-      .header .meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; }
-      .instructions { background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 16px; font-size: 12px; font-style: italic; }
+      @page { margin: 0; size: ${pageSize}; }
+      * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font-family: ${effectiveBengaliFont}, 'Noto Sans Bengali', sans-serif; font-size: ${fontConfig.fontSize}px; line-height: ${ls.lineSpacing};
+        padding: ${ls.marginTop}mm ${ls.marginRight}mm ${ls.marginBottom}mm ${ls.marginLeft}mm;
+        position: relative; }
+      ${ls.watermark && institution?.logo_url ? `body::before { content: ''; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; height: auto; background: url(${institution.logo_url}) no-repeat center; background-size: contain; opacity: 0.06; z-index: 0; pointer-events: none; }` : ''}
+      .content { position: relative; z-index: 1; }
       .question { margin-bottom: 14px; page-break-inside: avoid; }
       .q-header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 3px; }
       .options { margin-left: 40px; margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 16px; font-size: 13px; }
       .group-label { font-weight: 700; font-size: 14px; margin: 14px 0 6px; padding: 3px 8px; background: #e8e8e8; }
     </style></head><body>
-    <div class="header">
-      ${institution?.logo_url && headerConfig.showLogo ? '<img src="' + institution.logo_url + '" style="height:50px;margin:0 auto 8px" />' : ''}
-      ${institution && headerConfig.showInstitutionName ? '<h2>' + (language === 'bn' ? institution.name : institution.name_en || institution.name) + '</h2>' : ''}
-      ${institution?.address ? '<p style="font-size:11px;color:#555">' + institution.address + '</p>' : ''}
-      ${sessionName ? '<p style="font-size:13px;font-weight:600;margin-top:4px">' + sessionName + '</p>' : ''}
-      <h1>${language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>
-      ${subjectName ? '<p style="font-size:13px">📖 ' + subjectName + '</p>' : ''}
-      <div class="meta"><span>${language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: ${totalMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${selectedPaper.duration_minutes} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div>
+    <div class="content">
+      ${buildHeaderHtml()}
+      ${(selectedPaper.instructions_bn || selectedPaper.instructions) ? '<div style="background:#f5f5f5;padding:10px;border-radius:4px;margin-bottom:16px;font-size:12px;font-style:italic">' + (language === 'bn' ? selectedPaper.instructions_bn : selectedPaper.instructions) + '</div>' : ''}
+      ${buildQuestionsHtml()}
     </div>
-    ${(selectedPaper.instructions_bn || selectedPaper.instructions) ? '<div class="instructions">' + (language === 'bn' ? selectedPaper.instructions_bn : selectedPaper.instructions) + '</div>' : ''}
-    ${buildQuestionsHtml()}
     <script>window.onload=function(){window.print()}<\/script></body></html>`;
 
     const w = window.open('', '_blank');
@@ -941,22 +1194,22 @@ const AdminQuestionPapers = () => {
             </p>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          {/* Arabic Keyboard Toggle */}
+        <div className="flex gap-1.5 flex-wrap">
           <Button variant={showArabicKeyboard ? 'default' : 'outline'} size="sm" onClick={() => setShowArabicKeyboard(!showArabicKeyboard)}>
             <Keyboard className="h-4 w-4 mr-1" />AR
           </Button>
-          {/* Bijoy Mode Indicator */}
           {bijoyMode && (
-            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-bold animate-pulse">
-              বিজয় ON
-            </Badge>
+            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-bold animate-pulse">বিজয় ON</Badge>
           )}
-          {/* Font Panel Toggle */}
+          <Button variant={showSymbols ? 'default' : 'outline'} size="sm" onClick={() => setShowSymbols(!showSymbols)}>
+            <Hash className="h-4 w-4 mr-1" />{language === 'bn' ? 'সিম্বল' : 'Symbols'}
+          </Button>
           <Button variant={showFontPanel ? 'default' : 'outline'} size="sm" onClick={() => setShowFontPanel(!showFontPanel)}>
             <Type className="h-4 w-4 mr-1" />{language === 'bn' ? 'ফন্ট' : 'Font'}
           </Button>
-          {/* Approval actions */}
+          <Button variant={showLayoutPanel ? 'default' : 'outline'} size="sm" onClick={() => setShowLayoutPanel(!showLayoutPanel)}>
+            <Settings2 className="h-4 w-4 mr-1" />{language === 'bn' ? 'লেআউট' : 'Layout'}
+          </Button>
           {status === 'pending' && (
             <>
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => updateStatus.mutate({ id: selectedPaper.id, status: 'approved' })}>
@@ -986,6 +1239,12 @@ const AdminQuestionPapers = () => {
           <span><strong>{language === 'bn' ? 'প্রত্যাখ্যানের কারণ:' : 'Rejection note:'}</strong> {selectedPaper.rejection_note}</span>
         </div>
       )}
+
+      {/* Quick Symbols Bar */}
+      {showSymbols && <QuickSymbolsBar onInsert={() => {}} activeInputRef={activeInputRef} />}
+
+      {/* Layout Settings Panel */}
+      {showLayoutPanel && <LayoutSettingsPanel layout={layoutSettings} setLayout={setLayoutSettings} language={language} />}
 
       {/* Font Panel */}
       {showFontPanel && (
@@ -1044,7 +1303,9 @@ const AdminQuestionPapers = () => {
             <Card key={qi} className="card-elevated">
               <CardContent className="pt-3 pb-3 space-y-2">
                 <div className="flex items-start gap-2">
-                  <span className="font-bold text-primary mt-1 shrink-0">{qi + 1}.</span>
+                  <span className="font-bold text-primary mt-1 shrink-0">
+                    {language === 'bn' ? toBengaliNum(qi + 1) : qi + 1}.
+                  </span>
                   <div className="flex-1 space-y-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
@@ -1121,9 +1382,13 @@ const AdminQuestionPapers = () => {
         <div className="hidden lg:block sticky top-0">
           <div className="flex items-center gap-2 mb-2">
             <Eye className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-semibold text-muted-foreground">{language === 'bn' ? 'লাইভ প্রিভিউ (A4)' : 'Live Preview (A4)'}</span>
+            <span className="text-sm font-semibold text-muted-foreground">
+              {language === 'bn' ? 'লাইভ প্রিভিউ' : 'Live Preview'}
+              {layoutSettings.orientation === 'landscape' ? ' (Landscape)' : ' (A4)'}
+              {layoutSettings.columns === 2 ? ' • 2 Col' : ''}
+            </span>
           </div>
-          <LivePreview paper={selectedPaper} questions={questions} fontConfig={fontConfig} headerConfig={headerConfig} institution={institution} language={language} />
+          <LivePreview paper={selectedPaper} questions={questions} fontConfig={fontConfig} headerConfig={headerConfig} institution={institution} language={language} layout={layoutSettings} />
         </div>
       </div>
 
