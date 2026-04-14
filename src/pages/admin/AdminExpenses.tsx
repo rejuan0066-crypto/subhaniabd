@@ -122,7 +122,7 @@ const AdminExpenses = () => {
     queryKey: ['expenses', selectedMonthYear],
     queryFn: async () => {
       const { data, error } = await supabase.from('expenses')
-        .select('*, expense_projects(name, name_bn), expense_categories(name, name_bn)')
+        .select('*, expense_institutions(name, name_bn), expense_categories(name, name_bn)')
         .eq('month_year', selectedMonthYear)
         .order('expense_date', { ascending: false });
       if (error) throw error;
@@ -143,7 +143,7 @@ const AdminExpenses = () => {
   const { data: allExpenses = [] } = useQuery({
     queryKey: ['all_expenses'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expenses').select('month_year, amount, project_id, category_id, expense_projects(name, name_bn), expense_categories(name, name_bn)');
+      const { data, error } = await supabase.from('expenses').select('month_year, amount, project_id, category_id, expense_institutions(name, name_bn), expense_categories(name, name_bn)');
       if (error) throw error;
       return data;
     }
