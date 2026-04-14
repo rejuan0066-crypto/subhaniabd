@@ -2593,6 +2593,7 @@ export type Database = {
           id: string
           instructions: string | null
           instructions_bn: string | null
+          layout_settings: Json | null
           rejection_note: string | null
           status: string
           subject_id: string | null
@@ -2616,6 +2617,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           instructions_bn?: string | null
+          layout_settings?: Json | null
           rejection_note?: string | null
           status?: string
           subject_id?: string | null
@@ -2639,6 +2641,7 @@ export type Database = {
           id?: string
           instructions?: string | null
           instructions_bn?: string | null
+          layout_settings?: Json | null
           rejection_note?: string | null
           status?: string
           subject_id?: string | null
