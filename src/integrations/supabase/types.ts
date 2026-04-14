@@ -1143,31 +1143,28 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          institution_id: string | null
+          institution_id: string
           is_active: boolean | null
           name: string
           name_bn: string
-          project_id: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id: string
           is_active?: boolean | null
           name: string
           name_bn: string
-          project_id: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id?: string
           is_active?: boolean | null
           name?: string
           name_bn?: string
-          project_id?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -1176,13 +1173,6 @@ export type Database = {
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "expense_institutions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expense_categories_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "expense_projects"
             referencedColumns: ["id"]
           },
         ]
@@ -1194,7 +1184,6 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_bn: string
-          project_id: string
           sort_order: number | null
           updated_at: string | null
         }
@@ -1204,7 +1193,6 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_bn: string
-          project_id: string
           sort_order?: number | null
           updated_at?: string | null
         }
@@ -1214,19 +1202,10 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_bn?: string
-          project_id?: string
           sort_order?: number | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "expense_institutions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "expense_projects"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       expense_monthly_summary: {
         Row: {
@@ -1270,33 +1249,6 @@ export type Database = {
         }
         Relationships: []
       }
-      expense_projects: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          name: string
-          name_bn: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          name: string
-          name_bn: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          name?: string
-          name_bn?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       expenses: {
         Row: {
           amount: number
@@ -1307,8 +1259,8 @@ export type Database = {
           expense_date: string
           has_receipt: boolean | null
           id: string
+          institution_id: string
           month_year: string
-          project_id: string
           quantity: number | null
           receipt_url: string | null
           updated_at: string | null
@@ -1322,8 +1274,8 @@ export type Database = {
           expense_date?: string
           has_receipt?: boolean | null
           id?: string
+          institution_id: string
           month_year: string
-          project_id: string
           quantity?: number | null
           receipt_url?: string | null
           updated_at?: string | null
@@ -1337,8 +1289,8 @@ export type Database = {
           expense_date?: string
           has_receipt?: boolean | null
           id?: string
+          institution_id?: string
           month_year?: string
-          project_id?: string
           quantity?: number | null
           receipt_url?: string | null
           updated_at?: string | null
@@ -1352,10 +1304,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "expenses_project_id_fkey"
-            columns: ["project_id"]
+            foreignKeyName: "expenses_institution_id_fkey"
+            columns: ["institution_id"]
             isOneToOne: false
-            referencedRelation: "expense_projects"
+            referencedRelation: "expense_institutions"
             referencedColumns: ["id"]
           },
         ]
