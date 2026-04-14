@@ -86,6 +86,9 @@ const AdminExpenses = () => {
   const [editingDepositId, setEditingDepositId] = useState<string | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingExpInstitutionId, setEditingExpInstitutionId] = useState<string | null>(null);
+  const [expInstitutionDialog, setExpInstitutionDialog] = useState(false);
+  const [expInstitutionForm, setExpInstitutionForm] = useState({ project_id: '', name: '', name_bn: '' });
 
   // Form states
   const defaultExpenseForm = { project_id: '', institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
