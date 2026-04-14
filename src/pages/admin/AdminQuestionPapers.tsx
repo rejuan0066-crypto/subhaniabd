@@ -106,9 +106,9 @@ const AdminQuestionPapers = () => {
   const { data: subjects = [] } = useQuery({
     queryKey: ['subjects-list', newPaper.class_id],
     queryFn: async () => {
-      let q = supabase.from('subjects').select('id, name, name_bn, class_id, sort_order').eq('is_active', true);
+      let q = supabase.from('subjects').select('id, name, name_bn, class_id').eq('is_active', true);
       if (newPaper.class_id) q = q.eq('class_id', newPaper.class_id);
-      const { data, error } = await q.order('sort_order');
+      const { data, error } = await q.order('name_bn');
       if (error) throw error;
       return data;
     },
