@@ -918,6 +918,11 @@ const AdminQuestionPapers = () => {
       const target = e.target as HTMLElement;
       const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isEditable) return;
+      // Skip numeric inputs (marks field etc.)
+      if (target.tagName === 'INPUT') {
+        const inputEl = target as HTMLInputElement;
+        if (inputEl.inputMode === 'numeric' || inputEl.dataset.noBijoy === 'true') return;
+      }
       const code = e.code;
       if (!code) return;
       const arabicChar = e.shiftKey ? PHYSICAL_CODE_TO_ARABIC_SHIFTED[code] : PHYSICAL_CODE_TO_ARABIC[code];
