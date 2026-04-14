@@ -1371,7 +1371,7 @@ const AdminQuestionPapers = () => {
                       </div>
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'নম্বর' : 'Marks'}</Label>
-                        <Input type="text" inputMode="numeric" value={q.marks || ''} onChange={e => {
+                        <Input type="text" inputMode="numeric" value={q.marks || ''} placeholder="৫" onChange={e => {
                           const val = e.target.value.replace(/[^\d০-৯]/g, '');
                           if (val === '') { updateQuestion(qi, 'marks', 0); return; }
                           const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
