@@ -446,7 +446,13 @@ const AdminExpenses = () => {
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
   });
 
-  const filteredCategories = categories.filter((c: any) => !expenseForm.project_id || c.project_id === expenseForm.project_id);
+  const filteredInstitutions = expenseInstitutions.filter((inst: any) => inst.project_id === expenseForm.project_id);
+  const filteredCategories = categories.filter((c: any) => {
+    if (!expenseForm.project_id) return false;
+    if (c.project_id !== expenseForm.project_id) return false;
+    if (expenseForm.institution_id && (c as any).institution_id && (c as any).institution_id !== expenseForm.institution_id) return false;
+    return true;
+  });
   const selectedExpenseProject = projects.find((p: any) => p.id === expenseForm.project_id);
   const selectedExpenseCategory = categories.find((c: any) => c.id === expenseForm.category_id);
 
