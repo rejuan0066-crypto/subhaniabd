@@ -868,6 +868,12 @@ const AdminQuestionPapers = () => {
           <Button variant={showArabicKeyboard ? 'default' : 'outline'} size="sm" onClick={() => setShowArabicKeyboard(!showArabicKeyboard)}>
             <Keyboard className="h-4 w-4 mr-1" />AR
           </Button>
+          {/* Bijoy Mode Indicator */}
+          {bijoyMode && (
+            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-bold animate-pulse">
+              বিজয় ON
+            </Badge>
+          )}
           {/* Font Panel Toggle */}
           <Button variant={showFontPanel ? 'default' : 'outline'} size="sm" onClick={() => setShowFontPanel(!showFontPanel)}>
             <Type className="h-4 w-4 mr-1" />{language === 'bn' ? 'ফন্ট' : 'Font'}
