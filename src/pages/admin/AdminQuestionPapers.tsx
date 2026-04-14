@@ -370,7 +370,7 @@ const AdminQuestionPapers = () => {
         exam_session_id: newPaper.exam_session_id || null, class_id: newPaper.class_id || null,
         division_id: newPaper.division_id || null, subject_id: newPaper.subject_id || null,
         status: 'pending', created_by: user?.id || null,
-        font_config: fontConfig, header_config: headerConfig,
+        font_config: fontConfig as any, header_config: headerConfig as any,
       });
       if (error) throw error;
     },
