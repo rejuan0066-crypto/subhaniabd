@@ -408,11 +408,11 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
     return (
       <div key={i} className="mb-2" style={{ fontFamily, lineHeight: layout.lineSpacing }}>
         {q.group_label_bn && (i === 0 || q.group_label_bn !== questions[i - 1]?.group_label_bn) ? (
-          <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100 flex justify-between items-center">
-            <span>{language === 'bn' ? q.group_label_bn : q.group_label}</span>
+          <div className="font-bold text-center mb-2 mt-3 py-1 border-b border-gray-300">
+            <span className="text-sm tracking-wide">{language === 'bn' ? q.group_label_bn : q.group_label}</span>
             {q.group_marks != null && q.group_marks > 0 && (
-              <span className="text-xs font-semibold text-gray-600">
-                [{language === 'bn' ? toBengaliNum(q.group_marks) : q.group_marks}]
+              <span className="text-xs font-semibold text-gray-500 ml-2">
+                [{language === 'bn' ? toBengaliNum(q.group_marks) : q.group_marks} {language === 'bn' ? 'নম্বর' : 'marks'}]
               </span>
             )}
           </div>
@@ -1408,103 +1408,136 @@ const AdminQuestionPapers = () => {
         {/* LEFT: Question Editor */}
         <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
           {questions.map((q, qi) => (
-            <Card key={qi} className="card-elevated">
-              <CardContent className="pt-3 pb-3 space-y-2">
-                <div className="flex items-start gap-2">
-                  <span className="font-bold text-primary mt-1 shrink-0">
-                    {"\u200B"}
+            <div key={qi} className="relative group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+              {/* Serial Badge + Delete */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20">
+                    {language === 'bn' ? toBengaliNum(qi + 1) : qi + 1}
                   </span>
-                  <div className="flex-1 space-y-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? layoutSettings.questionLabelBn : layoutSettings.questionLabelEn}</Label>
-                        <Textarea value={q.question_text_bn} onChange={e => updateQuestion(qi, 'question_text_bn', e.target.value)}
-                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" dir="auto"
-                          style={bijoyMode ? { fontFamily: 'SutonnyMJ, SutonnyOMJ, "Noto Sans Bengali", sans-serif' } : undefined} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (ইংরেজি)' : 'Question (EN)'}</Label>
-                        <Textarea value={q.question_text} onChange={e => updateQuestion(qi, 'question_text', e.target.value)}
-                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'ধরন' : 'Type'}</Label>
-                        <Select value={q.question_type} onValueChange={v => updateQuestion(qi, 'question_type', v)}>
-                          <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                          <SelectContent>{QUESTION_TYPES.map(t => (<SelectItem key={t.value} value={t.value}>{language === 'bn' ? t.labelBn : t.labelEn}</SelectItem>))}</SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন নম্বর' : 'Marks'}</Label>
-                        <Input type="text" inputMode="numeric" value={q.marks || ''} placeholder="৫" onChange={e => {
-                          const val = e.target.value.replace(/[^\d০-৯]/g, '');
-                          if (val === '') { updateQuestion(qi, 'marks', 0); return; }
-                          const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
-                          updateQuestion(qi, 'marks', num);
-                        }} onFocus={e => setActiveInputRef(e.target)} className="h-8 text-xs" dir="auto" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'গ্রুপ (বাং)' : 'Group (BN)'}</Label>
-                        <Input value={q.group_label_bn} onChange={e => updateQuestion(qi, 'group_label_bn', e.target.value)} className="h-8 text-xs" placeholder="ক বিভাগ" onFocus={e => setActiveInputRef(e.target)} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'গ্রুপ (ইং)' : 'Group (EN)'}</Label>
-                        <Input value={q.group_label} onChange={e => updateQuestion(qi, 'group_label', e.target.value)} className="h-8 text-xs" placeholder="Section A" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">{language === 'bn' ? 'গ্রুপ নম্বর' : 'Group Marks'}</Label>
-                        <Input type="text" inputMode="numeric" value={q.group_marks ?? ''} onChange={e => {
-                          const val = e.target.value.replace(/[^\d০-৯]/g, '');
-                          if (val === '') { updateQuestion(qi, 'group_marks', null); return; }
-                          const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
-                          updateQuestion(qi, 'group_marks', num);
-                        }} onFocus={e => setActiveInputRef(e.target)} className="h-8 text-xs" placeholder="২০" />
-                      </div>
-                    </div>
-                    {q.question_type === 'mcq' && (
-                      <div className="space-y-1.5 pl-2">
-                        <Label className="text-xs font-semibold">{language === 'bn' ? 'অপশন' : 'Options'}</Label>
-                        {Array.isArray(q.options) && q.options.map((opt: any, oi: number) => (
-                          <div key={oi} className="flex gap-1.5 items-center">
-                            <span className="text-xs font-medium w-4">{String.fromCharCode(65 + oi)}</span>
-                            <Input className="flex-1 h-7 text-xs" placeholder="বাংলা" value={opt.text_bn || ''} onChange={e => updateMcqOption(qi, oi, 'text_bn', e.target.value)} onFocus={e => setActiveInputRef(e.target)} />
-                            <Input className="flex-1 h-7 text-xs" placeholder="English" value={opt.text || ''} onChange={e => updateMcqOption(qi, oi, 'text', e.target.value)} />
-                            <label className="flex items-center gap-0.5 text-xs whitespace-nowrap">
-                              <input type="radio" name={`correct-${qi}`} checked={opt.is_correct} onChange={() => updateMcqOption(qi, oi, 'is_correct', true)} />
-                              ✓
-                            </label>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeMcqOption(qi, oi)}><Trash2 className="h-3 w-3" /></Button>
-                          </div>
-                        ))}
-                        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => addMcqOption(qi)}>
-                          <Plus className="h-3 w-3 mr-1" />{language === 'bn' ? 'অপশন' : 'Option'}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => removeQuestion(qi)}>
-                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                  </Button>
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                    {language === 'bn' ? 'প্রশ্ন' : 'Question'} #{language === 'bn' ? toBengaliNum(qi + 1) : qi + 1}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+                <button
+                  onClick={() => removeQuestion(qi)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors opacity-0 group-hover:opacity-100"
+                  title={language === 'bn' ? 'মুছুন' : 'Delete'}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              <div className="px-4 pb-3 space-y-2.5">
+                {/* Two-Column Question Textareas */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="relative">
+                    <Textarea
+                      value={q.question_text_bn}
+                      onChange={e => updateQuestion(qi, 'question_text_bn', e.target.value)}
+                      onFocus={e => setActiveInputRef(e.target)}
+                      rows={2}
+                      className="text-sm pt-6 bg-muted/30 border-border/50 focus:bg-background focus:border-primary/40 rounded-xl resize-none transition-colors"
+                      dir="auto"
+                      placeholder={language === 'bn' ? 'বাংলা/আরবি প্রশ্ন লিখুন...' : 'Bengali/Arabic question...'}
+                      style={bijoyMode ? { fontFamily: 'SutonnyMJ, SutonnyOMJ, "Noto Sans Bengali", sans-serif' } : undefined}
+                    />
+                    <span className="absolute top-1.5 left-3 text-[10px] font-semibold text-muted-foreground/70 pointer-events-none">
+                      {language === 'bn' ? layoutSettings.questionLabelBn : layoutSettings.questionLabelEn}
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Textarea
+                      value={q.question_text}
+                      onChange={e => updateQuestion(qi, 'question_text', e.target.value)}
+                      onFocus={e => setActiveInputRef(e.target)}
+                      rows={2}
+                      className="text-sm pt-6 bg-muted/30 border-border/50 focus:bg-background focus:border-primary/40 rounded-xl resize-none transition-colors"
+                      placeholder={language === 'bn' ? 'ইংরেজি প্রশ্ন লিখুন...' : 'English question...'}
+                    />
+                    <span className="absolute top-1.5 left-3 text-[10px] font-semibold text-muted-foreground/70 pointer-events-none">
+                      {language === 'bn' ? 'প্রশ্ন (ইংরেজি)' : 'Question (EN)'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Compact Settings Row */}
+                <div className="grid grid-cols-5 gap-1.5 bg-muted/20 rounded-xl p-2 border border-border/30">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">{language === 'bn' ? 'ধরন' : 'Type'}</span>
+                    <Select value={q.question_type} onValueChange={v => updateQuestion(qi, 'question_type', v)}>
+                      <SelectTrigger className="h-7 text-[11px] bg-background/80 border-border/40 rounded-lg"><SelectValue /></SelectTrigger>
+                      <SelectContent>{QUESTION_TYPES.map(t => (<SelectItem key={t.value} value={t.value}>{language === 'bn' ? t.labelBn : t.labelEn}</SelectItem>))}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">{language === 'bn' ? 'প্রশ্ন নম্বর' : 'Marks'}</span>
+                    <Input type="text" inputMode="numeric" value={q.marks || ''} placeholder="৫" onChange={e => {
+                      const val = e.target.value.replace(/[^\d০-৯]/g, '');
+                      if (val === '') { updateQuestion(qi, 'marks', 0); return; }
+                      const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
+                      updateQuestion(qi, 'marks', num);
+                    }} onFocus={e => setActiveInputRef(e.target)} className="h-7 text-[11px] bg-background/80 border-border/40 rounded-lg text-center" dir="auto" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">{language === 'bn' ? 'গ্রুপ (বাং)' : 'Group BN'}</span>
+                    <Input value={q.group_label_bn} onChange={e => updateQuestion(qi, 'group_label_bn', e.target.value)} className="h-7 text-[11px] bg-background/80 border-border/40 rounded-lg" placeholder="ক বিভাগ" onFocus={e => setActiveInputRef(e.target)} />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">{language === 'bn' ? 'গ্রুপ (ইং)' : 'Group EN'}</span>
+                    <Input value={q.group_label} onChange={e => updateQuestion(qi, 'group_label', e.target.value)} className="h-7 text-[11px] bg-background/80 border-border/40 rounded-lg" placeholder="Section A" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">{language === 'bn' ? 'গ্রুপ নম্বর' : 'Grp Marks'}</span>
+                    <Input type="text" inputMode="numeric" value={q.group_marks ?? ''} onChange={e => {
+                      const val = e.target.value.replace(/[^\d০-৯]/g, '');
+                      if (val === '') { updateQuestion(qi, 'group_marks', null); return; }
+                      const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
+                      updateQuestion(qi, 'group_marks', num);
+                    }} onFocus={e => setActiveInputRef(e.target)} className="h-7 text-[11px] bg-background/80 border-border/40 rounded-lg text-center" placeholder="২০" />
+                  </div>
+                </div>
+
+                {/* MCQ Options */}
+                {q.question_type === 'mcq' && (
+                  <div className="space-y-1.5 pl-3 pt-1 border-l-2 border-primary/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{language === 'bn' ? 'অপশনসমূহ' : 'Options'}</span>
+                    {Array.isArray(q.options) && q.options.map((opt: any, oi: number) => (
+                      <div key={oi} className="flex gap-1.5 items-center">
+                        <span className="text-xs font-bold text-primary/70 w-5 text-center">{String.fromCharCode(65 + oi)}</span>
+                        <Input className="flex-1 h-7 text-xs rounded-lg bg-muted/30 border-border/40" placeholder="বাংলা" value={opt.text_bn || ''} onChange={e => updateMcqOption(qi, oi, 'text_bn', e.target.value)} onFocus={e => setActiveInputRef(e.target)} />
+                        <Input className="flex-1 h-7 text-xs rounded-lg bg-muted/30 border-border/40" placeholder="English" value={opt.text || ''} onChange={e => updateMcqOption(qi, oi, 'text', e.target.value)} />
+                        <label className="flex items-center gap-0.5 text-xs whitespace-nowrap">
+                          <input type="radio" name={`correct-${qi}`} checked={opt.is_correct} onChange={() => updateMcqOption(qi, oi, 'is_correct', true)} className="accent-primary" />
+                          ✓
+                        </label>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full hover:bg-destructive/10 hover:text-destructive" onClick={() => removeMcqOption(qi, oi)}><Trash2 className="h-3 w-3" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="h-7 text-xs rounded-lg" onClick={() => addMcqOption(qi)}>
+                      <Plus className="h-3 w-3 mr-1" />{language === 'bn' ? 'অপশন' : 'Option'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           ))}
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={addQuestion} className="flex-1">
-              <Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-1">
+            <Button onClick={addQuestion} className="flex-1 h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 font-semibold">
+              <Plus className="h-4 w-4 mr-1.5" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
             </Button>
             <Button
               variant="outline"
-              className="flex-1"
+              className="flex-1 h-10 rounded-xl border-dashed border-2"
               disabled={scanning}
               onClick={() => scanInputRef.current?.click()}
             >
               {scanning ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
               ) : (
-                <ScanLine className="h-4 w-4 mr-1" />
+                <ScanLine className="h-4 w-4 mr-1.5" />
               )}
               {language === 'bn' ? (scanning ? 'স্ক্যান হচ্ছে...' : 'স্ক্যান ও ইম্পোর্ট') : (scanning ? 'Scanning...' : 'Scan & Import')}
             </Button>
