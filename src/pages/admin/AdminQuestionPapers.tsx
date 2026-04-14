@@ -120,7 +120,7 @@ const AdminQuestionPapers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('question_papers')
-        .select('*, exam_sessions(id, name, name_bn)')
+        .select('*, exam_sessions(id, name, name_bn), subjects(id, name, name_bn)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
