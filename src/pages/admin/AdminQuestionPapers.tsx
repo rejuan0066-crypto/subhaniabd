@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Plus, Trash2, Printer, ArrowLeft, Check, X, Clock, Eye, Keyboard, Type, ChevronDown, ChevronUp, GripVertical, FileCheck, AlertCircle, Settings2, Columns, RotateCcw, Bold, Italic, Underline, Hash } from 'lucide-react';
+import { Plus, Trash2, Printer, ArrowLeft, Check, X, Clock, Eye, Keyboard, Type, ChevronDown, ChevronUp, GripVertical, FileCheck, AlertCircle, Settings2, Columns, RotateCcw, Bold, Italic, Underline, Hash, ScanLine, Loader2 } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -864,6 +864,73 @@ const AdminQuestionPapers = () => {
     }]);
   };
 
+  const [scanning, setScanning] = useState(false);
+  const scanInputRef = useRef<HTMLInputElement>(null);
+
+  const handleScanImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(language === 'bn' ? 'শুধুমাত্র ছবি ফাইল গ্রহণযোগ্য' : 'Only image files accepted');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error(language === 'bn' ? 'ফাইল সাইজ ১০MB এর বেশি হতে পারবে না' : 'File must be under 10MB');
+      return;
+    }
+
+    setScanning(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const { data, error } = await supabase.functions.invoke('scan-questions', {
+        body: { image_base64: base64 },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const scannedQuestions = data?.questions || [];
+      if (scannedQuestions.length === 0) {
+        toast.warning(language === 'bn' ? 'কোনো প্রশ্ন শনাক্ত হয়নি' : 'No questions detected');
+        return;
+      }
+
+      setQuestions(prev => {
+        const startOrder = prev.length;
+        const newQs = scannedQuestions.map((sq: { text: string; marks: number }, i: number) => ({
+          question_text: '', question_text_bn: sq.text || '',
+          question_type: 'descriptive' as const,
+          marks: sq.marks || 0, sort_order: startOrder + i,
+          group_label: '', group_label_bn: '',
+          group_marks: null, options: null, answer: '',
+        }));
+        return [...prev, ...newQs];
+      });
+
+      toast.success(
+        language === 'bn'
+          ? `${scannedQuestions.length}টি প্রশ্ন স্ক্যান করে যোগ করা হয়েছে`
+          : `${scannedQuestions.length} questions imported from scan`
+      );
+    } catch (err: any) {
+      console.error('Scan error:', err);
+      toast.error(err.message || (language === 'bn' ? 'স্ক্যান ব্যর্থ হয়েছে' : 'Scan failed'));
+    } finally {
+      setScanning(false);
+    }
+  };
+
   const updateQuestion = (index: number, field: keyof Question, value: any) => {
     setQuestions(prev => prev.map((q, i) => i === index ? { ...q, [field]: value } : q));
   };
@@ -1424,9 +1491,31 @@ const AdminQuestionPapers = () => {
               </CardContent>
             </Card>
           ))}
-          <Button variant="outline" onClick={addQuestion} className="w-full">
-            <Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={addQuestion} className="flex-1">
+              <Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              disabled={scanning}
+              onClick={() => scanInputRef.current?.click()}
+            >
+              {scanning ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <ScanLine className="h-4 w-4 mr-1" />
+              )}
+              {language === 'bn' ? (scanning ? 'স্ক্যান হচ্ছে...' : 'স্ক্যান ও ইম্পোর্ট') : (scanning ? 'Scanning...' : 'Scan & Import')}
+            </Button>
+            <input
+              ref={scanInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleScanImport}
+            />
+          </div>
         </div>
 
         {/* RIGHT: Live Preview */}
