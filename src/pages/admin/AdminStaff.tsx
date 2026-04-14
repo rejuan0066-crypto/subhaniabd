@@ -79,7 +79,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const { data: staffList = [], isLoading } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('staff').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('staff').select('*').order('staff_id', { ascending: true, nullsFirst: false });
       if (error) throw error;
       return data;
     },
