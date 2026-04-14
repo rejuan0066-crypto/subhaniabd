@@ -300,6 +300,7 @@ interface Question {
   sort_order: number;
   group_label: string;
   group_label_bn: string;
+  group_marks: number | null;
   options: any;
   answer: string;
 }
@@ -405,8 +406,13 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
     return (
       <div key={i} className="mb-2" style={{ fontFamily, lineHeight: layout.lineSpacing }}>
         {q.group_label_bn && (i === 0 || q.group_label_bn !== questions[i - 1]?.group_label_bn) ? (
-          <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100">
-            {language === 'bn' ? q.group_label_bn : q.group_label}
+          <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100 flex justify-between items-center">
+            <span>{language === 'bn' ? q.group_label_bn : q.group_label}</span>
+            {q.group_marks != null && q.group_marks > 0 && (
+              <span className="text-xs font-semibold text-gray-600">
+                [{language === 'bn' ? toBengaliNum(q.group_marks) : q.group_marks}]
+              </span>
+            )}
           </div>
         ) : null}
         <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
@@ -756,6 +762,7 @@ const AdminQuestionPapers = () => {
         id: q.id, question_text: q.question_text || '', question_text_bn: q.question_text_bn || '',
         question_type: q.question_type || 'descriptive', marks: q.marks || 5, sort_order: q.sort_order || 0,
         group_label: q.group_label || '', group_label_bn: q.group_label_bn || '',
+        group_marks: q.group_marks ?? null,
         options: q.options, answer: q.answer || '',
       })));
     }
@@ -845,7 +852,7 @@ const AdminQuestionPapers = () => {
     setQuestions(prev => [...prev, {
       question_text: '', question_text_bn: '', question_type: 'descriptive',
       marks: 5, sort_order: prev.length, group_label: '', group_label_bn: '',
-      options: null, answer: '',
+      group_marks: null, options: null, answer: '',
     }]);
   };
 
@@ -1346,7 +1353,7 @@ const AdminQuestionPapers = () => {
                           onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'ধরন' : 'Type'}</Label>
                         <Select value={q.question_type} onValueChange={v => updateQuestion(qi, 'question_type', v)}>
@@ -1369,6 +1376,15 @@ const AdminQuestionPapers = () => {
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'গ্রুপ (ইং)' : 'Group (EN)'}</Label>
                         <Input value={q.group_label} onChange={e => updateQuestion(qi, 'group_label', e.target.value)} className="h-8 text-xs" placeholder="Section A" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{language === 'bn' ? 'গ্রুপ নম্বর' : 'Group Marks'}</Label>
+                        <Input type="text" inputMode="numeric" value={q.group_marks ?? ''} onChange={e => {
+                          const val = e.target.value.replace(/[^\d০-৯]/g, '');
+                          if (val === '') { updateQuestion(qi, 'group_marks', null); return; }
+                          const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
+                          updateQuestion(qi, 'group_marks', num);
+                        }} onFocus={e => setActiveInputRef(e.target)} className="h-8 text-xs" placeholder="২০" />
                       </div>
                     </div>
                     {q.question_type === 'mcq' && (
