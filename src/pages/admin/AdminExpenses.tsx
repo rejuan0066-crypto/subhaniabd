@@ -59,6 +59,9 @@ const AdminExpenses = () => {
   const bn = language === 'bn';
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
+  const [filterMode, setFilterMode] = useState<'monthly' | 'yearly' | 'session'>('monthly');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -103,7 +106,17 @@ const AdminExpenses = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
 
-  // Queries - expense_institutions is now the top-level entity
+  // Queries
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic_sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').order('name', { ascending: false });
+      if (error) throw error;
+      return data as any[];
+    }
+  });
+
+  // expense_institutions is now the top-level entity
   const { data: expenseInstitutions = [] } = useQuery({
     queryKey: ['expense_institutions'],
     queryFn: async () => {
@@ -215,16 +228,44 @@ const AdminExpenses = () => {
   const currentArrears = rawCash < 0 ? Math.abs(rawCash) : 0;
   const totalArrears = previousArrears + currentArrears;
 
-  const totalExpenseAll = useMemo(() => allExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [allExpenses]);
-  const totalDepositAll = useMemo(() => allDeposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [allDeposits]);
+  // Helper: check if month_year matches current filter
+  const matchesFilter = (monthYear: string) => {
+    if (filterMode === 'yearly') {
+      return monthYear.endsWith(`-${selectedYear}`);
+    }
+    if (filterMode === 'session') {
+      const session = academicSessions.find((s: any) => s.id === selectedSessionId);
+      if (!session || !session.start_date || !session.end_date) return false;
+      // Extract year and month from month_year (e.g., "January-2026")
+      const parts = monthYear.split('-');
+      const yr = parseInt(parts[1]);
+      const mi = MONTHS.indexOf(parts[0]);
+      if (mi < 0) return false;
+      const entryDate = new Date(yr, mi, 15); // mid-month
+      return entryDate >= new Date(session.start_date) && entryDate <= new Date(session.end_date);
+    }
+    return true; // monthly mode - show all for "total" row
+  };
+
+  const filteredExpenses = useMemo(() => allExpenses.filter((e: any) => matchesFilter(e.month_year)), [allExpenses, filterMode, selectedYear, selectedSessionId, academicSessions]);
+  const filteredDeposits = useMemo(() => allDeposits.filter((d: any) => matchesFilter(d.month_year)), [allDeposits, filterMode, selectedYear, selectedSessionId, academicSessions]);
+
+  const totalExpenseAll = useMemo(() => filteredExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [filteredExpenses]);
+  const totalDepositAll = useMemo(() => filteredDeposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [filteredDeposits]);
   const rawCashAll = totalDepositAll - totalExpenseAll;
   const totalCashAll = rawCashAll >= 0 ? rawCashAll : 0;
   const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
 
+  const filterLabel = filterMode === 'yearly' 
+    ? (bn ? `${selectedYear} সাল` : `Year ${selectedYear}`)
+    : filterMode === 'session'
+    ? (bn ? (academicSessions.find((s: any) => s.id === selectedSessionId)?.name_bn || 'সেশন') : (academicSessions.find((s: any) => s.id === selectedSessionId)?.name || 'Session'))
+    : (bn ? 'সর্বমোট' : 'Grand Total');
+
   // Institution-wise breakdown
   const institutionBreakdown = useMemo(() => {
     const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
-    allExpenses.forEach((e: any) => {
+    filteredExpenses.forEach((e: any) => {
       if (!e.institution_id) return;
       if (!map[e.institution_id]) {
         map[e.institution_id] = { name: e.expense_institutions?.name || '', name_bn: e.expense_institutions?.name_bn || '', monthly: 0, total: 0 };
@@ -233,12 +274,12 @@ const AdminExpenses = () => {
       if (e.month_year === selectedMonthYear) map[e.institution_id].monthly += Number(e.amount || 0);
     });
     return Object.values(map);
-  }, [allExpenses, selectedMonthYear]);
+  }, [filteredExpenses, selectedMonthYear]);
 
   // Category-wise breakdown
   const categoryBreakdown = useMemo(() => {
     const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
-    allExpenses.forEach((e: any) => {
+    filteredExpenses.forEach((e: any) => {
       if (!e.category_id) return;
       if (!map[e.category_id]) {
         map[e.category_id] = { name: e.expense_categories?.name || '', name_bn: e.expense_categories?.name_bn || '', monthly: 0, total: 0 };
@@ -493,10 +534,10 @@ const AdminExpenses = () => {
 
   // Get selected month display name
   const selectedMonthIndex = MONTHS.indexOf(selectedMonthYear.split('-')[0]);
-  const selectedYear = selectedMonthYear.split('-')[1];
+  const selectedMonthYearStr = selectedMonthYear.split('-')[1];
   const selectedMonthName = bn 
-    ? `${MONTHS_BN[selectedMonthIndex]} ${selectedYear}` 
-    : `${MONTHS[selectedMonthIndex]} ${selectedYear}`;
+    ? `${MONTHS_BN[selectedMonthIndex]} ${selectedMonthYearStr}` 
+    : `${MONTHS[selectedMonthIndex]} ${selectedMonthYearStr}`;
 
   const openEditExpense = (e: any) => {
     setEditingExpenseId(e.id);
@@ -668,9 +709,9 @@ const AdminExpenses = () => {
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">{bn ? 'আর্থিক লেনদেন পরিচালনা করুন' : 'Manage financial transactions'}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="w-[200px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[180px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
               <SelectContent className="max-h-60">
                 {years.map(y => MONTHS.map((m, i) => (
                   <SelectItem key={`${m}-${y}`} value={`${m}-${y}`}>
@@ -679,6 +720,34 @@ const AdminExpenses = () => {
                 )))}
               </SelectContent>
             </Select>
+            <Select value={filterMode} onValueChange={(v: any) => setFilterMode(v)}>
+              <SelectTrigger className="w-[140px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">{bn ? 'মাসিক' : 'Monthly'}</SelectItem>
+                <SelectItem value="yearly">{bn ? 'বাৎসরিক' : 'Yearly'}</SelectItem>
+                <SelectItem value="session">{bn ? 'সেশন ইয়ার' : 'Session Year'}</SelectItem>
+              </SelectContent>
+            </Select>
+            {filterMode === 'yearly' && (
+              <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
+                <SelectTrigger className="w-[110px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {years.map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {filterMode === 'session' && (
+              <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
+                <SelectTrigger className="w-[150px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue placeholder={bn ? 'সেশন বাছুন' : 'Select Session'} /></SelectTrigger>
+                <SelectContent>
+                  {academicSessions.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn || s.name : s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
@@ -714,13 +783,13 @@ const AdminExpenses = () => {
           ))}
         </div>
 
-        {/* Overall Stats */}
+        {/* Overall / Filtered Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: bn ? 'মোট খরচ' : 'Total Expense', val: totalExpenseAll, gradient: 'from-rose-500/10 via-red-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-rose-500 to-red-400', icon: TrendingDown, color: 'text-rose-600 dark:text-rose-400', sparkColor: '#f43f5e' },
-            { label: bn ? 'মোট জমা' : 'Total Deposit', val: totalDepositAll, gradient: 'from-emerald-500/10 via-green-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-emerald-500 to-green-400', icon: TrendingUp, color: 'text-emerald-600 dark:text-emerald-400', sparkColor: '#10b981' },
-            { label: bn ? 'মোট ক্যাশ' : 'Total Cash', val: totalCashAll, gradient: totalCashAll >= 0 ? 'from-blue-500/10 via-sky-400/5 to-transparent' : 'from-orange-500/10 via-amber-400/5 to-transparent', iconBg: totalCashAll >= 0 ? 'bg-gradient-to-br from-blue-500 to-sky-400' : 'bg-gradient-to-br from-orange-500 to-amber-400', icon: Wallet, color: totalCashAll >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400', sparkColor: totalCashAll >= 0 ? '#3b82f6' : '#f97316' },
-            { label: bn ? 'মোট বকেয়া' : 'Total Arrears', val: totalArrearsAll, gradient: totalArrearsAll > 0 ? 'from-amber-500/10 via-yellow-400/5 to-transparent' : 'from-slate-500/10 via-gray-400/5 to-transparent', iconBg: totalArrearsAll > 0 ? 'bg-gradient-to-br from-amber-500 to-yellow-400' : 'bg-gradient-to-br from-slate-400 to-gray-400', icon: DollarSign, color: totalArrearsAll > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground', sparkColor: '#f59e0b' },
+            { label: `${filterLabel} ${bn ? 'খরচ' : 'Expense'}`, val: totalExpenseAll, gradient: 'from-rose-500/10 via-red-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-rose-500 to-red-400', icon: TrendingDown, color: 'text-rose-600 dark:text-rose-400', sparkColor: '#f43f5e' },
+            { label: `${filterLabel} ${bn ? 'জমা' : 'Deposit'}`, val: totalDepositAll, gradient: 'from-emerald-500/10 via-green-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-emerald-500 to-green-400', icon: TrendingUp, color: 'text-emerald-600 dark:text-emerald-400', sparkColor: '#10b981' },
+            { label: `${filterLabel} ${bn ? 'ক্যাশ' : 'Cash'}`, val: totalCashAll, gradient: totalCashAll >= 0 ? 'from-blue-500/10 via-sky-400/5 to-transparent' : 'from-orange-500/10 via-amber-400/5 to-transparent', iconBg: totalCashAll >= 0 ? 'bg-gradient-to-br from-blue-500 to-sky-400' : 'bg-gradient-to-br from-orange-500 to-amber-400', icon: Wallet, color: totalCashAll >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400', sparkColor: totalCashAll >= 0 ? '#3b82f6' : '#f97316' },
+            { label: `${filterLabel} ${bn ? 'বকেয়া' : 'Arrears'}`, val: totalArrearsAll, gradient: totalArrearsAll > 0 ? 'from-amber-500/10 via-yellow-400/5 to-transparent' : 'from-slate-500/10 via-gray-400/5 to-transparent', iconBg: totalArrearsAll > 0 ? 'bg-gradient-to-br from-amber-500 to-yellow-400' : 'bg-gradient-to-br from-slate-400 to-gray-400', icon: DollarSign, color: totalArrearsAll > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground', sparkColor: '#f59e0b' },
           ].map((s, i) => (
             <motion.div
               key={`all-${i}`}
@@ -767,7 +836,7 @@ const AdminExpenses = () => {
                       <TableRow>
                         <TableHead>{bn ? 'প্রতিষ্ঠান' : 'Institution'}</TableHead>
                         <TableHead className="text-right">{bn ? `${selectedMonthName} খরচ` : `${selectedMonthName}`}</TableHead>
-                        <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
+                        <TableHead className="text-right">{`${filterLabel} ${bn ? 'খরচ' : 'Total'}`}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -789,7 +858,7 @@ const AdminExpenses = () => {
                       <TableRow>
                         <TableHead>{bn ? 'ক্যাটেগরি' : 'Category'}</TableHead>
                         <TableHead className="text-right">{bn ? `${selectedMonthName} খরচ` : `${selectedMonthName}`}</TableHead>
-                        <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
+                        <TableHead className="text-right">{`${filterLabel} ${bn ? 'খরচ' : 'Total'}`}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
