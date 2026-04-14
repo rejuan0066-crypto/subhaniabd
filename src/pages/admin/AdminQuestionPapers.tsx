@@ -615,8 +615,11 @@ const AdminQuestionPapers = () => {
       const isTextarea = target.tagName === 'TEXTAREA';
       if (!isInput && !isTextarea) return;
       if (isInput) {
-        const inputType = (target as HTMLInputElement).type?.toLowerCase() || 'text';
+        const inputEl = target as HTMLInputElement;
+        const inputType = inputEl.type?.toLowerCase() || 'text';
         if (!['text', 'search', ''].includes(inputType)) return;
+        // Skip numeric inputs (marks field etc.)
+        if (inputEl.inputMode === 'numeric' || inputEl.dataset.noBijoy === 'true') return;
       }
       const char = e.key;
       if (char.length !== 1) return;
