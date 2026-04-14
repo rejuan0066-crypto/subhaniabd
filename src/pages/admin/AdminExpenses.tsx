@@ -818,7 +818,9 @@ const AdminExpenses = () => {
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(prev => prev === tab.value ? '' : tab.value)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === tab.value ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab.value
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25'
+                  : 'bg-white/60 dark:bg-white/10 backdrop-blur border border-emerald-200/30 dark:border-emerald-800/30 text-muted-foreground hover:text-foreground hover:shadow-md hover:border-emerald-300/50'}`}
               >
                 {tab.label}
               </button>
