@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye } from 'lucide-react';
+import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লিটার', 'ফুট', 'মিটার', 'সেট', 'প্যাকেট', 'বস্তা', 'রিম'];
@@ -1507,19 +1507,48 @@ const AdminExpenses = () => {
             </div>
             <div>
               <Label>{bn ? 'রসিদ সংযুক্ত করুন' : 'Attach Receipt'}</Label>
-              <div className="flex items-center gap-2">
-                <Input 
-                  type="file" 
-                  accept="image/*,.pdf" 
-                  onChange={e => {
-                    const file = e.target.files?.[0] || null;
-                    setReceiptFile(file);
-                    if (file) setExpenseForm(f => ({ ...f, has_receipt: true }));
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="file" 
+                    accept="image/*,.pdf" 
+                    onChange={e => {
+                      const file = e.target.files?.[0] || null;
+                      setReceiptFile(file);
+                      if (file) setExpenseForm(f => ({ ...f, has_receipt: true }));
+                    }}
+                    className="flex-1"
+                  />
+                  {receiptFile && <Upload className="h-4 w-4 text-muted-foreground" />}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={() => {
+                    const scanInput = document.createElement('input');
+                    scanInput.type = 'file';
+                    scanInput.accept = 'image/*';
+                    scanInput.capture = 'environment';
+                    scanInput.onchange = (ev) => {
+                      const file = (ev.target as HTMLInputElement).files?.[0] || null;
+                      if (file) {
+                        setReceiptFile(file);
+                        setExpenseForm(f => ({ ...f, has_receipt: true }));
+                        toast.success(bn ? 'রসিদ স্ক্যান সফল হয়েছে' : 'Receipt scanned successfully');
+                      }
+                    };
+                    scanInput.click();
                   }}
-                  className="flex-1"
-                />
-                {receiptFile && <Upload className="h-4 w-4 text-muted-foreground" />}
+                >
+                  <ScanLine className="h-4 w-4" />
+                  {bn ? 'স্ক্যানার দিয়ে স্ক্যান করুন' : 'Scan with Scanner'}
+                </Button>
               </div>
+              {receiptFile && (
+                <p className="text-xs text-muted-foreground mt-1 truncate">{receiptFile.name}</p>
+              )}
               {expenseForm.receipt_url && !receiptFile && (
                 <a href={expenseForm.receipt_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline mt-1 inline-block">
                   {bn ? 'বর্তমান রসিদ দেখুন' : 'View current receipt'}
