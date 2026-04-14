@@ -827,7 +827,7 @@ const AdminQuestionPapers = () => {
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (বাংলা/আরবি)' : 'Question (BN/AR)'}</Label>
                         <Textarea value={q.question_text_bn} onChange={e => updateQuestion(qi, 'question_text_bn', e.target.value)}
-                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" />
+                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" dir="auto" />
                       </div>
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (ইংরেজি)' : 'Question (EN)'}</Label>
