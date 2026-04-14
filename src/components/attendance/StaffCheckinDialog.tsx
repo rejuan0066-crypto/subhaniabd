@@ -24,6 +24,7 @@ interface Props {
 const StaffCheckinDialog = ({ open, onOpenChange, selectedDate }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState('staff_id');
   const [staffIdInput, setStaffIdInput] = useState('');
   const [loading, setLoading] = useState(false);
