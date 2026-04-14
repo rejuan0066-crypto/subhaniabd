@@ -59,6 +59,9 @@ const AdminExpenses = () => {
   const bn = language === 'bn';
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
+  const [filterMode, setFilterMode] = useState<'monthly' | 'yearly' | 'session'>('monthly');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
