@@ -869,7 +869,19 @@ const AdminExpenses = () => {
             {/* Level 2: Category List for selected project */}
             {selectedInstId && !selectedCategoryId && (
               <div className="space-y-3">
-                <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedInst?.name_bn : selectedInst?.name}</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedInst?.name_bn : selectedInst?.name}</h3>
+                  {canAddItem && (
+                    <Button size="sm" onClick={() => {
+                      setReceiptFile(null);
+                      setEditingExpenseId(null);
+                      setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId });
+                      setExpenseDialog(true);
+                    }}>
+                      <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ এন্ট্রি' : 'Add Expense'}
+                    </Button>
+                  )}
+                </div>
                 {instCategories.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">{bn ? 'এই প্রতিষ্ঠানে কোনো ক্যাটেগরি নেই।' : 'No categories in this institution.'}</p>
                 ) : (
