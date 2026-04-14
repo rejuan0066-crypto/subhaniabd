@@ -925,7 +925,11 @@ const AdminQuestionPapers = () => {
                       </div>
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'নম্বর' : 'Marks'}</Label>
-                        <Input type="number" value={q.marks} onChange={e => updateQuestion(qi, 'marks', Number(e.target.value))} className="h-8 text-xs" />
+                        <Input type="text" inputMode="numeric" value={q.marks} onChange={e => {
+                          const val = e.target.value.replace(/[^\d০-৯]/g, '');
+                          const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
+                          updateQuestion(qi, 'marks', num);
+                        }} onFocus={e => setActiveInputRef(e.target)} className="h-8 text-xs" dir="auto" />
                       </div>
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'গ্রুপ (বাং)' : 'Group (BN)'}</Label>
