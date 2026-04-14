@@ -189,6 +189,11 @@ const StatusBadge = ({ status, language }: { status: string; language: string })
 const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, language }: {
   paper: any; questions: Question[]; fontConfig: FontConfig; headerConfig: HeaderConfig; institution: any; language: string;
 }) => {
+  // When SutonnyMJ (Bijoy) is selected, text is converted to Unicode by the interceptor,
+  // so we must use a Unicode-capable Bengali font for rendering in the preview.
+  const effectiveBengaliFont = fontConfig.bengali === 'SutonnyMJ'
+    ? '"Noto Sans Bengali", "SutonnyOMJ", sans-serif'
+    : fontConfig.bengali;
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
   const sessionName = paper?.exam_sessions ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name) : '';
   const subjectName = paper?.subjects ? (language === 'bn' ? paper.subjects.name_bn : paper.subjects.name) : '';
