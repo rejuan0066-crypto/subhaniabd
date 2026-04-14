@@ -872,14 +872,20 @@ const AdminExpenses = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedInst?.name_bn : selectedInst?.name}</h3>
                   {canAddItem && (
-                    <Button size="sm" onClick={() => {
-                      setReceiptFile(null);
-                      setEditingExpenseId(null);
-                      setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId });
-                      setExpenseDialog(true);
-                    }}>
-                      <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ এন্ট্রি' : 'Add Expense'}
-                    </Button>
+                    <motion.button
+                      whileHover={{ scale: 1.04, boxShadow: '0 8px 32px -4px rgba(16,185,129,0.45)' }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setReceiptFile(null);
+                        setEditingExpenseId(null);
+                        setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId });
+                        setExpenseDialog(true);
+                      }}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[16px] text-sm font-semibold tracking-wide text-white border border-white/20 backdrop-blur-sm transition-all duration-300"
+                      style={{ background: 'linear-gradient(135deg, hsl(160 84% 30%), hsl(160 70% 36%))' , boxShadow: '0 4px 20px -4px rgba(16,185,129,0.35)' }}
+                    >
+                      <Plus className="w-4 h-4" />{bn ? 'খরচ এন্ট্রি' : 'Add Expense'}
+                    </motion.button>
                   )}
                 </div>
                 {instCategories.length === 0 ? (
@@ -968,17 +974,21 @@ const AdminExpenses = () => {
                 {/* Floating Action Button */}
                 {canAddItem && (
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.06, boxShadow: '0 12px 40px -6px rgba(16,185,129,0.5)' }}
+                    whileTap={{ scale: 0.92 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     onClick={() => {
                       setReceiptFile(null);
                       setEditingExpenseId(null);
                       setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId, category_id: selectedCategoryId });
                       setExpenseDialog(true);
                     }}
-                    className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center animate-pulse hover:animate-none"
+                    className="fixed bottom-8 right-8 z-50 flex items-center gap-2.5 px-6 py-3.5 rounded-[16px] text-white text-sm font-semibold tracking-wide border border-white/20 backdrop-blur-sm transition-all duration-300"
+                    style={{ background: 'linear-gradient(135deg, hsl(160 84% 30%), hsl(160 70% 36%))', boxShadow: '0 8px 30px -6px rgba(16,185,129,0.4)' }}
                   >
-                    <Plus className="w-6 h-6" />
+                    <Plus className="w-5 h-5" />
+                    <span>{bn ? 'খরচ যোগ করুন' : 'Add Expense'}</span>
                   </motion.button>
                 )}
               </div>
