@@ -3,7 +3,36 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+// Wrapper that supports toggle behavior (click active tab to deselect)
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+>(({ value, onValueChange, defaultValue, ...props }, ref) => {
+  const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
+  const currentValue = value !== undefined ? value : internalValue;
+
+  const handleValueChange = React.useCallback((newValue: string) => {
+    // Toggle: if same tab clicked, deselect
+    const resolved = newValue === currentValue ? '' : newValue;
+    if (onValueChange) {
+      onValueChange(resolved);
+    } else {
+      setInternalValue(resolved);
+    }
+  }, [currentValue, onValueChange]);
+
+  return (
+    <TabsPrimitive.Root
+      ref={ref}
+      value={currentValue}
+      onValueChange={handleValueChange}
+      {...props}
+    />
+  );
+}) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & React.RefAttributes<React.ElementRef<typeof TabsPrimitive.Root>>
+>;
+Tabs.displayName = "Tabs";
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
