@@ -30,43 +30,62 @@ const ARABIC_ROWS_NORMAL = [
   ['ئ', 'ء', 'ؤ', 'ر', 'لا', 'ى', 'ة', 'و', 'ز', 'ظ'],
 ];
 const ARABIC_ROWS_SHIFTED = [
-  ['ّ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+'],
+  ['ّ', '!', '@', '#', '$', '%', '^', '&', '*', ')', '(', '_', '+'],
   ['َ', 'ً', 'ُ', 'ٌ', 'لإ', 'إ', '\'', '÷', '×', '؛', '<', '>', '|'],
-  ['ِ', 'ٍ', ']', '[', 'لأ', 'أ', 'إ', '،', '/', ':', '"'],
+  ['ِ', 'ٍ', ']', '[', 'لأ', 'أ', 'ـ', '،', '/', ':', '"'],
   ['~', 'ْ', '{', '}', 'لآ', 'آ', '\'', ',', '.', '؟'],
 ];
 
-// Physical keyboard → Arabic character mapping (IBM PC Arabic Keyboard standard)
-const PHYSICAL_TO_ARABIC: Record<string, string> = {
+// Physical keyboard → Arabic character mapping using KeyboardEvent.code (physical key position)
+// This works regardless of OS keyboard layout (English or Arabic)
+const PHYSICAL_CODE_TO_ARABIC: Record<string, string> = {
   // Number row (unshifted)
-  '`': 'ذ',
-  '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩', '0': '٠',
-  '-': '-', '=': '=',
-  // Top row (unshifted) – QWERTY positions
-  'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
-  '[': 'ج', ']': 'د', '\\': '\\',
-  // Home row (unshifted)
-  'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
-  'l': 'م', ';': 'ك', "'": 'ط',
-  // Bottom row (unshifted)
-  'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
-  ',': 'و', '.': 'ز', '/': 'ظ',
-  // Number row (shifted)
-  '~': 'ّ', '!': '!', '@': '@', '#': '#', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '(': '(', ')': ')', '_': '_', '+': '+',
-  // Top row (shifted)
-  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'لإ', 'Y': 'إ', 'U': '\'', 'I': '÷', 'O': '×', 'P': '؛',
-  '{': '<', '}': '>', '|': '|',
-  // Home row (shifted)
-  'A': 'ِ', 'S': 'ٍ', 'D': ']', 'F': '[', 'G': 'لأ', 'H': 'أ', 'J': 'إ', 'K': '،', 'L': '/', ':': ':', '"': '"',
-  // Bottom row (shifted)
-  'Z': '~', 'X': 'ْ', 'C': '{', 'V': '}', 'B': 'لآ', 'N': 'آ', 'M': '\'',
-  '<': ',', '>': '.', '?': '؟',
+  'Backquote': 'ذ',
+  'Digit1': '١', 'Digit2': '٢', 'Digit3': '٣', 'Digit4': '٤', 'Digit5': '٥',
+  'Digit6': '٦', 'Digit7': '٧', 'Digit8': '٨', 'Digit9': '٩', 'Digit0': '٠',
+  'Minus': '-', 'Equal': '=',
+  // Top row (QWERTY positions)
+  'KeyQ': 'ض', 'KeyW': 'ص', 'KeyE': 'ث', 'KeyR': 'ق', 'KeyT': 'ف',
+  'KeyY': 'غ', 'KeyU': 'ع', 'KeyI': 'ه', 'KeyO': 'خ', 'KeyP': 'ح',
+  'BracketLeft': 'ج', 'BracketRight': 'د', 'Backslash': '\\',
+  // Home row
+  'KeyA': 'ش', 'KeyS': 'س', 'KeyD': 'ي', 'KeyF': 'ب', 'KeyG': 'ل',
+  'KeyH': 'ا', 'KeyJ': 'ت', 'KeyK': 'ن', 'KeyL': 'م',
+  'Semicolon': 'ك', 'Quote': 'ط',
+  // Bottom row
+  'KeyZ': 'ئ', 'KeyX': 'ء', 'KeyC': 'ؤ', 'KeyV': 'ر', 'KeyB': 'لا',
+  'KeyN': 'ى', 'KeyM': 'ة', 'Comma': 'و', 'Period': 'ز', 'Slash': 'ظ',
 };
+
+const PHYSICAL_CODE_TO_ARABIC_SHIFTED: Record<string, string> = {
+  // Number row (shifted)
+  'Backquote': 'ّ',
+  'Digit1': '!', 'Digit2': '@', 'Digit3': '#', 'Digit4': '$', 'Digit5': '%',
+  'Digit6': '^', 'Digit7': '&', 'Digit8': '*', 'Digit9': ')', 'Digit0': '(',
+  'Minus': '_', 'Equal': '+',
+  // Top row (shifted)
+  'KeyQ': 'َ', 'KeyW': 'ً', 'KeyE': 'ُ', 'KeyR': 'ٌ', 'KeyT': 'لإ',
+  'KeyY': 'إ', 'KeyU': '\'', 'KeyI': '÷', 'KeyO': '×', 'KeyP': '؛',
+  'BracketLeft': '<', 'BracketRight': '>', 'Backslash': '|',
+  // Home row (shifted)
+  'KeyA': 'ِ', 'KeyS': 'ٍ', 'KeyD': ']', 'KeyF': '[', 'KeyG': 'لأ',
+  'KeyH': 'أ', 'KeyJ': 'ـ', 'KeyK': '،', 'KeyL': '/',
+  'Semicolon': ':', 'Quote': '"',
+  // Bottom row (shifted)
+  'KeyZ': '~', 'KeyX': 'ْ', 'KeyC': '{', 'KeyV': '}', 'KeyB': 'لآ',
+  'KeyN': 'آ', 'KeyM': '\'', 'Comma': ',', 'Period': '.', 'Slash': '؟',
+};
+
+// Legacy key-based map for virtual keyboard highlighting (char → physical code)
+const ARABIC_TO_PHYSICAL_CODE: Record<string, string> = {};
+for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
+  ARABIC_TO_PHYSICAL_CODE[ar] = code;
+}
 
 // Reverse map: Arabic char → physical key (for highlighting)
 const ARABIC_TO_PHYSICAL: Record<string, string> = {};
-for (const [phys, ar] of Object.entries(PHYSICAL_TO_ARABIC)) {
-  ARABIC_TO_PHYSICAL[ar] = phys;
+for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
+  ARABIC_TO_PHYSICAL[ar] = code;
 }
 
 // ─── Arabic Keyboard Component ───
@@ -668,10 +687,10 @@ const AdminQuestionPapers = () => {
       const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isEditable) return;
 
-      const char = e.key;
-      if (char.length !== 1) return;
+      const code = e.code;
+      if (!code) return;
 
-      const arabicChar = PHYSICAL_TO_ARABIC[char];
+      const arabicChar = e.shiftKey ? PHYSICAL_CODE_TO_ARABIC_SHIFTED[code] : PHYSICAL_CODE_TO_ARABIC[code];
       if (!arabicChar) return;
 
       e.preventDefault();
