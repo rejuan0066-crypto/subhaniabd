@@ -859,7 +859,7 @@ const AdminQuestionPapers = () => {
   const addQuestion = () => {
     setQuestions(prev => [...prev, {
       question_text: '', question_text_bn: '', question_type: 'descriptive',
-      marks: 5, sort_order: prev.length, group_label: '', group_label_bn: '',
+      marks: 0, sort_order: prev.length, group_label: '', group_label_bn: '',
       group_marks: null, options: null, answer: '',
     }]);
   };
