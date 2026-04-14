@@ -189,6 +189,11 @@ const StatusBadge = ({ status, language }: { status: string; language: string })
 const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, language }: {
   paper: any; questions: Question[]; fontConfig: FontConfig; headerConfig: HeaderConfig; institution: any; language: string;
 }) => {
+  // When SutonnyMJ (Bijoy) is selected, text is converted to Unicode by the interceptor,
+  // so we must use a Unicode-capable Bengali font for rendering in the preview.
+  const effectiveBengaliFont = fontConfig.bengali === 'SutonnyMJ'
+    ? '"Noto Sans Bengali", "SutonnyOMJ", sans-serif'
+    : fontConfig.bengali;
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
   const sessionName = paper?.exam_sessions ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name) : '';
   const subjectName = paper?.subjects ? (language === 'bn' ? paper.subjects.name_bn : paper.subjects.name) : '';
@@ -197,7 +202,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
     <div className="bg-white text-black rounded-xl shadow-lg border border-border/20 overflow-hidden">
       {/* A4 Preview */}
       <div className="p-1">
-        <div className="relative" style={{ fontFamily: fontConfig.bengali, fontSize: `${fontConfig.fontSize}px`, aspectRatio: '210/297', maxHeight: '70vh', overflow: 'auto' }}>
+        <div className="relative" style={{ fontFamily: effectiveBengaliFont, fontSize: `${fontConfig.fontSize}px`, aspectRatio: '210/297', maxHeight: '70vh', overflow: 'auto' }}>
           <div className="p-6 sm:p-8">
             {/* Header */}
             <div className={`mb-4 pb-3 border-b-2 border-black ${headerConfig.centered ? 'text-center' : ''}`}>
@@ -205,7 +210,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
                 <img src={institution.logo_url} alt="" className="h-14 mx-auto mb-2" />
               )}
               {headerConfig.showInstitutionName && institution && (
-                <h2 className="text-lg font-bold" style={{ fontFamily: fontConfig.bengali }}>
+                <h2 className="text-lg font-bold" style={{ fontFamily: effectiveBengaliFont }}>
                   {language === 'bn' ? institution.name : institution.name_en || institution.name}
                 </h2>
               )}
@@ -232,7 +237,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
             {questions.map((q, i) => {
               const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
               const isArabic = /[\u0600-\u06FF]/.test(qText);
-              const fontFamily = isArabic ? fontConfig.arabic : fontConfig.bengali;
+              const fontFamily = isArabic ? fontConfig.arabic : effectiveBengaliFont;
 
               return (
                 <div key={i} className="mb-3" style={{ fontFamily }}>
