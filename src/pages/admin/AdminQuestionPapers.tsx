@@ -500,6 +500,9 @@ const AdminQuestionPapers = () => {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPapers.map((paper: any) => {
               const subjectInfo = SUBJECT_TYPES.find(s => s.value === paper.subject_type);
+              const subjectName = paper.subjects
+                ? (language === 'bn' ? paper.subjects.name_bn : paper.subjects.name)
+                : (subjectInfo ? (language === 'bn' ? subjectInfo.labelBn : subjectInfo.labelEn) : null);
               const sessionName = paper.exam_sessions
                 ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name)
                 : null;
@@ -522,9 +525,11 @@ const AdminQuestionPapers = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="secondary">
-                        {subjectInfo?.icon} {language === 'bn' ? subjectInfo?.labelBn : subjectInfo?.labelEn}
-                      </Badge>
+                      {subjectName && (
+                        <Badge variant="secondary">
+                          📖 {subjectName}
+                        </Badge>
+                      )}
                       <Badge variant="outline">
                         {paper.total_marks} {language === 'bn' ? 'নম্বর' : 'marks'}
                       </Badge>
