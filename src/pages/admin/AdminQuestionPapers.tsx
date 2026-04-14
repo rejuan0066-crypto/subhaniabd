@@ -84,8 +84,8 @@ for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
 
 // Reverse map: Arabic char → physical key (for highlighting)
 const ARABIC_TO_PHYSICAL: Record<string, string> = {};
-for (const [phys, ar] of Object.entries(PHYSICAL_TO_ARABIC)) {
-  ARABIC_TO_PHYSICAL[ar] = phys;
+for (const [code, ar] of Object.entries(PHYSICAL_CODE_TO_ARABIC)) {
+  ARABIC_TO_PHYSICAL[ar] = code;
 }
 
 // ─── Arabic Keyboard Component ───
@@ -687,10 +687,10 @@ const AdminQuestionPapers = () => {
       const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isEditable) return;
 
-      const char = e.key;
-      if (char.length !== 1) return;
+      const code = e.code;
+      if (!code) return;
 
-      const arabicChar = PHYSICAL_TO_ARABIC[char];
+      const arabicChar = e.shiftKey ? PHYSICAL_CODE_TO_ARABIC_SHIFTED[code] : PHYSICAL_CODE_TO_ARABIC[code];
       if (!arabicChar) return;
 
       e.preventDefault();
