@@ -265,7 +265,7 @@ const AdminExpenses = () => {
   // Institution-wise breakdown
   const institutionBreakdown = useMemo(() => {
     const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
-    allExpenses.forEach((e: any) => {
+    filteredExpenses.forEach((e: any) => {
       if (!e.institution_id) return;
       if (!map[e.institution_id]) {
         map[e.institution_id] = { name: e.expense_institutions?.name || '', name_bn: e.expense_institutions?.name_bn || '', monthly: 0, total: 0 };
@@ -274,12 +274,12 @@ const AdminExpenses = () => {
       if (e.month_year === selectedMonthYear) map[e.institution_id].monthly += Number(e.amount || 0);
     });
     return Object.values(map);
-  }, [allExpenses, selectedMonthYear]);
+  }, [filteredExpenses, selectedMonthYear]);
 
   // Category-wise breakdown
   const categoryBreakdown = useMemo(() => {
     const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
-    allExpenses.forEach((e: any) => {
+    filteredExpenses.forEach((e: any) => {
       if (!e.category_id) return;
       if (!map[e.category_id]) {
         map[e.category_id] = { name: e.expense_categories?.name || '', name_bn: e.expense_categories?.name_bn || '', monthly: 0, total: 0 };
