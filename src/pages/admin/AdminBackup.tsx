@@ -109,13 +109,29 @@ const AdminBackup = () => {
   const [lastBackup, setLastBackup] = useState<string | null>(null);
   const [tables, setTables] = useState<string[]>([]);
 
-  // Load tables dynamically from DB
+  // Load tables dynamically from DB via edge function
   useEffect(() => {
-    supabase.rpc('get_public_tables').then(({ data }) => {
-      if (data && Array.isArray(data)) {
-        setTables((data as any[]).map((r: any) => r.table_name));
+    const loadTables = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+        // Call backup endpoint with a special param to just get table list
+        const res = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/database-backup?list_tables=true`,
+          { headers: { Authorization: `Bearer ${session.access_token}` } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.tables && Array.isArray(data.tables)) {
+            setTables(data.tables);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load tables', e);
       }
-    });
+    };
+    loadTables();
   }, []);
 
   // Restore state
