@@ -94,7 +94,7 @@ const AdminFormulaBuilder = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formulaData, setFormulaData] = useState<FormulaData>(emptyFormula);
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('');
   const [varKey, setVarKey] = useState('');
   const [varLabel, setVarLabel] = useState('');
   const [varLabelEn, setVarLabelEn] = useState('');

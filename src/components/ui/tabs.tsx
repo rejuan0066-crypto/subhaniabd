@@ -3,7 +3,37 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
 
-const Tabs = TabsPrimitive.Root;
+// Wrapper that supports toggle behavior (click active tab to deselect)
+// All tabs default to closed; clicking an active tab closes it
+const Tabs = React.forwardRef<
+  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(({ value, onValueChange, defaultValue: _dv, ...props }, ref) => {
+  const [internalValue, setInternalValue] = React.useState('');
+  const currentValue = value !== undefined ? value : internalValue;
+
+  const handleValueChange = React.useCallback((newValue: string) => {
+    const resolved = newValue === currentValue ? '' : newValue;
+    if (onValueChange) {
+      onValueChange(resolved);
+    } else {
+      setInternalValue(resolved);
+    }
+  }, [currentValue, onValueChange]);
+
+  return (
+    <TabsPrimitive.Root
+      ref={ref}
+      value={currentValue}
+      onValueChange={handleValueChange}
+      {...props}
+    />
+  );
+}) as React.ForwardRefExoticComponent<
+  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & React.RefAttributes<React.ElementRef<typeof TabsPrimitive.Root>>
+>;
+Tabs.displayName = "Tabs";
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,

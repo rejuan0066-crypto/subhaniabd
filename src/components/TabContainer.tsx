@@ -74,12 +74,16 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
   // ── Single-level mode ──
   if (tabs && !groups) {
-    const activeId = searchParams.get(paramKey) || tabs[0]?.id || '';
-    const activeTab = tabs.find(t => t.id === activeId) || tabs[0];
+    const activeId = searchParams.get(paramKey) || '';
+    const activeTab = activeId ? tabs.find(t => t.id === activeId) : null;
 
-    const setActive = (id: string) => {
+    const toggleTab = (id: string) => {
       const next = new URLSearchParams(searchParams);
-      next.set(paramKey, id);
+      if (activeId === id) {
+        next.delete(paramKey);
+      } else {
+        next.set(paramKey, id);
+      }
       setSearchParams(next, { replace: true });
     };
 
@@ -90,16 +94,18 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
             <TabButton
               key={t.id}
               active={activeTab?.id === t.id}
-              onClick={() => setActive(t.id)}
+              onClick={() => toggleTab(t.id)}
               icon={t.icon}
               label={t.label}
             />
           ))}
         </div>
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab?.id} variants={tabVariants} initial="initial" animate="animate" exit="exit">
-            {activeTab?.content}
-          </motion.div>
+          {activeTab && (
+            <motion.div key={activeTab.id} variants={tabVariants} initial="initial" animate="animate" exit="exit">
+              {activeTab.content}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     );
@@ -108,26 +114,35 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
   // ── Multi-level mode ──
   if (!groups) return null;
 
-  const activeGroupId = searchParams.get(paramKey) || groups[0]?.id || '';
-  const activeGroup = groups.find(g => g.id === activeGroupId) || groups[0];
+  const activeGroupId = searchParams.get(paramKey) || '';
+  const activeGroup = activeGroupId ? groups.find(g => g.id === activeGroupId) : null;
   const childTabs = activeGroup?.tabs || [];
-  const activeChildId = searchParams.get(childParamKey) || childTabs[0]?.id || '';
-  const activeChild = childTabs.find(t => t.id === activeChildId) || childTabs[0];
+  const activeChildId = searchParams.get(childParamKey) || '';
+  const activeChild = activeChildId ? childTabs.find(t => t.id === activeChildId) : null;
 
-  const setGroup = (id: string) => {
+  const toggleGroup = (id: string) => {
     const next = new URLSearchParams(searchParams);
-    next.set(paramKey, id);
-    next.delete(childParamKey);
+    if (activeGroupId === id) {
+      next.delete(paramKey);
+      next.delete(childParamKey);
+    } else {
+      next.set(paramKey, id);
+      next.delete(childParamKey);
+    }
     setSearchParams(next, { replace: true });
   };
 
-  const setChild = (id: string) => {
+  const toggleChild = (id: string) => {
     const next = new URLSearchParams(searchParams);
-    next.set(childParamKey, id);
+    if (activeChildId === id) {
+      next.delete(childParamKey);
+    } else {
+      next.set(childParamKey, id);
+    }
     setSearchParams(next, { replace: true });
   };
 
-  const content = childTabs.length > 0 ? activeChild?.content : activeGroup?.content;
+  const content = activeGroup ? (childTabs.length > 0 ? activeChild?.content : activeGroup?.content) : null;
 
   return (
     <div className={cn('w-full', className)}>
@@ -137,7 +152,7 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
           <TabButton
             key={g.id}
             active={activeGroup?.id === g.id}
-            onClick={() => setGroup(g.id)}
+            onClick={() => toggleGroup(g.id)}
             icon={g.icon}
             label={g.label}
             level={1}
@@ -146,13 +161,13 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
       </div>
 
       {/* Level-2 tabs */}
-      {childTabs.length > 0 && (
+      {activeGroup && childTabs.length > 0 && (
         <div className="sticky top-12 z-[19] mb-4 flex flex-wrap gap-2 border-b border-border/40 bg-background/95 py-2 pl-1 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           {childTabs.map(t => (
             <TabButton
               key={t.id}
               active={activeChild?.id === t.id}
-              onClick={() => setChild(t.id)}
+              onClick={() => toggleChild(t.id)}
               icon={t.icon}
               label={t.label}
               level={2}
@@ -162,9 +177,11 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
       )}
 
       <AnimatePresence mode="wait">
-        <motion.div key={`${activeGroup?.id}-${activeChild?.id}`} variants={tabVariants} initial="initial" animate="animate" exit="exit">
-          {content}
-        </motion.div>
+        {content && (
+          <motion.div key={`${activeGroup?.id}-${activeChild?.id}`} variants={tabVariants} initial="initial" animate="animate" exit="exit">
+            {content}
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

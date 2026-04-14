@@ -18,7 +18,7 @@ const AdminIdCards = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
   const { settings } = useWebsiteSettings();
-  const [activeTab, setActiveTab] = useState('student');
+  const [activeTab, setActiveTab] = useState('');
   const [search, setSearch] = useState('');
   const [staffSearch, setStaffSearch] = useState('');
   const [filterDivisionId, setFilterDivisionId] = useState('all');

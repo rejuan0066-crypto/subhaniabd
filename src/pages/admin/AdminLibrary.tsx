@@ -10,7 +10,7 @@ import LibraryReports from '@/components/library/LibraryReports';
 const AdminLibrary = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
-  const [tab, setTab] = useState('dashboard');
+  const [tab, setTab] = useState('');
 
   const tabs = [
     { key: 'dashboard', label: bn ? 'ড্যাশবোর্ড' : 'Dashboard', icon: BarChart3 },
