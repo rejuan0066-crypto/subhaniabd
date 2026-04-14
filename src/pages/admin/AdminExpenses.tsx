@@ -496,10 +496,10 @@ const AdminExpenses = () => {
 
   // Get selected month display name
   const selectedMonthIndex = MONTHS.indexOf(selectedMonthYear.split('-')[0]);
-  const selectedYear = selectedMonthYear.split('-')[1];
+  const selectedMonthYearStr = selectedMonthYear.split('-')[1];
   const selectedMonthName = bn 
-    ? `${MONTHS_BN[selectedMonthIndex]} ${selectedYear}` 
-    : `${MONTHS[selectedMonthIndex]} ${selectedYear}`;
+    ? `${MONTHS_BN[selectedMonthIndex]} ${selectedMonthYearStr}` 
+    : `${MONTHS[selectedMonthIndex]} ${selectedMonthYearStr}`;
 
   const openEditExpense = (e: any) => {
     setEditingExpenseId(e.id);
