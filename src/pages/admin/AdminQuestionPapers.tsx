@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Trash2, FileText, Printer, GripVertical, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Printer, GripVertical, ArrowLeft } from 'lucide-react';
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 
 const SUBJECT_TYPES = [
@@ -50,24 +50,64 @@ const AdminQuestionPapers = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>('all');
+  const [filterSession, setFilterSession] = useState<string>('all');
 
-  // Form state for new paper
   const [newPaper, setNewPaper] = useState({
     title: '', title_bn: '', subject_type: 'bangla',
     total_marks: 100, duration_minutes: 120,
     instructions: '', instructions_bn: '',
+    exam_session_id: '', class_id: '', division_id: '',
   });
 
-  // Questions state for editing
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Fetch papers
+  // Fetch exam sessions
+  const { data: examSessions = [] } = useQuery({
+    queryKey: ['exam-sessions-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('exam_sessions')
+        .select('id, name, name_bn, academic_session_id, exam_type, is_active')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch divisions
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('divisions')
+        .select('id, name, name_bn, sort_order')
+        .eq('is_active', true)
+        .order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch classes filtered by division
+  const { data: classes = [] } = useQuery({
+    queryKey: ['classes-list', newPaper.division_id],
+    queryFn: async () => {
+      let q = supabase.from('classes').select('id, name, name_bn, division_id, sort_order').eq('is_active', true);
+      if (newPaper.division_id) q = q.eq('division_id', newPaper.division_id);
+      const { data, error } = await q.order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch papers with exam session join
   const { data: papers = [], isLoading } = useQuery({
     queryKey: ['question-papers'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('question_papers')
-        .select('*')
+        .select('*, exam_sessions(id, name, name_bn)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
@@ -90,6 +130,24 @@ const AdminQuestionPapers = () => {
     enabled: !!selectedPaper?.id,
   });
 
+  // Sync questions when paperQuestions change
+  useEffect(() => {
+    if (selectedPaper && paperQuestions) {
+      setQuestions(paperQuestions.map((q: any) => ({
+        id: q.id,
+        question_text: q.question_text || '',
+        question_text_bn: q.question_text_bn || '',
+        question_type: q.question_type || 'descriptive',
+        marks: q.marks || 5,
+        sort_order: q.sort_order || 0,
+        group_label: q.group_label || '',
+        group_label_bn: q.group_label_bn || '',
+        options: q.options,
+        answer: q.answer || '',
+      })));
+    }
+  }, [selectedPaper?.id, paperQuestions]);
+
   // Create paper
   const createPaper = useMutation({
     mutationFn: async () => {
@@ -101,19 +159,21 @@ const AdminQuestionPapers = () => {
         duration_minutes: newPaper.duration_minutes,
         instructions: newPaper.instructions,
         instructions_bn: newPaper.instructions_bn,
+        exam_session_id: newPaper.exam_session_id || null,
+        class_id: newPaper.class_id || null,
+        division_id: newPaper.division_id || null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-papers'] });
       setShowCreateDialog(false);
-      setNewPaper({ title: '', title_bn: '', subject_type: 'bangla', total_marks: 100, duration_minutes: 120, instructions: '', instructions_bn: '' });
+      setNewPaper({ title: '', title_bn: '', subject_type: 'bangla', total_marks: 100, duration_minutes: 120, instructions: '', instructions_bn: '', exam_session_id: '', class_id: '', division_id: '' });
       toast.success(language === 'bn' ? 'প্রশ্নপত্র তৈরি হয়েছে' : 'Question paper created');
     },
     onError: () => toast.error(language === 'bn' ? 'ত্রুটি হয়েছে' : 'Error occurred'),
   });
 
-  // Delete paper
   const deletePaper = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('question_papers').delete().eq('id', id);
@@ -127,11 +187,9 @@ const AdminQuestionPapers = () => {
     },
   });
 
-  // Save questions
   const saveQuestions = useMutation({
     mutationFn: async () => {
       if (!selectedPaper?.id) return;
-      // Delete existing then insert
       await supabase.from('questions').delete().eq('paper_id', selectedPaper.id);
       if (questions.length > 0) {
         const rows = questions.map((q, i) => ({
@@ -156,52 +214,6 @@ const AdminQuestionPapers = () => {
     },
     onError: () => toast.error(language === 'bn' ? 'ত্রুটি হয়েছে' : 'Error occurred'),
   });
-
-  // Load questions when paper selected
-  const openPaper = (paper: any) => {
-    setSelectedPaper(paper);
-  };
-
-  // Update questions state when paperQuestions loaded
-  useState(() => {
-    if (paperQuestions.length > 0) {
-      setQuestions(paperQuestions.map(q => ({
-        ...q,
-        question_text: q.question_text || '',
-        question_text_bn: q.question_text_bn || '',
-        question_type: q.question_type || 'descriptive',
-        marks: q.marks || 5,
-        sort_order: q.sort_order || 0,
-        group_label: q.group_label || '',
-        group_label_bn: q.group_label_bn || '',
-        options: q.options,
-        answer: q.answer || '',
-      })));
-    }
-  });
-
-  // Sync questions when paperQuestions change
-  const syncQuestions = () => {
-    if (paperQuestions.length > 0 || selectedPaper) {
-      setQuestions(paperQuestions.map((q: any) => ({
-        id: q.id,
-        question_text: q.question_text || '',
-        question_text_bn: q.question_text_bn || '',
-        question_type: q.question_type || 'descriptive',
-        marks: q.marks || 5,
-        sort_order: q.sort_order || 0,
-        group_label: q.group_label || '',
-        group_label_bn: q.group_label_bn || '',
-        options: q.options,
-        answer: q.answer || '',
-      })));
-    }
-  };
-
-  // Effect replacement
-  if (selectedPaper && paperQuestions && questions.length === 0 && paperQuestions.length > 0) {
-    syncQuestions();
-  }
 
   const addQuestion = () => {
     setQuestions(prev => [...prev, {
@@ -252,6 +264,9 @@ const AdminQuestionPapers = () => {
     if (!selectedPaper) return;
     const subjectInfo = SUBJECT_TYPES.find(s => s.value === selectedPaper.subject_type);
     const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
+    const sessionName = selectedPaper.exam_sessions
+      ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name)
+      : '';
 
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
     <style>
@@ -260,17 +275,18 @@ const AdminQuestionPapers = () => {
       body { font-family: 'Noto Sans Bengali', sans-serif; padding: 40px; font-size: 14px; }
       .header { text-align: center; margin-bottom: 24px; border-bottom: 2px solid #000; padding-bottom: 16px; }
       .header h1 { font-size: 20px; margin-bottom: 4px; }
+      .header .session { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: #333; }
       .header .meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 13px; }
       .instructions { background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 13px; }
       .question { margin-bottom: 16px; page-break-inside: avoid; }
       .question .q-header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; }
-      .question .q-text { margin-left: 24px; }
       .options { margin-left: 48px; margin-top: 4px; }
       .option { margin-bottom: 2px; }
       .group-label { font-weight: 700; font-size: 15px; margin: 16px 0 8px; padding: 4px 8px; background: #e8e8e8; }
       @media print { body { padding: 20px; } @page { margin: 15mm; } }
     </style></head><body>
     <div class="header">
+      ${sessionName ? `<div class="session">${sessionName}</div>` : ''}
       <h1>${language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>
       <div style="font-size:14px">${subjectInfo ? (language === 'bn' ? subjectInfo.labelBn : subjectInfo.labelEn) : ''}</div>
       <div class="meta">
@@ -289,21 +305,24 @@ const AdminQuestionPapers = () => {
           groupHtml = `<div class="group-label">${gl}</div>`;
         }
         const opts = Array.isArray(q.options) ? q.options.map((o: any, oi: number) =>
-          `<div class="option">${String.fromCharCode(2453 + oi)}। ${language === 'bn' ? o.text_bn || o.text : o.text}</div>`
+          \`<div class="option">\${String.fromCharCode(2453 + oi)}। \${language === 'bn' ? o.text_bn || o.text : o.text}</div>\`
         ).join('') : '';
-        return `${groupHtml}<div class="question">
-          <div class="q-header"><span>${i + 1}। ${language === 'bn' ? q.question_text_bn || q.question_text : q.question_text}</span><span>[${q.marks}]</span></div>
-          ${opts ? `<div class="options">${opts}</div>` : ''}
-        </div>`;
+        return \`\${groupHtml}<div class="question">
+          <div class="q-header"><span>\${i + 1}। \${language === 'bn' ? q.question_text_bn || q.question_text : q.question_text}</span><span>[\${q.marks}]</span></div>
+          \${opts ? \`<div class="options">\${opts}</div>\` : ''}
+        </div>\`;
       }).join('');
     })()}
-    <script>window.onload=()=>window.print()</script></body></html>`;
+    <script>window.onload=()=>window.print()<\/script></body></html>`;
 
     const w = window.open('', '_blank');
     if (w) { w.document.write(html); w.document.close(); }
   };
 
-  const filteredPapers = filterType === 'all' ? papers : papers.filter((p: any) => p.subject_type === filterType);
+  // Filter papers
+  let filteredPapers = papers;
+  if (filterType !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.subject_type === filterType);
+  if (filterSession !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.exam_session_id === filterSession);
 
   // Paper list view
   if (!selectedPaper) {
@@ -314,12 +333,25 @@ const AdminQuestionPapers = () => {
             {language === 'bn' ? '📝 প্রশ্নপত্র তৈরি' : '📝 Question Paper Builder'}
           </h1>
           <div className="flex gap-2 flex-wrap">
+            <Select value={filterSession} onValueChange={setFilterSession}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder={language === 'bn' ? 'পরীক্ষা সেশন' : 'Exam Session'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{language === 'bn' ? 'সকল সেশন' : 'All Sessions'}</SelectItem>
+                {examSessions.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {language === 'bn' ? s.name_bn : s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{language === 'bn' ? 'সকল' : 'All'}</SelectItem>
+                <SelectItem value="all">{language === 'bn' ? 'সকল বিষয়' : 'All Subjects'}</SelectItem>
                 {SUBJECT_TYPES.map(s => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.icon} {language === 'bn' ? s.labelBn : s.labelEn}
@@ -331,11 +363,50 @@ const AdminQuestionPapers = () => {
               <DialogTrigger asChild>
                 <Button><Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'নতুন প্রশ্নপত্র' : 'New Paper'}</Button>
               </DialogTrigger>
-              <DialogContent className="max-w-lg">
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{language === 'bn' ? 'নতুন প্রশ্নপত্র তৈরি' : 'Create Question Paper'}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
+                  {/* Exam Session */}
+                  <div>
+                    <Label>{language === 'bn' ? 'পরীক্ষা সেশন' : 'Exam Session'} <span className="text-destructive">*</span></Label>
+                    <Select value={newPaper.exam_session_id} onValueChange={v => setNewPaper(p => ({ ...p, exam_session_id: v }))}>
+                      <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'সেশন নির্বাচন করুন' : 'Select session'} /></SelectTrigger>
+                      <SelectContent>
+                        {examSessions.map((s: any) => (
+                          <SelectItem key={s.id} value={s.id}>{language === 'bn' ? s.name_bn : s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Division & Class */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>{language === 'bn' ? 'বিভাগ' : 'Division'}</Label>
+                      <Select value={newPaper.division_id} onValueChange={v => setNewPaper(p => ({ ...p, division_id: v, class_id: '' }))}>
+                        <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                        <SelectContent>
+                          {divisions.map((d: any) => (
+                            <SelectItem key={d.id} value={d.id}>{language === 'bn' ? d.name_bn : d.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>{language === 'bn' ? 'শ্রেণী' : 'Class'}</Label>
+                      <Select value={newPaper.class_id} onValueChange={v => setNewPaper(p => ({ ...p, class_id: v }))} disabled={!newPaper.division_id}>
+                        <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                        <SelectContent>
+                          {classes.filter((c: any) => !newPaper.division_id || c.division_id === newPaper.division_id).map((c: any) => (
+                            <SelectItem key={c.id} value={c.id}>{language === 'bn' ? c.name_bn : c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>{language === 'bn' ? 'শিরোনাম (ইংরেজি)' : 'Title (English)'}</Label>
@@ -377,7 +448,7 @@ const AdminQuestionPapers = () => {
                     <Label>{language === 'bn' ? 'নির্দেশনা (ইংরেজি)' : 'Instructions (English)'}</Label>
                     <Textarea value={newPaper.instructions} onChange={e => setNewPaper(p => ({ ...p, instructions: e.target.value }))} rows={2} />
                   </div>
-                  <Button onClick={() => createPaper.mutate()} disabled={!newPaper.title_bn || createPaper.isPending} className="w-full">
+                  <Button onClick={() => createPaper.mutate()} disabled={!newPaper.title_bn || !newPaper.exam_session_id || createPaper.isPending} className="w-full">
                     {language === 'bn' ? 'তৈরি করুন' : 'Create'}
                   </Button>
                 </div>
@@ -396,13 +467,21 @@ const AdminQuestionPapers = () => {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPapers.map((paper: any) => {
               const subjectInfo = SUBJECT_TYPES.find(s => s.value === paper.subject_type);
+              const sessionName = paper.exam_sessions
+                ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name)
+                : null;
               return (
-                <Card key={paper.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => openPaper(paper)}>
+                <Card key={paper.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedPaper(paper)}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-base leading-tight">
-                        {language === 'bn' ? paper.title_bn : paper.title}
-                      </CardTitle>
+                      <div>
+                        {sessionName && (
+                          <p className="text-xs text-muted-foreground mb-1">📋 {sessionName}</p>
+                        )}
+                        <CardTitle className="text-base leading-tight">
+                          {language === 'bn' ? paper.title_bn : paper.title}
+                        </CardTitle>
+                      </div>
                       <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={e => { e.stopPropagation(); setDeleteTarget(paper.id); }}>
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />
                       </Button>
@@ -441,6 +520,9 @@ const AdminQuestionPapers = () => {
   // Question editor view
   const subjectInfo = SUBJECT_TYPES.find(s => s.value === selectedPaper.subject_type);
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
+  const sessionName = selectedPaper.exam_sessions
+    ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name)
+    : '';
 
   return (
     <div className="space-y-4">
@@ -451,7 +533,8 @@ const AdminQuestionPapers = () => {
           </Button>
           <div>
             <h1 className="text-lg font-bold">{language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>
-            <div className="flex gap-2 text-sm text-muted-foreground">
+            <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
+              {sessionName && <span>📋 {sessionName}</span>}
               <span>{subjectInfo?.icon} {language === 'bn' ? subjectInfo?.labelBn : subjectInfo?.labelEn}</span>
               <span>•</span>
               <span>{language === 'bn' ? 'মোট নম্বর' : 'Total'}: {totalMarks}/{selectedPaper.total_marks}</span>
@@ -509,7 +592,6 @@ const AdminQuestionPapers = () => {
                   </div>
                 </div>
 
-                {/* MCQ Options */}
                 {q.question_type === 'mcq' && (
                   <div className="space-y-2 ml-2">
                     <Label className="text-xs font-semibold">{language === 'bn' ? 'অপশনসমূহ' : 'Options'}</Label>
