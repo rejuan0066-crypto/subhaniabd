@@ -288,7 +288,30 @@ const AdminExpenses = () => {
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
-  const addExpense = useMutation({
+  const addExpInstitution = useMutation({
+    mutationFn: async () => {
+      if (!expInstitutionForm.project_id || !expInstitutionForm.name || !expInstitutionForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
+      if (editingExpInstitutionId) {
+        const { error } = await supabase.from('expense_institutions').update({ name: expInstitutionForm.name, name_bn: expInstitutionForm.name_bn, project_id: expInstitutionForm.project_id }).eq('id', editingExpInstitutionId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('expense_institutions').insert(expInstitutionForm);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setExpInstitutionDialog(false); setExpInstitutionForm({ project_id: '', name: '', name_bn: '' }); setEditingExpInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
+  });
+
+  const deleteExpInstitution = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('expense_institutions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted'); }
+  });
+
+
     mutationFn: async () => {
       if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
       const parsedAmount = Number(bnToEnDigit(expenseForm.amount));
