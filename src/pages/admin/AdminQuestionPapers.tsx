@@ -289,6 +289,64 @@ const AdminQuestionPapers = () => {
   const [fontConfig, setFontConfig] = useState<FontConfig>({ arabic: 'Amiri', bengali: 'SutonnyOMJ', english: 'Arial', fontSize: 14 });
   const [headerConfig, setHeaderConfig] = useState<HeaderConfig>({ showLogo: true, showInstitutionName: true, centered: true });
 
+  // Bijoy mode: active when SutonnyMJ (ASCII/Bijoy) font is selected
+  const bijoyMode = fontConfig.bengali === 'SutonnyMJ';
+
+  // Bijoy ASCII→Unicode keydown interceptor
+  useEffect(() => {
+    if (!bijoyMode) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT';
+      const isTextarea = target.tagName === 'TEXTAREA';
+      if (!isInput && !isTextarea) return;
+
+      // Only intercept on text-type inputs
+      if (isInput) {
+        const inputType = (target as HTMLInputElement).type?.toLowerCase() || 'text';
+        if (!['text', 'search', ''].includes(inputType)) return;
+      }
+
+      const char = e.key;
+      if (char.length !== 1) return;
+      if (!isBijoyKey(char)) return;
+
+      const unicodeChar = bijoyCharToUnicode(char);
+      if (unicodeChar === char) return;
+
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const el = target as HTMLInputElement | HTMLTextAreaElement;
+      el.focus();
+
+      // Try execCommand first (works well with React controlled inputs)
+      const success = document.execCommand('insertText', false, unicodeChar);
+      if (!success) {
+        // Fallback: native setter approach
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? start;
+        const newValue = el.value.slice(0, start) + unicodeChar + el.value.slice(end);
+        const newCursor = start + unicodeChar.length;
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(proto, 'value');
+        if (descriptor?.set) {
+          descriptor.set.call(el, newValue);
+        } else {
+          el.value = newValue;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        requestAnimationFrame(() => el.setSelectionRange(newCursor, newCursor));
+      }
+    };
+
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [bijoyMode]);
+
   const [newPaper, setNewPaper] = useState({
     title: '', title_bn: '', subject_type: 'bangla',
     total_marks: 100, duration_minutes: 120,
