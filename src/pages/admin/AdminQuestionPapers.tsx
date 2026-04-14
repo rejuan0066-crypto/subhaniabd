@@ -202,7 +202,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
     <div className="bg-white text-black rounded-xl shadow-lg border border-border/20 overflow-hidden">
       {/* A4 Preview */}
       <div className="p-1">
-        <div className="relative" style={{ fontFamily: fontConfig.bengali, fontSize: `${fontConfig.fontSize}px`, aspectRatio: '210/297', maxHeight: '70vh', overflow: 'auto' }}>
+        <div className="relative" style={{ fontFamily: effectiveBengaliFont, fontSize: `${fontConfig.fontSize}px`, aspectRatio: '210/297', maxHeight: '70vh', overflow: 'auto' }}>
           <div className="p-6 sm:p-8">
             {/* Header */}
             <div className={`mb-4 pb-3 border-b-2 border-black ${headerConfig.centered ? 'text-center' : ''}`}>
@@ -210,7 +210,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
                 <img src={institution.logo_url} alt="" className="h-14 mx-auto mb-2" />
               )}
               {headerConfig.showInstitutionName && institution && (
-                <h2 className="text-lg font-bold" style={{ fontFamily: fontConfig.bengali }}>
+                <h2 className="text-lg font-bold" style={{ fontFamily: effectiveBengaliFont }}>
                   {language === 'bn' ? institution.name : institution.name_en || institution.name}
                 </h2>
               )}
@@ -237,7 +237,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
             {questions.map((q, i) => {
               const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
               const isArabic = /[\u0600-\u06FF]/.test(qText);
-              const fontFamily = isArabic ? fontConfig.arabic : fontConfig.bengali;
+              const fontFamily = isArabic ? fontConfig.arabic : effectiveBengaliFont;
 
               return (
                 <div key={i} className="mb-3" style={{ fontFamily }}>
