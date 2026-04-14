@@ -143,7 +143,7 @@ const DashboardInstitutionCard = () => {
       <div className="flex-1 min-w-0 w-full flex flex-col items-center">
         <h1 className="text-3xl font-display font-bold truncate text-center text-primary lg:text-5xl">{(language === 'bn' ? institution?.name : (institution?.name_en || institution?.name)) || (language === 'bn' ? 'প্রতিষ্ঠানের নাম' : 'Institution Name')}</h1>
         {institution?.name_en && institution?.name && (
-          <p className="text-lg font-display font-semibold text-center text-primary/70 lg:text-6xl">{language === 'bn' ? institution.name_en : institution.name}</p>
+          <p className="text-lg font-display font-semibold text-center text-primary/70 lg:text-3xl">{language === 'bn' ? institution.name_en : institution.name}</p>
         )}
         <div className="text-sm lg:text-base text-muted-foreground space-y-0.5 lg:space-y-1 w-full">
           {institution?.address && <p className="truncate text-center text-lg lg:text-xl">{institution.address}</p>}
