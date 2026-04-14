@@ -331,8 +331,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
             <h1 className="text-sm font-bold mt-0.5">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
             {subjectName && <p className="text-xs">📖 {subjectName}</p>}
             <div className="flex justify-between mt-1.5 text-[10px] font-medium">
-              <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
-              <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+              <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+              <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
             </div>
           </div>
         </div>
@@ -355,8 +355,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
         </div>
         <div className="flex justify-between items-center mt-1 text-[10px]">
           {subjectName && <span className="font-medium">📖 {subjectName}</span>}
-          <span>{language === 'bn' ? 'পূর্ণমান' : 'Marks'}: {totalMarks}</span>
-          <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+          <span>{language === 'bn' ? 'পূর্ণমান' : 'Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+          <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
         </div>
       </div>
     );
@@ -371,8 +371,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
       <h1 className="text-base font-bold mt-1">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
       {subjectName && <p className="text-sm">📖 {subjectName}</p>}
       <div className="flex justify-between mt-2 text-xs">
-        <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
-        <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+        <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+        <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
       </div>
     </div>
   );
