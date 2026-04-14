@@ -56,7 +56,7 @@ const AdminExpenses = () => {
   const bn = language === 'bn';
 
   const [selectedMonthYear, setSelectedMonthYear] = useState(`${MONTHS[new Date().getMonth()]}-${currentYear}`);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState<string>('');
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -67,7 +67,7 @@ const AdminExpenses = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteConfirmType, setDeleteConfirmType] = useState<'expense' | 'deposit'>('expense');
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
-  const [breakdownTab, setBreakdownTab] = useState<'institution' | 'category'>('institution');
+  const [breakdownTab, setBreakdownTab] = useState<'institution' | 'category' | null>(null);
 
   // Dialogs
   const [expInstDialog, setExpInstDialog] = useState(false);
