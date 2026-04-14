@@ -850,10 +850,9 @@ const AdminExpenses = () => {
                       <Wallet className="w-5 h-5 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-foreground text-sm leading-tight">{bn ? 'সর্বমোট' : 'Grand Total'}</h4>
+                      <h4 className="font-semibold text-foreground text-sm leading-tight">{bn ? 'মোট খরচ' : 'Total Expense'}</h4>
                       <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
                         <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-bold">৳{formatNum(monthlyTotalExpense)}</span></span>
-                        <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-bold">৳{formatNum(totalExpenseAll)}</span></span>
                       </div>
                     </div>
                   </div>
