@@ -1348,7 +1348,7 @@ const AdminQuestionPapers = () => {
                           onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'ধরন' : 'Type'}</Label>
                         <Select value={q.question_type} onValueChange={v => updateQuestion(qi, 'question_type', v)}>
@@ -1371,6 +1371,15 @@ const AdminQuestionPapers = () => {
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'গ্রুপ (ইং)' : 'Group (EN)'}</Label>
                         <Input value={q.group_label} onChange={e => updateQuestion(qi, 'group_label', e.target.value)} className="h-8 text-xs" placeholder="Section A" />
+                      </div>
+                      <div>
+                        <Label className="text-xs">{language === 'bn' ? 'গ্রুপ নম্বর' : 'Group Marks'}</Label>
+                        <Input type="text" inputMode="numeric" value={q.group_marks ?? ''} onChange={e => {
+                          const val = e.target.value.replace(/[^\d০-৯]/g, '');
+                          if (val === '') { updateQuestion(qi, 'group_marks', null); return; }
+                          const num = parseInt(val.replace(/[০-৯]/g, d => String('০১২৩৪৫৬৭৮৯'.indexOf(d)))) || 0;
+                          updateQuestion(qi, 'group_marks', num);
+                        }} onFocus={e => setActiveInputRef(e.target)} className="h-8 text-xs" placeholder="২০" />
                       </div>
                     </div>
                     {q.question_type === 'mcq' && (
