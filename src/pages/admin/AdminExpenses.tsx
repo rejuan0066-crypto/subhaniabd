@@ -522,7 +522,9 @@ const AdminExpenses = () => {
     setEditingExpenseId(e.id);
     const method = getMethod(e.description);
     const isKnownMethod = EXPENSE_METHODS.includes(method);
-    setExpenseForm({ project_id: e.project_id, institution_id: '', category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    const cat = categories.find((c: any) => c.id === e.category_id);
+    const instId = (cat as any)?.institution_id || '';
+    setExpenseForm({ project_id: e.project_id, institution_id: instId, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
