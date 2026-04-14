@@ -109,15 +109,6 @@ const AdminExpenses = () => {
     }
   });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['expense_categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('expense_categories').select('*, expense_institutions(name, name_bn)').order('name');
-      if (error) throw error;
-      return data;
-    }
-  });
-
   const { data: expenses = [] } = useQuery({
     queryKey: ['expenses', selectedMonthYear],
     queryFn: async () => {
