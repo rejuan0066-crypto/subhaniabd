@@ -57,6 +57,7 @@ const AdminQuestionPapers = () => {
     total_marks: 100, duration_minutes: 120,
     instructions: '', instructions_bn: '',
     exam_session_id: '', class_id: '', division_id: '',
+    subject_id: '',
   });
 
   const [questions, setQuestions] = useState<Question[]>([]);
