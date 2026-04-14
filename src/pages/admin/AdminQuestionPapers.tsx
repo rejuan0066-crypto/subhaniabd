@@ -273,6 +273,8 @@ interface LayoutSettings {
   lineSpacing: number;
   watermark: boolean;
   headerStyle: 'simple' | 'decorative' | 'classic';
+  questionLabelBn: string;
+  questionLabelEn: string;
 }
 
 const DEFAULT_LAYOUT: LayoutSettings = {
@@ -285,6 +287,8 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   lineSpacing: 1.5,
   watermark: false,
   headerStyle: 'simple',
+  questionLabelBn: 'প্রশ্ন (বাংলা/আরবি)',
+  questionLabelEn: 'Question (BN/AR)',
 };
 
 interface Question {
