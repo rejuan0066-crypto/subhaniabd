@@ -50,6 +50,14 @@ Deno.serve(async (req) => {
     const TABLES: string[] = (tableRows as any[]).map((r: any) => r.table_name);
 
     const url = new URL(req.url);
+
+    // If just listing tables, return immediately
+    if (url.searchParams.get('list_tables') === 'true') {
+      return new Response(JSON.stringify({ tables: TABLES }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const tableParam = url.searchParams.get('table');
     const format = url.searchParams.get('format') || 'json';
 
