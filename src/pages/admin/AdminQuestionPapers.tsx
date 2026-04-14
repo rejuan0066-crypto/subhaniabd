@@ -981,7 +981,7 @@ const AdminQuestionPapers = () => {
 
       {/* Arabic Keyboard */}
       {showArabicKeyboard && (
-        <ArabicKeyboard onKeyPress={handleArabicKey} onClose={() => setShowArabicKeyboard(false)} />
+        <ArabicKeyboard onKeyPress={handleArabicKey} onClose={() => setShowArabicKeyboard(false)} highlightedKey={highlightedArabicKey} />
       )}
 
       {/* Reject Dialog */}
