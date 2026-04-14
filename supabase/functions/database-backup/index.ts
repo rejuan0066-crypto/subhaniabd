@@ -12,6 +12,7 @@ const TABLES = [
   'notices', 'attendance_records', 'attendance_rules', 'institutions',
   'custom_forms', 'custom_form_fields', 'formulas', 'validation_rules',
   'system_modules', 'role_permissions', 'website_settings', 'notifications',
+  'library_books', 'library_issuances', 'library_fines',
 ];
 
 Deno.serve(async (req) => {
