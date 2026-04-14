@@ -99,29 +99,11 @@ const AdminExpenses = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
 
-  // Queries
-  const { data: projects = [] } = useQuery({
-    queryKey: ['expense_projects'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('expense_projects').select('*').order('name');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ['expense_categories'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('expense_categories').select('*, expense_projects(name, name_bn)').order('name');
-      if (error) throw error;
-      return data;
-    }
-  });
-
+  // Queries - expense_institutions is now the top-level entity
   const { data: expenseInstitutions = [] } = useQuery({
     queryKey: ['expense_institutions'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expense_institutions').select('*').eq('is_active', true).order('sort_order');
+      const { data, error } = await supabase.from('expense_institutions').select('*').order('name');
       if (error) throw error;
       return data as any[];
     }
