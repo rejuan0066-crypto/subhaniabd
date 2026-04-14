@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import AdminLayout from '@/components/AdminLayout';
+
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -655,7 +655,7 @@ const AdminExpenses = () => {
   const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ institution_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6 relative">
         {/* Glassmorphism Container */}
         <div className="rounded-3xl border border-emerald-200/30 bg-white/40 dark:bg-white/5 backdrop-blur-xl p-6 space-y-6" style={{ boxShadow: '0 8px 32px rgba(16,185,129,0.06)' }}>
@@ -817,7 +817,7 @@ const AdminExpenses = () => {
             ].map(tab => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(prev => prev === tab.value ? '' : tab.value)}
+                onClick={() => setActiveTab(activeTab === tab.value ? '' : tab.value)}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-2xl text-sm font-semibold transition-all whitespace-nowrap ${activeTab === tab.value
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25'
                   : 'bg-white/60 dark:bg-white/10 backdrop-blur border border-emerald-200/30 dark:border-emerald-800/30 text-muted-foreground hover:text-foreground hover:shadow-md hover:border-emerald-300/50'}`}
@@ -2154,7 +2154,7 @@ const AdminExpenses = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 
