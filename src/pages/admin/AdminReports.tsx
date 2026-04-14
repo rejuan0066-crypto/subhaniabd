@@ -39,7 +39,7 @@ const AdminReports = () => {
   const { settings: ws } = useWebsiteSettings();
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
-  const [activeTab, setActiveTab] = useState('income-expense');
+  const [activeTab, setActiveTab] = useState('');
 
   // === Export helpers ===
   const getExportData = () => {

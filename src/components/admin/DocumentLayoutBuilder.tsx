@@ -210,7 +210,7 @@ const DocumentLayoutBuilder = () => {
   const [formType, setFormType] = useState<'form' | 'receipt'>('form');
   const [formCategory, setFormCategory] = useState('student');
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('sections');
+  const [activeTab, setActiveTab] = useState('');
   const [importingForm, setImportingForm] = useState(false);
 
   // Drag state

@@ -38,7 +38,7 @@ const AdminStudentPromotion = () => {
   const [remarks, setRemarks] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState('promote');
+  const [activeTab, setActiveTab] = useState('');
 
   // Fetch sessions
   const { data: sessions = [] } = useQuery({

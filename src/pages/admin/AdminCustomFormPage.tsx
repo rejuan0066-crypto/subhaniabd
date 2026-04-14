@@ -38,7 +38,7 @@ const AdminCustomFormPage = () => {
   const [presentAddr, setPresentAddr] = useState<AddressData>({ division: '', district: '', upazila: '', union: '', postOffice: '', village: '' });
   const [sameAsPermanent, setSameAsPermanent] = useState(false);
   const [viewSubmission, setViewSubmission] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('form');
+  const [activeTab, setActiveTab] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: form } = useQuery({

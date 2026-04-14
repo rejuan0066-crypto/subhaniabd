@@ -24,7 +24,7 @@ const AdminGuardianNotifications = () => {
   const bn = language === 'bn';
   const { canAddItem } = usePagePermissions('/admin/guardian-notifications');
 
-  const [activeTab, setActiveTab] = useState('send');
+  const [activeTab, setActiveTab] = useState('');
   const [channel, setChannel] = useState<'sms' | 'email'>('sms');
   const [templateType, setTemplateType] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('');
