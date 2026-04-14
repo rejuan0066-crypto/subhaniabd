@@ -25,6 +25,92 @@ const ARABIC_KEYBOARD_ROWS = [
   ['ً', 'ٌ', 'ٍ', 'َ', 'ُ', 'ِ', 'ّ', 'ْ'],
 ];
 
+// Physical keyboard → Arabic character mapping (standard Arabic keyboard layout)
+const PHYSICAL_TO_ARABIC: Record<string, string> = {
+  'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
+  '[': 'ج', ']': 'د', 'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
+  'l': 'م', ';': 'ك', "'": 'ط', 'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
+  ',': 'و', '.': 'ز', '/': 'ظ',
+  // Shift variants (harakat)
+  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'ِ', 'Y': 'ٍ', 'U': 'ّ', 'I': 'ْ',
+};
+
+// Reverse map: Arabic char → physical key (for highlighting)
+const ARABIC_TO_PHYSICAL: Record<string, string> = {};
+for (const [phys, ar] of Object.entries(PHYSICAL_TO_ARABIC)) {
+  ARABIC_TO_PHYSICAL[ar] = phys;
+}
+
+// ─── Arabic Keyboard Component ───
+const ArabicKeyboard = ({
+  onKeyPress,
+  onClose,
+  highlightedKey,
+}: {
+  onKeyPress: (char: string) => void;
+  onClose: () => void;
+  highlightedKey: string | null;
+}) => {
+  const [position, setPosition] = useState({ x: 100, y: 300 });
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const kbRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    setDragging(true);
+    setDragOffset({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+    const handleMove = (e: MouseEvent) => setPosition({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
+    const handleUp = () => setDragging(false);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+    return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); };
+  }, [dragging, dragOffset]);
+
+  return (
+    <div
+      ref={kbRef}
+      className="fixed z-[100] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-3 select-none"
+      style={{ left: position.x, top: position.y, cursor: dragging ? 'grabbing' : 'grab' }}
+      onMouseDown={handleMouseDown}
+    >
+      <div className="flex items-center justify-between mb-2 px-1">
+        <span className="text-xs font-semibold text-muted-foreground">⌨️ Arabic Keyboard</span>
+        <span className="text-[10px] text-muted-foreground mx-2">Physical keys mapped when AR is ON</span>
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}><X className="h-3 w-3" /></Button>
+      </div>
+      {ARABIC_KEYBOARD_ROWS.map((row, ri) => (
+        <div key={ri} className="flex gap-1 justify-center mb-1" dir="rtl">
+          {row.map((char) => {
+            const isHighlighted = highlightedKey === char;
+            return (
+              <button
+                key={char}
+                className={`h-9 min-w-[2.2rem] px-1.5 rounded-lg text-base font-medium transition-all duration-100
+                  ${isHighlighted
+                    ? 'bg-primary text-primary-foreground scale-110 shadow-md'
+                    : 'bg-secondary/80 hover:bg-primary/20 hover:text-primary active:scale-95'
+                  }`}
+                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onKeyPress(char); }}
+              >
+                {char}
+              </button>
+            );
+          })}
+        </div>
+      ))}
+      <div className="flex gap-1 justify-center mt-1">
+        <button className="h-9 px-6 rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress(' '); }}>Space</button>
+        <button className="h-9 px-4 rounded-lg bg-secondary/80 hover:bg-destructive/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress('BACKSPACE'); }}>⌫</button>
+      </div>
+    </div>
+  );
+};
+
 const QUESTION_TYPES = [
   { value: 'descriptive', labelBn: 'বর্ণনামূলক', labelEn: 'Descriptive' },
   { value: 'mcq', labelBn: 'বহুনির্বাচনী (MCQ)', labelEn: 'MCQ' },
@@ -61,19 +147,6 @@ const FONT_PRESETS = {
   ],
 };
 
-interface Question {
-  id?: string;
-  question_text: string;
-  question_text_bn: string;
-  question_type: string;
-  marks: number;
-  sort_order: number;
-  group_label: string;
-  group_label_bn: string;
-  options: any;
-  answer: string;
-}
-
 interface FontConfig {
   arabic: string;
   bengali: string;
@@ -87,61 +160,19 @@ interface HeaderConfig {
   centered: boolean;
 }
 
-// ─── Arabic Keyboard Component ───
-const ArabicKeyboard = ({ onKeyPress, onClose }: { onKeyPress: (char: string) => void; onClose: () => void }) => {
-  const [position, setPosition] = useState({ x: 100, y: 300 });
-  const [dragging, setDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const kbRef = useRef<HTMLDivElement>(null);
+interface Question {
+  id?: string;
+  question_text: string;
+  question_text_bn: string;
+  question_type: string;
+  marks: number;
+  sort_order: number;
+  group_label: string;
+  group_label_bn: string;
+  options: any;
+  answer: string;
+}
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    setDragging(true);
-    setDragOffset({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
-
-  useEffect(() => {
-    if (!dragging) return;
-    const handleMove = (e: MouseEvent) => setPosition({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
-    const handleUp = () => setDragging(false);
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
-    return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); };
-  }, [dragging, dragOffset]);
-
-  return (
-    <div
-      ref={kbRef}
-      className="fixed z-[100] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-3 select-none"
-      style={{ left: position.x, top: position.y, cursor: dragging ? 'grabbing' : 'grab' }}
-      onMouseDown={handleMouseDown}
-    >
-      <div className="flex items-center justify-between mb-2 px-1">
-        <span className="text-xs font-semibold text-muted-foreground">⌨️ Arabic Keyboard</span>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}><X className="h-3 w-3" /></Button>
-      </div>
-      {ARABIC_KEYBOARD_ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-1 justify-center mb-1">
-          {row.map((char) => (
-            <button
-              key={char}
-              className="h-9 min-w-[2.2rem] px-1.5 rounded-lg bg-secondary/80 hover:bg-primary/20 hover:text-primary text-base font-medium transition-colors active:scale-95"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onKeyPress(char); }}
-            >
-              {char}
-            </button>
-          ))}
-        </div>
-      ))}
-      <div className="flex gap-1 justify-center mt-1">
-        <button className="h-9 px-6 rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onClick={() => onKeyPress(' ')}>Space</button>
-        <button className="h-9 px-4 rounded-lg bg-secondary/80 hover:bg-destructive/20 text-sm transition-colors" onClick={() => onKeyPress('BACKSPACE')}>⌫</button>
-      </div>
-    </div>
-  );
-};
-
-// ─── Status Badge Component ───
 const StatusBadge = ({ status, language }: { status: string; language: string }) => {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const Icon = config.icon;
@@ -249,6 +280,7 @@ const AdminQuestionPapers = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showArabicKeyboard, setShowArabicKeyboard] = useState(false);
   const [activeInputRef, setActiveInputRef] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const [highlightedArabicKey, setHighlightedArabicKey] = useState<string | null>(null);
   const [showFontPanel, setShowFontPanel] = useState(false);
   const [rejectionNote, setRejectionNote] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -479,31 +511,79 @@ const AdminQuestionPapers = () => {
     }));
   };
 
-  // Arabic keyboard handler
+  // Arabic keyboard handler - inserts at cursor position
   const handleArabicKey = useCallback((char: string) => {
     if (!activeInputRef) return;
     const el = activeInputRef;
-    const start = el.selectionStart || 0;
-    const end = el.selectionEnd || 0;
+    el.focus();
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? start;
+
     if (char === 'BACKSPACE') {
       if (start > 0) {
         const newVal = el.value.slice(0, start - 1) + el.value.slice(end);
-        const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set
-          || Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-        nativeSet?.call(el, newVal);
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        setTimeout(() => el.setSelectionRange(start - 1, start - 1), 0);
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+        setter?.call(el, newVal);
+        el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+        requestAnimationFrame(() => el.setSelectionRange(start - 1, start - 1));
       }
     } else {
       const newVal = el.value.slice(0, start) + char + el.value.slice(end);
-      const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set
-        || Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      nativeSet?.call(el, newVal);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      setTimeout(() => el.setSelectionRange(start + char.length, start + char.length), 0);
+      const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+      setter?.call(el, newVal);
+      el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      const newPos = start + char.length;
+      requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
     }
-    el.focus();
   }, [activeInputRef]);
+
+  // Physical keyboard → Arabic mapping when AR keyboard is open
+  useEffect(() => {
+    if (!showArabicKeyboard) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      
+      const target = e.target as HTMLElement;
+      const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      if (!isEditable) return;
+
+      const char = e.key;
+      if (char.length !== 1) return;
+
+      const arabicChar = PHYSICAL_TO_ARABIC[char];
+      if (!arabicChar) return;
+
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      // Highlight the key on virtual keyboard
+      setHighlightedArabicKey(arabicChar);
+      setTimeout(() => setHighlightedArabicKey(null), 200);
+
+      // Insert Arabic character
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        const el = target as HTMLInputElement | HTMLTextAreaElement;
+        setActiveInputRef(el);
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? start;
+        const newVal = el.value.slice(0, start) + arabicChar + el.value.slice(end);
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+        setter?.call(el, newVal);
+        el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+        const newPos = start + arabicChar.length;
+        requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
+      } else if (target.isContentEditable) {
+        document.execCommand('insertText', false, arabicChar);
+      }
+    };
+
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [showArabicKeyboard]);
 
   // Print function
   const printPaper = () => {
@@ -901,7 +981,7 @@ const AdminQuestionPapers = () => {
 
       {/* Arabic Keyboard */}
       {showArabicKeyboard && (
-        <ArabicKeyboard onKeyPress={handleArabicKey} onClose={() => setShowArabicKeyboard(false)} />
+        <ArabicKeyboard onKeyPress={handleArabicKey} onClose={() => setShowArabicKeyboard(false)} highlightedKey={highlightedArabicKey} />
       )}
 
       {/* Reject Dialog */}
