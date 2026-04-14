@@ -407,44 +407,31 @@ export const useWebsiteSettings = () => {
       
       if (error) {
         console.warn('Website settings fetch error:', error.message);
-        // On auth errors (401/403), don't throw — return defaults so cached data is preserved
+        // On auth errors, try fetching with a fresh anon client approach by clearing session first
         if (error.message?.includes('JWT') || error.code === 'PGRST301' || error.code === '401') {
-          return null;
+          // Try one more time — auth may have cleared by now
+          const { data: retryData, error: retryError } = await supabase
+            .from('website_settings')
+            .select('key, value');
+          if (retryError) {
+            return null;
+          }
+          return parseSettingsData(retryData);
         }
         throw error;
       }
       
-      const result = { ...DEFAULT_SETTINGS };
-      data?.forEach((row) => {
-        const key = row.key as keyof WebsiteSettings;
-        if (key in result) {
-          const defaultVal = DEFAULT_SETTINGS[key];
-          const dbVal = row.value;
-          if (defaultVal && typeof defaultVal === 'object' && !Array.isArray(defaultVal) && dbVal && typeof dbVal === 'object' && !Array.isArray(dbVal)) {
-            (result as any)[key] = { ...defaultVal, ...(dbVal as any) };
-          } else {
-            (result as any)[key] = dbVal;
-          }
-        }
-      });
-      // Ensure section_order has all keys
-      if (result.section_order) {
-        const existingKeys = new Set(result.section_order.map((s: any) => s.key));
-        ALL_SECTION_CONFIGS.forEach(cfg => {
-          if (!existingKeys.has(cfg.key)) {
-            result.section_order.push(cfg);
-          }
-        });
-      }
-      return result;
+      return parseSettingsData(data);
     },
-    staleTime: 5 * 60 * 1000, // 5 min — keep cached data longer to avoid default flashes
+    staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
+    refetchOnMount: 'always',
     retry: (failureCount, error) => {
-      // Don't retry auth errors
-      if (error?.message?.includes('JWT') || error?.message?.includes('401')) return false;
+      // Retry auth errors up to 3 times (session may be refreshing)
+      if (error?.message?.includes('JWT') || error?.message?.includes('401')) return failureCount < 3;
       return failureCount < 2;
     },
+    retryDelay: (attemptIndex) => Math.min(1000 * (attemptIndex + 1), 3000),
   });
 
   const updateSetting = useMutation({
