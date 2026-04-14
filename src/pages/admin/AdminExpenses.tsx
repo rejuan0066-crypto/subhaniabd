@@ -743,7 +743,7 @@ const AdminExpenses = () => {
                 ].map(tab => (
                   <button
                     key={tab.value}
-                    onClick={() => setBreakdownTab(tab.value)}
+                    onClick={() => setBreakdownTab(prev => prev === tab.value ? null : tab.value)}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${breakdownTab === tab.value ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}
                   >
                     {tab.label}
@@ -807,7 +807,7 @@ const AdminExpenses = () => {
             ].map(tab => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
+                onClick={() => setActiveTab(prev => prev === tab.value ? '' : tab.value)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === tab.value ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}
               >
                 {tab.label}
