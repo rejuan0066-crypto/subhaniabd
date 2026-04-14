@@ -18,6 +18,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2 } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedCounter from '@/components/expenses/AnimatedCounter';
+import MiniSparkline from '@/components/expenses/MiniSparkline';
 
 const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লিটার', 'ফুট', 'মিটার', 'সেট', 'প্যাকেট', 'বস্তা', 'রিম'];
 const EXPENSE_METHODS = ['ক্যাশ', 'চেক', 'বিকাশ', 'নগদ', 'রকেট', 'ব্যাংক ট্রান্সফার', 'অন্যান্য'];
