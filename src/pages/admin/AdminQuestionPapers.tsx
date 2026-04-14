@@ -400,7 +400,7 @@ const AdminQuestionPapers = () => {
     mutationFn: async () => {
       if (!selectedPaper?.id) return;
       // Save font/header config too
-      await supabase.from('question_papers').update({ font_config: fontConfig, header_config: headerConfig }).eq('id', selectedPaper.id);
+      await supabase.from('question_papers').update({ font_config: fontConfig as any, header_config: headerConfig as any }).eq('id', selectedPaper.id);
       await supabase.from('questions').delete().eq('paper_id', selectedPaper.id);
       if (questions.length > 0) {
         const rows = questions.map((q, i) => ({
