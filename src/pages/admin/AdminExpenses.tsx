@@ -281,7 +281,7 @@ const AdminExpenses = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_categories'] }); setCategoryDialog(false); setCategoryForm({ project_id: '', name: '', name_bn: '' }); setEditingCategoryId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_categories'] }); setCategoryDialog(false); setCategoryForm({ project_id: '', institution_id: '', name: '', name_bn: '' }); setEditingCategoryId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
@@ -490,7 +490,7 @@ const AdminExpenses = () => {
     setEditingExpenseId(e.id);
     const method = getMethod(e.description);
     const isKnownMethod = EXPENSE_METHODS.includes(method);
-    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    setExpenseForm({ project_id: e.project_id, institution_id: '', category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
@@ -632,13 +632,13 @@ const AdminExpenses = () => {
 
   const openEditCategory = (c: any) => {
     setEditingCategoryId(c.id);
-    setCategoryForm({ project_id: c.project_id, name: c.name, name_bn: c.name_bn });
+    setCategoryForm({ project_id: c.project_id, institution_id: (c as any).institution_id || '', name: c.name, name_bn: c.name_bn });
     setCategoryDialog(true);
   };
   const resetExpenseDialog = (open: boolean) => { if (!open) { setEditingExpenseId(null); setExpenseForm(defaultExpenseForm); } setExpenseDialog(open); };
   const resetDepositDialog = (open: boolean) => { if (!open) { setEditingDepositId(null); setDepositForm(defaultDepositForm); } setDepositDialog(open); };
   const resetProjectDialog = (open: boolean) => { if (!open) { setEditingProjectId(null); setProjectForm({ name: '', name_bn: '' }); } setProjectDialog(open); };
-  const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
+  const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', institution_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
     <AdminLayout>
