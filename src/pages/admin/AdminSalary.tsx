@@ -786,6 +786,7 @@ const AdminSalary = () => {
       sheetData.push([
         fmtIdx(idx + 1),
         s.name_bn,
+        s.staff_id || '-',
         getDesignation(s.designation),
         fmtNum(Number(rec?.base_salary || s.salary || 0)),
         fmtNum(Number(rec?.bonus || 0)),
