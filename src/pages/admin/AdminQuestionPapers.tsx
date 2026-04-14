@@ -1315,7 +1315,7 @@ const AdminQuestionPapers = () => {
                   <div className="flex-1 space-y-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (বাংলা/আরবি)' : 'Question (BN/AR)'}</Label>
+                        <Label className="text-xs">{language === 'bn' ? layoutSettings.questionLabelBn : layoutSettings.questionLabelEn}</Label>
                         <Textarea value={q.question_text_bn} onChange={e => updateQuestion(qi, 'question_text_bn', e.target.value)}
                           onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" dir="auto"
                           style={bijoyMode ? { fontFamily: 'SutonnyMJ, SutonnyOMJ, "Noto Sans Bengali", sans-serif' } : undefined} />
