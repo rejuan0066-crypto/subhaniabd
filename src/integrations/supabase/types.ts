@@ -2578,6 +2578,138 @@ export type Database = {
           },
         ]
       }
+      question_papers: {
+        Row: {
+          class_id: string | null
+          created_at: string
+          created_by: string | null
+          division_id: string | null
+          duration_minutes: number
+          exam_session_id: string | null
+          id: string
+          instructions: string | null
+          instructions_bn: string | null
+          status: string
+          subject_type: string
+          title: string
+          title_bn: string
+          total_marks: number
+          updated_at: string
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          division_id?: string | null
+          duration_minutes?: number
+          exam_session_id?: string | null
+          id?: string
+          instructions?: string | null
+          instructions_bn?: string | null
+          status?: string
+          subject_type?: string
+          title: string
+          title_bn: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          division_id?: string | null
+          duration_minutes?: number
+          exam_session_id?: string | null
+          id?: string
+          instructions?: string | null
+          instructions_bn?: string | null
+          status?: string
+          subject_type?: string
+          title?: string
+          title_bn?: string
+          total_marks?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_papers_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_papers_division_id_fkey"
+            columns: ["division_id"]
+            isOneToOne: false
+            referencedRelation: "divisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_papers_exam_session_id_fkey"
+            columns: ["exam_session_id"]
+            isOneToOne: false
+            referencedRelation: "exam_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          answer: string | null
+          created_at: string
+          group_label: string | null
+          group_label_bn: string | null
+          id: string
+          marks: number
+          options: Json | null
+          paper_id: string
+          question_text: string
+          question_text_bn: string | null
+          question_type: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          answer?: string | null
+          created_at?: string
+          group_label?: string | null
+          group_label_bn?: string | null
+          id?: string
+          marks?: number
+          options?: Json | null
+          paper_id: string
+          question_text: string
+          question_text_bn?: string | null
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          answer?: string | null
+          created_at?: string
+          group_label?: string | null
+          group_label_bn?: string | null
+          id?: string
+          marks?: number
+          options?: Json | null
+          paper_id?: string
+          question_text?: string
+          question_text_bn?: string | null
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "question_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       receipt_counter: {
         Row: {
           current_year: number

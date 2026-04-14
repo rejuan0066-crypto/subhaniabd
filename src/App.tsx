@@ -87,6 +87,7 @@ import AdminIdCards from "./pages/admin/AdminIdCards";
 import AdminClassRoutine from "./pages/admin/AdminClassRoutine";
 import AdminExamRoutine from "./pages/admin/AdminExamRoutine";
 import AdminStudentPromotion from "./pages/admin/AdminStudentPromotion";
+import AdminQuestionPapers from "./pages/admin/AdminQuestionPapers";
 import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
 import StaffCheckin from "./pages/StaffCheckin";
@@ -266,6 +267,7 @@ const App = () => (
                     <Route path="class-routine" element={<AdminClassRoutine />} />
                     <Route path="exam-routine" element={<AdminExamRoutine />} />
                     <Route path="student-promotion" element={<ModuleGuard menuPath="/admin/student-promotion"><AdminStudentPromotion /></ModuleGuard>} />
+                    <Route path="question-papers" element={<AdminQuestionPapers />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
