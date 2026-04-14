@@ -118,6 +118,15 @@ const AdminExpenses = () => {
     }
   });
 
+  const { data: expenseInstitutions = [] } = useQuery({
+    queryKey: ['expense_institutions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_institutions').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data as any[];
+    }
+  });
+
   const { data: expenses = [] } = useQuery({
     queryKey: ['expenses', selectedMonthYear],
     queryFn: async () => {
