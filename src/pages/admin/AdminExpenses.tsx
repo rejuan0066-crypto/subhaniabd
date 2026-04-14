@@ -800,8 +800,7 @@ const AdminExpenses = () => {
                 </div>
               )}
             </div>
-          );
-        })()}
+        )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex flex-wrap gap-2 mb-4">
