@@ -1106,45 +1106,106 @@ const AdminExpenses = () => {
                 </CardContent>
               </Card>
 
-              {/* Categories */}
+              {/* Expense Institutions */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-base">{bn ? 'ক্যাটেগরি' : 'Categories'}</CardTitle>
-                  <Dialog open={categoryDialog} onOpenChange={resetCategoryDialog}>
-                    <DialogTrigger asChild><Button size="sm" variant="outline"><TagIcon className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
+                  <CardTitle className="text-base">{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institutions'}</CardTitle>
+                  <Dialog open={expInstitutionDialog} onOpenChange={(open) => { if (!open) { setEditingExpInstitutionId(null); setExpInstitutionForm({ project_id: '', name: '', name_bn: '' }); } setExpInstitutionDialog(open); }}>
+                    <DialogTrigger asChild><Button size="sm" variant="outline"><Building2 className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
                     <DialogContent>
-                      <DialogHeader><DialogTitle>{editingCategoryId ? (bn ? 'ক্যাটেগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটেগরি' : 'New Category')}</DialogTitle></DialogHeader>
+                      <DialogHeader><DialogTitle>{editingExpInstitutionId ? (bn ? 'শাখা সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন শাখা' : 'New Institution')}</DialogTitle></DialogHeader>
                       <div className="space-y-3">
                         <div>
                           <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
-                          <Select value={categoryForm.project_id} onValueChange={v => setCategoryForm(f => ({ ...f, project_id: v }))}>
+                          <Select value={expInstitutionForm.project_id} onValueChange={v => setExpInstitutionForm(f => ({ ...f, project_id: v }))}>
                             <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                             <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} /></div>
-                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={categoryForm.name_bn} onChange={e => setCategoryForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
-                        <Button className="w-full" onClick={() => addCategory.mutate()} disabled={addCategory.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={expInstitutionForm.name} onChange={e => setExpInstitutionForm(f => ({ ...f, name: e.target.value }))} /></div>
+                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={expInstitutionForm.name_bn} onChange={e => setExpInstitutionForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
+                        <Button className="w-full" onClick={() => addExpInstitution.mutate()} disabled={addExpInstitution.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </CardHeader>
                 <CardContent>
-                  {categories.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটেগরি নেই' : 'No categories'}</p> : (
+                  {expenseInstitutions.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো শাখা নেই' : 'No institutions'}</p> : (
                     <ul className="space-y-2">
-                      {categories.map((c: any) => (
-                        <li key={c.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
-                          <div>
-                            <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
-                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
-                          </div>
-                          <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
-                        </li>
-                      ))}
+                      {expenseInstitutions.map((inst: any) => {
+                        const proj = projects.find((p: any) => p.id === inst.project_id);
+                        return (
+                          <li key={inst.id} className="flex items-center justify-between p-2 rounded-[12px] bg-primary/5 border border-primary/10">
+                            <div>
+                              <Building2 className="w-3.5 h-3.5 inline mr-1.5 text-primary" />
+                              <span className="text-sm font-medium">{bn ? inst.name_bn : inst.name}</span>
+                              {proj && <span className="text-xs text-muted-foreground ml-2">({bn ? proj.name_bn : proj.name})</span>}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => { setEditingExpInstitutionId(inst.id); setExpInstitutionForm({ project_id: inst.project_id, name: inst.name, name_bn: inst.name_bn }); setExpInstitutionDialog(true); }}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteExpInstitution.mutate(inst.id); }}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Categories - full width below */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base">{bn ? 'ক্যাটেগরি' : 'Categories'}</CardTitle>
+                <Dialog open={categoryDialog} onOpenChange={resetCategoryDialog}>
+                  <DialogTrigger asChild><Button size="sm" variant="outline"><TagIcon className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>{editingCategoryId ? (bn ? 'ক্যাটেগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটেগরি' : 'New Category')}</DialogTitle></DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
+                        <Select value={categoryForm.project_id} onValueChange={v => setCategoryForm(f => ({ ...f, project_id: v, institution_id: '' }))}>
+                          <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                          <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      {categoryForm.project_id && expenseInstitutions.filter((i: any) => i.project_id === categoryForm.project_id).length > 0 && (
+                        <div>
+                          <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
+                          <Select value={categoryForm.institution_id || undefined} onValueChange={v => setCategoryForm(f => ({ ...f, institution_id: v }))}>
+                            <SelectTrigger className="rounded-[12px] border-primary/30"><SelectValue placeholder={bn ? 'শাখা নির্বাচন' : 'Select institution'} /></SelectTrigger>
+                            <SelectContent>{expenseInstitutions.filter((i: any) => i.project_id === categoryForm.project_id).map((i: any) => <SelectItem key={i.id} value={i.id}><Building2 className="w-3 h-3 inline mr-1 text-primary" />{bn ? i.name_bn : i.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} /></div>
+                      <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={categoryForm.name_bn} onChange={e => setCategoryForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
+                      <Button className="w-full" onClick={() => addCategory.mutate()} disabled={addCategory.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {categories.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটেগরি নেই' : 'No categories'}</p> : (
+                  <ul className="space-y-2">
+                    {categories.map((c: any) => {
+                      const catInst = expenseInstitutions.find((i: any) => i.id === (c as any).institution_id);
+                      return (
+                        <li key={c.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+                          <div>
+                            <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
+                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
+                            {catInst && <span className="text-xs text-primary ml-1">• {bn ? catInst.name_bn : catInst.name}</span>}
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
             </div>
           </TabsContent>
 
