@@ -3,6 +3,7 @@ import BackButton from './BackButton';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageToggle from './LanguageToggle';
+import BijoyToggle from './BijoyToggle';
 import { Menu, X, Phone, Mail, MapPin, GraduationCap } from 'lucide-react';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import { useMenuSettings } from '@/hooks/useMenuSettings';
@@ -97,6 +98,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
                 )}
               </div>
               <div className="flex items-center gap-3">
+                <BijoyToggle />
                 <LanguageToggle />
                 <Link to="/login" className="btn-gold-gradient !px-4 !py-1.5 !text-xs rounded-full">
                   {t('login')}
