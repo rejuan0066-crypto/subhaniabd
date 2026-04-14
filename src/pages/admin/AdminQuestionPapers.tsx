@@ -300,6 +300,7 @@ interface Question {
   sort_order: number;
   group_label: string;
   group_label_bn: string;
+  group_marks: number | null;
   options: any;
   answer: string;
 }
