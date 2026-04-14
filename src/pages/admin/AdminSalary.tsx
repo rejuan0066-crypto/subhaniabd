@@ -927,6 +927,7 @@ const AdminSalary = () => {
             Number(rec.advance_deduction || 0) + Number(rec.other_deduction || 0) : 0;
           return {
             name: s.name_bn,
+            staff_id: s.staff_id || '-',
             designation: getDesignation(s.designation),
             base_salary: Number(rec?.base_salary || s.salary || 0),
             present: rec?.present_days || 0,
