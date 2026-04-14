@@ -557,6 +557,9 @@ const AdminQuestionPapers = () => {
 
   // Question editor view
   const subjectInfo = SUBJECT_TYPES.find(s => s.value === selectedPaper.subject_type);
+  const subjectName = selectedPaper.subjects
+    ? (language === 'bn' ? selectedPaper.subjects.name_bn : selectedPaper.subjects.name)
+    : (subjectInfo ? (language === 'bn' ? subjectInfo.labelBn : subjectInfo.labelEn) : '');
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
   const sessionName = selectedPaper.exam_sessions
     ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name)
@@ -573,7 +576,7 @@ const AdminQuestionPapers = () => {
             <h1 className="text-lg font-bold">{language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>
             <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
               {sessionName && <span>📋 {sessionName}</span>}
-              <span>{subjectInfo?.icon} {language === 'bn' ? subjectInfo?.labelBn : subjectInfo?.labelEn}</span>
+              {subjectName && <span>📖 {subjectName}</span>}
               <span>•</span>
               <span>{language === 'bn' ? 'মোট নম্বর' : 'Total'}: {totalMarks}/{selectedPaper.total_marks}</span>
             </div>
