@@ -326,17 +326,18 @@ const AdminBackup = () => {
                       <p className="text-[10px] text-muted-foreground font-mono">{key}</p>
                     </div>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => downloadBackup(t.key, 'json')} disabled={!!loading} title="JSON">
-                        {loading === `${t.key}-json` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileJson className="w-3.5 h-3.5" />}
+                      <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => downloadBackup(key, 'json')} disabled={!!loading} title="JSON">
+                        {loading === `${key}-json` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileJson className="w-3.5 h-3.5" />}
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => downloadBackup(t.key, 'csv')} disabled={!!loading} title="CSV">
-                        {loading === `${t.key}-csv` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
+                      <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => downloadBackup(key, 'csv')} disabled={!!loading} title="CSV">
+                        {loading === `${key}-csv` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileSpreadsheet className="w-3.5 h-3.5" />}
                       </Button>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
 
