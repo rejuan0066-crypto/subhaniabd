@@ -416,7 +416,7 @@ const AdminQuestionPapers = () => {
                     </div>
                     <div>
                       <Label>{language === 'bn' ? 'শ্রেণী' : 'Class'}</Label>
-                      <Select value={newPaper.class_id} onValueChange={v => setNewPaper(p => ({ ...p, class_id: v }))} disabled={!newPaper.division_id}>
+                      <Select value={newPaper.class_id} onValueChange={v => setNewPaper(p => ({ ...p, class_id: v, subject_id: '' }))} disabled={!newPaper.division_id}>
                         <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                         <SelectContent>
                           {classes.filter((c: any) => !newPaper.division_id || c.division_id === newPaper.division_id).map((c: any) => (
@@ -425,6 +425,19 @@ const AdminQuestionPapers = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Subject from DB */}
+                  <div>
+                    <Label>{language === 'bn' ? 'বিষয়' : 'Subject'}</Label>
+                    <Select value={newPaper.subject_id} onValueChange={v => setNewPaper(p => ({ ...p, subject_id: v }))} disabled={!newPaper.class_id}>
+                      <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'বিষয় নির্বাচন করুন' : 'Select subject'} /></SelectTrigger>
+                      <SelectContent>
+                        {subjects.filter((s: any) => !newPaper.class_id || s.class_id === newPaper.class_id).map((s: any) => (
+                          <SelectItem key={s.id} value={s.id}>{language === 'bn' ? s.name_bn : s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
