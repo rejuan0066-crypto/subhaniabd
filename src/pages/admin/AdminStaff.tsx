@@ -74,6 +74,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const [accRole, setAccRole] = useState('none');
   const [accCreating, setAccCreating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [generatingIds, setGeneratingIds] = useState(false);
 
   const { data: staffList = [], isLoading } = useQuery({
     queryKey: ['staff'],
