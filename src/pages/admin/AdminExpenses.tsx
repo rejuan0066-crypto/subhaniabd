@@ -858,7 +858,7 @@ const AdminExpenses = () => {
                       <TableRow>
                         <TableHead>{bn ? 'ক্যাটেগরি' : 'Category'}</TableHead>
                         <TableHead className="text-right">{bn ? `${selectedMonthName} খরচ` : `${selectedMonthName}`}</TableHead>
-                        <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
+                        <TableHead className="text-right">{`${filterLabel} ${bn ? 'খরচ' : 'Total'}`}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
