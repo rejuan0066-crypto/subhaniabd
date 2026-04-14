@@ -295,25 +295,8 @@ const AdminQuestionPapers = () => {
       </div>
     </div>
     ${(selectedPaper.instructions_bn || selectedPaper.instructions) ? `<div class="instructions">${language === 'bn' ? selectedPaper.instructions_bn : selectedPaper.instructions}</div>` : ''}
-    ${(() => {
-      let currentGroup = '';
-      return questions.map((q, i) => {
-        let groupHtml = '';
-        const gl = language === 'bn' ? q.group_label_bn : q.group_label;
-        if (gl && gl !== currentGroup) {
-          currentGroup = gl;
-          groupHtml = `<div class="group-label">${gl}</div>`;
-        }
-        const opts = Array.isArray(q.options) ? q.options.map((o: any, oi: number) =>
-          \`<div class="option">\${String.fromCharCode(2453 + oi)}। \${language === 'bn' ? o.text_bn || o.text : o.text}</div>\`
-        ).join('') : '';
-        return \`\${groupHtml}<div class="question">
-          <div class="q-header"><span>\${i + 1}। \${language === 'bn' ? q.question_text_bn || q.question_text : q.question_text}</span><span>[\${q.marks}]</span></div>
-          \${opts ? \`<div class="options">\${opts}</div>\` : ''}
-        </div>\`;
-      }).join('');
-    })()}
-    <script>window.onload=()=>window.print()<\/script></body></html>`;
+    ${buildQuestionsHtml()}
+    <script>window.onload=function(){window.print()}<\/script></body></html>`;
 
     const w = window.open('', '_blank');
     if (w) { w.document.write(html); w.document.close(); }
