@@ -562,6 +562,18 @@ const LayoutSettingsPanel = ({ layout, setLayout, language }: { layout: LayoutSe
             {language === 'bn' ? 'ওয়াটারমার্ক' : 'Watermark'}
           </label>
         </div>
+
+        {/* Row 4: Custom Question Labels */}
+        <div className="grid grid-cols-2 gap-3 pt-1 border-t border-border/50">
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন লেবেল (বাংলা)' : 'Question Label (BN)'}</Label>
+            <Input className="h-8 text-xs" value={layout.questionLabelBn} onChange={e => setLayout({ ...layout, questionLabelBn: e.target.value })} placeholder="প্রশ্ন (বাংলা/আরবি)" />
+          </div>
+          <div>
+            <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন লেবেল (ইংরেজি)' : 'Question Label (EN)'}</Label>
+            <Input className="h-8 text-xs" value={layout.questionLabelEn} onChange={e => setLayout({ ...layout, questionLabelEn: e.target.value })} placeholder="Question (BN/AR)" />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
