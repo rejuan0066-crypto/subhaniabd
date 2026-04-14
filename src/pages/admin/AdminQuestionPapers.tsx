@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { bijoyCharToUnicode, isBijoyKey } from '@/lib/bijoyKeymap';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -287,6 +288,64 @@ const AdminQuestionPapers = () => {
 
   const [fontConfig, setFontConfig] = useState<FontConfig>({ arabic: 'Amiri', bengali: 'SutonnyOMJ', english: 'Arial', fontSize: 14 });
   const [headerConfig, setHeaderConfig] = useState<HeaderConfig>({ showLogo: true, showInstitutionName: true, centered: true });
+
+  // Bijoy mode: active when SutonnyMJ (ASCII/Bijoy) font is selected
+  const bijoyMode = fontConfig.bengali === 'SutonnyMJ';
+
+  // Bijoy ASCII→Unicode keydown interceptor
+  useEffect(() => {
+    if (!bijoyMode) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT';
+      const isTextarea = target.tagName === 'TEXTAREA';
+      if (!isInput && !isTextarea) return;
+
+      // Only intercept on text-type inputs
+      if (isInput) {
+        const inputType = (target as HTMLInputElement).type?.toLowerCase() || 'text';
+        if (!['text', 'search', ''].includes(inputType)) return;
+      }
+
+      const char = e.key;
+      if (char.length !== 1) return;
+      if (!isBijoyKey(char)) return;
+
+      const unicodeChar = bijoyCharToUnicode(char);
+      if (unicodeChar === char) return;
+
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const el = target as HTMLInputElement | HTMLTextAreaElement;
+      el.focus();
+
+      // Try execCommand first (works well with React controlled inputs)
+      const success = document.execCommand('insertText', false, unicodeChar);
+      if (!success) {
+        // Fallback: native setter approach
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? start;
+        const newValue = el.value.slice(0, start) + unicodeChar + el.value.slice(end);
+        const newCursor = start + unicodeChar.length;
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const descriptor = Object.getOwnPropertyDescriptor(proto, 'value');
+        if (descriptor?.set) {
+          descriptor.set.call(el, newValue);
+        } else {
+          el.value = newValue;
+        }
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        requestAnimationFrame(() => el.setSelectionRange(newCursor, newCursor));
+      }
+    };
+
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [bijoyMode]);
 
   const [newPaper, setNewPaper] = useState({
     title: '', title_bn: '', subject_type: 'bangla',
@@ -809,6 +868,12 @@ const AdminQuestionPapers = () => {
           <Button variant={showArabicKeyboard ? 'default' : 'outline'} size="sm" onClick={() => setShowArabicKeyboard(!showArabicKeyboard)}>
             <Keyboard className="h-4 w-4 mr-1" />AR
           </Button>
+          {/* Bijoy Mode Indicator */}
+          {bijoyMode && (
+            <Badge variant="secondary" className="bg-primary/10 text-primary text-xs font-bold animate-pulse">
+              বিজয় ON
+            </Badge>
+          )}
           {/* Font Panel Toggle */}
           <Button variant={showFontPanel ? 'default' : 'outline'} size="sm" onClick={() => setShowFontPanel(!showFontPanel)}>
             <Type className="h-4 w-4 mr-1" />{language === 'bn' ? 'ফন্ট' : 'Font'}
@@ -907,7 +972,8 @@ const AdminQuestionPapers = () => {
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (বাংলা/আরবি)' : 'Question (BN/AR)'}</Label>
                         <Textarea value={q.question_text_bn} onChange={e => updateQuestion(qi, 'question_text_bn', e.target.value)}
-                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" dir="auto" />
+                          onFocus={e => setActiveInputRef(e.target)} rows={2} className="text-sm" dir="auto"
+                          style={bijoyMode ? { fontFamily: 'SutonnyMJ, SutonnyOMJ, "Noto Sans Bengali", sans-serif' } : undefined} />
                       </div>
                       <div>
                         <Label className="text-xs">{language === 'bn' ? 'প্রশ্ন (ইংরেজি)' : 'Question (EN)'}</Label>
