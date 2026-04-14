@@ -98,6 +98,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
                 )}
               </div>
               <div className="flex items-center gap-3">
+                <BijoyToggle />
                 <LanguageToggle />
                 <Link to="/login" className="btn-gold-gradient !px-4 !py-1.5 !text-xs rounded-full">
                   {t('login')}

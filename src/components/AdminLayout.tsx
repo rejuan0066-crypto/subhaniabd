@@ -564,6 +564,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               )}
               <DarkModeToggle />
               <NotificationPanel />
+              <BijoyToggle />
               <LanguageToggle />
               <Link to="/" className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
                 <Globe className="w-5 h-5" />
