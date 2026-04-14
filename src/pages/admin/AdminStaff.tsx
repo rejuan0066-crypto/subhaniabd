@@ -235,6 +235,23 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     setAccCreating(false);
   };
 
+  const missingIdCount = staffList.filter((s: any) => !s.staff_id).length;
+
+  const handleBulkGenerateIds = async () => {
+    setGeneratingIds(true);
+    try {
+      const staffWithoutId = staffList.filter((s: any) => !s.staff_id);
+      for (const s of staffWithoutId) {
+        await supabase.from('staff').update({ updated_at: new Date().toISOString() }).eq('id', s.id);
+      }
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(bn ? `${staffWithoutId.length} জন কর্মীর আইডি জেনারেট হয়েছে` : `Generated IDs for ${staffWithoutId.length} staff`);
+    } catch {
+      toast.error(bn ? 'আইডি জেনারেট ব্যর্থ' : 'Failed to generate IDs');
+    }
+    setGeneratingIds(false);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
