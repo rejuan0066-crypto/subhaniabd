@@ -838,8 +838,10 @@ const AdminExpenses = () => {
                   {expenseInstitutions.map((p: any) => (
                     <button
                       key={p.id}
-                      onClick={() => { setSelectedInstId(p.id); setSelectedCategoryId(null); }}
-                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${selectedInstId === p.id ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-secondary/50 text-foreground border-border hover:bg-secondary'}`}
+                      onClick={() => { setSelectedInstId(selectedInstId === p.id ? '' : p.id); setSelectedCategoryId(null); }}
+                      className={`group px-4 py-2.5 rounded-2xl text-sm font-medium transition-all ${selectedInstId === p.id
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25'
+                        : 'bg-white/60 dark:bg-white/10 backdrop-blur border border-emerald-200/30 dark:border-emerald-800/30 text-foreground hover:shadow-md hover:border-emerald-300/50'}`}
                     >
                       <Building2 className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
                       {bn ? p.name_bn : p.name}
