@@ -421,10 +421,10 @@ const AdminQuestionPapers = () => {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, note }: { id: string; status: string; note?: string }) => {
-      const update: any = { status };
+      const update: Record<string, any> = { status };
       if (status === 'approved') { update.approved_by = user?.id; update.approved_at = new Date().toISOString(); }
       if (note) update.rejection_note = note;
-      const { error } = await supabase.from('question_papers').update(update).eq('id', id);
+      const { error } = await supabase.from('question_papers').update(update as any).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
