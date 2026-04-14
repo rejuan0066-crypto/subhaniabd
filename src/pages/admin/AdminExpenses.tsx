@@ -1466,7 +1466,7 @@ const AdminExpenses = () => {
                   />
                   <Select value={expenseForm.quantity_unit} onValueChange={v => setExpenseForm(f => ({ ...f, quantity_unit: v }))}>
                     <SelectTrigger className="w-24">
-                      <SelectValue />
+                      <SelectValue placeholder={bn ? 'একক' : 'Unit'} />
                     </SelectTrigger>
                     <SelectContent>
                       {QUANTITY_UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
