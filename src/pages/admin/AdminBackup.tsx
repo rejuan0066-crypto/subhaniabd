@@ -107,6 +107,16 @@ const AdminBackup = () => {
   const { canAddItem, canEditItem } = usePagePermissions('/admin/backup');
   const [loading, setLoading] = useState<string | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
+  const [tables, setTables] = useState<string[]>([]);
+
+  // Load tables dynamically from DB
+  useEffect(() => {
+    supabase.rpc('get_public_tables').then(({ data }) => {
+      if (data && Array.isArray(data)) {
+        setTables((data as any[]).map((r: any) => r.table_name));
+      }
+    });
+  }, []);
 
   // Restore state
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -190,7 +200,7 @@ const AdminBackup = () => {
       .map(([key, val]: [string, any]) => ({
         table: key,
         count: val?.count || val?.data?.length || 0,
-        label: TABLES.find(t => t.key === key)?.[bn ? 'labelBn' : 'labelEn'] || key,
+        label: getTableDisplay(key)[bn ? 'labelBn' : 'labelEn'] || key,
       }))
       .filter(t => t.count > 0);
   };
@@ -264,7 +274,7 @@ const AdminBackup = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-base font-bold">{bn ? 'সম্পূর্ণ ব্যাকআপ' : 'Full Backup'}</h2>
-                    <p className="text-xs text-muted-foreground">{bn ? `সকল ${TABLES.length}টি টেবিল ডাউনলোড` : `Download all ${TABLES.length} tables`}</p>
+                    <p className="text-xs text-muted-foreground">{bn ? `সকল ${tables.length}টি টেবিল ডাউনলোড` : `Download all ${tables.length} tables`}</p>
                   </div>
                 </div>
                 <Button onClick={() => downloadBackup(undefined, 'json')} disabled={!!loading}>
@@ -304,14 +314,16 @@ const AdminBackup = () => {
             {bn ? 'পৃথক টেবিল এক্সপোর্ট' : 'Individual Table Export'}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {TABLES.map(t => (
-              <Card key={t.key} className="hover:shadow-md transition-shadow">
+            {tables.map(key => {
+              const t = getTableDisplay(key);
+              return (
+              <Card key={key} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{t.icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{bn ? t.labelBn : t.labelEn}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{t.key}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{key}</p>
                     </div>
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => downloadBackup(t.key, 'json')} disabled={!!loading} title="JSON">
@@ -422,7 +434,7 @@ const AdminBackup = () => {
                   <div key={table} className="flex items-center justify-between px-3 py-2 text-sm">
                     <div className="flex items-center gap-2">
                       {res.success ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> : <XCircle className="w-4 h-4 text-destructive" />}
-                      <span>{TABLES.find(t => t.key === table)?.[bn ? 'labelBn' : 'labelEn'] || table}</span>
+                      <span>{getTableDisplay(table)[bn ? 'labelBn' : 'labelEn'] || table}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {res.success ? (
