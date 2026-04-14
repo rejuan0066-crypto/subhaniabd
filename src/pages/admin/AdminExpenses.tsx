@@ -311,7 +311,7 @@ const AdminExpenses = () => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted'); }
   });
 
-
+  const addExpense = useMutation({
     mutationFn: async () => {
       if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
       const parsedAmount = Number(bnToEnDigit(expenseForm.amount));
