@@ -175,6 +175,7 @@ const AdminQuestionPapers = () => {
         exam_session_id: newPaper.exam_session_id || null,
         class_id: newPaper.class_id || null,
         division_id: newPaper.division_id || null,
+        subject_id: newPaper.subject_id || null,
       });
       if (error) throw error;
     },
