@@ -60,8 +60,8 @@ const AdminExpenses = () => {
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  const [printProjectId, setPrintProjectId] = useState<string | null>(null);
-  const [editProjectEntriesId, setEditProjectEntriesId] = useState<string | null>(null);
+  const [printInstitutionId, setPrintInstitutionId] = useState<string | null>(null);
+  const [editInstitutionEntriesId, setEditInstitutionEntriesId] = useState<string | null>(null);
   const [entriesFilterCategoryId, setEntriesFilterCategoryId] = useState<string>('all');
   const [entriesSearchText, setEntriesSearchText] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -69,7 +69,7 @@ const AdminExpenses = () => {
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
 
   // Dialogs
-  const [projectDialog, setProjectDialog] = useState(false);
+  const [expInstDialog, setExpInstDialog] = useState(false);
   const [categoryDialog, setCategoryDialog] = useState(false);
   const [expenseDialog, setExpenseDialog] = useState(false);
   const [depositDialog, setDepositDialog] = useState(false);
@@ -84,17 +84,14 @@ const AdminExpenses = () => {
   // Edit IDs
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [editingDepositId, setEditingDepositId] = useState<string | null>(null);
-  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
+  const [editingExpInstId, setEditingExpInstId] = useState<string | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [editingExpInstitutionId, setEditingExpInstitutionId] = useState<string | null>(null);
-  const [expInstitutionDialog, setExpInstitutionDialog] = useState(false);
-  const [expInstitutionForm, setExpInstitutionForm] = useState({ project_id: '', name: '', name_bn: '' });
 
   // Form states
-  const defaultExpenseForm = { project_id: '', institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
+  const defaultExpenseForm = { institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
-  const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
-  const [categoryForm, setCategoryForm] = useState({ project_id: '', institution_id: '', name: '', name_bn: '' });
+  const [expInstForm, setExpInstForm] = useState({ name: '', name_bn: '' });
+  const [categoryForm, setCategoryForm] = useState({ institution_id: '', name: '', name_bn: '' });
   const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
   const [depositForm, setDepositForm] = useState(defaultDepositForm);
   const [institutionForm, setInstitutionForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' });
