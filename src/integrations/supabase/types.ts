@@ -1529,6 +1529,57 @@ export type Database = {
           },
         ]
       }
+      fixed_assets: {
+        Row: {
+          asset_name_bn: string
+          asset_name_en: string | null
+          category: string
+          condition_notes: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          location_bn: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          quantity: number | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          asset_name_bn: string
+          asset_name_en?: string | null
+          category?: string
+          condition_notes?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          location_bn?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          asset_name_bn?: string
+          asset_name_en?: string | null
+          category?: string
+          condition_notes?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          location_bn?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          quantity?: number | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       form_settings: {
         Row: {
           field_name: string | null
@@ -1735,6 +1786,92 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      inventory_items: {
+        Row: {
+          buying_price: number | null
+          category: string
+          created_at: string | null
+          current_stock: number
+          id: string
+          is_active: boolean | null
+          min_stock_level: number
+          name_bn: string
+          name_en: string | null
+          notes: string | null
+          unit: string
+          updated_at: string | null
+        }
+        Insert: {
+          buying_price?: number | null
+          category?: string
+          created_at?: string | null
+          current_stock?: number
+          id?: string
+          is_active?: boolean | null
+          min_stock_level?: number
+          name_bn: string
+          name_en?: string | null
+          notes?: string | null
+          unit?: string
+          updated_at?: string | null
+        }
+        Update: {
+          buying_price?: number | null
+          category?: string
+          created_at?: string | null
+          current_stock?: number
+          id?: string
+          is_active?: boolean | null
+          min_stock_level?: number
+          name_bn?: string
+          name_en?: string | null
+          notes?: string | null
+          unit?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      inventory_logs: {
+        Row: {
+          change_amount: number
+          created_at: string | null
+          expense_id: string | null
+          id: string
+          item_id: string
+          performed_by: string | null
+          reason: string | null
+          type: string
+        }
+        Insert: {
+          change_amount: number
+          created_at?: string | null
+          expense_id?: string | null
+          id?: string
+          item_id: string
+          performed_by?: string | null
+          reason?: string | null
+          type?: string
+        }
+        Update: {
+          change_amount?: number
+          created_at?: string | null
+          expense_id?: string | null
+          id?: string
+          item_id?: string
+          performed_by?: string | null
+          reason?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_logs_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       joining_letters: {
         Row: {
