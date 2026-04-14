@@ -14,6 +14,7 @@ import { useThemeSettings } from '@/hooks/useThemeSettings';
 import { useSidebarSections } from '@/hooks/useSidebarSections';
 import { useWebsiteSettings } from '@/hooks/useWebsiteSettings';
 import LanguageToggle from './LanguageToggle';
+import BijoyToggle from './BijoyToggle';
 import NotificationPanel from './NotificationPanel';
 import DarkModeToggle from './DarkModeToggle';
 import {
