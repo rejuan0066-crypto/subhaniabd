@@ -739,9 +739,7 @@ const AdminExpenses = () => {
         </div>
 
         {/* Project & Category Breakdown Tabs */}
-        {(institutionBreakdown.length > 0 || categoryBreakdown.length > 0) && (() => {
-          const [breakdownTab, setBreakdownTab] = React.useState<'institution' | 'category'>('institution');
-          return (
+        {(institutionBreakdown.length > 0 || categoryBreakdown.length > 0) && (
             <div>
               <div className="flex flex-wrap gap-2 mb-3">
                 {[
