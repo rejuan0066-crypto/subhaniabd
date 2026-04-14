@@ -267,6 +267,7 @@ const App = () => (
                     <Route path="class-routine" element={<AdminClassRoutine />} />
                     <Route path="exam-routine" element={<AdminExamRoutine />} />
                     <Route path="student-promotion" element={<ModuleGuard menuPath="/admin/student-promotion"><AdminStudentPromotion /></ModuleGuard>} />
+                    <Route path="question-papers" element={<AdminQuestionPapers />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
 
