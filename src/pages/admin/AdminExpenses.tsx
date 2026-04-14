@@ -1206,7 +1206,6 @@ const AdminExpenses = () => {
                 )}
               </CardContent>
             </Card>
-            </div>
           </TabsContent>
 
           {/* Summary Tab */}
