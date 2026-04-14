@@ -1146,15 +1146,6 @@ const AdminExpenses = () => {
                           <SelectContent>{expenseInstitutions.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      {categoryForm.institution_id && expenseInstitutions.filter((i: any) => i.project_id === categoryForm.institution_id).length > 0 && (
-                        <div>
-                          <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
-                          <Select value={categoryForm.institution_id || undefined} onValueChange={v => setCategoryForm(f => ({ ...f, institution_id: v }))}>
-                            <SelectTrigger className="rounded-[12px] border-primary/30"><SelectValue placeholder={bn ? 'শাখা নির্বাচন' : 'Select institution'} /></SelectTrigger>
-                            <SelectContent>{expenseInstitutions.filter((i: any) => i.project_id === categoryForm.institution_id).map((i: any) => <SelectItem key={i.id} value={i.id}><Building2 className="w-3 h-3 inline mr-1 text-primary" />{bn ? i.name_bn : i.name}</SelectItem>)}</SelectContent>
-                          </Select>
-                        </div>
-                      )}
                       <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} /></div>
                       <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={categoryForm.name_bn} onChange={e => setCategoryForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
                       <Button className="w-full" onClick={() => addCategory.mutate()} disabled={addCategory.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
