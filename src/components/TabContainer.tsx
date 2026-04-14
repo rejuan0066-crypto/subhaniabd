@@ -74,12 +74,16 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
   // ── Single-level mode ──
   if (tabs && !groups) {
-    const activeId = searchParams.get(paramKey) || tabs[0]?.id || '';
-    const activeTab = tabs.find(t => t.id === activeId) || tabs[0];
+    const activeId = searchParams.get(paramKey) || '';
+    const activeTab = activeId ? tabs.find(t => t.id === activeId) : null;
 
-    const setActive = (id: string) => {
+    const toggleTab = (id: string) => {
       const next = new URLSearchParams(searchParams);
-      next.set(paramKey, id);
+      if (activeId === id) {
+        next.delete(paramKey);
+      } else {
+        next.set(paramKey, id);
+      }
       setSearchParams(next, { replace: true });
     };
 
@@ -90,16 +94,18 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
             <TabButton
               key={t.id}
               active={activeTab?.id === t.id}
-              onClick={() => setActive(t.id)}
+              onClick={() => toggleTab(t.id)}
               icon={t.icon}
               label={t.label}
             />
           ))}
         </div>
         <AnimatePresence mode="wait">
-          <motion.div key={activeTab?.id} variants={tabVariants} initial="initial" animate="animate" exit="exit">
-            {activeTab?.content}
-          </motion.div>
+          {activeTab && (
+            <motion.div key={activeTab.id} variants={tabVariants} initial="initial" animate="animate" exit="exit">
+              {activeTab.content}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     );
