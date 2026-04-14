@@ -542,14 +542,14 @@ const AdminExpenses = () => {
     rows.push([]);
 
     expenseInstitutions.forEach((inst: any) => {
-      const projExpenses = expenses.filter((e: any) => e.institution_id === inst.id);
-      if (projExpenses.length === 0) return;
-      const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-      rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? inst.name_bn : inst.name}`, '', '', '', `৳${formatNum(projTotal)}`]);
+      const instExpenses = expenses.filter((e: any) => e.institution_id === inst.id);
+      if (instExpenses.length === 0) return;
+      const instTotal = instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+      rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? inst.name_bn : inst.name}`, '', '', '', `৳${formatNum(instTotal)}`]);
 
-      const projCategories = categories.filter((c: any) => c.institution_id === inst.id);
-      projCategories.forEach((cat: any) => {
-        const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+      const instCatsForPrint = categories.filter((c: any) => c.institution_id === inst.id);
+      instCatsForPrint.forEach((cat: any) => {
+        const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
         if (catExpenses.length === 0) return;
         const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
         rows.push([`  ${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', `৳${formatNum(catTotal)}`]);
@@ -614,8 +614,8 @@ const AdminExpenses = () => {
   const handleInstExcelDownload = (instId: string) => {
     const inst = expenseInstitutions.find((p: any) => p.id === instId);
     if (!inst) return;
-    const projExpenses = expenses.filter((e: any) => e.institution_id === projectId);
-    const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+    const instExpenses = expenses.filter((e: any) => e.institution_id === projectId);
+    const instTotal = instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
     const rows: string[][] = [];
     rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? instName : instNameEn]);
     rows.push([bn ? 'ঠিকানা' : 'Address', instAddress]);
@@ -626,9 +626,9 @@ const AdminExpenses = () => {
     rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? inst.name_bn : inst.name}`, selectedMonthYear]);
     rows.push([]);
 
-    const projCategories = categories.filter((c: any) => c.institution_id === projectId);
-    projCategories.forEach((cat: any) => {
-      const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+    const instCatsForPrint = categories.filter((c: any) => c.institution_id === projectId);
+    instCatsForPrint.forEach((cat: any) => {
+      const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
       if (catExpenses.length === 0) return;
       const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
       rows.push([`${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', '', `৳${formatNum(catTotal)}`]);
@@ -639,7 +639,7 @@ const AdminExpenses = () => {
       rows.push([]);
     });
 
-    rows.push([bn ? 'প্রকল্প মোট খরচ' : 'Project Total', `৳${formatNum(projTotal)}`]);
+    rows.push([bn ? 'প্রকল্প মোট খরচ' : 'Project Total', `৳${formatNum(instTotal)}`]);
     const csvContent = rows.map(r => r.map(c => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1359,13 +1359,13 @@ const AdminExpenses = () => {
                     <div className="space-y-2">
                       {expenseInstitutions.map((p: any) => {
                         const projExp = expenses.filter((e: any) => e.institution_id === p.id);
-                        const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+                        const instTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                         if (projExp.length === 0) return null;
                         return (
                           <div key={p.id} className="stat-card flex items-center justify-between">
                             <div>
                               <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
-                              <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
+                              <span className="text-xs text-muted-foreground ml-2">৳{formatNum(instTotal)}</span>
                             </div>
                             <div className="flex gap-1">
                               <Button variant="outline" size="sm" onClick={() => setEditInstEntriesId(p.id)}>
@@ -1423,20 +1423,20 @@ const AdminExpenses = () => {
 
         {/* Project & Category wise detailed breakdown */}
         {expenseInstitutions.map((inst: any) => {
-          const projExpenses = expenses.filter((e: any) => e.institution_id === inst.id);
-          if (projExpenses.length === 0) return null;
-          const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-          const projCategories = categories.filter((c: any) => c.institution_id === inst.id);
+          const instExpenses = expenses.filter((e: any) => e.institution_id === inst.id);
+          if (instExpenses.length === 0) return null;
+          const instTotal = instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+          const instCatsForPrint = categories.filter((c: any) => c.institution_id === inst.id);
           
           return (
             <div key={inst.id} className="mb-6" style={{ pageBreakInside: 'avoid' }}>
               <h2 className="text-base font-bold mb-1 border-b pb-1">
                 {bn ? 'প্রতিষ্ঠান' : 'Institution'}: {bn ? inst.name_bn : inst.name}
-                <span className="float-right">{bn ? 'মোট' : 'Total'}: ৳{formatNum(projTotal)}</span>
+                <span className="float-right">{bn ? 'মোট' : 'Total'}: ৳{formatNum(instTotal)}</span>
               </h2>
               
-              {projCategories.map((cat: any) => {
-                const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+              {instCatsForPrint.map((cat: any) => {
+                const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
                 if (catExpenses.length === 0) return null;
                 const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                 
@@ -1732,18 +1732,18 @@ const AdminExpenses = () => {
           </div>
 
           {(() => {
-            let projExpenses = expenses.filter((e: any) => e.institution_id === editInstEntriesId);
-            const projCategories = categories.filter((c: any) => c.institution_id === editInstEntriesId);
-            if (projExpenses.length === 0) return <p className="text-sm text-muted-foreground">{bn ? 'কোনো এন্ট্রি নেই' : 'No entries'}</p>;
+            let instExpenses = expenses.filter((e: any) => e.institution_id === editInstEntriesId);
+            const instCatsForPrint = categories.filter((c: any) => c.institution_id === editInstEntriesId);
+            if (instExpenses.length === 0) return <p className="text-sm text-muted-foreground">{bn ? 'কোনো এন্ট্রি নেই' : 'No entries'}</p>;
 
             // Apply category filter
             if (entriesFilterCategoryId !== 'all') {
-              projExpenses = projExpenses.filter((e: any) => e.category_id === entriesFilterCategoryId);
+              instExpenses = instExpenses.filter((e: any) => e.category_id === entriesFilterCategoryId);
             }
             // Apply search
             if (entriesSearchText.trim()) {
               const q = entriesSearchText.trim().toLowerCase();
-              projExpenses = projExpenses.filter((e: any) =>
+              instExpenses = instExpenses.filter((e: any) =>
                 (e.description || '').toLowerCase().includes(q) ||
                 (e.expense_date || '').includes(q) ||
                 String(e.amount).includes(q)
@@ -1751,15 +1751,15 @@ const AdminExpenses = () => {
             }
 
             const filteredCategories = entriesFilterCategoryId === 'all'
-              ? projCategories
-              : projCategories.filter((c: any) => c.id === entriesFilterCategoryId);
+              ? instCatsForPrint
+              : instCatsForPrint.filter((c: any) => c.id === entriesFilterCategoryId);
 
-            if (projExpenses.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো ফলাফল পাওয়া যায়নি' : 'No results found'}</p>;
+            if (instExpenses.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">{bn ? 'কোনো ফলাফল পাওয়া যায়নি' : 'No results found'}</p>;
 
             return (
               <div className="space-y-4">
                 {filteredCategories.map((cat: any) => {
-                  const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+                  const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
                   if (catExpenses.length === 0) return null;
                   const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                   return (
@@ -1816,7 +1816,7 @@ const AdminExpenses = () => {
                   );
                 })}
                 <div className="border-t pt-2 text-right font-bold text-sm">
-                  {bn ? 'মোট' : 'Total'}: ৳{formatNum(projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0))}
+                  {bn ? 'মোট' : 'Total'}: ৳{formatNum(instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0))}
                 </div>
               </div>
             );
@@ -1887,9 +1887,9 @@ const AdminExpenses = () => {
           (() => {
             const inst = expenseInstitutions.find((p: any) => p.id === printInstitutionId);
             if (!inst) return null;
-            const projExpenses = expenses.filter((e: any) => e.institution_id === printInstitutionId);
-            const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-            const projCategories = categories.filter((c: any) => c.institution_id === printInstitutionId);
+            const instExpenses = expenses.filter((e: any) => e.institution_id === printInstitutionId);
+            const instTotal = instExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+            const instCatsForPrint = categories.filter((c: any) => c.institution_id === printInstitutionId);
             const ed = printEditData;
             const dInstName = ed.instName || (bn ? instName : instNameEn);
             const dInstAddress = ed.instAddress || instAddress;
@@ -1915,8 +1915,8 @@ const AdminExpenses = () => {
 
                 {ed.extraNote && <p className="text-xs mb-3 italic border-l-2 border-primary pl-2">{ed.extraNote}</p>}
 
-                {projCategories.map((cat: any) => {
-                  const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
+                {instCatsForPrint.map((cat: any) => {
+                  const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
                   if (catExpenses.length === 0) return null;
                   const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                   return (
@@ -1951,7 +1951,7 @@ const AdminExpenses = () => {
                 })}
 
                 <div className="border-t-2 border-foreground pt-2 text-right font-bold text-sm">
-                  {bn ? 'প্রকল্প মোট খরচ' : 'Project Total'}: ৳{formatNum(projTotal)}
+                  {bn ? 'প্রকল্প মোট খরচ' : 'Project Total'}: ৳{formatNum(instTotal)}
                 </div>
 
                 <div className="flex justify-between mt-12 pt-8">
