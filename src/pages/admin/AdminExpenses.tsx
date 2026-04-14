@@ -614,7 +614,7 @@ const AdminExpenses = () => {
 
     const instCatsForPrint = categories.filter((c: any) => c.institution_id === instId);
     instCatsForPrint.forEach((cat: any) => {
-      const catExpenses = instExpenses.filter((e: any) => e.category_id === cat.id);
+      const catExpenses = instExpensesFiltered.filter((e: any) => e.category_id === cat.id);
       if (catExpenses.length === 0) return;
       const catTotal = catExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
       rows.push([`${bn ? 'ক্যাটেগরি' : 'Category'}: ${bn ? cat.name_bn : cat.name}`, '', '', '', '', `৳${formatNum(catTotal)}`]);
@@ -1086,7 +1086,7 @@ const AdminExpenses = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-base">{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institutions'}</CardTitle>
-                  <Dialog open={expInstDialog} onOpenChange={(open) => { if (!open) { setEditingExpInstId(null); setExpInstForm({ institution_id: '', name: '', name_bn: '' }); } setExpInstDialog(open); }}>
+                  <Dialog open={expInstDialog} onOpenChange={(open) => { if (!open) { setEditingExpInstId(null); setExpInstForm({ name: '', name_bn: '' }); } setExpInstDialog(open); }}>
                     <DialogTrigger asChild><Button size="sm" variant="outline"><Building2 className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
                     <DialogContent>
                       <DialogHeader><DialogTitle>{editingExpInstId ? (bn ? 'শাখা সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন শাখা' : 'New Institution')}</DialogTitle></DialogHeader>
@@ -1354,7 +1354,7 @@ const AdminExpenses = () => {
                               <span className="text-xs text-muted-foreground ml-2">৳{formatNum(instTotal)}</span>
                             </div>
                             <div className="flex gap-1">
-                              <Button variant="outline" size="sm" onClick={() => setEditInstEntriesId(p.id)}>
+                              <Button variant="outline" size="sm" onClick={() => setEditInstitutionEntriesId(p.id)}>
                                 <Edit2 className="w-3 h-3 mr-1" />{bn ? 'এডিট' : 'Edit'}
                               </Button>
                               <Button variant="outline" size="sm" onClick={() => setPrintInstitutionId(p.id)}>
@@ -1510,20 +1510,6 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
             </div>
-            {expenseForm.institution_id && filteredInstitutions.length > 0 && (
-              <div>
-                <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
-                <Select
-                  value={expenseForm.institution_id || undefined}
-                  onValueChange={value => setExpenseForm(f => ({ ...f, institution_id: value, category_id: '' }))}
-                >
-                  <SelectTrigger className="rounded-[12px] border-primary/30 focus:ring-primary/20"><SelectValue placeholder={bn ? 'শাখা নির্বাচন করুন' : 'Select institution'} /></SelectTrigger>
-                  <SelectContent>
-                    {filteredInstitutions.map((inst: any) => <SelectItem key={inst.id} value={inst.id}><Building2 className="w-3 h-3 inline mr-1.5 text-primary" />{bn ? inst.name_bn : inst.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
             <div>
               <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
               <Select
@@ -1681,14 +1667,14 @@ const AdminExpenses = () => {
       </Dialog>
 
       {/* Project Entries Edit Dialog */}
-      <Dialog open={!!editInstEntriesId} onOpenChange={(open) => { if (!open) { setEditInstEntriesId(null); setEntriesFilterCategoryId('all'); setEntriesSearchText(''); } }}>
+      <Dialog open={!!editInstitutionEntriesId} onOpenChange={(open) => { if (!open) { setEditInstitutionEntriesId(null); setEntriesFilterCategoryId('all'); setEntriesSearchText(''); } }}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = expenseInstitutions.find((p: any) => p.id === editInstEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
+              <span>{bn ? 'প্রতিষ্ঠানের এন্ট্রি সম্পাদনা' : 'Edit Institution Entries'} — {(() => { const p = expenseInstitutions.find((p: any) => p.id === editInstitutionEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
               <Button size="sm" onClick={() => {
-                const pid = editInstEntriesId || '';
-                setEditInstEntriesId(null);
+                const pid = editInstitutionEntriesId || '';
+                setEditInstitutionEntriesId(null);
                 setTimeout(() => { setExpenseForm({ ...defaultExpenseForm, institution_id: pid }); setEditingExpenseId(null); setExpenseDialog(true); }, 150);
               }}>
                 <Plus className="w-3 h-3 mr-1" />{bn ? 'নতুন এন্ট্রি' : 'New Entry'}
@@ -1704,7 +1690,7 @@ const AdminExpenses = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সব ক্যাটেগরি' : 'All Categories'}</SelectItem>
-                {categories.filter((c: any) => c.institution_id === editInstEntriesId).map((c: any) => (
+                {categories.filter((c: any) => c.institution_id === editInstitutionEntriesId).map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -1718,8 +1704,8 @@ const AdminExpenses = () => {
           </div>
 
           {(() => {
-            let instExpenses = expenses.filter((e: any) => e.institution_id === editInstEntriesId);
-            const instCatsForPrint = categories.filter((c: any) => c.institution_id === editInstEntriesId);
+            let instExpenses = expenses.filter((e: any) => e.institution_id === editInstitutionEntriesId);
+            const instCatsForPrint = categories.filter((c: any) => c.institution_id === editInstitutionEntriesId);
             if (instExpenses.length === 0) return <p className="text-sm text-muted-foreground">{bn ? 'কোনো এন্ট্রি নেই' : 'No entries'}</p>;
 
             // Apply category filter
@@ -1784,7 +1770,7 @@ const AdminExpenses = () => {
                               <TableCell>
                                 <div className="flex gap-1">
                                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                                    setEditInstEntriesId(null);
+                                    setEditInstitutionEntriesId(null);
                                     setTimeout(() => { openEditExpense(e); }, 150);
                                   }}>
                                     <Edit2 className="w-3 h-3" />
