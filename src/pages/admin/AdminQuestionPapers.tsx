@@ -57,6 +57,7 @@ const AdminQuestionPapers = () => {
     total_marks: 100, duration_minutes: 120,
     instructions: '', instructions_bn: '',
     exam_session_id: '', class_id: '', division_id: '',
+    subject_id: '',
   });
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -101,13 +102,25 @@ const AdminQuestionPapers = () => {
     },
   });
 
+  // Fetch subjects filtered by class
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects-list', newPaper.class_id],
+    queryFn: async () => {
+      let q = supabase.from('subjects').select('id, name, name_bn, class_id, sort_order').eq('is_active', true);
+      if (newPaper.class_id) q = q.eq('class_id', newPaper.class_id);
+      const { data, error } = await q.order('sort_order');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Fetch papers with exam session join
   const { data: papers = [], isLoading } = useQuery({
     queryKey: ['question-papers'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('question_papers')
-        .select('*, exam_sessions(id, name, name_bn)')
+        .select('*, exam_sessions(id, name, name_bn), subjects(id, name, name_bn)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
@@ -162,13 +175,14 @@ const AdminQuestionPapers = () => {
         exam_session_id: newPaper.exam_session_id || null,
         class_id: newPaper.class_id || null,
         division_id: newPaper.division_id || null,
+        subject_id: newPaper.subject_id || null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-papers'] });
       setShowCreateDialog(false);
-      setNewPaper({ title: '', title_bn: '', subject_type: 'bangla', total_marks: 100, duration_minutes: 120, instructions: '', instructions_bn: '', exam_session_id: '', class_id: '', division_id: '' });
+      setNewPaper({ title: '', title_bn: '', subject_type: 'bangla', total_marks: 100, duration_minutes: 120, instructions: '', instructions_bn: '', exam_session_id: '', class_id: '', division_id: '', subject_id: '' });
       toast.success(language === 'bn' ? 'প্রশ্নপত্র তৈরি হয়েছে' : 'Question paper created');
     },
     onError: () => toast.error(language === 'bn' ? 'ত্রুটি হয়েছে' : 'Error occurred'),
@@ -322,7 +336,7 @@ const AdminQuestionPapers = () => {
 
   // Filter papers
   let filteredPapers = papers;
-  if (filterType !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.subject_type === filterType);
+  if (filterType !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.subject_id === filterType || p.subject_type === filterType);
   if (filterSession !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.exam_session_id === filterSession);
 
   // Paper list view
@@ -348,7 +362,7 @@ const AdminQuestionPapers = () => {
               </SelectContent>
             </Select>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -356,6 +370,11 @@ const AdminQuestionPapers = () => {
                 {SUBJECT_TYPES.map(s => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.icon} {language === 'bn' ? s.labelBn : s.labelEn}
+                  </SelectItem>
+                ))}
+                {subjects.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    📖 {language === 'bn' ? s.name_bn : s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -397,7 +416,7 @@ const AdminQuestionPapers = () => {
                     </div>
                     <div>
                       <Label>{language === 'bn' ? 'শ্রেণী' : 'Class'}</Label>
-                      <Select value={newPaper.class_id} onValueChange={v => setNewPaper(p => ({ ...p, class_id: v }))} disabled={!newPaper.division_id}>
+                      <Select value={newPaper.class_id} onValueChange={v => setNewPaper(p => ({ ...p, class_id: v, subject_id: '' }))} disabled={!newPaper.division_id}>
                         <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                         <SelectContent>
                           {classes.filter((c: any) => !newPaper.division_id || c.division_id === newPaper.division_id).map((c: any) => (
@@ -406,6 +425,19 @@ const AdminQuestionPapers = () => {
                         </SelectContent>
                       </Select>
                     </div>
+                  </div>
+
+                  {/* Subject from DB */}
+                  <div>
+                    <Label>{language === 'bn' ? 'বিষয়' : 'Subject'}</Label>
+                    <Select value={newPaper.subject_id} onValueChange={v => setNewPaper(p => ({ ...p, subject_id: v }))} disabled={!newPaper.class_id}>
+                      <SelectTrigger><SelectValue placeholder={language === 'bn' ? 'বিষয় নির্বাচন করুন' : 'Select subject'} /></SelectTrigger>
+                      <SelectContent>
+                        {subjects.filter((s: any) => !newPaper.class_id || s.class_id === newPaper.class_id).map((s: any) => (
+                          <SelectItem key={s.id} value={s.id}>{language === 'bn' ? s.name_bn : s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -468,6 +500,9 @@ const AdminQuestionPapers = () => {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPapers.map((paper: any) => {
               const subjectInfo = SUBJECT_TYPES.find(s => s.value === paper.subject_type);
+              const subjectName = paper.subjects
+                ? (language === 'bn' ? paper.subjects.name_bn : paper.subjects.name)
+                : (subjectInfo ? (language === 'bn' ? subjectInfo.labelBn : subjectInfo.labelEn) : null);
               const sessionName = paper.exam_sessions
                 ? (language === 'bn' ? paper.exam_sessions.name_bn : paper.exam_sessions.name)
                 : null;
@@ -490,9 +525,11 @@ const AdminQuestionPapers = () => {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="secondary">
-                        {subjectInfo?.icon} {language === 'bn' ? subjectInfo?.labelBn : subjectInfo?.labelEn}
-                      </Badge>
+                      {subjectName && (
+                        <Badge variant="secondary">
+                          📖 {subjectName}
+                        </Badge>
+                      )}
                       <Badge variant="outline">
                         {paper.total_marks} {language === 'bn' ? 'নম্বর' : 'marks'}
                       </Badge>
@@ -520,6 +557,9 @@ const AdminQuestionPapers = () => {
 
   // Question editor view
   const subjectInfo = SUBJECT_TYPES.find(s => s.value === selectedPaper.subject_type);
+  const subjectName = selectedPaper.subjects
+    ? (language === 'bn' ? selectedPaper.subjects.name_bn : selectedPaper.subjects.name)
+    : (subjectInfo ? (language === 'bn' ? subjectInfo.labelBn : subjectInfo.labelEn) : '');
   const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
   const sessionName = selectedPaper.exam_sessions
     ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name)
@@ -536,7 +576,7 @@ const AdminQuestionPapers = () => {
             <h1 className="text-lg font-bold">{language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>
             <div className="flex gap-2 text-sm text-muted-foreground flex-wrap">
               {sessionName && <span>📋 {sessionName}</span>}
-              <span>{subjectInfo?.icon} {language === 'bn' ? subjectInfo?.labelBn : subjectInfo?.labelEn}</span>
+              {subjectName && <span>📖 {subjectName}</span>}
               <span>•</span>
               <span>{language === 'bn' ? 'মোট নম্বর' : 'Total'}: {totalMarks}/{selectedPaper.total_marks}</span>
             </div>

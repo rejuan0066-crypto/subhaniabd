@@ -2590,6 +2590,7 @@ export type Database = {
           instructions: string | null
           instructions_bn: string | null
           status: string
+          subject_id: string | null
           subject_type: string
           title: string
           title_bn: string
@@ -2607,6 +2608,7 @@ export type Database = {
           instructions?: string | null
           instructions_bn?: string | null
           status?: string
+          subject_id?: string | null
           subject_type?: string
           title: string
           title_bn: string
@@ -2624,6 +2626,7 @@ export type Database = {
           instructions?: string | null
           instructions_bn?: string | null
           status?: string
+          subject_id?: string | null
           subject_type?: string
           title?: string
           title_bn?: string
@@ -2650,6 +2653,13 @@ export type Database = {
             columns: ["exam_session_id"]
             isOneToOne: false
             referencedRelation: "exam_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_papers_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
