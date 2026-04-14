@@ -275,6 +275,7 @@ interface LayoutSettings {
   headerStyle: 'simple' | 'decorative' | 'classic';
   questionLabelBn: string;
   questionLabelEn: string;
+  showQuestionMarks: boolean;
 }
 
 const DEFAULT_LAYOUT: LayoutSettings = {
@@ -289,6 +290,7 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   headerStyle: 'simple',
   questionLabelBn: 'প্রশ্ন (বাংলা/আরবি)',
   questionLabelEn: 'Question (BN/AR)',
+  showQuestionMarks: true,
 };
 
 interface Question {
