@@ -470,6 +470,13 @@ const AdminExpenses = () => {
   const [selectedInstId, setSelectedInstId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
+  // Auto-select first institution
+  useEffect(() => {
+    if (expenseInstitutions.length > 0 && !selectedInstId) {
+      setSelectedInstId(expenseInstitutions[0].id);
+    }
+  }, [expenseInstitutions, selectedInstId]);
+
   const selectedInst = expenseInstitutions.find((p: any) => p.id === selectedInstId);
   const instCategories = categories.filter((c: any) => c.institution_id === selectedInstId);
   const categoryExpenses = expenses.filter((e: any) => e.institution_id === selectedInstId && e.category_id === selectedCategoryId);
