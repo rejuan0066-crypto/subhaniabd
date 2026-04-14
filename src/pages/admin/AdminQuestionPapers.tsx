@@ -419,7 +419,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
         ) : null}
         <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
           <span> {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
-          {layout.showQuestionMarks && (
+          {layout.showQuestionMarks && q.marks > 0 && (
             <span className="text-gray-500 shrink-0 ml-2">[{language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span>
           )}
         </div>
