@@ -656,15 +656,21 @@ const AdminExpenses = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 relative">
+        {/* Glassmorphism Container */}
+        <div className="rounded-3xl border border-emerald-200/30 bg-white/40 dark:bg-white/5 backdrop-blur-xl p-6 space-y-6" style={{ boxShadow: '0 8px 32px rgba(16,185,129,0.06)' }}>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl font-display font-bold text-foreground">
-            {bn ? 'খরচ ব্যবস্থাপনা' : 'Expense Management'}
-          </h1>
+          <div>
+            <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
+              {bn ? 'খরচ ব্যবস্থাপনা' : 'Expense Management'}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{bn ? 'আর্থিক লেনদেন পরিচালনা করুন' : 'Manage financial transactions'}</p>
+          </div>
           <div className="flex items-center gap-2">
             <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-[200px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
               <SelectContent className="max-h-60">
                 {years.map(y => MONTHS.map((m, i) => (
                   <SelectItem key={`${m}-${y}`} value={`${m}-${y}`}>
@@ -676,63 +682,64 @@ const AdminExpenses = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="stat-card flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
-              <TrendingDown className="w-5 h-5 text-destructive" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg font-bold text-destructive leading-tight">৳{formatNum(monthlyTotalExpense)}</p>
-              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? `${selectedMonthName} খরচ` : `${selectedMonthName} Expense`}</p>
-            </div>
-          </div>
-          <div className="stat-card flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-lg font-bold text-primary leading-tight">৳{formatNum(monthlyTotalDeposit)}</p>
-              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? `${selectedMonthName} জমা` : `${selectedMonthName} Deposit`}</p>
-            </div>
-          </div>
-          <div className="stat-card flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl ${monthlyCash >= 0 ? 'bg-primary/10' : 'bg-destructive/10'} flex items-center justify-center shrink-0`}>
-              <Wallet className={`w-5 h-5 ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`} />
-            </div>
-            <div className="min-w-0">
-              <p className={`text-lg font-bold leading-tight ${monthlyCash >= 0 ? 'text-primary' : 'text-destructive'}`}>৳{formatNum(monthlyCash)}</p>
-              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? `${selectedMonthName} ক্যাশ` : `${selectedMonthName} Cash`}</p>
-            </div>
-          </div>
-          <div className="stat-card flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl ${totalArrears > 0 ? 'bg-destructive/10' : 'bg-muted/50'} flex items-center justify-center shrink-0`}>
-              <DollarSign className={`w-5 h-5 ${totalArrears > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
-            </div>
-            <div className="min-w-0">
-              <p className={`text-lg font-bold leading-tight ${totalArrears > 0 ? 'text-destructive' : 'text-foreground'}`}>৳{formatNum(totalArrears)}</p>
-              <p className="text-[11px] text-muted-foreground leading-tight">{bn ? 'বকেয়া' : 'Arrears'}</p>
-            </div>
-          </div>
+        {/* Premium Stats Cards - Monthly */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: bn ? `${selectedMonthName} খরচ` : `${selectedMonthName} Expense`, val: monthlyTotalExpense, gradient: 'from-rose-500/10 via-red-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-rose-500 to-red-400', icon: TrendingDown, color: 'text-rose-600 dark:text-rose-400', sparkColor: '#f43f5e', sparkData: [3,5,4,7,6,8,monthlyTotalExpense > 0 ? 10 : 0] },
+            { label: bn ? `${selectedMonthName} জমা` : `${selectedMonthName} Deposit`, val: monthlyTotalDeposit, gradient: 'from-emerald-500/10 via-green-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-emerald-500 to-green-400', icon: TrendingUp, color: 'text-emerald-600 dark:text-emerald-400', sparkColor: '#10b981', sparkData: [2,4,3,6,5,7,monthlyTotalDeposit > 0 ? 10 : 0] },
+            { label: bn ? `${selectedMonthName} ক্যাশ` : `${selectedMonthName} Cash`, val: monthlyCash, gradient: monthlyCash >= 0 ? 'from-blue-500/10 via-sky-400/5 to-transparent' : 'from-orange-500/10 via-amber-400/5 to-transparent', iconBg: monthlyCash >= 0 ? 'bg-gradient-to-br from-blue-500 to-sky-400' : 'bg-gradient-to-br from-orange-500 to-amber-400', icon: Wallet, color: monthlyCash >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400', sparkColor: monthlyCash >= 0 ? '#3b82f6' : '#f97316', sparkData: [5,4,6,3,7,5,8] },
+            { label: bn ? 'বকেয়া' : 'Arrears', val: totalArrears, gradient: totalArrears > 0 ? 'from-amber-500/10 via-yellow-400/5 to-transparent' : 'from-slate-500/10 via-gray-400/5 to-transparent', iconBg: totalArrears > 0 ? 'bg-gradient-to-br from-amber-500 to-yellow-400' : 'bg-gradient-to-br from-slate-400 to-gray-400', icon: DollarSign, color: totalArrears > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground', sparkColor: '#f59e0b', sparkData: [2,3,2,4,3,5,totalArrears > 0 ? 6 : 0] },
+          ].map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              className={`relative overflow-hidden rounded-2xl border border-emerald-200/20 dark:border-emerald-800/20 bg-gradient-to-br ${s.gradient} bg-white/60 dark:bg-white/5 backdrop-blur-lg p-4`}
+              style={{ boxShadow: '0 4px 20px rgba(16,185,129,0.04)' }}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shadow-lg`}>
+                    <s.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <AnimatedCounter value={s.val} className={`text-xl font-bold ${s.color}`} />
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
+                  </div>
+                </div>
+                <MiniSparkline data={s.sparkData} color={s.sparkColor} />
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Overall Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: bn ? 'মোট খরচ' : 'Total Expense', val: totalExpenseAll, color: 'text-destructive', icon: TrendingDown, bg: 'bg-destructive/10' },
-            { label: bn ? 'মোট জমা' : 'Total Deposit', val: totalDepositAll, color: 'text-primary', icon: TrendingUp, bg: 'bg-primary/10' },
-            { label: bn ? 'মোট ক্যাশ' : 'Total Cash', val: totalCashAll, color: totalCashAll >= 0 ? 'text-primary' : 'text-destructive', icon: Wallet, bg: totalCashAll >= 0 ? 'bg-primary/10' : 'bg-destructive/10' },
-            { label: bn ? 'মোট বকেয়া' : 'Total Arrears', val: totalArrearsAll, color: totalArrearsAll > 0 ? 'text-destructive' : 'text-muted-foreground', icon: DollarSign, bg: totalArrearsAll > 0 ? 'bg-destructive/10' : 'bg-muted/50' },
+            { label: bn ? 'মোট খরচ' : 'Total Expense', val: totalExpenseAll, gradient: 'from-rose-500/10 via-red-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-rose-500 to-red-400', icon: TrendingDown, color: 'text-rose-600 dark:text-rose-400', sparkColor: '#f43f5e' },
+            { label: bn ? 'মোট জমা' : 'Total Deposit', val: totalDepositAll, gradient: 'from-emerald-500/10 via-green-400/5 to-transparent', iconBg: 'bg-gradient-to-br from-emerald-500 to-green-400', icon: TrendingUp, color: 'text-emerald-600 dark:text-emerald-400', sparkColor: '#10b981' },
+            { label: bn ? 'মোট ক্যাশ' : 'Total Cash', val: totalCashAll, gradient: totalCashAll >= 0 ? 'from-blue-500/10 via-sky-400/5 to-transparent' : 'from-orange-500/10 via-amber-400/5 to-transparent', iconBg: totalCashAll >= 0 ? 'bg-gradient-to-br from-blue-500 to-sky-400' : 'bg-gradient-to-br from-orange-500 to-amber-400', icon: Wallet, color: totalCashAll >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400', sparkColor: totalCashAll >= 0 ? '#3b82f6' : '#f97316' },
+            { label: bn ? 'মোট বকেয়া' : 'Total Arrears', val: totalArrearsAll, gradient: totalArrearsAll > 0 ? 'from-amber-500/10 via-yellow-400/5 to-transparent' : 'from-slate-500/10 via-gray-400/5 to-transparent', iconBg: totalArrearsAll > 0 ? 'bg-gradient-to-br from-amber-500 to-yellow-400' : 'bg-gradient-to-br from-slate-400 to-gray-400', icon: DollarSign, color: totalArrearsAll > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground', sparkColor: '#f59e0b' },
           ].map((s, i) => (
-            <div key={i} className="stat-card flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center shrink-0`}>
-                <s.icon className={`w-5 h-5 ${s.color}`} />
+            <motion.div
+              key={`all-${i}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.08, duration: 0.4 }}
+              className={`relative overflow-hidden rounded-2xl border border-emerald-200/20 dark:border-emerald-800/20 bg-gradient-to-br ${s.gradient} bg-white/60 dark:bg-white/5 backdrop-blur-lg p-4`}
+              style={{ boxShadow: '0 4px 20px rgba(16,185,129,0.04)' }}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center shadow-lg`}>
+                  <s.icon className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <AnimatedCounter value={s.val} className={`text-lg font-bold ${s.color}`} />
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className={`text-lg font-bold leading-tight ${s.color}`}>৳{formatNum(s.val)}</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">{s.label}</p>
-              </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
