@@ -862,7 +862,7 @@ const AdminExpenses = () => {
                           setExpenseForm(defaultExpenseForm);
                           setExpenseDialog(true);
                         }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[16px] text-sm font-semibold tracking-wide text-white border border-white/20 backdrop-blur-sm transition-all duration-300"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold tracking-wide text-white border border-white/20 backdrop-blur-sm transition-all duration-300"
                         style={{ background: 'linear-gradient(135deg, hsl(160 84% 30%), hsl(160 70% 36%))', boxShadow: '0 4px 20px -4px rgba(16,185,129,0.35)' }}
                       >
                         <Plus className="w-4 h-4" />
