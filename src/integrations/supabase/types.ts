@@ -1143,6 +1143,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          institution_id: string | null
           is_active: boolean | null
           name: string
           name_bn: string
@@ -1152,6 +1153,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
+          institution_id?: string | null
           is_active?: boolean | null
           name: string
           name_bn: string
@@ -1161,6 +1163,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
+          institution_id?: string | null
           is_active?: boolean | null
           name?: string
           name_bn?: string
@@ -1169,7 +1172,55 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "expense_categories_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "expense_institutions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "expense_categories_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "expense_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expense_institutions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_bn: string
+          project_id: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_bn: string
+          project_id: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_bn?: string
+          project_id?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_institutions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "expense_projects"
