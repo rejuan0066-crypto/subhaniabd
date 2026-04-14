@@ -10,7 +10,7 @@ type ProtectedRouteState = AuthRedirectState & {
 };
 
 export const hasResolvedAuthRedirectState = ({ role, userStatus }: AuthRedirectState): boolean => {
-  return isAdminRole(role) || typeof userStatus === 'string';
+  return isAdminRole(role) || typeof role === 'string' || typeof userStatus === 'string';
 };
 
 export const getAuthenticatedHomePath = ({ role, userStatus }: AuthRedirectState): string => {

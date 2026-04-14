@@ -495,8 +495,11 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{bn ? 'রোল ছাড়া' : 'No Role'}</SelectItem>
-                    <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
                     <SelectItem value="teacher">{bn ? 'শিক্ষক' : 'Teacher'}</SelectItem>
+                    <SelectItem value="administrative">{bn ? 'প্রশাসনিক' : 'Administrative'}</SelectItem>
+                    <SelectItem value="support">{bn ? 'সাপোর্ট' : 'Support'}</SelectItem>
+                    <SelectItem value="general">{bn ? 'সহায়ক' : 'General'}</SelectItem>
+                    <SelectItem value="staff">{bn ? 'স্টাফ' : 'Staff'}</SelectItem>
                     <SelectItem value="admin">{bn ? 'অ্যাডমিন' : 'Admin'}</SelectItem>
                   </SelectContent>
                 </Select>

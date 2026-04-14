@@ -289,7 +289,7 @@ Deno.serve(async (req) => {
       }
 
       // The actual role in user_roles must be one of the enum values (admin, staff, teacher)
-      const actualRole = base_role || (newRole === 'admin' ? 'admin' : newRole === 'teacher' ? 'teacher' : 'staff');
+      const actualRole = base_role || (['admin', 'teacher', 'staff', 'administrative', 'support', 'general'].includes(newRole) ? newRole : 'staff');
 
       // Upsert role (insert if not exists, update if exists)
       const { data: existingRole } = await supabaseAdmin
