@@ -1330,7 +1330,7 @@ const AdminQuestionPapers = () => {
               <CardContent className="pt-3 pb-3 space-y-2">
                 <div className="flex items-start gap-2">
                   <span className="font-bold text-primary mt-1 shrink-0">
-                    {language === 'bn' ? toBengaliNum(qi + 1) : qi + 1}.
+                    {"\u200B"}
                   </span>
                   <div className="flex-1 space-y-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
