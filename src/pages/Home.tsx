@@ -81,6 +81,8 @@ const Home = () => {
       if (error) throw error;
       return data;
     },
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * (attempt + 1), 3000),
   });
 
   const { data: staffFormPublic } = useQuery({
