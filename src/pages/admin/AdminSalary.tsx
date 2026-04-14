@@ -765,7 +765,7 @@ const AdminSalary = () => {
     sheetData.push([]);
     
     const headers = [
-      '#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
+      '#', bn ? 'নাম' : 'Name', bn ? 'স্টাফ আইডি' : 'Staff ID', bn ? 'পদবি' : 'Designation',
       bn ? 'মূল বেতন' : 'Base Salary', bn ? 'বোনাস' : 'Bonus',
       bn ? 'ওভারটাইম' : 'Overtime', bn ? 'কর্তন' : 'Deductions',
       bn ? 'জমা' : 'Savings', bn ? 'অগ্রিম' : 'Advance',
