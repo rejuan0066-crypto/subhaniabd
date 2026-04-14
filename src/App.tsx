@@ -66,6 +66,7 @@ import AdminMenuManager from "./pages/admin/AdminMenuManager";
 import AdminWidgetBuilder from "./pages/admin/AdminWidgetBuilder";
 import AdminBackup from "./pages/admin/AdminBackup";
 import AdminRecycleBin from "./pages/admin/AdminRecycleBin";
+import AdminSystemLogs from "./pages/admin/AdminSystemLogs";
 import AdminGuardianNotifications from "./pages/admin/AdminGuardianNotifications";
 import AdminSalary from "./pages/admin/AdminSalary";
 import AdminPosts from "./pages/admin/AdminPosts";
@@ -251,6 +252,7 @@ const App = () => (
                     <Route path="widget-builder" element={<AdminWidgetBuilder />} />
                     <Route path="backup" element={<AdminBackup />} />
                     <Route path="recycle-bin" element={<AdminRecycleBin />} />
+                    <Route path="system-logs" element={<AdminSystemLogs />} />
                     <Route path="guardian-notify" element={<AdminGuardianNotifications />} />
                     <Route path="salary" element={<ModuleGuard menuPath="/admin/salary"><AdminSalary /></ModuleGuard>} />
                     <Route path="posts" element={<AdminPosts />} />
