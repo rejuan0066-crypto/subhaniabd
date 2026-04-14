@@ -710,16 +710,6 @@ const AdminExpenses = () => {
             <p className="text-sm text-muted-foreground mt-0.5">{bn ? 'আর্থিক লেনদেন পরিচালনা করুন' : 'Manage financial transactions'}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="w-[180px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
-              <SelectContent className="max-h-60">
-                {years.map(y => MONTHS.map((m, i) => (
-                  <SelectItem key={`${m}-${y}`} value={`${m}-${y}`}>
-                    {bn ? `${MONTHS_BN[i]} ${y}` : `${m} ${y}`}
-                  </SelectItem>
-                )))}
-              </SelectContent>
-            </Select>
             <Select value={filterMode} onValueChange={(v: any) => setFilterMode(v)}>
               <SelectTrigger className="w-[140px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -748,6 +738,45 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
             )}
+            <Select value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
+              <SelectTrigger className="w-[180px] rounded-xl border-emerald-200/50 bg-white/60 dark:bg-white/10 backdrop-blur"><SelectValue /></SelectTrigger>
+              <SelectContent className="max-h-60">
+                {(() => {
+                  if (filterMode === 'yearly') {
+                    return MONTHS.map((m, i) => (
+                      <SelectItem key={`${m}-${selectedYear}`} value={`${m}-${selectedYear}`}>
+                        {bn ? `${MONTHS_BN[i]} ${selectedYear}` : `${m} ${selectedYear}`}
+                      </SelectItem>
+                    ));
+                  }
+                  if (filterMode === 'session') {
+                    const session = academicSessions.find((s: any) => s.id === selectedSessionId);
+                    if (session?.start_date && session?.end_date) {
+                      const start = new Date(session.start_date);
+                      const end = new Date(session.end_date);
+                      const opts: { key: string; label: string }[] = [];
+                      const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+                      while (cur <= end) {
+                        const mi = cur.getMonth();
+                        const yr = cur.getFullYear();
+                        const val = `${MONTHS[mi]}-${yr}`;
+                        opts.push({ key: val, label: bn ? `${MONTHS_BN[mi]} ${yr}` : `${MONTHS[mi]} ${yr}` });
+                        cur.setMonth(cur.getMonth() + 1);
+                      }
+                      return opts.map(o => (
+                        <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>
+                      ));
+                    }
+                    return <SelectItem value="" disabled>{bn ? 'সেশন বাছুন' : 'Select session first'}</SelectItem>;
+                  }
+                  return years.map(y => MONTHS.map((m, i) => (
+                    <SelectItem key={`${m}-${y}`} value={`${m}-${y}`}>
+                      {bn ? `${MONTHS_BN[i]} ${y}` : `${m} ${y}`}
+                    </SelectItem>
+                  )));
+                })()}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
