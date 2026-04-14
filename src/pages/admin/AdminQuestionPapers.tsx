@@ -1491,9 +1491,31 @@ const AdminQuestionPapers = () => {
               </CardContent>
             </Card>
           ))}
-          <Button variant="outline" onClick={addQuestion} className="w-full">
-            <Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={addQuestion} className="flex-1">
+              <Plus className="h-4 w-4 mr-1" />{language === 'bn' ? 'প্রশ্ন যোগ করুন' : 'Add Question'}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              disabled={scanning}
+              onClick={() => scanInputRef.current?.click()}
+            >
+              {scanning ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <ScanLine className="h-4 w-4 mr-1" />
+              )}
+              {language === 'bn' ? (scanning ? 'স্ক্যান হচ্ছে...' : 'স্ক্যান ও ইম্পোর্ট') : (scanning ? 'Scanning...' : 'Scan & Import')}
+            </Button>
+            <input
+              ref={scanInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleScanImport}
+            />
+          </div>
         </div>
 
         {/* RIGHT: Live Preview */}
