@@ -408,11 +408,11 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
     return (
       <div key={i} className="mb-2" style={{ fontFamily, lineHeight: layout.lineSpacing }}>
         {q.group_label_bn && (i === 0 || q.group_label_bn !== questions[i - 1]?.group_label_bn) ? (
-          <div className="font-bold text-sm mb-1 mt-2 px-1 py-0.5 bg-gray-100 flex justify-between items-center">
-            <span>{language === 'bn' ? q.group_label_bn : q.group_label}</span>
+          <div className="font-bold text-center mb-2 mt-3 py-1 border-b border-gray-300">
+            <span className="text-sm tracking-wide">{language === 'bn' ? q.group_label_bn : q.group_label}</span>
             {q.group_marks != null && q.group_marks > 0 && (
-              <span className="text-xs font-semibold text-gray-600">
-                [{language === 'bn' ? toBengaliNum(q.group_marks) : q.group_marks}]
+              <span className="text-xs font-semibold text-gray-500 ml-2">
+                [{language === 'bn' ? toBengaliNum(q.group_marks) : q.group_marks} {language === 'bn' ? 'নম্বর' : 'marks'}]
               </span>
             )}
           </div>
