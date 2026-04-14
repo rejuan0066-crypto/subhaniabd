@@ -839,7 +839,6 @@ const AdminExpenses = () => {
                           <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? p.name_bn : p.name}</h4>
                           <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
                             <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-medium">৳{formatNum(getInstMonthly(p.id))}</span></span>
-                            <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-medium">৳{formatNum(getInstTotal(p.id))}</span></span>
                           </div>
                         </div>
                       </div>
