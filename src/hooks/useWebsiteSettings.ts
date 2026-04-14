@@ -395,6 +395,31 @@ const DEFAULT_SETTINGS: WebsiteSettings = {
   loader_logo_shape: 'square',
 };
 
+const parseSettingsData = (data: any[] | null): WebsiteSettings => {
+  const result = { ...DEFAULT_SETTINGS };
+  data?.forEach((row) => {
+    const key = row.key as keyof WebsiteSettings;
+    if (key in result) {
+      const defaultVal = DEFAULT_SETTINGS[key];
+      const dbVal = row.value;
+      if (defaultVal && typeof defaultVal === 'object' && !Array.isArray(defaultVal) && dbVal && typeof dbVal === 'object' && !Array.isArray(dbVal)) {
+        (result as any)[key] = { ...defaultVal, ...(dbVal as any) };
+      } else {
+        (result as any)[key] = dbVal;
+      }
+    }
+  });
+  if (result.section_order) {
+    const existingKeys = new Set(result.section_order.map((s: any) => s.key));
+    ALL_SECTION_CONFIGS.forEach(cfg => {
+      if (!existingKeys.has(cfg.key)) {
+        result.section_order.push(cfg);
+      }
+    });
+  }
+  return result;
+};
+
 export const useWebsiteSettings = () => {
   const queryClient = useQueryClient();
 
