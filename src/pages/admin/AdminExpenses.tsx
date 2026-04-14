@@ -67,6 +67,7 @@ const AdminExpenses = () => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteConfirmType, setDeleteConfirmType] = useState<'expense' | 'deposit'>('expense');
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
+  const [breakdownTab, setBreakdownTab] = useState<'institution' | 'category'>('institution');
 
   // Dialogs
   const [expInstDialog, setExpInstDialog] = useState(false);
