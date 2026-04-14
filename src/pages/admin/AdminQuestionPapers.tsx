@@ -49,7 +49,8 @@ const FONT_PRESETS = {
     { value: 'Scheherazade New', label: 'Scheherazade New' },
   ],
   bengali: [
-    { value: 'SutonnyOMJ', label: 'SutonnyOMJ' },
+    { value: 'SutonnyOMJ', label: 'SutonnyOMJ (Unicode)' },
+    { value: 'SutonnyMJ', label: 'SutonnyMJ (ASCII/Bijoy)' },
     { value: 'Noto Sans Bengali', label: 'Noto Sans Bengali' },
     { value: 'Hind Siliguri', label: 'Hind Siliguri' },
   ],
