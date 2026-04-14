@@ -615,8 +615,11 @@ const AdminQuestionPapers = () => {
       const isTextarea = target.tagName === 'TEXTAREA';
       if (!isInput && !isTextarea) return;
       if (isInput) {
-        const inputType = (target as HTMLInputElement).type?.toLowerCase() || 'text';
+        const inputEl = target as HTMLInputElement;
+        const inputType = inputEl.type?.toLowerCase() || 'text';
         if (!['text', 'search', ''].includes(inputType)) return;
+        // Skip numeric inputs (marks field etc.)
+        if (inputEl.inputMode === 'numeric' || inputEl.dataset.noBijoy === 'true') return;
       }
       const char = e.key;
       if (char.length !== 1) return;
@@ -915,6 +918,11 @@ const AdminQuestionPapers = () => {
       const target = e.target as HTMLElement;
       const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (!isEditable) return;
+      // Skip numeric inputs (marks field etc.)
+      if (target.tagName === 'INPUT') {
+        const inputEl = target as HTMLInputElement;
+        if (inputEl.inputMode === 'numeric' || inputEl.dataset.noBijoy === 'true') return;
+      }
       const code = e.code;
       if (!code) return;
       const arabicChar = e.shiftKey ? PHYSICAL_CODE_TO_ARABIC_SHIFTED[code] : PHYSICAL_CODE_TO_ARABIC[code];
