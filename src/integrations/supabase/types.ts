@@ -3917,6 +3917,12 @@ export type Database = {
         Returns: string
       }
       get_next_receipt_serial: { Args: never; Returns: string }
+      get_public_tables: {
+        Args: never
+        Returns: {
+          table_name: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
