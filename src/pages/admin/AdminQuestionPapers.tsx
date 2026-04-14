@@ -336,7 +336,7 @@ const AdminQuestionPapers = () => {
 
   // Filter papers
   let filteredPapers = papers;
-  if (filterType !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.subject_type === filterType);
+  if (filterType !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.subject_id === filterType || p.subject_type === filterType);
   if (filterSession !== 'all') filteredPapers = filteredPapers.filter((p: any) => p.exam_session_id === filterSession);
 
   // Paper list view
