@@ -792,12 +792,22 @@ const AdminExpenses = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 w-full max-w-lg">
-            <TabsTrigger value="dashboard">{bn ? 'খরচ' : 'Expenses'}</TabsTrigger>
-            <TabsTrigger value="deposits">{bn ? 'জমা' : 'Deposits'}</TabsTrigger>
-            <TabsTrigger value="settings">{bn ? 'প্রতিষ্ঠান' : 'Institutions'}</TabsTrigger>
-            <TabsTrigger value="summary">{bn ? 'সারাংশ' : 'Summary'}</TabsTrigger>
-          </TabsList>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[
+              { value: 'dashboard', label: bn ? 'খরচ' : 'Expenses' },
+              { value: 'deposits', label: bn ? 'জমা' : 'Deposits' },
+              { value: 'settings', label: bn ? 'প্রতিষ্ঠান' : 'Institutions' },
+              { value: 'summary', label: bn ? 'সারাংশ' : 'Summary' },
+            ].map(tab => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === tab.value ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
           {/* Expenses Tab - Drill-down: Projects → Categories → Expenses */}
           <TabsContent value="dashboard" className="space-y-4">
