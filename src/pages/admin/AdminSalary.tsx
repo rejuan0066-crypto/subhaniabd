@@ -765,7 +765,7 @@ const AdminSalary = () => {
     sheetData.push([]);
     
     const headers = [
-      '#', bn ? 'নাম' : 'Name', bn ? 'পদবি' : 'Designation',
+      '#', bn ? 'নাম' : 'Name', bn ? 'স্টাফ আইডি' : 'Staff ID', bn ? 'পদবি' : 'Designation',
       bn ? 'মূল বেতন' : 'Base Salary', bn ? 'বোনাস' : 'Bonus',
       bn ? 'ওভারটাইম' : 'Overtime', bn ? 'কর্তন' : 'Deductions',
       bn ? 'জমা' : 'Savings', bn ? 'অগ্রিম' : 'Advance',
@@ -786,6 +786,7 @@ const AdminSalary = () => {
       sheetData.push([
         fmtIdx(idx + 1),
         s.name_bn,
+        s.staff_id || '-',
         getDesignation(s.designation),
         fmtNum(Number(rec?.base_salary || s.salary || 0)),
         fmtNum(Number(rec?.bonus || 0)),
@@ -927,6 +928,7 @@ const AdminSalary = () => {
             Number(rec.advance_deduction || 0) + Number(rec.other_deduction || 0) : 0;
           return {
             name: s.name_bn,
+            staff_id: s.staff_id || '-',
             designation: getDesignation(s.designation),
             base_salary: Number(rec?.base_salary || s.salary || 0),
             present: rec?.present_days || 0,
@@ -1006,7 +1008,8 @@ const AdminSalary = () => {
     </div>
     <table>
       <tr><th>${bn ? 'নাম' : 'Name'}</th><td>${staffMember.name_bn}</td>
-          <th>${bn ? 'পদবি' : 'Designation'}</th><td>${getDesignation(staffMember.designation)}</td></tr>
+          <th>${bn ? 'স্টাফ আইডি' : 'Staff ID'}</th><td>${staffMember.staff_id || '-'}</td></tr>
+      <tr><th>${bn ? 'পদবি' : 'Designation'}</th><td>${getDesignation(staffMember.designation)}</td>
       <tr><th>${bn ? 'বিভাগ' : 'Department'}</th><td>${staffMember.department || '-'}</td>
           <th>${bn ? 'কর্মদিবস' : 'Working Days'}</th><td>${bn ? toBnDigits(record.working_days) : record.working_days}</td></tr>
       <tr><th>${bn ? 'উপস্থিত' : 'Present'}</th><td>${bn ? toBnDigits(record.present_days) : record.present_days}</td>
@@ -1142,6 +1145,7 @@ const AdminSalary = () => {
                       <tr className="border-b bg-muted/50">
                         <th className="px-3 py-2 text-left text-xs font-medium">#</th>
                         <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'নাম' : 'Name'}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'স্টাফ আইডি' : 'Staff ID'}</th>
                         <th className="px-3 py-2 text-left text-xs font-medium">{bn ? 'পদবি' : 'Designation'}</th>
                         <th className="px-3 py-2 text-center text-xs font-medium">{bn ? 'ডিউটি' : 'Duty'}</th>
                         <th className="px-3 py-2 text-right text-xs font-medium">{bn ? 'মূল বেতন' : 'Base'}</th>
@@ -1175,6 +1179,7 @@ const AdminSalary = () => {
                             <td className="px-3 py-2">
                               <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
                             </td>
+                            <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{s.staff_id || '-'}</td>
                             <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
                             <td className="px-3 py-2 text-center">
                               <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
