@@ -4,15 +4,16 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 
 // Wrapper that supports toggle behavior (click active tab to deselect)
+// All tabs default to closed; clicking an active tab closes it
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
->(({ value, onValueChange, defaultValue, ...props }, ref) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+>(({ value, onValueChange, defaultValue: _dv, ...props }, ref) => {
   const [internalValue, setInternalValue] = React.useState('');
   const currentValue = value !== undefined ? value : internalValue;
 
   const handleValueChange = React.useCallback((newValue: string) => {
-    // Toggle: if same tab clicked, deselect
     const resolved = newValue === currentValue ? '' : newValue;
     if (onValueChange) {
       onValueChange(resolved);
