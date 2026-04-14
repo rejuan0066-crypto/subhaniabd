@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -24,6 +24,7 @@ interface Props {
 const StaffCheckinDialog = ({ open, onOpenChange, selectedDate }: Props) => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState('staff_id');
   const [staffIdInput, setStaffIdInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -168,6 +169,8 @@ const StaffCheckinDialog = ({ open, onOpenChange, selectedDate }: Props) => {
       }
 
       loadRecentCheckins();
+      // Invalidate main attendance list so it reflects check-in/check-out
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
     } catch (err: any) {
       console.error(err);
       toast.error(bn ? 'সমস্যা হয়েছে' : 'Error occurred');
