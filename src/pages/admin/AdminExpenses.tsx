@@ -470,6 +470,13 @@ const AdminExpenses = () => {
   const [selectedInstId, setSelectedInstId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
+  // Auto-select first institution
+  useEffect(() => {
+    if (expenseInstitutions.length > 0 && !selectedInstId) {
+      setSelectedInstId(expenseInstitutions[0].id);
+    }
+  }, [expenseInstitutions, selectedInstId]);
+
   const selectedInst = expenseInstitutions.find((p: any) => p.id === selectedInstId);
   const instCategories = categories.filter((c: any) => c.institution_id === selectedInstId);
   const categoryExpenses = expenses.filter((e: any) => e.institution_id === selectedInstId && e.category_id === selectedCategoryId);
@@ -794,70 +801,39 @@ const AdminExpenses = () => {
 
           {/* Expenses Tab - Drill-down: Projects → Categories → Expenses */}
           <TabsContent value="dashboard" className="space-y-4">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm">
-              <button 
-                onClick={() => { setSelectedInstId(null); setSelectedCategoryId(null); }}
-                className={`font-medium ${!selectedInstId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
-              >
-                {bn ? 'প্রতিষ্ঠান সমূহ' : 'Institutions'}
-              </button>
-              {selectedInstId && (
-                <>
-                  <span className="text-muted-foreground">/</span>
-                  <button 
-                    onClick={() => setSelectedCategoryId(null)}
-                    className={`font-medium ${!selectedCategoryId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
-                  >
-                    {bn ? selectedInst?.name_bn : selectedInst?.name}
-                  </button>
-                </>
-              )}
-              {selectedCategoryId && (
-                <>
-                  <span className="text-muted-foreground">/</span>
-                  <span className="font-medium text-primary">{bn ? selectedCategory?.name_bn : selectedCategory?.name}</span>
-                </>
-              )}
-            </div>
+            {/* Institution Tabs */}
+            {expenseInstitutions.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">{bn ? 'কোনো প্রতিষ্ঠান নেই। সেটিংস ট্যাব থেকে যোগ করুন।' : 'No institutions. Add from Settings tab.'}</p>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-2 items-center">
+                  {expenseInstitutions.map((p: any) => (
+                    <button
+                      key={p.id}
+                      onClick={() => { setSelectedInstId(p.id); setSelectedCategoryId(null); }}
+                      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${selectedInstId === p.id ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-secondary/50 text-foreground border-border hover:bg-secondary'}`}
+                    >
+                      <Building2 className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
+                      {bn ? p.name_bn : p.name}
+                      <span className="ml-2 text-[11px] opacity-80">৳{formatNum(getInstMonthly(p.id))}</span>
+                    </button>
+                  ))}
+                  <div className="ml-auto text-sm font-semibold text-destructive">
+                    {bn ? 'মোট:' : 'Total:'} ৳{formatNum(monthlyTotalExpense)}
+                  </div>
+                </div>
 
-            {/* Level 1: Project List */}
-            {!selectedInstId && (
-              <div className="space-y-3">
-                <h3 className="font-semibold">{bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select Institution'} ({selectedMonthYear})</h3>
-                {expenseInstitutions.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">{bn ? 'কোনো প্রতিষ্ঠান নেই। সেটিংস ট্যাব থেকে যোগ করুন।' : 'No institutions. Add from Settings tab.'}</p>
-                ) : (
-                  <>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {expenseInstitutions.map((p: any) => (
-                      <div key={p.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedInstId(p.id)}>
-                        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                          <FolderPlus className="w-5 h-5 text-accent" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? p.name_bn : p.name}</h4>
-                          <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
-                            <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-medium">৳{formatNum(getInstMonthly(p.id))}</span></span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {/* Breadcrumb when inside a category */}
+                {selectedInstId && selectedCategoryId && (
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <button onClick={() => setSelectedCategoryId(null)} className="text-primary hover:underline cursor-pointer">
+                      {bn ? selectedInst?.name_bn : selectedInst?.name}
+                    </button>
+                    <span>/</span>
+                    <span className="font-medium text-foreground">{bn ? selectedCategory?.name_bn : selectedCategory?.name}</span>
                   </div>
-                  <div className="stat-card flex items-center gap-3 bg-primary/5 border-primary/20 mt-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Wallet className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-foreground text-sm leading-tight">{bn ? 'মোট খরচ' : 'Total Expense'}</h4>
-                      <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
-                        <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-bold">৳{formatNum(monthlyTotalExpense)}</span></span>
-                      </div>
-                    </div>
-                  </div>
-                  </>
                 )}
-              </div>
+              </>
             )}
 
             {/* Level 2: Category List for selected project */}
