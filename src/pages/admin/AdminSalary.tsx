@@ -1179,6 +1179,7 @@ const AdminSalary = () => {
                             <td className="px-3 py-2">
                               <p className="font-medium">{bn ? s.name_bn : (s.name_en || s.name_bn)}</p>
                             </td>
+                            <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{s.staff_id || '-'}</td>
                             <td className="px-3 py-2 text-muted-foreground">{getDesignation(s.designation)}</td>
                             <td className="px-3 py-2 text-center">
                               <button onClick={() => setDutyDialog({ id: s.id, name: s.name_bn, duty_start_time: s.duty_start_time || '08:00', duty_end_time: s.duty_end_time || '17:00' })}
