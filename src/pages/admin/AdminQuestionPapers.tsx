@@ -264,6 +264,24 @@ const AdminQuestionPapers = () => {
     if (!selectedPaper) return;
     const subjectInfo = SUBJECT_TYPES.find(s => s.value === selectedPaper.subject_type);
     const totalMarks = questions.reduce((s, q) => s + q.marks, 0);
+    const buildQuestionsHtml = () => {
+      let currentGroup = '';
+      return questions.map((q, i) => {
+        let groupHtml = '';
+        const gl = language === 'bn' ? q.group_label_bn : q.group_label;
+        if (gl && gl !== currentGroup) {
+          currentGroup = gl;
+          groupHtml = '<div class="group-label">' + gl + '</div>';
+        }
+        const opts = Array.isArray(q.options) ? q.options.map((o: any, oi: number) =>
+          '<div class="option">' + String.fromCharCode(2453 + oi) + '। ' + (language === 'bn' ? o.text_bn || o.text : o.text) + '</div>'
+        ).join('') : '';
+        const qText = language === 'bn' ? q.question_text_bn || q.question_text : q.question_text;
+        return groupHtml + '<div class="question"><div class="q-header"><span>' + (i + 1) + '। ' + qText + '</span><span>[' + q.marks + ']</span></div>' +
+          (opts ? '<div class="options">' + opts + '</div>' : '') + '</div>';
+      }).join('');
+    };
+
     const sessionName = selectedPaper.exam_sessions
       ? (language === 'bn' ? selectedPaper.exam_sessions.name_bn : selectedPaper.exam_sessions.name)
       : '';
