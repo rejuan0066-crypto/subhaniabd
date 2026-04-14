@@ -18,8 +18,11 @@ import { Plus, Trash2, Printer, ArrowLeft, Check, X, Clock, Eye, Keyboard, Type,
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useAuth } from '@/hooks/useAuth';
 
-// ─── Arabic Virtual Keyboard Layout ───
-// Arabic keyboard rows – normal and shifted (matching standard Arabic keyboard image)
+// ─── Arabic Virtual Keyboard Layout (IBM PC Arabic Keyboard) ───
+// Row 0: Number row (` 1-0 - =)
+// Row 1: QWERTY top row
+// Row 2: Home row (Caps Lock row)
+// Row 3: Bottom row (Shift row)
 const ARABIC_ROWS_NORMAL = [
   ['ذ', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '٠', '-', '='],
   ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د', '\\'],
@@ -28,24 +31,36 @@ const ARABIC_ROWS_NORMAL = [
 ];
 const ARABIC_ROWS_SHIFTED = [
   ['ّ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+'],
-  ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', '÷', '×', '؛', '<', '>', '|'],
+  ['َ', 'ً', 'ُ', 'ٌ', 'لإ', 'إ', '\'', '÷', '×', '؛', '<', '>', '|'],
   ['ِ', 'ٍ', ']', '[', 'لأ', 'أ', 'إ', '،', '/', ':', '"'],
-  ['~', 'ْ', '{', '}', 'لآ', 'آ', "'", ',', '.', '؟'],
+  ['~', 'ْ', '{', '}', 'لآ', 'آ', '\'', ',', '.', '؟'],
 ];
 
-// Physical keyboard → Arabic character mapping (standard Arabic keyboard layout)
+// Physical keyboard → Arabic character mapping (IBM PC Arabic Keyboard standard)
 const PHYSICAL_TO_ARABIC: Record<string, string> = {
+  // Number row (unshifted)
   '`': 'ذ',
+  '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩', '0': '٠',
+  '-': '-', '=': '=',
+  // Top row (unshifted) – QWERTY positions
   'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
   '[': 'ج', ']': 'د', '\\': '\\',
+  // Home row (unshifted)
   'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
   'l': 'م', ';': 'ك', "'": 'ط',
+  // Bottom row (unshifted)
   'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
   ',': 'و', '.': 'ز', '/': 'ظ',
-  '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩', '0': '٠',
-  // Shift variants (harakat & specials)
-  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'ِ', 'Y': 'ٍ', 'U': 'ّ', 'I': 'ْ',
-  'H': 'أ', 'J': 'إ', 'N': 'آ', 'B': 'لآ', 'G': 'لأ',
+  // Number row (shifted)
+  '~': 'ّ', '!': '!', '@': '@', '#': '#', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '(': '(', ')': ')', '_': '_', '+': '+',
+  // Top row (shifted)
+  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'لإ', 'Y': 'إ', 'U': '\'', 'I': '÷', 'O': '×', 'P': '؛',
+  '{': '<', '}': '>', '|': '|',
+  // Home row (shifted)
+  'A': 'ِ', 'S': 'ٍ', 'D': ']', 'F': '[', 'G': 'لأ', 'H': 'أ', 'J': 'إ', 'K': '،', 'L': '/', ':': ':', '"': '"',
+  // Bottom row (shifted)
+  'Z': '~', 'X': 'ْ', 'C': '{', 'V': '}', 'B': 'لآ', 'N': 'آ', 'M': '\'',
+  '<': ',', '>': '.', '?': '؟',
 };
 
 // Reverse map: Arabic char → physical key (for highlighting)
