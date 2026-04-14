@@ -1107,7 +1107,7 @@ const AdminExpenses = () => {
                       <div className="space-y-3">
                         <div>
                           <Label>{bn ? 'প্রতিষ্ঠান' : 'Institution'} *</Label>
-                          <Select value={expInstForm.name} onValueChange={v => setExpInstForm(f => ({ ...f, project_id: v }))}>
+                          <Select value={expInstForm.name} onValueChange={v => setExpInstForm(f => ({ ...f, name: v }))}>
                             <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                             <SelectContent>{expenseInstitutions.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                           </Select>
@@ -1518,7 +1518,7 @@ const AdminExpenses = () => {
                 value={expenseForm.institution_id || undefined}
                 onValueChange={value => setExpenseForm(f => ({ ...f, institution_id: value, category_id: '' }))}
               >
-                <SelectTrigger><SelectValue placeholder={bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select institution'} /></SelectTrigger>
                 <SelectContent>
                   {expenseInstitutions.map((inst: any) => <SelectItem key={inst.id} value={inst.id}>{bn ? inst.name_bn : inst.name}</SelectItem>)}
                 </SelectContent>
@@ -1551,7 +1551,7 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
               {selectedExpenseProject && !selectedExpenseCategory && (
-                <p className="mt-1 text-xs text-muted-foreground">{bn ? 'এই প্রকল্পের জন্য একটি ক্যাটেগরি নির্বাচন করুন' : 'Select a category for this project'}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{bn ? 'এই প্রতিষ্ঠানের জন্য একটি ক্যাটেগরি নির্বাচন করুন' : 'Select a category for this institution'}</p>
               )}
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -1703,7 +1703,7 @@ const AdminExpenses = () => {
               <Button size="sm" onClick={() => {
                 const pid = editInstEntriesId || '';
                 setEditInstEntriesId(null);
-                setTimeout(() => { setExpenseForm({ ...defaultExpenseForm, project_id: pid }); setEditingExpenseId(null); setExpenseDialog(true); }, 150);
+                setTimeout(() => { setExpenseForm({ ...defaultExpenseForm, institution_id: pid }); setEditingExpenseId(null); setExpenseDialog(true); }, 150);
               }}>
                 <Plus className="w-3 h-3 mr-1" />{bn ? 'নতুন এন্ট্রি' : 'New Entry'}
               </Button>
@@ -1886,7 +1886,7 @@ const AdminExpenses = () => {
           ) : (
           (() => {
             const inst = expenseInstitutions.find((p: any) => p.id === printInstitutionId);
-            if (!project) return null;
+            if (!inst) return null;
             const projExpenses = expenses.filter((e: any) => e.institution_id === printInstitutionId);
             const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
             const projCategories = categories.filter((c: any) => c.institution_id === printInstitutionId);
