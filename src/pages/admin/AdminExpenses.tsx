@@ -2154,7 +2154,7 @@ const AdminExpenses = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </>
   );
 };
 
