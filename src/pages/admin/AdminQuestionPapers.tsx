@@ -511,31 +511,79 @@ const AdminQuestionPapers = () => {
     }));
   };
 
-  // Arabic keyboard handler
+  // Arabic keyboard handler - inserts at cursor position
   const handleArabicKey = useCallback((char: string) => {
     if (!activeInputRef) return;
     const el = activeInputRef;
-    const start = el.selectionStart || 0;
-    const end = el.selectionEnd || 0;
+    el.focus();
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? start;
+
     if (char === 'BACKSPACE') {
       if (start > 0) {
         const newVal = el.value.slice(0, start - 1) + el.value.slice(end);
-        const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set
-          || Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-        nativeSet?.call(el, newVal);
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        setTimeout(() => el.setSelectionRange(start - 1, start - 1), 0);
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+        setter?.call(el, newVal);
+        el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+        requestAnimationFrame(() => el.setSelectionRange(start - 1, start - 1));
       }
     } else {
       const newVal = el.value.slice(0, start) + char + el.value.slice(end);
-      const nativeSet = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set
-        || Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-      nativeSet?.call(el, newVal);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      setTimeout(() => el.setSelectionRange(start + char.length, start + char.length), 0);
+      const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+      setter?.call(el, newVal);
+      el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      const newPos = start + char.length;
+      requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
     }
-    el.focus();
   }, [activeInputRef]);
+
+  // Physical keyboard → Arabic mapping when AR keyboard is open
+  useEffect(() => {
+    if (!showArabicKeyboard) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      
+      const target = e.target as HTMLElement;
+      const isEditable = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      if (!isEditable) return;
+
+      const char = e.key;
+      if (char.length !== 1) return;
+
+      const arabicChar = PHYSICAL_TO_ARABIC[char];
+      if (!arabicChar) return;
+
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      // Highlight the key on virtual keyboard
+      setHighlightedArabicKey(arabicChar);
+      setTimeout(() => setHighlightedArabicKey(null), 200);
+
+      // Insert Arabic character
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        const el = target as HTMLInputElement | HTMLTextAreaElement;
+        setActiveInputRef(el);
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? start;
+        const newVal = el.value.slice(0, start) + arabicChar + el.value.slice(end);
+        const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+        setter?.call(el, newVal);
+        el.dispatchEvent(new InputEvent('input', { bubbles: true }));
+        const newPos = start + arabicChar.length;
+        requestAnimationFrame(() => el.setSelectionRange(newPos, newPos));
+      } else if (target.isContentEditable) {
+        document.execCommand('insertText', false, arabicChar);
+      }
+    };
+
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [showArabicKeyboard]);
 
   // Print function
   const printPaper = () => {
