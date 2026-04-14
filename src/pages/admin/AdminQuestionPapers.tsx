@@ -410,7 +410,7 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
           </div>
         ) : null}
         <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
-          <span>{serial}। {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
+          <span> {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
           <span className="text-gray-500 shrink-0 ml-2">[{language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span>
         </div>
         {q.question_type === 'mcq' && Array.isArray(q.options) && (
