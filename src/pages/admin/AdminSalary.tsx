@@ -208,10 +208,10 @@ const AdminSalary = () => {
   });
 
   // Fetch expense projects for salary→expense integration
-  const { data: expenseProjects = [] } = useQuery({
-    queryKey: ['expense-projects-salary'],
+  const { data: expenseInstitutions = [] } = useQuery({
+    queryKey: ['expense-institutions-salary'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('expense_projects').select('*').eq('is_active', true).order('name_bn');
+      const { data, error } = await supabase.from('expense_institutions').select('*').eq('is_active', true).order('name_bn');
       if (error) throw error;
       return data;
     },
@@ -642,7 +642,7 @@ const AdminSalary = () => {
       if (error) throw error;
 
       const expenseConfig = getSetting('expense_location');
-      const projectId = expenseConfig?.project_id;
+      const projectId = expenseConfig?.institution_id;
       const categoryId = expenseConfig?.category_id;
 
       if (projectId && categoryId) {
@@ -654,7 +654,7 @@ const AdminSalary = () => {
         const pdfUrl = `https://${projectRef}.supabase.co/functions/v1/salary-pdf`;
 
         const { error: expError } = await supabase.from('expenses').insert({
-          project_id: projectId,
+          institution_id: projectId,
           category_id: categoryId,
           month_year: monthYear,
           expense_date: new Date().toISOString().split('T')[0],
@@ -1759,23 +1759,23 @@ const AdminSalary = () => {
                   <FolderOpen className="h-4 w-4 inline mr-1 text-primary" />
                   <span className="font-semibold">{bn ? 'খরচে অটো-সেভ সেটিংস' : 'Auto-Save to Expenses Settings'}</span>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {bn ? 'বেতন পরিশোধ করলে স্বয়ংক্রিয়ভাবে খরচ ব্যবস্থাপনায় সেভ হবে। প্রকল্প ও ক্যাটাগরি নির্বাচন করুন।' 
-                         : 'When salary is paid, it will auto-save to expense management. Select project & category.'}
+                    {bn ? 'বেতন পরিশোধ করলে স্বয়ংক্রিয়ভাবে খরচ ব্যবস্থাপনায় সেভ হবে। প্রতিষ্ঠান ও ক্যাটাগরি নির্বাচন করুন।' 
+                         : 'When salary is paid, it will auto-save to expense management. Select institution & category.'}
                   </p>
                 </div>
 
                 <div>
-                  <Label>{bn ? 'প্রকল্প (Project)' : 'Expense Project'}</Label>
+                  <Label>{bn ? 'প্রতিষ্ঠান (Institution)' : 'Expense Institution'}</Label>
                   <Select
-                    value={getSetting('expense_location')?.project_id || ''}
+                    value={getSetting('expense_location')?.institution_id || ''}
                     onValueChange={v => {
                       const current = getSetting('expense_location') || {};
-                      saveSettingMutation.mutate({ key: 'expense_location', value: { ...current, project_id: v } });
+                      saveSettingMutation.mutate({ key: 'expense_location', value: { ...current, institution_id: v } });
                     }}
                   >
-                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select institution'} /></SelectTrigger>
                     <SelectContent>
-                      {expenseProjects.map((p: any) => (
+                      {expenseInstitutions.map((p: any) => (
                         <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -1795,8 +1795,8 @@ const AdminSalary = () => {
                     <SelectContent>
                       {expenseCategories
                         .filter((c: any) => {
-                          const selectedProject = getSetting('expense_location')?.project_id;
-                          return !selectedProject || c.project_id === selectedProject;
+                          const selectedInstitution = getSetting('expense_location')?.institution_id;
+                          return !selectedInstitution || c.institution_id === selectedInstitution;
                         })
                         .map((c: any) => (
                           <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
@@ -1805,7 +1805,7 @@ const AdminSalary = () => {
                   </Select>
                 </div>
 
-                {getSetting('expense_location')?.project_id && getSetting('expense_location')?.category_id ? (
+                {getSetting('expense_location')?.institution_id && getSetting('expense_location')?.category_id ? (
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-sm">
                     <CheckCircle2 className="h-4 w-4 inline mr-1 text-emerald-600" />
                     <span className="text-emerald-700 dark:text-emerald-400 font-medium">
@@ -1816,7 +1816,7 @@ const AdminSalary = () => {
                   <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm">
                     <AlertCircle className="h-4 w-4 inline mr-1 text-yellow-600" />
                     <span className="text-yellow-700 dark:text-yellow-400">
-                      {bn ? 'প্রকল্প ও ক্যাটাগরি নির্বাচন করুন অটো-সেভ চালু করতে' : 'Select project & category to enable auto-save'}
+                      {bn ? 'প্রতিষ্ঠান ও ক্যাটাগরি নির্বাচন করুন অটো-সেভ চালু করতে' : 'Select institution & category to enable auto-save'}
                     </span>
                   </div>
                 )}
