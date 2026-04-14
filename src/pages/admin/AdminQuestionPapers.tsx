@@ -19,21 +19,33 @@ import DeleteConfirmDialog from '@/components/DeleteConfirmDialog';
 import { useAuth } from '@/hooks/useAuth';
 
 // ─── Arabic Virtual Keyboard Layout ───
-const ARABIC_KEYBOARD_ROWS = [
-  ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د'],
+// Arabic keyboard rows – normal and shifted (matching standard Arabic keyboard image)
+const ARABIC_ROWS_NORMAL = [
+  ['ذ', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '٠', '-', '='],
+  ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د', '\\'],
   ['ش', 'س', 'ي', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ك', 'ط'],
   ['ئ', 'ء', 'ؤ', 'ر', 'لا', 'ى', 'ة', 'و', 'ز', 'ظ'],
-  ['ً', 'ٌ', 'ٍ', 'َ', 'ُ', 'ِ', 'ّ', 'ْ'],
+];
+const ARABIC_ROWS_SHIFTED = [
+  ['ّ', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+'],
+  ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', '÷', '×', '؛', '<', '>', '|'],
+  ['ِ', 'ٍ', ']', '[', 'لأ', 'أ', 'إ', '،', '/', ':', '"'],
+  ['~', 'ْ', '{', '}', 'لآ', 'آ', "'", ',', '.', '؟'],
 ];
 
 // Physical keyboard → Arabic character mapping (standard Arabic keyboard layout)
 const PHYSICAL_TO_ARABIC: Record<string, string> = {
+  '`': 'ذ',
   'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
-  '[': 'ج', ']': 'د', 'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
-  'l': 'م', ';': 'ك', "'": 'ط', 'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
+  '[': 'ج', ']': 'د', '\\': '\\',
+  'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
+  'l': 'م', ';': 'ك', "'": 'ط',
+  'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
   ',': 'و', '.': 'ز', '/': 'ظ',
-  // Shift variants (harakat)
+  '1': '١', '2': '٢', '3': '٣', '4': '٤', '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩', '0': '٠',
+  // Shift variants (harakat & specials)
   'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'ِ', 'Y': 'ٍ', 'U': 'ّ', 'I': 'ْ',
+  'H': 'أ', 'J': 'إ', 'N': 'آ', 'B': 'لآ', 'G': 'لأ',
 };
 
 // Reverse map: Arabic char → physical key (for highlighting)
@@ -55,6 +67,7 @@ const ArabicKeyboard = ({
   const [position, setPosition] = useState({ x: 100, y: 300 });
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [shifted, setShifted] = useState(false);
   const kbRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -72,25 +85,46 @@ const ArabicKeyboard = ({
     return () => { window.removeEventListener('mousemove', handleMove); window.removeEventListener('mouseup', handleUp); };
   }, [dragging, dragOffset]);
 
+  // Listen for physical Shift key
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => { if (e.key === 'Shift') setShifted(true); };
+    const up = (e: KeyboardEvent) => { if (e.key === 'Shift') setShifted(false); };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); };
+  }, []);
+
+  const rows = shifted ? ARABIC_ROWS_SHIFTED : ARABIC_ROWS_NORMAL;
+  const rowLabels = ['', 'Tab', 'Caps', 'Shift'];
+
   return (
     <div
       ref={kbRef}
       className="fixed z-[100] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-3 select-none"
-      style={{ left: position.x, top: position.y, cursor: dragging ? 'grabbing' : 'grab' }}
+      style={{ left: position.x, top: position.y, cursor: dragging ? 'grabbing' : 'grab', minWidth: 520 }}
       onMouseDown={handleMouseDown}
     >
       <div className="flex items-center justify-between mb-2 px-1">
         <span className="text-xs font-semibold text-muted-foreground">⌨️ Arabic Keyboard</span>
-        <span className="text-[10px] text-muted-foreground mx-2">Physical keys mapped when AR is ON</span>
+        <div className="flex items-center gap-2">
+          {shifted && <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">SHIFT</span>}
+          <span className="text-[10px] text-muted-foreground">Physical keys mapped when AR is ON</span>
+        </div>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}><X className="h-3 w-3" /></Button>
       </div>
-      {ARABIC_KEYBOARD_ROWS.map((row, ri) => (
+      {rows.map((row, ri) => (
         <div key={ri} className="flex gap-1 justify-center mb-1" dir="rtl">
+          {ri === 3 && (
+            <button
+              className={`h-9 px-3 rounded-lg text-[10px] font-bold transition-all ${shifted ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-primary/20'}`}
+              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setShifted(!shifted); }}
+            >Shift</button>
+          )}
           {row.map((char) => {
             const isHighlighted = highlightedKey === char;
             return (
               <button
-                key={char}
+                key={`${ri}-${char}`}
                 className={`h-9 min-w-[2.2rem] px-1.5 rounded-lg text-base font-medium transition-all duration-100
                   ${isHighlighted
                     ? 'bg-primary text-primary-foreground scale-110 shadow-md'
@@ -102,11 +136,16 @@ const ArabicKeyboard = ({
               </button>
             );
           })}
+          {ri === 0 && (
+            <button className="h-9 px-3 rounded-lg bg-muted text-muted-foreground text-[10px] font-bold hover:bg-destructive/20" onMouseDown={(e) => { e.preventDefault(); onKeyPress('BACKSPACE'); }}>⌫</button>
+          )}
+          {ri === 2 && (
+            <button className="h-9 px-3 rounded-lg bg-muted text-muted-foreground text-[10px] font-bold" onMouseDown={(e) => { e.preventDefault(); onKeyPress('\n'); }}>Enter ↵</button>
+          )}
         </div>
       ))}
       <div className="flex gap-1 justify-center mt-1">
-        <button className="h-9 px-6 rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress(' '); }}>Space</button>
-        <button className="h-9 px-4 rounded-lg bg-secondary/80 hover:bg-destructive/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress('BACKSPACE'); }}>⌫</button>
+        <button className="h-9 flex-1 max-w-[280px] rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress(' '); }}>Space</button>
       </div>
     </div>
   );
