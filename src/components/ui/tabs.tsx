@@ -8,7 +8,7 @@ const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 >(({ value, onValueChange, defaultValue, ...props }, ref) => {
-  const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
+  const [internalValue, setInternalValue] = React.useState('');
   const currentValue = value !== undefined ? value : internalValue;
 
   const handleValueChange = React.useCallback((newValue: string) => {
