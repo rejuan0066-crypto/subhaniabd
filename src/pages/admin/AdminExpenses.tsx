@@ -218,15 +218,15 @@ const AdminExpenses = () => {
   const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
 
   // Project-wise breakdown
-  const projectBreakdown = useMemo(() => {
+  const institutionBreakdown = useMemo(() => {
     const map: Record<string, { name: string, name_bn: string, monthly: number, total: number }> = {};
     allExpenses.forEach((e: any) => {
-      if (!e.project_id) return;
-      if (!map[e.project_id]) {
-        map[e.project_id] = { name: e.expense_projects?.name || '', name_bn: e.expense_projects?.name_bn || '', monthly: 0, total: 0 };
+      if (!e.institution_id) return;
+      if (!map[e.institution_id]) {
+        map[e.institution_id] = { name: e.expense_institutions?.name || '', name_bn: e.expense_institutions?.name_bn || '', monthly: 0, total: 0 };
       }
-      map[e.project_id].total += Number(e.amount || 0);
-      if (e.month_year === selectedMonthYear) map[e.project_id].monthly += Number(e.amount || 0);
+      map[e.institution_id].total += Number(e.amount || 0);
+      if (e.month_year === selectedMonthYear) map[e.institution_id].monthly += Number(e.amount || 0);
     });
     return Object.values(map);
   }, [allExpenses, selectedMonthYear]);
@@ -250,14 +250,14 @@ const AdminExpenses = () => {
     mutationFn: async () => {
       if (!projectForm.name || !projectForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
       if (editingProjectId) {
-        const { error } = await supabase.from('expense_projects').update(projectForm).eq('id', editingProjectId);
+        const { error } = await supabase.from('expense_institutions').update(projectForm).eq('id', editingProjectId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('expense_projects').insert(projectForm);
+        const { error } = await supabase.from('expense_institutions').insert(projectForm);
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_projects'] }); setProjectDialog(false); setProjectForm({ name: '', name_bn: '' }); setEditingProjectId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setProjectDialog(false); setProjectForm({ name: '', name_bn: '' }); setEditingProjectId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
@@ -301,7 +301,7 @@ const AdminExpenses = () => {
 
   const addExpense = useMutation({
     mutationFn: async () => {
-      if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
+      if (!expenseForm.institution_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
       const parsedAmount = Number(bnToEnDigit(expenseForm.amount));
       const parsedQty = expenseForm.quantity ? Number(bnToEnDigit(expenseForm.quantity)) : 1;
       if (isNaN(parsedAmount) || parsedAmount <= 0) { toast.error(bn ? 'সঠিক টাকার পরিমাণ দিন' : 'Enter valid amount'); return; }
@@ -330,7 +330,7 @@ const AdminExpenses = () => {
       
       const payload = {
         month_year: selectedMonthYear,
-        project_id: expenseForm.project_id,
+        institution_id: expenseForm.institution_id,
         category_id: expenseForm.category_id,
         expense_date: expenseForm.expense_date,
         description: descWithTags,
@@ -351,9 +351,9 @@ const AdminExpenses = () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
       // Reset form for new entry, keep dialog open with same project/category
-      const keepProjectId = expenseForm.project_id || '';
+      const keepInstitutionId = expenseForm.institution_id || '';
       const keepCategoryId = expenseForm.category_id || '';
-      setExpenseForm({ ...defaultExpenseForm, project_id: keepProjectId, category_id: keepCategoryId });
+      setExpenseForm({ ...defaultExpenseForm, project_id: keepInstitutionId, category_id: keepCategoryId });
       setReceiptFile(null);
       setEditingExpenseId(null);
       toast.success(bn ? 'সংরক্ষিত! নতুন এন্ট্রি দিন' : 'Saved! Add new entry');
@@ -460,14 +460,14 @@ const AdminExpenses = () => {
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
   });
 
-  const filteredInstitutions = expenseInstitutions.filter((inst: any) => inst.project_id === expenseForm.project_id);
+  const filteredInstitutions = expenseInstitutions.filter((inst: any) => inst.project_id === expenseForm.institution_id);
   const filteredCategories = categories.filter((c: any) => {
-    if (!expenseForm.project_id) return false;
-    if (c.project_id !== expenseForm.project_id) return false;
+    if (!expenseForm.institution_id) return false;
+    if (c.institution_id !== expenseForm.institution_id) return false;
     if (expenseForm.institution_id && (c as any).institution_id && (c as any).institution_id !== expenseForm.institution_id) return false;
     return true;
   });
-  const selectedExpenseProject = projects.find((p: any) => p.id === expenseForm.project_id);
+  const selectedExpenseProject = projects.find((p: any) => p.id === expenseForm.institution_id);
   const selectedExpenseCategory = categories.find((c: any) => c.id === expenseForm.category_id);
 
   // Load summary defaults
@@ -485,14 +485,14 @@ const AdminExpenses = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const selectedProject = projects.find((p: any) => p.id === selectedProjectId);
-  const projectCategories = categories.filter((c: any) => c.project_id === selectedProjectId);
-  const categoryExpenses = expenses.filter((e: any) => e.project_id === selectedProjectId && e.category_id === selectedCategoryId);
+  const projectCategories = categories.filter((c: any) => c.institution_id === selectedProjectId);
+  const categoryExpenses = expenses.filter((e: any) => e.institution_id === selectedProjectId && e.category_id === selectedCategoryId);
   const categoryExpenseTotal = categoryExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const selectedCategory = categories.find((c: any) => c.id === selectedCategoryId);
 
   // Project monthly/total for drill-down
-  const getProjectMonthly = (pid: string) => expenses.filter((e: any) => e.project_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-  const getProjectTotal = (pid: string) => allExpenses.filter((e: any) => e.project_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+  const getProjectMonthly = (pid: string) => expenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+  const getProjectTotal = (pid: string) => allExpenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const getCategoryMonthly = (cid: string) => expenses.filter((e: any) => e.category_id === cid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const getCategoryTotal = (cid: string) => allExpenses.filter((e: any) => e.category_id === cid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
 
@@ -512,7 +512,7 @@ const AdminExpenses = () => {
     const isKnownMethod = EXPENSE_METHODS.includes(method);
     const cat = categories.find((c: any) => c.id === e.category_id);
     const instId = (cat as any)?.institution_id || '';
-    setExpenseForm({ project_id: e.project_id, institution_id: instId, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    setExpenseForm({ project_id: e.institution_id, institution_id: instId, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
@@ -542,12 +542,12 @@ const AdminExpenses = () => {
     rows.push([]);
 
     projects.forEach((project: any) => {
-      const projExpenses = expenses.filter((e: any) => e.project_id === project.id);
+      const projExpenses = expenses.filter((e: any) => e.institution_id === project.id);
       if (projExpenses.length === 0) return;
       const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
       rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, '', '', '', `৳${formatNum(projTotal)}`]);
 
-      const projCategories = categories.filter((c: any) => c.project_id === project.id);
+      const projCategories = categories.filter((c: any) => c.institution_id === project.id);
       projCategories.forEach((cat: any) => {
         const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
         if (catExpenses.length === 0) return;
@@ -614,7 +614,7 @@ const AdminExpenses = () => {
   const handleProjectExcelDownload = (projectId: string) => {
     const project = projects.find((p: any) => p.id === projectId);
     if (!project) return;
-    const projExpenses = expenses.filter((e: any) => e.project_id === projectId);
+    const projExpenses = expenses.filter((e: any) => e.institution_id === projectId);
     const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
     const rows: string[][] = [];
     rows.push([bn ? 'প্রতিষ্ঠান' : 'Institution', bn ? instName : instNameEn]);
@@ -626,7 +626,7 @@ const AdminExpenses = () => {
     rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, selectedMonthYear]);
     rows.push([]);
 
-    const projCategories = categories.filter((c: any) => c.project_id === projectId);
+    const projCategories = categories.filter((c: any) => c.institution_id === projectId);
     projCategories.forEach((cat: any) => {
       const catExpenses = projExpenses.filter((e: any) => e.category_id === cat.id);
       if (catExpenses.length === 0) return;
@@ -654,7 +654,7 @@ const AdminExpenses = () => {
 
   const openEditCategory = (c: any) => {
     setEditingCategoryId(c.id);
-    setCategoryForm({ project_id: c.project_id, institution_id: (c as any).institution_id || '', name: c.name, name_bn: c.name_bn });
+    setCategoryForm({ project_id: c.institution_id, institution_id: (c as any).institution_id || '', name: c.name, name_bn: c.name_bn });
     setCategoryDialog(true);
   };
   const resetExpenseDialog = (open: boolean) => { if (!open) { setEditingExpenseId(null); setExpenseForm(defaultExpenseForm); } setExpenseDialog(open); };
@@ -745,7 +745,7 @@ const AdminExpenses = () => {
         </div>
 
         {/* Project & Category Breakdown Tabs */}
-        {(projectBreakdown.length > 0 || categoryBreakdown.length > 0) && (
+        {(institutionBreakdown.length > 0 || categoryBreakdown.length > 0) && (
           <Tabs defaultValue="project-breakdown">
             <TabsList className="grid grid-cols-2 w-full max-w-md">
               <TabsTrigger value="project-breakdown">{bn ? 'প্রকল্প ভিত্তিক খরচ' : 'Project-wise'}</TabsTrigger>
@@ -762,7 +762,7 @@ const AdminExpenses = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {projectBreakdown.map((p, i) => (
+                    {institutionBreakdown.map((p, i) => (
                       <TableRow key={i}>
                         <TableCell className="font-medium">{bn ? p.name_bn : p.name}</TableCell>
                         <TableCell className="text-right text-destructive">৳{formatNum(p.monthly)}</TableCell>
@@ -1185,7 +1185,7 @@ const AdminExpenses = () => {
                         <li key={c.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
                           <div>
                             <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
-                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
+                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_institutions?.name_bn : (c as any).expense_institutions?.name})</span>
                             {catInst && <span className="text-xs text-primary ml-1">• {bn ? catInst.name_bn : catInst.name}</span>}
                           </div>
                           <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
@@ -1358,7 +1358,7 @@ const AdminExpenses = () => {
                     </div>
                     <div className="space-y-2">
                       {projects.map((p: any) => {
-                        const projExp = expenses.filter((e: any) => e.project_id === p.id);
+                        const projExp = expenses.filter((e: any) => e.institution_id === p.id);
                         const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                         if (projExp.length === 0) return null;
                         return (
@@ -1423,10 +1423,10 @@ const AdminExpenses = () => {
 
         {/* Project & Category wise detailed breakdown */}
         {projects.map((project: any) => {
-          const projExpenses = expenses.filter((e: any) => e.project_id === project.id);
+          const projExpenses = expenses.filter((e: any) => e.institution_id === project.id);
           if (projExpenses.length === 0) return null;
           const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-          const projCategories = categories.filter((c: any) => c.project_id === project.id);
+          const projCategories = categories.filter((c: any) => c.institution_id === project.id);
           
           return (
             <div key={project.id} className="mb-6" style={{ pageBreakInside: 'avoid' }}>
@@ -1515,7 +1515,7 @@ const AdminExpenses = () => {
             <div>
               <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
               <Select
-                value={expenseForm.project_id || undefined}
+                value={expenseForm.institution_id || undefined}
                 onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, institution_id: '', category_id: '' }))}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
@@ -1524,7 +1524,7 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
             </div>
-            {expenseForm.project_id && filteredInstitutions.length > 0 && (
+            {expenseForm.institution_id && filteredInstitutions.length > 0 && (
               <div>
                 <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
                 <Select
@@ -1543,7 +1543,7 @@ const AdminExpenses = () => {
               <Select
                 value={expenseForm.category_id || undefined}
                 onValueChange={value => setExpenseForm(f => ({ ...f, category_id: value }))}
-                disabled={!expenseForm.project_id}
+                disabled={!expenseForm.institution_id}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select category'} /></SelectTrigger>
                 <SelectContent>
@@ -1718,7 +1718,7 @@ const AdminExpenses = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সব ক্যাটেগরি' : 'All Categories'}</SelectItem>
-                {categories.filter((c: any) => c.project_id === editProjectEntriesId).map((c: any) => (
+                {categories.filter((c: any) => c.institution_id === editProjectEntriesId).map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -1732,8 +1732,8 @@ const AdminExpenses = () => {
           </div>
 
           {(() => {
-            let projExpenses = expenses.filter((e: any) => e.project_id === editProjectEntriesId);
-            const projCategories = categories.filter((c: any) => c.project_id === editProjectEntriesId);
+            let projExpenses = expenses.filter((e: any) => e.institution_id === editProjectEntriesId);
+            const projCategories = categories.filter((c: any) => c.institution_id === editProjectEntriesId);
             if (projExpenses.length === 0) return <p className="text-sm text-muted-foreground">{bn ? 'কোনো এন্ট্রি নেই' : 'No entries'}</p>;
 
             // Apply category filter
@@ -1887,9 +1887,9 @@ const AdminExpenses = () => {
           (() => {
             const project = projects.find((p: any) => p.id === printProjectId);
             if (!project) return null;
-            const projExpenses = expenses.filter((e: any) => e.project_id === printProjectId);
+            const projExpenses = expenses.filter((e: any) => e.institution_id === printProjectId);
             const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-            const projCategories = categories.filter((c: any) => c.project_id === printProjectId);
+            const projCategories = categories.filter((c: any) => c.institution_id === printProjectId);
             const ed = printEditData;
             const dInstName = ed.instName || (bn ? instName : instNameEn);
             const dInstAddress = ed.instAddress || instAddress;
