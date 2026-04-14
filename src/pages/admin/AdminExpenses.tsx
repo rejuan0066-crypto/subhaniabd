@@ -246,18 +246,18 @@ const AdminExpenses = () => {
   }, [allExpenses, selectedMonthYear]);
 
   // Mutations
-  const addProject = useMutation({
+  const addExpInst = useMutation({
     mutationFn: async () => {
-      if (!projectForm.name || !projectForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
-      if (editingProjectId) {
-        const { error } = await supabase.from('expense_institutions').update(projectForm).eq('id', editingProjectId);
+      if (!expInstForm.name || !expInstForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
+      if (editingExpInstId) {
+        const { error } = await supabase.from('expense_institutions').update(expInstForm).eq('id', editingExpInstId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('expense_institutions').insert(projectForm);
+        const { error } = await supabase.from('expense_institutions').insert(expInstForm);
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setProjectDialog(false); setProjectForm({ name: '', name_bn: '' }); setEditingProjectId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setExpInstDialog(false); setExpInstForm({ name: '', name_bn: '' }); setEditingExpInstId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
   });
 
@@ -467,7 +467,7 @@ const AdminExpenses = () => {
     if (expenseForm.institution_id && (c as any).institution_id && (c as any).institution_id !== expenseForm.institution_id) return false;
     return true;
   });
-  const selectedExpenseProject = projects.find((p: any) => p.id === expenseForm.institution_id);
+  const selectedExpenseProject = expenseInstitutions.find((p: any) => p.id === expenseForm.institution_id);
   const selectedExpenseCategory = categories.find((c: any) => c.id === expenseForm.category_id);
 
   // Load summary defaults
@@ -481,18 +481,18 @@ const AdminExpenses = () => {
   }, [summaryData]);
 
   // Drill-down state for expenses tab
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedInstId, setSelectedInstId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const selectedProject = projects.find((p: any) => p.id === selectedProjectId);
-  const projectCategories = categories.filter((c: any) => c.institution_id === selectedProjectId);
-  const categoryExpenses = expenses.filter((e: any) => e.institution_id === selectedProjectId && e.category_id === selectedCategoryId);
+  const selectedInst = expenseInstitutions.find((p: any) => p.id === selectedInstId);
+  const instCategories = categories.filter((c: any) => c.institution_id === selectedInstId);
+  const categoryExpenses = expenses.filter((e: any) => e.institution_id === selectedInstId && e.category_id === selectedCategoryId);
   const categoryExpenseTotal = categoryExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const selectedCategory = categories.find((c: any) => c.id === selectedCategoryId);
 
   // Project monthly/total for drill-down
-  const getProjectMonthly = (pid: string) => expenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-  const getProjectTotal = (pid: string) => allExpenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+  const getInstMonthly = (pid: string) => expenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
+  const getInstTotal = (pid: string) => allExpenses.filter((e: any) => e.institution_id === pid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const getCategoryMonthly = (cid: string) => expenses.filter((e: any) => e.category_id === cid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
   const getCategoryTotal = (cid: string) => allExpenses.filter((e: any) => e.category_id === cid).reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
 
@@ -520,10 +520,10 @@ const AdminExpenses = () => {
     setDepositForm({ deposit_date: d.deposit_date, bank_details: d.bank_details || '', other_details: d.other_details || '', amount: String(d.amount), source: d.source || 'manual' });
     setDepositDialog(true);
   };
-  const openEditProject = (p: any) => {
-    setEditingProjectId(p.id);
-    setProjectForm({ name: p.name, name_bn: p.name_bn });
-    setProjectDialog(true);
+  const openEditExpInst = (p: any) => {
+    setEditingExpInstId(p.id);
+    setExpInstForm({ name: p.name, name_bn: p.name_bn });
+    setExpInstDialog(true);
   };
   const handleExcelDownload = () => {
     const rows: string[][] = [];
@@ -541,11 +541,11 @@ const AdminExpenses = () => {
     rows.push([bn ? 'পূর্ববর্তী বকেয়া' : 'Previous Arrears', `৳${formatNum(previousArrears)}`, bn ? 'ক্যাশ' : 'Cash', `৳${formatNum(monthlyCash)}`]);
     rows.push([]);
 
-    projects.forEach((project: any) => {
+    expenseInstitutions.forEach((project: any) => {
       const projExpenses = expenses.filter((e: any) => e.institution_id === project.id);
       if (projExpenses.length === 0) return;
       const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-      rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, '', '', '', `৳${formatNum(projTotal)}`]);
+      rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? project.name_bn : project.name}`, '', '', '', `৳${formatNum(projTotal)}`]);
 
       const projCategories = categories.filter((c: any) => c.institution_id === project.id);
       projCategories.forEach((cat: any) => {
@@ -611,8 +611,8 @@ const AdminExpenses = () => {
     toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
   };
 
-  const handleProjectExcelDownload = (projectId: string) => {
-    const project = projects.find((p: any) => p.id === projectId);
+  const handleInstExcelDownload = (projectId: string) => {
+    const project = expenseInstitutions.find((p: any) => p.id === projectId);
     if (!project) return;
     const projExpenses = expenses.filter((e: any) => e.institution_id === projectId);
     const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
@@ -623,7 +623,7 @@ const AdminExpenses = () => {
     rows.push([bn ? 'ইমেইল' : 'Email', instEmail]);
     if (instOther) rows.push([bn ? 'অন্যান্য' : 'Other', instOther]);
     rows.push([]);
-    rows.push([`${bn ? 'প্রকল্প' : 'Project'}: ${bn ? project.name_bn : project.name}`, selectedMonthYear]);
+    rows.push([`${bn ? 'প্রতিষ্ঠান' : 'Institution'}: ${bn ? project.name_bn : project.name}`, selectedMonthYear]);
     rows.push([]);
 
     const projCategories = categories.filter((c: any) => c.institution_id === projectId);
@@ -659,7 +659,7 @@ const AdminExpenses = () => {
   };
   const resetExpenseDialog = (open: boolean) => { if (!open) { setEditingExpenseId(null); setExpenseForm(defaultExpenseForm); } setExpenseDialog(open); };
   const resetDepositDialog = (open: boolean) => { if (!open) { setEditingDepositId(null); setDepositForm(defaultDepositForm); } setDepositDialog(open); };
-  const resetProjectDialog = (open: boolean) => { if (!open) { setEditingProjectId(null); setProjectForm({ name: '', name_bn: '' }); } setProjectDialog(open); };
+  const resetExpInstDialog = (open: boolean) => { if (!open) { setEditingExpInstId(null); setExpInstForm({ name: '', name_bn: '' }); } setExpInstDialog(open); };
   const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', institution_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
@@ -756,7 +756,7 @@ const AdminExpenses = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{bn ? 'প্রকল্প' : 'Project'}</TableHead>
+                      <TableHead>{bn ? 'প্রতিষ্ঠান' : 'Institution'}</TableHead>
                       <TableHead className="text-right">{bn ? `${selectedMonthName} খরচ` : `${selectedMonthName}`}</TableHead>
                       <TableHead className="text-right">{bn ? 'মোট খরচ' : 'Total'}</TableHead>
                     </TableRow>
@@ -802,7 +802,7 @@ const AdminExpenses = () => {
           <TabsList className="grid grid-cols-4 w-full max-w-lg">
             <TabsTrigger value="dashboard">{bn ? 'খরচ' : 'Expenses'}</TabsTrigger>
             <TabsTrigger value="deposits">{bn ? 'জমা' : 'Deposits'}</TabsTrigger>
-            <TabsTrigger value="settings">{bn ? 'প্রকল্প' : 'Projects'}</TabsTrigger>
+            <TabsTrigger value="settings">{bn ? 'প্রতিষ্ঠান' : 'Institutions'}</TabsTrigger>
             <TabsTrigger value="summary">{bn ? 'সারাংশ' : 'Summary'}</TabsTrigger>
           </TabsList>
 
@@ -811,19 +811,19 @@ const AdminExpenses = () => {
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm">
               <button 
-                onClick={() => { setSelectedProjectId(null); setSelectedCategoryId(null); }}
-                className={`font-medium ${!selectedProjectId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
+                onClick={() => { setSelectedInstId(null); setSelectedCategoryId(null); }}
+                className={`font-medium ${!selectedInstId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
               >
-                {bn ? 'প্রকল্প সমূহ' : 'Projects'}
+                {bn ? 'প্রতিষ্ঠান সমূহ' : 'Institutions'}
               </button>
-              {selectedProjectId && (
+              {selectedInstId && (
                 <>
                   <span className="text-muted-foreground">/</span>
                   <button 
                     onClick={() => setSelectedCategoryId(null)}
                     className={`font-medium ${!selectedCategoryId ? 'text-primary' : 'text-muted-foreground hover:text-foreground underline cursor-pointer'}`}
                   >
-                    {bn ? selectedProject?.name_bn : selectedProject?.name}
+                    {bn ? selectedInst?.name_bn : selectedInst?.name}
                   </button>
                 </>
               )}
@@ -836,23 +836,23 @@ const AdminExpenses = () => {
             </div>
 
             {/* Level 1: Project List */}
-            {!selectedProjectId && (
+            {!selectedInstId && (
               <div className="space-y-3">
-                <h3 className="font-semibold">{bn ? 'প্রকল্প নির্বাচন করুন' : 'Select Project'} ({selectedMonthYear})</h3>
-                {projects.length === 0 ? (
+                <h3 className="font-semibold">{bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select Institution'} ({selectedMonthYear})</h3>
+                {expenseInstitutions.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">{bn ? 'কোনো প্রকল্প নেই। প্রকল্প ট্যাব থেকে যোগ করুন।' : 'No projects. Add from Projects tab.'}</p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {projects.map((p: any) => (
-                      <div key={p.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedProjectId(p.id)}>
+                    {expenseInstitutions.map((p: any) => (
+                      <div key={p.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedInstId(p.id)}>
                         <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
                           <FolderPlus className="w-5 h-5 text-accent" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? p.name_bn : p.name}</h4>
                           <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
-                            <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-medium">৳{formatNum(getProjectMonthly(p.id))}</span></span>
-                            <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-medium">৳{formatNum(getProjectTotal(p.id))}</span></span>
+                            <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-medium">৳{formatNum(getInstMonthly(p.id))}</span></span>
+                            <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-medium">৳{formatNum(getInstTotal(p.id))}</span></span>
                           </div>
                         </div>
                       </div>
@@ -863,14 +863,14 @@ const AdminExpenses = () => {
             )}
 
             {/* Level 2: Category List for selected project */}
-            {selectedProjectId && !selectedCategoryId && (
+            {selectedInstId && !selectedCategoryId && (
               <div className="space-y-3">
-                <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedProject?.name_bn : selectedProject?.name}</h3>
-                {projectCategories.length === 0 ? (
+                <h3 className="font-semibold">{bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select Category'} — {bn ? selectedInst?.name_bn : selectedInst?.name}</h3>
+                {instCategories.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">{bn ? 'এই প্রকল্পে কোনো ক্যাটেগরি নেই। প্রকল্প ট্যাব থেকে যোগ করুন।' : 'No categories in this project.'}</p>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {projectCategories.map((c: any) => (
+                    {instCategories.map((c: any) => (
                       <div key={c.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCategoryId(c.id)}>
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                           <TagIcon className="w-5 h-5 text-primary" />
@@ -890,14 +890,14 @@ const AdminExpenses = () => {
             )}
 
             {/* Level 3: Expenses for selected project+category */}
-            {selectedProjectId && selectedCategoryId && (
+            {selectedInstId && selectedCategoryId && (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
                   {canAddItem && <Button size="sm" onClick={() => {
                     setReceiptFile(null);
                     setEditingExpenseId(null);
-                    setExpenseForm({ ...defaultExpenseForm, project_id: selectedProjectId, category_id: selectedCategoryId });
+                    setExpenseForm({ ...defaultExpenseForm, project_id: selectedInstId, category_id: selectedCategoryId });
                     setExpenseDialog(true);
                   }}>
                     <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}
@@ -1069,26 +1069,26 @@ const AdminExpenses = () => {
               {/* Projects */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-base">{bn ? 'প্রকল্প' : 'Projects'}</CardTitle>
-                  <Dialog open={projectDialog} onOpenChange={resetProjectDialog}>
+                  <CardTitle className="text-base">{bn ? 'প্রতিষ্ঠান' : 'Institutions'}</CardTitle>
+                  <Dialog open={expInstDialog} onOpenChange={resetExpInstDialog}>
                     <DialogTrigger asChild><Button size="sm" variant="outline"><FolderPlus className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
                     <DialogContent>
-                      <DialogHeader><DialogTitle>{editingProjectId ? (bn ? 'প্রকল্প সম্পাদনা' : 'Edit Project') : (bn ? 'নতুন প্রকল্প' : 'New Project')}</DialogTitle></DialogHeader>
+                      <DialogHeader><DialogTitle>{editingExpInstId ? (bn ? 'প্রকল্প সম্পাদনা' : 'Edit Project') : (bn ? 'নতুন প্রকল্প' : 'New Project')}</DialogTitle></DialogHeader>
                       <div className="space-y-3">
-                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={projectForm.name} onChange={e => setProjectForm(f => ({ ...f, name: e.target.value }))} /></div>
-                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={projectForm.name_bn} onChange={e => setProjectForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
-                        <Button className="w-full" onClick={() => addProject.mutate()} disabled={addProject.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={expInstForm.name} onChange={e => setExpInstForm(f => ({ ...f, name: e.target.value }))} /></div>
+                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={expInstForm.name_bn} onChange={e => setExpInstForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
+                        <Button className="w-full" onClick={() => addExpInst.mutate()} disabled={addExpInst.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </CardHeader>
                 <CardContent>
-                  {projects.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো প্রকল্প নেই' : 'No projects'}</p> : (
+                  {expenseInstitutions.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো প্রতিষ্ঠান নেই' : 'No institutions'}</p> : (
                     <ul className="space-y-2">
-                      {projects.map((p: any) => (
+                      {expenseInstitutions.map((p: any) => (
                         <li key={p.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
                           <span className="text-sm font-medium">{bn ? p.name_bn : p.name}</span>
-                          <Button variant="ghost" size="icon" onClick={() => openEditProject(p)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => openEditExpInst(p)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
                         </li>
                       ))}
                     </ul>
@@ -1106,10 +1106,10 @@ const AdminExpenses = () => {
                       <DialogHeader><DialogTitle>{editingExpInstitutionId ? (bn ? 'শাখা সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন শাখা' : 'New Institution')}</DialogTitle></DialogHeader>
                       <div className="space-y-3">
                         <div>
-                          <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
+                          <Label>{bn ? 'প্রতিষ্ঠান' : 'Institution'} *</Label>
                           <Select value={expInstitutionForm.project_id} onValueChange={v => setExpInstitutionForm(f => ({ ...f, project_id: v }))}>
                             <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-                            <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
+                            <SelectContent>{expenseInstitutions.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={expInstitutionForm.name} onChange={e => setExpInstitutionForm(f => ({ ...f, name: e.target.value }))} /></div>
@@ -1123,7 +1123,7 @@ const AdminExpenses = () => {
                   {expenseInstitutions.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো শাখা নেই' : 'No institutions'}</p> : (
                     <ul className="space-y-2">
                       {expenseInstitutions.map((inst: any) => {
-                        const proj = projects.find((p: any) => p.id === inst.project_id);
+                        const proj = expenseInstitutions.find((p: any) => p.id === inst.project_id);
                         return (
                           <li key={inst.id} className="flex items-center justify-between p-2 rounded-[12px] bg-primary/5 border border-primary/10">
                             <div>
@@ -1154,10 +1154,10 @@ const AdminExpenses = () => {
                     <DialogHeader><DialogTitle>{editingCategoryId ? (bn ? 'ক্যাটেগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটেগরি' : 'New Category')}</DialogTitle></DialogHeader>
                     <div className="space-y-3">
                       <div>
-                        <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
+                        <Label>{bn ? 'প্রতিষ্ঠান' : 'Institution'} *</Label>
                         <Select value={categoryForm.project_id} onValueChange={v => setCategoryForm(f => ({ ...f, project_id: v, institution_id: '' }))}>
                           <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
-                          <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
+                          <SelectContent>{expenseInstitutions.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                       {categoryForm.project_id && expenseInstitutions.filter((i: any) => i.project_id === categoryForm.project_id).length > 0 && (
@@ -1340,7 +1340,7 @@ const AdminExpenses = () => {
                 </div>
 
                 {/* Per-project download */}
-                {projects.length > 0 && (
+                {expenseInstitutions.length > 0 && (
                   <div className="card-elevated p-4">
                     <div className="flex items-center justify-between mb-3">
                       <h4 className="text-sm font-semibold text-foreground">{bn ? 'প্রকল্প ভিত্তিক ডাউনলোড' : 'Per-Project Download'}</h4>
@@ -1357,7 +1357,7 @@ const AdminExpenses = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      {projects.map((p: any) => {
+                      {expenseInstitutions.map((p: any) => {
                         const projExp = expenses.filter((e: any) => e.institution_id === p.id);
                         const projTotal = projExp.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
                         if (projExp.length === 0) return null;
@@ -1368,13 +1368,13 @@ const AdminExpenses = () => {
                               <span className="text-xs text-muted-foreground ml-2">৳{formatNum(projTotal)}</span>
                             </div>
                             <div className="flex gap-1">
-                              <Button variant="outline" size="sm" onClick={() => setEditProjectEntriesId(p.id)}>
+                              <Button variant="outline" size="sm" onClick={() => setEditInstEntriesId(p.id)}>
                                 <Edit2 className="w-3 h-3 mr-1" />{bn ? 'এডিট' : 'Edit'}
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => setPrintProjectId(p.id)}>
+                              <Button variant="outline" size="sm" onClick={() => setPrintInstitutionId(p.id)}>
                                 <Printer className="w-3 h-3 mr-1" />{bn ? 'প্রিন্ট' : 'Print'}
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => handleProjectExcelDownload(p.id)}>
+                              <Button variant="outline" size="sm" onClick={() => handleInstExcelDownload(p.id)}>
                                 <Download className="w-3 h-3 mr-1" />{bn ? 'এক্সেল' : 'Excel'}
                               </Button>
                             </div>
@@ -1422,7 +1422,7 @@ const AdminExpenses = () => {
         </table>
 
         {/* Project & Category wise detailed breakdown */}
-        {projects.map((project: any) => {
+        {expenseInstitutions.map((project: any) => {
           const projExpenses = expenses.filter((e: any) => e.institution_id === project.id);
           if (projExpenses.length === 0) return null;
           const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
@@ -1431,7 +1431,7 @@ const AdminExpenses = () => {
           return (
             <div key={project.id} className="mb-6" style={{ pageBreakInside: 'avoid' }}>
               <h2 className="text-base font-bold mb-1 border-b pb-1">
-                {bn ? 'প্রকল্প' : 'Project'}: {bn ? project.name_bn : project.name}
+                {bn ? 'প্রতিষ্ঠান' : 'Institution'}: {bn ? project.name_bn : project.name}
                 <span className="float-right">{bn ? 'মোট' : 'Total'}: ৳{formatNum(projTotal)}</span>
               </h2>
               
@@ -1513,14 +1513,14 @@ const AdminExpenses = () => {
           <DialogHeader><DialogTitle>{editingExpenseId ? (bn ? 'খরচ সম্পাদনা' : 'Edit Expense') : (bn ? 'নতুন খরচ' : 'New Expense')}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
+              <Label>{bn ? 'প্রতিষ্ঠান' : 'Institution'} *</Label>
               <Select
                 value={expenseForm.institution_id || undefined}
                 onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, institution_id: '', category_id: '' }))}
               >
-                <SelectTrigger><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={bn ? 'প্রতিষ্ঠান নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
                 <SelectContent>
-                  {projects.map((project: any) => <SelectItem key={project.id} value={project.id}>{bn ? project.name_bn : project.name}</SelectItem>)}
+                  {expenseInstitutions.map((project: any) => <SelectItem key={project.id} value={project.id}>{bn ? project.name_bn : project.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -1695,14 +1695,14 @@ const AdminExpenses = () => {
       </Dialog>
 
       {/* Project Entries Edit Dialog */}
-      <Dialog open={!!editProjectEntriesId} onOpenChange={(open) => { if (!open) { setEditProjectEntriesId(null); setEntriesFilterCategoryId('all'); setEntriesSearchText(''); } }}>
+      <Dialog open={!!editInstEntriesId} onOpenChange={(open) => { if (!open) { setEditInstEntriesId(null); setEntriesFilterCategoryId('all'); setEntriesSearchText(''); } }}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = projects.find((p: any) => p.id === editProjectEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
+              <span>{bn ? 'প্রকল্পের এন্ট্রি সম্পাদনা' : 'Edit Project Entries'} — {(() => { const p = expenseInstitutions.find((p: any) => p.id === editInstEntriesId); return p ? (bn ? p.name_bn : p.name) : ''; })()}</span>
               <Button size="sm" onClick={() => {
-                const pid = editProjectEntriesId || '';
-                setEditProjectEntriesId(null);
+                const pid = editInstEntriesId || '';
+                setEditInstEntriesId(null);
                 setTimeout(() => { setExpenseForm({ ...defaultExpenseForm, project_id: pid }); setEditingExpenseId(null); setExpenseDialog(true); }, 150);
               }}>
                 <Plus className="w-3 h-3 mr-1" />{bn ? 'নতুন এন্ট্রি' : 'New Entry'}
@@ -1718,7 +1718,7 @@ const AdminExpenses = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সব ক্যাটেগরি' : 'All Categories'}</SelectItem>
-                {categories.filter((c: any) => c.institution_id === editProjectEntriesId).map((c: any) => (
+                {categories.filter((c: any) => c.institution_id === editInstEntriesId).map((c: any) => (
                   <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -1732,8 +1732,8 @@ const AdminExpenses = () => {
           </div>
 
           {(() => {
-            let projExpenses = expenses.filter((e: any) => e.institution_id === editProjectEntriesId);
-            const projCategories = categories.filter((c: any) => c.institution_id === editProjectEntriesId);
+            let projExpenses = expenses.filter((e: any) => e.institution_id === editInstEntriesId);
+            const projCategories = categories.filter((c: any) => c.institution_id === editInstEntriesId);
             if (projExpenses.length === 0) return <p className="text-sm text-muted-foreground">{bn ? 'কোনো এন্ট্রি নেই' : 'No entries'}</p>;
 
             // Apply category filter
@@ -1798,7 +1798,7 @@ const AdminExpenses = () => {
                               <TableCell>
                                 <div className="flex gap-1">
                                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                                    setEditProjectEntriesId(null);
+                                    setEditInstEntriesId(null);
                                     setTimeout(() => { openEditExpense(e); }, 150);
                                   }}>
                                     <Edit2 className="w-3 h-3" />
@@ -1824,8 +1824,8 @@ const AdminExpenses = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!printProjectId} onOpenChange={(open) => {
-        if (!open) { setPrintProjectId(null); setPrintEditMode(false); }
+      <Dialog open={!!printInstitutionId} onOpenChange={(open) => {
+        if (!open) { setPrintInstitutionId(null); setPrintEditMode(false); }
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
           <DialogHeader>
@@ -1885,11 +1885,11 @@ const AdminExpenses = () => {
             </div>
           ) : (
           (() => {
-            const project = projects.find((p: any) => p.id === printProjectId);
+            const project = expenseInstitutions.find((p: any) => p.id === printInstitutionId);
             if (!project) return null;
-            const projExpenses = expenses.filter((e: any) => e.institution_id === printProjectId);
+            const projExpenses = expenses.filter((e: any) => e.institution_id === printInstitutionId);
             const projTotal = projExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0);
-            const projCategories = categories.filter((c: any) => c.institution_id === printProjectId);
+            const projCategories = categories.filter((c: any) => c.institution_id === printInstitutionId);
             const ed = printEditData;
             const dInstName = ed.instName || (bn ? instName : instNameEn);
             const dInstAddress = ed.instAddress || instAddress;
@@ -1910,7 +1910,7 @@ const AdminExpenses = () => {
                   {dInstOther && <p className="text-xs">{dInstOther}</p>}
                   <p className="text-base font-semibold mt-2">{dReportTitle}</p>
                   {ed.reportSubtitle && <p className="text-sm">{ed.reportSubtitle}</p>}
-                  <p className="text-sm">{bn ? 'প্রকল্প' : 'Project'}: {bn ? project.name_bn : project.name} | {selectedMonthYear}</p>
+                  <p className="text-sm">{bn ? 'প্রতিষ্ঠান' : 'Institution'}: {bn ? project.name_bn : project.name} | {selectedMonthYear}</p>
                 </div>
 
                 {ed.extraNote && <p className="text-xs mb-3 italic border-l-2 border-primary pl-2">{ed.extraNote}</p>}
@@ -1971,7 +1971,7 @@ const AdminExpenses = () => {
           })()
           )}
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => { setPrintProjectId(null); setPrintEditMode(false); }}>{bn ? 'বন্ধ করুন' : 'Close'}</Button>
+            <Button variant="outline" onClick={() => { setPrintInstitutionId(null); setPrintEditMode(false); }}>{bn ? 'বন্ধ করুন' : 'Close'}</Button>
             {!printEditMode && (
               <Button onClick={() => {
                 const content = document.getElementById('project-print-content');
