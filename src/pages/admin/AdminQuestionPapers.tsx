@@ -111,7 +111,68 @@ const ArabicKeyboard = ({
   );
 };
 
-// ─── Status Badge Component ───
+const QUESTION_TYPES = [
+  { value: 'descriptive', labelBn: 'বর্ণনামূলক', labelEn: 'Descriptive' },
+  { value: 'mcq', labelBn: 'বহুনির্বাচনী (MCQ)', labelEn: 'MCQ' },
+  { value: 'short', labelBn: 'সংক্ষিপ্ত', labelEn: 'Short Answer' },
+  { value: 'fill_blank', labelBn: 'শূন্যস্থান পূরণ', labelEn: 'Fill in the Blank' },
+  { value: 'true_false', labelBn: 'সত্য/মিথ্যা', labelEn: 'True/False' },
+  { value: 'matching', labelBn: 'মিলকরণ', labelEn: 'Matching' },
+];
+
+const STATUS_CONFIG: Record<string, { label: string; labelBn: string; color: string; icon: any }> = {
+  pending: { label: 'Pending', labelBn: 'অপেক্ষমান', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock },
+  approved: { label: 'Approved', labelBn: 'অনুমোদিত', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', icon: Check },
+  rejected: { label: 'Rejected', labelBn: 'প্রত্যাখ্যাত', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: X },
+  revision: { label: 'Needs Revision', labelBn: 'সংশোধন প্রয়োজন', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: AlertCircle },
+};
+
+const FONT_PRESETS = {
+  arabic: [
+    { value: 'Amiri', label: 'Amiri' },
+    { value: 'Traditional Arabic', label: 'Traditional Arabic' },
+    { value: 'Noto Naskh Arabic', label: 'Noto Naskh Arabic' },
+    { value: 'Scheherazade New', label: 'Scheherazade New' },
+  ],
+  bengali: [
+    { value: 'SutonnyOMJ', label: 'SutonnyOMJ (Unicode)' },
+    { value: 'SutonnyMJ', label: 'SutonnyMJ (ASCII/Bijoy)' },
+    { value: 'Noto Sans Bengali', label: 'Noto Sans Bengali' },
+    { value: 'Hind Siliguri', label: 'Hind Siliguri' },
+  ],
+  english: [
+    { value: 'Arial', label: 'Arial' },
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Georgia', label: 'Georgia' },
+  ],
+};
+
+interface FontConfig {
+  arabic: string;
+  bengali: string;
+  english: string;
+  fontSize: number;
+}
+
+interface HeaderConfig {
+  showLogo: boolean;
+  showInstitutionName: boolean;
+  centered: boolean;
+}
+
+interface Question {
+  id?: string;
+  question_text: string;
+  question_text_bn: string;
+  question_type: string;
+  marks: number;
+  sort_order: number;
+  group_label: string;
+  group_label_bn: string;
+  options: any;
+  answer: string;
+}
+
 const StatusBadge = ({ status, language }: { status: string; language: string }) => {
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
   const Icon = config.icon;
