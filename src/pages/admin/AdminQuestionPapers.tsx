@@ -768,7 +768,7 @@ const AdminQuestionPapers = () => {
     if (selectedPaper && paperQuestions) {
       setQuestions(paperQuestions.map((q: any) => ({
         id: q.id, question_text: q.question_text || '', question_text_bn: q.question_text_bn || '',
-        question_type: q.question_type || 'descriptive', marks: q.marks || 5, sort_order: q.sort_order || 0,
+        question_type: q.question_type || 'descriptive', marks: q.marks ?? 0, sort_order: q.sort_order || 0,
         group_label: q.group_label || '', group_label_bn: q.group_label_bn || '',
         group_marks: q.group_marks ?? null,
         options: q.options, answer: q.answer || '',
