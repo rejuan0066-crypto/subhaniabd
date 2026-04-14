@@ -1440,7 +1440,7 @@ const AdminExpenses = () => {
               <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
               <Select
                 value={expenseForm.project_id || undefined}
-                onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, category_id: f.project_id === value ? f.category_id : '' }))}
+                onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, institution_id: '', category_id: '' }))}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
                 <SelectContent>
@@ -1448,6 +1448,20 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
             </div>
+            {expenseForm.project_id && filteredInstitutions.length > 0 && (
+              <div>
+                <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
+                <Select
+                  value={expenseForm.institution_id || undefined}
+                  onValueChange={value => setExpenseForm(f => ({ ...f, institution_id: value, category_id: '' }))}
+                >
+                  <SelectTrigger className="rounded-[12px] border-primary/30 focus:ring-primary/20"><SelectValue placeholder={bn ? 'শাখা নির্বাচন করুন' : 'Select institution'} /></SelectTrigger>
+                  <SelectContent>
+                    {filteredInstitutions.map((inst: any) => <SelectItem key={inst.id} value={inst.id}><Building2 className="w-3 h-3 inline mr-1.5 text-primary" />{bn ? inst.name_bn : inst.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
               <Select
