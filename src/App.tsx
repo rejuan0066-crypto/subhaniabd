@@ -176,6 +176,7 @@ const App = () => (
       <LanguageProvider>
         <AuthProvider>
           <ThemeProvider>
+            <BijoyProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
