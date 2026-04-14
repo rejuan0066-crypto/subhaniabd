@@ -275,6 +275,7 @@ interface LayoutSettings {
   headerStyle: 'simple' | 'decorative' | 'classic';
   questionLabelBn: string;
   questionLabelEn: string;
+  showQuestionMarks: boolean;
 }
 
 const DEFAULT_LAYOUT: LayoutSettings = {
@@ -289,6 +290,7 @@ const DEFAULT_LAYOUT: LayoutSettings = {
   headerStyle: 'simple',
   questionLabelBn: 'প্রশ্ন (বাংলা/আরবি)',
   questionLabelEn: 'Question (BN/AR)',
+  showQuestionMarks: true,
 };
 
 interface Question {
@@ -417,7 +419,9 @@ const LivePreview = ({ paper, questions, fontConfig, headerConfig, institution, 
         ) : null}
         <div className="flex justify-between text-sm" dir={isArabic ? 'rtl' : 'ltr'}>
           <span> {qText || (language === 'bn' ? '(প্রশ্ন লিখুন)' : '(Enter question)')}</span>
-          <span className="text-gray-500 shrink-0 ml-2">[{language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span>
+          {layout.showQuestionMarks && (
+            <span className="text-gray-500 shrink-0 ml-2">[{language === 'bn' ? toBengaliNum(q.marks) : q.marks}]</span>
+          )}
         </div>
         {q.question_type === 'mcq' && Array.isArray(q.options) && (
           <div className="ml-6 mt-1 grid grid-cols-2 gap-x-4 text-xs">
@@ -566,6 +570,10 @@ const LayoutSettingsPanel = ({ layout, setLayout, language }: { layout: LayoutSe
           <label className="flex items-center gap-2 text-xs whitespace-nowrap">
             <Switch checked={layout.watermark} onCheckedChange={v => setLayout({ ...layout, watermark: v })} />
             {language === 'bn' ? 'ওয়াটারমার্ক' : 'Watermark'}
+          </label>
+          <label className="flex items-center gap-2 text-xs whitespace-nowrap">
+            <Switch checked={layout.showQuestionMarks} onCheckedChange={v => setLayout({ ...layout, showQuestionMarks: v })} />
+            {language === 'bn' ? 'প্রশ্নের নম্বর' : 'Question Marks'}
           </label>
         </div>
 
