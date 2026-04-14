@@ -25,70 +25,32 @@ const ARABIC_KEYBOARD_ROWS = [
   ['ً', 'ٌ', 'ٍ', 'َ', 'ُ', 'ِ', 'ّ', 'ْ'],
 ];
 
-const QUESTION_TYPES = [
-  { value: 'descriptive', labelBn: 'বর্ণনামূলক', labelEn: 'Descriptive' },
-  { value: 'mcq', labelBn: 'বহুনির্বাচনী (MCQ)', labelEn: 'MCQ' },
-  { value: 'short', labelBn: 'সংক্ষিপ্ত', labelEn: 'Short Answer' },
-  { value: 'fill_blank', labelBn: 'শূন্যস্থান পূরণ', labelEn: 'Fill in the Blank' },
-  { value: 'true_false', labelBn: 'সত্য/মিথ্যা', labelEn: 'True/False' },
-  { value: 'matching', labelBn: 'মিলকরণ', labelEn: 'Matching' },
-];
-
-const STATUS_CONFIG: Record<string, { label: string; labelBn: string; color: string; icon: any }> = {
-  pending: { label: 'Pending', labelBn: 'অপেক্ষমান', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', icon: Clock },
-  approved: { label: 'Approved', labelBn: 'অনুমোদিত', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', icon: Check },
-  rejected: { label: 'Rejected', labelBn: 'প্রত্যাখ্যাত', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: X },
-  revision: { label: 'Needs Revision', labelBn: 'সংশোধন প্রয়োজন', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: AlertCircle },
+// Physical keyboard → Arabic character mapping (standard Arabic keyboard layout)
+const PHYSICAL_TO_ARABIC: Record<string, string> = {
+  'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح',
+  '[': 'ج', ']': 'د', 'a': 'ش', 's': 'س', 'd': 'ي', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن',
+  'l': 'م', ';': 'ك', "'": 'ط', 'z': 'ئ', 'x': 'ء', 'c': 'ؤ', 'v': 'ر', 'b': 'لا', 'n': 'ى', 'm': 'ة',
+  ',': 'و', '.': 'ز', '/': 'ظ',
+  // Shift variants (harakat)
+  'Q': 'َ', 'W': 'ً', 'E': 'ُ', 'R': 'ٌ', 'T': 'ِ', 'Y': 'ٍ', 'U': 'ّ', 'I': 'ْ',
 };
 
-const FONT_PRESETS = {
-  arabic: [
-    { value: 'Amiri', label: 'Amiri' },
-    { value: 'Traditional Arabic', label: 'Traditional Arabic' },
-    { value: 'Noto Naskh Arabic', label: 'Noto Naskh Arabic' },
-    { value: 'Scheherazade New', label: 'Scheherazade New' },
-  ],
-  bengali: [
-    { value: 'SutonnyOMJ', label: 'SutonnyOMJ (Unicode)' },
-    { value: 'SutonnyMJ', label: 'SutonnyMJ (ASCII/Bijoy)' },
-    { value: 'Noto Sans Bengali', label: 'Noto Sans Bengali' },
-    { value: 'Hind Siliguri', label: 'Hind Siliguri' },
-  ],
-  english: [
-    { value: 'Arial', label: 'Arial' },
-    { value: 'Times New Roman', label: 'Times New Roman' },
-    { value: 'Georgia', label: 'Georgia' },
-  ],
-};
-
-interface Question {
-  id?: string;
-  question_text: string;
-  question_text_bn: string;
-  question_type: string;
-  marks: number;
-  sort_order: number;
-  group_label: string;
-  group_label_bn: string;
-  options: any;
-  answer: string;
-}
-
-interface FontConfig {
-  arabic: string;
-  bengali: string;
-  english: string;
-  fontSize: number;
-}
-
-interface HeaderConfig {
-  showLogo: boolean;
-  showInstitutionName: boolean;
-  centered: boolean;
+// Reverse map: Arabic char → physical key (for highlighting)
+const ARABIC_TO_PHYSICAL: Record<string, string> = {};
+for (const [phys, ar] of Object.entries(PHYSICAL_TO_ARABIC)) {
+  ARABIC_TO_PHYSICAL[ar] = phys;
 }
 
 // ─── Arabic Keyboard Component ───
-const ArabicKeyboard = ({ onKeyPress, onClose }: { onKeyPress: (char: string) => void; onClose: () => void }) => {
+const ArabicKeyboard = ({
+  onKeyPress,
+  onClose,
+  highlightedKey,
+}: {
+  onKeyPress: (char: string) => void;
+  onClose: () => void;
+  highlightedKey: string | null;
+}) => {
   const [position, setPosition] = useState({ x: 100, y: 300 });
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -118,24 +80,32 @@ const ArabicKeyboard = ({ onKeyPress, onClose }: { onKeyPress: (char: string) =>
     >
       <div className="flex items-center justify-between mb-2 px-1">
         <span className="text-xs font-semibold text-muted-foreground">⌨️ Arabic Keyboard</span>
+        <span className="text-[10px] text-muted-foreground mx-2">Physical keys mapped when AR is ON</span>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}><X className="h-3 w-3" /></Button>
       </div>
       {ARABIC_KEYBOARD_ROWS.map((row, ri) => (
-        <div key={ri} className="flex gap-1 justify-center mb-1">
-          {row.map((char) => (
-            <button
-              key={char}
-              className="h-9 min-w-[2.2rem] px-1.5 rounded-lg bg-secondary/80 hover:bg-primary/20 hover:text-primary text-base font-medium transition-colors active:scale-95"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onKeyPress(char); }}
-            >
-              {char}
-            </button>
-          ))}
+        <div key={ri} className="flex gap-1 justify-center mb-1" dir="rtl">
+          {row.map((char) => {
+            const isHighlighted = highlightedKey === char;
+            return (
+              <button
+                key={char}
+                className={`h-9 min-w-[2.2rem] px-1.5 rounded-lg text-base font-medium transition-all duration-100
+                  ${isHighlighted
+                    ? 'bg-primary text-primary-foreground scale-110 shadow-md'
+                    : 'bg-secondary/80 hover:bg-primary/20 hover:text-primary active:scale-95'
+                  }`}
+                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); onKeyPress(char); }}
+              >
+                {char}
+              </button>
+            );
+          })}
         </div>
       ))}
       <div className="flex gap-1 justify-center mt-1">
-        <button className="h-9 px-6 rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onClick={() => onKeyPress(' ')}>Space</button>
-        <button className="h-9 px-4 rounded-lg bg-secondary/80 hover:bg-destructive/20 text-sm transition-colors" onClick={() => onKeyPress('BACKSPACE')}>⌫</button>
+        <button className="h-9 px-6 rounded-lg bg-secondary/80 hover:bg-primary/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress(' '); }}>Space</button>
+        <button className="h-9 px-4 rounded-lg bg-secondary/80 hover:bg-destructive/20 text-sm transition-colors" onMouseDown={(e) => { e.preventDefault(); onKeyPress('BACKSPACE'); }}>⌫</button>
       </div>
     </div>
   );
