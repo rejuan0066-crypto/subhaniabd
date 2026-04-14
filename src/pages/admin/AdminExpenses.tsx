@@ -228,11 +228,39 @@ const AdminExpenses = () => {
   const currentArrears = rawCash < 0 ? Math.abs(rawCash) : 0;
   const totalArrears = previousArrears + currentArrears;
 
-  const totalExpenseAll = useMemo(() => allExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [allExpenses]);
-  const totalDepositAll = useMemo(() => allDeposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [allDeposits]);
+  // Helper: check if month_year matches current filter
+  const matchesFilter = (monthYear: string) => {
+    if (filterMode === 'yearly') {
+      return monthYear.endsWith(`-${selectedYear}`);
+    }
+    if (filterMode === 'session') {
+      const session = academicSessions.find((s: any) => s.id === selectedSessionId);
+      if (!session || !session.start_date || !session.end_date) return false;
+      // Extract year and month from month_year (e.g., "January-2026")
+      const parts = monthYear.split('-');
+      const yr = parseInt(parts[1]);
+      const mi = MONTHS.indexOf(parts[0]);
+      if (mi < 0) return false;
+      const entryDate = new Date(yr, mi, 15); // mid-month
+      return entryDate >= new Date(session.start_date) && entryDate <= new Date(session.end_date);
+    }
+    return true; // monthly mode - show all for "total" row
+  };
+
+  const filteredExpenses = useMemo(() => allExpenses.filter((e: any) => matchesFilter(e.month_year)), [allExpenses, filterMode, selectedYear, selectedSessionId, academicSessions]);
+  const filteredDeposits = useMemo(() => allDeposits.filter((d: any) => matchesFilter(d.month_year)), [allDeposits, filterMode, selectedYear, selectedSessionId, academicSessions]);
+
+  const totalExpenseAll = useMemo(() => filteredExpenses.reduce((s: number, e: any) => s + Number(e.amount || 0), 0), [filteredExpenses]);
+  const totalDepositAll = useMemo(() => filteredDeposits.reduce((s: number, d: any) => s + Number(d.amount || 0), 0), [filteredDeposits]);
   const rawCashAll = totalDepositAll - totalExpenseAll;
   const totalCashAll = rawCashAll >= 0 ? rawCashAll : 0;
   const totalArrearsAll = rawCashAll < 0 ? Math.abs(rawCashAll) : 0;
+
+  const filterLabel = filterMode === 'yearly' 
+    ? (bn ? `${selectedYear} সাল` : `Year ${selectedYear}`)
+    : filterMode === 'session'
+    ? (bn ? (academicSessions.find((s: any) => s.id === selectedSessionId)?.name_bn || 'সেশন') : (academicSessions.find((s: any) => s.id === selectedSessionId)?.name || 'Session'))
+    : (bn ? 'সর্বমোট' : 'Grand Total');
 
   // Institution-wise breakdown
   const institutionBreakdown = useMemo(() => {
