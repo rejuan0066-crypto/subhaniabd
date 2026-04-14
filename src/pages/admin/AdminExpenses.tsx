@@ -848,8 +848,27 @@ const AdminExpenses = () => {
                       <span className="ml-2 text-[11px] opacity-80">৳{formatNum(getInstMonthly(p.id))}</span>
                     </button>
                   ))}
-                  <div className="ml-auto text-sm font-semibold text-destructive">
-                    {bn ? 'মোট:' : 'Total:'} ৳{formatNum(monthlyTotalExpense)}
+                  <div className="ml-auto flex items-center gap-3">
+                    <span className="text-sm font-semibold text-destructive">
+                      {bn ? 'মোট:' : 'Total:'} ৳{formatNum(monthlyTotalExpense)}
+                    </span>
+                    {canAddItem && !selectedInstId && (
+                      <motion.button
+                        whileHover={{ scale: 1.04, boxShadow: '0 8px 32px -4px rgba(16,185,129,0.45)' }}
+                        whileTap={{ scale: 0.92 }}
+                        onClick={() => {
+                          setReceiptFile(null);
+                          setEditingExpenseId(null);
+                          setExpenseForm(defaultExpenseForm);
+                          setExpenseDialog(true);
+                        }}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[16px] text-sm font-semibold tracking-wide text-white border border-white/20 backdrop-blur-sm transition-all duration-300"
+                        style={{ background: 'linear-gradient(135deg, hsl(160 84% 30%), hsl(160 70% 36%))', boxShadow: '0 4px 20px -4px rgba(16,185,129,0.35)' }}
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>{bn ? 'খরচ যোগ করুন' : 'Add Expense'}</span>
+                      </motion.button>
+                    )}
                   </div>
                 </div>
 
