@@ -41,7 +41,7 @@ const MONTHS_BN = [
 ];
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
+const years = Array.from({ length: 20 }, (_, i) => currentYear - 5 + i);
 
 const getMonthYearOptions = (lang: string) => {
   const m = lang === 'bn' ? MONTHS_BN : MONTHS;
