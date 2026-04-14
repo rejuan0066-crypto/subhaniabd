@@ -875,17 +875,23 @@ const AdminExpenses = () => {
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {instCategories.map((c: any) => (
-                      <div key={c.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCategoryId(c.id)}>
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                          <TagIcon className="w-5 h-5 text-primary" />
+                      <motion.div
+                        key={c.id}
+                        whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(16,185,129,0.12)' }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center gap-3 cursor-pointer rounded-2xl border border-emerald-200/20 dark:border-emerald-800/20 bg-white/60 dark:bg-white/5 backdrop-blur-lg p-4 hover:border-emerald-300/40"
+                        onClick={() => setSelectedCategoryId(c.id)}
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+                          <TagIcon className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-semibold text-foreground text-sm leading-tight truncate">{bn ? c.name_bn : c.name}</h4>
                           <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
-                            <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-medium">৳{formatNum(getCategoryMonthly(c.id))}</span></span>
+                            <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-rose-500 font-medium">৳{formatNum(getCategoryMonthly(c.id))}</span></span>
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
