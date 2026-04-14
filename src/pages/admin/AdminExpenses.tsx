@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine } from 'lucide-react';
+import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2 } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 
 const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লিটার', 'ফুট', 'মিটার', 'সেট', 'প্যাকেট', 'বস্তা', 'রিম'];
@@ -86,12 +86,15 @@ const AdminExpenses = () => {
   const [editingDepositId, setEditingDepositId] = useState<string | null>(null);
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingExpInstitutionId, setEditingExpInstitutionId] = useState<string | null>(null);
+  const [expInstitutionDialog, setExpInstitutionDialog] = useState(false);
+  const [expInstitutionForm, setExpInstitutionForm] = useState({ project_id: '', name: '', name_bn: '' });
 
   // Form states
-  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
+  const defaultExpenseForm = { project_id: '', institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
-  const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
+  const [categoryForm, setCategoryForm] = useState({ project_id: '', institution_id: '', name: '', name_bn: '' });
   const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
   const [depositForm, setDepositForm] = useState(defaultDepositForm);
   const [institutionForm, setInstitutionForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' });
@@ -115,6 +118,15 @@ const AdminExpenses = () => {
       const { data, error } = await supabase.from('expense_categories').select('*, expense_projects(name, name_bn)').order('name');
       if (error) throw error;
       return data;
+    }
+  });
+
+  const { data: expenseInstitutions = [] } = useQuery({
+    queryKey: ['expense_institutions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('expense_institutions').select('*').eq('is_active', true).order('sort_order');
+      if (error) throw error;
+      return data as any[];
     }
   });
 
@@ -272,8 +284,31 @@ const AdminExpenses = () => {
         if (error) throw error;
       }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_categories'] }); setCategoryDialog(false); setCategoryForm({ project_id: '', name: '', name_bn: '' }); setEditingCategoryId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_categories'] }); setCategoryDialog(false); setCategoryForm({ project_id: '', institution_id: '', name: '', name_bn: '' }); setEditingCategoryId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
+  });
+
+  const addExpInstitution = useMutation({
+    mutationFn: async () => {
+      if (!expInstitutionForm.project_id || !expInstitutionForm.name || !expInstitutionForm.name_bn) { toast.error(bn ? 'সব তথ্য পূরণ করুন' : 'Fill all fields'); return; }
+      if (editingExpInstitutionId) {
+        const { error } = await supabase.from('expense_institutions').update({ name: expInstitutionForm.name, name_bn: expInstitutionForm.name_bn, project_id: expInstitutionForm.project_id }).eq('id', editingExpInstitutionId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('expense_institutions').insert(expInstitutionForm);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); setExpInstitutionDialog(false); setExpInstitutionForm({ project_id: '', name: '', name_bn: '' }); setEditingExpInstitutionId(null); toast.success(bn ? 'সংরক্ষিত' : 'Saved'); },
+    onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error occurred')
+  });
+
+  const deleteExpInstitution = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('expense_institutions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expense_institutions'] }); toast.success(bn ? 'মুছে ফেলা হয়েছে' : 'Deleted'); }
   });
 
   const addExpense = useMutation({
@@ -437,7 +472,13 @@ const AdminExpenses = () => {
     onError: () => toast.error(bn ? 'ত্রুটি হয়েছে' : 'Error')
   });
 
-  const filteredCategories = categories.filter((c: any) => !expenseForm.project_id || c.project_id === expenseForm.project_id);
+  const filteredInstitutions = expenseInstitutions.filter((inst: any) => inst.project_id === expenseForm.project_id);
+  const filteredCategories = categories.filter((c: any) => {
+    if (!expenseForm.project_id) return false;
+    if (c.project_id !== expenseForm.project_id) return false;
+    if (expenseForm.institution_id && (c as any).institution_id && (c as any).institution_id !== expenseForm.institution_id) return false;
+    return true;
+  });
   const selectedExpenseProject = projects.find((p: any) => p.id === expenseForm.project_id);
   const selectedExpenseCategory = categories.find((c: any) => c.id === expenseForm.category_id);
 
@@ -481,7 +522,9 @@ const AdminExpenses = () => {
     setEditingExpenseId(e.id);
     const method = getMethod(e.description);
     const isKnownMethod = EXPENSE_METHODS.includes(method);
-    setExpenseForm({ project_id: e.project_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    const cat = categories.find((c: any) => c.id === e.category_id);
+    const instId = (cat as any)?.institution_id || '';
+    setExpenseForm({ project_id: e.project_id, institution_id: instId, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
@@ -623,13 +666,13 @@ const AdminExpenses = () => {
 
   const openEditCategory = (c: any) => {
     setEditingCategoryId(c.id);
-    setCategoryForm({ project_id: c.project_id, name: c.name, name_bn: c.name_bn });
+    setCategoryForm({ project_id: c.project_id, institution_id: (c as any).institution_id || '', name: c.name, name_bn: c.name_bn });
     setCategoryDialog(true);
   };
   const resetExpenseDialog = (open: boolean) => { if (!open) { setEditingExpenseId(null); setExpenseForm(defaultExpenseForm); } setExpenseDialog(open); };
   const resetDepositDialog = (open: boolean) => { if (!open) { setEditingDepositId(null); setDepositForm(defaultDepositForm); } setDepositDialog(open); };
   const resetProjectDialog = (open: boolean) => { if (!open) { setEditingProjectId(null); setProjectForm({ name: '', name_bn: '' }); } setProjectDialog(open); };
-  const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
+  const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ project_id: '', institution_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
     <AdminLayout>
@@ -1065,46 +1108,106 @@ const AdminExpenses = () => {
                 </CardContent>
               </Card>
 
-              {/* Categories */}
+              {/* Expense Institutions */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-base">{bn ? 'ক্যাটেগরি' : 'Categories'}</CardTitle>
-                  <Dialog open={categoryDialog} onOpenChange={resetCategoryDialog}>
-                    <DialogTrigger asChild><Button size="sm" variant="outline"><TagIcon className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
+                  <CardTitle className="text-base">{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institutions'}</CardTitle>
+                  <Dialog open={expInstitutionDialog} onOpenChange={(open) => { if (!open) { setEditingExpInstitutionId(null); setExpInstitutionForm({ project_id: '', name: '', name_bn: '' }); } setExpInstitutionDialog(open); }}>
+                    <DialogTrigger asChild><Button size="sm" variant="outline"><Building2 className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
                     <DialogContent>
-                      <DialogHeader><DialogTitle>{editingCategoryId ? (bn ? 'ক্যাটেগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটেগরি' : 'New Category')}</DialogTitle></DialogHeader>
+                      <DialogHeader><DialogTitle>{editingExpInstitutionId ? (bn ? 'শাখা সম্পাদনা' : 'Edit Institution') : (bn ? 'নতুন শাখা' : 'New Institution')}</DialogTitle></DialogHeader>
                       <div className="space-y-3">
                         <div>
                           <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
-                          <Select value={categoryForm.project_id} onValueChange={v => setCategoryForm(f => ({ ...f, project_id: v }))}>
+                          <Select value={expInstitutionForm.project_id} onValueChange={v => setExpInstitutionForm(f => ({ ...f, project_id: v }))}>
                             <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
                             <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
-                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} /></div>
-                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={categoryForm.name_bn} onChange={e => setCategoryForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
-                        <Button className="w-full" onClick={() => addCategory.mutate()} disabled={addCategory.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                        <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={expInstitutionForm.name} onChange={e => setExpInstitutionForm(f => ({ ...f, name: e.target.value }))} /></div>
+                        <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={expInstitutionForm.name_bn} onChange={e => setExpInstitutionForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
+                        <Button className="w-full" onClick={() => addExpInstitution.mutate()} disabled={addExpInstitution.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </CardHeader>
                 <CardContent>
-                  {categories.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটেগরি নেই' : 'No categories'}</p> : (
+                  {expenseInstitutions.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো শাখা নেই' : 'No institutions'}</p> : (
                     <ul className="space-y-2">
-                      {categories.map((c: any) => (
-                        <li key={c.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
-                          <div>
-                            <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
-                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
-                          </div>
-                          <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
-                        </li>
-                      ))}
+                      {expenseInstitutions.map((inst: any) => {
+                        const proj = projects.find((p: any) => p.id === inst.project_id);
+                        return (
+                          <li key={inst.id} className="flex items-center justify-between p-2 rounded-[12px] bg-primary/5 border border-primary/10">
+                            <div>
+                              <Building2 className="w-3.5 h-3.5 inline mr-1.5 text-primary" />
+                              <span className="text-sm font-medium">{bn ? inst.name_bn : inst.name}</span>
+                              {proj && <span className="text-xs text-muted-foreground ml-2">({bn ? proj.name_bn : proj.name})</span>}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" onClick={() => { setEditingExpInstitutionId(inst.id); setExpInstitutionForm({ project_id: inst.project_id, name: inst.name, name_bn: inst.name_bn }); setExpInstitutionDialog(true); }}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => { if (confirm(bn ? 'মুছে ফেলতে চান?' : 'Delete?')) deleteExpInstitution.mutate(inst.id); }}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </CardContent>
               </Card>
             </div>
+
+            {/* Categories - full width below */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-base">{bn ? 'ক্যাটেগরি' : 'Categories'}</CardTitle>
+                <Dialog open={categoryDialog} onOpenChange={resetCategoryDialog}>
+                  <DialogTrigger asChild><Button size="sm" variant="outline"><TagIcon className="w-4 h-4 mr-1" />{bn ? 'যোগ' : 'Add'}</Button></DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>{editingCategoryId ? (bn ? 'ক্যাটেগরি সম্পাদনা' : 'Edit Category') : (bn ? 'নতুন ক্যাটেগরি' : 'New Category')}</DialogTitle></DialogHeader>
+                    <div className="space-y-3">
+                      <div>
+                        <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
+                        <Select value={categoryForm.project_id} onValueChange={v => setCategoryForm(f => ({ ...f, project_id: v, institution_id: '' }))}>
+                          <SelectTrigger><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select'} /></SelectTrigger>
+                          <SelectContent>{projects.map((p: any) => <SelectItem key={p.id} value={p.id}>{bn ? p.name_bn : p.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      {categoryForm.project_id && expenseInstitutions.filter((i: any) => i.project_id === categoryForm.project_id).length > 0 && (
+                        <div>
+                          <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
+                          <Select value={categoryForm.institution_id || undefined} onValueChange={v => setCategoryForm(f => ({ ...f, institution_id: v }))}>
+                            <SelectTrigger className="rounded-[12px] border-primary/30"><SelectValue placeholder={bn ? 'শাখা নির্বাচন' : 'Select institution'} /></SelectTrigger>
+                            <SelectContent>{expenseInstitutions.filter((i: any) => i.project_id === categoryForm.project_id).map((i: any) => <SelectItem key={i.id} value={i.id}><Building2 className="w-3 h-3 inline mr-1 text-primary" />{bn ? i.name_bn : i.name}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <div><Label>{bn ? 'নাম (ইংরেজি)' : 'Name (English)'} *</Label><Input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} /></div>
+                      <div><Label>{bn ? 'নাম (বাংলা)' : 'Name (Bangla)'} *</Label><Input value={categoryForm.name_bn} onChange={e => setCategoryForm(f => ({ ...f, name_bn: e.target.value }))} /></div>
+                      <Button className="w-full" onClick={() => addCategory.mutate()} disabled={addCategory.isPending}>{bn ? 'সংরক্ষণ' : 'Save'}</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {categories.length === 0 ? <p className="text-sm text-muted-foreground">{bn ? 'কোনো ক্যাটেগরি নেই' : 'No categories'}</p> : (
+                  <ul className="space-y-2">
+                    {categories.map((c: any) => {
+                      const catInst = expenseInstitutions.find((i: any) => i.id === (c as any).institution_id);
+                      return (
+                        <li key={c.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/30">
+                          <div>
+                            <span className="text-sm font-medium">{bn ? c.name_bn : c.name}</span>
+                            <span className="text-xs text-muted-foreground ml-2">({bn ? (c as any).expense_projects?.name_bn : (c as any).expense_projects?.name})</span>
+                            {catInst && <span className="text-xs text-primary ml-1">• {bn ? catInst.name_bn : catInst.name}</span>}
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={() => openEditCategory(c)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Summary Tab */}
@@ -1425,7 +1528,7 @@ const AdminExpenses = () => {
               <Label>{bn ? 'প্রকল্প' : 'Project'} *</Label>
               <Select
                 value={expenseForm.project_id || undefined}
-                onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, category_id: f.project_id === value ? f.category_id : '' }))}
+                onValueChange={value => setExpenseForm(f => ({ ...f, project_id: value, institution_id: '', category_id: '' }))}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'প্রকল্প নির্বাচন করুন' : 'Select project'} /></SelectTrigger>
                 <SelectContent>
@@ -1433,6 +1536,20 @@ const AdminExpenses = () => {
                 </SelectContent>
               </Select>
             </div>
+            {expenseForm.project_id && filteredInstitutions.length > 0 && (
+              <div>
+                <Label>{bn ? 'শাখা/প্রতিষ্ঠান' : 'Institution'}</Label>
+                <Select
+                  value={expenseForm.institution_id || undefined}
+                  onValueChange={value => setExpenseForm(f => ({ ...f, institution_id: value, category_id: '' }))}
+                >
+                  <SelectTrigger className="rounded-[12px] border-primary/30 focus:ring-primary/20"><SelectValue placeholder={bn ? 'শাখা নির্বাচন করুন' : 'Select institution'} /></SelectTrigger>
+                  <SelectContent>
+                    {filteredInstitutions.map((inst: any) => <SelectItem key={inst.id} value={inst.id}><Building2 className="w-3 h-3 inline mr-1.5 text-primary" />{bn ? inst.name_bn : inst.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
               <Select
