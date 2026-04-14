@@ -87,6 +87,7 @@ import AdminIdCards from "./pages/admin/AdminIdCards";
 import AdminClassRoutine from "./pages/admin/AdminClassRoutine";
 import AdminExamRoutine from "./pages/admin/AdminExamRoutine";
 import AdminStudentPromotion from "./pages/admin/AdminStudentPromotion";
+import AdminQuestionPapers from "./pages/admin/AdminQuestionPapers";
 import NotFound from "./pages/NotFound";
 import AttendanceCheckin from "./pages/AttendanceCheckin";
 import StaffCheckin from "./pages/StaffCheckin";
