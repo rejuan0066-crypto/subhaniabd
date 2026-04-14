@@ -655,7 +655,7 @@ const AdminExpenses = () => {
   const resetCategoryDialog = (open: boolean) => { if (!open) { setEditingCategoryId(null); setCategoryForm({ institution_id: '', name: '', name_bn: '' }); } setCategoryDialog(open); };
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6 relative">
         {/* Glassmorphism Container */}
         <div className="rounded-3xl border border-emerald-200/30 bg-white/40 dark:bg-white/5 backdrop-blur-xl p-6 space-y-6" style={{ boxShadow: '0 8px 32px rgba(16,185,129,0.06)' }}>
