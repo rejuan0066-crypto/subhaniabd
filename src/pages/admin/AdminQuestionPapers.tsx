@@ -280,6 +280,7 @@ const AdminQuestionPapers = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [showArabicKeyboard, setShowArabicKeyboard] = useState(false);
   const [activeInputRef, setActiveInputRef] = useState<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const [highlightedArabicKey, setHighlightedArabicKey] = useState<string | null>(null);
   const [showFontPanel, setShowFontPanel] = useState(false);
   const [rejectionNote, setRejectionNote] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
