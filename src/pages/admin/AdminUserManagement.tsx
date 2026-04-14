@@ -507,8 +507,12 @@ const AdminUserManagement = () => {
     const roleInfo = customRoles.find(cr => cr.name === r || cr.base_role === r);
     const colors: Record<string, string> = {
       admin: 'bg-destructive/10 text-destructive border-destructive/30',
+      super_admin: 'bg-destructive/10 text-destructive border-destructive/30',
       teacher: 'bg-primary/10 text-primary border-primary/30',
       staff: 'bg-accent/50 text-accent-foreground border-accent',
+      administrative: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+      support: 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-900/30 dark:text-cyan-300 dark:border-cyan-700',
+      general: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-600',
     };
     const displayName = roleInfo ? (bn ? roleInfo.name_bn : roleInfo.name) : r;
     return <Badge variant="outline" className={colors[r] || 'bg-secondary/50 text-secondary-foreground border-secondary'}>{displayName}</Badge>;
