@@ -88,10 +88,10 @@ const AdminExpenses = () => {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   // Form states
-  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
+  const defaultExpenseForm = { project_id: '', institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
-  const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
+  const [categoryForm, setCategoryForm] = useState({ project_id: '', institution_id: '', name: '', name_bn: '' });
   const [expenseForm, setExpenseForm] = useState(defaultExpenseForm);
   const [depositForm, setDepositForm] = useState(defaultDepositForm);
   const [institutionForm, setInstitutionForm] = useState({ name: '', name_en: '', address: '', phone: '', email: '', other_info: '', logo_url: '' });
