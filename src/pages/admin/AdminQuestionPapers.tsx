@@ -331,8 +331,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
             <h1 className="text-sm font-bold mt-0.5">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
             {subjectName && <p className="text-xs">📖 {subjectName}</p>}
             <div className="flex justify-between mt-1.5 text-[10px] font-medium">
-              <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
-              <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+              <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+              <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
             </div>
           </div>
         </div>
@@ -355,8 +355,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
         </div>
         <div className="flex justify-between items-center mt-1 text-[10px]">
           {subjectName && <span className="font-medium">📖 {subjectName}</span>}
-          <span>{language === 'bn' ? 'পূর্ণমান' : 'Marks'}: {totalMarks}</span>
-          <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+          <span>{language === 'bn' ? 'পূর্ণমান' : 'Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+          <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
         </div>
       </div>
     );
@@ -371,8 +371,8 @@ const renderHeader = (style: string, paper: any, institution: any, language: str
       <h1 className="text-base font-bold mt-1">{language === 'bn' ? paper?.title_bn : paper?.title}</h1>
       {subjectName && <p className="text-sm">📖 {subjectName}</p>}
       <div className="flex justify-between mt-2 text-xs">
-        <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {totalMarks}</span>
-        <span>{language === 'bn' ? 'সময়' : 'Time'}: {paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
+        <span>{language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}</span>
+        <span>{language === 'bn' ? 'সময়' : 'Time'}: {language === 'bn' ? toBengaliNum(paper?.duration_minutes || 0) : paper?.duration_minutes} {language === 'bn' ? 'মিনিট' : 'min'}</span>
       </div>
     </div>
   );
@@ -949,13 +949,15 @@ const AdminQuestionPapers = () => {
       const sessionHtml = sessionName ? `<p style="font-size:13px;font-weight:600;margin:4px 0">${sessionName}</p>` : '';
       const titleHtml = `<h1 style="font-size:16px;font-weight:700;margin:4px 0">${language === 'bn' ? selectedPaper.title_bn : selectedPaper.title}</h1>`;
       const subjectHtml = subjectName ? `<p style="font-size:13px;margin:2px 0">📖 ${subjectName}</p>` : '';
-      const metaHtml = `<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px"><span>${language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: ${totalMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${selectedPaper.duration_minutes} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div>`;
+      const bnMarks = language === 'bn' ? toBengaliNum(totalMarks) : totalMarks;
+      const bnDur = language === 'bn' ? toBengaliNum(selectedPaper.duration_minutes) : selectedPaper.duration_minutes;
+      const metaHtml = `<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px"><span>${language === 'bn' ? 'পূর্ণমান' : 'Full Marks'}: ${bnMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${bnDur} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div>`;
 
       if (ls.headerStyle === 'decorative') {
         return `<div style="text-align:center;margin-bottom:16px;padding:12px;border:2px solid #000;border-radius:8px"><div style="border:1px solid rgba(0,0,0,0.3);padding:8px;border-radius:4px">${logoHtml}${nameHtml}${addressHtml}<div style="border-top:1px dashed rgba(0,0,0,0.3);margin:6px 0"></div>${sessionHtml}${titleHtml}${subjectHtml}${metaHtml}</div></div>`;
       }
       if (ls.headerStyle === 'classic') {
-        return `<div style="text-align:center;margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px">${logoHtml ? logoHtml.replace('display:block', 'display:inline') : ''}<div>${nameHtml}${addressHtml}</div></div><div style="border-top:2px solid #000;border-bottom:1px solid #000;padding:4px 0;margin:4px 0">${sessionHtml}${titleHtml}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px">${subjectHtml ? `<span style="font-weight:500">📖 ${subjectName}</span>` : ''}<span>${language === 'bn' ? 'পূর্ণমান' : 'Marks'}: ${totalMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${selectedPaper.duration_minutes} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div></div>`;
+        return `<div style="text-align:center;margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px">${logoHtml ? logoHtml.replace('display:block', 'display:inline') : ''}<div>${nameHtml}${addressHtml}</div></div><div style="border-top:2px solid #000;border-bottom:1px solid #000;padding:4px 0;margin:4px 0">${sessionHtml}${titleHtml}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px">${subjectHtml ? `<span style="font-weight:500">📖 ${subjectName}</span>` : ''}<span>${language === 'bn' ? 'পূর্ণমান' : 'Marks'}: ${bnMarks}</span><span>${language === 'bn' ? 'সময়' : 'Time'}: ${bnDur} ${language === 'bn' ? 'মিনিট' : 'min'}</span></div></div>`;
       }
       return `<div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #000">${logoHtml}${nameHtml}${addressHtml}${sessionHtml}${titleHtml}${subjectHtml}${metaHtml}</div>`;
     };
@@ -1151,8 +1153,8 @@ const AdminQuestionPapers = () => {
                   <CardContent className="pt-0">
                     <div className="flex gap-1.5 flex-wrap">
                       {subjectName && <Badge variant="secondary" className="text-xs">📖 {subjectName}</Badge>}
-                      <Badge variant="outline" className="text-xs">{paper.total_marks} {language === 'bn' ? 'নম্বর' : 'marks'}</Badge>
-                      <Badge variant="outline" className="text-xs">{paper.duration_minutes} {language === 'bn' ? 'মি' : 'min'}</Badge>
+                      <Badge variant="outline" className="text-xs">{language === 'bn' ? toBengaliNum(paper.total_marks) : paper.total_marks} {language === 'bn' ? 'নম্বর' : 'marks'}</Badge>
+                      <Badge variant="outline" className="text-xs">{language === 'bn' ? toBengaliNum(paper.duration_minutes) : paper.duration_minutes} {language === 'bn' ? 'মি' : 'min'}</Badge>
                     </div>
                     {status === 'rejected' && paper.rejection_note && (
                       <p className="text-xs text-destructive mt-2 line-clamp-2">⚠️ {paper.rejection_note}</p>
@@ -1190,7 +1192,7 @@ const AdminQuestionPapers = () => {
               <StatusBadge status={status} language={language} />
             </div>
             <p className="text-xs text-muted-foreground">
-              {language === 'bn' ? 'মোট' : 'Total'}: {totalMarks}/{selectedPaper.total_marks}
+              {language === 'bn' ? 'মোট' : 'Total'}: {language === 'bn' ? toBengaliNum(totalMarks) : totalMarks}/{language === 'bn' ? toBengaliNum(selectedPaper.total_marks) : selectedPaper.total_marks}
             </p>
           </div>
         </div>
