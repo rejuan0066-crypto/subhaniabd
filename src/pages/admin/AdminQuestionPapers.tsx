@@ -362,7 +362,7 @@ const AdminQuestionPapers = () => {
               </SelectContent>
             </Select>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-36">
+              <SelectTrigger className="w-44">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -370,6 +370,11 @@ const AdminQuestionPapers = () => {
                 {SUBJECT_TYPES.map(s => (
                   <SelectItem key={s.value} value={s.value}>
                     {s.icon} {language === 'bn' ? s.labelBn : s.labelEn}
+                  </SelectItem>
+                ))}
+                {subjects.map((s: any) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    📖 {language === 'bn' ? s.name_bn : s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
