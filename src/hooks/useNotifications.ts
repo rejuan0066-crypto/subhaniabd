@@ -38,8 +38,9 @@ export const useNotifications = () => {
   useEffect(() => {
     if (authLoading || !user) return;
 
+    const channelName = `notifications-realtime-${Date.now()}`;
     const channel = supabase
-      .channel('notifications-realtime')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
         queryClient.invalidateQueries({ queryKey: ['notifications'] });
       })
