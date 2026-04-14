@@ -169,6 +169,8 @@ const StaffCheckinDialog = ({ open, onOpenChange, selectedDate }: Props) => {
       }
 
       loadRecentCheckins();
+      // Invalidate main attendance list so it reflects check-in/check-out
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
     } catch (err: any) {
       console.error(err);
       toast.error(bn ? 'সমস্যা হয়েছে' : 'Error occurred');
