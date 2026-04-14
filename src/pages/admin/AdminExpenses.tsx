@@ -900,68 +900,75 @@ const AdminExpenses = () => {
 
             {/* Level 3: Expenses for selected project+category */}
             {selectedInstId && selectedCategoryId && (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-semibold">{bn ? 'খরচ তালিকা' : 'Expense List'} ({selectedMonthYear})</h3>
-                  {canAddItem && <Button size="sm" onClick={() => {
-                    setReceiptFile(null);
-                    setEditingExpenseId(null);
-                    setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId, category_id: selectedCategoryId });
-                    setExpenseDialog(true);
-                  }}>
-                    <Plus className="w-4 h-4 mr-1" />{bn ? 'খরচ যোগ' : 'Add Expense'}
-                  </Button>}
                 </div>
 
-                <div className="border rounded-lg overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>#</TableHead>
-                        <TableHead>{bn ? 'তারিখ' : 'Date'}</TableHead>
-                        <TableHead>{bn ? 'বিবরণ' : 'Description'}</TableHead>
-                        <TableHead>{bn ? 'পরিমাণ' : 'Qty'}</TableHead>
-                        <TableHead>{bn ? 'মাধ্যম' : 'Method'}</TableHead>
-                        <TableHead>{bn ? 'রসিদ' : 'Receipt'}</TableHead>
-                        <TableHead className="text-right">{bn ? 'টাকা' : 'Amount'}</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {categoryExpenses.length === 0 && (
-                        <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</TableCell></TableRow>
-                      )}
-                      {categoryExpenses.map((e: any, i: number) => (
-                        <TableRow key={e.id}>
-                          <TableCell>{i + 1}</TableCell>
-                          <TableCell>{e.expense_date}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">{cleanDesc(e.description)}</TableCell>
-                          <TableCell>{e.quantity} {getUnit(e.description)}</TableCell>
-                          <TableCell>{getMethod(e.description)}</TableCell>
-                          <TableCell>
-                            {e.has_receipt && e.receipt_url ? (
-                              <Button variant="ghost" size="sm" className="text-primary p-0 h-auto" onClick={() => setReceiptPreview(e.receipt_url)}>
-                                <Eye className="w-4 h-4 mr-1" />{bn ? 'দেখুন' : 'View'}
-                              </Button>
-                            ) : e.has_receipt ? '✅' : '❌'}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">৳{formatNum(Number(e.amount))}</TableCell>
-                          <TableCell className="flex gap-1">
-                            {canEditItem && <Button variant="ghost" size="icon" onClick={() => openEditExpense(e)}><Edit2 className="w-4 h-4 text-muted-foreground" /></Button>}
-                            {canDeleteItem && <Button variant="ghost" size="icon" onClick={() => { setDeleteConfirmId(e.id); setDeleteConfirmType('expense'); }}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {categoryExpenses.length > 0 && (
-                        <TableRow className="bg-muted/50 font-bold">
-                          <TableCell colSpan={6} className="text-right">{bn ? 'মোট খরচ:' : 'Total:'}</TableCell>
-                          <TableCell className="text-right">৳{formatNum(categoryExpenseTotal)}</TableCell>
-                          <TableCell />
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                {categoryExpenses.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-12">{bn ? 'কোনো খরচ নেই' : 'No expenses'}</p>
+                ) : (
+                  <div className="space-y-3">
+                    {categoryExpenses.map((e: any, i: number) => (
+                      <motion.div
+                        key={e.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        whileHover={{ y: -4, boxShadow: '0 12px 30px rgba(16,185,129,0.12)' }}
+                        className="rounded-[20px] border border-emerald-200/20 dark:border-emerald-800/20 bg-white/70 dark:bg-white/5 backdrop-blur-lg p-4 flex items-center gap-4 transition-all"
+                      >
+                        <span className="text-xs font-bold text-muted-foreground w-6 text-center">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground text-sm truncate">{cleanDesc(e.description)}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{getMethod(e.description)}</span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <span>{e.expense_date}</span>
+                            <span>{e.quantity} {getUnit(e.description)}</span>
+                          </div>
+                        </div>
+                        {/* Receipt glowing dot */}
+                        <div className="flex items-center gap-1">
+                          <span className={`inline-block w-2.5 h-2.5 rounded-full ${e.has_receipt ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]'}`} />
+                          {e.has_receipt && e.receipt_url && (
+                            <Button variant="ghost" size="sm" className="text-emerald-600 p-0 h-auto text-xs" onClick={() => setReceiptPreview(e.receipt_url)}>
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                        <span className="font-bold text-foreground text-sm whitespace-nowrap">৳{formatNum(Number(e.amount))}</span>
+                        <div className="flex gap-1">
+                          {canEditItem && <button onClick={() => openEditExpense(e)} className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-emerald-200/30 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition-all"><Edit2 className="w-3.5 h-3.5 text-emerald-600" /></button>}
+                          {canDeleteItem && <button onClick={() => { setDeleteConfirmId(e.id); setDeleteConfirmType('expense'); }} className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-rose-200/30 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition-all"><Trash2 className="w-3.5 h-3.5 text-rose-500" /></button>}
+                        </div>
+                      </motion.div>
+                    ))}
+                    {/* Total bar */}
+                    <div className="rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-200/30 p-4 flex justify-between items-center">
+                      <span className="font-semibold text-foreground">{bn ? 'মোট খরচ:' : 'Total:'}</span>
+                      <span className="font-bold text-lg text-emerald-600">৳{formatNum(categoryExpenseTotal)}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Floating Action Button */}
+                {canAddItem && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setReceiptFile(null);
+                      setEditingExpenseId(null);
+                      setExpenseForm({ ...defaultExpenseForm, institution_id: selectedInstId, category_id: selectedCategoryId });
+                      setExpenseDialog(true);
+                    }}
+                    className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-xl shadow-emerald-500/30 flex items-center justify-center animate-pulse hover:animate-none"
+                  >
+                    <Plus className="w-6 h-6" />
+                  </motion.button>
+                )}
               </div>
             )}
           </TabsContent>
