@@ -20,7 +20,7 @@ interface StatsListProps {
 }
 
 const TABLE_CONFIG: Record<TableType, { selectQuery: string; editPath: string; nameField: string; statusField?: string; softDeleteField?: string }> = {
-  students: { selectQuery: '*, divisions(name_bn)', editPath: '/admin/students', nameField: 'name_bn', statusField: 'status', softDeleteField: 'status' },
+  students: { selectQuery: '*, classes(name_bn, name)', editPath: '/admin/students', nameField: 'name_bn', statusField: 'status', softDeleteField: 'status' },
   staff: { selectQuery: '*', editPath: '/admin/staff', nameField: 'name_bn', statusField: 'status', softDeleteField: 'status' },
   donors: { selectQuery: '*', editPath: '/admin/donors', nameField: 'name_bn', statusField: 'status', softDeleteField: 'status' },
   divisions: { selectQuery: '*, classes(id, name_bn, name)', editPath: '/admin/divisions', nameField: 'name_bn', statusField: 'is_active', softDeleteField: 'is_active' },
@@ -103,7 +103,7 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
             <td className="px-3 py-2 font-medium text-foreground">{item.name_bn || item.name_en}</td>
             <td className="px-3 py-2 text-muted-foreground">{item.student_id || '-'}</td>
             <td className="px-3 py-2 text-muted-foreground">{item.roll_number || '-'}</td>
-            <td className="px-3 py-2 text-muted-foreground">{item.divisions?.name_bn || '-'}</td>
+            <td className="px-3 py-2 text-muted-foreground">{item.classes?.name_bn || item.classes?.name || '-'}</td>
             <td className="px-3 py-2">{getStatusBadge(item)}</td>
           </>
         );
@@ -175,7 +175,7 @@ const DashboardStatsList = ({ open, onClose, title, table, filters = {} }: Stats
     const h = (t: string) => <th className="px-3 py-2 text-left text-xs font-semibold text-muted-foreground">{t}</th>;
     switch (table) {
       case 'students':
-        return <>{h('#')}{h(bn ? 'নাম' : 'Name')}{h(bn ? 'আইডি' : 'ID')}{h(bn ? 'রোল' : 'Roll')}{h(bn ? 'বিভাগ' : 'Division')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
+        return <>{h('#')}{h(bn ? 'নাম' : 'Name')}{h(bn ? 'আইডি' : 'ID')}{h(bn ? 'রোল' : 'Roll')}{h(bn ? 'শ্রেণী' : 'Class')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
       case 'staff':
         return <>{h('#')}{h(bn ? 'নাম' : 'Name')}{h(bn ? 'পদবী' : 'Designation')}{h(bn ? 'ফোন' : 'Phone')}{h(bn ? 'স্ট্যাটাস' : 'Status')}{h(bn ? 'অ্যাকশন' : 'Actions')}</>;
       case 'donors':
