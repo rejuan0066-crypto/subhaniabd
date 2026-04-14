@@ -61,6 +61,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminPermissions from "./pages/admin/AdminPermissions";
 import AdminThemeCustomizer from "./pages/admin/AdminThemeCustomizer";
 import ThemeProvider from "./components/ThemeProvider";
+import { BijoyProvider } from "./contexts/BijoyContext";
 import AdminMenuManager from "./pages/admin/AdminMenuManager";
 import AdminWidgetBuilder from "./pages/admin/AdminWidgetBuilder";
 import AdminBackup from "./pages/admin/AdminBackup";
