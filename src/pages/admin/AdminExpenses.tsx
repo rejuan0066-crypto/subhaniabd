@@ -23,7 +23,7 @@ const QUANTITY_UNITS = ['পিস', 'কেজি', 'গ্রাম', 'লি�
 const EXPENSE_METHODS = ['ক্যাশ', 'চেক', 'বিকাশ', 'নগদ', 'রকেট', 'ব্যাংক ট্রান্সফার', 'অন্যান্য'];
 
 const bnToEnDigit = (str: string) => str.replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d).toString());
-const onlyNumbers = (str: string) => bnToEnDigit(str).replace(/[^0-9.]/g, '');
+const onlyNumbers = (str: string) => str.replace(/[^0-9০-৯.]/g, '');
 const getUnit = (desc: string) => desc?.match(/\[unit:(.*?)\]/)?.[1] || 'পিস';
 const getMethod = (desc: string) => desc?.match(/\[method:(.*?)\]/)?.[1] || 'ক্যাশ';
 const cleanDesc = (desc: string) => (desc || '').replace(/\[unit:.*?\]/g, '').replace(/\[method:.*?\]/g, '').trim() || '-';
@@ -88,7 +88,7 @@ const AdminExpenses = () => {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   // Form states
-  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '1', quantity_unit: 'পিস', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
+  const defaultExpenseForm = { project_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: 'পিস', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [projectForm, setProjectForm] = useState({ name: '', name_bn: '' });
   const [categoryForm, setCategoryForm] = useState({ project_id: '', name: '', name_bn: '' });
@@ -279,8 +279,8 @@ const AdminExpenses = () => {
   const addExpense = useMutation({
     mutationFn: async () => {
       if (!expenseForm.project_id || !expenseForm.category_id || !expenseForm.amount || !expenseForm.quantity) { toast.error(bn ? 'পরিমাণ ও টাকা অবশ্যই পূরণ করুন' : 'Quantity & Amount are required'); return; }
-      const parsedAmount = Number(onlyNumbers(expenseForm.amount));
-      const parsedQty = Number(onlyNumbers(expenseForm.quantity));
+      const parsedAmount = Number(bnToEnDigit(expenseForm.amount));
+      const parsedQty = expenseForm.quantity ? Number(bnToEnDigit(expenseForm.quantity)) : 1;
       if (isNaN(parsedAmount) || parsedAmount <= 0) { toast.error(bn ? 'সঠিক টাকার পরিমাণ দিন' : 'Enter valid amount'); return; }
       if (isNaN(parsedQty) || parsedQty <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid quantity'); return; }
       
