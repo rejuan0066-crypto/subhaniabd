@@ -740,10 +740,16 @@ const AdminExpenses = () => {
         {/* Project & Category Breakdown Tabs */}
         {(institutionBreakdown.length > 0 || categoryBreakdown.length > 0) && (
           <Tabs defaultValue="institution-breakdown">
-            <TabsList className="grid grid-cols-2 w-full max-w-md">
-              <TabsTrigger value="institution-breakdown">{bn ? 'প্রতিষ্ঠান ভিত্তিক খরচ' : 'Institution-wise'}</TabsTrigger>
-              <TabsTrigger value="category-breakdown">{bn ? 'ক্যাটেগরি ভিত্তিক খরচ' : 'Category-wise'}</TabsTrigger>
-            </TabsList>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {[
+                { value: 'institution-breakdown', label: bn ? 'প্রতিষ্ঠান ভিত্তিক খরচ' : 'Institution-wise' },
+                { value: 'category-breakdown', label: bn ? 'ক্যাটেগরি ভিত্তিক খরচ' : 'Category-wise' },
+              ].map(tab => (
+                <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap data-[state=active]:bg-primary/10 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-sm bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground">
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </div>
             <TabsContent value="institution-breakdown">
               <div className="border rounded-lg overflow-auto">
                 <Table>
