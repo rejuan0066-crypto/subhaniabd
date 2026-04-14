@@ -828,6 +828,7 @@ const AdminExpenses = () => {
                 {expenseInstitutions.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">{bn ? 'কোনো প্রতিষ্ঠান নেই। সেটিংস ট্যাব থেকে যোগ করুন।' : 'No institutions. Add from Settings tab.'}</p>
                 ) : (
+                  <>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {expenseInstitutions.map((p: any) => (
                       <div key={p.id} className="stat-card flex items-center gap-3 cursor-pointer" onClick={() => setSelectedInstId(p.id)}>
@@ -844,6 +845,19 @@ const AdminExpenses = () => {
                       </div>
                     ))}
                   </div>
+                  <div className="stat-card flex items-center gap-3 bg-primary/5 border-primary/20 mt-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Wallet className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-foreground text-sm leading-tight">{bn ? 'সর্বমোট' : 'Grand Total'}</h4>
+                      <div className="flex gap-3 text-[11px] text-muted-foreground mt-0.5">
+                        <span>{bn ? `${selectedMonthName}:` : `${selectedMonthName}:`} <span className="text-destructive font-bold">৳{formatNum(monthlyTotalExpense)}</span></span>
+                        <span>{bn ? 'মোট:' : 'Tot:'} <span className="text-destructive font-bold">৳{formatNum(totalExpenseAll)}</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  </>
                 )}
               </div>
             )}
