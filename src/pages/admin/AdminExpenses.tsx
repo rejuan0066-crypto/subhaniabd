@@ -1378,7 +1378,8 @@ const AdminExpenses = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
+        </div>{/* end glassmorphism container */}
+      </div>{/* end space-y-6 */}
 
       {/* Print Section */}
       <div className="print-section hidden print:block p-8" style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}>
