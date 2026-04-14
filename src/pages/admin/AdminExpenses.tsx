@@ -106,7 +106,17 @@ const AdminExpenses = () => {
   const [logoUploading, setLogoUploading] = useState(false);
   const [summaryForm, setSummaryForm] = useState({ principal_name: '', casher_name: '', previous_arrears: '0' });
 
-  // Queries - expense_institutions is now the top-level entity
+  // Queries
+  const { data: academicSessions = [] } = useQuery({
+    queryKey: ['academic_sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').order('name', { ascending: false });
+      if (error) throw error;
+      return data as any[];
+    }
+  });
+
+  // expense_institutions is now the top-level entity
   const { data: expenseInstitutions = [] } = useQuery({
     queryKey: ['expense_institutions'],
     queryFn: async () => {
