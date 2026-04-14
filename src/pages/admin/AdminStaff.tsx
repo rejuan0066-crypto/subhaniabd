@@ -74,6 +74,7 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
   const [accRole, setAccRole] = useState('none');
   const [accCreating, setAccCreating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [generatingIds, setGeneratingIds] = useState(false);
 
   const { data: staffList = [], isLoading } = useQuery({
     queryKey: ['staff'],
@@ -234,6 +235,23 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
     setAccCreating(false);
   };
 
+  const missingIdCount = staffList.filter((s: any) => !s.staff_id).length;
+
+  const handleBulkGenerateIds = async () => {
+    setGeneratingIds(true);
+    try {
+      const staffWithoutId = staffList.filter((s: any) => !s.staff_id);
+      for (const s of staffWithoutId) {
+        await supabase.from('staff').update({ updated_at: new Date().toISOString() }).eq('id', s.id);
+      }
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast.success(bn ? `${staffWithoutId.length} জন কর্মীর আইডি জেনারেট হয়েছে` : `Generated IDs for ${staffWithoutId.length} staff`);
+    } catch {
+      toast.error(bn ? 'আইডি জেনারেট ব্যর্থ' : 'Failed to generate IDs');
+    }
+    setGeneratingIds(false);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -246,11 +264,19 @@ const AdminStaff = ({ staffType = 'all' }: { staffType?: StaffPageType }) => {
               {staffType === 'teacher' ? (bn ? `মোট ${typeFiltered.length} জন শিক্ষক` : `Total ${typeFiltered.length} teachers`) : staffType === 'administrative' ? (bn ? `মোট ${typeFiltered.length} জন প্রশাসনিক কর্মকর্তা` : `Total ${typeFiltered.length} administrative staff`) : staffType === 'staff' ? (bn ? `মোট ${typeFiltered.length} জন সহায়ক কর্মী` : `Total ${typeFiltered.length} general staff`) : (bn ? `মোট ${staffList.length} জন কর্মী/শিক্ষক` : `Total ${staffList.length} staff`)}
             </p>
           </div>
-          {canAddItem && (
-            <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : staffType === 'administrative' ? '/admin/administrative-staff/add' : staffType === 'staff' ? '/admin/general-staff/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
-              <Plus className="w-4 h-4" /> {t('addNew')}
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {missingIdCount > 0 && isAdminRole(role) && (
+              <Button variant="outline" onClick={handleBulkGenerateIds} disabled={generatingIds} className="flex items-center gap-2">
+                {generatingIds ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                {bn ? `আইডি জেনারেট (${missingIdCount})` : `Generate IDs (${missingIdCount})`}
+              </Button>
+            )}
+            {canAddItem && (
+              <Button onClick={() => navigate(staffType === 'teacher' ? '/admin/teachers/add' : staffType === 'administrative' ? '/admin/administrative-staff/add' : staffType === 'staff' ? '/admin/general-staff/add' : '/admin/staff/add')} className="btn-primary-gradient flex items-center gap-2">
+                <Plus className="w-4 h-4" /> {t('addNew')}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="card-elevated p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
