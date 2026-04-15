@@ -639,7 +639,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       </div>
                     )}
                   </div>
-                </div>
               );
             });
           })()}
