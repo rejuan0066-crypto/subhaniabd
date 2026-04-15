@@ -424,34 +424,29 @@
     border: 1px solid hsl(0 0% 100% / 0.06);
   }
 
-  /* Floating popover for collapsed & expanded sidebar */
+  /* Portal-based flyout popover */
   .sidebar-popover-submenu {
-    position: absolute;
-    left: 100%;
-    top: 0;
-    min-width: 230px;
-    max-height: 70vh;
+    min-width: 240px;
     overflow-y: auto;
-    z-index: 100;
-    margin-left: 0;
     padding: 8px;
     border-radius: 18px;
-    background: linear-gradient(180deg, hsl(160 84% 18% / 0.95), hsl(160 84% 12% / 0.97));
-    backdrop-filter: blur(40px) saturate(2);
-    -webkit-backdrop-filter: blur(40px) saturate(2);
-    border: 1px solid hsl(160 84% 40% / 0.18);
-    box-shadow: 8px 8px 36px -4px hsl(0 0% 0% / 0.45), 0 0 0 1px hsl(0 0% 100% / 0.04), 0 0 24px -4px hsl(160 84% 40% / 0.12);
-    animation: popoverFlyIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    background: linear-gradient(180deg, hsl(160 84% 20% / 0.99), hsl(160 84% 14% / 0.99));
+    backdrop-filter: blur(28px) saturate(1.8);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8);
+    border: 1px solid hsl(160 84% 42% / 0.22);
+    box-shadow: 0 22px 60px -18px hsl(0 0% 0% / 0.48), 0 10px 30px -12px hsl(160 84% 18% / 0.35), 0 0 0 1px hsl(0 0% 100% / 0.05);
+    animation: popoverFlyIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    isolation: isolate;
   }
   .sidebar-popover-arrow {
     position: absolute;
     left: -6px;
-    top: 14px;
+    top: 16px;
     width: 12px;
     height: 12px;
-    background: hsl(160 84% 18% / 0.95);
-    border-left: 1px solid hsl(160 84% 40% / 0.18);
-    border-bottom: 1px solid hsl(160 84% 40% / 0.18);
+    background: hsl(160 84% 18% / 0.99);
+    border-left: 1px solid hsl(160 84% 42% / 0.22);
+    border-bottom: 1px solid hsl(160 84% 42% / 0.22);
     transform: rotate(45deg);
     border-radius: 0 0 0 4px;
   }
