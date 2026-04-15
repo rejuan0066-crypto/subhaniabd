@@ -1869,7 +1869,6 @@ const AdminExpenses = () => {
             <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
               {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
             </Button>
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
