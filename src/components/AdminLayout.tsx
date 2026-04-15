@@ -71,6 +71,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
+  const triggerRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [flyoutPosition, setFlyoutPosition] = useState<{ top: number; left: number; maxHeight: number; arrowTop: number } | null>(null);
 
   // Fetch staff photo & profile for sidebar avatar
   const { data: sidebarStaffPhoto } = useQuery({
