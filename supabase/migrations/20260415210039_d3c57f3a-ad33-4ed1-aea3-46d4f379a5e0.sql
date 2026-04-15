@@ -1,0 +1,1 @@
+ALTER TABLE public.fee_payments ADD COLUMN approved_by TEXT DEFAULT NULL;

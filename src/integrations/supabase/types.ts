@@ -1348,6 +1348,7 @@ export type Database = {
       fee_payments: {
         Row: {
           amount: number
+          approved_by: string | null
           collected_by: string | null
           created_at: string | null
           deleted_at: string | null
@@ -1364,6 +1365,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          approved_by?: string | null
           collected_by?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -1380,6 +1382,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          approved_by?: string | null
           collected_by?: string | null
           created_at?: string | null
           deleted_at?: string | null
