@@ -506,17 +506,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="relative"
                     onMouseEnter={() => {
-                        if (hasChildren && !mobile) {
+                      if (hasChildren && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         if (hoverSuppressRef.current === item.path) return;
+                        updateFlyoutPosition(item.path);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                        if (hasChildren && !mobile) {
+                      if (hasChildren && !mobile) {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
-                        }, 300);
+                        }, 220);
                         hoverSuppressRef.current = null;
                       }
                     }}
@@ -526,8 +527,14 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
                       return hasChildren ? (
                       <div
+                        ref={(element) => {
+                          triggerRefs.current[item.path] = element;
+                        }}
                         className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
-                        onClick={() => toggleGroup(item.path)}
+                        onClick={() => {
+                          updateFlyoutPosition(item.path);
+                          toggleGroup(item.path);
+                        }}
                       >
                         <div className="flex items-center gap-2.5 flex-1 min-w-0">
                           <item.icon className="sidebar-icon w-5 h-5 shrink-0" />
@@ -556,38 +563,54 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       </Link>
                     );
                     })()}
-
-                    {/* Desktop: Fly-out popover submenu (both collapsed and expanded) */}
-                    {hasChildren && !mobile && isGroupOpen && (
-                      <div className="sidebar-popover-submenu" style={sidebarOpen ? { left: '100%', top: 0 } : undefined}>
-                        {/* Arrow pointing to parent */}
-                        <div className="sidebar-popover-arrow" />
-                        <div className="text-xs font-bold text-sidebar-foreground/50 uppercase tracking-wider px-3 py-2 mb-1">
-                          {item.label}
-                        </div>
-                        {item.children!.map(child => {
-                          const [childPathname, childSearch] = child.path.split('?');
-                          const childActive = childSearch
-                            ? (location.pathname === childPathname && location.search === '?' + childSearch)
-                            : location.pathname === child.path;
-                          return (
-                            <Link
-                              key={child.path}
-                              to={child.path}
-                              onClick={() => {
-                                setHoverGroup(null);
-                                setOpenMenuId(null);
-                              }}
-                              className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
-                            >
-                              <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
-                              <span className="truncate">{child.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
                     </div>
+
+                    {/* Desktop flyout is rendered via portal to escape sidebar overflow */}
+                    {hasChildren && !mobile && isGroupOpen && flyoutPosition && createPortal(
+                      <div
+                        className="fixed z-[120]"
+                        style={{ top: `${flyoutPosition.top}px`, left: `${flyoutPosition.left}px` }}
+                        onMouseEnter={() => {
+                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                          setHoverGroup(item.path);
+                        }}
+                        onMouseLeave={() => {
+                          hoverTimeoutRef.current = setTimeout(() => {
+                            setHoverGroup((current) => (current === item.path ? null : current));
+                          }, 220);
+                        }}
+                      >
+                        <div className="absolute inset-y-0 -left-3 w-3" />
+                        <div className="sidebar-popover-submenu relative ml-0" style={{ maxHeight: `${flyoutPosition.maxHeight}px` }}>
+                          <div className="sidebar-popover-arrow" style={{ top: `${flyoutPosition.arrowTop}px` }} />
+                          <div className="text-xs font-bold text-sidebar-foreground/50 uppercase tracking-wider px-3 py-2 mb-1">
+                            {item.label}
+                          </div>
+                          {item.children!.map(child => {
+                            const [childPathname, childSearch] = child.path.split('?');
+                            const childActive = childSearch
+                              ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                              : location.pathname === child.path;
+                            return (
+                              <Link
+                                key={child.path}
+                                to={child.path}
+                                onClick={() => {
+                                  setHoverGroup(null);
+                                  setOpenMenuId(null);
+                                }}
+                                className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
+                              >
+                                <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
+                                <span className="truncate">{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>,
+                      document.body
+                    )}
+                  </div>
 
                     {/* Mobile: accordion submenu */}
                     {hasChildren && mobile && (
