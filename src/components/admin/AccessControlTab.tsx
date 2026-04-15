@@ -44,6 +44,9 @@ const ALL_ADMIN_PATHS = [
   { path: '/admin/joining-letters', label_en: 'Joining Letters', label_bn: 'যোগদান পত্র' },
   { path: '/admin/admission-letters', label_en: 'Admission Letters', label_bn: 'ভর্তি পত্র' },
   { path: '/admin/library', label_en: 'Library', label_bn: 'লাইব্রেরি' },
+  { path: '/admin/inventory', label_en: 'Inventory & Assets', label_bn: 'ইনভেন্টরি ও সম্পদ' },
+  { path: '/admin/system-logs', label_en: 'System Logs', label_bn: 'সিস্টেম লগ' },
+  { path: '/admin/question-papers', label_en: 'Question Papers', label_bn: 'প্রশ্নপত্র' },
 ];
 
 const BASE_ROLES = [
