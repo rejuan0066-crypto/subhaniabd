@@ -65,7 +65,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hoverCooldownRef = useRef(false);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
@@ -153,21 +152,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-
-    const isOpen = openMenuId === key || hoverGroup === key;
-
-    if (isOpen) {
-      setOpenMenuId(null);
-      setHoverGroup(null);
-      // Block hover from reopening any menu for 500ms after a manual close
-      hoverCooldownRef.current = true;
-      setTimeout(() => { hoverCooldownRef.current = false; }, 500);
-      return;
-    }
-
-    setOpenMenuId(key);
-    setHoverGroup(null);
+    setOpenMenuId((prev) => (prev === key ? null : key));
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -449,7 +434,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = openMenuId === item.path || hoverGroup === item.path;
+                      const isGroupOpen = (sidebarOpen || mobile) ? openMenuId === item.path : hoverGroup === item.path;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -471,13 +456,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="relative"
                     onMouseEnter={() => {
-                      if (hasChildren && !hoverCooldownRef.current) {
+                      if (hasChildren && !sidebarOpen && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (hasChildren) {
+                      if (hasChildren && !sidebarOpen && !mobile) {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
                         }, 300);
