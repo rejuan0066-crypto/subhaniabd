@@ -198,18 +198,35 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     children?: { path: string; label: string; icon: any }[];
   };
 
-  const configToMenuItem = (cfg: MenuItemConfig): MenuItem => ({
-    path: cfg.path,
-    label: language === 'bn' ? cfg.label_bn : cfg.label_en,
-    icon: getIcon(cfg.icon),
-    children: cfg.children
-      ?.filter(c => c.visible && !c.tab_of && canAccessPath(c.path))
-      .map(c => ({
-        path: c.path,
-        label: language === 'bn' ? c.label_bn : c.label_en,
-        icon: getIcon(c.icon),
-      })),
-  });
+  const dedupeMenuEntries = <T extends { path: string }>(items: T[]) => {
+    const seen = new Set<string>();
+    return items.filter((item) => {
+      const normalizedPath = item.path.trim();
+      if (seen.has(normalizedPath)) return false;
+      seen.add(normalizedPath);
+      return true;
+    });
+  };
+
+  const configToMenuItem = (cfg: MenuItemConfig): MenuItem => {
+    const children = dedupeMenuEntries(
+      (cfg.children ?? [])
+        .filter(c => c.visible && !c.tab_of && canAccessPath(c.path))
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(c => ({
+          path: c.path,
+          label: language === 'bn' ? c.label_bn : c.label_en,
+          icon: getIcon(c.icon),
+        }))
+    );
+
+    return {
+      path: cfg.path,
+      label: language === 'bn' ? cfg.label_bn : cfg.label_en,
+      icon: getIcon(cfg.icon),
+      children: children.length > 0 ? children : undefined,
+    };
+  };
 
   const canAccessParent = (item: MenuItemConfig): boolean => {
     if (isAdmin) return true;
@@ -220,37 +237,46 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-  const baseMenuItems: MenuItem[] = menuConfig.sidebar
-    .filter(item => item.visible && !item.tab_of && canAccessParent(item))
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map(configToMenuItem);
+  const baseMenuItems: MenuItem[] = dedupeMenuEntries(
+    menuConfig.sidebar
+      .filter(item => item.visible && !item.tab_of && canAccessParent(item))
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(configToMenuItem)
+  );
 
   const menuItems: MenuItem[] = baseMenuItems.map(item => {
-    const subForms = publishedForms.filter(f => f.publish_to === 'sub_menu' && f.parent_menu === item.path);
+    const subForms = dedupeMenuEntries(
+      publishedForms
+        .filter(f => f.publish_to === 'sub_menu' && f.parent_menu === item.path)
+        .map(f => ({
+          path: `/admin/custom/${f.menu_slug}`,
+          label: language === 'bn' ? f.name_bn : f.name,
+          icon: FileBox,
+        }))
+    );
+
     if (subForms.length > 0) {
       const existingChildren = item.children || [];
-      const newChildren = subForms.map(f => ({
-        path: `/admin/custom/${f.menu_slug}`,
-        label: language === 'bn' ? f.name_bn : f.name,
-        icon: FileBox,
-      }));
-      return { ...item, children: [...existingChildren, ...newChildren] };
+      return { ...item, children: dedupeMenuEntries([...existingChildren, ...subForms]) };
     }
     return item;
   });
 
-  const mainMenuForms = publishedForms.filter(f => f.publish_to === 'main_menu');
-  mainMenuForms.forEach(f => {
+  dedupeMenuEntries(
+    publishedForms
+      .filter(f => f.publish_to === 'main_menu')
+      .map(f => ({
+        path: `/admin/custom/${f.menu_slug}`,
+        label: language === 'bn' ? f.name_bn : f.name,
+        icon: FileBox,
+      }))
+  ).forEach(f => {
     const settingsIdx = menuItems.findIndex(m => m.path === '/admin/settings');
-    const newItem: MenuItem = {
-      path: `/admin/custom/${f.menu_slug}`,
-      label: language === 'bn' ? f.name_bn : f.name,
-      icon: FileBox,
-    };
+    if (menuItems.some(m => m.path === f.path)) return;
     if (settingsIdx !== -1) {
-      menuItems.splice(settingsIdx, 0, newItem);
+      menuItems.splice(settingsIdx, 0, f);
     } else {
-      menuItems.push(newItem);
+      menuItems.push(f);
     }
   });
 
