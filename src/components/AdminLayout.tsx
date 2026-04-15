@@ -64,8 +64,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
-  const [manuallyClosedGroup, setManuallyClosedGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverCooldownRef = useRef(false);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
@@ -155,18 +155,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const toggleGroup = (key: string) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
 
-    const isClosingCurrentGroup = openMenuId === key || hoverGroup === key;
+    const isOpen = openMenuId === key || hoverGroup === key;
 
-    if (isClosingCurrentGroup) {
+    if (isOpen) {
       setOpenMenuId(null);
       setHoverGroup(null);
-      setManuallyClosedGroup(key);
+      // Block hover from reopening any menu for 500ms after a manual close
+      hoverCooldownRef.current = true;
+      setTimeout(() => { hoverCooldownRef.current = false; }, 500);
       return;
     }
 
-    setManuallyClosedGroup(null);
     setOpenMenuId(key);
-    setHoverGroup(key);
+    setHoverGroup(null);
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -335,7 +336,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
     if (activeParentGroup) {
       setOpenMenuId(activeParentGroup.path);
-      setManuallyClosedGroup(null);
     }
   }, [location.pathname, location.search, menuItems]);
 
@@ -449,7 +449,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = openMenuId === item.path || (hoverGroup === item.path && manuallyClosedGroup !== item.path);
+                      const isGroupOpen = openMenuId === item.path || hoverGroup === item.path;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -471,18 +471,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="flex items-center relative"
                     onMouseEnter={() => {
-                      if (hasChildren) {
+                      if (hasChildren && !hoverCooldownRef.current) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                        if (manuallyClosedGroup !== item.path) {
-                          setHoverGroup(item.path);
-                        }
+                        setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
                       if (hasChildren) {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
-                          setManuallyClosedGroup((current) => (current === item.path ? null : current));
                         }, 300);
                       }
                     }}
