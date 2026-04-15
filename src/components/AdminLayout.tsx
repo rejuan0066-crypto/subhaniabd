@@ -153,17 +153,16 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenMenuId((prev) => {
-      if (prev === key) {
-        setHoverGroup(null);
-        hoverSuppressRef.current = key;
-        return null;
-      }
-
-      hoverSuppressRef.current = null;
+    const isCurrentlyOpen = openMenuId === key || hoverGroup === key;
+    if (isCurrentlyOpen) {
+      setOpenMenuId(null);
+      setHoverGroup(null);
+      hoverSuppressRef.current = key;
+    } else {
+      setOpenMenuId(key);
       setHoverGroup(key);
-      return key;
-    });
+      hoverSuppressRef.current = null;
+    }
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
