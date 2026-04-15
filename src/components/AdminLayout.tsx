@@ -152,7 +152,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenGroups(prev => {
+      const isCurrentlyOpen = prev[key] === true;
+      // Accordion: close all, toggle clicked
+      const next: Record<string, boolean> = {};
+      // Explicitly set all known groups to false
+      Object.keys(prev).forEach(k => { next[k] = false; });
+      if (!isCurrentlyOpen) {
+        next[key] = true;
+      } else {
+        next[key] = false;
+      }
+      return next;
+    });
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -417,7 +429,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = openGroups[item.path] || hasActiveChild;
+                      const isGroupOpen = item.path in openGroups ? openGroups[item.path] : hasActiveChild;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -455,29 +467,16 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       const isHoverOpen = hoverGroup === item.path;
                       const isExpanded = isGroupOpen || isHoverOpen;
                       return hasChildren ? (
-                      <div className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}>
-                        <Link
-                          to={item.path}
-                          onClick={(e) => {
-                            if (mobile) setMobileSidebarOpen(false);
-                            if (adminTheme.sidebarStableNav) {
-                              e.preventDefault();
-                              startNavTransition(() => navigate(item.path));
-                            }
-                          }}
-                          className="flex items-center gap-2.5 flex-1 min-w-0"
-                          title={!sidebarOpen && !mobile ? item.label : undefined}
-                        >
+                      <div
+                        className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
+                        onClick={() => toggleGroup(item.path)}
+                      >
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
                           <item.icon className="sidebar-icon w-5 h-5 shrink-0" />
                           {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
-                        </Link>
+                        </div>
                         {(sidebarOpen || mobile) && hasChildren && (
-                          <button
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleGroup(item.path); }}
-                            className="p-0.5 rounded hover:bg-sidebar-accent/50 shrink-0 ml-auto"
-                          >
-                            <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 ${isExpanded ? 'open' : ''}`} />
-                          </button>
+                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isExpanded ? 'open' : ''}`} />
                         )}
                       </div>
                     ) : (
