@@ -460,10 +460,15 @@ const AdminFeeReceipts = () => {
                       <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{p.fee_type}</td>
                       <td className="px-4 py-3 text-right font-semibold text-foreground">৳{p.paid_amount.toLocaleString('bn-BD')}</td>
                       <td className="px-4 py-3 text-center">
-                        <Button size="sm" variant="ghost" className="text-primary hover:text-primary" onClick={() => setSelectedReceipt(p)}>
-                          <Receipt className="w-4 h-4 mr-1" />
-                          {language === 'bn' ? 'রসিদ' : 'View'}
-                        </Button>
+                        <div className="flex items-center justify-center gap-1">
+                          <Button size="sm" variant="ghost" className="text-primary hover:text-primary" onClick={() => setSelectedReceipt(p)}>
+                            <Receipt className="w-4 h-4 mr-1" />
+                            {language === 'bn' ? 'রসিদ' : 'View'}
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-success hover:text-success" onClick={() => handlePrint(p)} title={language === 'bn' ? 'প্রিন্ট' : 'Print'}>
+                            <Printer className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
