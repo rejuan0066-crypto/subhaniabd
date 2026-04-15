@@ -48,7 +48,8 @@ export const DEFAULT_SECTIONS: DashboardSection[] = [
   { id: 'student_detail', titleBn: 'ছাত্র বিস্তারিত পরিসংখ্যান', titleEn: 'Student Detailed Stats', visible: true, sort_order: 6, icon: 'Users', style: { columns: 4, columnsMobile: 2, gap: 12 } },
   { id: 'donor', titleBn: 'দাতা তালিকা', titleEn: 'Donor List', visible: true, sort_order: 7, icon: 'Heart', style: { columns: 4, columnsMobile: 2, gap: 12 } },
   { id: 'fee_stats', titleBn: 'ফি পরিসংখ্যান', titleEn: 'Fee Statistics', visible: true, sort_order: 8, icon: 'CreditCard' },
-  { id: 'custom_widgets', titleBn: 'কাস্টম উইজেট', titleEn: 'Custom Widgets', visible: true, sort_order: 9, icon: 'Star' },
+  { id: 'financial_analytics', titleBn: 'আর্থিক বিশ্লেষণ', titleEn: 'Financial Analytics', visible: true, sort_order: 9, icon: 'CreditCard' },
+  { id: 'custom_widgets', titleBn: 'কাস্টম উইজেট', titleEn: 'Custom Widgets', visible: true, sort_order: 10, icon: 'Star' },
 ];
 
 // Define which cards exist in each section for hide/show toggle
