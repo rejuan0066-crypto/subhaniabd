@@ -677,17 +677,31 @@ const AdminSalary = () => {
     },
   });
 
-  // Mark as unpaid
+  // Mark as unpaid + remove expense entry
   const markUnpaidMutation = useMutation({
     mutationFn: async (id: string) => {
+      const record = records.find((r: any) => r.id === id);
       const { error } = await supabase.from('salary_records')
         .update({ status: 'pending', paid_at: null, updated_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
+
+      // Remove the corresponding expense entry (soft delete)
+      if (record) {
+        const staffMember = staff.find((s: any) => s.id === record.staff_id);
+        const staffName = staffMember?.name_bn || staffMember?.name_en || 'Staff';
+        // Match by description pattern and amount
+        const { error: delError } = await supabase.from('expenses')
+          .update({ deleted_at: new Date().toISOString() })
+          .like('description', `%${staffName}%`)
+          .eq('amount', Number(record.net_salary))
+          .is('deleted_at', null);
+        if (delError) console.error('Expense removal error:', delError);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salary-records', monthYear] });
-      toast.success(bn ? 'অপরিশোধিত হিসেবে চিহ্নিত হয়েছে' : 'Marked as unpaid');
+      toast.success(bn ? 'অপরিশোধিত ও খরচ থেকে সরানো হয়েছে' : 'Marked as unpaid & expense removed');
     },
   });
 
