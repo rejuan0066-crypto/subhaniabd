@@ -369,7 +369,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         />
       )}
       <div
-        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300 h-[100dvh] max-h-[100dvh]' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col ${mobile ? '' : 'h-full'} transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : ''}`}
+        className={`${mobile ? 'w-[280px] max-w-[85vw] animate-in slide-in-from-left duration-300' : sidebarOpen ? sidebarWidthClass : 'w-16'} sidebar-glass flex flex-col h-[100dvh] max-h-[100dvh] transition-all duration-500 ${mobile ? 'order-first shadow-2xl' : ''}`}
         style={sidebarStyle}
       >
         {/* Logo */}
@@ -402,7 +402,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <nav
           ref={(element) => restoreMenuScroll(element, mobile)}
           onScroll={(event) => persistMenuScroll(mobile, event.currentTarget.scrollTop)}
-          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overscroll-contain scrollbar-thin"
+          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overscroll-contain sidebar-scrollbar"
           data-current-path={location.pathname}
         >
           {/* Group items with labels */}
