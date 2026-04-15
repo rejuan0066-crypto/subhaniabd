@@ -141,11 +141,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     ...(adminTheme.headerTextColor ? { color: adminTheme.headerTextColor } : {}),
   };
 
-  // When embedded or already inside an admin shell, render only the page content
-  if (isEmbedded || isNestedAdminLayout) {
-    return <>{children}</>;
-  }
-
   const isAdmin = isAdminRole(role);
 
   // Check if user can see a menu path
