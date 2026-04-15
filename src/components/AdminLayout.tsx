@@ -469,7 +469,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     </div>
                   )}
                   <div
-                    className="flex items-center relative"
+                    className="relative"
                     onMouseEnter={() => {
                       if (hasChildren && !hoverCooldownRef.current) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -484,6 +484,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       }
                     }}
                   >
+                    <div className="flex items-center">
                     {(() => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
                       return hasChildren ? (
@@ -521,16 +522,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                     {/* Collapsed sidebar: floating popover submenu */}
                     {hasChildren && !sidebarOpen && !mobile && hoverGroup === item.path && (
-                      <div
-                        className="sidebar-popover-submenu"
-                        onMouseEnter={() => {
-                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                          setHoverGroup(item.path);
-                        }}
-                        onMouseLeave={() => {
-                          hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 250);
-                        }}
-                      >
+                      <div className="sidebar-popover-submenu">
                         <div className="text-xs font-bold text-sidebar-foreground/50 uppercase tracking-wider px-3 py-2 mb-1">
                           {item.label}
                         </div>
@@ -551,6 +543,40 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                             </Link>
                           );
                         })}
+                      </div>
+                    )}
+                    </div>
+
+                    {/* Expanded sidebar: slide-down submenu (INSIDE hover zone) */}
+                    {hasChildren && (sidebarOpen || mobile) && (
+                      <div
+                        className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
+                      >
+                        <div className="sidebar-submenu-container">
+                          {item.children!.map(child => {
+                            const [childPathname, childSearch] = child.path.split('?');
+                            const childActive = childSearch
+                              ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                              : location.pathname === child.path;
+                            return (
+                              <Link
+                                key={child.path}
+                                to={child.path}
+                                onClick={(e) => {
+                                  if (mobile) setMobileSidebarOpen(false);
+                                  if (adminTheme.sidebarStableNav) {
+                                    e.preventDefault();
+                                    startNavTransition(() => navigate(child.path));
+                                  }
+                                }}
+                                className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
+                              >
+                                <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
+                                <span className="truncate">{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
