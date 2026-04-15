@@ -203,6 +203,14 @@ const AdminExpenses = () => {
     }
   });
 
+  const { data: inventoryItems = [] } = useQuery({
+    queryKey: ['inventory-items-for-expense'],
+    queryFn: async () => {
+      const { data } = await supabase.from('inventory_items').select('*').eq('is_active', true).order('name_bn');
+      return data || [];
+    },
+  });
+
   // Auto-select default institution
   useEffect(() => {
     if (institutions.length > 0 && !selectedInstitutionId) {
