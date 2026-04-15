@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 import { CheckCircle2, Download, Printer, Receipt, Search, Calendar, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { numberToBanglaWords, toBanglaDigits } from '@/lib/amountInWords';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
