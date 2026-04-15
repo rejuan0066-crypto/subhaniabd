@@ -354,20 +354,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   });
 
 
+  // Close flyout on route change
   useEffect(() => {
-    const activeParentGroup = menuItems.find((item) =>
-      item.children?.some((child) => {
-        const [childPathname, childSearch] = child.path.split('?');
-        return childSearch
-          ? location.pathname === childPathname && location.search === `?${childSearch}`
-          : location.pathname === child.path;
-      })
-    );
-
-    if (activeParentGroup) {
-      setOpenMenuId(activeParentGroup.path);
-    }
-  }, [location.pathname, location.search, menuItems]);
+    setHoverGroup(null);
+    setOpenMenuId(null);
+  }, [location.pathname, location.search]);
 
   // When embedded or already inside an admin shell, render only the page content
   if (isEmbedded || isNestedAdminLayout) {
