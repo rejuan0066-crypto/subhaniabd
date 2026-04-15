@@ -63,8 +63,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  const [hoverGroup, setHoverGroup] = useState<string | null>(null);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
@@ -448,24 +446,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       {groupLabel}
                     </div>
                   )}
-                  <div
-                    className="flex items-center"
-                    onMouseEnter={() => {
-                      if (!mobile && hasChildren) {
-                        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                        setHoverGroup(item.path);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      if (!mobile && hasChildren) {
-                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
-                      }
-                    }}
-                  >
+                  <div className="flex items-center">
                     {(() => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
-                      const isHoverOpen = hoverGroup === item.path;
-                      const isExpanded = isGroupOpen || isHoverOpen;
+                      const isExpanded = isGroupOpen;
                       return hasChildren ? (
                       <div
                         className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
@@ -499,51 +483,42 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     );
                     })()}
                   </div>
-                  {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
+                  {hasChildren && (sidebarOpen || mobile) && (
                     <div
                       ref={(el) => {
-                        if (el && (isGroupOpen || hoverGroup === item.path)) {
+                        if (el && isGroupOpen) {
                           requestAnimationFrame(() => {
                             el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                           });
                         }
                       }}
-                      className="sidebar-submenu-enter sidebar-submenu-container"
-                      onMouseEnter={() => {
-                        if (!mobile) {
-                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                          setHoverGroup(item.path);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        if (!mobile) {
-                          hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
-                        }
-                      }}
+                      className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
                     >
-                      {item.children!.map(child => {
-                        const [childPathname, childSearch] = child.path.split('?');
-                        const childActive = childSearch
-                          ? (location.pathname === childPathname && location.search === '?' + childSearch)
-                          : location.pathname === child.path;
-                        return (
-                          <Link
-                            key={child.path}
-                            to={child.path}
-                            onClick={(e) => {
-                              if (mobile) setMobileSidebarOpen(false);
-                              if (adminTheme.sidebarStableNav) {
-                                e.preventDefault();
-                                startNavTransition(() => navigate(child.path));
-                              }
-                            }}
-                            className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
-                          >
-                            <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
-                            <span className="truncate">{child.label}</span>
-                          </Link>
-                        );
-                      })}
+                      <div className="sidebar-submenu-container">
+                        {item.children!.map(child => {
+                          const [childPathname, childSearch] = child.path.split('?');
+                          const childActive = childSearch
+                            ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                            : location.pathname === child.path;
+                          return (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              onClick={(e) => {
+                                if (mobile) setMobileSidebarOpen(false);
+                                if (adminTheme.sidebarStableNav) {
+                                  e.preventDefault();
+                                  startNavTransition(() => navigate(child.path));
+                                }
+                              }}
+                              className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
+                            >
+                              <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
+                              <span className="truncate">{child.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
