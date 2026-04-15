@@ -191,11 +191,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // When embedded or already inside an admin shell, render only the page content
-  if (isEmbedded || isNestedAdminLayout) {
-    return <>{children}</>;
-  }
-
   // Fetch published custom forms for dynamic menu
   const { data: publishedForms = [] } = useQuery({
     queryKey: ['published-custom-forms'],
@@ -210,6 +205,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       return data;
     },
   });
+
+  // When embedded or already inside an admin shell, render only the page content
+  if (isEmbedded || isNestedAdminLayout) {
+    return <>{children}</>;
+  }
 
   type MenuItem = {
     path: string;
