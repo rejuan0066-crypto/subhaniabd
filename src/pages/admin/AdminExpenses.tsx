@@ -1251,7 +1251,7 @@ const AdminExpenses = () => {
                       </div>
                       <div>
                         <Label>{bn ? 'পরিমাণ (টাকা)' : 'Amount (BDT)'} *</Label>
-                        <Input type="number" value={depositForm.amount} onChange={e => setDepositForm(f => ({ ...f, amount: e.target.value }))} />
+                        <Input type="text" inputMode="decimal" value={depositForm.amount} onChange={e => setDepositForm(f => ({ ...f, amount: onlyNumbers(e.target.value) }))} />
                       </div>
                       <Button className="w-full" onClick={() => addDeposit.mutate()} disabled={addDeposit.isPending}>
                         {bn ? 'সংরক্ষণ করুন' : 'Save'}
@@ -1548,7 +1548,7 @@ const AdminExpenses = () => {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label>{bn ? 'পূর্ববর্তী বকেয়া' : 'Previous Arrears'}</Label>
-                    <Input type="number" value={summaryForm.previous_arrears} onChange={e => setSummaryForm(f => ({ ...f, previous_arrears: e.target.value }))} />
+                    <Input type="text" inputMode="decimal" value={summaryForm.previous_arrears} onChange={e => setSummaryForm(f => ({ ...f, previous_arrears: onlyNumbers(e.target.value) }))} />
                   </div>
                   <div>
                     <Label>{bn ? 'প্রিন্সিপালের নাম' : 'Principal Name'}</Label>
