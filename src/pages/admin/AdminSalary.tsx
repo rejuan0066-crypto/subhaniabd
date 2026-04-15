@@ -680,7 +680,7 @@ const AdminSalary = () => {
   // Mark as unpaid + remove expense entry
   const markUnpaidMutation = useMutation({
     mutationFn: async (id: string) => {
-      const record = records.find((r: any) => r.id === id);
+      const record = salaryRecords.find((r: any) => r.id === id);
       const { error } = await supabase.from('salary_records')
         .update({ status: 'pending', paid_at: null, updated_at: new Date().toISOString() })
         .eq('id', id);
