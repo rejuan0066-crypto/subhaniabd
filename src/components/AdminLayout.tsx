@@ -421,6 +421,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         const [cPath, cSearch] = c.path.split('?');
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
+                      const isActive = isDirectActive && !hasActiveChild;
                       const isGroupOpen = lockedGroup === item.path || hoverGroup === item.path || hasActiveChild;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
