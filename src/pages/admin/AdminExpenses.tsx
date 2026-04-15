@@ -1830,8 +1830,45 @@ const AdminExpenses = () => {
               <Checkbox checked={expenseForm.has_receipt} onCheckedChange={v => setExpenseForm(f => ({ ...f, has_receipt: !!v }))} />
               <Label>{bn ? 'রসিদ আছে' : 'Has Receipt'}</Label>
             </div>
+
+            {/* Inventory Integration Toggle */}
+            <div className="rounded-xl border border-emerald-200/30 dark:border-emerald-800/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-emerald-600" />
+                  <Label className="text-sm font-semibold">{bn ? 'ইনভেন্টরিতে যোগ হবে?' : 'Add to Inventory?'}</Label>
+                </div>
+                <Switch
+                  checked={expenseForm.add_to_inventory}
+                  onCheckedChange={v => setExpenseForm(f => ({ ...f, add_to_inventory: v, inventory_item_id: v ? f.inventory_item_id : '' }))}
+                />
+              </div>
+              {expenseForm.add_to_inventory && (
+                <div>
+                  <Label className="text-xs">{bn ? 'ইনভেন্টরি আইটেম নির্বাচন করুন' : 'Select Inventory Item'}</Label>
+                  <Select
+                    value={expenseForm.inventory_item_id || undefined}
+                    onValueChange={v => setExpenseForm(f => ({ ...f, inventory_item_id: v }))}
+                  >
+                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'আইটেম বাছুন...' : 'Select item...'} /></SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {inventoryItems.map((item: any) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {bn ? item.name_bn : (item.name_en || item.name_bn)} — {bn ? 'স্টক:' : 'Stock:'} {item.current_stock} {item.unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {inventoryItems.length === 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-1">{bn ? 'ইনভেন্টরি পেজ থেকে আইটেম যোগ করুন' : 'Add items from Inventory page first'}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
               {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
+            </Button>
             </Button>
           </div>
         </DialogContent>
