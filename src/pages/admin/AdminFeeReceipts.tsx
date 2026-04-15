@@ -368,6 +368,9 @@ const AdminFeeReceipts = () => {
                       <span className="text-lg font-medium">৳</span>{selectedReceipt.paid_amount.toLocaleString('bn-BD')}
                     </span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2 italic text-center">
+                    {language === 'bn' ? 'কথায়' : 'In words'}: {numberToBanglaWords(selectedReceipt.paid_amount)}
+                  </p>
                 </div>
 
                 {/* Signature */}
