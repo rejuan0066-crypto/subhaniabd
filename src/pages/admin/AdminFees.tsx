@@ -23,6 +23,17 @@ const AdminFees = () => {
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/fees', 'fee_payments');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/fees');
+  const { user } = useAuth();
+
+  const { data: currentProfile } = useQuery({
+    queryKey: ['current-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
   const [mainTab, setMainTab] = useState<MainTab>('payment');
   const [tab, setTab] = useState<FeeTab>('monthly');
   const [selectedDivision, setSelectedDivision] = useState('');
