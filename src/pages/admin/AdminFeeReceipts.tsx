@@ -390,6 +390,12 @@ const AdminFeeReceipts = () => {
         flex: 1;
         text-align: center;
       }
+      .collector-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #065f46;
+        margin-bottom: 4px;
+      }
       .signature-line {
         border-top: 1.5px solid #1f2937;
         margin-bottom: 6px;
