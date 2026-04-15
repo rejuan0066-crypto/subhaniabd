@@ -653,10 +653,11 @@ const AdminSalary = () => {
         const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const pdfUrl = `https://${projectRef}.supabase.co/functions/v1/salary-pdf`;
 
+        const expenseMonthYear = `${monthName?.en || 'January'}-${selectedYear}`;
         const { error: expError } = await supabase.from('expenses').insert({
           institution_id: projectId,
           category_id: categoryId,
-          month_year: monthYear,
+          month_year: expenseMonthYear,
           expense_date: new Date().toISOString().split('T')[0],
           amount: Number(record.net_salary),
           description,
