@@ -336,7 +336,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
     if (activeParentGroup) {
       setOpenMenuId(activeParentGroup.path);
-      setManuallyClosedGroup(null);
     }
   }, [location.pathname, location.search, menuItems]);
 
