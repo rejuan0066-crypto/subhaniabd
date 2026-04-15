@@ -62,7 +62,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { settings: websiteSettings } = useWebsiteSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [lockedGroup, setLockedGroup] = useState<string | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startNavTransition] = useTransition();
@@ -152,12 +152,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    // Click toggles lock: if already locked on this key, unlock (close). Otherwise lock open.
-    if (lockedGroup === key) {
-      setLockedGroup(null);
-    } else {
-      setLockedGroup(key);
-    }
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+
+    const isClosingCurrentGroup = openMenuId === key;
+    setOpenMenuId(isClosingCurrentGroup ? null : key);
+    setHoverGroup(isClosingCurrentGroup ? null : key);
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -313,6 +312,22 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     }
   });
 
+
+  useEffect(() => {
+    const activeParentGroup = menuItems.find((item) =>
+      item.children?.some((child) => {
+        const [childPathname, childSearch] = child.path.split('?');
+        return childSearch
+          ? location.pathname === childPathname && location.search === `?${childSearch}`
+          : location.pathname === child.path;
+      })
+    );
+
+    if (activeParentGroup) {
+      setOpenMenuId(activeParentGroup.path);
+    }
+  }, [location.pathname, location.search, menuItems]);
+
   // Group menu items by category using dynamic sidebar sections
   const getGroupInfo = (path: string): { label: string; color?: string; bgColor?: string } | null => {
     for (const sec of sidebarSections) {
@@ -423,7 +438,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = lockedGroup === item.path || hoverGroup === item.path || hasActiveChild;
+                      const isGroupOpen = openMenuId === item.path || hoverGroup === item.path;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
