@@ -206,11 +206,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     },
   });
 
-  // When embedded or already inside an admin shell, render only the page content
-  if (isEmbedded || isNestedAdminLayout) {
-    return <>{children}</>;
-  }
-
   type MenuItem = {
     path: string;
     label: string;
@@ -339,6 +334,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
       setOpenMenuId(activeParentGroup.path);
     }
   }, [location.pathname, location.search, menuItems]);
+
+  // When embedded or already inside an admin shell, render only the page content
+  if (isEmbedded || isNestedAdminLayout) {
+    return <>{children}</>;
+  }
 
   // Group menu items by category using dynamic sidebar sections
   const getGroupInfo = (path: string): { label: string; color?: string; bgColor?: string } | null => {
