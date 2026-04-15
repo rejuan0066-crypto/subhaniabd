@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
+import { useAuth } from '@/hooks/useAuth';
 import FeeTypeManager from '@/components/admin/FeeTypeManager';
 import StudentCategoryManager from '@/components/admin/StudentCategoryManager';
 
@@ -22,6 +23,17 @@ const AdminFees = () => {
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/fees', 'fee_payments');
   const { canAddItem, canEditItem } = usePagePermissions('/admin/fees');
+  const { user } = useAuth();
+
+  const { data: currentProfile } = useQuery({
+    queryKey: ['current-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
   const [mainTab, setMainTab] = useState<MainTab>('payment');
   const [tab, setTab] = useState<FeeTab>('monthly');
   const [selectedDivision, setSelectedDivision] = useState('');
@@ -137,7 +149,8 @@ const AdminFees = () => {
         status: 'paid',
         paid_at: new Date().toISOString(),
         receipt_number: serialNumber,
-      };
+        collected_by: currentProfile?.full_name || '',
+      } as any;
       if (await checkApproval('add', payload, undefined, `ফি পরিশোধ: ৳${paidAmount}`)) return;
       const { error } = await supabase.from('fee_payments').insert(payload);
       if (error) throw error;

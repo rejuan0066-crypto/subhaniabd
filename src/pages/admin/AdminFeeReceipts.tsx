@@ -25,6 +25,7 @@ interface ReceiptData {
   paid_at: string;
   month: string;
   year: number;
+  collected_by: string;
 }
 
 const AdminFeeReceipts = () => {
@@ -84,6 +85,7 @@ const AdminFeeReceipts = () => {
         paid_at: p.paid_at,
         month: p.month,
         year: p.year,
+        collected_by: p.collected_by || '',
       })) as ReceiptData[];
     }
   });
@@ -181,8 +183,9 @@ const AdminFeeReceipts = () => {
 
             <div class="signature-section">
               <div class="signature-block">
+                ${receipt.collected_by ? `<div class="collector-name">${receipt.collected_by}</div>` : ''}
                 <div class="signature-line"></div>
-                <div class="signature-title">${isStudentCopy ? 'আদায়কারী' : 'আদায়কারী'}</div>
+                <div class="signature-title">আদায়কারী</div>
                 <div class="signature-sub">Collector</div>
               </div>
               ${!isStudentCopy ? `<div class="signature-block">
@@ -386,6 +389,12 @@ const AdminFeeReceipts = () => {
       .signature-block {
         flex: 1;
         text-align: center;
+      }
+      .collector-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: #065f46;
+        margin-bottom: 4px;
       }
       .signature-line {
         border-top: 1.5px solid #1f2937;
