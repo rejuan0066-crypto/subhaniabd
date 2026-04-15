@@ -26,6 +26,7 @@ interface ReceiptData {
   month: string;
   year: number;
   collected_by: string;
+  approved_by: string;
 }
 
 const AdminFeeReceipts = () => {
@@ -86,6 +87,7 @@ const AdminFeeReceipts = () => {
         month: p.month,
         year: p.year,
         collected_by: p.collected_by || '',
+        approved_by: p.approved_by || '',
       })) as ReceiptData[];
     }
   });
@@ -189,6 +191,7 @@ const AdminFeeReceipts = () => {
                 <div class="signature-sub">Collector</div>
               </div>
               ${!isStudentCopy ? `<div class="signature-block">
+                ${receipt.approved_by ? `<div class="collector-name">${receipt.approved_by}</div>` : ''}
                 <div class="signature-line"></div>
                 <div class="signature-title">গ্রহণকারী</div>
                 <div class="signature-sub">Receiver</div>
