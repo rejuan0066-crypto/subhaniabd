@@ -448,6 +448,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   </div>
                   {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
                     <div
+                      ref={(el) => {
+                        if (el && (isGroupOpen || hoverGroup === item.path)) {
+                          requestAnimationFrame(() => {
+                            el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                          });
+                        }
+                      }}
                       className="sidebar-submenu-enter sidebar-submenu-container"
                       onMouseEnter={() => {
                         if (!mobile) {
