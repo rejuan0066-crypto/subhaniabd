@@ -444,14 +444,14 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="flex items-center relative"
                     onMouseEnter={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
+                      if (hasChildren) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
-                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 250);
+                      if (hasChildren) {
+                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 300);
                       }
                     }}
                   >
