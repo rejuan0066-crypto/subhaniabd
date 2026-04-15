@@ -429,7 +429,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = openGroups[item.path] ?? hasActiveChild;
+                      const isGroupOpen = item.path in openGroups ? openGroups[item.path] : hasActiveChild;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
