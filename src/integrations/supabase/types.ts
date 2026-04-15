@@ -4109,6 +4109,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_inventory_stock: {
+        Args: { p_amount: number; p_item_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:

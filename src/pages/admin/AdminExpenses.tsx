@@ -15,8 +15,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2 } from 'lucide-react';
+import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2, Package, AlertTriangle } from 'lucide-react';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedCounter from '@/components/expenses/AnimatedCounter';
@@ -95,7 +96,7 @@ const AdminExpenses = () => {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
   // Form states
-  const defaultExpenseForm = { institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '' };
+  const defaultExpenseForm = { institution_id: '', category_id: '', expense_date: new Date().toISOString().split('T')[0], description: '', quantity: '', quantity_unit: '', has_receipt: false, receipt_url: '', amount: '', expense_method: 'ক্যাশ', expense_method_other: '', add_to_inventory: false, inventory_item_id: '' };
   const defaultDepositForm = { deposit_date: new Date().toISOString().split('T')[0], bank_details: '', other_details: '', amount: '', source: 'manual' };
   const [expInstForm, setExpInstForm] = useState({ name: '', name_bn: '' });
   const [categoryForm, setCategoryForm] = useState({ institution_id: '', name: '', name_bn: '' });
@@ -200,6 +201,14 @@ const AdminExpenses = () => {
       if (error) throw error;
       return data as any[];
     }
+  });
+
+  const { data: inventoryItems = [] } = useQuery({
+    queryKey: ['inventory-items-for-expense'],
+    queryFn: async () => {
+      const { data } = await supabase.from('inventory_items').select('*').eq('is_active', true).order('name_bn');
+      return data || [];
+    },
   });
 
   // Auto-select default institution
@@ -374,13 +383,38 @@ const AdminExpenses = () => {
         const { error } = await supabase.from('expenses').update(payload).eq('id', editingExpenseId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('expenses').insert(payload);
+        const { data: insertedExpense, error } = await supabase.from('expenses').insert(payload).select('id').single();
         if (error) throw error;
+
+        // Inventory integration: update stock and create log
+        if (expenseForm.add_to_inventory && expenseForm.inventory_item_id && insertedExpense) {
+          const { error: stockError } = await supabase.rpc('increment_inventory_stock' as any, {
+            p_item_id: expenseForm.inventory_item_id,
+            p_amount: parsedQty
+          });
+          if (stockError) {
+            // Fallback: manual update
+            const { data: currentItem } = await supabase.from('inventory_items').select('current_stock').eq('id', expenseForm.inventory_item_id).single();
+            if (currentItem) {
+              await supabase.from('inventory_items').update({ current_stock: (currentItem.current_stock || 0) + parsedQty }).eq('id', expenseForm.inventory_item_id);
+            }
+          }
+          await supabase.from('inventory_logs').insert({
+            item_id: expenseForm.inventory_item_id,
+            type: 'in',
+            change_amount: parsedQty,
+            reason: `Purchased via Expense ID: ${insertedExpense.id}`,
+            expense_id: insertedExpense.id,
+          });
+        }
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
+      qc.invalidateQueries({ queryKey: ['inventory-items-for-expense'] });
+      qc.invalidateQueries({ queryKey: ['inventory-items'] });
+      qc.invalidateQueries({ queryKey: ['inventory-logs'] });
       // Reset form for new entry, keep dialog open with same project/category
       const keepInstitutionId = expenseForm.institution_id || '';
       const keepCategoryId = expenseForm.category_id || '';
@@ -545,7 +579,7 @@ const AdminExpenses = () => {
     const isKnownMethod = EXPENSE_METHODS.includes(method);
     const cat = categories.find((c: any) => c.id === e.category_id);
     const instId = (cat as any)?.institution_id || '';
-    setExpenseForm({ institution_id: e.institution_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    setExpenseForm({ institution_id: e.institution_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method, add_to_inventory: false, inventory_item_id: '' });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
@@ -840,6 +874,60 @@ const AdminExpenses = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Inventory Summary Card */}
+        {inventoryItems.length > 0 && (() => {
+          const totalStockValue = inventoryItems.reduce((s: number, item: any) => s + (Number(item.current_stock || 0) * Number(item.buying_price || 0)), 0);
+          const lowStockItems = inventoryItems.filter((item: any) => Number(item.current_stock || 0) < Number(item.min_stock_level || 5));
+          return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="relative overflow-hidden rounded-2xl border border-emerald-200/20 dark:border-emerald-800/20 bg-gradient-to-br from-teal-500/10 via-cyan-400/5 to-transparent bg-white/60 dark:bg-white/5 backdrop-blur-lg p-4"
+                style={{ boxShadow: '0 4px 20px rgba(16,185,129,0.04)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-400 flex items-center justify-center shadow-lg">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <AnimatedCounter value={totalStockValue} className="text-lg font-bold text-teal-600 dark:text-teal-400" />
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{bn ? 'মোট স্টক মূল্য' : 'Total Stock Value'}</p>
+                  </div>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className={`relative overflow-hidden rounded-2xl border ${lowStockItems.length > 0 ? 'border-amber-300/30 dark:border-amber-700/30' : 'border-emerald-200/20 dark:border-emerald-800/20'} bg-gradient-to-br ${lowStockItems.length > 0 ? 'from-amber-500/10 via-orange-400/5 to-transparent' : 'from-emerald-500/10 via-green-400/5 to-transparent'} bg-white/60 dark:bg-white/5 backdrop-blur-lg p-4`}
+                style={{ boxShadow: '0 4px 20px rgba(16,185,129,0.04)' }}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-xl ${lowStockItems.length > 0 ? 'bg-gradient-to-br from-amber-500 to-orange-400' : 'bg-gradient-to-br from-emerald-500 to-green-400'} flex items-center justify-center shadow-lg shrink-0`}>
+                    <AlertTriangle className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-lg font-bold ${lowStockItems.length > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{lowStockItems.length}</p>
+                    <p className="text-[11px] text-muted-foreground">{bn ? 'কম স্টক সতর্কতা' : 'Low Stock Alerts'}</p>
+                    {lowStockItems.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {lowStockItems.slice(0, 3).map((item: any) => (
+                          <span key={item.id} className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                            {bn ? item.name_bn : (item.name_en || item.name_bn)}: {item.current_stock}
+                          </span>
+                        ))}
+                        {lowStockItems.length > 3 && <span className="text-[10px] text-muted-foreground">+{lowStockItems.length - 3}</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
 
         {/* Project & Category Breakdown Tabs */}
         {(institutionBreakdown.length > 0 || categoryBreakdown.length > 0) && (
@@ -1674,7 +1762,13 @@ const AdminExpenses = () => {
               <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
               <Select
                 value={expenseForm.category_id || undefined}
-                onValueChange={value => setExpenseForm(f => ({ ...f, category_id: value }))}
+                onValueChange={value => {
+                  const cat = categories.find((c: any) => c.id === value);
+                  const catName = (cat?.name || '').toLowerCase();
+                  const catNameBn = cat?.name_bn || '';
+                  const isInventoryCategory = catName.includes('grocery') || catName.includes('stationar') || catNameBn.includes('খাদ্য') || catNameBn.includes('স্টেশনার') || catNameBn.includes('মুদি');
+                  setExpenseForm(f => ({ ...f, category_id: value, add_to_inventory: isInventoryCategory ? true : f.add_to_inventory }));
+                }}
                 disabled={!expenseForm.institution_id}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select category'} /></SelectTrigger>
@@ -1796,6 +1890,42 @@ const AdminExpenses = () => {
               <Checkbox checked={expenseForm.has_receipt} onCheckedChange={v => setExpenseForm(f => ({ ...f, has_receipt: !!v }))} />
               <Label>{bn ? 'রসিদ আছে' : 'Has Receipt'}</Label>
             </div>
+
+            {/* Inventory Integration Toggle */}
+            <div className="rounded-xl border border-emerald-200/30 dark:border-emerald-800/30 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-emerald-600" />
+                  <Label className="text-sm font-semibold">{bn ? 'ইনভেন্টরিতে যোগ হবে?' : 'Add to Inventory?'}</Label>
+                </div>
+                <Switch
+                  checked={expenseForm.add_to_inventory}
+                  onCheckedChange={v => setExpenseForm(f => ({ ...f, add_to_inventory: v, inventory_item_id: v ? f.inventory_item_id : '' }))}
+                />
+              </div>
+              {expenseForm.add_to_inventory && (
+                <div>
+                  <Label className="text-xs">{bn ? 'ইনভেন্টরি আইটেম নির্বাচন করুন' : 'Select Inventory Item'}</Label>
+                  <Select
+                    value={expenseForm.inventory_item_id || undefined}
+                    onValueChange={v => setExpenseForm(f => ({ ...f, inventory_item_id: v }))}
+                  >
+                    <SelectTrigger className="mt-1"><SelectValue placeholder={bn ? 'আইটেম বাছুন...' : 'Select item...'} /></SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {inventoryItems.map((item: any) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {bn ? item.name_bn : (item.name_en || item.name_bn)} — {bn ? 'স্টক:' : 'Stock:'} {item.current_stock} {item.unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {inventoryItems.length === 0 && (
+                    <p className="text-[11px] text-muted-foreground mt-1">{bn ? 'ইনভেন্টরি পেজ থেকে আইটেম যোগ করুন' : 'Add items from Inventory page first'}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Button className="w-full" onClick={() => addExpense.mutate()} disabled={addExpense.isPending || uploading}>
               {uploading ? (bn ? 'আপলোড হচ্ছে...' : 'Uploading...') : (bn ? 'সংরক্ষণ করুন' : 'Save')}
             </Button>
