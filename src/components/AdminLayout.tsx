@@ -486,6 +486,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
                         }, 300);
+                        hoverSuppressRef.current = null;
                       }
                     }}
                   >
