@@ -107,55 +107,16 @@ const AdminFeeReceipts = () => {
     { value: 'december', en: 'December', bn: 'ডিসেম্বর' },
   ];
 
-  const handlePrint = (receipt: ReceiptData) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
+  const buildReceiptBlock = (receipt: ReceiptData, copyLabel: string) => {
     const amountWords = numberToBanglaWords(receipt.paid_amount);
     const amountBn = toBanglaDigits(receipt.paid_amount.toLocaleString());
     const dateBn = receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-';
     const monthLabel = receipt.month || '-';
-    const logoTag = institution?.logo_url ? `<img src="${institution.logo_url}" style="height:52px;object-fit:contain;" />` : '';
+    const logoTag = institution?.logo_url ? `<img src="${institution.logo_url}" style="height:40px;object-fit:contain;" />` : '';
 
-    const html = `
-    <!DOCTYPE html>
-    <html><head>
-      <meta charset="utf-8" />
-      <title>মানি রিসিট - ${receipt.receipt_number}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; background:#f0fdf4; display:flex; justify-content:center; padding:30px 15px; }
-        .receipt { background:#fff; width:100%; max-width:560px; border:3px solid #059669; border-radius:0; position:relative; }
-        .receipt::before { content:''; position:absolute; top:4px; left:4px; right:4px; bottom:4px; border:1px solid #d1fae5; pointer-events:none; }
-        .header { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; padding:20px 24px 16px; text-align:center; }
-        .header .logo-row { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:8px; }
-        .header .inst-name { font-size:20px; font-weight:800; letter-spacing:0.5px; }
-        .header .inst-name-en { font-size:13px; font-weight:600; opacity:0.9; margin-top:2px; }
-        .header .inst-addr { font-size:11px; opacity:0.8; margin-top:4px; line-height:1.5; }
-        .receipt-title { background:#ecfdf5; border-bottom:2px solid #059669; padding:10px 0; text-align:center; }
-        .receipt-title h2 { font-size:18px; font-weight:800; color:#064e3b; letter-spacing:3px; }
-        .receipt-title .sub { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:2px; margin-top:2px; }
-        .body { padding:20px 24px; }
-        .info-grid { display:grid; grid-template-columns:140px 1fr; gap:8px 12px; margin-bottom:16px; }
-        .info-grid .lbl { font-size:12px; font-weight:600; color:#374151; }
-        .info-grid .val { font-size:13px; font-weight:700; color:#0f172a; border-bottom:1px dotted #d1d5db; padding-bottom:2px; }
-        .amount-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:2px solid #059669; border-radius:10px; padding:16px 20px; margin:16px 0; text-align:center; }
-        .amount-box .figure { font-size:32px; font-weight:800; color:#064e3b; }
-        .amount-box .taka { font-size:18px; }
-        .amount-box .words { font-size:13px; color:#065f46; margin-top:6px; font-weight:600; font-style:italic; }
-        .divider { border:none; border-top:1px dashed #a7f3d0; margin:16px 0; }
-        .sig-section { display:flex; justify-content:space-between; margin-top:44px; gap:30px; }
-        .sig-block { flex:1; text-align:center; }
-        .sig-line { border-top:1.5px solid #374151; padding-top:6px; font-size:11px; font-weight:600; color:#374151; }
-        .sig-role { font-size:9px; color:#6b7280; margin-top:2px; }
-        .footer { text-align:center; padding:12px; background:#f0fdf4; border-top:1px solid #d1fae5; }
-        .footer p { font-size:9px; color:#6b7280; }
-        .badge { display:inline-block; background:#d1fae5; color:#065f46; font-size:10px; font-weight:700; padding:3px 10px; border-radius:12px; letter-spacing:1px; }
-        @media print { body { background:#fff; padding:0; } .receipt { border:2px solid #059669; max-width:100%; } }
-      </style>
-    </head><body>
+    return `
       <div class="receipt">
+        <div class="copy-label">${copyLabel}</div>
         <div class="header">
           <div class="logo-row">
             ${logoTag}
@@ -166,71 +127,104 @@ const AdminFeeReceipts = () => {
           </div>
           <div class="inst-addr">
             ${institution?.address || ''}
-            ${institution?.phone ? `<br>${language === 'bn' ? 'ফোন' : 'Phone'}: ${institution.phone}` : ''}
-            ${institution?.email ? ` | ${language === 'bn' ? 'ইমেইল' : 'Email'}: ${institution.email}` : ''}
+            ${institution?.phone ? ` | ফোন: ${institution.phone}` : ''}
+            ${institution?.email ? ` | ইমেইল: ${institution.email}` : ''}
           </div>
         </div>
-
         <div class="receipt-title">
           <h2>মানি রিসিট</h2>
           <div class="sub">MONEY RECEIPT</div>
         </div>
-
         <div class="body">
           <div class="info-grid">
-            <span class="lbl">রসিদ নং:</span>
-            <span class="val">${receipt.receipt_number}</span>
-            <span class="lbl">তারিখ:</span>
-            <span class="val">${dateBn}</span>
-            <span class="lbl">স্ট্যাটাস:</span>
-            <span class="val"><span class="badge">✓ পরিশোধিত</span></span>
+            <span class="lbl">রসিদ নং:</span><span class="val">${receipt.receipt_number}</span>
+            <span class="lbl">তারিখ:</span><span class="val">${dateBn}</span>
+            <span class="lbl">স্ট্যাটাস:</span><span class="val"><span class="badge">✓ পরিশোধিত</span></span>
           </div>
-
           <hr class="divider" />
-
           <div class="info-grid">
-            <span class="lbl">ছাত্রের নাম:</span>
-            <span class="val">${receipt.student_name}</span>
-            <span class="lbl">ছাত্র আইডি:</span>
-            <span class="val">${receipt.student_id}</span>
-            <span class="lbl">শ্রেণী:</span>
-            <span class="val">${receipt.class_name}</span>
-            <span class="lbl">রোল নম্বর:</span>
-            <span class="val">${receipt.roll}</span>
+            <span class="lbl">ছাত্রের নাম:</span><span class="val">${receipt.student_name}</span>
+            <span class="lbl">ছাত্র আইডি:</span><span class="val">${receipt.student_id}</span>
+            <span class="lbl">শ্রেণী:</span><span class="val">${receipt.class_name}</span>
+            <span class="lbl">রোল নম্বর:</span><span class="val">${receipt.roll}</span>
           </div>
-
           <hr class="divider" />
-
           <div class="info-grid">
-            <span class="lbl">ফি এর ধরন:</span>
-            <span class="val">${receipt.fee_type}</span>
-            <span class="lbl">মাস:</span>
-            <span class="val">${monthLabel}</span>
-            <span class="lbl">বছর:</span>
-            <span class="val">${receipt.year || '-'}</span>
+            <span class="lbl">ফি এর ধরন:</span><span class="val">${receipt.fee_type}</span>
+            <span class="lbl">মাস:</span><span class="val">${monthLabel}</span>
+            <span class="lbl">বছর:</span><span class="val">${receipt.year || '-'}</span>
           </div>
-
           <div class="amount-box">
             <div class="figure"><span class="taka">৳</span> ${amountBn}</div>
             <div class="words">কথায়: ${amountWords}</div>
           </div>
-
           <div class="sig-section">
-            <div class="sig-block">
-              <div class="sig-line">হিসাবরক্ষক / গ্রহণকারী</div>
-              <div class="sig-role">Accountant / Receiver</div>
-            </div>
-            <div class="sig-block">
-              <div class="sig-line">অভিভাবক / ছাত্র</div>
-              <div class="sig-role">Guardian / Student</div>
-            </div>
+            <div class="sig-block"><div class="sig-line">হিসাবরক্ষক / গ্রহণকারী</div><div class="sig-role">Accountant</div></div>
+            <div class="sig-block"><div class="sig-line">অভিভাবক / ছাত্র</div><div class="sig-role">Guardian / Student</div></div>
           </div>
         </div>
-
         <div class="footer">
-          <p>এটি কম্পিউটার জেনারেটেড মানি রিসিট | Computer Generated Money Receipt</p>
-          ${institution?.other_info ? `<p style="margin-top:4px">${institution.other_info}</p>` : ''}
+          <p>কম্পিউটার জেনারেটেড মানি রিসিট | Computer Generated Money Receipt</p>
         </div>
+      </div>`;
+  };
+
+  const handlePrint = (receipt: ReceiptData) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy');
+    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy');
+
+    const html = `
+    <!DOCTYPE html>
+    <html><head>
+      <meta charset="utf-8" />
+      <title>মানি রিসিট - ${receipt.receipt_number}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; background:#f0fdf4; padding:10px; }
+        .page-wrapper { display:flex; gap:16px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
+        .receipt { background:#fff; width:48%; min-width:340px; max-width:480px; border:2.5px solid #059669; position:relative; flex-shrink:0; }
+        .receipt::before { content:''; position:absolute; top:3px; left:3px; right:3px; bottom:3px; border:1px solid #d1fae5; pointer-events:none; }
+        .copy-label { background:#064e3b; color:#fff; text-align:center; font-size:11px; font-weight:700; padding:4px 0; letter-spacing:2px; }
+        .header { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; padding:14px 16px 10px; text-align:center; }
+        .header .logo-row { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; }
+        .header .inst-name { font-size:16px; font-weight:800; letter-spacing:0.5px; }
+        .header .inst-name-en { font-size:11px; font-weight:600; opacity:0.9; margin-top:1px; }
+        .header .inst-addr { font-size:9px; opacity:0.8; margin-top:3px; line-height:1.4; }
+        .receipt-title { background:#ecfdf5; border-bottom:2px solid #059669; padding:7px 0; text-align:center; }
+        .receipt-title h2 { font-size:15px; font-weight:800; color:#064e3b; letter-spacing:3px; }
+        .receipt-title .sub { font-size:8px; color:#6b7280; text-transform:uppercase; letter-spacing:2px; margin-top:1px; }
+        .body { padding:14px 16px; }
+        .info-grid { display:grid; grid-template-columns:110px 1fr; gap:5px 8px; margin-bottom:10px; }
+        .info-grid .lbl { font-size:10px; font-weight:600; color:#374151; }
+        .info-grid .val { font-size:11px; font-weight:700; color:#0f172a; border-bottom:1px dotted #d1d5db; padding-bottom:1px; }
+        .amount-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:2px solid #059669; border-radius:8px; padding:10px 14px; margin:10px 0; text-align:center; }
+        .amount-box .figure { font-size:24px; font-weight:800; color:#064e3b; }
+        .amount-box .taka { font-size:14px; }
+        .amount-box .words { font-size:10px; color:#065f46; margin-top:4px; font-weight:600; font-style:italic; }
+        .divider { border:none; border-top:1px dashed #a7f3d0; margin:10px 0; }
+        .sig-section { display:flex; justify-content:space-between; margin-top:30px; gap:20px; }
+        .sig-block { flex:1; text-align:center; }
+        .sig-line { border-top:1.5px solid #374151; padding-top:4px; font-size:9px; font-weight:600; color:#374151; }
+        .sig-role { font-size:8px; color:#6b7280; margin-top:1px; }
+        .footer { text-align:center; padding:8px; background:#f0fdf4; border-top:1px solid #d1fae5; }
+        .footer p { font-size:8px; color:#6b7280; }
+        .badge { display:inline-block; background:#d1fae5; color:#065f46; font-size:9px; font-weight:700; padding:2px 8px; border-radius:10px; letter-spacing:1px; }
+        .cut-line { width:100%; border:none; border-top:2px dashed #9ca3af; margin:0; }
+        @media print {
+          body { background:#fff; padding:0; }
+          .page-wrapper { gap:0; }
+          .receipt { border:2px solid #059669; width:49%; min-width:0; }
+          .cut-line { display:none; }
+        }
+      </style>
+    </head><body>
+      <div class="page-wrapper">
+        ${officeCopy}
+        ${studentCopy}
       </div>
     </body></html>`;
 
