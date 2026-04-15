@@ -107,7 +107,7 @@ const AdminFeeReceipts = () => {
     { value: 'december', en: 'December', bn: 'ডিসেম্বর' },
   ];
 
-  const buildReceiptBlock = (receipt: ReceiptData, copyLabel: string) => {
+  const buildReceiptBlock = (receipt: ReceiptData, copyLabel: string, isStudentCopy: boolean = false) => {
     const amountWords = numberToBanglaWords(receipt.paid_amount);
     const amountBn = toBanglaDigits(receipt.paid_amount.toLocaleString());
     const dateBn = receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-';
@@ -182,14 +182,14 @@ const AdminFeeReceipts = () => {
             <div class="signature-section">
               <div class="signature-block">
                 <div class="signature-line"></div>
-                <div class="signature-title">হিসাবরক্ষক / গ্রহণকারী</div>
-                <div class="signature-sub">Accountant</div>
+                <div class="signature-title">আদায়কারী</div>
+                <div class="signature-sub">Collector</div>
               </div>
-              <div class="signature-block">
+              ${!isStudentCopy ? `<div class="signature-block">
                 <div class="signature-line"></div>
                 <div class="signature-title">অভিভাবক / ছাত্র</div>
                 <div class="signature-sub">Guardian / Student</div>
-              </div>
+              </div>` : ''}
             </div>
           </div>
 
@@ -201,8 +201,8 @@ const AdminFeeReceipts = () => {
   };
 
   const getReceiptHtml = (receipt: ReceiptData) => {
-    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy');
-    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy');
+    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy', false);
+    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy', true);
 
     return `<!DOCTYPE html>
 <html>
