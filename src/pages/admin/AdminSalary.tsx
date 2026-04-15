@@ -653,12 +653,15 @@ const AdminSalary = () => {
         const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID;
         const pdfUrl = `https://${projectRef}.supabase.co/functions/v1/salary-pdf`;
 
-        const expenseMonthYear = `${monthName?.en || 'January'}-${selectedYear}`;
+        // Use payment date's month for expense categorization
+        const today = new Date();
+        const paymentMonthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const expenseMonthYear = `${paymentMonthNames[today.getMonth()]}-${today.getFullYear()}`;
         const { error: expError } = await supabase.from('expenses').insert({
           institution_id: projectId,
           category_id: categoryId,
           month_year: expenseMonthYear,
-          expense_date: new Date().toISOString().split('T')[0],
+          expense_date: today.toISOString().split('T')[0],
           amount: Number(record.net_salary),
           description,
           has_receipt: true,
