@@ -65,6 +65,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverSuppressRef = useRef<string | null>(null);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
@@ -154,10 +155,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const toggleGroup = (key: string) => {
     setOpenMenuId((prev) => {
       if (prev === key) {
-        setHoverGroup((current) => (current === key ? null : current));
+        setHoverGroup(null);
+        hoverSuppressRef.current = key;
         return null;
       }
 
+      hoverSuppressRef.current = null;
       setHoverGroup(key);
       return key;
     });
@@ -474,6 +477,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     onMouseEnter={() => {
                         if (hasChildren && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                        if (hoverSuppressRef.current === item.path) return;
                         setHoverGroup(item.path);
                       }
                     }}
@@ -482,6 +486,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
                         }, 300);
+                        hoverSuppressRef.current = null;
                       }
                     }}
                   >
