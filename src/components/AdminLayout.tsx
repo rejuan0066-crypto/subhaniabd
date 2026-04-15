@@ -541,7 +541,9 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         </div>
                         {(sidebarOpen || mobile) && hasChildren && (
-                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
+                          mobile
+                            ? <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
+                            : <ChevronRight className={`w-3.5 h-3.5 shrink-0 ml-auto transition-transform duration-200 opacity-40 ${isGroupOpen ? 'opacity-80 translate-x-0.5' : ''}`} />
                         )}
                       </div>
                     ) : (
@@ -580,10 +582,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           }, 220);
                         }}
                       >
-                        <div className="absolute inset-y-0 -left-3 w-3" />
+                        {/* Invisible bridge to prevent gap closure */}
+                        <div className="absolute inset-y-0 -left-4 w-4" />
                         <div className="sidebar-popover-submenu relative ml-0" style={{ maxHeight: `${flyoutPosition.maxHeight}px` }}>
                           <div className="sidebar-popover-arrow" style={{ top: `${flyoutPosition.arrowTop}px` }} />
-                          <div className="text-xs font-bold text-sidebar-foreground/50 uppercase tracking-wider px-3 py-2 mb-1">
+                          <div className="sidebar-popover-header">
                             {item.label}
                           </div>
                           {item.children!.map(child => {
@@ -601,8 +604,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                                 }}
                                 className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                               >
-                                <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
-                                <span className="truncate">{child.label}</span>
+                                <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
+                                <span className="truncate text-[13px]">{child.label}</span>
                               </Link>
                             );
                           })}
