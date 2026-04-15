@@ -377,12 +377,12 @@ const AdminFeeReceipts = () => {
                 <div className="mx-5 mt-8 mb-2 flex justify-between gap-8">
                   <div className="flex-1 text-center">
                     <div className="border-t border-border pt-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      {language === 'bn' ? 'গ্রহণকারী' : 'Received By'}
+                      {language === 'bn' ? 'হিসাবরক্ষক / গ্রহণকারী' : 'Accountant / Receiver'}
                     </div>
                   </div>
                   <div className="flex-1 text-center">
                     <div className="border-t border-border pt-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      {language === 'bn' ? 'অনুমোদনকারী' : 'Authorized By'}
+                      {language === 'bn' ? 'অভিভাবক / ছাত্র' : 'Guardian / Student'}
                     </div>
                   </div>
                 </div>
