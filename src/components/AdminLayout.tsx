@@ -451,21 +451,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="flex items-center relative"
                     onMouseEnter={() => {
-                      if (hasChildren) {
+                      if (hasChildren && !sidebarOpen && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (hasChildren) {
+                      if (hasChildren && !sidebarOpen && !mobile) {
                         hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 250);
                       }
                     }}
                   >
                     {(() => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
-                      const isHoverOpen = hoverGroup === item.path;
-                      const isExpanded = isGroupOpen || isHoverOpen;
                       return hasChildren ? (
                       <div
                         className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
@@ -476,7 +474,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         </div>
                         {(sidebarOpen || mobile) && hasChildren && (
-                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isExpanded ? 'open' : ''}`} />
+                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
                         )}
                       </div>
                     ) : (
@@ -539,24 +537,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   {hasChildren && (sidebarOpen || mobile) && (
                     <div
                       ref={(el) => {
-                        if (el && (isGroupOpen || hoverGroup === item.path)) {
+                        if (el && isGroupOpen) {
                           requestAnimationFrame(() => {
                             el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                           });
                         }
                       }}
-                      className={`sidebar-submenu-slide ${(isGroupOpen || hoverGroup === item.path) ? 'sidebar-submenu-open' : ''}`}
-                      onMouseEnter={() => {
-                        if (hasChildren) {
-                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                          setHoverGroup(item.path);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        if (hasChildren) {
-                          hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 250);
-                        }
-                      }}
+                      className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
                     >
                       <div className="sidebar-submenu-container">
                         {item.children!.map(child => {
