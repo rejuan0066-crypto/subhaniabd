@@ -494,31 +494,33 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                           });
                         }
                       }}
-                      className={`sidebar-submenu-slide sidebar-submenu-container ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
+                      className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
                     >
-                      {item.children!.map(child => {
-                        const [childPathname, childSearch] = child.path.split('?');
-                        const childActive = childSearch
-                          ? (location.pathname === childPathname && location.search === '?' + childSearch)
-                          : location.pathname === child.path;
-                        return (
-                          <Link
-                            key={child.path}
-                            to={child.path}
-                            onClick={(e) => {
-                              if (mobile) setMobileSidebarOpen(false);
-                              if (adminTheme.sidebarStableNav) {
-                                e.preventDefault();
-                                startNavTransition(() => navigate(child.path));
-                              }
-                            }}
-                            className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
-                          >
-                            <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
-                            <span className="truncate">{child.label}</span>
-                          </Link>
-                        );
-                      })}
+                      <div className="sidebar-submenu-container">
+                        {item.children!.map(child => {
+                          const [childPathname, childSearch] = child.path.split('?');
+                          const childActive = childSearch
+                            ? (location.pathname === childPathname && location.search === '?' + childSearch)
+                            : location.pathname === child.path;
+                          return (
+                            <Link
+                              key={child.path}
+                              to={child.path}
+                              onClick={(e) => {
+                                if (mobile) setMobileSidebarOpen(false);
+                                if (adminTheme.sidebarStableNav) {
+                                  e.preventDefault();
+                                  startNavTransition(() => navigate(child.path));
+                                }
+                              }}
+                              className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
+                            >
+                              <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
+                              <span className="truncate">{child.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>
