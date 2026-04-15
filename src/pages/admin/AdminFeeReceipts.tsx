@@ -25,6 +25,7 @@ interface ReceiptData {
   paid_at: string;
   month: string;
   year: number;
+  collected_by: string;
 }
 
 const AdminFeeReceipts = () => {
