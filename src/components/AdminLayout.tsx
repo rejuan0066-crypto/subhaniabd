@@ -213,6 +213,29 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const dedupeTopLevelMenuItems = (items: MenuItem[]) => {
+    const byPath = new Map<string, MenuItem>();
+
+    for (const item of items) {
+      const normalizedPath = item.path.trim();
+      const existing = byPath.get(normalizedPath);
+
+      if (!existing) {
+        byPath.set(normalizedPath, item);
+        continue;
+      }
+
+      const existingChildCount = existing.children?.length ?? 0;
+      const nextChildCount = item.children?.length ?? 0;
+
+      if (nextChildCount > existingChildCount) {
+        byPath.set(normalizedPath, item);
+      }
+    }
+
+    return items.filter((item) => byPath.get(item.path.trim()) === item);
+  };
+
   const configToMenuItem = (cfg: MenuItemConfig): MenuItem => {
     const children = dedupeMenuEntries(
       (cfg.children ?? [])
@@ -242,7 +265,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-  const baseMenuItems: MenuItem[] = dedupeMenuEntries(
+  const baseMenuItems: MenuItem[] = dedupeTopLevelMenuItems(
     menuConfig.sidebar
       .filter(item => item.visible && !item.tab_of && canAccessParent(item))
       .sort((a, b) => a.sort_order - b.sort_order)
