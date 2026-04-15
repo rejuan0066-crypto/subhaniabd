@@ -209,6 +209,22 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  useEffect(() => {
+    const activeFlyoutKey = hoverGroup ?? openMenuId;
+    if (!activeFlyoutKey || mobileSidebarOpen) return;
+
+    const syncPosition = () => updateFlyoutPosition(activeFlyoutKey);
+    syncPosition();
+
+    window.addEventListener('resize', syncPosition);
+    window.addEventListener('scroll', syncPosition, true);
+
+    return () => {
+      window.removeEventListener('resize', syncPosition);
+      window.removeEventListener('scroll', syncPosition, true);
+    };
+  }, [hoverGroup, openMenuId, mobileSidebarOpen, sidebarOpen]);
+
   // Fetch published custom forms for dynamic menu
   const { data: publishedForms = [] } = useQuery({
     queryKey: ['published-custom-forms'],
