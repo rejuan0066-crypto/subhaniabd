@@ -394,21 +394,19 @@
     color: hsl(var(--sidebar-foreground) / 0.38);
     letter-spacing: 0.12em;
   }
-  .sidebar-submenu-enter {
-    animation: submenuSlideIn 0.32s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  .sidebar-submenu-slide {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease;
+  }
+  .sidebar-submenu-slide > * {
     overflow: hidden;
   }
-  @keyframes submenuSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-8px) scale(0.98);
-      max-height: 0;
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      max-height: 2000px;
-    }
+  .sidebar-submenu-slide.sidebar-submenu-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
   }
   .sidebar-chevron {
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
