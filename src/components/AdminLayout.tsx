@@ -64,15 +64,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [hoverGroup, setHoverGroup] = useState<string | null>(null);
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hoverSuppressRef = useRef<string | null>(null);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
-  const triggerRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [flyoutPosition, setFlyoutPosition] = useState<{ top: number; left: number; maxHeight: number; arrowTop: number } | null>(null);
 
   // Fetch staff photo & profile for sidebar avatar
   const { data: sidebarStaffPhoto } = useQuery({
@@ -156,29 +151,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    const isCurrentlyOpen = openMenuId === key || hoverGroup === key;
-    if (isCurrentlyOpen) {
-      setOpenMenuId(null);
-      setHoverGroup(null);
-      hoverSuppressRef.current = key;
-    } else {
-      setOpenMenuId(key);
-      setHoverGroup(key);
-      hoverSuppressRef.current = null;
-    }
-  };
-
-  const updateFlyoutPosition = (key: string) => {
-    const trigger = triggerRefs.current[key];
-    if (!trigger) return;
-    const rect = trigger.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const estimatedHeight = 360;
-    const maxHeight = Math.min(420, viewportHeight - 24);
-    const top = Math.min(Math.max(12, rect.top - 6), Math.max(12, viewportHeight - Math.min(estimatedHeight, maxHeight) - 12));
-    const left = rect.right;
-    const arrowTop = Math.max(16, Math.min(rect.top - top + rect.height / 2 - 8, maxHeight - 28));
-    setFlyoutPosition({ top, left, maxHeight, arrowTop });
+    setOpenMenuId(prev => prev === key ? null : key);
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
