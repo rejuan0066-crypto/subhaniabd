@@ -172,10 +172,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     const savedScrollTop = window.sessionStorage.getItem(storageKey);
     const fallbackScrollTop = menuScrollPositionsRef.current[mobile ? 'mobile' : 'desktop'];
     const scrollTop = savedScrollTop ? Number(savedScrollTop) : fallbackScrollTop;
-    requestAnimationFrame(() => {
-      element.scrollTop = Number.isFinite(scrollTop) ? scrollTop : 0;
-    });
+    element.scrollTop = Number.isFinite(scrollTop) ? scrollTop : 0;
   };
+
+  useEffect(() => {
+    restoreMenuScroll(desktopMenuRef.current, false);
+    restoreMenuScroll(mobileMenuRef.current, true);
+  }, []);
 
   // Fetch published custom forms for dynamic menu
   const { data: publishedForms = [] } = useQuery({
