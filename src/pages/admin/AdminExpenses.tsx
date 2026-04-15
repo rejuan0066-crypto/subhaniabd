@@ -546,7 +546,7 @@ const AdminExpenses = () => {
     const isKnownMethod = EXPENSE_METHODS.includes(method);
     const cat = categories.find((c: any) => c.id === e.category_id);
     const instId = (cat as any)?.institution_id || '';
-    setExpenseForm({ institution_id: e.institution_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method });
+    setExpenseForm({ institution_id: e.institution_id, category_id: e.category_id, expense_date: e.expense_date, description: cleanDesc(e.description) === '-' ? '' : cleanDesc(e.description), quantity: String(e.quantity || 1), quantity_unit: getUnit(e.description), has_receipt: !!e.has_receipt, receipt_url: e.receipt_url || '', amount: String(e.amount), expense_method: isKnownMethod ? method : 'অন্যান্য', expense_method_other: isKnownMethod ? '' : method, add_to_inventory: false, inventory_item_id: '' });
     setExpenseDialog(true);
   };
   const openEditDeposit = (d: any) => {
