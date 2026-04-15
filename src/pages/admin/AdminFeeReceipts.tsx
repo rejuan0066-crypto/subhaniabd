@@ -182,13 +182,13 @@ const AdminFeeReceipts = () => {
             <div class="signature-section">
               <div class="signature-block">
                 <div class="signature-line"></div>
-                <div class="signature-title">আদায়কারী</div>
+                <div class="signature-title">${isStudentCopy ? 'আদায়কারী' : 'আদায়কারী'}</div>
                 <div class="signature-sub">Collector</div>
               </div>
               ${!isStudentCopy ? `<div class="signature-block">
                 <div class="signature-line"></div>
-                <div class="signature-title">অভিভাবক / ছাত্র</div>
-                <div class="signature-sub">Guardian / Student</div>
+                <div class="signature-title">গ্রহণকারী</div>
+                <div class="signature-sub">Receiver</div>
               </div>` : ''}
             </div>
           </div>
