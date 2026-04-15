@@ -315,11 +315,6 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   });
 
 
-  // Close flyout on route change
-  useEffect(() => {
-    setHoverGroup(null);
-    setOpenMenuId(null);
-  }, [location.pathname, location.search]);
 
   // When embedded or already inside an admin shell, render only the page content
   if (isEmbedded || isNestedAdminLayout) {
