@@ -17,7 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2, Package, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Edit2, DollarSign, TrendingDown, TrendingUp, Wallet, Printer, FolderPlus, TagIcon, Upload, Download, Eye, ScanLine, Building2, Package, AlertTriangle, FileText } from 'lucide-react';
+import ExpenseVoucherPrint from '@/components/expenses/ExpenseVoucherPrint';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedCounter from '@/components/expenses/AnimatedCounter';
@@ -75,6 +76,7 @@ const AdminExpenses = () => {
   const [deleteConfirmType, setDeleteConfirmType] = useState<'expense' | 'deposit'>('expense');
   const [selectedInstitutionId, setSelectedInstitutionId] = useState<string>('');
   const [breakdownTab, setBreakdownTab] = useState<'institution' | 'category' | null>(null);
+  const [voucherExpense, setVoucherExpense] = useState<any>(null);
 
   // Dialogs
   const [expInstDialog, setExpInstDialog] = useState(false);
@@ -1163,6 +1165,7 @@ const AdminExpenses = () => {
                         </div>
                         <span className="font-bold text-foreground text-sm whitespace-nowrap">৳{formatNum(Number(e.amount))}</span>
                         <div className="flex gap-1">
+                          <button onClick={() => setVoucherExpense(e)} className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-blue-200/30 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition-all" title={bn ? 'ভাউচার' : 'Voucher'}><FileText className="w-3.5 h-3.5 text-blue-500" /></button>
                           {canEditItem && <button onClick={() => openEditExpense(e)} className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-emerald-200/30 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition-all"><Edit2 className="w-3.5 h-3.5 text-emerald-600" /></button>}
                           {canDeleteItem && <button onClick={() => { setDeleteConfirmId(e.id); setDeleteConfirmType('expense'); }} className="w-8 h-8 rounded-full bg-white dark:bg-white/10 border border-rose-200/30 flex items-center justify-center shadow-sm hover:shadow-md hover:scale-110 transition-all"><Trash2 className="w-3.5 h-3.5 text-rose-500" /></button>}
                         </div>
@@ -1932,6 +1935,8 @@ const AdminExpenses = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ExpenseVoucherPrint expense={voucherExpense} open={!!voucherExpense} onClose={() => setVoucherExpense(null)} />
 
       <Dialog open={!!receiptPreview} onOpenChange={() => setReceiptPreview(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh]">

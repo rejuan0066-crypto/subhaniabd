@@ -15,8 +15,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import {
   Package, AlertTriangle, Plus, Edit2, Trash2, Loader2,
-  Box, Monitor, ArrowDownUp, BarChart3, Search
+  Box, Monitor, ArrowDownUp, BarChart3, Search, TrendingDown
 } from 'lucide-react';
+import InventoryConsumptionReport from '@/components/inventory/InventoryConsumptionReport';
 
 const UNITS = ['pcs', 'kg', 'gram', 'liter', 'meter', 'feet', 'set', 'packet', 'bag', 'ream', 'box'];
 const UNITS_BN: Record<string, string> = { pcs: 'পিস', kg: 'কেজি', gram: 'গ্রাম', liter: 'লিটার', meter: 'মিটার', feet: 'ফুট', set: 'সেট', packet: 'প্যাকেট', bag: 'বস্তা', ream: 'রিম', box: 'বক্স' };
@@ -232,10 +233,11 @@ const AdminInventory = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard" className="flex items-center gap-1.5 text-xs sm:text-sm"><BarChart3 className="w-4 h-4" /><span className="hidden sm:inline">{bn ? 'ড্যাশবোর্ড' : 'Dashboard'}</span></TabsTrigger>
             <TabsTrigger value="items" className="flex items-center gap-1.5 text-xs sm:text-sm"><Box className="w-4 h-4" /><span className="hidden sm:inline">{bn ? 'আইটেম' : 'Items'}</span></TabsTrigger>
             <TabsTrigger value="assets" className="flex items-center gap-1.5 text-xs sm:text-sm"><Monitor className="w-4 h-4" /><span className="hidden sm:inline">{bn ? 'সম্পদ' : 'Assets'}</span></TabsTrigger>
+            <TabsTrigger value="consumption" className="flex items-center gap-1.5 text-xs sm:text-sm"><TrendingDown className="w-4 h-4" /><span className="hidden sm:inline">{bn ? 'ব্যবহার' : 'Usage'}</span></TabsTrigger>
             <TabsTrigger value="logs" className="flex items-center gap-1.5 text-xs sm:text-sm"><ArrowDownUp className="w-4 h-4" /><span className="hidden sm:inline">{bn ? 'লগ' : 'Logs'}</span></TabsTrigger>
           </TabsList>
 
@@ -415,6 +417,13 @@ const AdminInventory = () => {
                 </table>
               </div>
             )}
+          </TabsContent>
+
+          {/* Consumption Tab */}
+          <TabsContent value="consumption">
+            <div className="mt-4">
+              <InventoryConsumptionReport />
+            </div>
           </TabsContent>
 
           {/* Logs Tab */}
