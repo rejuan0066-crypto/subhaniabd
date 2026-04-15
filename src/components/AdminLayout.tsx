@@ -477,6 +477,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     onMouseEnter={() => {
                         if (hasChildren && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                        if (hoverSuppressRef.current === item.path) return;
                         setHoverGroup(item.path);
                       }
                     }}
