@@ -65,6 +65,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverSuppressRef = useRef<string | null>(null);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
