@@ -112,125 +112,353 @@ const AdminFeeReceipts = () => {
     const amountBn = toBanglaDigits(receipt.paid_amount.toLocaleString());
     const dateBn = receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-';
     const monthLabel = receipt.month || '-';
-    const logoTag = institution?.logo_url ? `<img src="${institution.logo_url}" style="height:40px;object-fit:contain;" />` : '';
+    const yearLabel = receipt.year ? toBanglaDigits(String(receipt.year)) : '-';
+    const logoTag = institution?.logo_url ? `<img src="${institution.logo_url}" style="height:38px; width:38px; object-fit:contain;" />` : '';
 
     return `
-      <div class="receipt">
-        <div class="copy-label">${copyLabel}</div>
-        <div class="header">
-          <div class="logo-row">
-            ${logoTag}
-            <div>
-              <div class="inst-name">${institution?.name || 'প্রতিষ্ঠানের নাম'}</div>
-              ${institution?.name_en ? `<div class="inst-name-en">${institution.name_en}</div>` : ''}
+      <td class="receipt-cell">
+        <div class="receipt-shell">
+          <div class="copy-label">${copyLabel}</div>
+
+          <div class="header">
+            <div class="brand-row">
+              <div class="logo-wrap">${logoTag}</div>
+              <div class="brand-text">
+                <div class="inst-name">${institution?.name || 'প্রতিষ্ঠানের নাম'}</div>
+                ${institution?.name_en ? `<div class="inst-name-en">${institution.name_en}</div>` : ''}
+                <div class="inst-meta">
+                  ${institution?.address || ''}
+                  ${institution?.phone ? ` | ফোন: ${institution.phone}` : ''}
+                  ${institution?.email ? ` | ইমেইল: ${institution.email}` : ''}
+                </div>
+              </div>
             </div>
           </div>
-          <div class="inst-addr">
-            ${institution?.address || ''}
-            ${institution?.phone ? ` | ফোন: ${institution.phone}` : ''}
-            ${institution?.email ? ` | ইমেইল: ${institution.email}` : ''}
+
+          <div class="receipt-title">
+            <div class="receipt-title-bn">মানি রিসিট</div>
+            <div class="receipt-title-en">MONEY RECEIPT</div>
+          </div>
+
+          <div class="receipt-body">
+            <div class="info-grid">
+              <span class="lbl">রসিদ নং:</span>
+              <span class="val">${receipt.receipt_number}</span>
+              <span class="lbl">তারিখ:</span>
+              <span class="val">${dateBn}</span>
+              <span class="lbl">স্ট্যাটাস:</span>
+              <span class="val"><span class="badge">✓ পরিশোধিত</span></span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-grid">
+              <span class="lbl">ছাত্রের নাম:</span>
+              <span class="val">${receipt.student_name}</span>
+              <span class="lbl">ছাত্র আইডি:</span>
+              <span class="val">${receipt.student_id}</span>
+              <span class="lbl">শ্রেণী:</span>
+              <span class="val">${receipt.class_name}</span>
+              <span class="lbl">রোল নম্বর:</span>
+              <span class="val">${receipt.roll}</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-grid">
+              <span class="lbl">ফি এর ধরন:</span>
+              <span class="val">${receipt.fee_type}</span>
+              <span class="lbl">মাস:</span>
+              <span class="val">${monthLabel}</span>
+              <span class="lbl">বছর:</span>
+              <span class="val">${yearLabel}</span>
+            </div>
+
+            <div class="amount-box">
+              <div class="figure"><span class="taka">৳</span> ${amountBn}</div>
+              <div class="words">কথায়: ${amountWords}</div>
+            </div>
+
+            <div class="signature-section">
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-title">হিসাবরক্ষক / গ্রহণকারী</div>
+                <div class="signature-sub">Accountant</div>
+              </div>
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-title">অভিভাবক / ছাত্র</div>
+                <div class="signature-sub">Guardian / Student</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="receipt-footer">
+            <p>কম্পিউটার জেনারেটেড মানি রিসিট | Computer Generated Money Receipt</p>
           </div>
         </div>
-        <div class="receipt-title">
-          <h2>মানি রিসিট</h2>
-          <div class="sub">MONEY RECEIPT</div>
-        </div>
-        <div class="body">
-          <div class="info-grid">
-            <span class="lbl">রসিদ নং:</span><span class="val">${receipt.receipt_number}</span>
-            <span class="lbl">তারিখ:</span><span class="val">${dateBn}</span>
-            <span class="lbl">স্ট্যাটাস:</span><span class="val"><span class="badge">✓ পরিশোধিত</span></span>
-          </div>
-          <hr class="divider" />
-          <div class="info-grid">
-            <span class="lbl">ছাত্রের নাম:</span><span class="val">${receipt.student_name}</span>
-            <span class="lbl">ছাত্র আইডি:</span><span class="val">${receipt.student_id}</span>
-            <span class="lbl">শ্রেণী:</span><span class="val">${receipt.class_name}</span>
-            <span class="lbl">রোল নম্বর:</span><span class="val">${receipt.roll}</span>
-          </div>
-          <hr class="divider" />
-          <div class="info-grid">
-            <span class="lbl">ফি এর ধরন:</span><span class="val">${receipt.fee_type}</span>
-            <span class="lbl">মাস:</span><span class="val">${monthLabel}</span>
-            <span class="lbl">বছর:</span><span class="val">${receipt.year || '-'}</span>
-          </div>
-          <div class="amount-box">
-            <div class="figure"><span class="taka">৳</span> ${amountBn}</div>
-            <div class="words">কথায়: ${amountWords}</div>
-          </div>
-          <div class="sig-section">
-            <div class="sig-block"><div class="sig-line">হিসাবরক্ষক / গ্রহণকারী</div><div class="sig-role">Accountant</div></div>
-            <div class="sig-block"><div class="sig-line">অভিভাবক / ছাত্র</div><div class="sig-role">Guardian / Student</div></div>
-          </div>
-        </div>
-        <div class="footer">
-          <p>কম্পিউটার জেনারেটেড মানি রিসিট | Computer Generated Money Receipt</p>
-        </div>
-      </div>`;
+      </td>`;
+  };
+
+  const getReceiptHtml = (receipt: ReceiptData) => {
+    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy');
+    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy');
+
+    return `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>মানি রিসিট - ${receipt.receipt_number}</title>
+    <style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif;
+        background: #eef7f4;
+        color: #0f172a;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .page {
+        width: 297mm;
+        min-height: 210mm;
+        padding: 4mm;
+        background: #ffffff;
+      }
+      .receipt-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 4mm 0;
+        table-layout: fixed;
+      }
+      .receipt-cell {
+        width: 50%;
+        vertical-align: top;
+      }
+      .cut-cell {
+        width: 0;
+        border-left: 1.5px dashed #94a3b8;
+        position: relative;
+      }
+      .cut-cell::after {
+        content: '✂';
+        position: absolute;
+        top: 6px;
+        left: -8px;
+        background: #fff;
+        color: #64748b;
+        font-size: 10px;
+        padding: 0 2px;
+      }
+      .receipt-shell {
+        border: 2px solid #059669;
+        background: #ffffff;
+      }
+      .copy-label {
+        background: #065f46;
+        color: #ffffff;
+        text-align: center;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+      }
+      .header {
+        background: linear-gradient(180deg, #065f46 0%, #059669 100%);
+        padding: 16px 18px 12px;
+        color: #ffffff;
+      }
+      .brand-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      .logo-wrap {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.28);
+      }
+      .brand-text { text-align: center; }
+      .inst-name {
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1.15;
+      }
+      .inst-name-en {
+        margin-top: 3px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .inst-meta {
+        margin-top: 6px;
+        font-size: 9px;
+        line-height: 1.4;
+        opacity: 0.95;
+      }
+      .receipt-title {
+        text-align: center;
+        background: #eefaf5;
+        border-top: 1px solid #a7f3d0;
+        border-bottom: 1px solid #a7f3d0;
+        padding: 8px 0 7px;
+      }
+      .receipt-title-bn {
+        font-size: 18px;
+        font-weight: 800;
+        color: #064e3b;
+        line-height: 1;
+      }
+      .receipt-title-en {
+        margin-top: 3px;
+        font-size: 10px;
+        letter-spacing: 2.5px;
+        color: #6b7280;
+      }
+      .receipt-body {
+        padding: 16px 18px 14px;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 106px 1fr;
+        gap: 7px 10px;
+      }
+      .lbl {
+        font-size: 11px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+      .val {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        border-bottom: 1px dotted #cbd5e1;
+        padding-bottom: 2px;
+      }
+      .divider {
+        border-top: 1px dashed #86efac;
+        margin: 14px 0;
+      }
+      .badge {
+        display: inline-block;
+        background: #dcfce7;
+        color: #047857;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .amount-box {
+        margin-top: 14px;
+        border: 2px solid #10b981;
+        background: linear-gradient(90deg, #effcf6 0%, #d9fbe8 100%);
+        border-radius: 8px;
+        text-align: center;
+        padding: 14px 12px 12px;
+      }
+      .figure {
+        font-size: 30px;
+        font-weight: 800;
+        color: #065f46;
+        line-height: 1;
+      }
+      .taka {
+        font-size: 18px;
+      }
+      .words {
+        margin-top: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #166534;
+      }
+      .signature-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 22px;
+        margin-top: 30px;
+      }
+      .signature-block {
+        flex: 1;
+        text-align: center;
+      }
+      .signature-line {
+        border-top: 1.5px solid #1f2937;
+        margin-bottom: 6px;
+      }
+      .signature-title {
+        font-size: 10px;
+        font-weight: 700;
+        color: #1f2937;
+      }
+      .signature-sub {
+        margin-top: 2px;
+        font-size: 9px;
+        color: #6b7280;
+      }
+      .receipt-footer {
+        text-align: center;
+        background: #eefaf5;
+        border-top: 1px solid #d1fae5;
+        padding: 8px 10px;
+      }
+      .receipt-footer p {
+        font-size: 9px;
+        color: #6b7280;
+      }
+      @media print {
+        @page { size: A4 landscape; margin: 0; }
+        html, body { width: 297mm; background: #fff !important; }
+        body { padding: 0; }
+      }
+      @media screen {
+        body { padding: 18px; }
+        .page {
+          margin: 0 auto;
+          box-shadow: 0 10px 30px rgba(6, 95, 70, 0.12);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <table class="receipt-table">
+        <tr>
+          ${officeCopy}
+          <td class="cut-cell"></td>
+          ${studentCopy}
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>`;
   };
 
   const handlePrint = (receipt: ReceiptData) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy');
-    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy');
-
-    const html = `
-    <!DOCTYPE html>
-    <html><head>
-      <meta charset="utf-8" />
-      <title>মানি রিসিট - ${receipt.receipt_number}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; background:#f0fdf4; padding:10px; }
-        .page-wrapper { display:flex; gap:16px; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
-        .receipt { background:#fff; width:48%; min-width:340px; max-width:480px; border:2.5px solid #059669; position:relative; flex-shrink:0; }
-        .receipt::before { content:''; position:absolute; top:3px; left:3px; right:3px; bottom:3px; border:1px solid #d1fae5; pointer-events:none; }
-        .copy-label { background:#064e3b; color:#fff; text-align:center; font-size:11px; font-weight:700; padding:4px 0; letter-spacing:2px; }
-        .header { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; padding:14px 16px 10px; text-align:center; }
-        .header .logo-row { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:6px; }
-        .header .inst-name { font-size:16px; font-weight:800; letter-spacing:0.5px; }
-        .header .inst-name-en { font-size:11px; font-weight:600; opacity:0.9; margin-top:1px; }
-        .header .inst-addr { font-size:9px; opacity:0.8; margin-top:3px; line-height:1.4; }
-        .receipt-title { background:#ecfdf5; border-bottom:2px solid #059669; padding:7px 0; text-align:center; }
-        .receipt-title h2 { font-size:15px; font-weight:800; color:#064e3b; letter-spacing:3px; }
-        .receipt-title .sub { font-size:8px; color:#6b7280; text-transform:uppercase; letter-spacing:2px; margin-top:1px; }
-        .body { padding:14px 16px; }
-        .info-grid { display:grid; grid-template-columns:110px 1fr; gap:5px 8px; margin-bottom:10px; }
-        .info-grid .lbl { font-size:10px; font-weight:600; color:#374151; }
-        .info-grid .val { font-size:11px; font-weight:700; color:#0f172a; border-bottom:1px dotted #d1d5db; padding-bottom:1px; }
-        .amount-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:2px solid #059669; border-radius:8px; padding:10px 14px; margin:10px 0; text-align:center; }
-        .amount-box .figure { font-size:24px; font-weight:800; color:#064e3b; }
-        .amount-box .taka { font-size:14px; }
-        .amount-box .words { font-size:10px; color:#065f46; margin-top:4px; font-weight:600; font-style:italic; }
-        .divider { border:none; border-top:1px dashed #a7f3d0; margin:10px 0; }
-        .sig-section { display:flex; justify-content:space-between; margin-top:30px; gap:20px; }
-        .sig-block { flex:1; text-align:center; }
-        .sig-line { border-top:1.5px solid #374151; padding-top:4px; font-size:9px; font-weight:600; color:#374151; }
-        .sig-role { font-size:8px; color:#6b7280; margin-top:1px; }
-        .footer { text-align:center; padding:8px; background:#f0fdf4; border-top:1px solid #d1fae5; }
-        .footer p { font-size:8px; color:#6b7280; }
-        .badge { display:inline-block; background:#d1fae5; color:#065f46; font-size:9px; font-weight:700; padding:2px 8px; border-radius:10px; letter-spacing:1px; }
-        .cut-line { width:100%; border:none; border-top:2px dashed #9ca3af; margin:0; }
-        @media print {
-          body { background:#fff; padding:0; }
-          .page-wrapper { gap:0; }
-          .receipt { border:2px solid #059669; width:49%; min-width:0; }
-          .cut-line { display:none; }
-        }
-      </style>
-    </head><body>
-      <div class="page-wrapper">
-        ${officeCopy}
-        ${studentCopy}
-      </div>
-    </body></html>`;
-
-    printWindow.document.write(html);
+    printWindow.document.write(getReceiptHtml(receipt));
     printWindow.document.close();
-    setTimeout(() => printWindow.print(), 600);
+    setTimeout(() => printWindow.print(), 700);
+  };
+
+  const handleDownload = async (receipt: ReceiptData) => {
+    try {
+      const { downloadReceiptAsPdf } = await import('@/lib/receiptPdfDownload');
+      await downloadReceiptAsPdf(
+        getReceiptHtml(receipt),
+        `money-receipt-${receipt.receipt_number.replace(/[^a-zA-Z0-9-_]/g, '_')}.pdf`
+      );
+      toast.success(language === 'bn' ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
+    } catch (error: any) {
+      toast.error(error?.message || (language === 'bn' ? 'PDF তৈরি করা যায়নি' : 'Failed to generate PDF'));
+    }
   };
 
   return (
@@ -390,7 +618,7 @@ const AdminFeeReceipts = () => {
                 <div className="px-5 pb-6 flex gap-3">
                   <Button
                     className="flex-1 rounded-xl bg-primary/90 backdrop-blur-sm hover:bg-primary text-primary-foreground font-semibold"
-                    onClick={() => handlePrint(selectedReceipt)}
+                    onClick={() => void handleDownload(selectedReceipt)}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     {language === 'bn' ? 'ডাউনলোড' : 'Download PDF'}
