@@ -62,6 +62,7 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'exam-sessions', path: '/admin/exam-sessions', label_bn: 'পরীক্ষা সেশন', label_en: 'Exam Sessions', icon: 'CalendarDays', visible: true, sort_order: 0 },
     { id: 'exam-routine', path: '/admin/exam-routine', label_bn: 'পরীক্ষার রুটিন', label_en: 'Exam Routine', icon: 'ClipboardList', visible: true, sort_order: 1 },
     { id: 'results', path: '/admin/results', label_bn: 'ফলাফল', label_en: 'Results', icon: 'FileText', visible: true, sort_order: 2 },
+    { id: 'question-papers', path: '/admin/question-papers', label_bn: 'প্রশ্নপত্র', label_en: 'Question Papers', icon: 'FileText', visible: true, sort_order: 3 },
   ]},
 
   // আর্থিক
@@ -90,6 +91,12 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'prayer-calendar', path: '/admin/prayer-calendar', label_bn: 'নামাজ ও ক্যালেন্ডার', label_en: 'Prayer & Calendar', icon: 'Clock', visible: true, sort_order: 4 },
   ]},
 
+  // ইনভেন্টরি ও সম্পদ
+  { id: 'inventory-assets', path: '/admin/inventory', label_bn: 'ইনভেন্টরি ও সম্পদ', label_en: 'Inventory & Assets', icon: 'Folder', visible: true, sort_order: 5.5 },
+
+
+
+
   // সিস্টেম ও সেটিংস
   { id: 'system', path: '/admin/settings', label_bn: 'সিস্টেম', label_en: 'System', icon: 'Settings', visible: true, sort_order: 9, children: [
     { id: 'settings', path: '/admin/settings', label_bn: 'সেটিংস', label_en: 'Settings', icon: 'Settings', visible: true, sort_order: 0 },
@@ -99,6 +106,7 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
     { id: 'menu-manager', path: '/admin/menu-manager', label_bn: 'মেনু ম্যানেজার', label_en: 'Menu Manager', icon: 'ListOrdered', visible: true, sort_order: 4 },
     { id: 'backup', path: '/admin/backup', label_bn: 'ব্যাকআপ', label_en: 'Backup', icon: 'HardDrive', visible: true, sort_order: 5 },
     { id: 'recycle-bin', path: '/admin/recycle-bin', label_bn: 'রিসাইকেল বিন', label_en: 'Recycle Bin', icon: 'Trash2', visible: true, sort_order: 5.5 },
+    { id: 'system-logs', path: '/admin/system-logs', label_bn: 'সিস্টেম লগ', label_en: 'System Logs', icon: 'ClipboardList', visible: true, sort_order: 5.6 },
     { id: 'address-manager', path: '/admin/address-manager', label_bn: 'ঠিকানা ব্যবস্থাপনা', label_en: 'Address Manager', icon: 'MapPin', visible: true, sort_order: 6 },
     { id: 'api-verification', path: '/admin/api-verification', label_bn: 'API ভেরিফিকেশন', label_en: 'API Verification', icon: 'KeyRound', visible: true, sort_order: 7 },
     { id: 'form-builder', path: '/admin/form-builder', label_bn: 'কাস্টম বিল্ডার', label_en: 'Custom Builder', icon: 'Wrench', visible: true, sort_order: 8 },
