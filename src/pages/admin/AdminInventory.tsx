@@ -419,6 +419,13 @@ const AdminInventory = () => {
             )}
           </TabsContent>
 
+          {/* Consumption Tab */}
+          <TabsContent value="consumption">
+            <div className="mt-4">
+              <InventoryConsumptionReport />
+            </div>
+          </TabsContent>
+
           {/* Logs Tab */}
           <TabsContent value="logs">
             <div className="mt-4">
