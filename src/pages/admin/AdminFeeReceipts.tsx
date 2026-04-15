@@ -107,7 +107,7 @@ const AdminFeeReceipts = () => {
     { value: 'december', en: 'December', bn: 'ডিসেম্বর' },
   ];
 
-  const buildReceiptBlock = (receipt: ReceiptData, copyLabel: string) => {
+  const buildReceiptBlock = (receipt: ReceiptData, copyLabel: string, isStudentCopy: boolean = false) => {
     const amountWords = numberToBanglaWords(receipt.paid_amount);
     const amountBn = toBanglaDigits(receipt.paid_amount.toLocaleString());
     const dateBn = receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-';
