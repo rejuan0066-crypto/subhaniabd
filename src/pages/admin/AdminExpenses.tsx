@@ -1936,6 +1936,8 @@ const AdminExpenses = () => {
         </DialogContent>
       </Dialog>
 
+      <ExpenseVoucherPrint expense={voucherExpense} open={!!voucherExpense} onClose={() => setVoucherExpense(null)} />
+
       <Dialog open={!!receiptPreview} onOpenChange={() => setReceiptPreview(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh]">
           <DialogHeader>

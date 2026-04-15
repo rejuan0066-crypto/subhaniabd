@@ -12,6 +12,7 @@ import {
   type LucideIcon
 } from 'lucide-react';
 import DashboardInstitutionCard from '@/components/dashboard/DashboardInstitutionCard';
+import FinancialAnalyticsChart from '@/components/dashboard/FinancialAnalyticsChart';
 import DashboardSearch from '@/components/dashboard/DashboardSearch';
 import DashboardFeeSection from '@/components/dashboard/DashboardFeeSection';
 import DashboardStatsList from '@/components/dashboard/DashboardStatsList';
@@ -345,6 +346,16 @@ const Dashboard = () => {
       }
       case 'custom_widgets':
         return <DashboardCustomWidgets key={id} />;
+      case 'financial_analytics':
+        return canViewFinance ? (
+          <div key={id} className="card-elevated p-4">
+            <h3 className="font-display font-bold text-foreground mb-3 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-emerald-600" />
+              {bn ? 'আর্থিক বিশ্লেষণ' : 'Financial Analytics'}
+            </h3>
+            <FinancialAnalyticsChart />
+          </div>
+        ) : null;
       default:
         return null;
     }
