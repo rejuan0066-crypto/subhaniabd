@@ -152,7 +152,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenGroups(prev => ({ ...prev, [key]: !prev[key] }));
+    setOpenGroups(prev => {
+      const isCurrentlyOpen = prev[key];
+      // Accordion: close all others, toggle the clicked one
+      const next: Record<string, boolean> = {};
+      if (!isCurrentlyOpen) {
+        next[key] = true;
+      }
+      return next;
+    });
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
