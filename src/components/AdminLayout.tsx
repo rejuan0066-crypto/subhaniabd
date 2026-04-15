@@ -209,6 +209,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // Click-away: close flyout when clicking main content
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // If click is inside a portal popover or sidebar, ignore
+      if (target.closest('.sidebar-popover-submenu') || target.closest('.sidebar-glass')) return;
+      setHoverGroup(null);
+      setOpenMenuId(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   useEffect(() => {
     const activeFlyoutKey = hoverGroup ?? openMenuId;
     if (!activeFlyoutKey || mobileSidebarOpen) return;
