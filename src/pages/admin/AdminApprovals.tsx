@@ -34,6 +34,16 @@ const AdminApprovals = () => {
   const [detailAction, setDetailAction] = useState<any>(null);
   const [adminNote, setAdminNote] = useState('');
 
+  const { data: currentProfile } = useQuery({
+    queryKey: ['current-profile-approvals', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: actions = [], isLoading } = useQuery({
     queryKey: ['pending-actions', filter],
     queryFn: async () => {
@@ -58,6 +68,11 @@ const AdminApprovals = () => {
     // Remove internal fields from payload
     const cleanPayload = { ...payload };
     delete cleanPayload._description;
+
+    // For fee_payments, add approver's name as approved_by
+    if (target_table === 'fee_payments' && action_type === 'add') {
+      cleanPayload.approved_by = currentProfile?.full_name || '';
+    }
 
     try {
       if (action_type === 'add') {

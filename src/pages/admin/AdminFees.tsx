@@ -150,6 +150,7 @@ const AdminFees = () => {
         paid_at: new Date().toISOString(),
         receipt_number: serialNumber,
         collected_by: currentProfile?.full_name || '',
+        approved_by: currentProfile?.full_name || '',
       } as any;
       if (await checkApproval('add', payload, undefined, `ফি পরিশোধ: ৳${paidAmount}`)) return;
       const { error } = await supabase.from('fee_payments').insert(payload);
