@@ -63,6 +63,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [hoverGroup, setHoverGroup] = useState<string | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startNavTransition] = useTransition();
   const desktopMenuRef = useRef<HTMLElement | null>(null);
   const mobileMenuRef = useRef<HTMLElement | null>(null);
