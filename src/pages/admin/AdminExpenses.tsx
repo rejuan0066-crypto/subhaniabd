@@ -1708,7 +1708,13 @@ const AdminExpenses = () => {
               <Label>{bn ? 'ক্যাটেগরি' : 'Category'} *</Label>
               <Select
                 value={expenseForm.category_id || undefined}
-                onValueChange={value => setExpenseForm(f => ({ ...f, category_id: value }))}
+                onValueChange={value => {
+                  const cat = categories.find((c: any) => c.id === value);
+                  const catName = (cat?.name || '').toLowerCase();
+                  const catNameBn = cat?.name_bn || '';
+                  const isInventoryCategory = catName.includes('grocery') || catName.includes('stationar') || catNameBn.includes('খাদ্য') || catNameBn.includes('স্টেশনার') || catNameBn.includes('মুদি');
+                  setExpenseForm(f => ({ ...f, category_id: value, add_to_inventory: isInventoryCategory ? true : f.add_to_inventory }));
+                }}
                 disabled={!expenseForm.institution_id}
               >
                 <SelectTrigger><SelectValue placeholder={bn ? 'ক্যাটেগরি নির্বাচন করুন' : 'Select category'} /></SelectTrigger>
