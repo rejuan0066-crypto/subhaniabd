@@ -155,10 +155,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const toggleGroup = (key: string) => {
     setOpenMenuId((prev) => {
       if (prev === key) {
-        setHoverGroup((current) => (current === key ? null : current));
+        setHoverGroup(null);
+        hoverSuppressRef.current = key;
         return null;
       }
 
+      hoverSuppressRef.current = null;
       setHoverGroup(key);
       return key;
     });
