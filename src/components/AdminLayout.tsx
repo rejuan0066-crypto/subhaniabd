@@ -525,9 +525,11 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     );
                     })()}
 
-                    {/* Collapsed sidebar: floating popover submenu */}
-                    {hasChildren && !sidebarOpen && !mobile && hoverGroup === item.path && (
-                      <div className="sidebar-popover-submenu">
+                    {/* Desktop: Fly-out popover submenu (both collapsed and expanded) */}
+                    {hasChildren && !mobile && isGroupOpen && (
+                      <div className="sidebar-popover-submenu" style={sidebarOpen ? { left: '100%', top: 0 } : undefined}>
+                        {/* Arrow pointing to parent */}
+                        <div className="sidebar-popover-arrow" />
                         <div className="text-xs font-bold text-sidebar-foreground/50 uppercase tracking-wider px-3 py-2 mb-1">
                           {item.label}
                         </div>
@@ -540,7 +542,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                             <Link
                               key={child.path}
                               to={child.path}
-                              onClick={() => setHoverGroup(null)}
+                              onClick={() => {
+                                setHoverGroup(null);
+                                setOpenMenuId(null);
+                              }}
                               className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                             >
                               <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
@@ -552,8 +557,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     )}
                     </div>
 
-                    {/* Expanded sidebar: slide-down submenu (INSIDE hover zone) */}
-                    {hasChildren && (sidebarOpen || mobile) && (
+                    {/* Mobile: accordion submenu */}
+                    {hasChildren && mobile && (
                       <div
                         className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
                       >
@@ -567,13 +572,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                               <Link
                                 key={child.path}
                                 to={child.path}
-                                onClick={(e) => {
-                                  if (mobile) setMobileSidebarOpen(false);
-                                  if (adminTheme.sidebarStableNav) {
-                                    e.preventDefault();
-                                    startNavTransition(() => navigate(child.path));
-                                  }
-                                }}
+                                onClick={() => setMobileSidebarOpen(false)}
                                 className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                               >
                                 <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
