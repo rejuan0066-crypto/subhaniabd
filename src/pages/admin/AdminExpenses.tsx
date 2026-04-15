@@ -383,13 +383,38 @@ const AdminExpenses = () => {
         const { error } = await supabase.from('expenses').update(payload).eq('id', editingExpenseId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('expenses').insert(payload);
+        const { data: insertedExpense, error } = await supabase.from('expenses').insert(payload).select('id').single();
         if (error) throw error;
+
+        // Inventory integration: update stock and create log
+        if (expenseForm.add_to_inventory && expenseForm.inventory_item_id && insertedExpense) {
+          const { error: stockError } = await supabase.rpc('increment_inventory_stock' as any, {
+            p_item_id: expenseForm.inventory_item_id,
+            p_amount: parsedQty
+          });
+          if (stockError) {
+            // Fallback: manual update
+            const { data: currentItem } = await supabase.from('inventory_items').select('current_stock').eq('id', expenseForm.inventory_item_id).single();
+            if (currentItem) {
+              await supabase.from('inventory_items').update({ current_stock: (currentItem.current_stock || 0) + parsedQty }).eq('id', expenseForm.inventory_item_id);
+            }
+          }
+          await supabase.from('inventory_logs').insert({
+            item_id: expenseForm.inventory_item_id,
+            type: 'in',
+            change_amount: parsedQty,
+            reason: `Purchased via Expense ID: ${insertedExpense.id}`,
+            expense_id: insertedExpense.id,
+          });
+        }
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['expenses'] });
       qc.invalidateQueries({ queryKey: ['all_expenses'] });
+      qc.invalidateQueries({ queryKey: ['inventory-items-for-expense'] });
+      qc.invalidateQueries({ queryKey: ['inventory-items'] });
+      qc.invalidateQueries({ queryKey: ['inventory-logs'] });
       // Reset form for new entry, keep dialog open with same project/category
       const keepInstitutionId = expenseForm.institution_id || '';
       const keepCategoryId = expenseForm.category_id || '';
