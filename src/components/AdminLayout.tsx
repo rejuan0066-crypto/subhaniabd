@@ -407,7 +407,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <nav
           ref={(element) => restoreMenuScroll(element, mobile)}
           onScroll={(event) => persistMenuScroll(mobile, event.currentTarget.scrollTop)}
-          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overscroll-contain sidebar-scrollbar"
+          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overflow-x-visible overscroll-contain sidebar-scrollbar select-none cursor-default"
           data-current-path={location.pathname}
         >
           {/* Group items with labels */}
