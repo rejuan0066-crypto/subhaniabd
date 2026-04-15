@@ -58,7 +58,7 @@ const AdminFeeReceipts = () => {
         .from('fee_payments')
         .select(`
           *,
-          students!inner(name_bn, name_en, student_id, roll_number, division_id, divisions:division_id(name, name_bn)),
+          students!inner(name_bn, name_en, student_id, roll_number, class_id, division_id, classes:class_id(name, name_bn), divisions:division_id(name, name_bn)),
           fee_types!inner(name, name_bn, fee_category)
         `)
         .eq('status', 'paid')
@@ -75,7 +75,7 @@ const AdminFeeReceipts = () => {
         receipt_number: p.receipt_number || `RCP-${p.id.slice(0, 8).toUpperCase()}`,
         student_name: p.students?.name_bn || p.students?.name_en || '',
         student_id: p.students?.student_id || '',
-        class_name: p.students?.divisions?.name_bn || p.students?.divisions?.name || '',
+        class_name: p.students?.classes?.name_bn || p.students?.classes?.name || p.students?.divisions?.name_bn || '',
         roll: p.students?.roll_number || '',
         fee_type: language === 'bn' ? p.fee_types?.name_bn : p.fee_types?.name,
         amount: p.amount,
