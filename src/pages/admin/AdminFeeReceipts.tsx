@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
 import { CheckCircle2, Download, Printer, Receipt, Search, Calendar, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { numberToBanglaWords, toBanglaDigits } from '@/lib/amountInWords';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -110,76 +111,126 @@ const AdminFeeReceipts = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const amountWords = numberToBanglaWords(receipt.paid_amount);
+    const amountBn = toBanglaDigits(receipt.paid_amount.toLocaleString());
+    const dateBn = receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-';
+    const monthLabel = receipt.month || '-';
+    const logoTag = institution?.logo_url ? `<img src="${institution.logo_url}" style="height:52px;object-fit:contain;" />` : '';
+
     const html = `
     <!DOCTYPE html>
     <html><head>
       <meta charset="utf-8" />
-      <title>Receipt - ${receipt.receipt_number}</title>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <title>মানি রিসিট - ${receipt.receipt_number}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap" rel="stylesheet">
       <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'SutonnyOMJ', 'Inter', 'Noto Sans Bengali', sans-serif; background: #f1f5f9; display: flex; justify-content: center; padding: 40px 20px; }
-        .card { background: white; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); max-width: 480px; width: 100%; padding: 40px 36px; }
-        .header { text-align: center; margin-bottom: 28px; }
-        .check-icon { width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
-        .check-icon svg { width: 28px; height: 28px; color: white; }
-        .inst-name { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-        .inst-addr { font-size: 12px; color: #64748b; }
-        .receipt-label { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #94a3b8; margin-top: 12px; }
-        .section { background: #f8fafc; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-        .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 500; }
-        .value { font-size: 14px; font-weight: 600; color: #0f172a; text-align: right; }
-        .dashed { border-top: 2px dashed #e2e8f0; margin: 16px 0; }
-        .total-row { display: flex; justify-content: space-between; align-items: center; }
-        .total-label { font-size: 13px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
-        .total-value { font-size: 32px; font-weight: 800; color: #4f46e5; }
-        .currency { font-size: 18px; font-weight: 500; }
-        .sig-section { margin-top: 40px; display: flex; justify-content: space-between; gap: 40px; }
-        .sig-block { text-align: center; flex: 1; }
-        .sig-line { border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .footer { text-align: center; margin-top: 24px; font-size: 10px; color: #94a3b8; }
-        .status-badge { display: inline-block; background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        @media print { body { background: white; padding: 0; } .card { box-shadow: none; border-radius: 0; max-width: 100%; } }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'SutonnyOMJ','Noto Sans Bengali',sans-serif; background:#f0fdf4; display:flex; justify-content:center; padding:30px 15px; }
+        .receipt { background:#fff; width:100%; max-width:560px; border:3px solid #059669; border-radius:0; position:relative; }
+        .receipt::before { content:''; position:absolute; top:4px; left:4px; right:4px; bottom:4px; border:1px solid #d1fae5; pointer-events:none; }
+        .header { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; padding:20px 24px 16px; text-align:center; }
+        .header .logo-row { display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:8px; }
+        .header .inst-name { font-size:20px; font-weight:800; letter-spacing:0.5px; }
+        .header .inst-name-en { font-size:13px; font-weight:600; opacity:0.9; margin-top:2px; }
+        .header .inst-addr { font-size:11px; opacity:0.8; margin-top:4px; line-height:1.5; }
+        .receipt-title { background:#ecfdf5; border-bottom:2px solid #059669; padding:10px 0; text-align:center; }
+        .receipt-title h2 { font-size:18px; font-weight:800; color:#064e3b; letter-spacing:3px; }
+        .receipt-title .sub { font-size:10px; color:#6b7280; text-transform:uppercase; letter-spacing:2px; margin-top:2px; }
+        .body { padding:20px 24px; }
+        .info-grid { display:grid; grid-template-columns:140px 1fr; gap:8px 12px; margin-bottom:16px; }
+        .info-grid .lbl { font-size:12px; font-weight:600; color:#374151; }
+        .info-grid .val { font-size:13px; font-weight:700; color:#0f172a; border-bottom:1px dotted #d1d5db; padding-bottom:2px; }
+        .amount-box { background:linear-gradient(135deg,#ecfdf5,#d1fae5); border:2px solid #059669; border-radius:10px; padding:16px 20px; margin:16px 0; text-align:center; }
+        .amount-box .figure { font-size:32px; font-weight:800; color:#064e3b; }
+        .amount-box .taka { font-size:18px; }
+        .amount-box .words { font-size:13px; color:#065f46; margin-top:6px; font-weight:600; font-style:italic; }
+        .divider { border:none; border-top:1px dashed #a7f3d0; margin:16px 0; }
+        .sig-section { display:flex; justify-content:space-between; margin-top:44px; gap:30px; }
+        .sig-block { flex:1; text-align:center; }
+        .sig-line { border-top:1.5px solid #374151; padding-top:6px; font-size:11px; font-weight:600; color:#374151; }
+        .sig-role { font-size:9px; color:#6b7280; margin-top:2px; }
+        .footer { text-align:center; padding:12px; background:#f0fdf4; border-top:1px solid #d1fae5; }
+        .footer p { font-size:9px; color:#6b7280; }
+        .badge { display:inline-block; background:#d1fae5; color:#065f46; font-size:10px; font-weight:700; padding:3px 10px; border-radius:12px; letter-spacing:1px; }
+        @media print { body { background:#fff; padding:0; } .receipt { border:2px solid #059669; max-width:100%; } }
       </style>
     </head><body>
-      <div class="card">
+      <div class="receipt">
         <div class="header">
-          <div class="check-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="inst-name">${institution?.name || 'প্রতিষ্ঠানের নাম'}</div>
-          ${institution?.name_en ? `<div style="font-size:14px;font-weight:600;color:#333;margin-bottom:2px">${institution.name_en}</div>` : ''}
-          <div class="inst-addr">${institution?.address || ''}</div>
-          ${institution?.email ? `<div class="inst-addr">${language === 'bn' ? 'ইমেইল' : 'Email'}: ${institution.email}</div>` : ''}
-          ${institution?.phone ? `<div class="inst-addr">${language === 'bn' ? 'ফোন' : 'Phone'}: ${institution.phone}</div>` : ''}
-          ${institution?.other_info ? `<div class="inst-addr" style="margin-top:2px">${institution.other_info}</div>` : ''}
-          <div class="receipt-label">Payment Receipt</div>
+          <div class="logo-row">
+            ${logoTag}
+            <div>
+              <div class="inst-name">${institution?.name || 'প্রতিষ্ঠানের নাম'}</div>
+              ${institution?.name_en ? `<div class="inst-name-en">${institution.name_en}</div>` : ''}
+            </div>
+          </div>
+          <div class="inst-addr">
+            ${institution?.address || ''}
+            ${institution?.phone ? `<br>${language === 'bn' ? 'ফোন' : 'Phone'}: ${institution.phone}` : ''}
+            ${institution?.email ? ` | ${language === 'bn' ? 'ইমেইল' : 'Email'}: ${institution.email}` : ''}
+          </div>
         </div>
-        <div class="section">
-          <div class="row"><span class="label">${language === 'bn' ? 'রসিদ নং' : 'Receipt No'}</span><span class="value">${receipt.receipt_number}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'তারিখ' : 'Date'}</span><span class="value">${receipt.paid_at ? new Date(receipt.paid_at).toLocaleDateString('bn-BD') : '-'}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'স্ট্যাটাস' : 'Status'}</span><span class="status-badge">${language === 'bn' ? 'পরিশোধিত' : 'Paid'}</span></div>
+
+        <div class="receipt-title">
+          <h2>মানি রিসিট</h2>
+          <div class="sub">MONEY RECEIPT</div>
         </div>
-        <div class="section">
-          <div class="row"><span class="label">${language === 'bn' ? 'ছাত্রের নাম' : 'Student'}</span><span class="value">${receipt.student_name}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'আইডি' : 'ID'}</span><span class="value">${receipt.student_id}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'শ্রেণী' : 'Class'}</span><span class="value">${receipt.class_name}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'রোল' : 'Roll'}</span><span class="value">${receipt.roll}</span></div>
+
+        <div class="body">
+          <div class="info-grid">
+            <span class="lbl">রসিদ নং:</span>
+            <span class="val">${receipt.receipt_number}</span>
+            <span class="lbl">তারিখ:</span>
+            <span class="val">${dateBn}</span>
+            <span class="lbl">স্ট্যাটাস:</span>
+            <span class="val"><span class="badge">✓ পরিশোধিত</span></span>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="info-grid">
+            <span class="lbl">ছাত্রের নাম:</span>
+            <span class="val">${receipt.student_name}</span>
+            <span class="lbl">ছাত্র আইডি:</span>
+            <span class="val">${receipt.student_id}</span>
+            <span class="lbl">শ্রেণী:</span>
+            <span class="val">${receipt.class_name}</span>
+            <span class="lbl">রোল নম্বর:</span>
+            <span class="val">${receipt.roll}</span>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="info-grid">
+            <span class="lbl">ফি এর ধরন:</span>
+            <span class="val">${receipt.fee_type}</span>
+            <span class="lbl">মাস:</span>
+            <span class="val">${monthLabel}</span>
+            <span class="lbl">বছর:</span>
+            <span class="val">${receipt.year || '-'}</span>
+          </div>
+
+          <div class="amount-box">
+            <div class="figure"><span class="taka">৳</span> ${amountBn}</div>
+            <div class="words">কথায়: ${amountWords}</div>
+          </div>
+
+          <div class="sig-section">
+            <div class="sig-block">
+              <div class="sig-line">হিসাবরক্ষক / গ্রহণকারী</div>
+              <div class="sig-role">Accountant / Receiver</div>
+            </div>
+            <div class="sig-block">
+              <div class="sig-line">অভিভাবক / ছাত্র</div>
+              <div class="sig-role">Guardian / Student</div>
+            </div>
+          </div>
         </div>
-        <div class="section">
-          <div class="row"><span class="label">${language === 'bn' ? 'ফি এর ধরন' : 'Fee Type'}</span><span class="value">${receipt.fee_type}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'মাস' : 'Month'}</span><span class="value">${receipt.month || '-'}</span></div>
-          <div class="row"><span class="label">${language === 'bn' ? 'বছর' : 'Year'}</span><span class="value">${receipt.year || '-'}</span></div>
+
+        <div class="footer">
+          <p>এটি কম্পিউটার জেনারেটেড মানি রিসিট | Computer Generated Money Receipt</p>
+          ${institution?.other_info ? `<p style="margin-top:4px">${institution.other_info}</p>` : ''}
         </div>
-        <div class="dashed"></div>
-        <div class="total-row">
-          <span class="total-label">${language === 'bn' ? 'মোট পরিশোধ' : 'Total Paid'}</span>
-          <span class="total-value"><span class="currency">৳</span>${receipt.paid_amount.toLocaleString('bn-BD')}</span>
-        </div>
-        <div class="sig-section">
-          <div class="sig-block"><div class="sig-line">${language === 'bn' ? 'গ্রহণকারী' : 'Received By'}</div></div>
-          <div class="sig-block"><div class="sig-line">${language === 'bn' ? 'অনুমোদনকারী' : 'Authorized By'}</div></div>
-        </div>
-        <div class="footer">${language === 'bn' ? 'এটি কম্পিউটার জেনারেটেড রসিদ' : 'This is a computer-generated receipt'}</div>
       </div>
     </body></html>`;
 
@@ -317,18 +368,21 @@ const AdminFeeReceipts = () => {
                       <span className="text-lg font-medium">৳</span>{selectedReceipt.paid_amount.toLocaleString('bn-BD')}
                     </span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2 italic text-center">
+                    {language === 'bn' ? 'কথায়' : 'In words'}: {numberToBanglaWords(selectedReceipt.paid_amount)}
+                  </p>
                 </div>
 
                 {/* Signature */}
                 <div className="mx-5 mt-8 mb-2 flex justify-between gap-8">
                   <div className="flex-1 text-center">
                     <div className="border-t border-border pt-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      {language === 'bn' ? 'গ্রহণকারী' : 'Received By'}
+                      {language === 'bn' ? 'হিসাবরক্ষক / গ্রহণকারী' : 'Accountant / Receiver'}
                     </div>
                   </div>
                   <div className="flex-1 text-center">
                     <div className="border-t border-border pt-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      {language === 'bn' ? 'অনুমোদনকারী' : 'Authorized By'}
+                      {language === 'bn' ? 'অভিভাবক / ছাত্র' : 'Guardian / Student'}
                     </div>
                   </div>
                 </div>
@@ -409,10 +463,15 @@ const AdminFeeReceipts = () => {
                       <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">{p.fee_type}</td>
                       <td className="px-4 py-3 text-right font-semibold text-foreground">৳{p.paid_amount.toLocaleString('bn-BD')}</td>
                       <td className="px-4 py-3 text-center">
-                        <Button size="sm" variant="ghost" className="text-primary hover:text-primary" onClick={() => setSelectedReceipt(p)}>
-                          <Receipt className="w-4 h-4 mr-1" />
-                          {language === 'bn' ? 'রসিদ' : 'View'}
-                        </Button>
+                        <div className="flex items-center justify-center gap-1">
+                          <Button size="sm" variant="ghost" className="text-primary hover:text-primary" onClick={() => setSelectedReceipt(p)}>
+                            <Receipt className="w-4 h-4 mr-1" />
+                            {language === 'bn' ? 'রসিদ' : 'View'}
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-success hover:text-success" onClick={() => handlePrint(p)} title={language === 'bn' ? 'প্রিন্ট' : 'Print'}>
+                            <Printer className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
