@@ -1,5 +1,4 @@
 import { createContext, useContext, ReactNode, useRef, useState, useEffect, useTransition } from 'react';
-import { createPortal } from 'react-dom';
 import BackButton from './BackButton';
 import AdminPageWithTabs from './AdminPageWithTabs';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -174,42 +173,18 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     restoreMenuScroll(mobileMenuRef.current, true);
   }, []);
 
+  // Auto-open parent of active child on route change
   useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Click-away: close flyout when clicking main content
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      // If click is inside a portal popover or sidebar, ignore
-      if (target.closest('.sidebar-popover-submenu') || target.closest('.sidebar-glass')) return;
-      setHoverGroup(null);
-      setOpenMenuId(null);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  useEffect(() => {
-    const activeFlyoutKey = hoverGroup ?? openMenuId;
-    if (!activeFlyoutKey || mobileSidebarOpen) return;
-
-    const syncPosition = () => updateFlyoutPosition(activeFlyoutKey);
-    syncPosition();
-
-    window.addEventListener('resize', syncPosition);
-    window.addEventListener('scroll', syncPosition, true);
-
-    return () => {
-      window.removeEventListener('resize', syncPosition);
-      window.removeEventListener('scroll', syncPosition, true);
-    };
-  }, [hoverGroup, openMenuId, mobileSidebarOpen, sidebarOpen]);
+    const activeParent = menuItems.find(item =>
+      item.children?.some(c => {
+        const [cPath, cSearch] = c.path.split('?');
+        return cSearch
+          ? location.pathname === cPath && location.search === `?${cSearch}`
+          : location.pathname === c.path;
+      })
+    );
+    setOpenMenuId(activeParent?.path ?? null);
+  }, [location.pathname, location.search]);
 
   // Fetch published custom forms for dynamic menu
   const { data: publishedForms = [] } = useQuery({
@@ -445,33 +420,34 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <nav
           ref={(element) => restoreMenuScroll(element, mobile)}
           onScroll={(event) => persistMenuScroll(mobile, event.currentTarget.scrollTop)}
-           className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overflow-x-visible overscroll-contain sidebar-scrollbar select-none cursor-default"
-           style={{ scrollbarGutter: 'stable' }}
+          className="flex-1 min-h-0 py-3 px-3 space-y-0.5 overflow-y-auto overscroll-contain sidebar-scrollbar select-none cursor-default"
+          style={{ scrollbarGutter: 'stable' }}
           data-current-path={location.pathname}
         >
-          {/* Group items with labels */}
           {(() => {
             let lastGroup = '';
             return menuItems.map((item) => {
               const currentFullPath = location.pathname + location.search;
               const isDirectActive = location.pathname === item.path || currentFullPath === item.path;
-                      const hasChildren = item.children && item.children.length > 0;
-                      const hasActiveChild = hasChildren && item.children!.some(c => {
-                        const [cPath, cSearch] = c.path.split('?');
-                        return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
-                      });
-                      const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = mobile ? openMenuId === item.path : (hoverGroup ?? openMenuId) === item.path;
+              const hasChildren = item.children && item.children.length > 0;
+              const hasActiveChild = hasChildren && item.children!.some(c => {
+                const [cPath, cSearch] = c.path.split('?');
+                return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
+              });
+              const isActive = isDirectActive && !hasActiveChild;
+              const isGroupOpen = openMenuId === item.path;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
               if (groupLabel) lastGroup = groupLabel;
 
+              const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
+
               return (
                 <div key={item.path}>
                   {showGroupLabel && (
                     <div
-                      className="sidebar-group-label mt-4 first:mt-0"
+                      className="sidebar-group-label"
                       style={{
                         ...(groupInfo?.color ? { color: groupInfo.color } : {}),
                         ...(groupInfo?.bgColor ? { backgroundColor: groupInfo.bgColor + '15', borderRadius: '6px', marginLeft: '-4px', marginRight: '-4px', paddingLeft: '16px' } : {}),
@@ -480,123 +456,24 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       {groupLabel}
                     </div>
                   )}
-                  <div
-                    className="relative"
-                    onMouseEnter={() => {
-                      if (hasChildren && !mobile) {
-                        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                        if (hoverSuppressRef.current === item.path) return;
-                        updateFlyoutPosition(item.path);
-                        setHoverGroup(item.path);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      if (hasChildren && !mobile) {
-                        hoverTimeoutRef.current = setTimeout(() => {
-                          setHoverGroup((current) => (current === item.path ? null : current));
-                        }, 220);
-                        hoverSuppressRef.current = null;
-                      }
-                    }}
-                  >
-                    <div className="flex items-center">
-                    {(() => {
-                      const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
-                      return hasChildren ? (
+
+                  {hasChildren ? (
+                    <>
                       <div
-                        ref={(element) => {
-                          triggerRefs.current[item.path] = element;
-                        }}
-                        className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
-                        onClick={() => {
-                          updateFlyoutPosition(item.path);
-                          toggleGroup(item.path);
-                        }}
+                        className={`sidebar-item cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
+                        onClick={() => toggleGroup(item.path)}
                       >
                         <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                          <item.icon className="sidebar-icon w-5 h-5 shrink-0" />
+                          <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
                           {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
                         </div>
-                        {(sidebarOpen || mobile) && hasChildren && (
-                          mobile
-                            ? <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
-                            : <ChevronRight className={`w-3.5 h-3.5 shrink-0 ml-auto transition-transform duration-200 opacity-40 ${isGroupOpen ? 'opacity-80 translate-x-0.5' : ''}`} />
+                        {(sidebarOpen || mobile) && (
+                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
                         )}
                       </div>
-                    ) : (
-                      <Link
-                        to={item.path}
-                        onClick={(e) => {
-                          if (mobile) setMobileSidebarOpen(false);
-                          if (adminTheme.sidebarStableNav) {
-                            e.preventDefault();
-                            startNavTransition(() => navigate(item.path));
-                          }
-                        }}
-                        className={`sidebar-item flex-1 ${effectClass} ${isActive ? 'active' : ''}`}
-                        title={!sidebarOpen && !mobile ? item.label : undefined}
-                      >
-                        <item.icon className="sidebar-icon w-5 h-5 shrink-0" />
-                        {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
-                        {isActive && (sidebarOpen || mobile) && <ChevronRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-50" />}
-                      </Link>
-                    );
-                    })()}
-                    </div>
 
-                    {/* Desktop flyout is rendered via portal to escape sidebar overflow */}
-                    {hasChildren && !mobile && isGroupOpen && flyoutPosition && createPortal(
-                      <div
-                        className="fixed z-[120]"
-                        style={{ top: `${flyoutPosition.top}px`, left: `${flyoutPosition.left}px` }}
-                        onMouseEnter={() => {
-                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                          setHoverGroup(item.path);
-                        }}
-                        onMouseLeave={() => {
-                          hoverTimeoutRef.current = setTimeout(() => {
-                            setHoverGroup((current) => (current === item.path ? null : current));
-                          }, 220);
-                        }}
-                      >
-                        {/* Invisible bridge to prevent gap closure */}
-                        <div className="absolute inset-y-0 -left-4 w-4" />
-                        <div className="sidebar-popover-submenu relative ml-0" style={{ maxHeight: `${flyoutPosition.maxHeight}px` }}>
-                          <div className="sidebar-popover-arrow" style={{ top: `${flyoutPosition.arrowTop}px` }} />
-                          <div className="sidebar-popover-header">
-                            {item.label}
-                          </div>
-                          {item.children!.map(child => {
-                            const [childPathname, childSearch] = child.path.split('?');
-                            const childActive = childSearch
-                              ? (location.pathname === childPathname && location.search === '?' + childSearch)
-                              : location.pathname === child.path;
-                            return (
-                              <Link
-                                key={child.path}
-                                to={child.path}
-                                onClick={() => {
-                                  setHoverGroup(null);
-                                  setOpenMenuId(null);
-                                }}
-                                className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
-                              >
-                                <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
-                                <span className="truncate text-[13px]">{child.label}</span>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>,
-                      document.body
-                    )}
-                  </div>
-
-                    {/* Mobile: accordion submenu */}
-                    {hasChildren && mobile && (
-                      <div
-                        className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
-                      >
+                      {/* Accordion submenu */}
+                      <div className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}>
                         <div className="sidebar-submenu-container">
                           {item.children!.map(child => {
                             const [childPathname, childSearch] = child.path.split('?');
@@ -607,18 +484,36 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                               <Link
                                 key={child.path}
                                 to={child.path}
-                                onClick={() => setMobileSidebarOpen(false)}
+                                onClick={() => { if (mobile) setMobileSidebarOpen(false); }}
                                 className={`sidebar-sub-item ${childActive ? 'active' : ''}`}
                               >
-                                <child.icon className="sidebar-icon w-[17px] h-[17px] shrink-0" />
+                                <child.icon className="sidebar-icon w-4 h-4 shrink-0" />
                                 <span className="truncate">{child.label}</span>
                               </Link>
                             );
                           })}
                         </div>
                       </div>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={(e) => {
+                        if (mobile) setMobileSidebarOpen(false);
+                        if (adminTheme.sidebarStableNav) {
+                          e.preventDefault();
+                          startNavTransition(() => navigate(item.path));
+                        }
+                      }}
+                      className={`sidebar-item ${effectClass} ${isActive ? 'active' : ''}`}
+                      title={!sidebarOpen && !mobile ? item.label : undefined}
+                    >
+                      <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
+                      {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
+                      {isActive && (sidebarOpen || mobile) && <ChevronRight className="w-3.5 h-3.5 ml-auto shrink-0 opacity-40" />}
+                    </Link>
+                  )}
+                </div>
               );
             });
           })()}
