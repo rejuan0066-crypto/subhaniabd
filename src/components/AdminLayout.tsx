@@ -448,24 +448,10 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                       {groupLabel}
                     </div>
                   )}
-                  <div
-                    className="flex items-center"
-                    onMouseEnter={() => {
-                      if (!mobile && hasChildren) {
-                        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                        setHoverGroup(item.path);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      if (!mobile && hasChildren) {
-                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
-                      }
-                    }}
-                  >
+                  <div className="flex items-center">
                     {(() => {
                       const effectClass = adminTheme.sidebarClickEffect && adminTheme.sidebarClickEffect !== 'none' ? `click-${adminTheme.sidebarClickEffect}` : '';
-                      const isHoverOpen = hoverGroup === item.path;
-                      const isExpanded = isGroupOpen || isHoverOpen;
+                      const isExpanded = isGroupOpen;
                       return hasChildren ? (
                       <div
                         className={`sidebar-item flex-1 cursor-pointer ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
@@ -499,27 +485,16 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                     );
                     })()}
                   </div>
-                  {hasChildren && (isGroupOpen || hoverGroup === item.path) && (sidebarOpen || mobile) && (
+                  {hasChildren && (sidebarOpen || mobile) && (
                     <div
                       ref={(el) => {
-                        if (el && (isGroupOpen || hoverGroup === item.path)) {
+                        if (el && isGroupOpen) {
                           requestAnimationFrame(() => {
                             el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                           });
                         }
                       }}
-                      className="sidebar-submenu-enter sidebar-submenu-container"
-                      onMouseEnter={() => {
-                        if (!mobile) {
-                          if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-                          setHoverGroup(item.path);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        if (!mobile) {
-                          hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 200);
-                        }
-                      }}
+                      className={`sidebar-submenu-slide sidebar-submenu-container ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}
                     >
                       {item.children!.map(child => {
                         const [childPathname, childSearch] = child.path.split('?');
