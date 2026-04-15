@@ -201,8 +201,8 @@ const AdminFeeReceipts = () => {
   };
 
   const getReceiptHtml = (receipt: ReceiptData) => {
-    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy');
-    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy');
+    const officeCopy = buildReceiptBlock(receipt, '📋 অফিস কপি | Office Copy', false);
+    const studentCopy = buildReceiptBlock(receipt, '🎓 ছাত্র কপি | Student Copy', true);
 
     return `<!DOCTYPE html>
 <html>
