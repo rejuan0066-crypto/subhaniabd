@@ -168,6 +168,19 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateFlyoutPosition = (key: string) => {
+    const trigger = triggerRefs.current[key];
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const estimatedHeight = 360;
+    const maxHeight = Math.min(420, viewportHeight - 24);
+    const top = Math.min(Math.max(12, rect.top - 6), Math.max(12, viewportHeight - Math.min(estimatedHeight, maxHeight) - 12));
+    const left = rect.right;
+    const arrowTop = Math.max(16, Math.min(rect.top - top + rect.height / 2 - 8, maxHeight - 28));
+    setFlyoutPosition({ top, left, maxHeight, arrowTop });
+  };
+
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
     const storageKey = mobile ? MENU_SCROLL_STORAGE_KEYS.mobile : MENU_SCROLL_STORAGE_KEYS.desktop;
     menuScrollPositionsRef.current[mobile ? 'mobile' : 'desktop'] = scrollTop;
