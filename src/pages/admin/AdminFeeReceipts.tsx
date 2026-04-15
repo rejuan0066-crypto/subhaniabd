@@ -85,6 +85,7 @@ const AdminFeeReceipts = () => {
         paid_at: p.paid_at,
         month: p.month,
         year: p.year,
+        collected_by: p.collected_by || '',
       })) as ReceiptData[];
     }
   });
