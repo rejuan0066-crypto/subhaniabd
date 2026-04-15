@@ -152,7 +152,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenMenuId((prev) => (prev === key ? null : key));
+    setOpenMenuId((prev) => {
+      if (prev === key) {
+        setHoverGroup((current) => (current === key ? null : current));
+        return null;
+      }
+
+      setHoverGroup(key);
+      return key;
+    });
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -173,6 +181,14 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     restoreMenuScroll(desktopMenuRef.current, false);
     restoreMenuScroll(mobileMenuRef.current, true);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
   }, []);
 
   // When embedded or already inside an admin shell, render only the page content
@@ -434,7 +450,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = (sidebarOpen || mobile) ? openMenuId === item.path : hoverGroup === item.path;
+                      const isGroupOpen = mobile ? openMenuId === item.path : (hoverGroup ?? openMenuId) === item.path;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -456,13 +472,13 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="relative"
                     onMouseEnter={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
+                        if (hasChildren && !mobile) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
+                        if (hasChildren && !mobile) {
                         hoverTimeoutRef.current = setTimeout(() => {
                           setHoverGroup((current) => (current === item.path ? null : current));
                         }, 300);
