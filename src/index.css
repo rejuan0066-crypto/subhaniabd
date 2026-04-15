@@ -505,14 +505,13 @@
     background: hsl(0 0% 100% / 0.13);
   }
   .sidebar-avatar-glow {
-    box-shadow: 0 0 0 2.5px hsl(160 84% 55% / 0.3), 0 0 15px hsl(160 84% 55% / 0.15);
+    box-shadow: 0 0 0 2px hsl(160 50% 40% / 0.25);
   }
   .user-role-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase;
-    background: linear-gradient(135deg, hsl(160 84% 55% / 0.18), hsl(160 60% 45% / 0.12));
-    color: hsl(160 84% 65%);
-    box-shadow: 0 0 15px hsl(160 84% 55% / 0.15), inset 0 1px 0 hsl(160 84% 55% / 0.1);
-    border: 1px solid hsl(160 84% 55% / 0.15);
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase;
+    background: hsl(160 50% 30% / 0.15);
+    color: hsl(160 60% 60%);
+    border: 1px solid hsl(160 50% 40% / 0.12);
   }
 
   /* ── Patterns ── */
