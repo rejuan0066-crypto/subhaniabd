@@ -94,8 +94,8 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   // ইনভেন্টরি ও সম্পদ
   { id: 'inventory-assets', path: '/admin/inventory', label_bn: 'ইনভেন্টরি ও সম্পদ', label_en: 'Inventory & Assets', icon: 'Folder', visible: true, sort_order: 5.5 },
 
-  // পরীক্ষার প্রশ্নপত্র
-  { id: 'question-papers', path: '/admin/question-papers', label_bn: 'প্রশ্নপত্র', label_en: 'Question Papers', icon: 'FileText', visible: true, sort_order: 4.5, tab_of: undefined },
+
+
 
   // সিস্টেম ও সেটিংস
   { id: 'system', path: '/admin/settings', label_bn: 'সিস্টেম', label_en: 'System', icon: 'Settings', visible: true, sort_order: 9, children: [
