@@ -152,19 +152,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenGroups(prev => {
-      const isCurrentlyOpen = prev[key] === true;
-      // Accordion: close all, toggle clicked
-      const next: Record<string, boolean> = {};
-      // Explicitly set all known groups to false
-      Object.keys(prev).forEach(k => { next[k] = false; });
-      if (!isCurrentlyOpen) {
-        next[key] = true;
-      } else {
-        next[key] = false;
-      }
-      return next;
-    });
+    // Click toggles lock: if already locked on this key, unlock (close). Otherwise lock open.
+    if (lockedGroup === key) {
+      setLockedGroup(null);
+    } else {
+      setLockedGroup(key);
+    }
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
