@@ -62,7 +62,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { settings: websiteSettings } = useWebsiteSettings();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+  const [lockedGroup, setLockedGroup] = useState<string | null>(null);
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startNavTransition] = useTransition();
@@ -152,19 +152,12 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleGroup = (key: string) => {
-    setOpenGroups(prev => {
-      const isCurrentlyOpen = prev[key] === true;
-      // Accordion: close all, toggle clicked
-      const next: Record<string, boolean> = {};
-      // Explicitly set all known groups to false
-      Object.keys(prev).forEach(k => { next[k] = false; });
-      if (!isCurrentlyOpen) {
-        next[key] = true;
-      } else {
-        next[key] = false;
-      }
-      return next;
-    });
+    // Click toggles lock: if already locked on this key, unlock (close). Otherwise lock open.
+    if (lockedGroup === key) {
+      setLockedGroup(null);
+    } else {
+      setLockedGroup(key);
+    }
   };
 
   const persistMenuScroll = (mobile: boolean, scrollTop: number) => {
@@ -414,7 +407,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
         <nav
           ref={(element) => restoreMenuScroll(element, mobile)}
           onScroll={(event) => persistMenuScroll(mobile, event.currentTarget.scrollTop)}
-          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overscroll-contain sidebar-scrollbar"
+          className="flex-1 min-h-0 py-4 px-3 space-y-1 overflow-y-auto overflow-x-visible overscroll-contain sidebar-scrollbar select-none cursor-default"
           data-current-path={location.pathname}
         >
           {/* Group items with labels */}
@@ -429,7 +422,7 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                         return cSearch ? (location.pathname === cPath && location.search === '?' + cSearch) : location.pathname === c.path;
                       });
                       const isActive = isDirectActive && !hasActiveChild;
-                      const isGroupOpen = item.path in openGroups ? openGroups[item.path] : hasActiveChild;
+                      const isGroupOpen = lockedGroup === item.path || hoverGroup === item.path || hasActiveChild;
               const groupInfo = getGroupInfo(item.path);
               const groupLabel = groupInfo?.label || '';
               const showGroupLabel = groupLabel && groupLabel !== lastGroup;
@@ -451,14 +444,14 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
                   <div
                     className="flex items-center relative"
                     onMouseEnter={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
+                      if (hasChildren) {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         setHoverGroup(item.path);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (hasChildren && !sidebarOpen && !mobile) {
-                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 250);
+                      if (hasChildren) {
+                        hoverTimeoutRef.current = setTimeout(() => setHoverGroup(null), 300);
                       }
                     }}
                   >
