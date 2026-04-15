@@ -11,7 +11,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { useAuth } from '@/hooks/useAuth';
-import { usePagePermissions } from '@/hooks/usePagePermissions';
 import FeeTypeManager from '@/components/admin/FeeTypeManager';
 import StudentCategoryManager from '@/components/admin/StudentCategoryManager';
 
