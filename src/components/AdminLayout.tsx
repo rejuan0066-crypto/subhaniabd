@@ -66,6 +66,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [, startNavTransition] = useTransition();
+  const desktopMenuRef = useRef<HTMLElement | null>(null);
+  const mobileMenuRef = useRef<HTMLElement | null>(null);
   const menuScrollPositionsRef = useRef({ desktop: 0, mobile: 0 });
 
   // Fetch staff photo & profile for sidebar avatar
