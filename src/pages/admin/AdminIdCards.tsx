@@ -533,16 +533,28 @@ const AdminIdCards = () => {
         </div>
         <div className="flex items-center gap-2">
           {activeTab === 'student' && selectedIds.size > 0 && (
-            <Button onClick={handlePrintSelected} className="btn-primary-gradient flex items-center gap-2">
-              <Printer className="w-4 h-4" />
-              {bn ? `${selectedIds.size} টি প্রিন্ট` : `Print ${selectedIds.size}`}
-            </Button>
+            <>
+              <Button onClick={handleBulkDownloadPdf} disabled={bulkDownloading} variant="outline" className="flex items-center gap-2">
+                {bulkDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {bn ? `${selectedIds.size} টি PDF` : `PDF ${selectedIds.size}`}
+              </Button>
+              <Button onClick={handlePrintSelected} className="btn-primary-gradient flex items-center gap-2">
+                <Printer className="w-4 h-4" />
+                {bn ? `${selectedIds.size} টি প্রিন্ট` : `Print ${selectedIds.size}`}
+              </Button>
+            </>
           )}
           {activeTab === 'staff' && selectedStaffIds.size > 0 && (
-            <Button onClick={handlePrintSelectedStaff} className="btn-primary-gradient flex items-center gap-2">
-              <Printer className="w-4 h-4" />
-              {bn ? `${selectedStaffIds.size} টি প্রিন্ট` : `Print ${selectedStaffIds.size}`}
-            </Button>
+            <>
+              <Button onClick={handleBulkDownloadPdf} disabled={bulkDownloading} variant="outline" className="flex items-center gap-2">
+                {bulkDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {bn ? `${selectedStaffIds.size} টি PDF` : `PDF ${selectedStaffIds.size}`}
+              </Button>
+              <Button onClick={handlePrintSelectedStaff} className="btn-primary-gradient flex items-center gap-2">
+                <Printer className="w-4 h-4" />
+                {bn ? `${selectedStaffIds.size} টি প্রিন্ট` : `Print ${selectedStaffIds.size}`}
+              </Button>
+            </>
           )}
         </div>
       </div>
