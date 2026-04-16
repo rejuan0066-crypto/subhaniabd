@@ -22,6 +22,15 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Kalpurush';
+  src: local('Kalpurush'),
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/kalpurush/kalpurush.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/kalpurush/kalpurush.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;

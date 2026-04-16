@@ -37,9 +37,9 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-// Unicode Bangla — SolaimanLipi gives a classic SutonnyMJ-like look while
+// Unicode Bangla — Kalpurush mimics the classic SutonnyMJ look while
 // remaining Unicode-compatible (no garbled glyphs).
-const BN = "'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif";
+const BN = "'Kalpurush', 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif";
 const EN = "'Inter', sans-serif";
 
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
