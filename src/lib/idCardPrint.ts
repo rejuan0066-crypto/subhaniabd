@@ -219,9 +219,13 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
       })
   );
 
-  Promise.all(imgPromises).then(() => {
+  const fontReady = (printWindow.document as any).fonts?.ready
+    ? (printWindow.document as any).fonts.ready
+    : Promise.resolve();
+
+  Promise.all([Promise.all(imgPromises), fontReady]).then(() => {
     setTimeout(() => {
       printWindow.print();
-    }, 500);
+    }, 600);
   });
 };
