@@ -37,9 +37,6 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-/* ── Arabic ornamental band (top) ── */
-const arabicBandSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='14' viewBox='0 0 200 14'%3E%3Cdefs%3E%3Cpattern id='ab' patternUnits='userSpaceOnUse' width='20' height='14'%3E%3Cpath d='M0 7 Q5 0 10 7 T20 7' fill='none' stroke='%23d4af37' stroke-width='0.6' opacity='0.9'/%3E%3Ccircle cx='10' cy='7' r='1.2' fill='%23d4af37' opacity='0.6'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='14' fill='%23022c22'/%3E%3Crect width='200' height='14' fill='url(%23ab)'/%3E%3C/svg%3E")`;
-
 const BN = "'SutonnyOMJ', 'SutonnyMJ', 'Noto Sans Bengali', sans-serif";
 const EN = "'Inter', sans-serif";
 
@@ -59,154 +56,125 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           minHeight: '3.375in',
           height: 'auto',
           background: '#ffffff',
-          borderRadius: '14px',
+          borderRadius: '12px',
           overflow: 'hidden',
           fontFamily: BN,
           fontSize: '7px',
-          color: '#1a1a1a',
+          color: '#0f172a',
           position: 'relative',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
-          border: '1px solid #e5e7eb',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
+          border: '1px solid #d1d5db',
           display: 'flex',
           flexDirection: 'column',
           WebkitPrintColorAdjust: 'exact',
           printColorAdjust: 'exact' as any,
         }}
       >
-        {/* ═══ TOP: Arabic ornamental band ═══ */}
-        <div style={{
-          height: '14px',
-          backgroundImage: arabicBandSvg,
-          backgroundSize: 'cover',
-          flexShrink: 0,
-        }} />
+        {/* ═══ HEADER — Solid Emerald, prominent branding ═══ */}
+        <div
+          style={{
+            background: 'linear-gradient(180deg, #064e3b 0%, #047857 100%)',
+            padding: '8px 8px 9px',
+            textAlign: 'center',
+            flexShrink: 0,
+            borderBottom: '2px solid #d4af37',
+            position: 'relative',
+          }}
+        >
+          {/* Optional logo small at top corner */}
+          {institution?.logo_url && (
+            <img
+              src={institution.logo_url}
+              alt=""
+              style={{
+                position: 'absolute',
+                top: '6px',
+                left: '7px',
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1px solid rgba(212,175,55,0.7)',
+              }}
+            />
+          )}
 
-        {/* ═══ WAVY HEADER WITH CURVES ═══ */}
-        <div style={{ position: 'relative', height: '70px', flexShrink: 0, overflow: 'hidden', background: '#ffffff' }}>
-          {/* SVG layered waves — emerald + teal/cyan */}
-          <svg
-            viewBox="0 0 200 70"
-            preserveAspectRatio="none"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
-          >
-            {/* Back layer — emerald deep */}
-            <path
-              d="M0,0 L200,0 L200,42 Q150,62 100,46 Q50,30 0,52 Z"
-              fill="#047857"
-            />
-            {/* Mid layer — teal */}
-            <path
-              d="M0,0 L200,0 L200,30 Q150,52 100,36 Q50,20 0,40 Z"
-              fill="#0d9488"
-              opacity="0.9"
-            />
-            {/* Front layer — cyan */}
-            <path
-              d="M0,0 L200,0 L200,18 Q150,40 100,24 Q50,10 0,28 Z"
-              fill="#22d3ee"
-              opacity="0.55"
-            />
-            {/* Bottom curve highlight */}
-            <path
-              d="M0,52 Q50,30 100,46 Q150,62 200,42 L200,55 Q150,72 100,55 Q50,40 0,60 Z"
-              fill="#064e3b"
-              opacity="0.7"
-            />
-          </svg>
-
-          {/* Header text */}
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            paddingTop: '6px',
-            zIndex: 2,
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '11px',
+            fontFamily: BN,
+            lineHeight: 1.2,
+            letterSpacing: '0.2px',
+            padding: '0 22px',
           }}>
+            {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
+          </div>
+          {institution?.name_en && (
             <div style={{
               color: '#ffffff',
-              fontWeight: 800,
-              fontSize: '9.5px',
-              fontFamily: BN,
-              textShadow: '0 1px 3px rgba(0,0,0,0.45)',
-              letterSpacing: '0.2px',
-              textAlign: 'center',
-              padding: '0 6px',
-              lineHeight: 1.15,
+              fontFamily: EN,
+              fontWeight: 700,
+              fontSize: '6.5px',
+              marginTop: '2px',
+              letterSpacing: '0.7px',
+              opacity: 0.95,
             }}>
-              {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
+              {institution.name_en}
             </div>
-            {institution?.name_en && (
-              <div style={{
-                color: '#fde047',
-                fontFamily: EN,
-                fontWeight: 700,
-                fontSize: '6px',
-                marginTop: '2px',
-                letterSpacing: '0.6px',
-                textShadow: '0 1px 2px rgba(0,0,0,0.4)',
-              }}>
-                {institution.name_en}
-              </div>
-            )}
-          </div>
+          )}
+          {institution?.address && (
+            <div style={{
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: '5.5px',
+              marginTop: '2px',
+              fontFamily: BN,
+            }}>
+              {institution.address}
+            </div>
+          )}
         </div>
 
-        {/* ═══ BODY ═══ */}
+        {/* ═══ BODY — Pure white ═══ */}
         <div style={{
           flex: '1 1 auto',
-          padding: '4px 10px 6px',
+          padding: '6px 11px 8px',
           display: 'flex',
           flexDirection: 'column',
           background: '#ffffff',
-          position: 'relative',
           minHeight: 0,
         }}>
-          {/* ── Circular photo with yellow half-ring ── */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-32px', marginBottom: '4px', position: 'relative', zIndex: 3 }}>
+          {/* ── Circular photo with thin gold ring ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
             <div style={{
-              position: 'relative',
               width: '64px',
               height: '64px',
+              borderRadius: '50%',
+              padding: '2px',
+              background: '#d4af37',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
             }}>
-              {/* Yellow accent half-ring behind photo */}
               <div style={{
-                position: 'absolute',
-                top: '-3px',
-                left: '-3px',
-                right: '-3px',
-                bottom: '-3px',
-                borderRadius: '50%',
-                background: 'conic-gradient(from 200deg, #facc15 0deg, #facc15 140deg, transparent 140deg, transparent 360deg)',
-                zIndex: 0,
-              }} />
-              {/* White inner ring */}
-              <div style={{
-                position: 'absolute',
-                inset: 0,
+                width: '100%',
+                height: '100%',
                 borderRadius: '50%',
                 background: '#ffffff',
-                padding: '2px',
-                zIndex: 1,
-                boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+                padding: '1.5px',
               }}>
                 <div style={{
                   width: '100%',
                   height: '100%',
                   borderRadius: '50%',
                   overflow: 'hidden',
-                  background: '#e0f2fe',
+                  background: '#f1f5f9',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1.5px solid #ffffff',
                 }}>
                   {student.photo_url ? (
                     <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
-                    <div style={{ fontSize: '22px', color: '#0369a1', fontWeight: 700, opacity: 0.4 }}>
+                    <div style={{ fontSize: '22px', color: '#064e3b', fontWeight: 700, opacity: 0.35 }}>
                       {student.name_bn?.[0] || student.name_en?.[0] || '?'}
                     </div>
                   )}
@@ -215,34 +183,41 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             </div>
           </div>
 
-          {/* ── Name in bold blue ── */}
+          {/* ── Name in bold dark green ── */}
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{
               fontWeight: 800,
-              fontSize: '11px',
-              color: '#1d4ed8',
+              fontSize: '12px',
+              color: '#064e3b',
               fontFamily: BN,
               lineHeight: 1.25,
             }}>
               {student.name_bn || student.name_en || '—'}
             </div>
             {student.name_en && student.name_bn && (
-              <div style={{ fontSize: '6.5px', color: '#64748b', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
+              <div style={{ fontSize: '7px', color: '#475569', fontFamily: EN, marginTop: '1px', fontWeight: 600 }}>
                 {student.name_en}
               </div>
             )}
+            <div style={{
+              width: '40px',
+              height: '1.5px',
+              background: '#d4af37',
+              margin: '3px auto 0',
+              borderRadius: '1px',
+            }} />
           </div>
 
-          {/* ── Info rows: label : value ── */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+          {/* ── Info rows ── */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             {student.father_name && <Row label={lang === 'bn' ? 'পিতা' : 'Father'} value={student.father_name} />}
             <Row label={lang === 'bn' ? 'জামাত' : 'Class'} value={student.class_name || '—'} />
-            <Row label={lang === 'bn' ? 'আইডি নং' : 'ID No'} value={student.student_id || '—'} bold />
+            <Row label={lang === 'bn' ? 'আইডি নং' : 'ID No'} value={student.student_id || '—'} highlight />
             {student.roll_number && <Row label={lang === 'bn' ? 'রোল' : 'Roll'} value={student.roll_number} />}
             {student.session_year && (
               <Row
                 label={lang === 'bn' ? 'শিক্ষাবর্ষ' : 'Session'}
-                value={lang === 'bn' && student.session_year_bn ? `${student.session_year_bn} খ্রিস্টাব্দ` : student.session_year}
+                value={lang === 'bn' && student.session_year_bn ? `${student.session_year_bn} খ্রিঃ` : student.session_year}
               />
             )}
             {(student.guardian_phone || student.phone) && (
@@ -252,82 +227,61 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           </div>
         </div>
 
-        {/* ═══ WAVY FOOTER WITH SIGNATURE & QR ═══ */}
-        <div style={{ position: 'relative', flexShrink: 0, marginTop: 'auto' }}>
-          {/* SVG wave footer background */}
-          <svg
-            viewBox="0 0 200 60"
-            preserveAspectRatio="none"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
-          >
-            <path
-              d="M0,18 Q50,0 100,14 Q150,28 200,8 L200,60 L0,60 Z"
-              fill="#22d3ee"
-              opacity="0.45"
-            />
-            <path
-              d="M0,26 Q50,10 100,22 Q150,36 200,18 L200,60 L0,60 Z"
-              fill="#0d9488"
-              opacity="0.85"
-            />
-            <path
-              d="M0,34 Q50,18 100,30 Q150,44 200,26 L200,60 L0,60 Z"
-              fill="#047857"
-            />
-          </svg>
-
-          {/* Footer content overlay */}
-          <div style={{
-            position: 'relative',
-            zIndex: 2,
-            padding: '20px 8px 6px',
+        {/* ═══ FOOTER — Solid Emerald ═══ */}
+        <div
+          style={{
+            background: 'linear-gradient(0deg, #064e3b 0%, #047857 100%)',
+            borderTop: '2px solid #d4af37',
+            padding: '5px 8px 5px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
             gap: '4px',
-          }}>
-            {/* Signature */}
-            <div className="signature-container" style={{ textAlign: 'center', flex: '0 0 auto', maxWidth: '52px' }}>
-              {principalSignatureUrl && (
-                <img
-                  src={principalSignatureUrl}
-                  alt="Signature"
-                  style={{ height: '12px', maxWidth: '46px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2.5) contrast(0.8)' }}
-                />
-              )}
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.85)', width: '46px', marginBottom: '1px' }} />
-              <div style={{ fontSize: '5.5px', color: '#ffffff', fontFamily: f, fontWeight: 600, lineHeight: 1.1 }}>
-                {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
-              </div>
-            </div>
-
-            {/* Validity */}
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.85)', fontFamily: f, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
-              </div>
-              <div style={{ fontSize: '7px', fontWeight: 800, color: '#fde047', fontFamily: f, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
-                {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
-              </div>
-            </div>
-
-            {/* QR */}
-            <div className="qr-code-container" style={{
-              flex: '0 0 auto',
-              background: '#ffffff',
-              borderRadius: '4px',
-              padding: '2.5px',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
-              border: '0.5px solid rgba(212,175,55,0.4)',
-            }}>
-              <QRCodeSVG
-                value={verifyUrl}
-                size={28}
-                level="M"
-                bgColor="#ffffff"
-                fgColor="#064e3b"
+            flexShrink: 0,
+            marginTop: 'auto',
+          }}
+        >
+          {/* Signature */}
+          <div className="signature-container" style={{ textAlign: 'center', flex: '0 0 auto', maxWidth: '54px' }}>
+            {principalSignatureUrl && (
+              <img
+                src={principalSignatureUrl}
+                alt="Signature"
+                style={{ height: '13px', maxWidth: '48px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2.5) contrast(0.8)' }}
               />
+            )}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.9)', width: '48px', marginBottom: '2px' }} />
+            <div style={{ fontSize: '5.5px', color: '#ffffff', fontFamily: f, fontWeight: 600, lineHeight: 1.15 }}>
+              {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
+          </div>
+
+          {/* Validity */}
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.85)', fontFamily: f, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+              {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
+            </div>
+            <div style={{ fontSize: '7.5px', fontWeight: 800, color: '#fde047', fontFamily: f, marginTop: '1px' }}>
+              {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
+            </div>
+          </div>
+
+          {/* QR */}
+          <div className="qr-code-container" style={{
+            flex: '0 0 auto',
+            background: '#ffffff',
+            borderRadius: '4px',
+            padding: '2.5px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+            border: '0.5px solid rgba(212,175,55,0.5)',
+          }}>
+            <QRCodeSVG
+              value={verifyUrl}
+              size={28}
+              level="M"
+              bgColor="#ffffff"
+              fgColor="#064e3b"
+            />
           </div>
         </div>
       </div>
@@ -338,29 +292,31 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
 StudentIdCard.displayName = 'StudentIdCard';
 
 /* ── Row: label : value ── */
-const Row = ({ label, value, bold, blood }: {
-  label: string; value: string; bold?: boolean; blood?: boolean;
+const Row = ({ label, value, highlight, blood }: {
+  label: string; value: string; highlight?: boolean; blood?: boolean;
 }) => (
   <div style={{
     display: 'flex',
     alignItems: 'baseline',
-    gap: '4px',
-    fontSize: '7.5px',
-    lineHeight: 1.4,
+    gap: '5px',
+    fontSize: '8.5px',
+    lineHeight: 1.55,
+    borderBottom: '1px dotted #e5e7eb',
+    paddingBottom: '1px',
   }}>
     <span style={{
-      color: '#475569',
-      fontWeight: 600,
+      color: '#334155',
+      fontWeight: 700,
       fontFamily: BN,
-      width: '46px',
+      width: '48px',
       flexShrink: 0,
     }}>
       {label}
     </span>
-    <span style={{ color: '#475569', fontWeight: 600 }}>:</span>
+    <span style={{ color: '#334155', fontWeight: 700 }}>:</span>
     <span style={{
-      color: blood ? '#dc2626' : '#0f172a',
-      fontWeight: bold ? 800 : 700,
+      color: blood ? '#dc2626' : highlight ? '#064e3b' : '#0f172a',
+      fontWeight: highlight ? 800 : 700,
       fontFamily: BN,
       flex: 1,
     }}>
