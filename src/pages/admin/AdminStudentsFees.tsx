@@ -162,11 +162,17 @@ const AdminStudentsFees = () => {
     const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
     const { startDate, endDate } = getSessionDateRange(feeTypeId);
 
-    // Determine admission date
+    // Determine admission date — use session start if admission is within the same session
     let admissionDate: Date | null = null;
     if (foundStudent?.admission_date) {
-      const ad = new Date(foundStudent.admission_date);
-      if (!isNaN(ad.getTime())) admissionDate = ad;
+      const ad = new Date(foundStudent.admission_date + 'T00:00:00');
+      if (!isNaN(ad.getTime())) {
+        // If admission is within the session range, don't skip earlier session months
+        // Only mark as 'na' if admission is after the session started (for mid-session joins)
+        if (ad > startDate) {
+          admissionDate = ad;
+        }
+      }
     }
 
     // Build month list from session start to end
@@ -180,7 +186,7 @@ const AdminStudentsFees = () => {
       const monthEn = MONTHS_EN[monthIndex];
       const monthBn = MONTHS_BN[monthIndex];
 
-      // Before admission → na
+      // Before admission month → na (only for mid-session admissions)
       if (admissionDate && cursor < new Date(admissionDate.getFullYear(), admissionDate.getMonth(), 1)) {
         results.push({ month: monthEn, monthBn, year, status: 'na' });
         cursor.setMonth(cursor.getMonth() + 1);
