@@ -232,7 +232,7 @@ const AdminStudentsFees = () => {
           .eq('student_id', foundStudent.id)
           .eq('fee_type_id', feeType)
           .eq('month', paymentMonth)
-          .eq('year', new Date().getFullYear())
+          .eq('year', paymentYear)
           .in('status', ['paid'])
           .limit(1)
           .maybeSingle();
