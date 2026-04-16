@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Save, Loader2, Eye, EyeOff, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
+import ManualPaymentMethodsManager from './ManualPaymentMethodsManager';
 
 const PROVIDERS = [
   { id: 'bkash', name: 'bKash', fields: ['api_url', 'api_key', 'api_secret', 'merchant_id', 'callback_url'] },
@@ -218,6 +219,11 @@ const PaymentGatewaySettings = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Manual Payment Methods Section */}
+      <div className="card-elevated p-6 rounded-xl mt-6">
+        <ManualPaymentMethodsManager />
       </div>
     </div>
   );
