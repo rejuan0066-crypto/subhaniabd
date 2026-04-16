@@ -923,7 +923,7 @@ const AdminIdCards = () => {
 
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
-        <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col !overflow-hidden p-6 sm:max-w-[28rem]">
+        <DialogContent style={{ overflow: 'hidden' }} className="flex h-[90vh] max-h-[90vh] flex-col p-6 sm:max-w-[28rem]">
           <DialogHeader className="shrink-0">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
@@ -959,7 +959,7 @@ const AdminIdCards = () => {
 
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
-        <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col !overflow-hidden p-6 sm:max-w-[28rem]">
+        <DialogContent style={{ overflow: 'hidden' }} className="flex h-[90vh] max-h-[90vh] flex-col p-6 sm:max-w-[28rem]">
           <DialogHeader className="shrink-0">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
