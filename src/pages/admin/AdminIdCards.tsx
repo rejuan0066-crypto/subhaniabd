@@ -923,24 +923,22 @@ const AdminIdCards = () => {
 
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
-        <DialogContent style={{ overflow: 'hidden', display: 'flex' }} className="max-h-[90vh] flex-col gap-0 p-6 sm:max-w-[28rem]">
+        <DialogContent
+          style={{ overflow: 'clip', display: 'flex' } as any}
+          className="max-h-[92vh] flex-col gap-0 p-6 sm:max-w-[24rem]"
+        >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-1 items-center justify-center overflow-hidden py-2">
+          <div className="flex min-h-[27rem] flex-1 items-center justify-center overflow-clip py-2">
             {previewStudent && (
-              <div
-                className="flex items-start justify-center"
-                style={{ width: '3.02in', height: '4.8in' }}
-              >
-                <div style={{ transform: 'scale(1.42)', transformOrigin: 'top center' }}>
-                  <StudentIdCard
-                    ref={cardRef}
-                    student={buildStudentData(previewStudent)}
-                    {...commonCardProps}
-                    profileUrl={getProfileUrl(previewStudent)}
-                  />
-                </div>
+              <div className="flex items-center justify-center p-3" style={{ zoom: 1.28 } as any}>
+                <StudentIdCard
+                  ref={cardRef}
+                  student={buildStudentData(previewStudent)}
+                  {...commonCardProps}
+                  profileUrl={getProfileUrl(previewStudent)}
+                />
               </div>
             )}
           </div>
@@ -958,23 +956,21 @@ const AdminIdCards = () => {
 
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
-        <DialogContent style={{ overflow: 'hidden', display: 'flex' }} className="max-h-[90vh] flex-col gap-0 p-6 sm:max-w-[28rem]">
+        <DialogContent
+          style={{ overflow: 'clip', display: 'flex' } as any}
+          className="max-h-[92vh] flex-col gap-0 p-6 sm:max-w-[24rem]"
+        >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-1 items-center justify-center overflow-hidden py-2">
+          <div className="flex min-h-[27rem] flex-1 items-center justify-center overflow-clip py-2">
             {previewStaff && (
-              <div
-                className="flex items-start justify-center"
-                style={{ width: '3.02in', height: '4.8in' }}
-              >
-                <div style={{ transform: 'scale(1.42)', transformOrigin: 'top center' }}>
-                  <StaffIdCard
-                    ref={staffCardRef}
-                    staff={buildStaffData(previewStaff)}
-                    {...commonCardProps}
-                  />
-                </div>
+              <div className="flex items-center justify-center p-3" style={{ zoom: 1.28 } as any}>
+                <StaffIdCard
+                  ref={staffCardRef}
+                  staff={buildStaffData(previewStaff)}
+                  {...commonCardProps}
+                />
               </div>
             )}
           </div>
