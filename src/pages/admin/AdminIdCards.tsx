@@ -924,15 +924,18 @@ const AdminIdCards = () => {
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
         <DialogContent
-          style={{ overflow: 'clip', display: 'flex' } as any}
-          className="max-h-[92vh] flex-col gap-0 p-6 sm:max-w-[24rem]"
+          style={{ overflow: 'hidden' }}
+          className="flex max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[30rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-[27rem] flex-1 items-center justify-center overflow-clip py-2">
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-2">
             {previewStudent && (
-              <div className="flex items-center justify-center p-3" style={{ zoom: 1.28 } as any}>
+              <div
+                className="flex w-full items-center justify-center overflow-hidden"
+                style={{ maxHeight: '85vh' }}
+              >
                 <StudentIdCard
                   ref={cardRef}
                   student={buildStudentData(previewStudent)}
@@ -957,15 +960,18 @@ const AdminIdCards = () => {
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
         <DialogContent
-          style={{ overflow: 'clip', display: 'flex' } as any}
-          className="max-h-[92vh] flex-col gap-0 p-6 sm:max-w-[24rem]"
+          style={{ overflow: 'hidden' }}
+          className="flex max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[30rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-[27rem] flex-1 items-center justify-center overflow-clip py-2">
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-2">
             {previewStaff && (
-              <div className="flex items-center justify-center p-3" style={{ zoom: 1.28 } as any}>
+              <div
+                className="flex w-full items-center justify-center overflow-hidden"
+                style={{ maxHeight: '85vh' }}
+              >
                 <StaffIdCard
                   ref={staffCardRef}
                   staff={buildStaffData(previewStaff)}
