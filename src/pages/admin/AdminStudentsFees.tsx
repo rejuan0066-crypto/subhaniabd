@@ -745,8 +745,9 @@ const AdminStudentsFees = () => {
                     </label>
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {getMonthlyStatuses(feeType).map(s => {
+                        const monthKey = `${s.month}-${s.year}`;
                         if (s.status === 'na') return (
-                          <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                          <div key={monthKey} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
                             <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                             <div className="text-[10px] mt-0.5">—</div>
                           </div>
@@ -754,12 +755,13 @@ const AdminStudentsFees = () => {
                         const canPay = s.status === 'due' || s.status === 'unpaid';
                         return (
                           <button
-                            key={s.month}
+                            key={monthKey}
                             type="button"
                             disabled={!canPay}
                             onClick={() => {
                               if (!canPay) return;
                               setPaymentMonth(s.month);
+                              setPaymentYear(s.year);
                               setAmount(String(selectedFeeTypeObj.amount));
                             }}
                             className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
@@ -767,19 +769,20 @@ const AdminStudentsFees = () => {
                               s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
                               s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
                               'bg-muted/30 border-border text-muted-foreground opacity-60 cursor-default'
-                            } ${paymentMonth === s.month ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
+                            } ${paymentMonth === s.month && paymentYear === s.year ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
                           >
                             <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                             <div className="text-[10px] mt-0.5">
                               {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
                             </div>
+                            <div className="text-[9px] text-muted-foreground/70">{s.year}</div>
                           </button>
                         );
                       })}
                     </div>
                     {paymentMonth && (
                       <p className="text-xs mt-2 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
-                        ✓ {bn ? `${MONTHS_BN[MONTHS_EN.indexOf(paymentMonth)]} মাসের ফি পরিশোধ হবে` : `Paying for ${paymentMonth}`}
+                        ✓ {bn ? `${MONTHS_BN[MONTHS_EN.indexOf(paymentMonth)]} ${paymentYear} মাসের ফি পরিশোধ হবে` : `Paying for ${paymentMonth} ${paymentYear}`}
                       </p>
                     )}
                   </div>
