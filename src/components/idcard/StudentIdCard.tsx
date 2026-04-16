@@ -39,6 +39,8 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
   ({ student, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
 
     const verifyUrl = `https://subhaniabd.com/verify/student/${student.student_id || ''}`;
+    const bengaliFont = "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif";
+    const englishFont = "'Inter', sans-serif";
 
     return (
       <div
@@ -235,17 +237,17 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               />
             )}
             <div style={{ borderTop: '1px solid rgba(212,175,55,0.6)', width: '50px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.8)', fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif" }}>
+             <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.8)', fontFamily: lang === 'bn' ? bengaliFont : englishFont }}>
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
 
           {/* Valid Until */}
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ fontSize: '4px', color: 'rgba(255,255,255,0.55)', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+             <div style={{ fontSize: lang === 'bn' ? '4.5px' : '4px', color: 'rgba(255,255,255,0.55)', fontFamily: lang === 'bn' ? bengaliFont : englishFont, textTransform: lang === 'bn' ? 'none' : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
               {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
             </div>
-            <div style={{ fontSize: '5.5px', fontWeight: 600, color: '#d4af37', fontFamily: "'Inter', sans-serif" }}>
+             <div style={{ fontSize: '5.5px', fontWeight: 600, color: '#d4af37', fontFamily: lang === 'bn' ? bengaliFont : englishFont }}>
               {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
             </div>
           </div>
