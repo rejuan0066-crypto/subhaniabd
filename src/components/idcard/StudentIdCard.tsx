@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface StudentIdCardProps {
   student: {
@@ -9,7 +10,9 @@ interface StudentIdCardProps {
     photo_url?: string;
     blood_group?: string;
     class_name?: string;
+    class_name_en?: string;
     division_name?: string;
+    division_name_en?: string;
     father_name?: string;
     mother_name?: string;
     phone?: string;
@@ -29,6 +32,7 @@ interface StudentIdCardProps {
   principalNameEn?: string;
   principalSignatureUrl?: string;
   lang?: 'bn' | 'en';
+  profileUrl?: string;
 }
 
 const labels = {
@@ -60,18 +64,14 @@ const labels = {
   },
 };
 
-const generateQrUrl = (data: string, size = 60) =>
-  `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=1`;
-
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
-  ({ student, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
+  ({ student, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn', profileUrl }, ref) => {
     const l = labels[lang];
 
     const qrData = JSON.stringify({
-      name: student.name_bn || student.name_en,
       id: student.student_id,
-      roll: student.roll_number,
-      class: student.class_name,
+      name: student.name_bn || student.name_en,
+      profile: profileUrl || '',
       institution: institution?.name,
     });
 
@@ -90,15 +90,15 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           color: '#1a1a2e',
           position: 'relative',
           boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-          border: '1px solid #e2e8f0',
+          border: '2px solid #064e3b',
           display: 'flex',
           flexDirection: 'column',
         }}
       >
-        {/* Header */}
+        {/* Header - Dark Emerald Green */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)',
+            background: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
             padding: '5px 8px 4px',
             textAlign: 'center',
             position: 'relative',
@@ -109,13 +109,18 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               <img
                 src={institution.logo_url}
                 alt="Logo"
-                style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.4)' }}
+                style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.5)' }}
               />
             )}
             <div>
               <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2 }}>
-                {lang === 'bn' ? (institution?.name || 'প্রতিষ্ঠানের নাম') : (institution?.name_en || institution?.name || 'Institution Name')}
+                {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
               </div>
+              {institution?.name_en && (
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '5px', lineHeight: 1.2 }}>
+                  {institution.name_en}
+                </div>
+              )}
             </div>
           </div>
           {institution?.address && (
@@ -125,7 +130,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           )}
           <div
             style={{
-              background: '#ef4444',
+              background: '#d97706',
               color: '#fff',
               fontSize: '5px',
               fontWeight: 700,
@@ -152,7 +157,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
                 height: '54px',
                 borderRadius: '4px',
                 overflow: 'hidden',
-                border: '1.5px solid #2563eb',
+                border: '1.5px solid #059669',
                 background: '#f1f5f9',
                 display: 'flex',
                 alignItems: 'center',
@@ -169,43 +174,47 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               )}
             </div>
 
-            {/* Name + basic info */}
+            {/* Name + basic info - Bilingual */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: '7.5px', color: '#0f172a', lineHeight: 1.2 }}>
-                {lang === 'bn' ? (student.name_bn || student.name_en || '—') : (student.name_en || student.name_bn || '—')}
+                {student.name_bn || student.name_en || '—'}
               </div>
-              {student.name_bn && student.name_en && (
+              {student.name_en && student.name_bn && (
                 <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>
-                  {lang === 'bn' ? student.name_en : student.name_bn}
+                  {student.name_en}
                 </div>
               )}
-              <div style={{ fontSize: '5.5px', color: '#2563eb', fontWeight: 600, marginTop: '2px' }}>
+              {!student.name_bn && student.name_en && null}
+              <div style={{ fontSize: '5.5px', color: '#059669', fontWeight: 600, marginTop: '2px' }}>
                 {l.id}: {student.student_id || '—'}
               </div>
             </div>
 
-            {/* QR Code */}
+            {/* QR Code using qrcode.react */}
             <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <img
-                src={generateQrUrl(qrData, 80)}
-                alt="QR"
-                style={{ width: '38px', height: '38px', borderRadius: '2px' }}
+              <QRCodeSVG
+                value={qrData}
+                size={38}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#064e3b"
+                style={{ borderRadius: '2px' }}
               />
             </div>
           </div>
 
-          {/* Info Grid */}
-          <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '2px' }}>
-            <InfoRow label={l.className} value={student.class_name || '—'} />
+          {/* Info Grid - Bilingual */}
+          <div style={{ width: '100%', borderTop: '1px solid #d1d5db', paddingTop: '2px' }}>
+            <BilingualRow label={l.className} valueBn={student.class_name} valueEn={student.class_name_en} />
             <InfoRow label={l.roll} value={student.roll_number || '—'} />
-            <InfoRow label={l.division} value={student.division_name || '—'} />
+            <BilingualRow label={l.division} valueBn={student.division_name} valueEn={student.division_name_en} />
             {student.blood_group && <InfoRow label={l.blood} value={student.blood_group} highlight />}
             {student.father_name && <InfoRow label={l.father} value={student.father_name} />}
             {(student.guardian_phone || student.phone) && (
               <InfoRow label={l.phone} value={student.guardian_phone || student.phone || ''} />
             )}
             {student.address && (
-              <div style={{ display: 'flex', padding: '1.5px 0', borderBottom: '1px dotted #f1f5f9' }}>
+              <div style={{ display: 'flex', padding: '1.5px 0', borderBottom: '1px dotted #e5e7eb' }}>
                 <span style={{ fontSize: '5.5px', color: '#64748b', whiteSpace: 'nowrap', marginRight: '4px' }}>{l.address}</span>
                 <span style={{ fontSize: '5.5px', fontWeight: 500, color: '#0f172a', lineHeight: 1.3, textAlign: 'right', flex: 1, wordBreak: 'break-word' }}>
                   {student.address}
@@ -215,14 +224,15 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer - Emerald Green accent */}
         <div
           style={{
-            borderTop: '1px solid #e2e8f0',
+            borderTop: '1.5px solid #064e3b',
             padding: '3px 8px 4px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
+            background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)',
           }}
         >
           <div style={{ textAlign: 'center' }}>
@@ -233,14 +243,14 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
                 style={{ height: '16px', maxWidth: '55px', objectFit: 'contain', marginBottom: '1px' }}
               />
             )}
-            <div style={{ borderTop: '1px dashed #94a3b8', width: '55px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '5px', color: '#64748b' }}>
+            <div style={{ borderTop: '1px dashed #064e3b', width: '55px', marginBottom: '1px' }} />
+            <div style={{ fontSize: '5px', color: '#064e3b' }}>
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '5px', color: '#64748b' }}>{l.validUntil}</div>
-            <div style={{ fontSize: '6px', fontWeight: 600, color: '#1e3a5f' }}>{lang === 'bn' && validUntilBn ? validUntilBn : validUntil}</div>
+            <div style={{ fontSize: '6px', fontWeight: 600, color: '#064e3b' }}>{lang === 'bn' && validUntilBn ? validUntilBn : validUntil}</div>
           </div>
         </div>
       </div>
@@ -257,7 +267,7 @@ const InfoRow = ({ label, value, highlight }: { label: string; value: string; hi
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1.5px 0',
-      borderBottom: '1px dotted #f1f5f9',
+      borderBottom: '1px dotted #e5e7eb',
     }}
   >
     <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
@@ -272,6 +282,26 @@ const InfoRow = ({ label, value, highlight }: { label: string; value: string; hi
       }}
     >
       {value}
+    </span>
+  </div>
+);
+
+const BilingualRow = ({ label, valueBn, valueEn }: { label: string; valueBn?: string; valueEn?: string }) => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '1.5px 0',
+      borderBottom: '1px dotted #e5e7eb',
+    }}
+  >
+    <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
+    <span style={{ fontSize: '6px', fontWeight: 600, color: '#0f172a', textAlign: 'right' }}>
+      {valueBn || valueEn || '—'}
+      {valueBn && valueEn && valueBn !== valueEn && (
+        <span style={{ fontSize: '5px', color: '#64748b', marginLeft: '2px' }}>({valueEn})</span>
+      )}
     </span>
   </div>
 );
