@@ -15,8 +15,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const statusConfig: Record<string, { bn: string; en: string; variant: 'default' | 'secondary' | 'destructive' }> = {
   pending: { bn: 'অপেক্ষমাণ', en: 'Pending', variant: 'secondary' },
-  success: { bn: 'সফল', en: 'Success', variant: 'default' },
-  failed: { bn: 'ব্যর্থ', en: 'Failed', variant: 'destructive' },
+  success: { bn: 'এপ্রোভড', en: 'Approved', variant: 'default' },
+  failed: { bn: 'প্রত্যাখ্যাত', en: 'Rejected', variant: 'destructive' },
 };
 
 const AdminPayments = () => {
@@ -107,7 +107,7 @@ const AdminPayments = () => {
           </div>
           <div className="card-elevated p-4 text-center">
             <p className="text-2xl font-bold text-success">{totals.success}</p>
-            <p className="text-xs text-muted-foreground">{bn ? 'সফল' : 'Successful'}</p>
+            <p className="text-xs text-muted-foreground">{bn ? 'এপ্রোভড' : 'Approved'}</p>
           </div>
           <div className="card-elevated p-4 text-center">
             <p className="text-2xl font-bold text-warning">{totals.pending}</p>
@@ -153,8 +153,8 @@ const AdminPayments = () => {
               <SelectContent>
                 <SelectItem value="all">{bn ? 'সব স্ট্যাটাস' : 'All Status'}</SelectItem>
                 <SelectItem value="pending">{bn ? 'অপেক্ষমাণ' : 'Pending'}</SelectItem>
-                <SelectItem value="success">{bn ? 'সফল' : 'Success'}</SelectItem>
-                <SelectItem value="failed">{bn ? 'ব্যর্থ' : 'Failed'}</SelectItem>
+                <SelectItem value="success">{bn ? 'এপ্রোভড' : 'Approved'}</SelectItem>
+                <SelectItem value="failed">{bn ? 'প্রত্যাখ্যাত' : 'Rejected'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -226,7 +226,7 @@ const AdminPayments = () => {
                               onClick={() => updateStatusMutation.mutate({ id: p.id, status: 'success' })}
                               disabled={updateStatusMutation.isPending}
                             >
-                              <CheckCircle className="w-3 h-3 mr-1" /> {bn ? 'সফল' : 'Approve'}
+                              <CheckCircle className="w-3 h-3 mr-1" /> {bn ? 'এপ্রোভ' : 'Approve'}
                             </Button>
                             <Button
                               size="sm"
@@ -235,7 +235,7 @@ const AdminPayments = () => {
                               onClick={() => updateStatusMutation.mutate({ id: p.id, status: 'failed' })}
                               disabled={updateStatusMutation.isPending}
                             >
-                              <XCircle className="w-3 h-3 mr-1" /> {bn ? 'বাতিল' : 'Reject'}
+                              <XCircle className="w-3 h-3 mr-1" /> {bn ? 'প্রত্যাখ্যান' : 'Reject'}
                             </Button>
                           </div>
                         )}
