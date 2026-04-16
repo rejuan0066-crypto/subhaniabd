@@ -35,45 +35,10 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-const labels = {
-  bn: {
-    cardTitle: 'ছাত্র পরিচয়পত্র',
-    id: 'আইডি',
-    className: 'শ্রেণী',
-    roll: 'রোল',
-    division: 'বিভাগ',
-    blood: 'রক্তের গ্রুপ',
-    father: 'পিতা',
-    phone: 'ফোন',
-    address: 'ঠিকানা',
-    principal: 'প্রিন্সিপাল',
-    validUntil: 'মেয়াদ',
-  },
-  en: {
-    cardTitle: 'STUDENT ID CARD',
-    id: 'ID',
-    className: 'Class',
-    roll: 'Roll',
-    division: 'Division',
-    blood: 'Blood Group',
-    father: 'Father',
-    phone: 'Phone',
-    address: 'Address',
-    principal: 'Principal',
-    validUntil: 'Valid Until',
-  },
-};
-
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
   ({ student, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn', profileUrl }, ref) => {
-    const l = labels[lang];
 
-    const qrData = JSON.stringify({
-      id: student.student_id,
-      name: student.name_bn || student.name_en,
-      profile: profileUrl || '',
-      institution: institution?.name,
-    });
+    const verifyUrl = `https://subhaniabd.com/verify/student/${student.student_id || ''}`;
 
     return (
       <div
@@ -82,26 +47,58 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         style={{
           width: '2.125in',
           height: '3.375in',
-          background: '#ffffff',
-          borderRadius: '8px',
+          background: 'linear-gradient(160deg, #064e3b 0%, #022c22 40%, #0a3d2e 70%, #041f17 100%)',
+          borderRadius: '10px',
           overflow: 'hidden',
-          fontFamily: "'Noto Sans Bengali', 'Segoe UI', sans-serif",
+          fontFamily: "'Hind Siliguri', 'Inter', sans-serif",
           fontSize: '7px',
-          color: '#1a1a2e',
+          color: '#ffffff',
           position: 'relative',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-          border: '2px solid #064e3b',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          border: '1.5px solid rgba(212,175,55,0.4)',
           display: 'flex',
           flexDirection: 'column',
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact' as any,
         }}
       >
-        {/* Header - Dark Emerald Green */}
+        {/* Watermark Logo */}
+        {institution?.logo_url && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100px',
+            height: '100px',
+            opacity: 0.06,
+            pointerEvents: 'none',
+            zIndex: 0,
+          }}>
+            <img src={institution.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
+        )}
+
+        {/* Subtle pattern overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.01) 8px, rgba(255,255,255,0.01) 9px)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }} />
+
+        {/* Header - Glassmorphism */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
-            padding: '5px 8px 4px',
+            background: 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            padding: '6px 8px 5px',
             textAlign: 'center',
             position: 'relative',
+            zIndex: 1,
+            borderBottom: '1px solid rgba(212,175,55,0.25)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
@@ -109,56 +106,66 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               <img
                 src={institution.logo_url}
                 alt="Logo"
-                style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(255,255,255,0.5)' }}
+                style={{
+                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover',
+                  border: '1.5px solid rgba(212,175,55,0.6)',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                }}
               />
             )}
             <div>
-              <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2 }}>
+              <div style={{
+                color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2,
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                fontFamily: "'Hind Siliguri', sans-serif",
+              }}>
                 {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
               </div>
               {institution?.name_en && (
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '5px', lineHeight: 1.2 }}>
+                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '4.5px', fontFamily: "'Inter', sans-serif", letterSpacing: '0.3px' }}>
                   {institution.name_en}
                 </div>
               )}
             </div>
           </div>
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '4.5px', marginTop: '1px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '4px', marginTop: '1px', fontFamily: "'Hind Siliguri', sans-serif" }}>
               {institution.address}
             </div>
           )}
           <div
             style={{
-              background: '#d97706',
-              color: '#fff',
+              background: 'linear-gradient(135deg, #d4af37, #b8860b)',
+              color: '#ffffff',
               fontSize: '5px',
               fontWeight: 700,
-              padding: '1px 8px',
-              borderRadius: '2px',
-              marginTop: '2px',
+              padding: '1.5px 10px',
+              borderRadius: '8px',
+              marginTop: '3px',
               display: 'inline-block',
-              letterSpacing: lang === 'en' ? '1px' : '0.5px',
-              textTransform: lang === 'en' ? 'uppercase' : 'none',
+              letterSpacing: '0.8px',
+              textTransform: 'uppercase',
+              fontFamily: "'Inter', sans-serif",
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }}
           >
-            {l.cardTitle}
+            {lang === 'bn' ? 'ছাত্র পরিচয়পত্র' : 'STUDENT ID CARD'}
           </div>
         </div>
 
         {/* Body */}
-        <div style={{ flex: 1, padding: '4px 8px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Photo + QR row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', width: '100%', marginBottom: '3px' }}>
-            {/* Photo */}
+        <div style={{ flex: 1, padding: '5px 8px 3px', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 1 }}>
+          {/* Photo centered */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}>
             <div
               style={{
-                width: '46px',
-                height: '54px',
-                borderRadius: '4px',
+                width: '52px',
+                height: '60px',
+                borderRadius: '6px',
                 overflow: 'hidden',
-                border: '1.5px solid #059669',
-                background: '#f1f5f9',
+                border: '2px solid rgba(212,175,55,0.7)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.15)',
+                background: '#1a3d2e',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -168,89 +175,102 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               {student.photo_url ? (
                 <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ fontSize: '18px', color: '#94a3b8', fontWeight: 700 }}>
+                <div style={{ fontSize: '20px', color: 'rgba(212,175,55,0.5)', fontWeight: 700 }}>
                   {student.name_bn?.[0] || student.name_en?.[0] || '?'}
                 </div>
               )}
             </div>
-
-            {/* Name + basic info - Bilingual */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '7.5px', color: '#0f172a', lineHeight: 1.2 }}>
-                {student.name_bn || student.name_en || '—'}
-              </div>
-              {student.name_en && student.name_bn && (
-                <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>
-                  {student.name_en}
-                </div>
-              )}
-              {!student.name_bn && student.name_en && null}
-              <div style={{ fontSize: '5.5px', color: '#059669', fontWeight: 600, marginTop: '2px' }}>
-                {l.id}: {student.student_id || '—'}
-              </div>
-            </div>
-
-            {/* QR Code using qrcode.react */}
-            <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <QRCodeSVG
-                value={qrData}
-                size={38}
-                level="M"
-                bgColor="#ffffff"
-                fgColor="#064e3b"
-                style={{ borderRadius: '2px' }}
-              />
-            </div>
           </div>
 
-          {/* Info Grid - Bilingual */}
-          <div style={{ width: '100%', borderTop: '1px solid #d1d5db', paddingTop: '2px' }}>
-            <BilingualRow label={l.className} valueBn={student.class_name} valueEn={student.class_name_en} />
-            <InfoRow label={l.roll} value={student.roll_number || '—'} />
-            <BilingualRow label={l.division} valueBn={student.division_name} valueEn={student.division_name_en} />
-            {student.blood_group && <InfoRow label={l.blood} value={student.blood_group} highlight />}
-            {student.father_name && <InfoRow label={l.father} value={student.father_name} />}
-            {(student.guardian_phone || student.phone) && (
-              <InfoRow label={l.phone} value={student.guardian_phone || student.phone || ''} />
-            )}
-            {student.address && (
-              <div style={{ display: 'flex', padding: '1.5px 0', borderBottom: '1px dotted #e5e7eb' }}>
-                <span style={{ fontSize: '5.5px', color: '#64748b', whiteSpace: 'nowrap', marginRight: '4px' }}>{l.address}</span>
-                <span style={{ fontSize: '5.5px', fontWeight: 500, color: '#0f172a', lineHeight: 1.3, textAlign: 'right', flex: 1, wordBreak: 'break-word' }}>
-                  {student.address}
-                </span>
+          {/* Name - bilingual */}
+          <div style={{ textAlign: 'center', marginBottom: '3px' }}>
+            <div style={{
+              fontWeight: 700, fontSize: '8px', color: '#ffffff', lineHeight: 1.2,
+              fontFamily: "'Hind Siliguri', sans-serif",
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+            }}>
+              {student.name_bn || student.name_en || '—'}
+            </div>
+            {student.name_en && student.name_bn && (
+              <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,0.6)', fontFamily: "'Inter', sans-serif", marginTop: '0.5px' }}>
+                {student.name_en}
               </div>
+            )}
+          </div>
+
+          {/* Info Grid */}
+          <div style={{
+            width: '100%',
+            background: 'rgba(255,255,255,0.07)',
+            borderRadius: '5px',
+            padding: '3px 5px',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <InfoRow label={lang === 'bn' ? 'আইডি' : 'ID'} value={student.student_id || '—'} accent />
+            <InfoRow label={lang === 'bn' ? 'শ্রেণী' : 'Class'} value={student.class_name || '—'} valueEn={student.class_name_en} />
+            <InfoRow label={lang === 'bn' ? 'রোল' : 'Roll'} value={student.roll_number || '—'} />
+            <InfoRow label={lang === 'bn' ? 'বিভাগ' : 'Division'} value={student.division_name || '—'} valueEn={student.division_name_en} />
+            {student.blood_group && <InfoRow label={lang === 'bn' ? 'রক্তের গ্রুপ' : 'Blood'} value={student.blood_group} blood />}
+            {student.father_name && <InfoRow label={lang === 'bn' ? 'পিতা' : 'Father'} value={student.father_name} />}
+            {(student.guardian_phone || student.phone) && (
+              <InfoRow label={lang === 'bn' ? 'ফোন' : 'Phone'} value={student.guardian_phone || student.phone || ''} />
             )}
           </div>
         </div>
 
-        {/* Footer - Emerald Green accent */}
+        {/* Footer */}
         <div
           style={{
-            borderTop: '1.5px solid #064e3b',
-            padding: '3px 8px 4px',
+            padding: '3px 7px 5px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            background: 'linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%)',
+            position: 'relative',
+            zIndex: 1,
+            borderTop: '1px solid rgba(212,175,55,0.2)',
+            background: 'rgba(0,0,0,0.15)',
           }}
         >
-          <div style={{ textAlign: 'center' }}>
+          {/* Signature */}
+          <div style={{ textAlign: 'center', maxWidth: '55px' }}>
             {principalSignatureUrl && (
               <img
                 src={principalSignatureUrl}
                 alt="Signature"
-                style={{ height: '16px', maxWidth: '55px', objectFit: 'contain', marginBottom: '1px' }}
+                style={{ height: '14px', maxWidth: '50px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2) contrast(0.8)' }}
               />
             )}
-            <div style={{ borderTop: '1px dashed #064e3b', width: '55px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '5px', color: '#064e3b' }}>
-              {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
+            <div style={{ borderTop: '1px solid rgba(212,175,55,0.5)', width: '50px', marginBottom: '1px' }} />
+            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.6)', fontFamily: "'Hind Siliguri', sans-serif" }}>
+              {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '5px', color: '#64748b' }}>{l.validUntil}</div>
-            <div style={{ fontSize: '6px', fontWeight: 600, color: '#064e3b' }}>{lang === 'bn' && validUntilBn ? validUntilBn : validUntil}</div>
+
+          {/* Valid Until */}
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontSize: '4px', color: 'rgba(255,255,255,0.45)', fontFamily: "'Inter', sans-serif", textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
+            </div>
+            <div style={{ fontSize: '5.5px', fontWeight: 600, color: '#d4af37', fontFamily: "'Inter', sans-serif" }}>
+              {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
+            </div>
+          </div>
+
+          {/* QR Code */}
+          <div style={{
+            flexShrink: 0,
+            background: '#ffffff',
+            borderRadius: '3px',
+            padding: '2px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+          }}>
+            <QRCodeSVG
+              value={verifyUrl}
+              size={30}
+              level="M"
+              bgColor="#ffffff"
+              fgColor="#022c22"
+            />
           </div>
         </div>
       </div>
@@ -260,47 +280,38 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
 
 StudentIdCard.displayName = 'StudentIdCard';
 
-const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
+const InfoRow = ({ label, value, valueEn, accent, blood }: {
+  label: string; value: string; valueEn?: string; accent?: boolean; blood?: boolean;
+}) => (
   <div
     style={{
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '1.5px 0',
-      borderBottom: '1px dotted #e5e7eb',
+      borderBottom: '1px solid rgba(255,255,255,0.06)',
     }}
   >
-    <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
+    <span style={{
+      fontSize: '5px', color: 'rgba(255,255,255,0.5)', fontWeight: 600,
+      fontFamily: "'Hind Siliguri', sans-serif",
+      textTransform: 'uppercase',
+      letterSpacing: '0.3px',
+    }}>{label}</span>
     <span
       style={{
-        fontSize: '6px',
-        fontWeight: 600,
-        color: highlight ? '#dc2626' : '#0f172a',
-        background: highlight ? '#fef2f2' : 'transparent',
-        padding: highlight ? '0 3px' : '0',
-        borderRadius: '2px',
+        fontSize: accent ? '6.5px' : '6px',
+        fontWeight: 700,
+        color: blood ? '#ef4444' : accent ? '#d4af37' : '#ffffff',
+        fontFamily: "'Hind Siliguri', 'Inter', sans-serif",
+        textAlign: 'right',
       }}
     >
       {value}
-    </span>
-  </div>
-);
-
-const BilingualRow = ({ label, valueBn, valueEn }: { label: string; valueBn?: string; valueEn?: string }) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1.5px 0',
-      borderBottom: '1px dotted #e5e7eb',
-    }}
-  >
-    <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
-    <span style={{ fontSize: '6px', fontWeight: 600, color: '#0f172a', textAlign: 'right' }}>
-      {valueBn || valueEn || '—'}
-      {valueBn && valueEn && valueBn !== valueEn && (
-        <span style={{ fontSize: '5px', color: '#64748b', marginLeft: '2px' }}>({valueEn})</span>
+      {valueEn && value !== valueEn && value !== '—' && (
+        <span style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.45)', marginLeft: '2px', fontFamily: "'Inter', sans-serif", fontWeight: 400 }}>
+          ({valueEn})
+        </span>
       )}
     </span>
   </div>
