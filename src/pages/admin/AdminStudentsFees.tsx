@@ -40,6 +40,7 @@ const AdminStudentsFees = () => {
   const bn = language === 'bn';
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState('');
   const [selectedFeeTypeObj, setSelectedFeeTypeObj] = useState<any>(null);
