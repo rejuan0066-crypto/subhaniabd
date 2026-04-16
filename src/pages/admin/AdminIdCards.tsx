@@ -831,6 +831,7 @@ const AdminIdCards = () => {
                   ref={cardRef}
                   student={buildStudentData(previewStudent)}
                   {...commonCardProps}
+                  profileUrl={getProfileUrl(previewStudent)}
                 />
               </div>
             )}
