@@ -34,6 +34,8 @@ const AdminIdCards = () => {
   const [validUntilBn, setValidUntilBn] = useState('');
   const [principalName, setPrincipalName] = useState('');
   const [principalNameEn, setPrincipalNameEn] = useState('');
+  const [principalNameDirty, setPrincipalNameDirty] = useState(false);
+  const [principalNameEnDirty, setPrincipalNameEnDirty] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [signatureUrl, setSignatureUrl] = useState('');
   const [uploadingSignature, setUploadingSignature] = useState(false);
@@ -55,17 +57,23 @@ const AdminIdCards = () => {
   });
 
   useEffect(() => {
+    const resolvedPrincipalName = idcardSettings?.idcard_principal_name || settings.principal_name || '';
+    const resolvedPrincipalNameEn = idcardSettings?.idcard_principal_name_en || '';
+
+    if (!principalNameDirty && principalName !== resolvedPrincipalName) {
+      setPrincipalName(resolvedPrincipalName);
+    }
+
+    if (!principalNameEnDirty && principalNameEn !== resolvedPrincipalNameEn) {
+      setPrincipalNameEn(resolvedPrincipalNameEn);
+    }
+
     if (idcardSettings) {
-      if (idcardSettings.idcard_principal_name && !principalName) setPrincipalName(idcardSettings.idcard_principal_name);
-      if (idcardSettings.idcard_principal_name_en && !principalNameEn) setPrincipalNameEn(idcardSettings.idcard_principal_name_en);
       if (idcardSettings.idcard_valid_until && !validUntil) setValidUntil(idcardSettings.idcard_valid_until);
       if (idcardSettings.idcard_valid_until_bn && !validUntilBn) setValidUntilBn(idcardSettings.idcard_valid_until_bn);
       if (idcardSettings.idcard_principal_signature_url && !signatureUrl) setSignatureUrl(idcardSettings.idcard_principal_signature_url);
     }
-    if (!idcardSettings?.idcard_principal_name && settings.principal_name && !principalName) {
-      setPrincipalName(settings.principal_name);
-    }
-  }, [idcardSettings, settings.principal_name]);
+  }, [idcardSettings, settings.principal_name, principalNameDirty, principalNameEnDirty, principalName, principalNameEn, validUntil, validUntilBn, signatureUrl]);
 
   const saveSettings = async () => {
     setSavingSettings(true);
@@ -84,6 +92,8 @@ const AdminIdCards = () => {
           await supabase.from('website_settings').insert({ key, value });
         }
       }
+      setPrincipalNameDirty(false);
+      setPrincipalNameEnDirty(false);
       refetchSettings();
       toast.success(bn ? 'সেটিংস সংরক্ষিত হয়েছে' : 'Settings saved');
     } catch (err: any) {
@@ -676,11 +686,11 @@ const AdminIdCards = () => {
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম (বাংলা)' : 'Principal Name (Bangla)'}</label>
-            <Input value={principalName} onChange={(e) => setPrincipalName(e.target.value)} className="bg-background" placeholder={bn ? 'বাংলায় নাম লিখুন' : 'Enter name in Bangla'} />
+             <Input value={principalName} onChange={(e) => { setPrincipalNameDirty(true); setPrincipalName(e.target.value); }} className="bg-background" placeholder={bn ? 'বাংলায় নাম লিখুন' : 'Enter name in Bangla'} />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের নাম (ইংরেজি)' : 'Principal Name (English)'}</label>
-            <Input value={principalNameEn} onChange={(e) => setPrincipalNameEn(e.target.value)} className="bg-background" placeholder={bn ? 'ইংরেজিতে নাম লিখুন' : 'Enter name in English'} />
+             <Input value={principalNameEn} onChange={(e) => { setPrincipalNameEnDirty(true); setPrincipalNameEn(e.target.value); }} className="bg-background" placeholder={bn ? 'ইংরেজিতে নাম লিখুন' : 'Enter name in English'} />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">{bn ? 'প্রিন্সিপালের স্বাক্ষর' : 'Principal Signature'}</label>
