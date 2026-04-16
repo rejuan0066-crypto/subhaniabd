@@ -132,45 +132,82 @@ const AdminStudentsFees = () => {
 
   const paidFeeTypeIds = new Set(studentFeePayments.filter((p: any) => p.status === 'paid').map((p: any) => p.fee_type_id));
 
-  // Build monthly payment status map: { feeTypeId: { monthName: status } }
+  // Build monthly payment status map: { feeTypeId: { "monthName-year": status } }
   const monthlyPaymentMap: Record<string, Record<string, string>> = {};
   studentFeePayments.forEach((p: any) => {
-    if (p.month) {
+    if (p.month && p.year) {
       if (!monthlyPaymentMap[p.fee_type_id]) monthlyPaymentMap[p.fee_type_id] = {};
-      monthlyPaymentMap[p.fee_type_id][p.month] = p.status;
+      monthlyPaymentMap[p.fee_type_id][`${p.month}-${p.year}`] = p.status;
     }
   });
 
-  // Get monthly fee status for a given fee type
-  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
-  const getMonthlyStatuses = (feeTypeId: string): { month: string; monthBn: string; status: MonthStatus }[] => {
+  // Get session date range for fee type
+  const getSessionDateRange = (feeTypeId: string) => {
+    const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
+    const session = sessions.find((s: any) => s.id === ftObj?.session_id);
+    if (session?.start_date && session?.end_date) {
+      return { startDate: new Date(session.start_date), endDate: new Date(session.end_date) };
+    }
+    // Fallback: current year Jan-Dec
     const now = new Date();
-    const currentMonthIndex = now.getMonth();
+    return { startDate: new Date(now.getFullYear(), 0, 1), endDate: new Date(now.getFullYear(), 11, 31) };
+  };
+
+  // Get monthly fee status for a given fee type (session-aware, multi-year)
+  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
+  type MonthStatusItem = { month: string; monthBn: string; year: number; status: MonthStatus };
+  const getMonthlyStatuses = (feeTypeId: string): MonthStatusItem[] => {
+    const now = new Date();
     const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
     const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
-    // Determine admission month index (0-based) from student's admission_date
-    let admissionMonthIndex = 0; // default: January
+    const { startDate, endDate } = getSessionDateRange(feeTypeId);
+
+    // Determine admission date
+    let admissionDate: Date | null = null;
     if (foundStudent?.admission_date) {
-      const admDate = new Date(foundStudent.admission_date);
-      if (!isNaN(admDate.getTime())) {
-        admissionMonthIndex = admDate.getMonth();
-      }
+      const ad = new Date(foundStudent.admission_date);
+      if (!isNaN(ad.getTime())) admissionDate = ad;
     }
 
-    return MONTHS_EN.map((monthEn, i) => {
-      // Month before admission → not applicable
-      if (i < admissionMonthIndex) {
-        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+    // Build month list from session start to end
+    const results: MonthStatusItem[] = [];
+    const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const endLimit = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+    while (cursor <= endLimit) {
+      const monthIndex = cursor.getMonth();
+      const year = cursor.getFullYear();
+      const monthEn = MONTHS_EN[monthIndex];
+      const monthBn = MONTHS_BN[monthIndex];
+
+      // Before admission → na
+      if (admissionDate && cursor < new Date(admissionDate.getFullYear(), admissionDate.getMonth(), 1)) {
+        results.push({ month: monthEn, monthBn, year, status: 'na' });
+        cursor.setMonth(cursor.getMonth() + 1);
+        continue;
       }
+
+      // Not in applicable months → na
       if (applicableMonths && !applicableMonths.includes(monthEn)) {
-        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+        results.push({ month: monthEn, monthBn, year, status: 'na' });
+        cursor.setMonth(cursor.getMonth() + 1);
+        continue;
       }
-      const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
-      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as MonthStatus };
-      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as MonthStatus };
-      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as MonthStatus };
-      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as MonthStatus };
-    });
+
+      const key = `${monthEn}-${year}`;
+      const existingStatus = monthlyPaymentMap[feeTypeId]?.[key];
+      if (existingStatus === 'paid') {
+        results.push({ month: monthEn, monthBn, year, status: 'paid' });
+      } else if (cursor < new Date(now.getFullYear(), now.getMonth(), 1)) {
+        results.push({ month: monthEn, monthBn, year, status: 'due' });
+      } else if (cursor.getFullYear() === now.getFullYear() && cursor.getMonth() === now.getMonth()) {
+        results.push({ month: monthEn, monthBn, year, status: 'unpaid' });
+      } else {
+        results.push({ month: monthEn, monthBn, year, status: 'upcoming' });
+      }
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return results;
   };
 
   // Filter fee types based on found student's division/class
