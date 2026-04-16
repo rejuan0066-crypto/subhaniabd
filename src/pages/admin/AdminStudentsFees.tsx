@@ -48,6 +48,7 @@ const AdminStudentsFees = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
   const [paymentMonth, setPaymentMonth] = useState('');
+  const [paymentYear, setPaymentYear] = useState<number>(new Date().getFullYear());
   const [transactionId, setTransactionId] = useState('');
 
   // Student search
@@ -131,45 +132,82 @@ const AdminStudentsFees = () => {
 
   const paidFeeTypeIds = new Set(studentFeePayments.filter((p: any) => p.status === 'paid').map((p: any) => p.fee_type_id));
 
-  // Build monthly payment status map: { feeTypeId: { monthName: status } }
+  // Build monthly payment status map: { feeTypeId: { "monthName-year": status } }
   const monthlyPaymentMap: Record<string, Record<string, string>> = {};
   studentFeePayments.forEach((p: any) => {
-    if (p.month) {
+    if (p.month && p.year) {
       if (!monthlyPaymentMap[p.fee_type_id]) monthlyPaymentMap[p.fee_type_id] = {};
-      monthlyPaymentMap[p.fee_type_id][p.month] = p.status;
+      monthlyPaymentMap[p.fee_type_id][`${p.month}-${p.year}`] = p.status;
     }
   });
 
-  // Get monthly fee status for a given fee type
-  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
-  const getMonthlyStatuses = (feeTypeId: string): { month: string; monthBn: string; status: MonthStatus }[] => {
+  // Get session date range for fee type
+  const getSessionDateRange = (feeTypeId: string) => {
+    const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
+    const session = sessions.find((s: any) => s.id === ftObj?.session_id);
+    if (session?.start_date && session?.end_date) {
+      return { startDate: new Date(session.start_date), endDate: new Date(session.end_date) };
+    }
+    // Fallback: current year Jan-Dec
     const now = new Date();
-    const currentMonthIndex = now.getMonth();
+    return { startDate: new Date(now.getFullYear(), 0, 1), endDate: new Date(now.getFullYear(), 11, 31) };
+  };
+
+  // Get monthly fee status for a given fee type (session-aware, multi-year)
+  type MonthStatus = 'paid' | 'due' | 'unpaid' | 'upcoming' | 'na';
+  type MonthStatusItem = { month: string; monthBn: string; year: number; status: MonthStatus };
+  const getMonthlyStatuses = (feeTypeId: string): MonthStatusItem[] => {
+    const now = new Date();
     const ftObj = dbFeeTypes.find((ft: any) => ft.id === feeTypeId);
     const applicableMonths: string[] | null = ftObj?.applicable_months && Array.isArray(ftObj.applicable_months) ? (ftObj.applicable_months as any[]).map(String) : null;
-    // Determine admission month index (0-based) from student's admission_date
-    let admissionMonthIndex = 0; // default: January
+    const { startDate, endDate } = getSessionDateRange(feeTypeId);
+
+    // Determine admission date
+    let admissionDate: Date | null = null;
     if (foundStudent?.admission_date) {
-      const admDate = new Date(foundStudent.admission_date);
-      if (!isNaN(admDate.getTime())) {
-        admissionMonthIndex = admDate.getMonth();
-      }
+      const ad = new Date(foundStudent.admission_date);
+      if (!isNaN(ad.getTime())) admissionDate = ad;
     }
 
-    return MONTHS_EN.map((monthEn, i) => {
-      // Month before admission → not applicable
-      if (i < admissionMonthIndex) {
-        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+    // Build month list from session start to end
+    const results: MonthStatusItem[] = [];
+    const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const endLimit = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+    while (cursor <= endLimit) {
+      const monthIndex = cursor.getMonth();
+      const year = cursor.getFullYear();
+      const monthEn = MONTHS_EN[monthIndex];
+      const monthBn = MONTHS_BN[monthIndex];
+
+      // Before admission → na
+      if (admissionDate && cursor < new Date(admissionDate.getFullYear(), admissionDate.getMonth(), 1)) {
+        results.push({ month: monthEn, monthBn, year, status: 'na' });
+        cursor.setMonth(cursor.getMonth() + 1);
+        continue;
       }
+
+      // Not in applicable months → na
       if (applicableMonths && !applicableMonths.includes(monthEn)) {
-        return { month: monthEn, monthBn: MONTHS_BN[i], status: 'na' as MonthStatus };
+        results.push({ month: monthEn, monthBn, year, status: 'na' });
+        cursor.setMonth(cursor.getMonth() + 1);
+        continue;
       }
-      const existingStatus = monthlyPaymentMap[feeTypeId]?.[monthEn];
-      if (existingStatus === 'paid') return { month: monthEn, monthBn: MONTHS_BN[i], status: 'paid' as MonthStatus };
-      if (i < currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'due' as MonthStatus };
-      if (i === currentMonthIndex) return { month: monthEn, monthBn: MONTHS_BN[i], status: 'unpaid' as MonthStatus };
-      return { month: monthEn, monthBn: MONTHS_BN[i], status: 'upcoming' as MonthStatus };
-    });
+
+      const key = `${monthEn}-${year}`;
+      const existingStatus = monthlyPaymentMap[feeTypeId]?.[key];
+      if (existingStatus === 'paid') {
+        results.push({ month: monthEn, monthBn, year, status: 'paid' });
+      } else if (cursor < new Date(now.getFullYear(), now.getMonth(), 1)) {
+        results.push({ month: monthEn, monthBn, year, status: 'due' });
+      } else if (cursor.getFullYear() === now.getFullYear() && cursor.getMonth() === now.getMonth()) {
+        results.push({ month: monthEn, monthBn, year, status: 'unpaid' });
+      } else {
+        results.push({ month: monthEn, monthBn, year, status: 'upcoming' });
+      }
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+    return results;
   };
 
   // Filter fee types based on found student's division/class
@@ -183,7 +221,7 @@ const AdminStudentsFees = () => {
 
   // Check for existing pending/approved payment for selected student + fee type + month
   const { data: existingPayment, isLoading: checkingExisting } = useQuery({
-    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth],
+    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth, paymentYear],
     queryFn: async () => {
       if (!foundStudent?.id || !selectedFeeTypeObj) return null;
       // For monthly fees, check fee_payments table by fee_type_id + month
@@ -194,7 +232,7 @@ const AdminStudentsFees = () => {
           .eq('student_id', foundStudent.id)
           .eq('fee_type_id', feeType)
           .eq('month', paymentMonth)
-          .eq('year', new Date().getFullYear())
+          .eq('year', paymentYear)
           .in('status', ['paid'])
           .limit(1)
           .maybeSingle();
@@ -345,7 +383,7 @@ const AdminStudentsFees = () => {
         receipt_number: serialNumber || txnId,
         paid_at: isCash ? new Date().toISOString() : null,
         month: paymentMonth || new Date().toLocaleString('default', { month: 'long' }),
-        year: new Date().getFullYear(),
+        year: paymentYear,
       };
       await supabase.from('fee_payments').insert(feePaymentPayload);
 
@@ -610,15 +648,16 @@ const AdminStudentsFees = () => {
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                         {statuses.map(s => {
                           const canPay = s.status === 'due' || s.status === 'unpaid';
+                          const monthKey = `${s.month}-${s.year}`;
                           if (s.status === 'na') return (
-                            <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                            <div key={monthKey} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
                               <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                               <div className="text-[10px] mt-0.5">—</div>
                             </div>
                           );
                           return (
                             <button
-                              key={s.month}
+                              key={monthKey}
                               type="button"
                               disabled={!canPay}
                               onClick={() => {
@@ -627,19 +666,21 @@ const AdminStudentsFees = () => {
                                 setSelectedFeeTypeObj(ft);
                                 setAmount(String(ft.amount));
                                 setPaymentMonth(s.month);
-                                toast.info(bn ? `${s.monthBn} মাস সিলেক্ট করা হয়েছে` : `${s.month} selected`);
+                                setPaymentYear(s.year);
+                                toast.info(bn ? `${s.monthBn} ${s.year} মাস সিলেক্ট করা হয়েছে` : `${s.month} ${s.year} selected`);
                               }}
                               className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
                                 s.status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 cursor-default' :
                                 s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
                                 s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
                                 'bg-muted/30 border-border text-muted-foreground opacity-60 cursor-default'
-                              } ${paymentMonth === s.month && feeType === ft.id ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
+                              } ${paymentMonth === s.month && paymentYear === s.year && feeType === ft.id ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
                             >
                               <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                               <div className="text-[10px] mt-0.5">
                                 {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
                               </div>
+                              <div className="text-[9px] text-muted-foreground/70">{s.year}</div>
                             </button>
                           );
                         })}
@@ -704,8 +745,9 @@ const AdminStudentsFees = () => {
                     </label>
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {getMonthlyStatuses(feeType).map(s => {
+                        const monthKey = `${s.month}-${s.year}`;
                         if (s.status === 'na') return (
-                          <div key={s.month} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
+                          <div key={monthKey} className="text-center rounded-lg px-2 py-2 text-xs font-medium border bg-muted/10 border-border/50 text-muted-foreground/30 line-through">
                             <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                             <div className="text-[10px] mt-0.5">—</div>
                           </div>
@@ -713,12 +755,13 @@ const AdminStudentsFees = () => {
                         const canPay = s.status === 'due' || s.status === 'unpaid';
                         return (
                           <button
-                            key={s.month}
+                            key={monthKey}
                             type="button"
                             disabled={!canPay}
                             onClick={() => {
                               if (!canPay) return;
                               setPaymentMonth(s.month);
+                              setPaymentYear(s.year);
                               setAmount(String(selectedFeeTypeObj.amount));
                             }}
                             className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all ${
@@ -726,19 +769,20 @@ const AdminStudentsFees = () => {
                               s.status === 'due' ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-800 dark:text-red-400 cursor-pointer hover:ring-2 hover:ring-red-400' :
                               s.status === 'unpaid' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-400 cursor-pointer hover:ring-2 hover:ring-amber-400' :
                               'bg-muted/30 border-border text-muted-foreground opacity-60 cursor-default'
-                            } ${paymentMonth === s.month ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
+                            } ${paymentMonth === s.month && paymentYear === s.year ? 'ring-2 ring-primary shadow-md scale-105' : ''}`}
                           >
                             <div className="truncate">{bn ? s.monthBn : s.month.slice(0, 3)}</div>
                             <div className="text-[10px] mt-0.5">
                               {s.status === 'paid' ? '✓' : s.status === 'due' ? '⚠' : s.status === 'unpaid' ? '○' : '—'}
                             </div>
+                            <div className="text-[9px] text-muted-foreground/70">{s.year}</div>
                           </button>
                         );
                       })}
                     </div>
                     {paymentMonth && (
                       <p className="text-xs mt-2 px-3 py-1.5 rounded-lg bg-primary/5 text-primary font-medium">
-                        ✓ {bn ? `${MONTHS_BN[MONTHS_EN.indexOf(paymentMonth)]} মাসের ফি পরিশোধ হবে` : `Paying for ${paymentMonth}`}
+                        ✓ {bn ? `${MONTHS_BN[MONTHS_EN.indexOf(paymentMonth)]} ${paymentYear} মাসের ফি পরিশোধ হবে` : `Paying for ${paymentMonth} ${paymentYear}`}
                       </p>
                     )}
                   </div>
