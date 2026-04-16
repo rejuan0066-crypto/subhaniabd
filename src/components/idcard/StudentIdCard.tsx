@@ -46,7 +46,7 @@ const watermarkMotifSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 /* ── Fine linen texture for body background ── */
 const linenTexture = `url("data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='4' fill='%23faf9f6'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23f5f3ef' opacity='0.5'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23f0ede8' opacity='0.3'/%3E%3C/svg%3E")`;
 
-const BN = "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif";
+const BN = "'SutonnyOMJ', 'SutonnyMJ', 'Noto Sans Bengali', sans-serif";
 const EN = "'Inter', sans-serif";
 
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
