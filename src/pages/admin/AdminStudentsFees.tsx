@@ -221,7 +221,7 @@ const AdminStudentsFees = () => {
 
   // Check for existing pending/approved payment for selected student + fee type + month
   const { data: existingPayment, isLoading: checkingExisting } = useQuery({
-    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth],
+    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth, paymentYear],
     queryFn: async () => {
       if (!foundStudent?.id || !selectedFeeTypeObj) return null;
       // For monthly fees, check fee_payments table by fee_type_id + month
