@@ -761,9 +761,9 @@ const AdminStudentsFees = () => {
                       </span>
                     </div>
                     <div className="text-xs space-y-1 text-foreground/80">
-                      <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {existingPayment.transaction_id}</p>
-                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{existingPayment.amount}</p>
-                      <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date(existingPayment.created_at).toLocaleDateString('bn-BD')}</p>
+                      {'transaction_id' in existingPayment && <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {(existingPayment as any).transaction_id}</p>}
+                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{(existingPayment as any).amount || (existingPayment as any).paid_amount}</p>
+                      {'created_at' in existingPayment && <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date((existingPayment as any).created_at).toLocaleDateString('bn-BD')}</p>}
                     </div>
                     <p className={`text-xs font-medium ${blockedStatus === 'pending' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                       {bn ? '🚫 বাতিল না হওয়া পর্যন্ত এই ফি ধরনে আবার পরিশোধ করা যাবে না।' : '🚫 Cannot pay again until this payment is cancelled.'}
