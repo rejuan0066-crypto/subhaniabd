@@ -923,15 +923,15 @@ const AdminIdCards = () => {
 
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[28rem]">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex h-[75vh] min-h-0 flex-col items-center overflow-hidden">
-            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden py-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
               {previewStudent && (
-                <div className="flex justify-center">
-                  <div className="flex w-[326px] min-h-[520px] justify-center pt-2">
+                <div className="flex justify-center px-3 pb-6">
+                  <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
                     <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
                       <StudentIdCard
                         ref={cardRef}
@@ -944,28 +944,30 @@ const AdminIdCards = () => {
                 </div>
               )}
             </div>
-            <Button
-              onClick={() => { if (cardRef.current) printIdCard(cardRef.current.outerHTML); }}
-              className="btn-primary-gradient flex items-center gap-2 mt-3"
-            >
-              <Printer className="w-4 h-4" />
-              {bn ? 'প্রিন্ট করুন' : 'Print Card'}
-            </Button>
+            <div className="shrink-0 pt-3">
+              <Button
+                onClick={() => { if (cardRef.current) printIdCard(cardRef.current.outerHTML); }}
+                className="btn-primary-gradient mx-auto flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                {bn ? 'প্রিন্ট করুন' : 'Print Card'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="flex h-[90vh] max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[28rem]">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex h-[75vh] min-h-0 flex-col items-center overflow-hidden">
-            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden py-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
               {previewStaff && (
-                <div className="flex justify-center">
-                  <div className="flex w-[326px] min-h-[520px] justify-center pt-2">
+                <div className="flex justify-center px-3 pb-6">
+                  <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
                     <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
                       <StaffIdCard
                         ref={staffCardRef}
@@ -977,13 +979,15 @@ const AdminIdCards = () => {
                 </div>
               )}
             </div>
-            <Button
-              onClick={() => { if (staffCardRef.current) printIdCard(staffCardRef.current.outerHTML); }}
-              className="btn-primary-gradient flex items-center gap-2 mt-3"
-            >
-              <Printer className="w-4 h-4" />
-              {bn ? 'প্রিন্ট করুন' : 'Print Card'}
-            </Button>
+            <div className="shrink-0 pt-3">
+              <Button
+                onClick={() => { if (staffCardRef.current) printIdCard(staffCardRef.current.outerHTML); }}
+                className="btn-primary-gradient mx-auto flex items-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                {bn ? 'প্রিন্ট করুন' : 'Print Card'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
