@@ -144,16 +144,15 @@
   body, button, input, textarea, select, label, span, p, div, a, li, td, th, h1, h2, h3, h4, h5, h6 {
     font-family: 'Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Noto Sans Bengali', 'Inter', sans-serif;
   }
+  body,
+  body *:not(svg):not(svg *):not(path):not(code):not(pre) {
+    font-family: 'Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Noto Sans Bengali', 'Inter', sans-serif !important;
+  }
   body {
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.7;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
   }
 
   /* ── Modern Global Input Styles ── */

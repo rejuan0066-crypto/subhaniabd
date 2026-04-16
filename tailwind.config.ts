@@ -12,6 +12,9 @@ export default {
         "2xl": "1400px",
       },
     },
+    fontFamily: {
+      sans: ['Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
+    },
     extend: {
       fontFamily: {
         display: ['Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
