@@ -320,7 +320,7 @@ const AdminStudentsFees = () => {
         fee_type: feeTypeName,
         amount: parseFloat(amount),
         transaction_id: txnId,
-        status: isCash ? 'pending' : 'pending',
+        status: isCash ? 'success' : 'pending',
         student_id: foundStudent.id,
         payer_name: foundStudent.name_bn,
         payment_method: isCash ? 'cash' : 'online',
