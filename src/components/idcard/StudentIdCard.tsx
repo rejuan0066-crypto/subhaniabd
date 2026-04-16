@@ -37,14 +37,8 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-/* ── Inline SVG Islamic geometric pattern for header/footer texture ── */
-const islamicPatternSvg = `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' patternUnits='userSpaceOnUse' width='20' height='20'%3E%3Cpath d='M0 10 L10 0 L20 10 L10 20Z' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Ccircle cx='10' cy='10' r='3' fill='none' stroke='rgba(212,175,55,0.08)' stroke-width='0.3'/%3E%3Cpath d='M0 0L20 20M20 0L0 20' stroke='rgba(255,255,255,0.03)' stroke-width='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='40' height='40' fill='url(%23p)'/%3E%3C/svg%3E")`;
-
-/* ── Watermark Islamic motif SVG for body ── */
-const watermarkMotifSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23064e3b' stroke-width='0.4' opacity='0.07'%3E%3Ccircle cx='40' cy='40' r='35'/%3E%3Ccircle cx='40' cy='40' r='28'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Cpath d='M40 5L40 75M5 40L75 40'/%3E%3Cpath d='M15.15 15.15L64.85 64.85M64.85 15.15L15.15 64.85'/%3E%3Cpolygon points='40,8 72,40 40,72 8,40'/%3E%3Cpolygon points='40,16 64,40 40,64 16,40'/%3E%3Cpath d='M40 5 Q55 20 40 40 Q25 20 40 5Z'/%3E%3Cpath d='M40 75 Q55 60 40 40 Q25 60 40 75Z'/%3E%3Cpath d='M5 40 Q20 25 40 40 Q20 55 5 40Z'/%3E%3Cpath d='M75 40 Q60 25 40 40 Q60 55 75 40Z'/%3E%3C/g%3E%3C/svg%3E")`;
-
-/* ── Fine linen texture for body background ── */
-const linenTexture = `url("data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='4' fill='%23faf9f6'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23f5f3ef' opacity='0.5'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23f0ede8' opacity='0.3'/%3E%3C/svg%3E")`;
+/* ── Arabic ornamental band (top) ── */
+const arabicBandSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='14' viewBox='0 0 200 14'%3E%3Cdefs%3E%3Cpattern id='ab' patternUnits='userSpaceOnUse' width='20' height='14'%3E%3Cpath d='M0 7 Q5 0 10 7 T20 7' fill='none' stroke='%23d4af37' stroke-width='0.6' opacity='0.9'/%3E%3Ccircle cx='10' cy='7' r='1.2' fill='%23d4af37' opacity='0.6'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='200' height='14' fill='%23022c22'/%3E%3Crect width='200' height='14' fill='url(%23ab)'/%3E%3C/svg%3E")`;
 
 const BN = "'SutonnyOMJ', 'SutonnyMJ', 'Noto Sans Bengali', sans-serif";
 const EN = "'Inter', sans-serif";
@@ -64,266 +58,276 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           maxWidth: '100%',
           minHeight: '3.375in',
           height: 'auto',
-          background: '#faf9f6',
-          borderRadius: '10px',
-          overflow: 'visible',
+          background: '#ffffff',
+          borderRadius: '14px',
+          overflow: 'hidden',
           fontFamily: BN,
           fontSize: '7px',
           color: '#1a1a1a',
           position: 'relative',
-          boxShadow: '0 6px 28px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(212,175,55,0.4)',
-          border: '1px solid #064e3b',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+          border: '1px solid #e5e7eb',
           display: 'flex',
           flexDirection: 'column',
           WebkitPrintColorAdjust: 'exact',
           printColorAdjust: 'exact' as any,
         }}
       >
-        {/* ═══ PREMIUM HEADER ═══ */}
-        <div
-          style={{
-            background: `${islamicPatternSvg}, linear-gradient(160deg, #022c22 0%, #064e3b 40%, #047857 100%)`,
-            padding: '7px 8px 6px',
-            textAlign: 'center',
-            position: 'relative',
-            borderBottom: '2.5px solid transparent',
-            borderImage: 'linear-gradient(90deg, #b8860b, #d4af37, #f0d78c, #d4af37, #b8860b) 1',
-          }}
-        >
-          {/* Top gold accent line */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)',
-          }} />
+        {/* ═══ TOP: Arabic ornamental band ═══ */}
+        <div style={{
+          height: '14px',
+          backgroundImage: arabicBandSvg,
+          backgroundSize: 'cover',
+          flexShrink: 0,
+        }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            {institution?.logo_url && (
-              <img
-                src={institution.logo_url}
-                alt="Logo"
-                style={{
-                  width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover',
-                  border: '1.5px solid rgba(212,175,55,0.8)',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
-                }}
-              />
-            )}
-            <div>
-              <div style={{
-                color: '#d4af37', fontWeight: 800, fontSize: '9.5px', lineHeight: 1.25,
-                textShadow: '0 1px 3px rgba(0,0,0,0.4)',
-                fontFamily: BN,
-                letterSpacing: '0.2px',
-              }}>
-                {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
-              </div>
-              {institution?.name_en && (
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '6px', fontFamily: EN, letterSpacing: '0.5px', fontWeight: 500, marginTop: '1px' }}>
-                  {institution.name_en}
-                </div>
-              )}
-            </div>
-          </div>
-          {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '5px', marginTop: '2px', fontFamily: BN }}>
-              {institution.address}
-            </div>
-          )}
-          <div
-            style={{
-              background: 'linear-gradient(135deg, #d4af37, #c9a84c, #b8860b)',
-              color: '#ffffff',
-              fontSize: '6.5px',
-              fontWeight: 700,
-              padding: '2px 12px',
-              borderRadius: '10px',
-              marginTop: '4px',
-              display: 'inline-block',
-              letterSpacing: '0.8px',
-              textTransform: 'uppercase',
-              fontFamily: lang === 'bn' ? BN : EN,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15)',
-            }}
+        {/* ═══ WAVY HEADER WITH CURVES ═══ */}
+        <div style={{ position: 'relative', height: '70px', flexShrink: 0, overflow: 'hidden', background: '#ffffff' }}>
+          {/* SVG layered waves — emerald + teal/cyan */}
+          <svg
+            viewBox="0 0 200 70"
+            preserveAspectRatio="none"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
           >
-            {lang === 'bn' ? 'ছাত্র পরিচয়পত্র' : 'STUDENT ID CARD'}
+            {/* Back layer — emerald deep */}
+            <path
+              d="M0,0 L200,0 L200,42 Q150,62 100,46 Q50,30 0,52 Z"
+              fill="#047857"
+            />
+            {/* Mid layer — teal */}
+            <path
+              d="M0,0 L200,0 L200,30 Q150,52 100,36 Q50,20 0,40 Z"
+              fill="#0d9488"
+              opacity="0.9"
+            />
+            {/* Front layer — cyan */}
+            <path
+              d="M0,0 L200,0 L200,18 Q150,40 100,24 Q50,10 0,28 Z"
+              fill="#22d3ee"
+              opacity="0.55"
+            />
+            {/* Bottom curve highlight */}
+            <path
+              d="M0,52 Q50,30 100,46 Q150,62 200,42 L200,55 Q150,72 100,55 Q50,40 0,60 Z"
+              fill="#064e3b"
+              opacity="0.7"
+            />
+          </svg>
+
+          {/* Header text */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            paddingTop: '6px',
+            zIndex: 2,
+          }}>
+            <div style={{
+              color: '#ffffff',
+              fontWeight: 800,
+              fontSize: '9.5px',
+              fontFamily: BN,
+              textShadow: '0 1px 3px rgba(0,0,0,0.45)',
+              letterSpacing: '0.2px',
+              textAlign: 'center',
+              padding: '0 6px',
+              lineHeight: 1.15,
+            }}>
+              {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
+            </div>
+            {institution?.name_en && (
+              <div style={{
+                color: '#fde047',
+                fontFamily: EN,
+                fontWeight: 700,
+                fontSize: '6px',
+                marginTop: '2px',
+                letterSpacing: '0.6px',
+                textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+              }}>
+                {institution.name_en}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* ═══ TEXTURED BODY ═══ */}
+        {/* ═══ BODY ═══ */}
         <div style={{
-          flex: 1,
-          flexGrow: 1,
-          padding: '6px 9px 4px',
+          flex: '1 1 auto',
+          padding: '4px 10px 6px',
           display: 'flex',
           flexDirection: 'column',
+          background: '#ffffff',
           position: 'relative',
-          backgroundImage: linenTexture,
-          backgroundColor: '#faf9f6',
+          minHeight: 0,
         }}>
-          {/* Islamic watermark motif */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90px',
-            height: '90px',
-            backgroundImage: watermarkMotifSvg,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            pointerEvents: 'none',
-            zIndex: 0,
-          }} />
-
-          {/* Watermark logo overlay */}
-          {institution?.logo_url && (
+          {/* ── Circular photo with yellow half-ring ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-32px', marginBottom: '4px', position: 'relative', zIndex: 3 }}>
             <div style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '50px',
-              height: '50px',
-              opacity: 0.04,
-              pointerEvents: 'none',
-              zIndex: 0,
+              position: 'relative',
+              width: '64px',
+              height: '64px',
             }}>
-              <img src={institution.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-            </div>
-          )}
-
-          {/* ── Photo with premium frame ── */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px', position: 'relative', zIndex: 1 }}>
-            <div style={{
-              padding: '2px',
-              borderRadius: '7px',
-              background: 'linear-gradient(135deg, #d4af37, #b8860b, #d4af37)',
-              boxShadow: '0 3px 10px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(212,175,55,0.3)',
-            }}>
-              <div
-                style={{
-                  width: '52px',
-                  height: '60px',
-                  borderRadius: '5px',
+              {/* Yellow accent half-ring behind photo */}
+              <div style={{
+                position: 'absolute',
+                top: '-3px',
+                left: '-3px',
+                right: '-3px',
+                bottom: '-3px',
+                borderRadius: '50%',
+                background: 'conic-gradient(from 200deg, #facc15 0deg, #facc15 140deg, transparent 140deg, transparent 360deg)',
+                zIndex: 0,
+              }} />
+              {/* White inner ring */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '50%',
+                background: '#ffffff',
+                padding: '2px',
+                zIndex: 1,
+                boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+              }}>
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
                   overflow: 'hidden',
-                  background: '#f0ede8',
+                  background: '#e0f2fe',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                }}
-              >
-                {student.photo_url ? (
-                  <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <div style={{ fontSize: '20px', color: '#064e3b', fontWeight: 700, opacity: 0.3 }}>
-                    {student.name_bn?.[0] || student.name_en?.[0] || '?'}
-                  </div>
-                )}
+                  border: '1.5px solid #ffffff',
+                }}>
+                  {student.photo_url ? (
+                    <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ fontSize: '22px', color: '#0369a1', fontWeight: 700, opacity: 0.4 }}>
+                      {student.name_bn?.[0] || student.name_en?.[0] || '?'}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* ── Name bilingual ── */}
-          <div style={{ textAlign: 'center', marginBottom: '4px', position: 'relative', zIndex: 1 }}>
+          {/* ── Name in bold blue ── */}
+          <div style={{ textAlign: 'center', marginBottom: '6px' }}>
             <div style={{
-              fontWeight: 800, fontSize: '10px', color: '#0f172a', lineHeight: 1.3,
+              fontWeight: 800,
+              fontSize: '11px',
+              color: '#1d4ed8',
               fontFamily: BN,
+              lineHeight: 1.25,
             }}>
               {student.name_bn || student.name_en || '—'}
             </div>
             {student.name_en && student.name_bn && (
-              <div style={{ fontSize: '6.5px', color: '#6b7280', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
+              <div style={{ fontSize: '6.5px', color: '#64748b', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
                 {student.name_en}
               </div>
             )}
           </div>
 
-          {/* ── Info grid ── */}
-          <div style={{
-            width: '100%',
-            background: 'rgba(255,255,255,0.7)',
-            borderRadius: '6px',
-            padding: '4px 6px',
-            border: '1px solid rgba(212,175,55,0.15)',
-            position: 'relative',
-            zIndex: 1,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          }}>
-            <InfoRow label={lang === 'bn' ? 'আইডি' : 'ID'} value={student.student_id || '—'} accent />
-            <InfoRow label={lang === 'bn' ? 'শ্রেণী' : 'Class'} value={student.class_name || '—'} valueEn={student.class_name_en} />
-            <InfoRow label={lang === 'bn' ? 'রোল' : 'Roll'} value={student.roll_number || '—'} />
-            <InfoRow label={lang === 'bn' ? 'বিভাগ' : 'Division'} value={student.division_name || '—'} valueEn={student.division_name_en} />
-            {student.blood_group && <InfoRow label={lang === 'bn' ? 'রক্তের গ্রুপ' : 'Blood'} value={student.blood_group} blood />}
-            {student.father_name && <InfoRow label={lang === 'bn' ? 'পিতা' : 'Father'} value={student.father_name} />}
-            {(student.guardian_phone || student.phone) && (
-              <InfoRow label={lang === 'bn' ? 'ফোন' : 'Phone'} value={student.guardian_phone || student.phone || ''} />
+          {/* ── Info rows: label : value ── */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+            {student.father_name && <Row label={lang === 'bn' ? 'পিতা' : 'Father'} value={student.father_name} />}
+            <Row label={lang === 'bn' ? 'জামাত' : 'Class'} value={student.class_name || '—'} />
+            <Row label={lang === 'bn' ? 'আইডি নং' : 'ID No'} value={student.student_id || '—'} bold />
+            {student.roll_number && <Row label={lang === 'bn' ? 'রোল' : 'Roll'} value={student.roll_number} />}
+            {student.session_year && (
+              <Row
+                label={lang === 'bn' ? 'শিক্ষাবর্ষ' : 'Session'}
+                value={lang === 'bn' && student.session_year_bn ? `${student.session_year_bn} খ্রিস্টাব্দ` : student.session_year}
+              />
             )}
-            {student.session_year && <InfoRow label={lang === 'bn' ? 'সেশন' : 'Session'} value={lang === 'bn' && student.session_year_bn ? student.session_year_bn : student.session_year} />}
+            {(student.guardian_phone || student.phone) && (
+              <Row label={lang === 'bn' ? 'মোবাইল' : 'Mobile'} value={student.guardian_phone || student.phone || ''} />
+            )}
+            {student.blood_group && <Row label={lang === 'bn' ? 'রক্ত' : 'Blood'} value={student.blood_group} blood />}
           </div>
         </div>
 
-        {/* ═══ PREMIUM FOOTER ═══ */}
-        <div
-          style={{
-            padding: '4px 7px 5px',
+        {/* ═══ WAVY FOOTER WITH SIGNATURE & QR ═══ */}
+        <div style={{ position: 'relative', flexShrink: 0, marginTop: 'auto' }}>
+          {/* SVG wave footer background */}
+          <svg
+            viewBox="0 0 200 60"
+            preserveAspectRatio="none"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
+          >
+            <path
+              d="M0,18 Q50,0 100,14 Q150,28 200,8 L200,60 L0,60 Z"
+              fill="#22d3ee"
+              opacity="0.45"
+            />
+            <path
+              d="M0,26 Q50,10 100,22 Q150,36 200,18 L200,60 L0,60 Z"
+              fill="#0d9488"
+              opacity="0.85"
+            />
+            <path
+              d="M0,34 Q50,18 100,30 Q150,44 200,26 L200,60 L0,60 Z"
+              fill="#047857"
+            />
+          </svg>
+
+          {/* Footer content overlay */}
+          <div style={{
+            position: 'relative',
+            zIndex: 2,
+            padding: '20px 8px 6px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            background: `${islamicPatternSvg}, linear-gradient(160deg, #022c22 0%, #064e3b 40%, #047857 100%)`,
-            borderTop: '2.5px solid transparent',
-            borderImage: 'linear-gradient(90deg, #b8860b, #d4af37, #f0d78c, #d4af37, #b8860b) 1',
-            position: 'relative',
-          }}
-        >
-          {/* Bottom gold accent */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)',
-          }} />
-
-          {/* Signature */}
-          <div className="signature-container" style={{ textAlign: 'center', maxWidth: '55px', position: 'relative' }}>
-            {principalSignatureUrl && (
-              <img
-                src={principalSignatureUrl}
-                alt="Signature"
-                style={{ height: '14px', maxWidth: '50px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2.5) contrast(0.7)' }}
-              />
-            )}
-            <div style={{ borderTop: '1px solid rgba(212,175,55,0.6)', width: '50px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,0.85)', fontFamily: f }}>
-              {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
-            </div>
-          </div>
-
-          {/* Valid Until */}
-          <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ fontSize: lang === 'bn' ? '5.5px' : '5px', color: 'rgba(255,255,255,0.55)', fontFamily: f, textTransform: lang === 'bn' ? 'none' as any : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
-              {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
-            </div>
-            <div style={{ fontSize: '7px', fontWeight: 700, color: '#d4af37', fontFamily: f, textShadow: '0 0 4px rgba(212,175,55,0.3)' }}>
-              {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
-            </div>
-          </div>
-
-          {/* QR */}
-          <div className="qr-code-container" style={{
-            flexShrink: 0,
-            background: '#ffffff',
-            borderRadius: '4px',
-            padding: '2.5px',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
-            border: '0.5px solid rgba(212,175,55,0.3)',
-            position: 'relative',
+            gap: '4px',
           }}>
-            <QRCodeSVG
-              value={verifyUrl}
-              size={28}
-              level="M"
-              bgColor="#ffffff"
-              fgColor="#064e3b"
-            />
+            {/* Signature */}
+            <div className="signature-container" style={{ textAlign: 'center', flex: '0 0 auto', maxWidth: '52px' }}>
+              {principalSignatureUrl && (
+                <img
+                  src={principalSignatureUrl}
+                  alt="Signature"
+                  style={{ height: '12px', maxWidth: '46px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2.5) contrast(0.8)' }}
+                />
+              )}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.85)', width: '46px', marginBottom: '1px' }} />
+              <div style={{ fontSize: '5.5px', color: '#ffffff', fontFamily: f, fontWeight: 600, lineHeight: 1.1 }}>
+                {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
+              </div>
+            </div>
+
+            {/* Validity */}
+            <div style={{ textAlign: 'center', flex: 1 }}>
+              <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.85)', fontFamily: f, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
+              </div>
+              <div style={{ fontSize: '7px', fontWeight: 800, color: '#fde047', fontFamily: f, textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
+              </div>
+            </div>
+
+            {/* QR */}
+            <div className="qr-code-container" style={{
+              flex: '0 0 auto',
+              background: '#ffffff',
+              borderRadius: '4px',
+              padding: '2.5px',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+              border: '0.5px solid rgba(212,175,55,0.4)',
+            }}>
+              <QRCodeSVG
+                value={verifyUrl}
+                size={28}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#064e3b"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -333,39 +337,34 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
 
 StudentIdCard.displayName = 'StudentIdCard';
 
-/* ── Premium Info Row ── */
-const InfoRow = ({ label, value, valueEn, accent, blood }: {
-  label: string; value: string; valueEn?: string; accent?: boolean; blood?: boolean;
+/* ── Row: label : value ── */
+const Row = ({ label, value, bold, blood }: {
+  label: string; value: string; bold?: boolean; blood?: boolean;
 }) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '2.5px 0',
-      borderBottom: '1px solid rgba(6,78,59,0.06)',
-    }}
-  >
+  <div style={{
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '4px',
+    fontSize: '7.5px',
+    lineHeight: 1.4,
+  }}>
     <span style={{
-      fontSize: '6.5px', color: '#78716c', fontWeight: 600,
+      color: '#475569',
+      fontWeight: 600,
       fontFamily: BN,
-      letterSpacing: '0.2px',
-    }}>{label}</span>
-    <span
-      style={{
-        fontSize: accent ? '8px' : '7.5px',
-        fontWeight: 800,
-        color: blood ? '#dc2626' : accent ? '#064e3b' : '#1e293b',
-        fontFamily: BN,
-        textAlign: 'right',
-      }}
-    >
+      width: '46px',
+      flexShrink: 0,
+    }}>
+      {label}
+    </span>
+    <span style={{ color: '#475569', fontWeight: 600 }}>:</span>
+    <span style={{
+      color: blood ? '#dc2626' : '#0f172a',
+      fontWeight: bold ? 800 : 700,
+      fontFamily: BN,
+      flex: 1,
+    }}>
       {value}
-      {valueEn && value !== valueEn && value !== '—' && (
-        <span style={{ fontSize: '5.5px', color: '#a8a29e', marginLeft: '2px', fontFamily: EN, fontWeight: 400 }}>
-          ({valueEn})
-        </span>
-      )}
     </span>
   </div>
 );

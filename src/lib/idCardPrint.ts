@@ -52,9 +52,9 @@ export const printIdCard = (cardHtml: string) => {
       animation: none !important;
       transition: none !important;
     }
-    .id-card-container > *:nth-child(2) {
-      flex: 1 1 auto !important;
-      min-height: 0 !important;
+    .id-card-container svg path {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .id-card-container img,
     .id-card-container svg {
