@@ -16,8 +16,7 @@
 @font-face {
   font-family: 'SolaimanLipi';
   src: local('SolaimanLipi'),
-       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/SolaimanLipi/SolaimanLipi.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/SolaimanLipi/SolaimanLipi.woff') format('woff');
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/solaiman-lipi/solaimanlipi-normal-v1.0.ttf') format('truetype');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -25,8 +24,7 @@
 @font-face {
   font-family: 'Kalpurush';
   src: local('Kalpurush'),
-       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/kalpurush/kalpurush.woff2') format('woff2'),
-       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/kalpurush/kalpurush.woff') format('woff');
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/kalpurush/Kalpurush-v0.258.ttf') format('truetype');
   font-style: normal;
   font-weight: 400;
   font-display: swap;
