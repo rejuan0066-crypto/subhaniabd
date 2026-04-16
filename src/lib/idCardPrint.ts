@@ -142,7 +142,7 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
       color-adjust: exact !important;
     }
     body {
-      font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif;
+      font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Inter', sans-serif;
       background: #f8fafc;
       display: flex;
       flex-wrap: wrap;
