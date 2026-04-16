@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import ManualPaymentMethods from '@/components/ManualPaymentMethods';
 
 const generateDonationTrxId = () => {
   const now = new Date();
@@ -31,17 +32,26 @@ const DonationPage = () => {
     purpose: '',
     paymentMethod: '',
   });
+  const [manualMethod, setManualMethod] = useState('');
+  const [manualTrxId, setManualTrxId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [trxId, setTrxId] = useState('');
 
   const updateField = (key: string, value: string) => setForm(p => ({ ...p, [key]: value }));
 
-  // Check if any payment gateway is enabled
   const { data: gateways = [] } = useQuery({
     queryKey: ['public-payment-gateways'],
     queryFn: async () => {
       const { data } = await supabase.from('payment_gateway_config').select('provider, provider_name, is_enabled').eq('is_enabled', true);
+      return data || [];
+    },
+  });
+
+  const { data: manualMethods = [] } = useQuery({
+    queryKey: ['public-manual-payment-methods'],
+    queryFn: async () => {
+      const { data } = await supabase.from('manual_payment_methods').select('*').eq('is_active', true).order('sort_order');
       return data || [];
     },
   });
@@ -55,6 +65,7 @@ const DonationPage = () => {
   });
 
   const hasGateway = gateways.length > 0;
+  const hasManualMethods = manualMethods.length > 0;
 
   const handleDonate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,12 +74,16 @@ const DonationPage = () => {
       return;
     }
 
+    if (form.paymentMethod === 'mobile_manual' && !manualTrxId) {
+      toast.error(bn ? 'ট্রানজেকশন আইডি আবশ্যক' : 'Transaction ID required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const txId = generateDonationTrxId();
 
       if (form.paymentMethod === 'online' && hasGateway) {
-        // Process through payment gateway
         const { data, error } = await supabase.functions.invoke('process-payment', {
           body: {
             amount: parseFloat(form.amount),
@@ -85,7 +100,6 @@ const DonationPage = () => {
         if (error) throw new Error(bn ? 'পেমেন্ট গেটওয়ে ত্রুটি' : 'Payment gateway error');
 
         if (data?.redirect_url) {
-          // Save donation record as pending
           await supabase.from('donors').insert({
             name_bn: form.name,
             phone: form.phone || null,
@@ -100,18 +114,43 @@ const DonationPage = () => {
         }
       }
 
-      // For manual/cash or when no gateway redirect
+      // Manual mobile banking or cash/bank
+      const donationType = form.paymentMethod === 'mobile_manual'
+        ? manualMethod || 'মোবাইল ব্যাংকিং'
+        : form.paymentMethod === 'bank'
+        ? 'ব্যাংক'
+        : 'নগদ';
+
+      const notes = form.paymentMethod === 'mobile_manual'
+        ? `TrxID: ${manualTrxId} | ${manualMethod} | Manual`
+        : `TrxID: ${txId} | ${form.paymentMethod}`;
+
+      // Insert into payments table for approval workflow
+      if (form.paymentMethod === 'mobile_manual') {
+        await supabase.from('payments').insert({
+          transaction_id: manualTrxId,
+          amount: parseFloat(form.amount),
+          fee_type: 'donation',
+          payer_name: form.name,
+          payer_phone: form.phone || null,
+          payer_email: form.email || null,
+          status: 'pending',
+          payment_method: manualMethod,
+          notes: form.purpose || null,
+        });
+      }
+
       await supabase.from('donors').insert({
         name_bn: form.name,
         phone: form.phone || null,
         donation_amount: parseFloat(form.amount),
-        donation_type: form.paymentMethod === 'online' ? 'অনলাইন' : form.paymentMethod === 'bank' ? 'ব্যাংক' : 'নগদ',
+        donation_type: donationType,
         purpose: form.purpose || null,
         status: 'active',
-        notes: `TrxID: ${txId} | ${form.paymentMethod}`,
+        notes,
       });
 
-      setTrxId(txId);
+      setTrxId(form.paymentMethod === 'mobile_manual' ? manualTrxId : txId);
       setIsDone(true);
       toast.success(bn ? 'দানের জন্য ধন্যবাদ!' : 'Thank you for your donation!');
     } catch (err: any) {
@@ -133,13 +172,19 @@ const DonationPage = () => {
               {bn ? 'জাযাকাল্লাহু খাইরান!' : 'Thank You!'}
             </h2>
             <p className="text-muted-foreground">
-              {bn ? 'আপনার দান সফলভাবে রেকর্ড করা হয়েছে।' : 'Your donation has been recorded successfully.'}
+              {bn
+                ? form.paymentMethod === 'mobile_manual'
+                  ? 'আপনার দান অনুমোদনের জন্য অপেক্ষমাণ রয়েছে।'
+                  : 'আপনার দান সফলভাবে রেকর্ড করা হয়েছে।'
+                : form.paymentMethod === 'mobile_manual'
+                ? 'Your donation is pending approval.'
+                : 'Your donation has been recorded successfully.'}
             </p>
             <div className="bg-secondary/50 rounded-lg p-3 text-sm">
               <span className="text-muted-foreground">{bn ? 'ট্রানজেকশন আইডি:' : 'Transaction ID:'}</span>
               <span className="font-mono font-bold text-foreground ml-2">{trxId}</span>
             </div>
-            <Button onClick={() => { setIsDone(false); setForm({ name: '', phone: '', email: '', amount: '', purpose: '', paymentMethod: '' }); }} variant="outline">
+            <Button onClick={() => { setIsDone(false); setForm({ name: '', phone: '', email: '', amount: '', purpose: '', paymentMethod: '' }); setManualTrxId(''); setManualMethod(''); }} variant="outline">
               {bn ? 'আবার দান করুন' : 'Donate Again'}
             </Button>
           </div>
@@ -187,21 +232,34 @@ const DonationPage = () => {
               </div>
               <div className="sm:col-span-2">
                 <Label className="text-sm font-medium text-foreground">{bn ? 'পেমেন্ট পদ্ধতি' : 'Payment Method'} *</Label>
-                <Select value={form.paymentMethod} onValueChange={(v) => updateField('paymentMethod', v)} required>
+                <Select value={form.paymentMethod} onValueChange={(v) => { updateField('paymentMethod', v); if (v !== 'mobile_manual') { setManualMethod(''); setManualTrxId(''); } }} required>
                   <SelectTrigger className="bg-background mt-1"><SelectValue placeholder={bn ? 'নির্বাচন করুন' : 'Select method'} /></SelectTrigger>
                   <SelectContent>
                     {hasGateway && (
-                      <SelectItem value="online">{bn ? '💳 অনলাইন পেমেন্ট (bKash/Nagad/Card)' : '💳 Online Payment (bKash/Nagad/Card)'}</SelectItem>
+                      <SelectItem value="online">{bn ? '💳 অনলাইন পেমেন্ট (গেটওয়ে)' : '💳 Online Payment (Gateway)'}</SelectItem>
                     )}
-                    <SelectItem value="manual">{bn ? '🏦 ম্যানুয়াল (ক্যাশ/ব্যাংক)' : '🏦 Manual (Cash/Bank)'}</SelectItem>
+                    {hasManualMethods && (
+                      <SelectItem value="mobile_manual">{bn ? '📱 মোবাইল ব্যাংকিং (বিকাশ/নগদ/রকেট)' : '📱 Mobile Banking (bKash/Nagad/Rocket)'}</SelectItem>
+                    )}
+                    <SelectItem value="manual">{bn ? '🏦 ম্যানুয়াল (ক্যাশ)' : '🏦 Manual (Cash)'}</SelectItem>
                     <SelectItem value="bank">{bn ? '🏛️ ব্যাংক ট্রান্সফার' : '🏛️ Bank Transfer'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
+            {/* Manual Mobile Banking Section */}
+            {form.paymentMethod === 'mobile_manual' && (
+              <ManualPaymentMethods
+                transactionId={manualTrxId}
+                onTransactionIdChange={setManualTrxId}
+                selectedMethod={manualMethod}
+                onMethodSelect={setManualMethod}
+              />
+            )}
+
             {/* Gateway warning */}
-            {!hasGateway && (
+            {!hasGateway && !hasManualMethods && (
               <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                 <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-amber-700 dark:text-amber-400">
