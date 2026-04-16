@@ -50,7 +50,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           background: '#ffffff',
           borderRadius: '10px',
           overflow: 'hidden',
-          fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif",
+          fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
           fontSize: '7px',
           color: '#1a1a1a',
           position: 'relative',
@@ -88,7 +88,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               <div style={{
                 color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2,
                 textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif",
+                fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
               }}>
                 {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
               </div>
@@ -100,7 +100,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             </div>
           </div>
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '4px', marginTop: '1px', fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif" }}>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '4px', marginTop: '1px', fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif" }}>
               {institution.address}
             </div>
           )}
@@ -181,7 +181,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           <div style={{ textAlign: 'center', marginBottom: '3px', position: 'relative', zIndex: 1 }}>
             <div style={{
               fontWeight: 700, fontSize: '8px', color: '#111827', lineHeight: 1.2,
-              fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif",
+              fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
             }}>
               {student.name_bn || student.name_en || '—'}
             </div>
@@ -235,7 +235,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               />
             )}
             <div style={{ borderTop: '1px solid rgba(212,175,55,0.6)', width: '50px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.8)', fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif" }}>
+            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.8)', fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif" }}>
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
@@ -288,7 +288,7 @@ const InfoRow = ({ label, value, valueEn, accent, blood }: {
   >
     <span style={{
       fontSize: '5px', color: '#6b7280', fontWeight: 600,
-      fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif",
+      fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
       letterSpacing: '0.2px',
     }}>{label}</span>
     <span
@@ -296,7 +296,7 @@ const InfoRow = ({ label, value, valueEn, accent, blood }: {
         fontSize: accent ? '6.5px' : '6px',
         fontWeight: 700,
         color: blood ? '#dc2626' : accent ? '#064e3b' : '#111827',
-        fontFamily: "'SutonnyMJ', 'Noto Sans Bengali', sans-serif",
+        fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
         textAlign: 'right',
       }}
     >
