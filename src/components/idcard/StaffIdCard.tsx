@@ -178,10 +178,13 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
 
             {/* QR Code */}
             <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <img
-                src={generateQrUrl(qrData, 80)}
-                alt="QR"
-                style={{ width: '38px', height: '38px', borderRadius: '2px' }}
+              <QRCodeSVG
+                value={qrData}
+                size={38}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#064e3b"
+                style={{ borderRadius: '2px' }}
               />
             </div>
           </div>
