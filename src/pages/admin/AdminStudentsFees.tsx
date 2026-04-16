@@ -353,8 +353,12 @@ const AdminStudentsFees = () => {
     },
     onSuccess: async (txnId) => {
       setStep('done');
+      // Invalidate queries so fee status updates immediately
+      queryClient.invalidateQueries({ queryKey: ['student_fee_payments_status'] });
+      queryClient.invalidateQueries({ queryKey: ['existing_payment_check'] });
+      queryClient.invalidateQueries({ queryKey: ['dues-fee-payments'] });
       if (paymentMethod === 'cash') {
-        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে (অনুমোদনের অপেক্ষায়)' : 'Cash payment saved (awaiting approval)');
+        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Cash payment saved successfully');
       } else {
         // Call process-payment edge function
         try {
