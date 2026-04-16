@@ -235,6 +235,17 @@ const AdminIdCards = () => {
     else setSelectedStaffIds(new Set(filteredStaff.map((s: any) => s.id)));
   };
 
+  const getClassNameBn = (classId: string | null) => {
+    if (!classId) return '-';
+    const cls = classes.find((c: any) => c.id === classId);
+    return cls ? cls.name_bn : '-';
+  };
+  const getClassNameEn = (classId: string | null) => {
+    if (!classId) return '-';
+    const cls = classes.find((c: any) => c.id === classId);
+    return cls ? cls.name : '-';
+  };
+
   const buildStudentData = (s: any) => ({
     name_bn: s.name_bn,
     name_en: s.name_en,
@@ -242,13 +253,134 @@ const AdminIdCards = () => {
     roll_number: s.roll_number,
     photo_url: s.photo_url,
     blood_group: s.blood_group,
-    class_name: getClassName(s.class_id),
-    division_name: bn ? s.divisions?.name_bn : s.divisions?.name,
+    class_name: getClassNameBn(s.class_id),
+    class_name_en: getClassNameEn(s.class_id),
+    division_name: s.divisions?.name_bn,
+    division_name_en: s.divisions?.name,
     father_name: s.father_name_bn || s.father_name,
     phone: s.phone,
     guardian_phone: s.guardian_phone,
     address: s.address,
   });
+
+  const getProfileUrl = (s: any) => `${window.location.origin}/student/${s.student_id || s.id}`;
+
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+
+  const handleBulkDownloadPdf = useCallback(async () => {
+    const ids = activeTab === 'student' ? selectedIds : selectedStaffIds;
+    if (ids.size === 0) {
+      toast.error(bn ? 'প্রথমে নির্বাচন করুন' : 'Select items first');
+      return;
+    }
+    setBulkDownloading(true);
+    toast.info(bn ? 'PDF তৈরি হচ্ছে...' : 'Generating PDF...');
+
+    try {
+      const selectedItems = activeTab === 'student'
+        ? filtered.filter((s: any) => selectedIds.has(s.id))
+        : filteredStaff.filter((s: any) => selectedStaffIds.has(s.id));
+
+      // Create off-screen container
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      document.body.appendChild(container);
+
+      // Render cards in pages of 8 (2 cols x 4 rows)
+      const CARDS_PER_PAGE = 8;
+      const COLS = 2;
+      const pages: HTMLDivElement[] = [];
+
+      for (let i = 0; i < selectedItems.length; i += CARDS_PER_PAGE) {
+        const pageItems = selectedItems.slice(i, i + CARDS_PER_PAGE);
+        const pageDiv = document.createElement('div');
+        pageDiv.style.width = '210mm';
+        pageDiv.style.minHeight = '297mm';
+        pageDiv.style.padding = '8mm';
+        pageDiv.style.background = '#ffffff';
+        pageDiv.style.display = 'grid';
+        pageDiv.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+        pageDiv.style.gap = '6mm';
+        pageDiv.style.alignContent = 'start';
+        pageDiv.style.justifyItems = 'center';
+        container.appendChild(pageDiv);
+        pages.push(pageDiv);
+
+        // Render each card
+        await new Promise<void>((resolve) => {
+          import('react-dom/client').then(({ createRoot }) => {
+            let rendered = 0;
+            pageItems.forEach((item: any) => {
+              const cardWrapper = document.createElement('div');
+              pageDiv.appendChild(cardWrapper);
+              const root = createRoot(cardWrapper);
+              if (activeTab === 'student') {
+                root.render(
+                  <StudentIdCard
+                    student={buildStudentData(item)}
+                    {...commonCardProps}
+                    profileUrl={getProfileUrl(item)}
+                  />
+                );
+              } else {
+                root.render(
+                  <StaffIdCard
+                    staff={buildStaffData(item)}
+                    {...commonCardProps}
+                  />
+                );
+              }
+              rendered++;
+              if (rendered === pageItems.length) {
+                setTimeout(resolve, 300);
+              }
+            });
+          });
+        });
+      }
+
+      // Wait for images to load
+      const allImgs = container.querySelectorAll('img');
+      await Promise.all(
+        Array.from(allImgs).map(
+          (img) => new Promise<void>((res) => {
+            if (img.complete) res();
+            else { img.onload = () => res(); img.onerror = () => res(); }
+          })
+        )
+      );
+      await new Promise((r) => setTimeout(r, 500));
+
+      // Generate PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      for (let i = 0; i < pages.length; i++) {
+        if (i > 0) pdf.addPage();
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: pages[i].scrollWidth,
+          height: pages[i].scrollHeight,
+        });
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfWidth = 210;
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, Math.min(pdfHeight, 297));
+      }
+
+      pdf.save(`id-cards-${activeTab}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      document.body.removeChild(container);
+      toast.success(bn ? 'PDF ডাউনলোড হয়েছে' : 'PDF downloaded');
+    } catch (err: any) {
+      console.error('PDF generation error:', err);
+      toast.error(bn ? 'PDF তৈরিতে সমস্যা' : 'PDF generation failed');
+    } finally {
+      setBulkDownloading(false);
+    }
+  }, [activeTab, selectedIds, selectedStaffIds, filtered, filteredStaff, institution, validUntil, validUntilBn, principalName, principalNameEn, signatureUrl, language, classes]);
 
   const buildStaffData = (s: any) => {
     const sd = s.staff_data || {};
