@@ -18,6 +18,8 @@ interface StudentIdCardProps {
     phone?: string;
     guardian_phone?: string;
     address?: string;
+    session_year?: string;
+    session_year_bn?: string;
   };
   institution?: {
     name?: string;
@@ -213,6 +215,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             {(student.guardian_phone || student.phone) && (
               <InfoRow label={lang === 'bn' ? 'ফোন' : 'Phone'} value={student.guardian_phone || student.phone || ''} />
             )}
+            {student.session_year && <InfoRow label={lang === 'bn' ? 'সেশন' : 'Session'} value={lang === 'bn' && student.session_year_bn ? student.session_year_bn : student.session_year} />}
           </div>
         </div>
 
