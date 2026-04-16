@@ -927,9 +927,9 @@ const AdminIdCards = () => {
           <DialogHeader>
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4 overflow-auto max-h-[75vh]">
+          <div className="flex flex-col items-center gap-4 py-4 overflow-y-auto max-h-[75vh]">
             {previewStudent && (
-              <div className="transform scale-[1.6] origin-top" style={{ marginBottom: '220px', marginTop: '8px' }}>
+              <div style={{ zoom: 1.6 } as any}>
                 <StudentIdCard
                   ref={cardRef}
                   student={buildStudentData(previewStudent)}
@@ -955,9 +955,9 @@ const AdminIdCards = () => {
           <DialogHeader>
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4 overflow-auto max-h-[75vh]">
+          <div className="flex flex-col items-center gap-4 py-4 overflow-y-auto max-h-[75vh]">
             {previewStaff && (
-              <div className="transform scale-[1.6] origin-top" style={{ marginBottom: '220px', marginTop: '8px' }}>
+              <div style={{ zoom: 1.6 } as any}>
                 <StaffIdCard
                   ref={staffCardRef}
                   staff={buildStaffData(previewStaff)}
