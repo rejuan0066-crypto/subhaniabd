@@ -56,6 +56,10 @@ const labels = {
   },
 };
 
+const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
+  ({ staff, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
+    const l = labels[lang];
+
     const qrData = JSON.stringify({
       name: staff.name_bn || staff.name_en,
       id: staff.staff_id,
