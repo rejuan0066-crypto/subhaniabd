@@ -2158,6 +2158,57 @@ export type Database = {
           },
         ]
       }
+      manual_payment_methods: {
+        Row: {
+          account_holder: string | null
+          account_holder_bn: string | null
+          account_number: string
+          created_at: string | null
+          id: string
+          instructions: string | null
+          instructions_bn: string | null
+          is_active: boolean | null
+          method_name: string
+          method_name_bn: string
+          method_type: string
+          qr_code_url: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_holder?: string | null
+          account_holder_bn?: string | null
+          account_number: string
+          created_at?: string | null
+          id?: string
+          instructions?: string | null
+          instructions_bn?: string | null
+          is_active?: boolean | null
+          method_name: string
+          method_name_bn: string
+          method_type?: string
+          qr_code_url?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_holder?: string | null
+          account_holder_bn?: string | null
+          account_number?: string
+          created_at?: string | null
+          id?: string
+          instructions?: string | null
+          instructions_bn?: string | null
+          is_active?: boolean | null
+          method_name?: string
+          method_name_bn?: string
+          method_type?: string
+          qr_code_url?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       notices: {
         Row: {
           attachment_url: string | null
