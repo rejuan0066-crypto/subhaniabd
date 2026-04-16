@@ -56,13 +56,6 @@ const labels = {
   },
 };
 
-const generateQrUrl = (data: string, size = 60) =>
-  `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=1`;
-
-const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
-  ({ staff, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
-    const l = labels[lang];
-
     const qrData = JSON.stringify({
       name: staff.name_bn || staff.name_en,
       id: staff.staff_id,
