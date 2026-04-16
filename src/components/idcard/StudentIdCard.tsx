@@ -108,7 +108,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             )}
             <div>
               <div style={{
-                color: '#d4af37', fontWeight: 800, fontSize: '8.5px', lineHeight: 1.25,
+                color: '#d4af37', fontWeight: 800, fontSize: '9.5px', lineHeight: 1.25,
                 textShadow: '0 1px 3px rgba(0,0,0,0.4)',
                 fontFamily: BN,
                 letterSpacing: '0.2px',
@@ -116,14 +116,14 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
                 {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
               </div>
               {institution?.name_en && (
-                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '5px', fontFamily: EN, letterSpacing: '0.5px', fontWeight: 500, marginTop: '1px' }}>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '6px', fontFamily: EN, letterSpacing: '0.5px', fontWeight: 500, marginTop: '1px' }}>
                   {institution.name_en}
                 </div>
               )}
             </div>
           </div>
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '4px', marginTop: '2px', fontFamily: BN }}>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '5px', marginTop: '2px', fontFamily: BN }}>
               {institution.address}
             </div>
           )}
@@ -131,7 +131,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             style={{
               background: 'linear-gradient(135deg, #d4af37, #c9a84c, #b8860b)',
               color: '#ffffff',
-              fontSize: '5.5px',
+              fontSize: '6.5px',
               fontWeight: 700,
               padding: '2px 12px',
               borderRadius: '10px',
@@ -224,13 +224,13 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           {/* ── Name bilingual ── */}
           <div style={{ textAlign: 'center', marginBottom: '4px', position: 'relative', zIndex: 1 }}>
             <div style={{
-              fontWeight: 800, fontSize: '8.5px', color: '#0f172a', lineHeight: 1.3,
+              fontWeight: 800, fontSize: '10px', color: '#0f172a', lineHeight: 1.3,
               fontFamily: BN,
             }}>
               {student.name_bn || student.name_en || '—'}
             </div>
             {student.name_en && student.name_bn && (
-              <div style={{ fontSize: '5.5px', color: '#6b7280', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
+              <div style={{ fontSize: '6.5px', color: '#6b7280', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
                 {student.name_en}
               </div>
             )}
@@ -289,17 +289,17 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               />
             )}
             <div style={{ borderTop: '1px solid rgba(212,175,55,0.6)', width: '50px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.85)', fontFamily: f }}>
+            <div style={{ fontSize: '5.5px', color: 'rgba(255,255,255,0.85)', fontFamily: f }}>
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
 
           {/* Valid Until */}
           <div style={{ textAlign: 'center', flex: 1 }}>
-            <div style={{ fontSize: lang === 'bn' ? '4.5px' : '4px', color: 'rgba(255,255,255,0.55)', fontFamily: f, textTransform: lang === 'bn' ? 'none' as any : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
+            <div style={{ fontSize: lang === 'bn' ? '5.5px' : '5px', color: 'rgba(255,255,255,0.55)', fontFamily: f, textTransform: lang === 'bn' ? 'none' as any : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
               {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
             </div>
-            <div style={{ fontSize: '6px', fontWeight: 700, color: '#d4af37', fontFamily: f, textShadow: '0 0 4px rgba(212,175,55,0.3)' }}>
+            <div style={{ fontSize: '7px', fontWeight: 700, color: '#d4af37', fontFamily: f, textShadow: '0 0 4px rgba(212,175,55,0.3)' }}>
               {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
             </div>
           </div>
@@ -343,13 +343,13 @@ const InfoRow = ({ label, value, valueEn, accent, blood }: {
     }}
   >
     <span style={{
-      fontSize: '5.5px', color: '#78716c', fontWeight: 600,
+      fontSize: '6.5px', color: '#78716c', fontWeight: 600,
       fontFamily: BN,
       letterSpacing: '0.2px',
     }}>{label}</span>
     <span
       style={{
-        fontSize: accent ? '7px' : '6.5px',
+        fontSize: accent ? '8px' : '7.5px',
         fontWeight: 800,
         color: blood ? '#dc2626' : accent ? '#064e3b' : '#1e293b',
         fontFamily: BN,
@@ -358,7 +358,7 @@ const InfoRow = ({ label, value, valueEn, accent, blood }: {
     >
       {value}
       {valueEn && value !== valueEn && value !== '—' && (
-        <span style={{ fontSize: '4.5px', color: '#a8a29e', marginLeft: '2px', fontFamily: EN, fontWeight: 400 }}>
+        <span style={{ fontSize: '5.5px', color: '#a8a29e', marginLeft: '2px', fontFamily: EN, fontWeight: 400 }}>
           ({valueEn})
         </span>
       )}
