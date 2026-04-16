@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Printer, CreditCard, Filter, Loader2, Eye, CheckSquare, Square, Upload, X, Save, Users, GraduationCap, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import StudentIdCard from '@/components/idcard/StudentIdCard';
 import StaffIdCard from '@/components/idcard/StaffIdCard';
@@ -22,6 +22,7 @@ const AdminIdCards = () => {
   const [activeTab, setActiveTab] = useState('');
   const [search, setSearch] = useState('');
   const [staffSearch, setStaffSearch] = useState('');
+  const [filterSessionId, setFilterSessionId] = useState('');
   const [filterDivisionId, setFilterDivisionId] = useState('all');
   const [filterClassId, setFilterClassId] = useState('all');
   const [staffCategoryFilter, setStaffCategoryFilter] = useState('all');
@@ -146,24 +147,48 @@ const AdminIdCards = () => {
     },
   });
 
+  // Fetch all academic sessions
+  const { data: allSessions = [] } = useQuery({
+    queryKey: ['all-academic-sessions-idcard'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('academic_sessions').select('*').order('name', { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Auto-select active session
+  useEffect(() => {
+    if (!filterSessionId && allSessions.length > 0) {
+      const active = allSessions.find((s: any) => s.is_active);
+      setFilterSessionId(active?.id || allSessions[0]?.id || 'all');
+    }
+  }, [allSessions, filterSessionId]);
+
+  // Selected session for validUntil
+  const selectedSession = useMemo(() => {
+    if (!filterSessionId || filterSessionId === 'all') return activeSession;
+    return allSessions.find((s: any) => s.id === filterSessionId) || activeSession;
+  }, [filterSessionId, allSessions, activeSession]);
+
   // Auto-set validUntil from active session end_date
   useEffect(() => {
     if (idcardSettings?.idcard_valid_until) return; // manual override takes priority
-    if (activeSession?.end_date) {
-      const d = new Date(activeSession.end_date);
+    if (selectedSession?.end_date) {
+      const d = new Date(selectedSession.end_date);
       const enMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
       const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
       const toBnDigit = (s: string) => s.replace(/[0-9]/g, (c) => '০১২৩৪৫৬৭৮৯'[parseInt(c)]);
       setValidUntil(`${enMonths[d.getMonth()]} ${d.getFullYear()}`);
       setValidUntilBn(`${bnMonths[d.getMonth()]} ${toBnDigit(String(d.getFullYear()))}`);
-    } else if (activeSession?.name) {
-      setValidUntil(activeSession.name);
-      setValidUntilBn(activeSession.name_bn || activeSession.name);
+    } else if (selectedSession?.name) {
+      setValidUntil(selectedSession.name);
+      setValidUntilBn(selectedSession.name_bn || selectedSession.name);
     } else {
       if (!validUntil) setValidUntil('December 2026');
       if (!validUntilBn) setValidUntilBn('ডিসেম্বর ২০২৬');
     }
-  }, [activeSession, idcardSettings]);
+  }, [selectedSession, idcardSettings]);
 
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
@@ -184,12 +209,17 @@ const AdminIdCards = () => {
   });
 
   const { data: students = [], isLoading } = useQuery({
-    queryKey: ['students-idcard'],
+    queryKey: ['students-idcard', filterSessionId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('students').select('*, divisions(name, name_bn)').order('roll_number', { ascending: true });
+      let query = supabase.from('students').select('*, divisions(name, name_bn)');
+      if (filterSessionId && filterSessionId !== 'all') {
+        query = query.eq('session_id', filterSessionId);
+      }
+      const { data, error } = await query.order('roll_number', { ascending: true });
       if (error) throw error;
       return data;
     },
+    enabled: !!filterSessionId,
   });
 
   const { data: staffList = [], isLoading: staffLoading } = useQuery({
@@ -688,6 +718,20 @@ const AdminIdCards = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input placeholder={bn ? 'নাম, আইডি বা রোল...' : 'Name, ID or Roll...'} className="pl-10 bg-background" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
+              <Select value={filterSessionId} onValueChange={(v) => { setFilterSessionId(v); setSelectedIds(new Set()); }}>
+                <SelectTrigger className="bg-background w-full sm:w-44">
+                  <GraduationCap className="w-4 h-4 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder={bn ? 'সেশন' : 'Session'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{bn ? 'সকল সেশন' : 'All Sessions'}</SelectItem>
+                  {allSessions.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {bn ? s.name_bn || s.name : s.name}{s.is_active ? (bn ? ' (সক্রিয়)' : ' (Active)') : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={filterDivisionId} onValueChange={(v) => { setFilterDivisionId(v); setFilterClassId('all'); }}>
                 <SelectTrigger className="bg-background w-full sm:w-40">
                   <Filter className="w-4 h-4 mr-1 text-muted-foreground" />
