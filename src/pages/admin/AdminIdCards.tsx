@@ -481,15 +481,42 @@ const AdminIdCards = () => {
     }
   }, [activeTab, selectedIds, selectedStaffIds, filtered, filteredStaff, institution, validUntil, validUntilBn, principalName, principalNameEn, signatureUrl, language, classes]);
 
+  // Map raw category/department keys to friendly Bangla labels
+  const departmentLabel = (raw: string | undefined | null): string => {
+    if (!raw) return '';
+    const key = String(raw).trim().toLowerCase();
+    const map: Record<string, string> = {
+      general: 'সাধারণ',
+      teacher: 'শিক্ষা বিভাগ',
+      teaching: 'শিক্ষা বিভাগ',
+      administrative: 'প্রশাসন',
+      admin: 'প্রশাসন',
+      support: 'সহায়ক বিভাগ',
+      accounts: 'হিসাব বিভাগ',
+      library: 'লাইব্রেরি',
+      kitchen: 'রান্না বিভাগ',
+    };
+    return map[key] || raw;
+  };
+
   const buildStaffData = (s: any) => {
     const sd = s.staff_data || {};
+    // Prefer human-readable department; skip raw keys like "general".
+    const rawDept = s.department && String(s.department).trim();
+    const friendlyDept = rawDept && rawDept.toLowerCase() !== 'general'
+      ? rawDept
+      : departmentLabel(s.staff_category);
     return {
       name_bn: s.name_bn,
       name_en: s.name_en,
       staff_id: s.staff_id,
       photo_url: s.photo_url,
       designation: s.designation,
-      department: s.department,
+      designation_bn: s.designation,
+      designation_en: sd.designation_en || '',
+      department: friendlyDept,
+      staff_category: s.staff_category,
+      father_name: sd.father_name || sd.father_name_bn,
       phone: s.phone,
       blood_group: sd.blood_group || s.blood_group,
       nid: s.nid || sd.nid,
