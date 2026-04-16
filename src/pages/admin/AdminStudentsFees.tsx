@@ -10,7 +10,7 @@ import DuesManagement from '@/components/fees/DuesManagement';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import FeeReceiptDownload from '@/components/fees/FeeReceiptDownload';
@@ -40,6 +40,7 @@ const AdminStudentsFees = () => {
   const bn = language === 'bn';
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState('');
   const [selectedFeeTypeObj, setSelectedFeeTypeObj] = useState<any>(null);
@@ -180,11 +181,27 @@ const AdminStudentsFees = () => {
       })
     : dbFeeTypes;
 
-  // Check for existing pending/approved payment for selected student + fee type
+  // Check for existing pending/approved payment for selected student + fee type + month
   const { data: existingPayment, isLoading: checkingExisting } = useQuery({
-    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn],
+    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth],
     queryFn: async () => {
       if (!foundStudent?.id || !selectedFeeTypeObj) return null;
+      // For monthly fees, check fee_payments table by fee_type_id + month
+      if (selectedFeeTypeObj.payment_frequency === 'monthly' && paymentMonth) {
+        const { data, error } = await supabase
+          .from('fee_payments')
+          .select('id, status, paid_amount, month, year')
+          .eq('student_id', foundStudent.id)
+          .eq('fee_type_id', feeType)
+          .eq('month', paymentMonth)
+          .eq('year', new Date().getFullYear())
+          .in('status', ['paid'])
+          .limit(1)
+          .maybeSingle();
+        if (error) throw error;
+        return data;
+      }
+      // For one-time fees, check payments table
       const feeTypeName = selectedFeeTypeObj.name_bn || selectedFeeTypeObj.name;
       const { data, error } = await supabase
         .from('payments')
@@ -202,7 +219,7 @@ const AdminStudentsFees = () => {
   });
 
   const isPaymentBlocked = !!existingPayment;
-  const blockedStatus = existingPayment?.status; // 'pending' or 'success'
+  const blockedStatus = existingPayment?.status; // 'pending' or 'success' or 'paid'
 
 
   const { data: gatewayConfig } = useQuery({
@@ -303,7 +320,7 @@ const AdminStudentsFees = () => {
         fee_type: feeTypeName,
         amount: parseFloat(amount),
         transaction_id: txnId,
-        status: isCash ? 'pending' : 'pending',
+        status: isCash ? 'success' : 'pending',
         student_id: foundStudent.id,
         payer_name: foundStudent.name_bn,
         payment_method: isCash ? 'cash' : 'online',
@@ -336,8 +353,12 @@ const AdminStudentsFees = () => {
     },
     onSuccess: async (txnId) => {
       setStep('done');
+      // Invalidate queries so fee status updates immediately
+      queryClient.invalidateQueries({ queryKey: ['student_fee_payments_status'] });
+      queryClient.invalidateQueries({ queryKey: ['existing_payment_check'] });
+      queryClient.invalidateQueries({ queryKey: ['dues-fee-payments'] });
       if (paymentMethod === 'cash') {
-        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে (অনুমোদনের অপেক্ষায়)' : 'Cash payment saved (awaiting approval)');
+        toast.success(bn ? 'ক্যাশ পেমেন্ট সফলভাবে সংরক্ষিত হয়েছে' : 'Cash payment saved successfully');
       } else {
         // Call process-payment edge function
         try {
@@ -744,9 +765,9 @@ const AdminStudentsFees = () => {
                       </span>
                     </div>
                     <div className="text-xs space-y-1 text-foreground/80">
-                      <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {existingPayment.transaction_id}</p>
-                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{existingPayment.amount}</p>
-                      <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date(existingPayment.created_at).toLocaleDateString('bn-BD')}</p>
+                      {'transaction_id' in existingPayment && <p><strong>{bn ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:</strong> {(existingPayment as any).transaction_id}</p>}
+                      <p><strong>{bn ? 'পরিমাণ' : 'Amount'}:</strong> ৳{(existingPayment as any).amount || (existingPayment as any).paid_amount}</p>
+                      {'created_at' in existingPayment && <p><strong>{bn ? 'তারিখ' : 'Date'}:</strong> {new Date((existingPayment as any).created_at).toLocaleDateString('bn-BD')}</p>}
                     </div>
                     <p className={`text-xs font-medium ${blockedStatus === 'pending' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                       {bn ? '🚫 বাতিল না হওয়া পর্যন্ত এই ফি ধরনে আবার পরিশোধ করা যাবে না।' : '🚫 Cannot pay again until this payment is cancelled.'}
