@@ -501,11 +501,20 @@ const AdminIdCards = () => {
 
   const buildStaffData = (s: any) => {
     const sd = s.staff_data || {};
-    // Prefer human-readable department; skip raw keys like "general".
+    // Department resolution priority:
+    // 1) If staff_category is "teacher" → always show "শিক্ষা বিভাগ" (category wins for consistency)
+    // 2) Else use the stored department if it's not a raw key like "general"
+    // 3) Else fall back to a friendly label derived from staff_category
+    const cat = String(s.staff_category || '').toLowerCase();
     const rawDept = s.department && String(s.department).trim();
-    const friendlyDept = rawDept && rawDept.toLowerCase() !== 'general'
-      ? rawDept
-      : departmentLabel(s.staff_category);
+    let friendlyDept = '';
+    if (cat === 'teacher' || cat === 'teaching') {
+      friendlyDept = 'শিক্ষা বিভাগ';
+    } else if (rawDept && rawDept.toLowerCase() !== 'general') {
+      friendlyDept = rawDept;
+    } else {
+      friendlyDept = departmentLabel(s.staff_category);
+    }
     return {
       name_bn: s.name_bn,
       name_en: s.name_en,
