@@ -928,7 +928,7 @@ const AdminIdCards = () => {
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
+            <div className="id-preview-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
               {previewStudent && (
                 <div className="flex justify-center px-3 pb-6">
                   <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
@@ -964,7 +964,7 @@ const AdminIdCards = () => {
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
+            <div className="id-preview-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
               {previewStaff && (
                 <div className="flex justify-center px-3 pb-6">
                   <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
