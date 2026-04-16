@@ -173,7 +173,6 @@ const AdminIdCards = () => {
 
   // Auto-set validUntil from active session end_date
   useEffect(() => {
-    if (idcardSettings?.idcard_valid_until) return; // manual override takes priority
     if (selectedSession?.end_date) {
       const d = new Date(selectedSession.end_date);
       const enMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -188,7 +187,7 @@ const AdminIdCards = () => {
       if (!validUntil) setValidUntil('December 2026');
       if (!validUntilBn) setValidUntilBn('ডিসেম্বর ২০২৬');
     }
-  }, [selectedSession, idcardSettings]);
+  }, [selectedSession]);
 
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
