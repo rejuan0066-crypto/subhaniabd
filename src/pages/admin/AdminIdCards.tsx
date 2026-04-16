@@ -955,9 +955,9 @@ const AdminIdCards = () => {
           <DialogHeader>
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4">
+          <div className="flex flex-col items-center gap-4 py-4 overflow-auto max-h-[75vh]">
             {previewStaff && (
-              <div className="transform scale-[1.8] origin-top my-8">
+              <div className="transform scale-[1.6] origin-top" style={{ marginBottom: '220px', marginTop: '8px' }}>
                 <StaffIdCard
                   ref={staffCardRef}
                   staff={buildStaffData(previewStaff)}
