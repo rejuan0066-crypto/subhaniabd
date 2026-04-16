@@ -383,7 +383,7 @@ const AdminStudentsFees = () => {
         receipt_number: serialNumber || txnId,
         paid_at: isCash ? new Date().toISOString() : null,
         month: paymentMonth || new Date().toLocaleString('default', { month: 'long' }),
-        year: new Date().getFullYear(),
+        year: paymentYear,
       };
       await supabase.from('fee_payments').insert(feePaymentPayload);
 
