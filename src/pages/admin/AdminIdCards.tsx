@@ -353,12 +353,36 @@ const AdminIdCards = () => {
       );
       await new Promise((r) => setTimeout(r, 500));
 
-      // Generate PDF
+      // Generate PDF with crop marks
       const pdf = new jsPDF('p', 'mm', 'a4');
+      const CARD_W_MM = 54; // 2.125in
+      const CARD_H_MM = 85.7; // 3.375in
+      const MARGIN_X = (210 - CARD_W_MM * 2 - 10) / 2; // center 2 cols with 10mm gap
+      const MARGIN_Y = (297 - CARD_H_MM * 4 - 6) / 2; // center 4 rows with 2mm gap
+      const CROP_LEN = 4;
+      const CROP_OFFSET = 1.5;
+
+      const drawCropMarks = (p: typeof pdf, x: number, y: number, w: number, h: number) => {
+        p.setDrawColor(0);
+        p.setLineWidth(0.15);
+        // Top-left
+        p.line(x - CROP_OFFSET - CROP_LEN, y, x - CROP_OFFSET, y);
+        p.line(x, y - CROP_OFFSET - CROP_LEN, x, y - CROP_OFFSET);
+        // Top-right
+        p.line(x + w + CROP_OFFSET, y, x + w + CROP_OFFSET + CROP_LEN, y);
+        p.line(x + w, y - CROP_OFFSET - CROP_LEN, x + w, y - CROP_OFFSET);
+        // Bottom-left
+        p.line(x - CROP_OFFSET - CROP_LEN, y + h, x - CROP_OFFSET, y + h);
+        p.line(x, y + h + CROP_OFFSET, x, y + h + CROP_OFFSET + CROP_LEN);
+        // Bottom-right
+        p.line(x + w + CROP_OFFSET, y + h, x + w + CROP_OFFSET + CROP_LEN, y + h);
+        p.line(x + w, y + h + CROP_OFFSET, x + w, y + h + CROP_OFFSET + CROP_LEN);
+      };
+
       for (let i = 0; i < pages.length; i++) {
         if (i > 0) pdf.addPage();
         const canvas = await html2canvas(pages[i], {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',
@@ -369,6 +393,16 @@ const AdminIdCards = () => {
         const pdfWidth = 210;
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, Math.min(pdfHeight, 297));
+
+        // Draw crop marks for each card position
+        const pageItems = selectedItems.slice(i * CARDS_PER_PAGE, (i + 1) * CARDS_PER_PAGE);
+        for (let j = 0; j < pageItems.length; j++) {
+          const col = j % COLS;
+          const row = Math.floor(j / COLS);
+          const cx = MARGIN_X + col * (CARD_W_MM + 10);
+          const cy = MARGIN_Y + row * (CARD_H_MM + 2);
+          drawCropMarks(pdf, cx, cy, CARD_W_MM, CARD_H_MM);
+        }
       }
 
       pdf.save(`id-cards-${activeTab}-${new Date().toISOString().slice(0, 10)}.pdf`);
