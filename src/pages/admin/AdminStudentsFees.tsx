@@ -181,11 +181,27 @@ const AdminStudentsFees = () => {
       })
     : dbFeeTypes;
 
-  // Check for existing pending/approved payment for selected student + fee type
+  // Check for existing pending/approved payment for selected student + fee type + month
   const { data: existingPayment, isLoading: checkingExisting } = useQuery({
-    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn],
+    queryKey: ['existing_payment_check', foundStudent?.id, feeType, selectedFeeTypeObj?.name_bn, paymentMonth],
     queryFn: async () => {
       if (!foundStudent?.id || !selectedFeeTypeObj) return null;
+      // For monthly fees, check fee_payments table by fee_type_id + month
+      if (selectedFeeTypeObj.payment_frequency === 'monthly' && paymentMonth) {
+        const { data, error } = await supabase
+          .from('fee_payments')
+          .select('id, status, paid_amount, month, year')
+          .eq('student_id', foundStudent.id)
+          .eq('fee_type_id', feeType)
+          .eq('month', paymentMonth)
+          .eq('year', new Date().getFullYear())
+          .in('status', ['paid'])
+          .limit(1)
+          .maybeSingle();
+        if (error) throw error;
+        return data;
+      }
+      // For one-time fees, check payments table
       const feeTypeName = selectedFeeTypeObj.name_bn || selectedFeeTypeObj.name;
       const { data, error } = await supabase
         .from('payments')
@@ -203,7 +219,7 @@ const AdminStudentsFees = () => {
   });
 
   const isPaymentBlocked = !!existingPayment;
-  const blockedStatus = existingPayment?.status; // 'pending' or 'success'
+  const blockedStatus = existingPayment?.status; // 'pending' or 'success' or 'paid'
 
 
   const { data: gatewayConfig } = useQuery({
