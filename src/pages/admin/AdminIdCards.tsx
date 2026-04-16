@@ -927,20 +927,26 @@ const AdminIdCards = () => {
           <DialogHeader>
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4 overflow-y-auto max-h-[75vh]">
-            {previewStudent && (
-              <div style={{ zoom: 1.6 } as any}>
-                <StudentIdCard
-                  ref={cardRef}
-                  student={buildStudentData(previewStudent)}
-                  {...commonCardProps}
-                  profileUrl={getProfileUrl(previewStudent)}
-                />
-              </div>
-            )}
+          <div className="flex h-[75vh] min-h-0 flex-col items-center overflow-hidden">
+            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden py-4">
+              {previewStudent && (
+                <div className="flex justify-center">
+                  <div className="flex w-[326px] min-h-[520px] justify-center pt-2">
+                    <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
+                      <StudentIdCard
+                        ref={cardRef}
+                        student={buildStudentData(previewStudent)}
+                        {...commonCardProps}
+                        profileUrl={getProfileUrl(previewStudent)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <Button
               onClick={() => { if (cardRef.current) printIdCard(cardRef.current.outerHTML); }}
-              className="btn-primary-gradient flex items-center gap-2 mt-4"
+              className="btn-primary-gradient flex items-center gap-2 mt-3"
             >
               <Printer className="w-4 h-4" />
               {bn ? 'প্রিন্ট করুন' : 'Print Card'}
@@ -955,19 +961,25 @@ const AdminIdCards = () => {
           <DialogHeader>
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col items-center gap-4 py-4 overflow-y-auto max-h-[75vh]">
-            {previewStaff && (
-              <div style={{ zoom: 1.6 } as any}>
-                <StaffIdCard
-                  ref={staffCardRef}
-                  staff={buildStaffData(previewStaff)}
-                  {...commonCardProps}
-                />
-              </div>
-            )}
+          <div className="flex h-[75vh] min-h-0 flex-col items-center overflow-hidden">
+            <div className="w-full flex-1 overflow-y-auto overflow-x-hidden py-4">
+              {previewStaff && (
+                <div className="flex justify-center">
+                  <div className="flex w-[326px] min-h-[520px] justify-center pt-2">
+                    <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
+                      <StaffIdCard
+                        ref={staffCardRef}
+                        staff={buildStaffData(previewStaff)}
+                        {...commonCardProps}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <Button
               onClick={() => { if (staffCardRef.current) printIdCard(staffCardRef.current.outerHTML); }}
-              className="btn-primary-gradient flex items-center gap-2 mt-4"
+              className="btn-primary-gradient flex items-center gap-2 mt-3"
             >
               <Printer className="w-4 h-4" />
               {bn ? 'প্রিন্ট করুন' : 'Print Card'}
