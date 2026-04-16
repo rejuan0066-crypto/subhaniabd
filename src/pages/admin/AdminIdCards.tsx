@@ -923,71 +923,69 @@ const AdminIdCards = () => {
 
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
-        <DialogContent style={{ overflow: 'hidden' }} className="flex h-[90vh] max-h-[90vh] flex-col p-6 sm:max-w-[28rem]">
-          <DialogHeader className="shrink-0">
+        <DialogContent style={{ overflow: 'hidden', display: 'flex' }} className="max-h-[90vh] flex-col gap-0 p-6 sm:max-w-[28rem]">
+          <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="id-preview-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
-              {previewStudent && (
-                <div className="flex justify-center px-3 pb-6">
-                  <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
-                    <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
-                      <StudentIdCard
-                        ref={cardRef}
-                        student={buildStudentData(previewStudent)}
-                        {...commonCardProps}
-                        profileUrl={getProfileUrl(previewStudent)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="shrink-0 pt-3">
-              <Button
-                onClick={() => { if (cardRef.current) printIdCard(cardRef.current.outerHTML); }}
-                className="btn-primary-gradient mx-auto flex items-center gap-2"
+          <div className="flex flex-1 items-center justify-center overflow-hidden py-2">
+            {previewStudent && (
+              <div
+                className="flex items-start justify-center"
+                style={{ width: '3.02in', height: '4.8in' }}
               >
-                <Printer className="w-4 h-4" />
-                {bn ? 'প্রিন্ট করুন' : 'Print Card'}
-              </Button>
-            </div>
+                <div style={{ transform: 'scale(1.42)', transformOrigin: 'top center' }}>
+                  <StudentIdCard
+                    ref={cardRef}
+                    student={buildStudentData(previewStudent)}
+                    {...commonCardProps}
+                    profileUrl={getProfileUrl(previewStudent)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="shrink-0 pt-4">
+            <Button
+              onClick={() => { if (cardRef.current) printIdCard(cardRef.current.outerHTML); }}
+              className="btn-primary-gradient mx-auto flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              {bn ? 'প্রিন্ট করুন' : 'Print Card'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
-        <DialogContent style={{ overflow: 'hidden' }} className="flex h-[90vh] max-h-[90vh] flex-col p-6 sm:max-w-[28rem]">
-          <DialogHeader className="shrink-0">
+        <DialogContent style={{ overflow: 'hidden', display: 'flex' }} className="max-h-[90vh] flex-col gap-0 p-6 sm:max-w-[28rem]">
+          <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="id-preview-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4 pr-2">
-              {previewStaff && (
-                <div className="flex justify-center px-3 pb-6">
-                  <div className="flex h-[5.55in] w-[3.55in] items-start justify-center overflow-visible pt-2">
-                    <div style={{ transform: 'scale(1.6)', transformOrigin: 'top center' }}>
-                      <StaffIdCard
-                        ref={staffCardRef}
-                        staff={buildStaffData(previewStaff)}
-                        {...commonCardProps}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="shrink-0 pt-3">
-              <Button
-                onClick={() => { if (staffCardRef.current) printIdCard(staffCardRef.current.outerHTML); }}
-                className="btn-primary-gradient mx-auto flex items-center gap-2"
+          <div className="flex flex-1 items-center justify-center overflow-hidden py-2">
+            {previewStaff && (
+              <div
+                className="flex items-start justify-center"
+                style={{ width: '3.02in', height: '4.8in' }}
               >
-                <Printer className="w-4 h-4" />
-                {bn ? 'প্রিন্ট করুন' : 'Print Card'}
-              </Button>
-            </div>
+                <div style={{ transform: 'scale(1.42)', transformOrigin: 'top center' }}>
+                  <StaffIdCard
+                    ref={staffCardRef}
+                    staff={buildStaffData(previewStaff)}
+                    {...commonCardProps}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="shrink-0 pt-4">
+            <Button
+              onClick={() => { if (staffCardRef.current) printIdCard(staffCardRef.current.outerHTML); }}
+              className="btn-primary-gradient mx-auto flex items-center gap-2"
+            >
+              <Printer className="w-4 h-4" />
+              {bn ? 'প্রিন্ট করুন' : 'Print Card'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
