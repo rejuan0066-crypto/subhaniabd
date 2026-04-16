@@ -8,11 +8,16 @@ interface StaffIdCardProps {
     staff_id?: string;
     photo_url?: string;
     designation?: string;
+    designation_en?: string;
+    designation_bn?: string;
     department?: string;
+    staff_category?: string;
     phone?: string;
     blood_group?: string;
     nid?: string;
     address?: string;
+    father_name?: string;
+    joining_date?: string;
   };
   institution?: {
     name?: string;
@@ -29,43 +34,45 @@ interface StaffIdCardProps {
   lang?: 'bn' | 'en';
 }
 
-const labels = {
-  bn: {
-    cardTitle: 'কর্মী পরিচয়পত্র',
-    id: 'আইডি',
-    designation: 'পদবী',
-    department: 'বিভাগ',
-    blood: 'রক্তের গ্রুপ',
-    phone: 'ফোন',
-    nid: 'NID',
-    address: 'ঠিকানা',
-    principal: 'প্রিন্সিপাল',
-    validUntil: 'মেয়াদ',
-  },
-  en: {
-    cardTitle: 'STAFF ID CARD',
-    id: 'ID',
-    designation: 'Designation',
-    department: 'Department',
-    blood: 'Blood Group',
-    phone: 'Phone',
-    nid: 'NID',
-    address: 'Address',
-    principal: 'Principal',
-    validUntil: 'Valid Until',
-  },
+const BN = "'SutonnyOMJ', 'SutonnyMJ', 'Noto Sans Bengali', sans-serif";
+const EN = "'Inter', sans-serif";
+
+/**
+ * Build a designation-aware card title.
+ * Examples:
+ *   শিক্ষক → "শিক্ষক পরিচয় পত্র"
+ *   অফিস সহকারী → "অফিস সহকারী পরিচয় পত্র"
+ *   fallback → "কর্মী পরিচয় পত্র"
+ */
+const buildCardTitle = (staff: StaffIdCardProps['staff'], lang: 'bn' | 'en'): string => {
+  const designation = lang === 'bn'
+    ? (staff.designation_bn || staff.designation || '')
+    : (staff.designation_en || staff.designation || '');
+
+  if (designation && designation.trim()) {
+    return lang === 'bn' ? `${designation} পরিচয় পত্র` : `${designation} ID Card`;
+  }
+
+  // Fallback by category
+  const cat = (staff.staff_category || '').toLowerCase();
+  if (lang === 'bn') {
+    if (cat.includes('teacher') || cat.includes('শিক্ষক')) return 'শিক্ষক পরিচয় পত্র';
+    if (cat.includes('admin')) return 'প্রশাসনিক পরিচয় পত্র';
+    if (cat.includes('support')) return 'সহায়ক কর্মী পরিচয় পত্র';
+    return 'কর্মী পরিচয় পত্র';
+  }
+  return 'STAFF ID CARD';
 };
 
 const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
   ({ staff, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
-    const l = labels[lang];
 
-    const qrData = JSON.stringify({
-      name: staff.name_bn || staff.name_en,
-      id: staff.staff_id,
-      designation: staff.designation,
-      institution: institution?.name,
-    });
+    const verifyUrl = `https://subhaniabd.com/verify/staff/${staff.staff_id || ''}`;
+    const f = lang === 'bn' ? BN : EN;
+    const cardTitle = buildCardTitle(staff, lang);
+    const designationDisplay = lang === 'bn'
+      ? (staff.designation_bn || staff.designation || '')
+      : (staff.designation_en || staff.designation || '');
 
     return (
       <div
@@ -77,165 +84,243 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
           minHeight: '3.375in',
           height: 'auto',
           background: '#ffffff',
-          borderRadius: '8px',
-          overflow: 'visible',
-          fontFamily: "'Noto Sans Bengali', 'Segoe UI', sans-serif",
+          borderRadius: '12px',
+          overflow: 'hidden',
+          fontFamily: BN,
           fontSize: '7px',
-          color: '#1a1a2e',
+          color: '#0f172a',
           position: 'relative',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-          border: '1px solid #e2e8f0',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.22)',
+          border: '1px solid #d1d5db',
           display: 'flex',
           flexDirection: 'column',
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact' as any,
         }}
       >
-        {/* Header */}
+        {/* ═══ HEADER — Solid Emerald, prominent branding ═══ */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #064e3b 0%, #059669 100%)',
-            padding: '5px 8px 4px',
+            background: 'linear-gradient(180deg, #064e3b 0%, #047857 100%)',
+            padding: '8px 8px 9px',
             textAlign: 'center',
+            flexShrink: 0,
+            borderBottom: '2px solid #d4af37',
             position: 'relative',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
-            {institution?.logo_url && (
-              <img
-                src={institution.logo_url}
-                alt="Logo"
-                style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.4)' }}
-              />
-            )}
-            <div>
-              <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2 }}>
-                {lang === 'bn' ? (institution?.name || 'প্রতিষ্ঠানের নাম') : (institution?.name_en || institution?.name || 'Institution Name')}
-              </div>
-            </div>
+          {institution?.logo_url && (
+            <img
+              src={institution.logo_url}
+              alt=""
+              style={{
+                position: 'absolute',
+                top: '6px',
+                left: '7px',
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '1px solid rgba(212,175,55,0.7)',
+              }}
+            />
+          )}
+
+          <div style={{
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '11px',
+            fontFamily: BN,
+            lineHeight: 1.2,
+            letterSpacing: '0.2px',
+            padding: '0 22px',
+          }}>
+            {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
           </div>
+          {institution?.name_en && (
+            <div style={{
+              color: '#ffffff',
+              fontFamily: EN,
+              fontWeight: 700,
+              fontSize: '6.5px',
+              marginTop: '2px',
+              letterSpacing: '0.7px',
+              opacity: 0.95,
+            }}>
+              {institution.name_en}
+            </div>
+          )}
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '4.5px', marginTop: '1px' }}>
+            <div style={{
+              color: 'rgba(255,255,255,0.75)',
+              fontSize: '5.5px',
+              marginTop: '2px',
+              fontFamily: BN,
+            }}>
               {institution.address}
             </div>
           )}
+
+          {/* Designation-specific card title pill */}
           <div
             style={{
-              background: '#d97706',
-              color: '#fff',
-              fontSize: '5px',
-              fontWeight: 700,
-              padding: '1px 8px',
-              borderRadius: '2px',
-              marginTop: '2px',
+              background: '#d4af37',
+              color: '#0f172a',
+              fontSize: '6.5px',
+              fontWeight: 800,
+              padding: '2px 10px',
+              borderRadius: '10px',
+              marginTop: '4px',
               display: 'inline-block',
-              letterSpacing: lang === 'en' ? '1px' : '0.5px',
+              letterSpacing: lang === 'en' ? '0.8px' : '0.3px',
               textTransform: lang === 'en' ? 'uppercase' : 'none',
+              fontFamily: lang === 'bn' ? BN : EN,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
             }}
           >
-            {l.cardTitle}
+            {cardTitle}
           </div>
         </div>
 
-        {/* Body */}
-        <div style={{ flex: 1, flexGrow: 1, padding: '4px 8px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Photo + QR row */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', width: '100%', marginBottom: '3px' }}>
-            {/* Photo */}
-            <div
-              style={{
-                width: '46px',
-                height: '54px',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                border: '1.5px solid #059669',
-                background: '#f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {staff.photo_url ? (
-                <img src={staff.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ fontSize: '18px', color: '#94a3b8', fontWeight: 700 }}>
-                  {staff.name_bn?.[0] || staff.name_en?.[0] || '?'}
+        {/* ═══ BODY — Pure white ═══ */}
+        <div style={{
+          flex: '1 1 auto',
+          padding: '6px 11px 8px',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#ffffff',
+          minHeight: 0,
+        }}>
+          {/* ── Circular photo with thin gold ring ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              padding: '2px',
+              background: '#d4af37',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
+            }}>
+              <div style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: '#ffffff',
+                padding: '1.5px',
+              }}>
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  background: '#f1f5f9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  {staff.photo_url ? (
+                    <img src={staff.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ fontSize: '22px', color: '#064e3b', fontWeight: 700, opacity: 0.35 }}>
+                      {staff.name_bn?.[0] || staff.name_en?.[0] || '?'}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Name + basic info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '7.5px', color: '#0f172a', lineHeight: 1.2 }}>
-                {lang === 'bn' ? (staff.name_bn || staff.name_en || '—') : (staff.name_en || staff.name_bn || '—')}
               </div>
-              {staff.name_bn && staff.name_en && (
-                <div style={{ fontSize: '5.5px', color: '#64748b', marginTop: '1px' }}>
-                  {lang === 'bn' ? staff.name_en : staff.name_bn}
-                </div>
-              )}
-              <div style={{ fontSize: '5.5px', color: '#059669', fontWeight: 600, marginTop: '2px' }}>
-                {staff.designation || '—'}
-              </div>
-            </div>
-
-            {/* QR Code */}
-            <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <QRCodeSVG
-                value={qrData}
-                size={38}
-                level="M"
-                bgColor="#ffffff"
-                fgColor="#064e3b"
-                style={{ borderRadius: '2px' }}
-              />
             </div>
           </div>
 
-          {/* Info Grid */}
-          <div style={{ width: '100%', borderTop: '1px solid #e2e8f0', paddingTop: '2px' }}>
-            <InfoRow label={l.id} value={staff.staff_id || '—'} />
-            {staff.designation && <InfoRow label={l.designation} value={staff.designation} />}
-            {staff.department && <InfoRow label={l.department} value={staff.department} />}
-            {staff.blood_group && <InfoRow label={l.blood} value={staff.blood_group} highlight />}
-            {staff.phone && <InfoRow label={l.phone} value={staff.phone} />}
-            {staff.nid && <InfoRow label={l.nid} value={staff.nid} />}
-            {staff.address && (
-              <div style={{ display: 'flex', padding: '1.5px 0', borderBottom: '1px dotted #f1f5f9' }}>
-                <span style={{ fontSize: '5.5px', color: '#64748b', whiteSpace: 'nowrap', marginRight: '4px' }}>{l.address}</span>
-                <span style={{ fontSize: '5.5px', fontWeight: 500, color: '#0f172a', lineHeight: 1.3, textAlign: 'right', flex: 1, wordBreak: 'break-word' }}>
-                  {staff.address}
-                </span>
+          {/* ── Name in bold dark green ── */}
+          <div style={{ textAlign: 'center', marginBottom: '6px' }}>
+            <div style={{
+              fontWeight: 800,
+              fontSize: '12px',
+              color: '#064e3b',
+              fontFamily: BN,
+              lineHeight: 1.25,
+            }}>
+              {lang === 'bn' ? (staff.name_bn || staff.name_en || '—') : (staff.name_en || staff.name_bn || '—')}
+            </div>
+            {staff.name_en && staff.name_bn && (
+              <div style={{ fontSize: '7px', color: '#475569', fontFamily: EN, marginTop: '1px', fontWeight: 600 }}>
+                {lang === 'bn' ? staff.name_en : staff.name_bn}
               </div>
             )}
+            <div style={{
+              width: '40px',
+              height: '1.5px',
+              background: '#d4af37',
+              margin: '3px auto 0',
+              borderRadius: '1px',
+            }} />
+          </div>
+
+          {/* ── Info rows ── */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {designationDisplay && <Row label={lang === 'bn' ? 'পদবী' : 'Designation'} value={designationDisplay} />}
+            {staff.father_name && <Row label={lang === 'bn' ? 'পিতা' : 'Father'} value={staff.father_name} />}
+            {staff.department && <Row label={lang === 'bn' ? 'বিভাগ' : 'Department'} value={staff.department} />}
+            <Row label={lang === 'bn' ? 'আইডি নং' : 'ID No'} value={staff.staff_id || '—'} highlight />
+            {staff.phone && <Row label={lang === 'bn' ? 'মোবাইল' : 'Mobile'} value={staff.phone} />}
+            {staff.blood_group && <Row label={lang === 'bn' ? 'রক্ত' : 'Blood'} value={staff.blood_group} blood />}
           </div>
         </div>
 
-        {/* Footer */}
+        {/* ═══ FOOTER — Solid Emerald ═══ */}
         <div
           style={{
-            borderTop: '1px solid #e2e8f0',
-            padding: '3px 8px 4px',
+            background: 'linear-gradient(0deg, #064e3b 0%, #047857 100%)',
+            borderTop: '2px solid #d4af37',
+            padding: '5px 8px 5px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
+            gap: '4px',
+            flexShrink: 0,
+            marginTop: 'auto',
           }}
         >
-          <div className="signature-container" style={{ textAlign: 'center', position: 'relative' }}>
+          {/* Signature */}
+          <div className="signature-container" style={{ textAlign: 'center', flex: '0 0 auto', maxWidth: '54px' }}>
             {principalSignatureUrl && (
               <img
                 src={principalSignatureUrl}
                 alt="Signature"
-                style={{ height: '16px', maxWidth: '55px', objectFit: 'contain', marginBottom: '1px' }}
+                style={{ height: '13px', maxWidth: '48px', objectFit: 'contain', marginBottom: '1px', filter: 'brightness(2.5) contrast(0.8)' }}
               />
             )}
-            <div style={{ borderTop: '1px dashed #94a3b8', width: '55px', marginBottom: '1px' }} />
-            <div style={{ fontSize: '5px', color: '#64748b' }}>
-              {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.9)', width: '48px', marginBottom: '2px' }} />
+            <div style={{ fontSize: '5.5px', color: '#ffffff', fontFamily: f, fontWeight: 600, lineHeight: 1.15 }}>
+              {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
-            <div className="qr-code-container" style={{ textAlign: 'right', position: 'relative' }}>
-            <div style={{ fontSize: '5px', color: '#64748b' }}>{l.validUntil}</div>
-            <div style={{ fontSize: '6px', fontWeight: 600, color: '#064e3b' }}>{lang === 'bn' && validUntilBn ? validUntilBn : validUntil}</div>
+
+          {/* Validity */}
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <div style={{ fontSize: '5px', color: 'rgba(255,255,255,0.85)', fontFamily: f, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>
+              {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
+            </div>
+            <div style={{ fontSize: '7.5px', fontWeight: 800, color: '#fde047', fontFamily: f, marginTop: '1px' }}>
+              {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
+            </div>
+          </div>
+
+          {/* QR */}
+          <div className="qr-code-container" style={{
+            flex: '0 0 auto',
+            background: '#ffffff',
+            borderRadius: '4px',
+            padding: '2.5px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.25)',
+            border: '0.5px solid rgba(212,175,55,0.5)',
+          }}>
+            <QRCodeSVG
+              value={verifyUrl}
+              size={28}
+              level="M"
+              bgColor="#ffffff"
+              fgColor="#064e3b"
+            />
           </div>
         </div>
       </div>
@@ -245,27 +330,35 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
 
 StaffIdCard.displayName = 'StaffIdCard';
 
-const InfoRow = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: '1.5px 0',
-      borderBottom: '1px dotted #f1f5f9',
-    }}
-  >
-    <span style={{ fontSize: '5.5px', color: '#64748b' }}>{label}</span>
-    <span
-      style={{
-        fontSize: '6px',
-        fontWeight: 600,
-        color: highlight ? '#dc2626' : '#0f172a',
-        background: highlight ? '#fef2f2' : 'transparent',
-        padding: highlight ? '0 3px' : '0',
-        borderRadius: '2px',
-      }}
-    >
+/* ── Row: label : value ── */
+const Row = ({ label, value, highlight, blood }: {
+  label: string; value: string; highlight?: boolean; blood?: boolean;
+}) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '5px',
+    fontSize: '8.5px',
+    lineHeight: 1.55,
+    borderBottom: '1px dotted #e5e7eb',
+    paddingBottom: '1px',
+  }}>
+    <span style={{
+      color: '#334155',
+      fontWeight: 700,
+      fontFamily: BN,
+      width: '48px',
+      flexShrink: 0,
+    }}>
+      {label}
+    </span>
+    <span style={{ color: '#334155', fontWeight: 700 }}>:</span>
+    <span style={{
+      color: blood ? '#dc2626' : highlight ? '#064e3b' : '#0f172a',
+      fontWeight: highlight ? 800 : 700,
+      fontFamily: BN,
+      flex: 1,
+    }}>
       {value}
     </span>
   </div>
