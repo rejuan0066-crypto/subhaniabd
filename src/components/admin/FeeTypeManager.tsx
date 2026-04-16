@@ -351,10 +351,10 @@ const FeeTypeManager = () => {
                       )}
                     </label>
                     <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
-                      const allSessionMonthNames = sessionMonths.map(m => m.en);
+                      const allKeys = sessionMonths.map(m => m.key);
                       setForm(p => ({
                         ...p,
-                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allSessionMonthNames
+                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allKeys
                       }));
                     }}>
                       {form.applicable_months.length === sessionMonths.length ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
@@ -362,17 +362,18 @@ const FeeTypeManager = () => {
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {sessionMonths.map((month) => {
-                      const isSelected = form.applicable_months.includes(month.en);
+                      const isSelected = form.applicable_months.includes(month.key);
+                      const showYear = sessionMonths.some(m => m.en === month.en && m.year !== month.year);
                       return (
                         <button
-                          key={month.en}
+                          key={month.key}
                           type="button"
                           onClick={() => {
                             setForm(p => ({
                               ...p,
                               applicable_months: isSelected
-                                ? p.applicable_months.filter(m => m !== month.en)
-                                : [...p.applicable_months, month.en]
+                                ? p.applicable_months.filter(m => m !== month.key)
+                                : [...p.applicable_months, month.key]
                             }));
                           }}
                           className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
@@ -382,6 +383,7 @@ const FeeTypeManager = () => {
                           }`}
                         >
                           {bn ? month.bn : month.en.slice(0, 3)}
+                          {showYear && <span className="block text-[10px] opacity-70">{month.year}</span>}
                         </button>
                       );
                     })}
