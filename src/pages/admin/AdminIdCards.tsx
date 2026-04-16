@@ -925,16 +925,19 @@ const AdminIdCards = () => {
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
         <DialogContent
           style={{ overflow: 'hidden' }}
-          className="flex max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[30rem]"
+          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[26rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-2">
+          <div
+            className="id-preview-scroll flex min-h-0 flex-1 flex-col items-center justify-start overflow-y-auto overflow-x-hidden"
+            style={{ maxHeight: '70vh', paddingBottom: '20px' }}
+          >
             {previewStudent && (
               <div
-                className="flex w-full items-center justify-center overflow-hidden"
-                style={{ maxHeight: '85vh' }}
+                className="flex items-start justify-center"
+                style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}
               >
                 <StudentIdCard
                   ref={cardRef}
@@ -961,16 +964,19 @@ const AdminIdCards = () => {
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
         <DialogContent
           style={{ overflow: 'hidden' }}
-          className="flex max-h-[90vh] flex-col overflow-hidden p-6 sm:max-w-[30rem]"
+          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[26rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
-          <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden py-2">
+          <div
+            className="id-preview-scroll flex min-h-0 flex-1 flex-col items-center justify-start overflow-y-auto overflow-x-hidden"
+            style={{ maxHeight: '70vh', paddingBottom: '20px' }}
+          >
             {previewStaff && (
               <div
-                className="flex w-full items-center justify-center overflow-hidden"
-                style={{ maxHeight: '85vh' }}
+                className="flex items-start justify-center"
+                style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}
               >
                 <StaffIdCard
                   ref={staffCardRef}
