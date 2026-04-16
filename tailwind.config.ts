@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
-        body: ['SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
-        bengali: ['SutonnyOMJ', '"Noto Sans Bengali"', 'sans-serif'],
+        display: ['Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
+        body: ['Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', 'Inter', '"Noto Sans Bengali"', 'sans-serif'],
+        bengali: ['Kalpurush', 'SolaimanLipi', 'SutonnyOMJ', '"Noto Sans Bengali"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
