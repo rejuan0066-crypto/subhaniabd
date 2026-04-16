@@ -90,7 +90,8 @@ export const printIdCard = (cardHtml: string) => {
   `);
   printWindow.document.close();
 
-  // Wait for fonts and images
+  // Wait for fonts AND images before printing — prevents Bangla text falling
+  // back to a non-Bangla glyph and rendering as garbage.
   const imgs = printWindow.document.querySelectorAll('img');
   const imgPromises = Array.from(imgs).map(
     (img) =>
@@ -103,10 +104,14 @@ export const printIdCard = (cardHtml: string) => {
       })
   );
 
-  Promise.all(imgPromises).then(() => {
+  const fontReady = (printWindow.document as any).fonts?.ready
+    ? (printWindow.document as any).fonts.ready
+    : Promise.resolve();
+
+  Promise.all([Promise.all(imgPromises), fontReady]).then(() => {
     setTimeout(() => {
       printWindow.print();
-    }, 500);
+    }, 600);
   });
 };
 
