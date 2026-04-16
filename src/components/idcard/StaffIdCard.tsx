@@ -73,10 +73,12 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
         className="id-card-container"
         style={{
           width: '2.125in',
-          height: '3.375in',
+          maxWidth: '100%',
+          minHeight: '3.375in',
+          height: 'auto',
           background: '#ffffff',
           borderRadius: '8px',
-          overflow: 'hidden',
+          overflow: 'visible',
           fontFamily: "'Noto Sans Bengali', 'Segoe UI', sans-serif",
           fontSize: '7px',
           color: '#1a1a2e',
@@ -134,7 +136,7 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
         </div>
 
         {/* Body */}
-        <div style={{ flex: 1, padding: '4px 8px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ flex: 1, flexGrow: 1, padding: '4px 8px 3px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Photo + QR row */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', width: '100%', marginBottom: '3px' }}>
             {/* Photo */}
@@ -218,7 +220,7 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
             alignItems: 'flex-end',
           }}
         >
-          <div style={{ textAlign: 'center' }}>
+          <div className="signature-container" style={{ textAlign: 'center', position: 'relative' }}>
             {principalSignatureUrl && (
               <img
                 src={principalSignatureUrl}
@@ -231,7 +233,7 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || l.principal}
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
+            <div className="qr-code-container" style={{ textAlign: 'right', position: 'relative' }}>
             <div style={{ fontSize: '5px', color: '#64748b' }}>{l.validUntil}</div>
             <div style={{ fontSize: '6px', fontWeight: 600, color: '#064e3b' }}>{lang === 'bn' && validUntilBn ? validUntilBn : validUntil}</div>
           </div>

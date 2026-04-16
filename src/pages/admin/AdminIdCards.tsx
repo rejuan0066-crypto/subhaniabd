@@ -497,6 +497,21 @@ const AdminIdCards = () => {
     lang: language as 'bn' | 'en',
   };
 
+  const previewScrollAreaStyle = {
+    maxHeight: '80vh',
+  } as const;
+
+  const previewCardShellStyle = {
+    width: '400px',
+    maxWidth: '100%',
+    paddingBottom: '40px',
+  } as const;
+
+  const previewCardScaleStyle = {
+    transform: 'scale(0.9)',
+    transformOrigin: 'top center',
+  } as const;
+
   const handlePrintSingle = useCallback((student: any) => {
     const tempDiv = document.createElement('div');
     document.body.appendChild(tempDiv);
@@ -924,27 +939,28 @@ const AdminIdCards = () => {
       {/* Student Preview Dialog */}
       <Dialog open={!!previewStudent} onOpenChange={(o) => { if (!o) setPreviewStudent(null); }}>
         <DialogContent
-          style={{ overflow: 'hidden' }}
-          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[26rem]"
+          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[32rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'আইডি কার্ড প্রিভিউ' : 'ID Card Preview'}</DialogTitle>
           </DialogHeader>
           <div
-            className="id-preview-scroll flex min-h-0 flex-1 flex-col items-center justify-start overflow-y-auto overflow-x-hidden"
-            style={{ maxHeight: '70vh', paddingBottom: '20px' }}
+            className="id-preview-scroll flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-2"
+            style={previewScrollAreaStyle}
           >
             {previewStudent && (
               <div
-                className="flex items-start justify-center"
-                style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}
+                className="flex w-full justify-center"
+                style={previewCardShellStyle}
               >
-                <StudentIdCard
-                  ref={cardRef}
-                  student={buildStudentData(previewStudent)}
-                  {...commonCardProps}
-                  profileUrl={getProfileUrl(previewStudent)}
-                />
+                <div className="flex w-full justify-center" style={previewCardScaleStyle}>
+                  <StudentIdCard
+                    ref={cardRef}
+                    student={buildStudentData(previewStudent)}
+                    {...commonCardProps}
+                    profileUrl={getProfileUrl(previewStudent)}
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -963,26 +979,27 @@ const AdminIdCards = () => {
       {/* Staff Preview Dialog */}
       <Dialog open={!!previewStaff} onOpenChange={(o) => { if (!o) setPreviewStaff(null); }}>
         <DialogContent
-          style={{ overflow: 'hidden' }}
-          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[26rem]"
+          className="flex max-h-[90vh] flex-col p-6 sm:max-w-[32rem]"
         >
           <DialogHeader className="shrink-0 pb-4">
             <DialogTitle>{bn ? 'কর্মী আইডি কার্ড প্রিভিউ' : 'Staff ID Card Preview'}</DialogTitle>
           </DialogHeader>
           <div
-            className="id-preview-scroll flex min-h-0 flex-1 flex-col items-center justify-start overflow-y-auto overflow-x-hidden"
-            style={{ maxHeight: '70vh', paddingBottom: '20px' }}
+            className="id-preview-scroll flex min-h-0 flex-1 items-start justify-center overflow-y-auto px-2"
+            style={previewScrollAreaStyle}
           >
             {previewStaff && (
               <div
-                className="flex items-start justify-center"
-                style={{ transform: 'scale(0.95)', transformOrigin: 'top center' }}
+                className="flex w-full justify-center"
+                style={previewCardShellStyle}
               >
-                <StaffIdCard
-                  ref={staffCardRef}
-                  staff={buildStaffData(previewStaff)}
-                  {...commonCardProps}
-                />
+                <div className="flex w-full justify-center" style={previewCardScaleStyle}>
+                  <StaffIdCard
+                    ref={staffCardRef}
+                    staff={buildStaffData(previewStaff)}
+                    {...commonCardProps}
+                  />
+                </div>
               </div>
             )}
           </div>

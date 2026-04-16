@@ -17,31 +17,45 @@ export const printIdCard = (cardHtml: string) => {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       width: 2.125in;
-      height: 3.375in;
+      min-height: 3.375in;
+      height: auto;
       margin: 0;
       padding: 0;
       background: #fff;
+      overflow: visible;
     }
     body {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
     }
     .id-card-container {
       width: 2.125in !important;
-      height: 3.375in !important;
+      min-height: 3.375in !important;
+      height: auto !important;
       box-shadow: none !important;
       border: none !important;
       border-radius: 0 !important;
       page-break-inside: avoid;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
+      overflow: visible !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .signature-container,
+    .qr-code-container {
+      position: relative !important;
+      inset: auto !important;
     }
     @media print {
       body { background: #fff; }
       .id-card-container {
+        height: 100% !important;
+        min-height: 3.375in !important;
         box-shadow: none !important;
         border: none !important;
+        overflow: visible !important;
       }
     }
   </style>
@@ -102,18 +116,32 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
       gap: 10px;
       padding: 10px;
       justify-content: center;
+      overflow: visible;
     }
     .card-wrapper {
       page-break-inside: avoid;
+      overflow: visible;
     }
     .id-card-container {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
+      min-height: 3.375in !important;
+      height: auto !important;
+      overflow: visible !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .signature-container,
+    .qr-code-container {
+      position: relative !important;
+      inset: auto !important;
     }
     @media print {
       body { background: #fff; padding: 0; gap: 5mm; }
       .id-card-container {
+        height: 100% !important;
         box-shadow: none !important;
+        overflow: visible !important;
       }
     }
   </style>

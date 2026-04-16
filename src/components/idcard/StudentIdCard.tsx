@@ -61,10 +61,12 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         className="id-card-container"
         style={{
           width: '2.125in',
-          height: '3.375in',
+          maxWidth: '100%',
+          minHeight: '3.375in',
+          height: 'auto',
           background: '#faf9f6',
           borderRadius: '10px',
-          overflow: 'hidden',
+          overflow: 'visible',
           fontFamily: BN,
           fontSize: '7px',
           color: '#1a1a1a',
@@ -150,6 +152,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         {/* ═══ TEXTURED BODY ═══ */}
         <div style={{
           flex: 1,
+          flexGrow: 1,
           padding: '6px 9px 4px',
           display: 'flex',
           flexDirection: 'column',
@@ -280,7 +283,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           }} />
 
           {/* Signature */}
-          <div style={{ textAlign: 'center', maxWidth: '55px' }}>
+          <div className="signature-container" style={{ textAlign: 'center', maxWidth: '55px', position: 'relative' }}>
             {principalSignatureUrl && (
               <img
                 src={principalSignatureUrl}
@@ -305,13 +308,14 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           </div>
 
           {/* QR */}
-          <div style={{
+          <div className="qr-code-container" style={{
             flexShrink: 0,
             background: '#ffffff',
             borderRadius: '4px',
             padding: '2.5px',
             boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
             border: '0.5px solid rgba(212,175,55,0.3)',
+            position: 'relative',
           }}>
             <QRCodeSVG
               value={verifyUrl}
