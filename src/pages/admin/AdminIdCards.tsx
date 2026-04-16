@@ -64,8 +64,6 @@ const AdminIdCards = () => {
     if (!idcardSettings?.idcard_principal_name && settings.principal_name && !principalName) {
       setPrincipalName(settings.principal_name);
     }
-    if (!validUntil) setValidUntil('December 2026');
-    if (!validUntilBn) setValidUntilBn('ডিসেম্বর ২০২৬');
   }, [idcardSettings, settings.principal_name]);
 
   const saveSettings = async () => {
@@ -138,6 +136,34 @@ const AdminIdCards = () => {
       return data;
     },
   });
+
+  // Fetch active academic session for valid-until
+  const { data: activeSession } = useQuery({
+    queryKey: ['active-academic-session-idcard'],
+    queryFn: async () => {
+      const { data } = await supabase.from('academic_sessions').select('*').eq('is_active', true).maybeSingle();
+      return data;
+    },
+  });
+
+  // Auto-set validUntil from active session end_date
+  useEffect(() => {
+    if (idcardSettings?.idcard_valid_until) return; // manual override takes priority
+    if (activeSession?.end_date) {
+      const d = new Date(activeSession.end_date);
+      const enMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const bnMonths = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+      const toBnDigit = (s: string) => s.replace(/[0-9]/g, (c) => '০১২৩৪৫৬৭৮৯'[parseInt(c)]);
+      setValidUntil(`${enMonths[d.getMonth()]} ${d.getFullYear()}`);
+      setValidUntilBn(`${bnMonths[d.getMonth()]} ${toBnDigit(String(d.getFullYear()))}`);
+    } else if (activeSession?.name) {
+      setValidUntil(activeSession.name);
+      setValidUntilBn(activeSession.name_bn || activeSession.name);
+    } else {
+      if (!validUntil) setValidUntil('December 2026');
+      if (!validUntilBn) setValidUntilBn('ডিসেম্বর ২০২৬');
+    }
+  }, [activeSession, idcardSettings]);
 
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions'],
