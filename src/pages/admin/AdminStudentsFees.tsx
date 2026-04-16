@@ -187,8 +187,8 @@ const AdminStudentsFees = () => {
         continue;
       }
 
-      // Not in applicable months → na
-      if (applicableMonths && !applicableMonths.includes(monthEn)) {
+      // Not in applicable months → na (supports both "January" and "January-2026" formats)
+      if (applicableMonths && !applicableMonths.includes(monthEn) && !applicableMonths.includes(`${monthEn}-${year}`)) {
         results.push({ month: monthEn, monthBn, year, status: 'na' });
         cursor.setMonth(cursor.getMonth() + 1);
         continue;

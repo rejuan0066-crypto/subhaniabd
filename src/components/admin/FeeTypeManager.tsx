@@ -56,18 +56,20 @@ const FeeTypeManager = () => {
 
   // Compute applicable months based on selected session's date range
   const sessionMonths = useMemo(() => {
-    if (!form.session_id) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    if (!form.session_id) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i, key: m, year: new Date().getFullYear() }));
     const session = sessions.find((s: any) => s.id === form.session_id);
-    if (!session?.start_date || !session?.end_date) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i }));
+    if (!session?.start_date || !session?.end_date) return MONTHS_EN.map((m, i) => ({ en: m, bn: MONTHS_BN[i], index: i, key: m, year: new Date().getFullYear() }));
     
-    const start = new Date(session.start_date);
-    const end = new Date(session.end_date);
-    const months: { en: string; bn: string; index: number }[] = [];
+    const start = new Date(session.start_date + 'T00:00:00');
+    const end = new Date(session.end_date + 'T00:00:00');
+    const months: { en: string; bn: string; index: number; key: string; year: number }[] = [];
     const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
     
     while (cursor <= end) {
       const mi = cursor.getMonth();
-      months.push({ en: MONTHS_EN[mi], bn: MONTHS_BN[mi], index: mi });
+      const yr = cursor.getFullYear();
+      const key = `${MONTHS_EN[mi]}-${yr}`;
+      months.push({ en: MONTHS_EN[mi], bn: MONTHS_BN[mi], index: mi, key, year: yr });
       cursor.setMonth(cursor.getMonth() + 1);
     }
     return months;
@@ -277,24 +279,23 @@ const FeeTypeManager = () => {
         <DialogContent>
           <DialogHeader><DialogTitle>{editId ? (bn ? 'ফি ধরন সম্পাদনা' : 'Edit Fee Type') : (bn ? 'নতুন ফি ধরন' : 'New Fee Type')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div>
+             <div>
               <label className="text-sm font-medium">{bn ? 'শিক্ষাবর্ষ' : 'Academic Session'}</label>
               <Select value={form.session_id || 'none'} onValueChange={v => {
                 const newSessionId = v === 'none' ? '' : v;
                 setForm(p => {
-                  // Filter out months not in new session range
                   const newSession = sessions.find((s: any) => s.id === newSessionId);
                   let validMonths = p.applicable_months;
                   if (newSession?.start_date && newSession?.end_date) {
-                    const start = new Date(newSession.start_date);
-                    const end = new Date(newSession.end_date);
-                    const allowedMonths: string[] = [];
+                    const start = new Date(newSession.start_date + 'T00:00:00');
+                    const end = new Date(newSession.end_date + 'T00:00:00');
+                    const allowedKeys: string[] = [];
                     const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
                     while (cursor <= end) {
-                      allowedMonths.push(MONTHS_EN[cursor.getMonth()]);
+                      allowedKeys.push(`${MONTHS_EN[cursor.getMonth()]}-${cursor.getFullYear()}`);
                       cursor.setMonth(cursor.getMonth() + 1);
                     }
-                    validMonths = p.applicable_months.filter(m => allowedMonths.includes(m));
+                    validMonths = p.applicable_months.filter(m => allowedKeys.includes(m));
                   }
                   return { ...p, session_id: newSessionId, applicable_months: validMonths };
                 });
@@ -350,10 +351,10 @@ const FeeTypeManager = () => {
                       )}
                     </label>
                     <button type="button" className="text-xs text-primary hover:underline" onClick={() => {
-                      const allSessionMonthNames = sessionMonths.map(m => m.en);
+                      const allKeys = sessionMonths.map(m => m.key);
                       setForm(p => ({
                         ...p,
-                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allSessionMonthNames
+                        applicable_months: p.applicable_months.length === sessionMonths.length ? [] : allKeys
                       }));
                     }}>
                       {form.applicable_months.length === sessionMonths.length ? (bn ? 'সব বাদ দিন' : 'Deselect All') : (bn ? 'সব নির্বাচন' : 'Select All')}
@@ -361,17 +362,18 @@ const FeeTypeManager = () => {
                   </div>
                   <div className="grid grid-cols-4 gap-2">
                     {sessionMonths.map((month) => {
-                      const isSelected = form.applicable_months.includes(month.en);
+                      const isSelected = form.applicable_months.includes(month.key);
+                      const showYear = sessionMonths.some(m => m.en === month.en && m.year !== month.year);
                       return (
                         <button
-                          key={month.en}
+                          key={month.key}
                           type="button"
                           onClick={() => {
                             setForm(p => ({
                               ...p,
                               applicable_months: isSelected
-                                ? p.applicable_months.filter(m => m !== month.en)
-                                : [...p.applicable_months, month.en]
+                                ? p.applicable_months.filter(m => m !== month.key)
+                                : [...p.applicable_months, month.key]
                             }));
                           }}
                           className={`text-center rounded-lg px-2 py-2 text-xs font-medium border transition-all cursor-pointer ${
@@ -381,6 +383,7 @@ const FeeTypeManager = () => {
                           }`}
                         >
                           {bn ? month.bn : month.en.slice(0, 3)}
+                          {showYear && <span className="block text-[10px] opacity-70">{month.year}</span>}
                         </button>
                       );
                     })}
