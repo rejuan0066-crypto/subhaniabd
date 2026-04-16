@@ -10,7 +10,7 @@ import DuesManagement from '@/components/fees/DuesManagement';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import FeeReceiptDownload from '@/components/fees/FeeReceiptDownload';
