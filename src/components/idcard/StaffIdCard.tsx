@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface StaffIdCardProps {
   staff: {
@@ -54,9 +55,6 @@ const labels = {
     validUntil: 'Valid Until',
   },
 };
-
-const generateQrUrl = (data: string, size = 60) =>
-  `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=1`;
 
 const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
   ({ staff, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
@@ -180,10 +178,13 @@ const StaffIdCard = forwardRef<HTMLDivElement, StaffIdCardProps>(
 
             {/* QR Code */}
             <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <img
-                src={generateQrUrl(qrData, 80)}
-                alt="QR"
-                style={{ width: '38px', height: '38px', borderRadius: '2px' }}
+              <QRCodeSVG
+                value={qrData}
+                size={38}
+                level="M"
+                bgColor="#ffffff"
+                fgColor="#064e3b"
+                style={{ borderRadius: '2px' }}
               />
             </div>
           </div>
