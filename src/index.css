@@ -13,8 +13,15 @@
   font-weight: 400;
   font-display: swap;
 }
-
-@tailwind base;
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: local('SolaimanLipi'),
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/SolaimanLipi/SolaimanLipi.woff2') format('woff2'),
+       url('https://cdn.jsdelivr.net/gh/maateen/bangla-web-fonts/fonts/SolaimanLipi/SolaimanLipi.woff') format('woff');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 @tailwind components;
 @tailwind utilities;
 
