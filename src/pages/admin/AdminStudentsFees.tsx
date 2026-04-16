@@ -48,6 +48,7 @@ const AdminStudentsFees = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [step, setStep] = useState<'form' | 'summary' | 'done'>('form');
   const [paymentMonth, setPaymentMonth] = useState('');
+  const [paymentYear, setPaymentYear] = useState<number>(new Date().getFullYear());
   const [transactionId, setTransactionId] = useState('');
 
   // Student search
