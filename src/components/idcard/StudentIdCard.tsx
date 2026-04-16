@@ -37,7 +37,9 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-const BN = "'SutonnyOMJ', 'SutonnyMJ', 'Noto Sans Bengali', sans-serif";
+// Unicode Bangla — Noto Sans Bengali first; SutonnyOMJ is a Bijoy ASCII font
+// and would garble Unicode text if listed before it.
+const BN = "'Noto Sans Bengali', 'Hind Siliguri', 'SutonnyOMJ', sans-serif";
 const EN = "'Inter', sans-serif";
 
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
