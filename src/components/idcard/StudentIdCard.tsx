@@ -37,9 +37,9 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
-// Unicode Bangla — Noto Sans Bengali first; SutonnyOMJ is a Bijoy ASCII font
-// and would garble Unicode text if listed before it.
-const BN = "'Noto Sans Bengali', 'Hind Siliguri', 'SutonnyOMJ', sans-serif";
+// Unicode Bangla — SolaimanLipi gives a classic SutonnyMJ-like look while
+// remaining Unicode-compatible (no garbled glyphs).
+const BN = "'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif";
 const EN = "'Inter', sans-serif";
 
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
