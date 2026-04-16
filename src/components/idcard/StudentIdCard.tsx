@@ -37,12 +37,23 @@ interface StudentIdCardProps {
   profileUrl?: string;
 }
 
+/* ── Inline SVG Islamic geometric pattern for header/footer texture ── */
+const islamicPatternSvg = `url("data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' patternUnits='userSpaceOnUse' width='20' height='20'%3E%3Cpath d='M0 10 L10 0 L20 10 L10 20Z' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='0.5'/%3E%3Ccircle cx='10' cy='10' r='3' fill='none' stroke='rgba(212,175,55,0.08)' stroke-width='0.3'/%3E%3Cpath d='M0 0L20 20M20 0L0 20' stroke='rgba(255,255,255,0.03)' stroke-width='0.3'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='40' height='40' fill='url(%23p)'/%3E%3C/svg%3E")`;
+
+/* ── Watermark Islamic motif SVG for body ── */
+const watermarkMotifSvg = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23064e3b' stroke-width='0.4' opacity='0.07'%3E%3Ccircle cx='40' cy='40' r='35'/%3E%3Ccircle cx='40' cy='40' r='28'/%3E%3Ccircle cx='40' cy='40' r='20'/%3E%3Cpath d='M40 5L40 75M5 40L75 40'/%3E%3Cpath d='M15.15 15.15L64.85 64.85M64.85 15.15L15.15 64.85'/%3E%3Cpolygon points='40,8 72,40 40,72 8,40'/%3E%3Cpolygon points='40,16 64,40 40,64 16,40'/%3E%3Cpath d='M40 5 Q55 20 40 40 Q25 20 40 5Z'/%3E%3Cpath d='M40 75 Q55 60 40 40 Q25 60 40 75Z'/%3E%3Cpath d='M5 40 Q20 25 40 40 Q20 55 5 40Z'/%3E%3Cpath d='M75 40 Q60 25 40 40 Q60 55 75 40Z'/%3E%3C/g%3E%3C/svg%3E")`;
+
+/* ── Fine linen texture for body background ── */
+const linenTexture = `url("data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='4' fill='%23faf9f6'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23f5f3ef' opacity='0.5'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23f0ede8' opacity='0.3'/%3E%3C/svg%3E")`;
+
+const BN = "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif";
+const EN = "'Inter', sans-serif";
+
 const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
   ({ student, institution, validUntil = 'December 2026', validUntilBn = '', principalName = '', principalNameEn = '', principalSignatureUrl, lang = 'bn' }, ref) => {
 
     const verifyUrl = `https://subhaniabd.com/verify/student/${student.student_id || ''}`;
-    const bengaliFont = "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif";
-    const englishFont = "'Inter', sans-serif";
+    const f = lang === 'bn' ? BN : EN;
 
     return (
       <div
@@ -51,102 +62,127 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
         style={{
           width: '2.125in',
           height: '3.375in',
-          background: '#ffffff',
+          background: '#faf9f6',
           borderRadius: '10px',
           overflow: 'hidden',
-          fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
+          fontFamily: BN,
           fontSize: '7px',
           color: '#1a1a1a',
           position: 'relative',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
-          border: '1.5px solid #064e3b',
+          boxShadow: '0 6px 28px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(212,175,55,0.4)',
+          border: '1px solid #064e3b',
           display: 'flex',
           flexDirection: 'column',
           WebkitPrintColorAdjust: 'exact',
           printColorAdjust: 'exact' as any,
         }}
       >
-        {/* ===== GREEN HEADER ===== */}
+        {/* ═══ PREMIUM HEADER ═══ */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
-            padding: '6px 8px 5px',
+            background: `${islamicPatternSvg}, linear-gradient(160deg, #022c22 0%, #064e3b 40%, #047857 100%)`,
+            padding: '7px 8px 6px',
             textAlign: 'center',
             position: 'relative',
-            borderBottom: '2px solid #d4af37',
+            borderBottom: '2.5px solid transparent',
+            borderImage: 'linear-gradient(90deg, #b8860b, #d4af37, #f0d78c, #d4af37, #b8860b) 1',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+          {/* Top gold accent line */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)',
+          }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
             {institution?.logo_url && (
               <img
                 src={institution.logo_url}
                 alt="Logo"
                 style={{
-                  width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover',
-                  border: '1.5px solid rgba(212,175,55,0.7)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover',
+                  border: '1.5px solid rgba(212,175,55,0.8)',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
                 }}
               />
             )}
             <div>
               <div style={{
-                color: '#ffffff', fontWeight: 700, fontSize: '7.5px', lineHeight: 1.2,
-                textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
+                color: '#d4af37', fontWeight: 800, fontSize: '8.5px', lineHeight: 1.25,
+                textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                fontFamily: BN,
+                letterSpacing: '0.2px',
               }}>
                 {institution?.name || 'আল আরাবিয়া সোবহানিয়া হাফিজিয়া মাদ্রাসা'}
               </div>
               {institution?.name_en && (
-                <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '4.5px', fontFamily: "'Inter', sans-serif", letterSpacing: '0.3px' }}>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '5px', fontFamily: EN, letterSpacing: '0.5px', fontWeight: 500, marginTop: '1px' }}>
                   {institution.name_en}
                 </div>
               )}
             </div>
           </div>
           {institution?.address && (
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '4px', marginTop: '1px', fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif" }}>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '4px', marginTop: '2px', fontFamily: BN }}>
               {institution.address}
             </div>
           )}
           <div
             style={{
-              background: 'linear-gradient(135deg, #d4af37, #b8860b)',
+              background: 'linear-gradient(135deg, #d4af37, #c9a84c, #b8860b)',
               color: '#ffffff',
-              fontSize: '5px',
+              fontSize: '5.5px',
               fontWeight: 700,
-              padding: '1.5px 10px',
-              borderRadius: '8px',
-              marginTop: '3px',
+              padding: '2px 12px',
+              borderRadius: '10px',
+              marginTop: '4px',
               display: 'inline-block',
               letterSpacing: '0.8px',
               textTransform: 'uppercase',
-              fontFamily: "'Inter', sans-serif",
-              boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+              fontFamily: lang === 'bn' ? BN : EN,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15)',
             }}
           >
             {lang === 'bn' ? 'ছাত্র পরিচয়পত্র' : 'STUDENT ID CARD'}
           </div>
         </div>
 
-        {/* ===== WHITE BODY ===== */}
+        {/* ═══ TEXTURED BODY ═══ */}
         <div style={{
           flex: 1,
-          padding: '5px 8px 3px',
+          padding: '6px 9px 4px',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          background: '#ffffff',
+          backgroundImage: linenTexture,
+          backgroundColor: '#faf9f6',
         }}>
-          {/* Subtle watermark logo in body center */}
+          {/* Islamic watermark motif */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90px',
+            height: '90px',
+            backgroundImage: watermarkMotifSvg,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            pointerEvents: 'none',
+            zIndex: 0,
+          }} />
+
+          {/* Watermark logo overlay */}
           {institution?.logo_url && (
             <div style={{
               position: 'absolute',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '70px',
-              height: '70px',
-              opacity: 0.05,
+              width: '50px',
+              height: '50px',
+              opacity: 0.04,
               pointerEvents: 'none',
               zIndex: 0,
             }}>
@@ -154,57 +190,62 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
             </div>
           )}
 
-          {/* Photo centered */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px', position: 'relative', zIndex: 1 }}>
-            <div
-              style={{
-                width: '52px',
-                height: '60px',
-                borderRadius: '6px',
-                overflow: 'hidden',
-                border: '1.5px solid #d4af37',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-                background: '#f8f9fa',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              {student.photo_url ? (
-                <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ fontSize: '20px', color: '#064e3b', fontWeight: 700, opacity: 0.4 }}>
-                  {student.name_bn?.[0] || student.name_en?.[0] || '?'}
-                </div>
-              )}
+          {/* ── Photo with premium frame ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px', position: 'relative', zIndex: 1 }}>
+            <div style={{
+              padding: '2px',
+              borderRadius: '7px',
+              background: 'linear-gradient(135deg, #d4af37, #b8860b, #d4af37)',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(212,175,55,0.3)',
+            }}>
+              <div
+                style={{
+                  width: '52px',
+                  height: '60px',
+                  borderRadius: '5px',
+                  overflow: 'hidden',
+                  background: '#f0ede8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {student.photo_url ? (
+                  <img src={student.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ fontSize: '20px', color: '#064e3b', fontWeight: 700, opacity: 0.3 }}>
+                    {student.name_bn?.[0] || student.name_en?.[0] || '?'}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Name - bilingual */}
-          <div style={{ textAlign: 'center', marginBottom: '3px', position: 'relative', zIndex: 1 }}>
+          {/* ── Name bilingual ── */}
+          <div style={{ textAlign: 'center', marginBottom: '4px', position: 'relative', zIndex: 1 }}>
             <div style={{
-              fontWeight: 700, fontSize: '8px', color: '#111827', lineHeight: 1.2,
-              fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
+              fontWeight: 800, fontSize: '8.5px', color: '#0f172a', lineHeight: 1.3,
+              fontFamily: BN,
             }}>
               {student.name_bn || student.name_en || '—'}
             </div>
             {student.name_en && student.name_bn && (
-              <div style={{ fontSize: '5.5px', color: '#6b7280', fontFamily: "'Inter', sans-serif", marginTop: '0.5px' }}>
+              <div style={{ fontSize: '5.5px', color: '#6b7280', fontFamily: EN, marginTop: '1px', fontWeight: 500 }}>
                 {student.name_en}
               </div>
             )}
           </div>
 
-          {/* Info Grid on white */}
+          {/* ── Info grid ── */}
           <div style={{
             width: '100%',
-            background: '#f9fafb',
-            borderRadius: '5px',
-            padding: '3px 5px',
-            border: '1px solid #e5e7eb',
+            background: 'rgba(255,255,255,0.7)',
+            borderRadius: '6px',
+            padding: '4px 6px',
+            border: '1px solid rgba(212,175,55,0.15)',
             position: 'relative',
             zIndex: 1,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
           }}>
             <InfoRow label={lang === 'bn' ? 'আইডি' : 'ID'} value={student.student_id || '—'} accent />
             <InfoRow label={lang === 'bn' ? 'শ্রেণী' : 'Class'} value={student.class_name || '—'} valueEn={student.class_name_en} />
@@ -219,17 +260,25 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
           </div>
         </div>
 
-        {/* ===== GREEN FOOTER ===== */}
+        {/* ═══ PREMIUM FOOTER ═══ */}
         <div
           style={{
-            padding: '3px 7px 5px',
+            padding: '4px 7px 5px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-end',
-            background: 'linear-gradient(135deg, #064e3b 0%, #047857 100%)',
-            borderTop: '2px solid #d4af37',
+            background: `${islamicPatternSvg}, linear-gradient(160deg, #022c22 0%, #064e3b 40%, #047857 100%)`,
+            borderTop: '2.5px solid transparent',
+            borderImage: 'linear-gradient(90deg, #b8860b, #d4af37, #f0d78c, #d4af37, #b8860b) 1',
+            position: 'relative',
           }}
         >
+          {/* Bottom gold accent */}
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0, height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.5), transparent)',
+          }} />
+
           {/* Signature */}
           <div style={{ textAlign: 'center', maxWidth: '55px' }}>
             {principalSignatureUrl && (
@@ -240,28 +289,29 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
               />
             )}
             <div style={{ borderTop: '1px solid rgba(212,175,55,0.6)', width: '50px', marginBottom: '1px' }} />
-             <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.8)', fontFamily: lang === 'bn' ? bengaliFont : englishFont }}>
+            <div style={{ fontSize: '4.5px', color: 'rgba(255,255,255,0.85)', fontFamily: f }}>
               {(lang === 'bn' ? principalName : principalNameEn) || principalName || (lang === 'bn' ? 'প্রিন্সিপাল' : 'Principal')}
             </div>
           </div>
 
           {/* Valid Until */}
           <div style={{ textAlign: 'center', flex: 1 }}>
-             <div style={{ fontSize: lang === 'bn' ? '4.5px' : '4px', color: 'rgba(255,255,255,0.55)', fontFamily: lang === 'bn' ? bengaliFont : englishFont, textTransform: lang === 'bn' ? 'none' : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
+            <div style={{ fontSize: lang === 'bn' ? '4.5px' : '4px', color: 'rgba(255,255,255,0.55)', fontFamily: f, textTransform: lang === 'bn' ? 'none' as any : 'uppercase', letterSpacing: lang === 'bn' ? '0' : '0.5px' }}>
               {lang === 'bn' ? 'মেয়াদ' : 'Valid Until'}
             </div>
-             <div style={{ fontSize: '5.5px', fontWeight: 600, color: '#d4af37', fontFamily: lang === 'bn' ? bengaliFont : englishFont }}>
+            <div style={{ fontSize: '6px', fontWeight: 700, color: '#d4af37', fontFamily: f, textShadow: '0 0 4px rgba(212,175,55,0.3)' }}>
               {lang === 'bn' && validUntilBn ? validUntilBn : validUntil}
             </div>
           </div>
 
-          {/* QR Code on white square */}
+          {/* QR */}
           <div style={{
             flexShrink: 0,
             background: '#ffffff',
-            borderRadius: '3px',
+            borderRadius: '4px',
             padding: '2.5px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+            border: '0.5px solid rgba(212,175,55,0.3)',
           }}>
             <QRCodeSVG
               value={verifyUrl}
@@ -279,6 +329,7 @@ const StudentIdCard = forwardRef<HTMLDivElement, StudentIdCardProps>(
 
 StudentIdCard.displayName = 'StudentIdCard';
 
+/* ── Premium Info Row ── */
 const InfoRow = ({ label, value, valueEn, accent, blood }: {
   label: string; value: string; valueEn?: string; accent?: boolean; blood?: boolean;
 }) => (
@@ -287,27 +338,27 @@ const InfoRow = ({ label, value, valueEn, accent, blood }: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '1.5px 0',
-      borderBottom: '1px solid #f3f4f6',
+      padding: '2.5px 0',
+      borderBottom: '1px solid rgba(6,78,59,0.06)',
     }}
   >
     <span style={{
-      fontSize: '5px', color: '#6b7280', fontWeight: 600,
-      fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
+      fontSize: '5.5px', color: '#78716c', fontWeight: 600,
+      fontFamily: BN,
       letterSpacing: '0.2px',
     }}>{label}</span>
     <span
       style={{
-        fontSize: accent ? '6.5px' : '6px',
-        fontWeight: 700,
-        color: blood ? '#dc2626' : accent ? '#064e3b' : '#111827',
-        fontFamily: "'SutonnyOMJ', 'Noto Sans Bengali', sans-serif",
+        fontSize: accent ? '7px' : '6.5px',
+        fontWeight: 800,
+        color: blood ? '#dc2626' : accent ? '#064e3b' : '#1e293b',
+        fontFamily: BN,
         textAlign: 'right',
       }}
     >
       {value}
       {valueEn && value !== valueEn && value !== '—' && (
-        <span style={{ fontSize: '4.5px', color: '#9ca3af', marginLeft: '2px', fontFamily: "'Inter', sans-serif", fontWeight: 400 }}>
+        <span style={{ fontSize: '4.5px', color: '#a8a29e', marginLeft: '2px', fontFamily: EN, fontWeight: 400 }}>
           ({valueEn})
         </span>
       )}
