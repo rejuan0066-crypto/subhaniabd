@@ -11,37 +11,56 @@ export const printIdCard = (cardHtml: string) => {
   <style>@font-face{font-family:"SutonnyOMJ";src:url("/fonts/SutonnyOMJ.ttf") format("truetype");font-display:swap;}</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     @page {
-      size: 2.125in 3.375in;
+      size: 54mm 86mm;
       margin: 0;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
     html, body {
-      width: 2.125in;
-      min-height: 3.375in;
-      height: auto;
+      width: 54mm;
+      height: 86mm;
       margin: 0;
       padding: 0;
       background: #fff;
-      overflow: visible;
+      overflow: hidden;
     }
     body {
       display: flex;
-      align-items: flex-start;
+      align-items: stretch;
       justify-content: center;
     }
+    .no-print { display: none !important; }
     .id-card-container {
-      width: 2.125in !important;
-      min-height: 3.375in !important;
-      height: auto !important;
+      width: 54mm !important;
+      height: 86mm !important;
+      min-height: 86mm !important;
+      max-height: 86mm !important;
       box-shadow: none !important;
       border: none !important;
       border-radius: 0 !important;
       page-break-inside: avoid;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
-      overflow: visible !important;
+      color-adjust: exact !important;
+      overflow: hidden !important;
       display: flex !important;
       flex-direction: column !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    .id-card-container > *:nth-child(2) {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
+    .id-card-container img,
+    .id-card-container svg {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      shape-rendering: geometricPrecision;
     }
     .signature-container,
     .qr-code-container {
@@ -50,12 +69,16 @@ export const printIdCard = (cardHtml: string) => {
     }
     @media print {
       body { background: #fff; }
+      .no-print { display: none !important; }
       .id-card-container {
-        height: 100% !important;
-        min-height: 3.375in !important;
+        width: 54mm !important;
+        height: 86mm !important;
         box-shadow: none !important;
         border: none !important;
-        overflow: visible !important;
+        overflow: hidden !important;
+        animation: none !important;
+        transition: none !important;
+        filter: none !important;
       }
     }
   </style>
@@ -105,31 +128,52 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
   <style>
     @page {
       size: A4;
-      margin: 10mm;
+      margin: 0;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
     body {
       font-family: 'SutonnyOMJ', 'Noto Sans Bengali', sans-serif;
       background: #f8fafc;
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      padding: 10px;
+      gap: 4mm;
+      padding: 8mm;
       justify-content: center;
-      overflow: visible;
+      overflow: hidden;
     }
+    .no-print { display: none !important; }
     .card-wrapper {
       page-break-inside: avoid;
-      overflow: visible;
+      overflow: hidden;
     }
     .id-card-container {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
-      min-height: 3.375in !important;
-      height: auto !important;
-      overflow: visible !important;
+      color-adjust: exact !important;
+      width: 54mm !important;
+      height: 86mm !important;
+      min-height: 86mm !important;
+      max-height: 86mm !important;
+      overflow: hidden !important;
       display: flex !important;
       flex-direction: column !important;
+      animation: none !important;
+      transition: none !important;
+    }
+    .id-card-container > *:nth-child(2) {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
+    .id-card-container img,
+    .id-card-container svg {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      shape-rendering: geometricPrecision;
     }
     .signature-container,
     .qr-code-container {
@@ -137,11 +181,16 @@ export const printMultipleIdCards = (cardHtmls: string[]) => {
       inset: auto !important;
     }
     @media print {
-      body { background: #fff; padding: 0; gap: 5mm; }
+      body { background: #fff; padding: 0; gap: 4mm; }
+      .no-print { display: none !important; }
       .id-card-container {
-        height: 100% !important;
+        width: 54mm !important;
+        height: 86mm !important;
         box-shadow: none !important;
-        overflow: visible !important;
+        overflow: hidden !important;
+        animation: none !important;
+        transition: none !important;
+        filter: none !important;
       }
     }
   </style>
