@@ -58,6 +58,7 @@ const DuesManagement = () => {
     },
   });
 
+  // Monthly payments for the selected month/year
   const { data: feePayments = [] } = useQuery({
     queryKey: ['dues-fee-payments', selectedMonth],
     queryFn: async () => {
@@ -65,6 +66,16 @@ const DuesManagement = () => {
       const month = parts[0];
       const year = parseInt(parts[1]);
       const { data } = await supabase.from('fee_payments').select('student_id, fee_type_id, status, paid_amount, amount').eq('month', month).eq('year', year).eq('status', 'paid');
+      return data || [];
+    },
+  });
+
+  // One-time / non-monthly payments — any time within the selected session
+  const { data: oneTimePayments = [] } = useQuery({
+    queryKey: ['dues-onetime-payments', selectedSessionId],
+    enabled: !!selectedSessionId,
+    queryFn: async () => {
+      const { data } = await supabase.from('fee_payments').select('student_id, fee_type_id, status').eq('status', 'paid');
       return data || [];
     },
   });
