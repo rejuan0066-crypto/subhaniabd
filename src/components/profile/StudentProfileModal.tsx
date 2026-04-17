@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +39,22 @@ const StudentProfileModal = ({
   const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'academic' | 'others'>('profile');
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
   const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_amount: '', reason: '' });
+  const [duesSessionId, setDuesSessionId] = useState<string>('');
+
+  const { data: allSessions = [] } = useQuery({
+    queryKey: ['profile-academic-sessions'],
+    queryFn: async () => {
+      const { data } = await supabase.from('academic_sessions').select('id, name, name_bn, start_date, end_date, is_active').order('start_date', { ascending: false, nullsFirst: false });
+      return data || [];
+    },
+  });
+
+  useEffect(() => {
+    if (!duesSessionId && allSessions.length > 0) {
+      const active = allSessions.find((s: any) => s.is_active) || allSessions[0];
+      setDuesSessionId(active.id);
+    }
+  }, [allSessions, duesSessionId]);
 
   const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
     queryKey: ['student-library-history', student.id],
@@ -401,7 +417,107 @@ const StudentProfileModal = ({
             </div>
           </div>
 
-          {/* Applicable Fee Types */}
+          {/* Session-based Dues Matrix (Month × Fee Type) */}
+          <ProfileSectionCard title={bn ? 'সেশন বকেয়া ম্যাট্রিক্স' : 'Session Dues Matrix'} icon={ClipboardList}>
+            <div className="col-span-full space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{bn ? 'সেশন:' : 'Session:'}</span>
+                <Select value={duesSessionId} onValueChange={setDuesSessionId}>
+                  <SelectTrigger className="h-8 text-xs w-auto min-w-[160px] rounded-full"><SelectValue placeholder={bn ? 'সেশন' : 'Session'} /></SelectTrigger>
+                  <SelectContent>
+                    {allSessions.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}{s.is_active && (bn ? ' (চলমান)' : ' (Active)')}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(() => {
+                const MONTHS_M = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+                const MONTHS_BN_M = ['জানু','ফেব্রু','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্ট','অক্টো','নভে','ডিসে'];
+                const session = allSessions.find((s: any) => s.id === duesSessionId);
+                if (!session) return <p className="text-xs text-muted-foreground/60 text-center py-3">{bn ? 'সেশন নির্বাচন করুন' : 'Select a session'}</p>;
+                // Build month timeline from session window
+                const monthsTimeline: { name: string; year: number; label: string }[] = [];
+                if (session.start_date && session.end_date) {
+                  const start = new Date(session.start_date);
+                  const end = new Date(session.end_date);
+                  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+                  while (cur <= end) {
+                    monthsTimeline.push({ name: MONTHS_M[cur.getMonth()], year: cur.getFullYear(), label: bn ? `${MONTHS_BN_M[cur.getMonth()]} ${cur.getFullYear()}` : `${MONTHS_M[cur.getMonth()].slice(0,3)} ${cur.getFullYear()}` });
+                    cur.setMonth(cur.getMonth() + 1);
+                  }
+                }
+                // Monthly fee types applicable to student in this session
+                const monthlyFeeTypes = (applicableFeeTypes as any[]).filter((ft: any) => ft.payment_frequency === 'monthly' && (!ft.session_id || ft.session_id === duesSessionId));
+                if (monthsTimeline.length === 0 || monthlyFeeTypes.length === 0) {
+                  return <p className="text-xs text-muted-foreground/60 text-center py-3">{bn ? 'এই সেশনে কোনো মাসিক ফি নেই' : 'No monthly fees for this session'}</p>;
+                }
+                const studentWaivers = (feeWaivers as any[]);
+                const paidLookup = new Set((feePayments as any[]).filter((p: any) => p.status === 'paid').map((p: any) => `${p.month}|${p.year}|${p.fee_type_id}`));
+                let grandDue = 0;
+                let grandPaid = 0;
+                return (
+                  <div className="overflow-x-auto rounded-xl border border-border/20">
+                    <table className="w-full text-xs">
+                      <thead className="bg-muted/30">
+                        <tr>
+                          <th className="text-left px-2.5 py-2 font-bold sticky left-0 bg-muted/30">{bn ? 'মাস' : 'Month'}</th>
+                          {monthlyFeeTypes.map((ft: any) => (
+                            <th key={ft.id} className="text-right px-2.5 py-2 font-bold whitespace-nowrap">{bn ? ft.name_bn : ft.name}</th>
+                          ))}
+                          <th className="text-right px-2.5 py-2 font-bold">{bn ? 'মোট' : 'Total'}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {monthsTimeline.map(m => {
+                          let rowTotal = 0;
+                          const cells = monthlyFeeTypes.map((ft: any) => {
+                            const months = Array.isArray(ft.applicable_months) ? ft.applicable_months : [];
+                            const applicable = months.length === 0 || months.includes(m.name);
+                            if (!applicable) return { ft, kind: 'na' as const };
+                            const isFreeMonthly = student.is_free && ft.fee_category === 'monthly';
+                            const waiver = studentWaivers.find((w: any) => w.fee_type_id === ft.id);
+                            const waiverPct = isFreeMonthly ? 100 : (waiver?.waiver_percent || 0);
+                            const net = ft.amount * (1 - waiverPct / 100);
+                            const paid = paidLookup.has(`${m.name}|${m.year}|${ft.id}`);
+                            if (paid) { grandPaid += net; return { ft, kind: 'paid' as const, amount: net }; }
+                            if (waiverPct >= 100) return { ft, kind: 'waived' as const };
+                            rowTotal += net;
+                            grandDue += net;
+                            return { ft, kind: 'due' as const, amount: net };
+                          });
+                          return (
+                            <tr key={`${m.name}-${m.year}`} className="border-t border-border/10 hover:bg-muted/20">
+                              <td className="px-2.5 py-2 font-semibold sticky left-0 bg-card">{m.label}</td>
+                              {cells.map((c, idx) => (
+                                <td key={idx} className="text-right px-2.5 py-2">
+                                  {c.kind === 'na' && <span className="text-muted-foreground/30">—</span>}
+                                  {c.kind === 'paid' && <span className="text-emerald-600 font-semibold">✓ ৳{c.amount}</span>}
+                                  {c.kind === 'waived' && <span className="text-amber-600 text-[10px] font-semibold">{bn ? 'মওকুফ' : 'Waived'}</span>}
+                                  {c.kind === 'due' && <span className="text-rose-600 font-bold">৳{c.amount}</span>}
+                                </td>
+                              ))}
+                              <td className="text-right px-2.5 py-2 font-bold text-rose-700">{rowTotal > 0 ? `৳${rowTotal}` : '—'}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot className="bg-muted/40 border-t border-border/30">
+                        <tr>
+                          <td className="px-2.5 py-2 font-black sticky left-0 bg-muted/40">{bn ? 'সারাংশ' : 'Summary'}</td>
+                          <td colSpan={monthlyFeeTypes.length} className="px-2.5 py-2 text-right">
+                            <span className="text-emerald-600 font-bold mr-3">{bn ? 'পরিশোধিত' : 'Paid'}: ৳{grandPaid.toLocaleString()}</span>
+                          </td>
+                          <td className="text-right px-2.5 py-2 font-black text-rose-700">৳{grandDue.toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                );
+              })()}
+            </div>
+          </ProfileSectionCard>
+
           <ProfileSectionCard title={bn ? 'প্রযোজ্য ফি ধরন' : 'Applicable Fee Types'} icon={FileText}>
             <div className="col-span-full">
               {feeTypesLoading ? (

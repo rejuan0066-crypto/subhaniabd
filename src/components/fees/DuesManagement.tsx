@@ -1,14 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Bell, AlertTriangle, Download } from 'lucide-react';
+import { Search, Bell, AlertTriangle, Download, CalendarRange } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -20,9 +20,25 @@ const DuesManagement = () => {
   const now = new Date();
   const currentMonthKey = `${MONTHS[now.getMonth()]}-${now.getFullYear()}`;
 
+  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
   const [searchText, setSearchText] = useState('');
   const [classFilter, setClassFilter] = useState('all');
+
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['dues-sessions'],
+    queryFn: async () => {
+      const { data } = await supabase.from('academic_sessions').select('id, name, name_bn, start_date, end_date, is_active').order('start_date', { ascending: false, nullsFirst: false });
+      return data || [];
+    },
+  });
+
+  useEffect(() => {
+    if (!selectedSessionId && sessions.length > 0) {
+      const active = sessions.find((s: any) => s.is_active) || sessions[0];
+      setSelectedSessionId(active.id);
+    }
+  }, [sessions, selectedSessionId]);
 
   const { data: students = [] } = useQuery({
     queryKey: ['dues-students'],
@@ -32,11 +48,13 @@ const DuesManagement = () => {
     },
   });
 
+  // Fee types scoped to the selected session (or session-less i.e. global)
   const { data: feeTypes = [] } = useQuery({
-    queryKey: ['dues-fee-types'],
+    queryKey: ['dues-fee-types', selectedSessionId],
+    enabled: !!selectedSessionId,
     queryFn: async () => {
       const { data } = await supabase.from('fee_types').select('*').eq('is_active', true).eq('payment_frequency', 'monthly');
-      return data || [];
+      return (data || []).filter((ft: any) => !ft.session_id || ft.session_id === selectedSessionId);
     },
   });
 
@@ -72,36 +90,32 @@ const DuesManagement = () => {
     const selectedMonthName = selectedMonth.split('-')[0];
     return feeTypes.filter(ft => {
       const months = Array.isArray(ft.applicable_months) ? ft.applicable_months : [];
-      // If no applicable_months specified, assume all months
       if (months.length === 0) return true;
       return months.includes(selectedMonthName);
     });
   }, [feeTypes, selectedMonth]);
 
+  // Per-student per-fee-type breakdown for the selected month
+  const computeBreakdown = (s: any) => {
+    const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
+    const paidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
+    const studentWaivers = waivers.filter(w => w.student_id === s.id);
+    return applicable.map(ft => {
+      const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
+      const waiverPct = waiver?.waiver_percent || 0;
+      const isPaid = paidIds.has(ft.id);
+      const isFullyWaived = waiverPct >= 100;
+      const due = (isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
+      return { feeTypeId: ft.id, due, isPaid, isFullyWaived };
+    });
+  };
+
   const dueStudents = useMemo(() => {
-    // Map of student_id -> Set of paid fee_type_ids for the selected month
-    const paidMap = new Map<string, Set<string>>();
-    feePayments.forEach(fp => {
-      if (!paidMap.has(fp.student_id)) paidMap.set(fp.student_id, new Set());
-      paidMap.get(fp.student_id)!.add(fp.fee_type_id);
-    });
-
-    const fullWaiverMap = new Map<string, Set<string>>();
-    waivers.filter(w => w.waiver_percent >= 100).forEach(w => {
-      if (!fullWaiverMap.has(w.student_id)) fullWaiverMap.set(w.student_id, new Set());
-      fullWaiverMap.get(w.student_id)!.add(w.fee_type_id);
-    });
-
     return students
       .filter(s => {
-        // Get applicable fee types for this student in this month
-        const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-        if (applicable.length === 0) return false;
-
-        // Student has dues if at least one applicable fee is neither paid nor fully waived
-        const paidSet = paidMap.get(s.id) || new Set();
-        const waiverSet = fullWaiverMap.get(s.id) || new Set();
-        return applicable.some(ft => !paidSet.has(ft.id) && !waiverSet.has(ft.id));
+        const breakdown = computeBreakdown(s);
+        if (breakdown.length === 0) return false;
+        return breakdown.some(b => b.due > 0);
       })
       .filter(s => {
         if (classFilter !== 'all' && s.class_id !== classFilter) return false;
@@ -111,24 +125,27 @@ const DuesManagement = () => {
         }
         return true;
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [students, feePayments, applicableFeeTypesForMonth, waivers, classFilter, searchText]);
 
-  // Helper: compute due amount for a single student in selected month
-  const computeStudentDue = (s: any) => {
-    const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-    const paidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
-    const studentWaivers = waivers.filter(w => w.student_id === s.id);
-    return applicable.reduce((sum, ft) => {
-      if (paidIds.has(ft.id)) return sum;
-      const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
-      const waiverPct = waiver?.waiver_percent || 0;
-      if (waiverPct >= 100) return sum;
-      return sum + ft.amount * (1 - waiverPct / 100);
-    }, 0);
-  };
+  const computeStudentDue = (s: any) => computeBreakdown(s).reduce((sum, b) => sum + b.due, 0);
 
   const totalDueAmount = useMemo(() => {
     return dueStudents.reduce((sum, s) => sum + computeStudentDue(s), 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dueStudents, applicableFeeTypesForMonth, feePayments, waivers]);
+
+  // Per-fee-type column totals
+  const feeTypeColumnTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    applicableFeeTypesForMonth.forEach(ft => { totals[ft.id] = 0; });
+    dueStudents.forEach(s => {
+      computeBreakdown(s).forEach(b => {
+        totals[b.feeTypeId] = (totals[b.feeTypeId] || 0) + b.due;
+      });
+    });
+    return totals;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dueStudents, applicableFeeTypesForMonth, feePayments, waivers]);
 
   const handleSendReminder = (student: any) => {
@@ -137,11 +154,25 @@ const DuesManagement = () => {
 
   const handleExportCSV = () => {
     const monthLabel = selectedMonth;
+    const headers = ['#', bn ? 'নাম' : 'Name', bn ? 'আইডি' : 'ID', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class'];
+    applicableFeeTypesForMonth.forEach(ft => headers.push(bn ? ft.name_bn : ft.name));
+    headers.push(bn ? 'মোট বকেয়া' : 'Total Due', bn ? 'ফোন' : 'Phone');
+
     const rows = [
-      ['#', bn ? 'নাম' : 'Name', bn ? 'আইডি' : 'ID', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class', bn ? 'বকেয়া' : 'Due Amount', bn ? 'ফোন' : 'Phone'],
+      headers,
       ...dueStudents.map((s, i) => {
-        const due = computeStudentDue(s);
-        return [String(i + 1), s.name_bn, s.student_id, s.roll_number || '-', (s as any).classes?.name_bn || '-', `৳${due}`, s.guardian_phone || s.phone || '-'];
+        const breakdown = computeBreakdown(s);
+        const breakdownMap = new Map(breakdown.map(b => [b.feeTypeId, b]));
+        const cells = [String(i + 1), s.name_bn, s.student_id, s.roll_number || '-', (s as any).classes?.name_bn || '-'];
+        applicableFeeTypesForMonth.forEach(ft => {
+          const b = breakdownMap.get(ft.id);
+          if (!b) cells.push('—');
+          else if (b.isPaid) cells.push(bn ? 'পরিশোধিত' : 'Paid');
+          else if (b.isFullyWaived) cells.push(bn ? 'মওকুফ' : 'Waived');
+          else cells.push(`৳${b.due}`);
+        });
+        cells.push(`৳${computeStudentDue(s)}`, s.guardian_phone || s.phone || '-');
+        return cells;
       })
     ];
     const csv = '\uFEFF' + rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
@@ -155,13 +186,35 @@ const DuesManagement = () => {
     toast.success(bn ? 'ডাউনলোড হয়েছে' : 'Downloaded');
   };
 
-  // Generate month options
-  const monthOptions = [];
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${MONTHS[d.getMonth()]}-${d.getFullYear()}`;
-    monthOptions.push({ key, label: bn ? `${MONTHS_BN[d.getMonth()]} ${d.getFullYear()}` : `${MONTHS[d.getMonth()]} ${d.getFullYear()}` });
-  }
+  // Generate month options based on session window if available
+  const monthOptions = useMemo(() => {
+    const session = sessions.find((s: any) => s.id === selectedSessionId);
+    const opts: { key: string; label: string }[] = [];
+    if (session?.start_date && session?.end_date) {
+      const start = new Date(session.start_date);
+      const end = new Date(session.end_date);
+      const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+      while (cur <= end) {
+        const key = `${MONTHS[cur.getMonth()]}-${cur.getFullYear()}`;
+        opts.push({ key, label: bn ? `${MONTHS_BN[cur.getMonth()]} ${cur.getFullYear()}` : `${MONTHS[cur.getMonth()]} ${cur.getFullYear()}` });
+        cur.setMonth(cur.getMonth() + 1);
+      }
+    } else {
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${MONTHS[d.getMonth()]}-${d.getFullYear()}`;
+        opts.push({ key, label: bn ? `${MONTHS_BN[d.getMonth()]} ${d.getFullYear()}` : `${MONTHS[d.getMonth()]} ${d.getFullYear()}` });
+      }
+    }
+    return opts;
+  }, [sessions, selectedSessionId, bn, now]);
+
+  // If selected month not in session window, default to first option
+  useEffect(() => {
+    if (monthOptions.length > 0 && !monthOptions.find(o => o.key === selectedMonth)) {
+      setSelectedMonth(monthOptions[0].key);
+    }
+  }, [monthOptions, selectedMonth]);
 
   return (
     <div className="space-y-4">
@@ -204,6 +257,14 @@ const DuesManagement = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
+        <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
+          <SelectTrigger className="w-[180px] gap-2"><CalendarRange className="w-4 h-4 text-muted-foreground" /><SelectValue placeholder={bn ? 'সেশন' : 'Session'} /></SelectTrigger>
+          <SelectContent>
+            {sessions.map((s: any) => (
+              <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}{s.is_active && (bn ? ' (চলমান)' : ' (Active)')}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -226,35 +287,49 @@ const DuesManagement = () => {
         </Button>
       </div>
 
-      {/* Table */}
+      {/* Table - matrix view */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-auto max-h-[500px]">
+          <div className="overflow-auto max-h-[560px]">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 bg-card z-10">
                 <TableRow>
                   <TableHead className="w-12">#</TableHead>
-                  <TableHead>{bn ? 'নাম' : 'Name'}</TableHead>
+                  <TableHead className="min-w-[160px]">{bn ? 'নাম' : 'Name'}</TableHead>
                   <TableHead>{bn ? 'আইডি' : 'ID'}</TableHead>
-                  <TableHead>{bn ? 'রোল' : 'Roll'}</TableHead>
                   <TableHead>{bn ? 'শ্রেণী' : 'Class'}</TableHead>
-                  <TableHead className="text-right">{bn ? 'বকেয়া' : 'Due'}</TableHead>
+                  {applicableFeeTypesForMonth.map(ft => (
+                    <TableHead key={ft.id} className="text-right whitespace-nowrap">
+                      {bn ? ft.name_bn : ft.name}
+                    </TableHead>
+                  ))}
+                  <TableHead className="text-right">{bn ? 'মোট' : 'Total'}</TableHead>
                   <TableHead className="text-right">{bn ? 'অ্যাকশন' : 'Action'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dueStudents.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{bn ? 'এই মাসে কোনো বকেয়া নেই' : 'No dues for this month'}</TableCell></TableRow>
+                {applicableFeeTypesForMonth.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{bn ? 'এই মাসের জন্য কোনো প্রযোজ্য মাসিক ফি নেই' : 'No monthly fee types applicable for this month'}</TableCell></TableRow>
+                ) : dueStudents.length === 0 ? (
+                  <TableRow><TableCell colSpan={6 + applicableFeeTypesForMonth.length} className="text-center py-8 text-muted-foreground">{bn ? 'এই মাসে কোনো বকেয়া নেই' : 'No dues for this month'}</TableCell></TableRow>
                 ) : dueStudents.map((s, i) => {
-                  const due = computeStudentDue(s);
+                  const breakdown = computeBreakdown(s);
+                  const breakdownMap = new Map(breakdown.map(b => [b.feeTypeId, b]));
+                  const total = computeStudentDue(s);
                   return (
                     <TableRow key={s.id}>
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-medium">{s.name_bn}</TableCell>
                       <TableCell><Badge variant="outline" className="font-mono text-xs">{s.student_id}</Badge></TableCell>
-                      <TableCell>{s.roll_number || '-'}</TableCell>
-                      <TableCell>{(s as any).classes?.name_bn || '-'}</TableCell>
-                      <TableCell className="text-right font-bold text-red-600">৳{due.toLocaleString('en-IN')}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{(s as any).classes?.name_bn || '-'}</TableCell>
+                      {applicableFeeTypesForMonth.map(ft => {
+                        const b = breakdownMap.get(ft.id);
+                        if (!b) return <TableCell key={ft.id} className="text-right text-muted-foreground/40">—</TableCell>;
+                        if (b.isPaid) return <TableCell key={ft.id} className="text-right"><Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge></TableCell>;
+                        if (b.isFullyWaived) return <TableCell key={ft.id} className="text-right"><Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">{bn ? 'মওকুফ' : 'Waived'}</Badge></TableCell>;
+                        return <TableCell key={ft.id} className="text-right font-semibold text-rose-600">৳{b.due.toLocaleString('en-IN')}</TableCell>;
+                      })}
+                      <TableCell className="text-right font-bold text-red-600">৳{total.toLocaleString('en-IN')}</TableCell>
                       <TableCell className="text-right">
                         <Button variant="outline" size="sm" onClick={() => handleSendReminder(s)} className="gap-1 text-xs">
                           <Bell className="w-3 h-3" />{bn ? 'রিমাইন্ডার' : 'Remind'}
@@ -264,6 +339,18 @@ const DuesManagement = () => {
                   );
                 })}
               </TableBody>
+              {applicableFeeTypesForMonth.length > 0 && dueStudents.length > 0 && (
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={4} className="font-bold text-right">{bn ? 'কলাম মোট' : 'Column Total'}</TableCell>
+                    {applicableFeeTypesForMonth.map(ft => (
+                      <TableCell key={ft.id} className="text-right font-bold text-rose-700">৳{(feeTypeColumnTotals[ft.id] || 0).toLocaleString('en-IN')}</TableCell>
+                    ))}
+                    <TableCell className="text-right font-black text-red-700">৳{totalDueAmount.toLocaleString('en-IN')}</TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableFooter>
+              )}
             </Table>
           </div>
         </CardContent>
