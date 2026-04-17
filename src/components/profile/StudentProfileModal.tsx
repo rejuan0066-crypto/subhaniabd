@@ -39,6 +39,22 @@ const StudentProfileModal = ({
   const [activeTab, setActiveTab] = useState<'profile' | 'finance' | 'academic' | 'others'>('profile');
   const [showWaiverDialog, setShowWaiverDialog] = useState(false);
   const [waiverForm, setWaiverForm] = useState({ fee_type_id: '', waiver_amount: '', reason: '' });
+  const [duesSessionId, setDuesSessionId] = useState<string>('');
+
+  const { data: allSessions = [] } = useQuery({
+    queryKey: ['profile-academic-sessions'],
+    queryFn: async () => {
+      const { data } = await supabase.from('academic_sessions').select('id, name, name_bn, start_date, end_date, is_active').order('start_date', { ascending: false, nullsFirst: false });
+      return data || [];
+    },
+  });
+
+  useEffect(() => {
+    if (!duesSessionId && allSessions.length > 0) {
+      const active = allSessions.find((s: any) => s.is_active) || allSessions[0];
+      setDuesSessionId(active.id);
+    }
+  }, [allSessions, duesSessionId]);
 
   const { data: libraryHistory = [], isLoading: libLoading } = useQuery({
     queryKey: ['student-library-history', student.id],
