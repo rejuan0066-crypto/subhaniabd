@@ -111,19 +111,25 @@ const DuesManagement = () => {
         }
         return true;
       });
-  }, [students, feePayments, feeTypes, waivers, classFilter, searchText]);
+  }, [students, feePayments, applicableFeeTypesForMonth, waivers, classFilter, searchText]);
+
+  // Helper: compute due amount for a single student in selected month
+  const computeStudentDue = (s: any) => {
+    const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
+    const paidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
+    const studentWaivers = waivers.filter(w => w.student_id === s.id);
+    return applicable.reduce((sum, ft) => {
+      if (paidIds.has(ft.id)) return sum;
+      const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
+      const waiverPct = waiver?.waiver_percent || 0;
+      if (waiverPct >= 100) return sum;
+      return sum + ft.amount * (1 - waiverPct / 100);
+    }, 0);
+  };
 
   const totalDueAmount = useMemo(() => {
-    return dueStudents.reduce((sum, s) => {
-      const applicableFees = feeTypes.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-      const studentWaivers = waivers.filter(w => w.student_id === s.id);
-      return sum + applicableFees.reduce((fSum, ft) => {
-        const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
-        const waiverPct = waiver?.waiver_percent || 0;
-        return fSum + ft.amount * (1 - waiverPct / 100);
-      }, 0);
-    }, 0);
-  }, [dueStudents, feeTypes, waivers]);
+    return dueStudents.reduce((sum, s) => sum + computeStudentDue(s), 0);
+  }, [dueStudents, applicableFeeTypesForMonth, feePayments, waivers]);
 
   const handleSendReminder = (student: any) => {
     toast.info(bn ? `${student.name_bn} এর জন্য রিমাইন্ডার পাঠানো হবে (এসএমএস এপিআই যুক্ত হলে)` : `Reminder will be sent to ${student.name_en || student.name_bn} (when SMS API is connected)`);
