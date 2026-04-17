@@ -18,6 +18,7 @@ const MONTHS_BN = ['জানুয়ারি','ফেব্রুয়ার
 const DuesManagement = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const navigate = useNavigate();
   const now = new Date();
   const currentMonthKey = `${MONTHS[now.getMonth()]}-${now.getFullYear()}`;
 
