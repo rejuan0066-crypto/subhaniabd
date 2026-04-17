@@ -140,12 +140,7 @@ const DuesManagement = () => {
     const rows = [
       ['#', bn ? 'নাম' : 'Name', bn ? 'আইডি' : 'ID', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class', bn ? 'বকেয়া' : 'Due Amount', bn ? 'ফোন' : 'Phone'],
       ...dueStudents.map((s, i) => {
-        const applicableFees = feeTypes.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-        const studentWaivers = waivers.filter(w => w.student_id === s.id);
-        const due = applicableFees.reduce((sum, ft) => {
-          const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
-          return sum + ft.amount * (1 - (waiver?.waiver_percent || 0) / 100);
-        }, 0);
+        const due = computeStudentDue(s);
         return [String(i + 1), s.name_bn, s.student_id, s.roll_number || '-', (s as any).classes?.name_bn || '-', `৳${due}`, s.guardian_phone || s.phone || '-'];
       })
     ];
