@@ -598,15 +598,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/8 px-4 lg:px-6 ${headerPadClass} fixed top-0 right-0 left-0 lg:left-[var(--admin-sidebar-width)] z-40 flex items-center justify-between`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
-            <div className="flex items-center gap-3">
-              <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200">
+          <header className={`bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/8 px-3 sm:px-4 lg:px-6 ${headerPadClass} fixed top-0 right-0 left-0 lg:left-[var(--admin-sidebar-width)] z-40 flex items-center justify-between gap-2`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 sm:p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200 shrink-0" aria-label="Toggle menu">
                 <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
               {/* Page label in header */}
-              <span className="hidden sm:inline text-sm font-medium text-foreground/80">{currentPageLabel}</span>
+              <span className="hidden sm:inline text-sm font-medium text-foreground/80 truncate">{currentPageLabel}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               {/* Search */}
               {adminTheme.headerShowSearch && (
                 <div className="hidden md:flex items-center gap-2 bg-secondary/50 backdrop-blur-sm rounded-2xl px-4 py-2 text-sm text-muted-foreground min-w-[200px] border border-border/20">
@@ -619,23 +619,22 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               )}
               <DarkModeToggle />
               <NotificationPanel />
-              <BijoyToggle />
-              <LanguageToggle />
-              <Link to="/" className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
+              <div className="hidden sm:flex items-center gap-1.5"><BijoyToggle /><LanguageToggle /></div>
+              <Link to="/" className="hidden sm:inline-flex p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
                 <Globe className="w-5 h-5" />
               </Link>
             </div>
           </header>
 
           {/* Content */}
-          <main className="flex-1 px-4 md:px-8 pb-8 pt-4 w-full max-w-[1440px] mx-auto overflow-x-hidden">
+          <main className="flex-1 px-3 sm:px-4 md:px-8 pb-8 pt-4 w-full max-w-[1440px] mx-auto overflow-x-hidden">
             <BackButton position="top" />
             {/* Page Header - outside card for clear separation */}
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">{currentPageLabel}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4 sm:mb-5">
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight truncate">{currentPageLabel}</h1>
                 {adminTheme.headerShowBreadcrumb && breadcrumbs.length > 1 && (
-                  <nav className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                  <nav className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground flex-wrap">
                     {breadcrumbs.map((crumb, i) => (
                       <span key={crumb.path} className="flex items-center gap-1">
                         {i > 0 && <ChevronRight className="w-3 h-3 opacity-40" />}
@@ -651,8 +650,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
             {/* Modern Glass Content Container */}
-            <div className="admin-page-card rounded-[36px] lg:rounded-[45px] bg-card/70 dark:bg-card/35 backdrop-blur-2xl border border-border/10 dark:border-border/8 p-5 sm:p-8 lg:p-10 min-h-[60vh] w-full" style={{ boxShadow: 'var(--shadow-float)' }}>
-              <div className="overflow-x-auto">
+            <div className="admin-page-card rounded-[24px] sm:rounded-[36px] lg:rounded-[45px] bg-card/70 dark:bg-card/35 backdrop-blur-2xl border border-border/10 dark:border-border/8 p-3 sm:p-6 lg:p-10 min-h-[60vh] w-full" style={{ boxShadow: 'var(--shadow-float)' }}>
+              <div className="overflow-x-auto -mx-1 px-1">
                 <AdminPageWithTabs>{children}</AdminPageWithTabs>
               </div>
             </div>
