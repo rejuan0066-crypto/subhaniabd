@@ -944,9 +944,9 @@ const AdminStudentsFees = () => {
                   tabIndex={-1}
                   placeholder="৳ 0.00"
                 />
-                <p className="text-[11px] text-muted-foreground mt-1">
+                <p className="text-[11px] text-muted-foreground mt-1 text-center font-[mono] border-solid">
                   {bn
-                    ? '⚠️ ফি ধরন অনুযায়ী পরিমাণ স্বয়ংক্রিয়ভাবে নির্ধারিত — কম বা বেশি পরিশোধ করা যাবে না।'
+                    ? '⚠️ ফি ধরন অনুযায়ী পরিমাণ স্বয়ংক্রিয়ভাবে নির্ধারিত।'
                     : '⚠️ Amount is fixed by the selected fee type — partial or excess payment is not allowed.'}
                 </p>
               </div>
