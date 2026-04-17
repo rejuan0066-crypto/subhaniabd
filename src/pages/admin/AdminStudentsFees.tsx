@@ -343,6 +343,31 @@ const AdminStudentsFees = () => {
     }
   };
 
+  // Auto-load student when redirected from Dues list with ?studentId=...
+  useEffect(() => {
+    const sid = searchParams.get('studentId');
+    if (!sid) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('students')
+        .select('*, divisions(name_bn, name)')
+        .eq('id', sid)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setFoundStudent(data);
+      setSearchMode('registration');
+      setRegNo(data.registration_no || '');
+      // Clean the param so refresh doesn't re-trigger
+      const next = new URLSearchParams(searchParams);
+      next.delete('studentId');
+      setSearchParams(next, { replace: true });
+      toast.success(bn ? 'ছাত্র লোড হয়েছে' : 'Student loaded');
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('studentId')]);
+
   const payMutation = useMutation({
     mutationFn: async () => {
       if (!feeType || !foundStudent || !amount) throw new Error('All fields are required');
