@@ -16,9 +16,6 @@ import { useApprovalCheck } from '@/hooks/useApprovalCheck';
 import FeeReceiptDownload from '@/components/fees/FeeReceiptDownload';
 import { EmbeddedProvider } from '@/contexts/EmbeddedContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import FeeTypeManager from '@/components/admin/FeeTypeManager';
-import StudentCategoryManager from '@/components/admin/StudentCategoryManager';
-import FeeCategoryManager from '@/components/admin/FeeCategoryManager';
 
 const LazyPaymentDashboard = lazy(() => import('@/pages/admin/AdminPayments'));
 
