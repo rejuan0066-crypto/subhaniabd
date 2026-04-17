@@ -921,8 +921,19 @@ const AdminStudentsFees = () => {
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'পরিমাণ (৳)' : 'Amount (৳)'} <span className="text-destructive">*</span>
                 </label>
-                <Input type="number" className="bg-background" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  placeholder="৳ 0.00" min="0" step="0.01" />
+                <Input
+                  type="number"
+                  className="bg-muted/40 cursor-not-allowed"
+                  value={amount}
+                  readOnly
+                  tabIndex={-1}
+                  placeholder="৳ 0.00"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {bn
+                    ? '⚠️ ফি ধরন অনুযায়ী পরিমাণ স্বয়ংক্রিয়ভাবে নির্ধারিত — কম বা বেশি পরিশোধ করা যাবে না।'
+                    : '⚠️ Amount is fixed by the selected fee type — partial or excess payment is not allowed.'}
+                </p>
               </div>
             </div>
 
