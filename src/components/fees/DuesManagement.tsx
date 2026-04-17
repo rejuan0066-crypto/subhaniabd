@@ -383,9 +383,18 @@ const DuesManagement = () => {
                       })}
                       <TableCell className="text-right font-bold text-red-600">৳{total.toLocaleString('en-IN')}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm" onClick={() => handleSendReminder(s)} className="gap-1 text-xs">
-                          <Bell className="w-3 h-3" />{bn ? 'রিমাইন্ডার' : 'Remind'}
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            onClick={() => handlePay(s)}
+                            className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            <CreditCard className="w-3 h-3" />{bn ? 'পরিশোধ' : 'Pay'}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleSendReminder(s)} className="gap-1 text-xs">
+                            <Bell className="w-3 h-3" />{bn ? 'রিমাইন্ডার' : 'Remind'}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
