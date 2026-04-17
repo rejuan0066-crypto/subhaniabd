@@ -246,12 +246,7 @@ const DuesManagement = () => {
                 {dueStudents.length === 0 ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{bn ? 'এই মাসে কোনো বকেয়া নেই' : 'No dues for this month'}</TableCell></TableRow>
                 ) : dueStudents.map((s, i) => {
-                  const applicableFees = feeTypes.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-                  const studentWaivers = waivers.filter(w => w.student_id === s.id);
-                  const due = applicableFees.reduce((sum, ft) => {
-                    const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
-                    return sum + ft.amount * (1 - (waiver?.waiver_percent || 0) / 100);
-                  }, 0);
+                  const due = computeStudentDue(s);
                   return (
                     <TableRow key={s.id}>
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
