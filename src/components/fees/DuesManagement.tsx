@@ -43,7 +43,7 @@ const DuesManagement = () => {
   const { data: students = [] } = useQuery({
     queryKey: ['dues-students'],
     queryFn: async () => {
-      const { data } = await supabase.from('students').select('id, name_bn, name_en, student_id, roll_number, class_id, phone, guardian_phone, status, classes(name, name_bn)').eq('status', 'active');
+      const { data } = await supabase.from('students').select('id, name_bn, name_en, student_id, roll_number, class_id, phone, guardian_phone, status, admission_date, classes(name, name_bn)').eq('status', 'active');
       return data || [];
     },
   });
@@ -111,6 +111,13 @@ const DuesManagement = () => {
 
   // Per-student per-fee-type breakdown for the selected month
   const computeBreakdown = (s: any) => {
+    const [selMonthName, selYearStr] = selectedMonth.split('-');
+    const selMonthIdx = MONTHS.indexOf(selMonthName);
+    const selYear = parseInt(selYearStr);
+    const selDate = new Date(selYear, selMonthIdx, 1);
+    const admDate = s.admission_date ? new Date(s.admission_date) : null;
+    const admMonthStart = admDate ? new Date(admDate.getFullYear(), admDate.getMonth(), 1) : null;
+
     const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
     const monthlyPaidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
     const oneTimePaidIds = new Set(oneTimePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
@@ -118,11 +125,14 @@ const DuesManagement = () => {
     return applicable.map(ft => {
       const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
       const waiverPct = waiver?.waiver_percent || 0;
+      // Skip fees for months before student's admission month (e.g. admission fee for March
+      // when student was admitted in April should not show in March's view).
+      const beforeAdmission = admMonthStart ? selDate < admMonthStart : false;
       // Monthly fees → check this month's payments. Non-monthly (one-time/yearly) → any payment counts.
       const isPaid = ft.payment_frequency === 'monthly' ? monthlyPaidIds.has(ft.id) : oneTimePaidIds.has(ft.id);
       const isFullyWaived = waiverPct >= 100;
-      const due = (isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
-      return { feeTypeId: ft.id, due, isPaid, isFullyWaived };
+      const due = (beforeAdmission || isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
+      return { feeTypeId: ft.id, due, isPaid, isFullyWaived, beforeAdmission };
     });
   };
 
@@ -341,6 +351,7 @@ const DuesManagement = () => {
                       {applicableFeeTypesForMonth.map(ft => {
                         const b = breakdownMap.get(ft.id);
                         if (!b) return <TableCell key={ft.id} className="text-right text-muted-foreground/40">—</TableCell>;
+                        if ((b as any).beforeAdmission) return <TableCell key={ft.id} className="text-right text-muted-foreground/40" title={bn ? 'ভর্তির আগে' : 'Before admission'}>—</TableCell>;
                         if (b.isPaid) return <TableCell key={ft.id} className="text-right"><Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge></TableCell>;
                         if (b.isFullyWaived) return <TableCell key={ft.id} className="text-right"><Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">{bn ? 'মওকুফ' : 'Waived'}</Badge></TableCell>;
                         return <TableCell key={ft.id} className="text-right font-semibold text-rose-600">৳{b.due.toLocaleString('en-IN')}</TableCell>;
