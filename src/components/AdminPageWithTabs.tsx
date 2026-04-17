@@ -106,19 +106,52 @@ const AdminPageWithTabs = ({ children }: Props) => {
     setActiveTab(prev => prev === id ? '' : id);
   };
 
+  const allTabs = [
+    { id: 'main', label: mainLabel },
+    ...tabItems.map(t => ({ id: t.id, label: bn ? t.label_bn : t.label_en })),
+  ];
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button onClick={() => toggleTab('main')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === 'main' ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
-          {mainLabel}
-        </button>
-        {tabItems.map(tab => (
-          <button key={tab.id} onClick={() => toggleTab(tab.id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${activeTab === tab.id ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
-            {bn ? tab.label_bn : tab.label_en}
-          </button>
-        ))}
+      <div className="mb-4">
+        <LayoutGroup id="admin-page-tabs">
+          <div
+            className={cn(
+              'inline-flex items-center gap-1 p-1.5 rounded-full max-w-full overflow-x-auto',
+              'border border-border/30',
+              'bg-gradient-to-r from-muted/70 via-muted/40 to-muted/70',
+              'backdrop-blur-xl',
+              'shadow-[inset_0_1px_0_hsl(var(--background)/0.4),0_2px_12px_-4px_hsl(var(--foreground)/0.08)]',
+              '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
+            )}
+          >
+            {allTabs.map(tab => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => toggleTab(tab.id)}
+                  className={cn(
+                    'relative flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                    active
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-primary/5',
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="admin-page-tab-bg"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-primary/85 shadow-[0_4px_14px_-2px_hsl(var(--primary)/0.45)]"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </LayoutGroup>
       </div>
 
       {activeTab === 'main' && (
