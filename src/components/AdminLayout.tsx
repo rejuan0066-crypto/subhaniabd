@@ -598,15 +598,15 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
         <div className={`flex min-h-screen flex-col min-w-0 ${mobileHeaderOffsetClass} ${desktopHeaderOffsetClass} lg:ml-[var(--admin-sidebar-width)]`}>
           {/* Top bar */}
-          <header className={`bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/8 px-4 lg:px-6 ${headerPadClass} fixed top-0 right-0 left-0 lg:left-[var(--admin-sidebar-width)] z-40 flex items-center justify-between`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
-            <div className="flex items-center gap-3">
-              <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200">
+          <header className={`bg-background/80 dark:bg-background/60 backdrop-blur-xl border-b border-border/8 px-3 sm:px-4 lg:px-6 ${headerPadClass} fixed top-0 right-0 left-0 lg:left-[var(--admin-sidebar-width)] z-40 flex items-center justify-between gap-2`} style={{ ...headerStyle, fontSize: 'var(--header-font-size, 13px)', paddingTop: `calc(env(safe-area-inset-top) + ${headerTopPadding})` }}>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <button onClick={() => { if (window.innerWidth < 1024) setMobileSidebarOpen(true); else setSidebarOpen(!sidebarOpen); }} className="p-2 sm:p-2.5 rounded-2xl hover:bg-secondary/60 transition-all duration-200 shrink-0" aria-label="Toggle menu">
                 <Menu className="w-5 h-5 text-muted-foreground" />
               </button>
               {/* Page label in header */}
-              <span className="hidden sm:inline text-sm font-medium text-foreground/80">{currentPageLabel}</span>
+              <span className="hidden sm:inline text-sm font-medium text-foreground/80 truncate">{currentPageLabel}</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
               {/* Search */}
               {adminTheme.headerShowSearch && (
                 <div className="hidden md:flex items-center gap-2 bg-secondary/50 backdrop-blur-sm rounded-2xl px-4 py-2 text-sm text-muted-foreground min-w-[200px] border border-border/20">
@@ -619,9 +619,8 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
               )}
               <DarkModeToggle />
               <NotificationPanel />
-              <BijoyToggle />
-              <LanguageToggle />
-              <Link to="/" className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
+              <div className="hidden sm:flex items-center gap-1.5"><BijoyToggle /><LanguageToggle /></div>
+              <Link to="/" className="hidden sm:inline-flex p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground" title={t('home')}>
                 <Globe className="w-5 h-5" />
               </Link>
             </div>
