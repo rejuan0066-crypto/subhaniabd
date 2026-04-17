@@ -111,6 +111,13 @@ const DuesManagement = () => {
 
   // Per-student per-fee-type breakdown for the selected month
   const computeBreakdown = (s: any) => {
+    const [selMonthName, selYearStr] = selectedMonth.split('-');
+    const selMonthIdx = MONTHS.indexOf(selMonthName);
+    const selYear = parseInt(selYearStr);
+    const selDate = new Date(selYear, selMonthIdx, 1);
+    const admDate = s.admission_date ? new Date(s.admission_date) : null;
+    const admMonthStart = admDate ? new Date(admDate.getFullYear(), admDate.getMonth(), 1) : null;
+
     const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
     const monthlyPaidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
     const oneTimePaidIds = new Set(oneTimePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
@@ -118,11 +125,14 @@ const DuesManagement = () => {
     return applicable.map(ft => {
       const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
       const waiverPct = waiver?.waiver_percent || 0;
+      // Skip fees for months before student's admission month (e.g. admission fee for March
+      // when student was admitted in April should not show in March's view).
+      const beforeAdmission = admMonthStart ? selDate < admMonthStart : false;
       // Monthly fees → check this month's payments. Non-monthly (one-time/yearly) → any payment counts.
       const isPaid = ft.payment_frequency === 'monthly' ? monthlyPaidIds.has(ft.id) : oneTimePaidIds.has(ft.id);
       const isFullyWaived = waiverPct >= 100;
-      const due = (isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
-      return { feeTypeId: ft.id, due, isPaid, isFullyWaived };
+      const due = (beforeAdmission || isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
+      return { feeTypeId: ft.id, due, isPaid, isFullyWaived, beforeAdmission };
     });
   };
 
