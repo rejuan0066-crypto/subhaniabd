@@ -94,6 +94,13 @@ const DEFAULT_SIDEBAR: MenuItemConfig[] = [
   // ইনভেন্টরি ও সম্পদ
   { id: 'inventory-assets', path: '/admin/inventory', label_bn: 'ইনভেন্টরি ও সম্পদ', label_en: 'Inventory & Assets', icon: 'Folder', visible: true, sort_order: 5.5 },
 
+  // ফি সেটআপ
+  { id: 'fee-setup', path: '/admin/fee-types', label_bn: 'ফি সেটআপ', label_en: 'Fee Setup', icon: 'Settings2', visible: true, sort_order: 6.5, children: [
+    { id: 'fee-types', path: '/admin/fee-types', label_bn: 'ফি ধরন', label_en: 'Fee Types', icon: 'Settings', visible: true, sort_order: 0 },
+    { id: 'fee-categories', path: '/admin/fee-categories', label_bn: 'ফি ক্যাটাগরি', label_en: 'Fee Categories', icon: 'Settings', visible: true, sort_order: 1 },
+    { id: 'student-categories', path: '/admin/student-categories', label_bn: 'ছাত্র ক্যাটাগরি', label_en: 'Student Categories', icon: 'Users', visible: true, sort_order: 2 },
+  ]},
+
 
 
 

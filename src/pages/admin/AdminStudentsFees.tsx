@@ -1079,24 +1079,6 @@ const AdminStudentsFees = () => {
             ),
           },
           {
-            id: 'fee_types',
-            label: bn ? 'ফি ধরন' : 'Fee Types',
-            icon: Settings,
-            content: <FeeTypeManager />,
-          },
-          {
-            id: 'fee_categories',
-            label: bn ? 'ফি ক্যাটাগরি' : 'Fee Categories',
-            icon: Settings,
-            content: <FeeCategoryManager />,
-          },
-          {
-            id: 'categories',
-            label: bn ? 'ছাত্র ক্যাটাগরি' : 'Student Categories',
-            icon: Users,
-            content: <StudentCategoryManager />,
-          },
-          {
             id: 'dues',
             label: bn ? 'বকেয়া তালিকা' : 'Dues List',
             icon: AlertTriangle,
