@@ -48,12 +48,12 @@ const DuesManagement = () => {
     },
   });
 
-  // Fee types scoped to the selected session (or session-less i.e. global)
+  // Fee types scoped to the selected session (or session-less i.e. global) — include ALL frequencies
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['dues-fee-types', selectedSessionId],
     enabled: !!selectedSessionId,
     queryFn: async () => {
-      const { data } = await supabase.from('fee_types').select('*').eq('is_active', true).eq('payment_frequency', 'monthly');
+      const { data } = await supabase.from('fee_types').select('*').eq('is_active', true);
       return (data || []).filter((ft: any) => !ft.session_id || ft.session_id === selectedSessionId);
     },
   });
@@ -86,9 +86,12 @@ const DuesManagement = () => {
   });
 
   // Filter fee types applicable to the selected month
+  // - monthly: respect applicable_months (empty = all months)
+  // - one-time / yearly / others: show in every month so they remain visible until paid
   const applicableFeeTypesForMonth = useMemo(() => {
     const selectedMonthName = selectedMonth.split('-')[0];
     return feeTypes.filter(ft => {
+      if (ft.payment_frequency !== 'monthly') return true;
       const months = Array.isArray(ft.applicable_months) ? ft.applicable_months : [];
       if (months.length === 0) return true;
       return months.includes(selectedMonthName);
