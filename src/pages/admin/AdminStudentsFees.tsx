@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { lazy, Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User, Banknote, Globe, AlertCircle, Settings, BarChart3, Users, Clock, X, Receipt, AlertTriangle } from 'lucide-react';
 import DuesManagement from '@/components/fees/DuesManagement';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -40,6 +40,7 @@ const AdminStudentsFees = () => {
   const bn = language === 'bn';
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { checkApproval } = useApprovalCheck('/admin/students-fees', 'payments');
   const [feeType, setFeeType] = useState('');
@@ -341,6 +342,31 @@ const AdminStudentsFees = () => {
       setSearching(false);
     }
   };
+
+  // Auto-load student when redirected from Dues list with ?studentId=...
+  useEffect(() => {
+    const sid = searchParams.get('studentId');
+    if (!sid) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('students')
+        .select('*, divisions(name_bn, name)')
+        .eq('id', sid)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setFoundStudent(data);
+      setSearchMode('registration');
+      setRegNo(data.registration_no || '');
+      // Clean the param so refresh doesn't re-trigger
+      const next = new URLSearchParams(searchParams);
+      next.delete('studentId');
+      setSearchParams(next, { replace: true });
+      toast.success(bn ? 'ছাত্র লোড হয়েছে' : 'Student loaded');
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('studentId')]);
 
   const payMutation = useMutation({
     mutationFn: async () => {

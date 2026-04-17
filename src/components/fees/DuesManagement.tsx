@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Search, Bell, AlertTriangle, Download, CalendarRange } from 'lucide-react';
+import { Search, Bell, AlertTriangle, Download, CalendarRange, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -17,6 +18,7 @@ const MONTHS_BN = ['জানুয়ারি','ফেব্রুয়ার
 const DuesManagement = () => {
   const { language } = useLanguage();
   const bn = language === 'bn';
+  const navigate = useNavigate();
   const now = new Date();
   const currentMonthKey = `${MONTHS[now.getMonth()]}-${now.getFullYear()}`;
 
@@ -176,6 +178,10 @@ const DuesManagement = () => {
 
   const handleSendReminder = (student: any) => {
     toast.info(bn ? `${student.name_bn} এর জন্য রিমাইন্ডার পাঠানো হবে (এসএমএস এপিআই যুক্ত হলে)` : `Reminder will be sent to ${student.name_en || student.name_bn} (when SMS API is connected)`);
+  };
+
+  const handlePay = (student: any) => {
+    navigate(`/admin/students-fees?tab=collection&studentId=${student.id}`);
   };
 
   const handleExportCSV = () => {
@@ -377,9 +383,18 @@ const DuesManagement = () => {
                       })}
                       <TableCell className="text-right font-bold text-red-600">৳{total.toLocaleString('en-IN')}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm" onClick={() => handleSendReminder(s)} className="gap-1 text-xs">
-                          <Bell className="w-3 h-3" />{bn ? 'রিমাইন্ডার' : 'Remind'}
-                        </Button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            onClick={() => handlePay(s)}
+                            className="gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                          >
+                            <CreditCard className="w-3 h-3" />{bn ? 'পরিশোধ' : 'Pay'}
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleSendReminder(s)} className="gap-1 text-xs">
+                            <Bell className="w-3 h-3" />{bn ? 'রিমাইন্ডার' : 'Remind'}
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
