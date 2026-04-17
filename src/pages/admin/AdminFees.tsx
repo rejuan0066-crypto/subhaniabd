@@ -1,4 +1,5 @@
 import AdminLayout from '@/components/AdminLayout';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -178,19 +179,12 @@ const AdminFees = () => {
       <div className="space-y-6">
         <h1 className="text-2xl font-display font-bold text-foreground">{bn ? 'ফি ব্যবস্থাপনা' : 'Fee Management'}</h1>
 
-        {/* Main Tabs */}
-        <div className="flex flex-wrap gap-2">
-          {mainTabs.map(t => {
-            const Icon = t.icon;
-            return (
-              <button key={t.key} onClick={() => setMainTab(t.key)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap ${mainTab === t.key ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'}`}>
-                <Icon className="w-4 h-4" />
-                {bn ? t.bn : t.en}
-              </button>
-            );
-          })}
-        </div>
+        {/* Main Tabs - Floating Segmented Control */}
+        <SegmentedTabs
+          tabs={mainTabs.map(t => ({ key: t.key, label: bn ? t.bn : t.en, icon: t.icon }))}
+          value={mainTab}
+          onChange={(k) => setMainTab(k as MainTab)}
+        />
 
         {/* Fee Types Tab */}
         {mainTab === 'fee_types' && (
@@ -209,14 +203,12 @@ const AdminFees = () => {
         {/* Payment Tab */}
         {mainTab === 'payment' && (
           <>
-            <div className="flex flex-wrap gap-2">
-              {feeTabs.map(t => (
-                <button key={t.key} onClick={() => { setTab(t.key); setShowList(false); }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${tab === t.key ? 'bg-primary/10 border-primary text-primary' : 'bg-background border-border text-muted-foreground hover:border-primary/40'}`}>
-                  {bn ? t.bn : t.en}
-                </button>
-              ))}
-            </div>
+            <SegmentedTabs
+              tabs={feeTabs.map(t => ({ key: t.key, label: bn ? t.bn : t.en }))}
+              value={tab}
+              onChange={(k) => { setTab(k as FeeTab); setShowList(false); }}
+              size="sm"
+            />
 
             <div className="card-elevated p-5">
               <h3 className="font-display font-bold text-foreground mb-4 flex items-center gap-2">

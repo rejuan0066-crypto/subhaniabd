@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, LayoutGroup } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 
@@ -37,36 +37,73 @@ const tabVariants = {
   exit: { opacity: 0, y: -4, transition: { duration: 0.12 } },
 };
 
-const TabButton = ({
+/**
+ * Floating segmented control button with sliding indicator (via layoutId).
+ * level 1 = primary pill (larger, bolder), level 2 = subtle secondary pill.
+ */
+const SegButton = ({
   active,
   onClick,
   icon: Icon,
   label,
   level = 1,
+  layoutId,
 }: {
   active: boolean;
   onClick: () => void;
   icon?: LucideIcon;
   label: string;
   level?: 1 | 2;
+  layoutId: string;
 }) => (
   <button
     type="button"
     onClick={onClick}
     className={cn(
-      'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border-2 whitespace-nowrap',
-      level === 1
-        ? active
-          ? 'bg-primary/10 border-primary text-primary shadow-sm'
-          : 'bg-background border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
-        : active
-          ? 'bg-primary/10 border-primary text-primary shadow-sm'
-          : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground',
+      'relative flex items-center justify-center gap-2 rounded-full font-semibold transition-colors duration-200 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+      level === 1 ? 'px-5 py-2.5 text-sm' : 'px-4 py-2 text-[13px]',
+      active
+        ? 'text-primary-foreground'
+        : 'text-muted-foreground hover:text-foreground hover:bg-primary/5',
     )}
   >
-    {Icon && <Icon className={cn('w-4 h-4', level === 2 && 'w-4 h-4')} />}
-    {label}
+    {active && (
+      <motion.span
+        layoutId={layoutId}
+        className={cn(
+          'absolute inset-0 rounded-full',
+          level === 1
+            ? 'bg-gradient-to-r from-primary to-primary/85 shadow-[0_4px_14px_-2px_hsl(var(--primary)/0.45)]'
+            : 'bg-gradient-to-r from-primary/95 to-primary/80 shadow-[0_3px_10px_-2px_hsl(var(--primary)/0.35)]',
+        )}
+        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+      />
+    )}
+    <span className="relative z-10 flex items-center gap-2">
+      {Icon && <Icon className={cn(level === 1 ? 'w-4 h-4' : 'w-3.5 h-3.5', 'shrink-0')} strokeWidth={1.75} />}
+      <span>{label}</span>
+    </span>
   </button>
+);
+
+/**
+ * Glassmorphism container for floating segmented tabs.
+ * Horizontally scrollable on small screens, sleek bar on desktop.
+ */
+const SegContainer = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <div
+    className={cn(
+      'inline-flex items-center gap-1 p-1.5 rounded-full max-w-full overflow-x-auto',
+      'border border-border/30',
+      'bg-gradient-to-r from-muted/70 via-muted/40 to-muted/70',
+      'backdrop-blur-xl',
+      'shadow-[inset_0_1px_0_hsl(var(--background)/0.4),0_2px_12px_-4px_hsl(var(--foreground)/0.08)]',
+      '[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]',
+      className,
+    )}
+  >
+    {children}
+  </div>
 );
 
 const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', className }: TabContainerProps) => {
@@ -89,16 +126,21 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
     return (
       <div className={cn('w-full', className)}>
-      <div className="sticky top-0 z-20 mb-4 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          {tabs.map(t => (
-            <TabButton
-              key={t.id}
-              active={activeTab?.id === t.id}
-              onClick={() => toggleTab(t.id)}
-              icon={t.icon}
-              label={t.label}
-            />
-          ))}
+        <div className="sticky top-0 z-20 mb-4 py-2 -mx-1 px-1">
+          <LayoutGroup id={`tabs-${paramKey}`}>
+            <SegContainer>
+              {tabs.map(t => (
+                <SegButton
+                  key={t.id}
+                  active={activeTab?.id === t.id}
+                  onClick={() => toggleTab(t.id)}
+                  icon={t.icon}
+                  label={t.label}
+                  layoutId={`seg-bg-${paramKey}`}
+                />
+              ))}
+            </SegContainer>
+          </LayoutGroup>
         </div>
         <AnimatePresence mode="wait">
           {activeTab && (
@@ -146,33 +188,43 @@ const TabContainer = ({ groups, tabs, paramKey = 'tab', childParamKey = 'sub', c
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Level-1 tabs */}
-      <div className="sticky top-0 z-20 mb-3 flex flex-wrap gap-2 border-b border-border/60 bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        {groups.map(g => (
-          <TabButton
-            key={g.id}
-            active={activeGroup?.id === g.id}
-            onClick={() => toggleGroup(g.id)}
-            icon={g.icon}
-            label={g.label}
-            level={1}
-          />
-        ))}
+      {/* Level-1 floating segmented bar */}
+      <div className="sticky top-0 z-20 mb-3 py-2 -mx-1 px-1">
+        <LayoutGroup id={`tabs-${paramKey}-l1`}>
+          <SegContainer>
+            {groups.map(g => (
+              <SegButton
+                key={g.id}
+                active={activeGroup?.id === g.id}
+                onClick={() => toggleGroup(g.id)}
+                icon={g.icon}
+                label={g.label}
+                level={1}
+                layoutId={`seg-bg-${paramKey}-l1`}
+              />
+            ))}
+          </SegContainer>
+        </LayoutGroup>
       </div>
 
-      {/* Level-2 tabs */}
+      {/* Level-2 floating sub bar */}
       {activeGroup && childTabs.length > 0 && (
-        <div className="sticky top-12 z-[19] mb-4 flex flex-wrap gap-2 border-b border-border/40 bg-background/95 py-2 pl-1 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          {childTabs.map(t => (
-            <TabButton
-              key={t.id}
-              active={activeChild?.id === t.id}
-              onClick={() => toggleChild(t.id)}
-              icon={t.icon}
-              label={t.label}
-              level={2}
-            />
-          ))}
+        <div className="sticky top-[60px] z-[19] mb-4 py-2 -mx-1 px-1">
+          <LayoutGroup id={`tabs-${paramKey}-l2`}>
+            <SegContainer className="bg-gradient-to-r from-muted/40 via-muted/20 to-muted/40">
+              {childTabs.map(t => (
+                <SegButton
+                  key={t.id}
+                  active={activeChild?.id === t.id}
+                  onClick={() => toggleChild(t.id)}
+                  icon={t.icon}
+                  label={t.label}
+                  level={2}
+                  layoutId={`seg-bg-${paramKey}-l2`}
+                />
+              ))}
+            </SegContainer>
+          </LayoutGroup>
         </div>
       )}
 

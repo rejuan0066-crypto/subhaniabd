@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { usePagePermissions } from '@/hooks/usePagePermissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from 'sonner';
 import XLSX from 'xlsx-js-style';
 import {
@@ -1145,13 +1146,18 @@ const AdminSalary = () => {
           </CardContent>
         </Card>
 
-        {/* Main Tabs: Salary Table + Savings Ledger */}
+        {/* Main Tabs: Floating Segmented Control */}
         <Tabs value={mainTab} onValueChange={setMainTab}>
-          <TabsList>
-            <TabsTrigger value="salary"><Wallet className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বেতন তালিকা' : 'Salary Sheet'}</TabsTrigger>
-            <TabsTrigger value="bonus"><DollarSign className="h-3.5 w-3.5 mr-1.5" />{bn ? 'বাৎসরিক বোনাস শিট' : 'Annual Bonus Sheet'}</TabsTrigger>
-            <TabsTrigger value="savings"><PiggyBank className="h-3.5 w-3.5 mr-1.5" />{bn ? 'জমার তালিকা' : 'Savings Ledger'}</TabsTrigger>
-          </TabsList>
+          <SegmentedTabs
+            tabs={[
+              { key: 'salary', label: bn ? 'বেতন তালিকা' : 'Salary Sheet', icon: Wallet },
+              { key: 'bonus', label: bn ? 'বাৎসরিক বোনাস শিট' : 'Annual Bonus Sheet', icon: DollarSign },
+              { key: 'savings', label: bn ? 'জমার তালিকা' : 'Savings Ledger', icon: PiggyBank },
+            ]}
+            value={mainTab}
+            onChange={setMainTab}
+            className="mb-3"
+          />
 
           <TabsContent value="salary">
             {/* Salary Table */}
