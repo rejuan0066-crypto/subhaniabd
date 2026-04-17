@@ -83,10 +83,10 @@ const AdminPageWithTabs = ({ children }: Props) => {
     [menuConfig.sidebar, location.pathname]
   );
 
-  const [activeTab, setActiveTab] = useState('');
+  const [activeTab, setActiveTab] = useState('main');
 
   useEffect(() => {
-    setActiveTab('');
+    setActiveTab('main');
   }, [location.pathname]);
 
   if (tabItems.length === 0) {
