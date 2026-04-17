@@ -39,6 +39,9 @@ import AdminSubjects from "./pages/admin/AdminSubjects";
 import AdminResults from "./pages/admin/AdminResults";
 import AdminNotices from "./pages/admin/AdminNotices";
 import AdminStudentsFees from "./pages/admin/AdminStudentsFees";
+import AdminFeeTypes from "./pages/admin/AdminFeeTypes";
+import AdminFeeCategories from "./pages/admin/AdminFeeCategories";
+import AdminStudentCategories from "./pages/admin/AdminStudentCategories";
 import AdminWebsite from "./pages/admin/AdminWebsite";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminExpenses from "./pages/admin/AdminExpenses";
@@ -230,6 +233,9 @@ const App = () => (
                     <Route path="results" element={<ModuleGuard menuPath="/admin/results"><AdminResults /></ModuleGuard>} />
                     <Route path="notices" element={<ModuleGuard menuPath="/admin/notices"><AdminNotices /></ModuleGuard>} />
                     <Route path="students-fees" element={<ModuleGuard menuPath="/admin/students-fees"><AdminStudentsFees /></ModuleGuard>} />
+                    <Route path="fee-types" element={<ModuleGuard menuPath="/admin/fee-types"><AdminFeeTypes /></ModuleGuard>} />
+                    <Route path="fee-categories" element={<ModuleGuard menuPath="/admin/fee-categories"><AdminFeeCategories /></ModuleGuard>} />
+                    <Route path="student-categories" element={<ModuleGuard menuPath="/admin/student-categories"><AdminStudentCategories /></ModuleGuard>} />
                     <Route path="website" element={<AdminWebsite />} />
                     <Route path="expenses" element={<ModuleGuard menuPath="/admin/expenses"><AdminExpenses /></ModuleGuard>} />
                     <Route path="donors" element={<ModuleGuard menuPath="/admin/donors"><AdminDonors /></ModuleGuard>} />
