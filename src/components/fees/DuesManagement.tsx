@@ -180,6 +180,10 @@ const DuesManagement = () => {
     toast.info(bn ? `${student.name_bn} এর জন্য রিমাইন্ডার পাঠানো হবে (এসএমএস এপিআই যুক্ত হলে)` : `Reminder will be sent to ${student.name_en || student.name_bn} (when SMS API is connected)`);
   };
 
+  const handlePay = (student: any) => {
+    navigate(`/admin/students-fees?tab=collection&studentId=${student.id}`);
+  };
+
   const handleExportCSV = () => {
     const monthLabel = selectedMonth;
     const headers = ['#', bn ? 'নাম' : 'Name', bn ? 'আইডি' : 'ID', bn ? 'রোল' : 'Roll', bn ? 'শ্রেণী' : 'Class'];
