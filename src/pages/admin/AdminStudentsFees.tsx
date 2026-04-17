@@ -521,7 +521,7 @@ const AdminStudentsFees = () => {
               </button>
               <button onClick={() => { setSearchMode('session_roll'); setFoundStudent(null); }}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${searchMode === 'session_roll' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
-                {bn ? 'সেশন + রোল' : 'Session + Roll'}
+                {bn ? 'সেশন = রোল' : 'Session + Roll'}
               </button>
             </div>
 
