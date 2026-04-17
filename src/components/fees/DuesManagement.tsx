@@ -112,12 +112,14 @@ const DuesManagement = () => {
   // Per-student per-fee-type breakdown for the selected month
   const computeBreakdown = (s: any) => {
     const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
-    const paidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
+    const monthlyPaidIds = new Set(feePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
+    const oneTimePaidIds = new Set(oneTimePayments.filter(fp => fp.student_id === s.id).map(fp => fp.fee_type_id));
     const studentWaivers = waivers.filter(w => w.student_id === s.id);
     return applicable.map(ft => {
       const waiver = studentWaivers.find(w => w.fee_type_id === ft.id);
       const waiverPct = waiver?.waiver_percent || 0;
-      const isPaid = paidIds.has(ft.id);
+      // Monthly fees → check this month's payments. Non-monthly (one-time/yearly) → any payment counts.
+      const isPaid = ft.payment_frequency === 'monthly' ? monthlyPaidIds.has(ft.id) : oneTimePaidIds.has(ft.id);
       const isFullyWaived = waiverPct >= 100;
       const due = (isPaid || isFullyWaived) ? 0 : ft.amount * (1 - waiverPct / 100);
       return { feeTypeId: ft.id, due, isPaid, isFullyWaived };
