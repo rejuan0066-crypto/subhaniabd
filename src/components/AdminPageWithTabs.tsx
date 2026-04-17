@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { motion, LayoutGroup } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMenuSettings, MenuItemConfig } from '@/hooks/useMenuSettings';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { EmbeddedProvider } from '@/contexts/EmbeddedContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Lazy-load map: path → component
 const PAGE_MAP: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
