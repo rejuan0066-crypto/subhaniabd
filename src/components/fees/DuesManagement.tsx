@@ -306,10 +306,10 @@ const DuesManagement = () => {
         </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
+      {/* Filters - stack vertically on mobile, row on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2 sm:gap-3 lg:items-center">
         <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
-          <SelectTrigger className="w-[180px] gap-2"><CalendarRange className="w-4 h-4 text-muted-foreground" /><SelectValue placeholder={bn ? 'সেশন' : 'Session'} /></SelectTrigger>
+          <SelectTrigger className="w-full lg:w-[180px] gap-2"><CalendarRange className="w-4 h-4 text-muted-foreground shrink-0" /><SelectValue placeholder={bn ? 'সেশন' : 'Session'} /></SelectTrigger>
           <SelectContent>
             {sessions.map((s: any) => (
               <SelectItem key={s.id} value={s.id}>{bn ? s.name_bn : s.name}{s.is_active && (bn ? ' (চলমান)' : ' (Active)')}</SelectItem>
@@ -317,31 +317,31 @@ const DuesManagement = () => {
           </SelectContent>
         </Select>
         <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-full lg:w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             {monthOptions.map(o => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={classFilter} onValueChange={setClassFilter}>
-          <SelectTrigger className="w-[150px]"><SelectValue placeholder={bn ? 'শ্রেণী' : 'Class'} /></SelectTrigger>
+          <SelectTrigger className="w-full lg:w-[150px]"><SelectValue placeholder={bn ? 'শ্রেণী' : 'Class'} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{bn ? 'সকল শ্রেণী' : 'All Classes'}</SelectItem>
             {classes.map(c => <SelectItem key={c.id} value={c.id}>{bn ? c.name_bn : c.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative w-full lg:flex-1 lg:min-w-[200px] sm:col-span-2 lg:col-span-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} value={searchText} onChange={e => setSearchText(e.target.value)} className="pl-9" />
+          <Input placeholder={bn ? 'নাম, আইডি বা রোল দিয়ে খুঁজুন...' : 'Search by name, ID or roll...'} value={searchText} onChange={e => setSearchText(e.target.value)} className="pl-9 w-full" />
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2 w-full lg:w-auto sm:col-span-2 lg:col-span-1">
           <Download className="w-4 h-4" />{bn ? 'এক্সপোর্ট' : 'Export CSV'}
         </Button>
       </div>
 
-      {/* Table - matrix view */}
+      {/* Table - matrix view (horizontal scroll on mobile) */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-auto max-h-[560px]">
+          <div className="overflow-x-auto overflow-y-auto max-h-[560px] -webkit-overflow-scrolling-touch">
             <Table>
               <TableHeader className="sticky top-0 bg-card z-10">
                 <TableRow>
