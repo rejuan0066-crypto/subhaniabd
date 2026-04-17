@@ -43,7 +43,7 @@ const DuesManagement = () => {
   const { data: students = [] } = useQuery({
     queryKey: ['dues-students'],
     queryFn: async () => {
-      const { data } = await supabase.from('students').select('id, name_bn, name_en, student_id, roll_number, class_id, phone, guardian_phone, status, classes(name, name_bn)').eq('status', 'active');
+      const { data } = await supabase.from('students').select('id, name_bn, name_en, student_id, roll_number, class_id, phone, guardian_phone, status, admission_date, classes(name, name_bn)').eq('status', 'active');
       return data || [];
     },
   });
