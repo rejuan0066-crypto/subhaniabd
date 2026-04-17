@@ -460,6 +460,21 @@ const AdminStudentsFees = () => {
     if (!foundStudent) { toast.error(bn ? 'প্রথমে ছাত্র খুঁজুন' : 'Search student first'); return; }
     if (selectedFeeTypeObj?.payment_frequency === 'monthly' && !paymentMonth) { toast.error(bn ? 'মাস নির্বাচন করুন' : 'Select a month'); return; }
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) { toast.error(bn ? 'সঠিক পরিমাণ দিন' : 'Enter valid amount'); return; }
+    // Enforce exact fee amount — no partial or excess payments allowed
+    if (selectedFeeTypeObj?.amount != null) {
+      const expected = Number(selectedFeeTypeObj.amount);
+      const entered = Number(amount);
+      // Allow exact single-fee amount, OR an integer multiple (used by "pay all dues" multi-month action)
+      const isExact = Math.abs(entered - expected) < 0.01;
+      const ratio = expected > 0 ? entered / expected : 0;
+      const isIntegerMultiple = expected > 0 && Math.abs(ratio - Math.round(ratio)) < 0.01 && Math.round(ratio) >= 1;
+      if (!isExact && !isIntegerMultiple) {
+        toast.error(bn
+          ? `পরিমাণ অবশ্যই ৳${expected} হতে হবে — কম বা বেশি পরিশোধ করা যাবে না`
+          : `Amount must be exactly ৳${expected} — partial or excess payment is not allowed`);
+        return;
+      }
+    }
     if (isPaymentBlocked) {
       toast.error(bn ? 'এই ফি ধরনে ইতিমধ্যে পেমেন্ট আছে। বাতিল না হওয়া পর্যন্ত আবার পরিশোধ করা যাবে না।' : 'Payment already exists. Cannot pay again until cancelled.');
       return;
@@ -921,8 +936,19 @@ const AdminStudentsFees = () => {
                 <label className="text-sm font-medium text-foreground mb-1 block">
                   {bn ? 'পরিমাণ (৳)' : 'Amount (৳)'} <span className="text-destructive">*</span>
                 </label>
-                <Input type="number" className="bg-background" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  placeholder="৳ 0.00" min="0" step="0.01" />
+                <Input
+                  type="number"
+                  className="bg-muted/40 cursor-not-allowed"
+                  value={amount}
+                  readOnly
+                  tabIndex={-1}
+                  placeholder="৳ 0.00"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {bn
+                    ? '⚠️ ফি ধরন অনুযায়ী পরিমাণ স্বয়ংক্রিয়ভাবে নির্ধারিত — কম বা বেশি পরিশোধ করা যাবে না।'
+                    : '⚠️ Amount is fixed by the selected fee type — partial or excess payment is not allowed.'}
+                </p>
               </div>
             </div>
 
