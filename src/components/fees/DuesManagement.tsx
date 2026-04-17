@@ -67,17 +67,41 @@ const DuesManagement = () => {
     },
   });
 
+  // Filter fee types applicable to the selected month
+  const applicableFeeTypesForMonth = useMemo(() => {
+    const selectedMonthName = selectedMonth.split('-')[0];
+    return feeTypes.filter(ft => {
+      const months = Array.isArray(ft.applicable_months) ? ft.applicable_months : [];
+      // If no applicable_months specified, assume all months
+      if (months.length === 0) return true;
+      return months.includes(selectedMonthName);
+    });
+  }, [feeTypes, selectedMonth]);
+
   const dueStudents = useMemo(() => {
-    const paidStudentIds = new Set(feePayments.map(fp => fp.student_id));
-    const fullWaiverStudentIds = new Set(
-      waivers.filter(w => w.waiver_percent >= 100).map(w => w.student_id)
-    );
+    // Map of student_id -> Set of paid fee_type_ids for the selected month
+    const paidMap = new Map<string, Set<string>>();
+    feePayments.forEach(fp => {
+      if (!paidMap.has(fp.student_id)) paidMap.set(fp.student_id, new Set());
+      paidMap.get(fp.student_id)!.add(fp.fee_type_id);
+    });
+
+    const fullWaiverMap = new Map<string, Set<string>>();
+    waivers.filter(w => w.waiver_percent >= 100).forEach(w => {
+      if (!fullWaiverMap.has(w.student_id)) fullWaiverMap.set(w.student_id, new Set());
+      fullWaiverMap.get(w.student_id)!.add(w.fee_type_id);
+    });
 
     return students
-      .filter(s => !paidStudentIds.has(s.id) && !fullWaiverStudentIds.has(s.id))
       .filter(s => {
-        // Check if student has applicable monthly fee types
-        return feeTypes.some(ft => !ft.class_id || ft.class_id === s.class_id);
+        // Get applicable fee types for this student in this month
+        const applicable = applicableFeeTypesForMonth.filter(ft => !ft.class_id || ft.class_id === s.class_id);
+        if (applicable.length === 0) return false;
+
+        // Student has dues if at least one applicable fee is neither paid nor fully waived
+        const paidSet = paidMap.get(s.id) || new Set();
+        const waiverSet = fullWaiverMap.get(s.id) || new Set();
+        return applicable.some(ft => !paidSet.has(ft.id) && !waiverSet.has(ft.id));
       })
       .filter(s => {
         if (classFilter !== 'all' && s.class_id !== classFilter) return false;
