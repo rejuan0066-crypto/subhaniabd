@@ -258,14 +258,33 @@ const DuesManagement = () => {
           </CardContent>
         </Card>
         <Card className="border-red-200/30 bg-red-50/50 dark:bg-red-950/20">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+          <CardContent className="p-4 space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{bn ? 'মোট বকেয়া' : 'Total Due Amount'}</p>
+                <p className="text-lg font-bold text-red-700 dark:text-red-400">৳{totalDueAmount.toLocaleString('en-IN')}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">{bn ? 'মোট বকেয়া' : 'Total Due Amount'}</p>
-              <p className="text-lg font-bold text-red-700 dark:text-red-400">৳{totalDueAmount.toLocaleString('en-IN')}</p>
-            </div>
+            {applicableFeeTypesForMonth.some(ft => (feeTypeColumnTotals[ft.id] || 0) > 0) && (
+              <div className="flex flex-wrap gap-1.5 pt-1 border-t border-red-200/30">
+                {applicableFeeTypesForMonth
+                  .filter(ft => (feeTypeColumnTotals[ft.id] || 0) > 0)
+                  .sort((a, b) => (feeTypeColumnTotals[b.id] || 0) - (feeTypeColumnTotals[a.id] || 0))
+                  .map(ft => (
+                    <span
+                      key={ft.id}
+                      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20"
+                      title={bn ? ft.name_bn : ft.name}
+                    >
+                      <span className="font-medium truncate max-w-[80px]">{bn ? ft.name_bn : ft.name}</span>
+                      <span className="font-bold">৳{(feeTypeColumnTotals[ft.id] || 0).toLocaleString('en-IN')}</span>
+                    </span>
+                  ))}
+              </div>
+            )}
           </CardContent>
         </Card>
         <Card className="border-emerald-200/30 bg-emerald-50/50 dark:bg-emerald-950/20">
