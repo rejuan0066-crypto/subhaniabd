@@ -351,6 +351,7 @@ const DuesManagement = () => {
                       {applicableFeeTypesForMonth.map(ft => {
                         const b = breakdownMap.get(ft.id);
                         if (!b) return <TableCell key={ft.id} className="text-right text-muted-foreground/40">—</TableCell>;
+                        if ((b as any).beforeAdmission) return <TableCell key={ft.id} className="text-right text-muted-foreground/40" title={bn ? 'ভর্তির আগে' : 'Before admission'}>—</TableCell>;
                         if (b.isPaid) return <TableCell key={ft.id} className="text-right"><Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px]">{bn ? '✓ পরিশোধিত' : '✓ Paid'}</Badge></TableCell>;
                         if (b.isFullyWaived) return <TableCell key={ft.id} className="text-right"><Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px]">{bn ? 'মওকুফ' : 'Waived'}</Badge></TableCell>;
                         return <TableCell key={ft.id} className="text-right font-semibold text-rose-600">৳{b.due.toLocaleString('en-IN')}</TableCell>;
