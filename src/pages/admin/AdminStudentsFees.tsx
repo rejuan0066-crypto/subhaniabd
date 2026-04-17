@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { lazy, Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { CreditCard, Loader2, CheckCircle, ArrowRight, ExternalLink, Search, User, Banknote, Globe, AlertCircle, Settings, BarChart3, Users, Clock, X, Receipt, AlertTriangle } from 'lucide-react';
 import DuesManagement from '@/components/fees/DuesManagement';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
