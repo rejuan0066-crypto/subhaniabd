@@ -454,39 +454,55 @@ const AdminLayout = ({ children }: { children: ReactNode }) => {
 
                   {hasChildren ? (
                     <>
-                      <div
-                        className={`sidebar-item ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
-                      >
-                        <Link
-                          to={item.path}
-                          onClick={(e) => {
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (sidebarOpen || mobile) {
+                            toggleGroup(item.path);
+                          } else {
+                            // collapsed sidebar: navigate to parent page
                             if (mobile) setMobileSidebarOpen(false);
                             if (adminTheme.sidebarStableNav) {
-                              e.preventDefault();
                               startNavTransition(() => navigate(item.path));
+                            } else {
+                              navigate(item.path);
                             }
-                            setOpenMenuId(item.path);
-                          }}
-                          className="flex items-center gap-2.5 flex-1 min-w-0 no-underline text-inherit cursor-pointer"
-                        >
-                          <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
-                          {(sidebarOpen || mobile) && <span className="truncate">{item.label}</span>}
-                        </Link>
+                          }
+                        }}
+                        className={`sidebar-item w-full text-left ${effectClass} ${isActive ? 'active' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
+                        title={!sidebarOpen && !mobile ? item.label : undefined}
+                      >
+                        <item.icon className="sidebar-icon w-[18px] h-[18px] shrink-0" />
+                        {(sidebarOpen || mobile) && <span className="truncate flex-1">{item.label}</span>}
                         {(sidebarOpen || mobile) && (
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); toggleGroup(item.path); }}
-                            className="p-1 -mr-1 rounded hover:bg-sidebar-accent/40 ml-auto"
-                            aria-label="Toggle submenu"
-                          >
-                            <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ${isGroupOpen ? 'open' : ''}`} />
-                          </button>
+                          <ChevronDown className={`sidebar-chevron w-3.5 h-3.5 shrink-0 ml-auto ${isGroupOpen ? 'open' : ''}`} />
                         )}
-                      </div>
+                      </button>
 
-                      {/* Accordion submenu */}
+                      {/* Accordion submenu — parent's own page injected as first item */}
                       <div className={`sidebar-submenu-slide ${isGroupOpen ? 'sidebar-submenu-open' : ''}`}>
                         <div className="sidebar-submenu-container">
+                          {/* Parent's own page as first sub-item */}
+                          {(() => {
+                            const parentActive = isDirectActive && !hasActiveChild;
+                            return (
+                              <Link
+                                key={`__parent_${item.path}`}
+                                to={item.path}
+                                onClick={(e) => {
+                                  if (mobile) setMobileSidebarOpen(false);
+                                  if (adminTheme.sidebarStableNav) {
+                                    e.preventDefault();
+                                    startNavTransition(() => navigate(item.path));
+                                  }
+                                }}
+                                className={`sidebar-sub-item ${parentActive ? 'active' : ''}`}
+                              >
+                                <item.icon className="sidebar-icon w-4 h-4 shrink-0" />
+                                <span className="truncate">{item.label}</span>
+                              </Link>
+                            );
+                          })()}
                           {item.children!.map(child => {
                             const [childPathname, childSearch] = child.path.split('?');
                             const childActive = childSearch
